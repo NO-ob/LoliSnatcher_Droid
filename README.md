@@ -1,16 +1,21 @@
-# loli
+# LoliSnatcher Droid
+[![github-small](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0)
 
-A new Flutter project.
+A booru client with support for batch downloading, written in Dart/Flutter for Android but may support for platforms in the flutter
+![github-small](https://i.imgur.com/wzdMoP0.png)
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+## To Do
+- [x] Search and retrieve data from gelbooru
+- [x] View image previews
+- [ ] Load new image previews on scroll
+- [ ] View Tags and Full Sized Image in a intent
+- [ ] Batch download Images from gelbooru
+- [ ] Add support for danbooru
+- [ ] Add settings
+    - [ ] Amount of images to fetch in one go
+    - [ ] More boorus
+    - [ ] Timeout between Snatching
+    - [ ] Default Tags
+    - [ ] Custom File Names
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
