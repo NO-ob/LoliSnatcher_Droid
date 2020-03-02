@@ -1,6 +1,8 @@
 abstract class BooruHandler {
   int pageNum = 0;
   int limit = 20;
+  String baseURL = "";
   String prevTags = "";
-  void search(String tags){}
+  BooruHandler(this.baseURL,this.limit);
+  Future Search(String tags){}
 }

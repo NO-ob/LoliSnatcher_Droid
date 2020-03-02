@@ -2,13 +2,9 @@ class BooruItem{
   String fileURL,sampleURL,thumbnailURL,tagString,postURL;
   int id,width,height;
 
-  BooruItem(String fileURL,String sampleURL,String thumbnailURL,String tags,String postURL){
-    this.fileURL = fileURL;
-    this.sampleURL = sampleURL;
-    this.thumbnailURL = thumbnailURL;
-    this.tagString = tags;
-    this.postURL = postURL;
+  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagString,this.postURL){
     print("Item created: " + postURL);
+    print(this);
   }
 
   String get file{
