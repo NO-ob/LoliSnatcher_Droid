@@ -11,10 +11,10 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 ## To Do
 - [x] Search and retrieve data from gelbooru
 - [x] View image previews
-- [ ] Load new image previews on scroll
+- [x] Load new image previews on scroll
 - [ ] View Tags and Full Sized Image in a intent
 - [ ] Batch download Images from gelbooru
-- [ ] Add support for danbooru
+- [x] Add support for danbooru
 - [ ] Add settings
     - [ ] Amount of images to fetch in one go
     - [ ] More boorus

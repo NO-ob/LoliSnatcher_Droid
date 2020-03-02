@@ -12,8 +12,12 @@ class DanbooruHandler extends BooruHandler{
   DanbooruHandler(String baseURL,int limit) : super(baseURL,limit);
 
 
-  Future Search(String tags) async{
+  Future Search(String tags, int pageNum) async{
     String url = makeURL(tags);
+    this.pageNum = pageNum;
+    if (prevTags != tags){
+      fetched = new List();
+    }
     print(url);
     final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"});
     if (response.statusCode == 200) {
@@ -41,13 +45,13 @@ class DanbooruHandler extends BooruHandler{
               .text));
         }
       }
-      print("REturning");
+      prevTags = tags;
       return fetched;
     } else {
       throw Exception('Search Failed');
     }
   }
   String makeURL(String tags){
-    return baseURL + "/posts.xml?tags=" + tags + "&limit=" + limit.toString();
+    return baseURL + "/posts.xml?tags=" + tags + "&limit=" + limit.toString() + "&page=" + pageNum.toString();
   }
 }

@@ -12,7 +12,11 @@ class GelbooruHandler extends BooruHandler{
   GelbooruHandler(String baseURL,int limit) : super(baseURL,limit);
 
 
-  Future Search(String tags) async{
+  Future Search(String tags,int pageNum) async{
+    this.pageNum = pageNum;
+    if (prevTags != tags){
+      fetched = new List();
+    }
     String url = makeURL(tags);
     print(url);
     final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36"});
@@ -24,12 +28,13 @@ class GelbooruHandler extends BooruHandler{
         var current = posts.elementAt(i);
         fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("sample_url"),current.getAttribute("preview_url"),current.getAttribute("tags"),current.getAttribute("id")));
       }
+      prevTags = tags;
       return fetched;
     } else {
         throw Exception('Search Failed');
       }
     }
     String makeURL(String tags){
-      return baseURL + "/index.php?page=dapi&s=post&q=index&tags=" + tags + "&limit=" + limit.toString();
+      return baseURL + "/index.php?page=dapi&s=post&q=index&tags=" + tags + "&limit=" + limit.toString() + "&pid=" + pageNum.toString();
     }
 }

@@ -4,5 +4,5 @@ abstract class BooruHandler {
   String baseURL = "";
   String prevTags = "";
   BooruHandler(this.baseURL,this.limit);
-  Future Search(String tags){}
+  Future Search(String tags, int pageNum){}
 }
