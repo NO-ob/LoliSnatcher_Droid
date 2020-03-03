@@ -4,8 +4,13 @@ import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
+import 'ImageWriter.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 void main() {
   runApp(MaterialApp(
+    navigatorKey: Get.key,
     home: Home(),
   ));
 }
@@ -16,7 +21,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   String tags = "rating:safe";
   int pageNum = 0;
   final searchTagsController = TextEditingController();
@@ -54,7 +58,7 @@ class _HomeState extends State<Home> {
                       icon: Icon(Icons.search),
                       onPressed: () {
                         setState((){
-                          tags = searchTagsController.text + " rating:safe";
+                          tags = searchTagsController.text;
                         });
                       },
                     ),
@@ -106,7 +110,9 @@ class _ImagesState extends State<Images> {
                     child: new InkResponse(
                       enableFeedback: true,
                       child:new Image.network('${snapshot.data[index].sampleURL}',fit: BoxFit.cover,),
-                      onTap: () => printInfo(snapshot.data[index],index),
+                      onTap: () {
+                        Get.to(ImagePage(snapshot.data,index));
+                      },
                     ),
                   ),
                 );
@@ -126,10 +132,61 @@ class _ImagesState extends State<Images> {
   }
 }
 
-
-// Function to test on click functionality of the grid tiles
-void printInfo(BooruItem item, int index){
-  print(item.fileURL);
+class ImagePage extends StatefulWidget {
+  final List fetched;
+  final int index;
+  ImagePage(this.fetched,this.index);
+  @override
+  _ImagePageState createState() => _ImagePageState();
 }
+
+class _ImagePageState extends State<ImagePage>{
+  PageController controller;
+  ImageWriter writer = new ImageWriter();
+  @override
+  void initState() {
+    super.initState();
+    controller = PageController(
+      initialPage: widget.index,
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Second Route"),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: (){
+              getPerms();
+              writer.saveImage([widget.fetched[controller.page.toInt()]]);
+            },
+          ),
+        ],
+      ),
+      body: Center(
+        child: PageView.builder(
+          controller: controller,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) {
+            return Container(
+              child: PhotoView(
+                imageProvider: NetworkImage(widget.fetched[index].fileURL),
+              ),
+            );
+          },
+          itemCount: widget.fetched.length,
+        ),
+      ),
+    );
+  }
+
+}
+void getPerms() async{
+  Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  print(permissions);
+}
+
 
 
