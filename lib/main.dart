@@ -63,8 +63,18 @@ class _HomeState extends State<Home> {
                       },
                     ),
                   ),
+
                 ],
-              ),),
+              ),
+            ),
+            Container(
+              child: FlatButton(
+                onPressed: (){
+                  Get.to(SnatcherPage());
+                },
+                child: Text("Snatch"),
+              ),
+            ),
 
           ],
         ),
@@ -183,6 +193,7 @@ class _ImagePageState extends State<ImagePage>{
   }
 
 }
+
 void getPerms() async{
   Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
   print(permissions);
@@ -190,3 +201,74 @@ void getPerms() async{
 
 
 
+class SnatcherPage extends StatefulWidget {
+  @override
+  _SnatcherPageState createState() => _SnatcherPageState();
+}
+
+class _SnatcherPageState extends State<SnatcherPage> {
+  final snatchTagsController = TextEditingController();
+  final snatchAmountController = TextEditingController();
+  final snatchTimeoutController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    getPerms();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Snatcher")
+      ),
+      body:Center(
+        child: ListView(
+          children: <Widget>[
+            Container(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Tags"),
+                  TextField(
+                    controller: snatchTagsController,
+                    decoration: InputDecoration(
+                      hintText:"Enter Tags",
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Amount"),
+                  TextField(
+                    controller: snatchAmountController,
+                    decoration: InputDecoration(
+                      hintText:"Enter Amount of Images",
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Timeout (MS)"),
+                  TextField(
+                    controller: snatchTimeoutController,
+                    decoration: InputDecoration(
+                      hintText:"Enter Timeout Length",
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
