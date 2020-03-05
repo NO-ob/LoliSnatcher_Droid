@@ -20,7 +20,6 @@ class ImageWriter{
     await Directory(path).create(recursive:true);
     File image = new File(path+item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
     await image.writeAsBytesSync(response.bodyBytes);
-    Get.snackbar("Snatched ＼(^ o ^)／",item.fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 0.5));
     return (item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
   }
 }

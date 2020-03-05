@@ -278,8 +278,9 @@ class _SnatcherPageState extends State<SnatcherPage> {
           Container(
             child: FlatButton(
               onPressed: (){
-
-                Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
+                Snatcher(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text);
+                Get.back();
+                //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
               },
               child: Text("Snatch Images"),
             ),
@@ -290,91 +291,29 @@ class _SnatcherPageState extends State<SnatcherPage> {
     );
   }
 }
-class SnatcherProgressPage extends StatefulWidget {
-  String tags,amount,timeout;
-  int pageNum=0;
-  int count=0;
-  SnatcherProgressPage(this.tags,this.amount,this.timeout);
-  @override
-  _SnatcherProgressPageState createState() => _SnatcherProgressPageState();
-}
 
-class _SnatcherProgressPageState extends State<SnatcherProgressPage> {
-  static int limit, count;
-  BooruHandler booruHandler;
+
+Future Snatcher(String tags, String amount, String timeout) async{
   ImageWriter writer = new ImageWriter();
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    if (int.parse(widget.amount) <= 100){limit = int.parse(widget.amount);} else {limit = 100;}
-    booruHandler = new GelbooruHandler("https://gelbooru.com", limit);
+  int count = 0, limit,page = 0;
+  var booruItems;
+  if (int.parse(amount) <= 100){
+    limit = int.parse(amount);
+  } else {
+    limit = 100;
   }
-  Future getItems() async{
-    int count = 0;
-    int page = 0;
-    var uwu;
-    while (count < int.parse(widget.amount)){
-      uwu = await booruHandler.Search(widget.tags,page);
-      page ++;
-      count += limit;
-      print(count);
-    }
-    print(uwu);
-    return uwu;
+  BooruHandler booruHandler = new GelbooruHandler("https://gelbooru.com", limit);
+  while (count < int.parse(amount)){
+    booruItems = await booruHandler.Search(tags,page);
+    page ++;
+    count += limit;
+    print(count);
   }
-  @override
-  Widget build(BuildContext context){
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Snatching"),
-      ),
-      body: FutureBuilder(
-          future: getItems(),
-          builder: (context, AsyncSnapshot snapshot){
-              switch(snapshot.connectionState){
-                case ConnectionState.active:
-                  return Text("Snatching");
-                  break;
-                case ConnectionState.done:
-                  return Container(child:FutureBuilder(
-                    future: snatcherWriter(snapshot.data, widget.amount,writer),
-                    builder: (context, AsyncSnapshot snap2){
-                      switch(snap2.connectionState){
-                        case ConnectionState.active:
-                          return Text(writer.status);
-                          break;
-                        case ConnectionState.done:
-                          return Text("Complete");
-                          break;
-
-                      }
-                      if (snap2.hasData){
-                        return Text(snap2.data);
-                      }
-                      return Text("somethings happening");
-                    }
-                  ),);
-                  break;
-                case ConnectionState.waiting:
-                  return CircularProgressIndicator();
-                  break;
-                case ConnectionState.none:
-                  return Text("hmmmmmm");
-                  break;
-              }
-              return Text("hmmmmmm");
-            },
-          ),
-    );
-  }
-}
-
-Future snatcherWriter(List items, String amount, ImageWriter writer) async{
-  var status;
   for (int n = 0; n < int.parse(amount); n ++){
-    status = await writer.write(items[n]);
-
+    print(n);
+    await writer.write(booruItems[n]);
+    Get.snackbar("Snatched ＼(^ o ^)／",booruItems[n].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1));
   }
-  return status;
 }
+
+
