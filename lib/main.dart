@@ -7,7 +7,7 @@ import 'libBooru/BooruItem.dart';
 import 'ImageWriter.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
+//import 'package:permission_handler/permission_handler.dart';
 void main() {
   runApp(MaterialApp(
     navigatorKey: Get.key,
@@ -72,7 +72,7 @@ class _HomeState extends State<Home> {
                 onPressed: (){
                   Get.to(SnatcherPage());
                 },
-                child: Text("Snatch"),
+                child: Text("Snatcher"),
               ),
             ),
 
@@ -164,7 +164,7 @@ class _ImagePageState extends State<ImagePage>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Second Route"),
+        title: Text("Image Viewer"),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
@@ -195,8 +195,8 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 void getPerms() async{
-  Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-  print(permissions);
+  //Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  //print(permissions);
 }
 
 
@@ -207,9 +207,9 @@ class SnatcherPage extends StatefulWidget {
 }
 
 class _SnatcherPageState extends State<SnatcherPage> {
-  final snatchTagsController = TextEditingController();
-  final snatchAmountController = TextEditingController();
-  final snatchTimeoutController = TextEditingController();
+  final snatcherTagsController = TextEditingController();
+  final snatcherAmountController = TextEditingController();
+  final snatcherTimeoutController = TextEditingController();
   @override
   void initState() {
     super.initState();
@@ -223,52 +223,158 @@ class _SnatcherPageState extends State<SnatcherPage> {
       ),
       body:Center(
         child: ListView(
-          children: <Widget>[
-            Container(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Tags"),
-                  TextField(
-                    controller: snatchTagsController,
+        children: <Widget>[
+          Container(
+            width: double.infinity,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text("Tags: "),
+                new Expanded(
+                  child: TextField(
+                    controller: snatcherTagsController,
                     decoration: InputDecoration(
                       hintText:"Enter Tags",
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Container(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Amount"),
-                  TextField(
-                    controller: snatchAmountController,
+          ),
+          Container(
+            width: double.infinity,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text("Amount: "),
+                new Expanded(
+                  child: TextField(
+                    controller: snatcherAmountController,
                     decoration: InputDecoration(
-                      hintText:"Enter Amount of Images",
+                      hintText:"Enter amount of images to snatch",
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Container(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Timeout (MS)"),
-                  TextField(
-                    controller: snatchTimeoutController,
+          ),
+          Container(
+            width: double.infinity,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                Text("Timeout: "),
+                new Expanded(
+                  child: TextField(
+                    controller: snatcherTimeoutController,
                     decoration: InputDecoration(
-                      hintText:"Enter Timeout Length",
+                      hintText:"Timeout between snatching (MS)",
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
+          Container(
+            child: FlatButton(
+              onPressed: (){
+
+                Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
+              },
+              child: Text("Snatch Images"),
+            ),
+          ),
+        ],
         ),
       ),
     );
   }
+}
+class SnatcherProgressPage extends StatefulWidget {
+  String tags,amount,timeout;
+  int pageNum=0;
+  int count=0;
+  SnatcherProgressPage(this.tags,this.amount,this.timeout);
+  @override
+  _SnatcherProgressPageState createState() => _SnatcherProgressPageState();
+}
+
+class _SnatcherProgressPageState extends State<SnatcherProgressPage> {
+  static int limit, count;
+  BooruHandler booruHandler;
+  ImageWriter writer = new ImageWriter();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (int.parse(widget.amount) <= 100){limit = int.parse(widget.amount);} else {limit = 100;}
+    booruHandler = new GelbooruHandler("https://gelbooru.com", limit);
+  }
+  Future getItems() async{
+    int count = 0;
+    int page = 0;
+    var uwu;
+    while (count < int.parse(widget.amount)){
+      uwu = await booruHandler.Search(widget.tags,page);
+      page ++;
+      count += limit;
+      print(count);
+    }
+    print(uwu);
+    return uwu;
+  }
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Snatching"),
+      ),
+      body: FutureBuilder(
+          future: getItems(),
+          builder: (context, AsyncSnapshot snapshot){
+              switch(snapshot.connectionState){
+                case ConnectionState.active:
+                  return Text("Snatching");
+                  break;
+                case ConnectionState.done:
+                  return Container(child:FutureBuilder(
+                    future: snatcherWriter(snapshot.data, widget.amount,writer),
+                    builder: (context, AsyncSnapshot snap2){
+                      switch(snap2.connectionState){
+                        case ConnectionState.active:
+                          return Text(writer.status);
+                          break;
+                        case ConnectionState.done:
+                          return Text("Complete");
+                          break;
+
+                      }
+                      if (snap2.hasData){
+                        return Text(snap2.data);
+                      }
+                      return Text("somethings happening");
+                    }
+                  ),);
+                  break;
+                case ConnectionState.waiting:
+                  return CircularProgressIndicator();
+                  break;
+                case ConnectionState.none:
+                  return Text("hmmmmmm");
+                  break;
+              }
+              return Text("hmmmmmm");
+            },
+          ),
+    );
+  }
+}
+
+Future snatcherWriter(List items, String amount, ImageWriter writer) async{
+  var status;
+  for (int n = 0; n < int.parse(amount); n ++){
+    status = await writer.write(items[n]);
+
+  }
+  return status;
 }

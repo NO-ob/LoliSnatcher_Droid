@@ -3,8 +3,6 @@ class BooruItem{
   int id,width,height;
 
   BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagString,this.postURL){
-    print("Item created: " + postURL);
-    print(this);
   }
 
   String get file{
