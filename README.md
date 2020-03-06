@@ -1,7 +1,7 @@
 # LoliSnatcher Droid
 [![github-small](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0)
 
-A booru client with support for batch downloading, written in Dart/Flutter for Android but may support for platforms in the future.
+A booru client with support for batch downloading, written in Dart/Flutter for Android but may support more platforms in the future.
 
 
 
