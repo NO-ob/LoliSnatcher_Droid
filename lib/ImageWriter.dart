@@ -16,7 +16,7 @@ class ImageWriter{
   Future write(BooruItem item) async{
     status = item.fileURL;
     var response = await http.get(item.fileURL);
-    var path = await ExtStorage.getExternalStoragePublicDirectory(ExtStorage.DIRECTORY_PICTURES) + "/LoliSnatcher/";
+    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/snatched/";
     await Directory(path).create(recursive:true);
     File image = new File(path+item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
     await image.writeAsBytesSync(response.bodyBytes);

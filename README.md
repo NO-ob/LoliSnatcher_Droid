@@ -13,6 +13,7 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 - [x] View image previews
 - [x] Load new image previews on scroll
 - [ ] View Tags and Full Sized Image in a intent
+- [ ] Add Open in browser button to gallery
 - [x] Batch download Images from gelbooru
 - [x] Add support for danbooru
 - [ ] Add settings
@@ -21,4 +22,8 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
     - [ ] Timeout between Snatching
     - [ ] Default Tags
     - [ ] Custom File Names
+- [ ] Tidy UI
+    - [ ] Drawer
+    - [ ] Add Tablet / Widescreen mode (Drawer always open, no top bar)
+    - [ ] Settings and Snatcher Pages
 

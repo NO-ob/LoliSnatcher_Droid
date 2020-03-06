@@ -7,7 +7,10 @@ import 'libBooru/BooruItem.dart';
 import 'ImageWriter.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
+import 'package:ext_storage/ext_storage.dart';
+import 'dart:io';
+//import 'package:permission_handler/permission_handler.dart';
 void main() {
   runApp(MaterialApp(
     navigatorKey: Get.key,
@@ -70,6 +73,7 @@ class _HomeState extends State<Home> {
                     child: IconButton(
                       icon: Icon(Icons.search),
                       onPressed: () {
+                        // Setstate and update the tags variable so the widget rebuilds with the new tags
                         setState((){
                           tags = searchTagsController.text;
                         });
@@ -83,9 +87,17 @@ class _HomeState extends State<Home> {
             Container(
               child: FlatButton(
                 onPressed: (){
-                  Get.to(SnatcherPage());
+                  Get.to(SnatcherPage(searchTagsController.text));
                 },
                 child: Text("Snatcher"),
+              ),
+            ),
+            Container(
+              child: FlatButton(
+                onPressed: (){
+                  Get.to(SettingsPage());
+                },
+                child: Text("Settings"),
               ),
             ),
 
@@ -95,6 +107,125 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+class SettingsPage extends StatefulWidget {
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final settingsTagsController = TextEditingController();
+  final settingsLimitController = TextEditingController();
+  String previewMode = "Sample";
+  @override
+  void initState() {
+    super.initState();
+    getPerms();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: Text("Settings")
+      ),
+      body:Center(
+        child: ListView(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Default Tags: "),
+                  new Expanded(
+                    child: TextField(
+                      controller: settingsTagsController,
+                      decoration: InputDecoration(
+                        hintText:"Enter Tags which are loaded when app is opened",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Limit : "),
+                  new Expanded(
+                    child: TextField(
+                      controller: settingsLimitController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      decoration: InputDecoration(
+                        hintText:"Images to fetch per page 0-100",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              child: DropdownButton<String>(
+                value: previewMode,
+                icon: Icon(Icons.arrow_downward),
+                onChanged: (String newValue){
+                  setState((){
+                    previewMode = newValue;
+                  });
+                },
+                items: <String>["Sample","Thumbnail"].map<DropdownMenuItem<String>>((String value){
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+            Container(
+              child: FlatButton(
+                onPressed: (){
+                  saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
+                },
+                child: Text("Save"),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+void saveSettings(String defTags, String limit, String previewMode) async{
+  var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+  await Directory(path).create(recursive:true);
+  File settingsFile = new File(path+"settings.conf");
+  var writer = settingsFile.openWrite();
+  if (defTags != ""){
+    await writer.write("Default Tags = ${defTags}\n");
+  }
+  if (limit != ""){
+    // Write limit if it between 0-100
+    if (int.parse(limit) <= 100 && int.parse(limit) > 0){
+      await writer.write("Limit = ${int.parse(limit)}\n");
+    } else {
+      // Close writer and alert user
+      writer.close();
+      Get.snackbar("Settings Error","${limit} is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+      return;
+    }
+  }
+  await writer.write("Preview Mode = ${previewMode}\n");
+  writer.close();
+  Get.snackbar("Settings Saved!","Var may not be updated until app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+}
+
+
 
 
 
@@ -212,12 +343,14 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 void getPerms() async{
-  await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  //await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 }
 
 
 
 class SnatcherPage extends StatefulWidget {
+  final String tags;
+  SnatcherPage(this.tags);
   @override
   _SnatcherPageState createState() => _SnatcherPageState();
 }
@@ -225,11 +358,14 @@ class SnatcherPage extends StatefulWidget {
 class _SnatcherPageState extends State<SnatcherPage> {
   final snatcherTagsController = TextEditingController();
   final snatcherAmountController = TextEditingController();
-  final snatcherTimeoutController = TextEditingController();
+  final snatcherSleepController = TextEditingController();
   @override
   void initState() {
     super.initState();
     getPerms();
+    if (widget.tags != ""){
+      snatcherTagsController.text = widget.tags;
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -266,6 +402,10 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 new Expanded(
                   child: TextField(
                     controller: snatcherAmountController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      WhitelistingTextInputFormatter.digitsOnly
+                    ],
                     decoration: InputDecoration(
                       hintText:"Enter amount of images to snatch",
                     ),
@@ -279,10 +419,14 @@ class _SnatcherPageState extends State<SnatcherPage> {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Text("Timeout: "),
+                Text("Sleep (MS): "),
                 new Expanded(
                   child: TextField(
-                    controller: snatcherTimeoutController,
+                    controller: snatcherSleepController,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: <TextInputFormatter>[
+                      WhitelistingTextInputFormatter.digitsOnly
+                    ],
                     decoration: InputDecoration(
                       hintText:"Timeout between snatching (MS)",
                     ),
@@ -294,7 +438,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
           Container(
             child: FlatButton(
               onPressed: (){
-                Snatcher(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text);
+                Snatcher(snatcherTagsController.text,snatcherAmountController.text,int.parse(snatcherSleepController.text));
                 Get.back();
                 //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
               },
@@ -309,7 +453,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
 }
 
 
-Future Snatcher(String tags, String amount, String timeout) async{
+Future Snatcher(String tags, String amount, int timeout) async{
   ImageWriter writer = new ImageWriter();
   int count = 0, limit,page = 0;
   var booruItems;
@@ -320,16 +464,26 @@ Future Snatcher(String tags, String amount, String timeout) async{
   }
   Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
   BooruHandler booruHandler = new GelbooruHandler("https://gelbooru.com", limit);
+  // Loop until the count variable is bigger or equal to amount
+  // The count variable is used instead of checking the length of booruItems because the amount of images stored on
+  // The booru may be less than the user wants which would result in an infinite loop since the length would never be big enough
   while (count < int.parse(amount)){
-    booruItems = await booruHandler.Search(tags,page);
+    booruItems = await Future.delayed(Duration(milliseconds: timeout), () {return booruHandler.Search(tags,page);});
     page ++;
     count += limit;
     print(count);
   }
-  for (int n = 0; n < int.parse(amount); n ++){
-    print(n);
-    await writer.write(booruItems[n]);
+  if (timeout > 0){
+    for (int n = 0; n < int.parse(amount); n ++){
+      Get.snackbar("Sleeping","(∪｡∪)｡｡｡zzz",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2));
+      await Future.delayed(Duration(milliseconds: timeout), () {return writer.write(booruItems[n]);});
+    }
+  } else {
+    for (int n = 0; n < int.parse(amount); n ++){
+      await writer.write(booruItems[n]);
+    }
   }
+
   Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
 }
 
