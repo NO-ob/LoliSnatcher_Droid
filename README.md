@@ -5,7 +5,7 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 
 
 
-![github-small](https://i.imgur.com/wzdMoP0.png)
+![github-small](https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/demo.gif)
 
 
 ## To Do
@@ -13,7 +13,7 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 - [x] View image previews
 - [x] Load new image previews on scroll
 - [ ] View Tags and Full Sized Image in a intent
-- [ ] Batch download Images from gelbooru
+- [x] Batch download Images from gelbooru
 - [x] Add support for danbooru
 - [ ] Add settings
     - [ ] Amount of images to fetch in one go

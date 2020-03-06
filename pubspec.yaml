@@ -35,9 +35,9 @@ dependencies:
 
 flutter_icons:
   android: "launcher_icon"
-  image_path: "images/iconBG.png"
-  adaptive_icon_background: "images/iconBG.png"
-  adaptive_icon_foreground: "images/iconFG.png"
+  image_path: "assets/images/iconBG.png"
+  adaptive_icon_background: "assets/images/iconBG.png"
+  adaptive_icon_foreground: "assets/images/iconFG.png"
 
 
 
@@ -56,6 +56,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/drawer_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

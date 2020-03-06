@@ -7,7 +7,7 @@ import 'libBooru/BooruItem.dart';
 import 'ImageWriter.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:get/get.dart';
-//import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 void main() {
   runApp(MaterialApp(
     navigatorKey: Get.key,
@@ -38,7 +38,20 @@ class _HomeState extends State<Home> {
         child: ListView(
           children:<Widget>[
             DrawerHeader(
-              child: Text("Loli Snatcher"),
+              child: Center(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: <Widget>[
+                    new Container(
+                        decoration: new BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: new DecorationImage(fit: BoxFit.fill, image: new AssetImage('assets/images/drawer_icon.png'),),
+                         ),
+                      ),
+                    new Text("Loli Snatcher"),
+                  ],
+                ),
+              ),
             ),
             Container(
               width: double.infinity,
@@ -93,6 +106,7 @@ class Images extends StatefulWidget {
   final String tags;
   Images({this.tags});
   int pageNum = 0;
+  List<BooruItem> selected = new List();
   @override
   _ImagesState createState() => _ImagesState();
 }
@@ -122,6 +136,9 @@ class _ImagesState extends State<Images> {
                       child:new Image.network('${snapshot.data[index].sampleURL}',fit: BoxFit.cover,),
                       onTap: () {
                         Get.to(ImagePage(snapshot.data,index));
+                      },
+                      onLongPress: (){
+                        widget.selected.add(snapshot.data[index]);
                       },
                     ),
                   ),
@@ -195,8 +212,7 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 void getPerms() async{
-  //Map<PermissionGroup, PermissionStatus> permissions = await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-  //print(permissions);
+  await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 }
 
 
@@ -302,6 +318,7 @@ Future Snatcher(String tags, String amount, String timeout) async{
   } else {
     limit = 100;
   }
+  Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
   BooruHandler booruHandler = new GelbooruHandler("https://gelbooru.com", limit);
   while (count < int.parse(amount)){
     booruItems = await booruHandler.Search(tags,page);
@@ -312,8 +329,8 @@ Future Snatcher(String tags, String amount, String timeout) async{
   for (int n = 0; n < int.parse(amount); n ++){
     print(n);
     await writer.write(booruItems[n]);
-    Get.snackbar("Snatched ＼(^ o ^)／",booruItems[n].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1));
   }
+  Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
 }
 
 
