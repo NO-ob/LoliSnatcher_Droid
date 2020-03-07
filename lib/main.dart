@@ -10,7 +10,7 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'dart:io';
-//import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 void main() {
   runApp(MaterialApp(
     navigatorKey: Get.key,
@@ -343,7 +343,7 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 void getPerms() async{
-  //await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 }
 
 
@@ -473,15 +473,9 @@ Future Snatcher(String tags, String amount, int timeout) async{
     count += limit;
     print(count);
   }
-  if (timeout > 0){
-    for (int n = 0; n < int.parse(amount); n ++){
-      Get.snackbar("Sleeping","(∪｡∪)｡｡｡zzz",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2));
-      await Future.delayed(Duration(milliseconds: timeout), () {return writer.write(booruItems[n]);});
-    }
-  } else {
-    for (int n = 0; n < int.parse(amount); n ++){
-      await writer.write(booruItems[n]);
-    }
+
+  for (int n = 0; n < int.parse(amount); n ++){
+    await writer.write(booruItems[n]);
   }
 
   Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
