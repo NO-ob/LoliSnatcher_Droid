@@ -5,12 +5,14 @@ import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'ImageWriter.dart';
+import 'SettingsHandler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'dart:io';
-import 'package:permission_handler/permission_handler.dart';
+//import 'package:permission_handler/permission_handler.dart';
+
 void main() {
   runApp(MaterialApp(
     navigatorKey: Get.key,
@@ -19,6 +21,7 @@ void main() {
 }
 
 class Home extends StatefulWidget {
+  SettingsHandler settingsHandler = new SettingsHandler();
   @override
   _HomeState createState() => _HomeState();
 }
@@ -26,89 +29,143 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String tags = "rating:safe";
   int pageNum = 0;
+  bool firstRun = true;
   final searchTagsController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Loli Snatcher"),
-      ),
-      body: Center(
-        child: new Images(tags: tags),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          children:<Widget>[
-            DrawerHeader(
-              child: Center(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: <Widget>[
-                    new Container(
+      return Scaffold(
+        appBar: AppBar(
+          title: Text("Loli Snatcher"),
+        ),
+        body: Center(
+          child: ImagesFuture(),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            children:<Widget>[
+              DrawerHeader(
+                child: Center(
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      new Container(
                         decoration: new BoxDecoration(
                           shape: BoxShape.circle,
                           image: new DecorationImage(fit: BoxFit.fill, image: new AssetImage('assets/images/drawer_icon.png'),),
-                         ),
+                        ),
                       ),
-                    new Text("Loli Snatcher"),
+                      new Text("Loli Snatcher"),
+                    ],
+                  ),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    new Expanded(
+                      child: TextField(
+                        controller: searchTagsController,
+                        decoration: InputDecoration(
+                          hintText:"Enter Tags",
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      child: IconButton(
+                        icon: Icon(Icons.search),
+                        onPressed: () {
+                          // Setstate and update the tags variable so the widget rebuilds with the new tags
+                          setState((){
+                            firstRun = false;
+                            tags = searchTagsController.text;
+                          });
+                        },
+                      ),
+                    ),
+
                   ],
                 ),
               ),
-            ),
-            Container(
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  new Expanded(
-                    child: TextField(
-                      controller: searchTagsController,
-                      decoration: InputDecoration(
-                        hintText:"Enter Tags",
-                      ),
-                    ),
-                  ),
-                  new Expanded(
-                    child: IconButton(
-                      icon: Icon(Icons.search),
-                      onPressed: () {
-                        // Setstate and update the tags variable so the widget rebuilds with the new tags
-                        setState((){
-                          tags = searchTagsController.text;
-                        });
-                      },
-                    ),
-                  ),
-
-                ],
+              Container(
+                child: FlatButton(
+                  onPressed: (){
+                    firstRun = false;
+                    Get.to(SnatcherPage(searchTagsController.text));
+                  },
+                  child: Text("Snatcher"),
+                ),
               ),
-            ),
-            Container(
-              child: FlatButton(
-                onPressed: (){
-                  Get.to(SnatcherPage(searchTagsController.text));
-                },
-                child: Text("Snatcher"),
+              Container(
+                child: FlatButton(
+                  onPressed: (){
+                    Get.to(SettingsPage(widget.settingsHandler));
+                  },
+                  child: Text("Settings"),
+                ),
               ),
-            ),
-            Container(
-              child: FlatButton(
-                onPressed: (){
-                  Get.to(SettingsPage());
-                },
-                child: Text("Settings"),
-              ),
-            ),
-
-          ],
+            ],
+          ),
         ),
-      ),
+      );
+  }
+  Widget ImagesFuture(){
+    return FutureBuilder(
+      future: ExtStorage.getExternalStorageDirectory(),
+      builder: (BuildContext context, AsyncSnapshot snapshot){
+        if (snapshot.connectionState == ConnectionState.done){
+            var path = snapshot.data + "/LoliSnatcher/snatched/";
+            if(File(path+"settings.conf").existsSync()){
+              return FutureBuilder(
+                  future: widget.settingsHandler.loadSettings(),
+                  builder: (BuildContext context, AsyncSnapshot snapshot){
+                    if (snapshot.connectionState == ConnectionState.done){
+                      if (firstRun){
+                        searchTagsController.text = widget.settingsHandler.defTags;
+                        return Images(widget.settingsHandler.defTags, widget.settingsHandler);
+                      } else {
+                        return Images(tags, widget.settingsHandler);
+                      }
+                    } else {
+                      return Container(child: CircularProgressIndicator());
+                    }
+                  }
+              );
+            } else {
+              getPerms();
+              return FutureBuilder(
+                future: widget.settingsHandler.writeDefaults() ,
+                builder: (BuildContext context, AsyncSnapshot snapshot){
+                  if (snapshot.connectionState == ConnectionState.done){
+                    return FutureBuilder(
+                      future: widget.settingsHandler.loadSettings(),
+                      builder: (BuildContext context, AsyncSnapshot snapshot){
+                        if (snapshot.connectionState == ConnectionState.done) {
+                          return Images(tags, widget.settingsHandler);
+                        } else {
+                          return Container(child: CircularProgressIndicator());
+                        }
+                      }
+                    );
+                  } else {
+                      return Container(child: CircularProgressIndicator());
+                  }
+                }
+              );
+            }
+          } else{
+          return Container(child: CircularProgressIndicator());
+        }
+      }
     );
   }
 }
 
+
 class SettingsPage extends StatefulWidget {
+  SettingsHandler settingsHandler;
+  SettingsPage(this.settingsHandler);
   @override
   _SettingsPageState createState() => _SettingsPageState();
 }
@@ -120,6 +177,13 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    widget.settingsHandler.loadSettings().whenComplete((){
+      settingsTagsController.text = widget.settingsHandler.defTags;
+      settingsLimitController.text = widget.settingsHandler.limit;
+      if (widget.settingsHandler.previewMode != ""){
+        previewMode = widget.settingsHandler.previewMode;
+      }
+    });
     getPerms();
   }
   @override
@@ -189,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Container(
               child: FlatButton(
                 onPressed: (){
-                  saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
                 },
                 child: Text("Save"),
               ),
@@ -201,33 +265,6 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-void saveSettings(String defTags, String limit, String previewMode) async{
-  var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
-  await Directory(path).create(recursive:true);
-  File settingsFile = new File(path+"settings.conf");
-  var writer = settingsFile.openWrite();
-  if (defTags != ""){
-    await writer.write("Default Tags = ${defTags}\n");
-  }
-  if (limit != ""){
-    // Write limit if it between 0-100
-    if (int.parse(limit) <= 100 && int.parse(limit) > 0){
-      await writer.write("Limit = ${int.parse(limit)}\n");
-    } else {
-      // Close writer and alert user
-      writer.close();
-      Get.snackbar("Settings Error","${limit} is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
-      return;
-    }
-  }
-  await writer.write("Preview Mode = ${previewMode}\n");
-  writer.close();
-  Get.snackbar("Settings Saved!","Var may not be updated until app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
-}
-
-
-
-
 
 /**
  * This widget will create a booru handler and then generate a gridview of preview images using a future builder and the search function of the booru handler
@@ -235,7 +272,8 @@ void saveSettings(String defTags, String limit, String previewMode) async{
 
 class Images extends StatefulWidget {
   final String tags;
-  Images({this.tags});
+  SettingsHandler settingsHandler;
+  Images(this.tags, this.settingsHandler);
   int pageNum = 0;
   List<BooruItem> selected = new List();
   @override
@@ -243,11 +281,15 @@ class Images extends StatefulWidget {
 }
 
 class _ImagesState extends State<Images> {
-  BooruHandler test = new GelbooruHandler("https://gelbooru.com", 10);
+  BooruHandler booruHandler;
+  @override
+  void initState(){
+    booruHandler = new GelbooruHandler("https://gelbooru.com",int.parse(widget.settingsHandler.limit));
+  }
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: test.Search(widget.tags, widget.pageNum),
+        future: booruHandler.Search(widget.tags, widget.pageNum),
         builder: (context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -264,7 +306,7 @@ class _ImagesState extends State<Images> {
                     // Inkresponse is used so the tile can have an onclick function
                     child: new InkResponse(
                       enableFeedback: true,
-                      child:new Image.network('${snapshot.data[index].sampleURL}',fit: BoxFit.cover,),
+                      child: sampleorThumb(snapshot.data[index]),
                       onTap: () {
                         Get.to(ImagePage(snapshot.data,index));
                       },
@@ -288,6 +330,13 @@ class _ImagesState extends State<Images> {
           }
         });
   }
+  Widget sampleorThumb(BooruItem item){
+    if (widget.settingsHandler.previewMode == "Sample"){
+      return new Image.network(item.sampleURL,fit: BoxFit.cover,);
+    } else {
+      return new Image.network(item.thumbnailURL,fit: BoxFit.cover,);
+    }
+  }
 }
 
 class ImagePage extends StatefulWidget {
@@ -301,6 +350,7 @@ class ImagePage extends StatefulWidget {
 class _ImagePageState extends State<ImagePage>{
   PageController controller;
   ImageWriter writer = new ImageWriter();
+
   @override
   void initState() {
     super.initState();
@@ -343,7 +393,7 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 void getPerms() async{
-  await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  //await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 }
 
 

@@ -3,7 +3,7 @@
 
 A booru client with support for batch downloading, written in Dart/Flutter for Android but may support more platforms in the future.
 
-
+Thanks to Showers-U for letting me use their art for an icon check them out on pixiv : https://www.pixiv.net/en/users/28366691
 
 ![github-small](https://github.com/NO-ob/LoliSnatcher_Droid/blob/master/demo.gif)
 
@@ -16,11 +16,11 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 - [ ] Add Open in browser button to gallery
 - [x] Batch download Images from gelbooru
 - [x] Add support for danbooru
-- [ ] Add settings
-    - [ ] Amount of images to fetch in one go
+- [x] Add settings
+    - [x] Amount of images to fetch in one go
     - [ ] More boorus
-    - [ ] Timeout between Snatching
-    - [ ] Default Tags
+    - [x] Timeout between Snatching
+    - [x] Default Tags
     - [ ] Custom File Names
 - [ ] Tidy UI
     - [ ] Drawer
