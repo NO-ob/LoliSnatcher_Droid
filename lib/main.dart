@@ -11,7 +11,7 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'dart:io';
-//import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -110,6 +110,9 @@ class _HomeState extends State<Home> {
         ),
       );
   }
+
+  //TO-DO: Change bloat into a function isntead of stacking futurebuilder like a retard
+  //Also add another perms check at the beginning
   Widget ImagesFuture(){
     return FutureBuilder(
       future: ExtStorage.getExternalStorageDirectory(),
@@ -393,7 +396,7 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 void getPerms() async{
-  //await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 }
 
 
