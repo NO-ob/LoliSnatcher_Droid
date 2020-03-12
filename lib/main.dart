@@ -4,6 +4,7 @@ import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
+import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
 import 'package:photo_view/photo_view.dart';
@@ -11,7 +12,7 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:ext_storage/ext_storage.dart';
 import 'dart:io';
-import 'package:permission_handler/permission_handler.dart';
+//import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -30,6 +31,7 @@ class _HomeState extends State<Home> {
   String tags = "rating:safe";
   int pageNum = 0;
   bool firstRun = true;
+  Booru selectedBooru;
   final searchTagsController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -89,6 +91,23 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Container(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    FutureBuilder(
+                      future: BooruSelector(),
+                      builder: (context, AsyncSnapshot snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                          return snapshot.data;
+                        } else {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              Container(
                 child: FlatButton(
                   onPressed: (){
                     firstRun = false;
@@ -115,52 +134,54 @@ class _HomeState extends State<Home> {
   //Also add another perms check at the beginning
   Widget ImagesFuture(){
     return FutureBuilder(
-      future: ExtStorage.getExternalStorageDirectory(),
-      builder: (BuildContext context, AsyncSnapshot snapshot){
-        if (snapshot.connectionState == ConnectionState.done){
-            var path = snapshot.data + "/LoliSnatcher/snatched/";
-            if(File(path+"settings.conf").existsSync()){
-              return FutureBuilder(
-                  future: widget.settingsHandler.loadSettings(),
-                  builder: (BuildContext context, AsyncSnapshot snapshot){
-                    if (snapshot.connectionState == ConnectionState.done){
-                      if (firstRun){
-                        searchTagsController.text = widget.settingsHandler.defTags;
-                        return Images(widget.settingsHandler.defTags, widget.settingsHandler);
-                      } else {
-                        return Images(tags, widget.settingsHandler);
-                      }
-                    } else {
-                      return Container(child: CircularProgressIndicator());
-                    }
-                  }
-              );
-            } else {
-              getPerms();
-              return FutureBuilder(
-                future: widget.settingsHandler.writeDefaults() ,
-                builder: (BuildContext context, AsyncSnapshot snapshot){
-                  if (snapshot.connectionState == ConnectionState.done){
-                    return FutureBuilder(
-                      future: widget.settingsHandler.loadSettings(),
-                      builder: (BuildContext context, AsyncSnapshot snapshot){
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          return Images(tags, widget.settingsHandler);
-                        } else {
-                          return Container(child: CircularProgressIndicator());
-                        }
-                      }
-                    );
-                  } else {
-                      return Container(child: CircularProgressIndicator());
-                  }
-                }
-              );
-            }
-          } else{
-          return Container(child: CircularProgressIndicator());
+      future: ImagesFutures(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+         if (snapshot.connectionState == ConnectionState.done){
+           tags = widget.settingsHandler.defTags;
+           searchTagsController.text = widget.settingsHandler.defTags;
+           return Images(tags, widget.settingsHandler,selectedBooru);
+         } else {
+           return Center(child: CircularProgressIndicator());
+         }
         }
-      }
+    );
+
+  }
+  Future ImagesFutures() async{
+    await getPerms();
+    await widget.settingsHandler.loadSettings();
+    return true;
+  }
+  Future BooruSelector() async{
+    if(widget.settingsHandler.booruList == null){
+      await widget.settingsHandler.getBooru();
+      print(widget.settingsHandler.booruList[1]);
+    }
+    if (selectedBooru == null){
+      selectedBooru = widget.settingsHandler.booruList[0];
+    }
+    return Container(
+      child: DropdownButton<Booru>(
+        value: selectedBooru,
+        icon: Icon(Icons.arrow_downward),
+        onChanged: (Booru newValue){
+          print(newValue.baseURL);
+          setState((){
+            selectedBooru = newValue;
+          });
+        },
+        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+          return DropdownMenuItem<Booru>(
+            value: value,
+            child: Row(
+              children: <Widget>[
+                Text(value.name),
+                Image.network(value.faviconURL),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
@@ -176,13 +197,14 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final settingsTagsController = TextEditingController();
   final settingsLimitController = TextEditingController();
+  Booru selectedBooru;
   String previewMode = "Sample";
   @override
   void initState() {
     super.initState();
     widget.settingsHandler.loadSettings().whenComplete((){
       settingsTagsController.text = widget.settingsHandler.defTags;
-      settingsLimitController.text = widget.settingsHandler.limit;
+      settingsLimitController.text = widget.settingsHandler.limit.toString();
       if (widget.settingsHandler.previewMode != ""){
         previewMode = widget.settingsHandler.previewMode;
       }
@@ -261,10 +283,218 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Text("Save"),
               ),
             ),
+            Container(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  FutureBuilder(
+                    future: BooruSelector(),
+                    builder: (context, AsyncSnapshot snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                        return snapshot.data;
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
+                  FlatButton(
+                    onPressed: (){
+                      if(selectedBooru != null){
+                        Get.to(booruEdit(selectedBooru,widget.settingsHandler));
+                      }
+                      //get to booru edit page;
+                    },
+                    child: Text("Edit"),
+                  ),
+                ],
+             ),
+            ),
           ],
         ),
       ),
     );
+  }
+  Future BooruSelector() async{
+    if(widget.settingsHandler.booruList == null){
+      await widget.settingsHandler.getBooru();
+      widget.settingsHandler.booruList.add(new Booru("New"," ","https://i.imgur.com/fGHg4Ul.png"," "));
+      print(widget.settingsHandler.booruList[1]);
+    }
+    if (selectedBooru == null){
+      selectedBooru = widget.settingsHandler.booruList[0];
+    }
+    return Container(
+      child: DropdownButton<Booru>(
+        value: selectedBooru,
+        icon: Icon(Icons.arrow_downward),
+        onChanged: (Booru newValue){
+          print(newValue.baseURL);
+          setState((){
+            selectedBooru = newValue;
+          });
+        },
+        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+          return DropdownMenuItem<Booru>(
+            value: value,
+            child: Row(
+              children: <Widget>[
+                Text(value.name),
+                Image.network(value.faviconURL),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+class booruEdit extends StatefulWidget {
+  SettingsHandler settingsHandler;
+  booruEdit(this.booru,this.settingsHandler);
+  Booru booru;
+  String booruType = "";
+  @override
+  _booruEditState createState() => _booruEditState();
+}
+
+class _booruEditState extends State<booruEdit> {
+  final booruNameController = TextEditingController();
+  final booruURLController = TextEditingController();
+  final booruFaviconController = TextEditingController();
+  @override
+  void initState() {
+    if (widget.booru.name != "New"){
+      booruNameController.text = widget.booru.name;
+      booruURLController.text = widget.booru.baseURL;
+      booruFaviconController.text = widget.booru.faviconURL;
+    }
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: Text("Settings")
+      ),
+      body:Center(
+        child: ListView(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Name: "),
+                  new Expanded(
+                    child: TextField(
+                      controller: booruNameController,
+                      decoration: InputDecoration(
+                        hintText:"Enter Booru Name",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("URL : "),
+                  new Expanded(
+                    child: TextField(
+                      controller: booruURLController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText:"Enter Booru URL",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Favicon : "),
+                  new Expanded(
+                    child: TextField(
+                      controller: booruFaviconController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText:"Enter Booru favicon URL",
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              child: Row(
+                children: <Widget>[
+                  FlatButton(
+                    onPressed: () async{
+                      String booruType = await booruTest(booruURLController.text);
+                      if(booruType != ""){
+                        setState((){
+                          widget.booruType = booruType;
+                        });
+                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+                      } else {
+                        Get.snackbar("No Data Returned","the Booru may not allow api access",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+                      }
+                    },
+                    child: Text("Test"),
+                  ),
+                  saveButton(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget saveButton(){
+    if (widget.booruType == ""){
+      return Container();
+    } else {
+      return FlatButton(
+        onPressed:() async{
+          getPerms();
+          await widget.settingsHandler.saveBooru(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
+        },
+        child: Text("Save"),
+      );
+    }
+  }
+  Future<String> booruTest(String URL) async{
+    String booruType = "";
+    BooruHandler test = new GelbooruHandler(URL, 5);
+    List<BooruItem> testFetched = await test.Search(" ", 1);
+    if (testFetched != null) {
+      booruType = "Gelbooru";
+      print("Found Results as Gelbooru");
+    } else {
+      test = new MoebooruHandler(URL, 5);
+      testFetched = await test.Search(" ", 1);
+      if (testFetched != null) {
+        booruType = "Moebooru";
+        print("Found Results as Moebooru");
+      } else {
+        test = new DanbooruHandler(URL, 5);
+        testFetched = await test.Search(" ", 1);
+        if (testFetched != null) {
+          booruType = "Danbooru";
+          print("Found Results as Danbooru");
+        }
+      }
+    }
+    return booruType;
   }
 }
 
@@ -275,8 +505,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
 class Images extends StatefulWidget {
   final String tags;
+  Booru booru;
   SettingsHandler settingsHandler;
-  Images(this.tags, this.settingsHandler);
+  Images(this.tags, this.settingsHandler,this.booru);
   int pageNum = 0;
   List<BooruItem> selected = new List();
   @override
@@ -287,7 +518,17 @@ class _ImagesState extends State<Images> {
   BooruHandler booruHandler;
   @override
   void initState(){
-    booruHandler = new GelbooruHandler("https://gelbooru.com",int.parse(widget.settingsHandler.limit));
+    switch(widget.booru.type){
+      case("Moebooru"):
+        booruHandler = new MoebooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
+        break;
+      case("Gelbooru"):
+        booruHandler = new GelbooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
+        break;
+      case("Danbooru"):
+        booruHandler = new DanbooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
+        break;
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -302,7 +543,7 @@ class _ImagesState extends State<Images> {
             child: GridView.builder(
               itemCount: snapshot.data.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2),
+                  crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 4),
               itemBuilder: (BuildContext context, int index) {
                 return new Card(
                   child: new GridTile(
@@ -395,8 +636,8 @@ class _ImagePageState extends State<ImagePage>{
 
 }
 
-void getPerms() async{
-  await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+Future getPerms() async{
+ //return await PermissionHandler().requestPermissions([PermissionGroup.storage]);
 }
 
 

@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:io';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:get/get.dart';
+import 'libBooru/Booru.dart';
 class SettingsHandler {
-  String defTags,limit,previewMode;
-  SettingsHandler(){
-  }
+  String defTags = "",previewMode = "Sample";
+  int limit = 20;
+  List<Booru> booruList;
   Future writeDefaults() async{
     var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
-    if (!await File(path+"settings.conf").exists()){
+    if (!File(path+"settings.conf").existsSync()){
       await Directory(path).create(recursive:true);
       File settingsFile = new File(path+"settings.conf");
       var writer = settingsFile.openWrite();
@@ -34,7 +35,7 @@ class SettingsHandler {
           break;
         case("Limit"):
           if (settings[i].split(" = ").length > 1){
-            limit = settings[i].split(" = ")[1];
+            limit = int.parse(settings[i].split(" = ")[1]);
             print("Found Limit " + settings[i].split(" = ")[1] );
           }
           break;
@@ -48,7 +49,7 @@ class SettingsHandler {
     }
     return true;
   }
-
+  //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
   void saveSettings(String defTags, String limit, String previewMode) async{
     var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
     await Directory(path).create(recursive:true);
@@ -61,6 +62,7 @@ class SettingsHandler {
       // Write limit if it between 0-100
       if (int.parse(limit) <= 100 && int.parse(limit) > 0){
         await writer.write("Limit = ${int.parse(limit)}\n");
+        this.limit = int.parse(limit);
       } else {
         // Close writer and alert user
         writer.close();
@@ -69,9 +71,36 @@ class SettingsHandler {
       }
     }
     writer.write("Preview Mode = $previewMode\n");
+    this.previewMode = previewMode;
     writer.close();
     await this.loadSettings();
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
   }
-
+  Future getBooru() async{
+    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    booruList = ([new Booru("lolibooru","Moebooru","https://lolibooru.moe/favicon.ico","https://lolibooru.moe/")]);
+    var directory = new Directory(path);
+    List files = directory.listSync();
+    if (files != null){
+      for (int i=0;i < files.length; i++){
+        if(files[i].path.contains(".booru")){
+          print (files[i].toString());
+          booruList.add(Booru.fromFile(files[i]));
+        }
+      }
+    }
+    return true;
+  }
+  Future saveBooru(Booru booru) async{
+    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    await Directory(path).create(recursive:true);
+    File booruFile = new File(path+"${booru.name}.booru");
+    var writer = booruFile.openWrite();
+    writer.write("Booru Name = ${booru.name}\n");
+    writer.write("Booru Type = ${booru.type}\n");
+    writer.write("Favicon URL = ${booru.faviconURL}\n");
+    writer.write("Base URL = ${booru.baseURL}\n");
+    writer.close();
+    return true;
+  }
 }
