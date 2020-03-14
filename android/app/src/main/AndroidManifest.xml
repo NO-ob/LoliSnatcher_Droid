@@ -12,8 +12,8 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="loli"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Loli Snatcher"
+        android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

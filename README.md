@@ -12,13 +12,14 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 - [x] Search and retrieve data from gelbooru
 - [x] View image previews
 - [x] Load new image previews on scroll
-- [ ] View Tags and Full Sized Image in a intent
+- [x] View full sized image in an intent
+- [ ] View Tags and comments In an intent
 - [ ] Add Open in browser button to gallery
 - [x] Batch download Images from gelbooru
 - [x] Add support for danbooru
 - [x] Add settings
     - [x] Amount of images to fetch in one go
-    - [ ] More boorus
+    - [x] More boorus
     - [x] Timeout between Snatching
     - [x] Default Tags
     - [ ] Custom File Names

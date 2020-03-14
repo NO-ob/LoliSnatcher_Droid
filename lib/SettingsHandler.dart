@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:get/get.dart';
 import 'libBooru/Booru.dart';
+
+/**
+ * This class is used loading from and writing settings to files
+ */
 class SettingsHandler {
   String defTags = "",previewMode = "Sample";
   int limit = 20;
@@ -77,18 +81,24 @@ class SettingsHandler {
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
   }
   Future getBooru() async{
-    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
-    booruList = ([new Booru("lolibooru","Moebooru","https://lolibooru.moe/favicon.ico","https://lolibooru.moe/")]);
-    var directory = new Directory(path);
-    List files = directory.listSync();
-    if (files != null){
-      for (int i=0;i < files.length; i++){
-        if(files[i].path.contains(".booru")){
-          print (files[i].toString());
-          booruList.add(Booru.fromFile(files[i]));
+    booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/")]);
+    try {
+      var path = await ExtStorage.getExternalStorageDirectory() +
+          "/LoliSnatcher/config/";
+      var directory = new Directory(path);
+      List files = directory.listSync();
+      if (files != null) {
+        for (int i = 0; i < files.length; i++) {
+          if (files[i].path.contains(".booru")) {
+            print(files[i].toString());
+            booruList.add(Booru.fromFile(files[i]));
+          }
         }
       }
+    } catch (e){
+      print(e);
     }
+
     return true;
   }
   Future saveBooru(Booru booru) async{

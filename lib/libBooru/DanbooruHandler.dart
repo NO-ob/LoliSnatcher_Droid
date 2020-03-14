@@ -3,13 +3,20 @@ import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
+
+/**
+ * Booru Handler for the Danbooru engine
+ */
 class DanbooruHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
 
   // Dart constructors are weird so it has to call super with the args
   DanbooruHandler(String baseURL,int limit) : super(baseURL,limit);
 
-
+  /**
+   * This function will call a http get request using the tags and pagenumber parsed to it
+   * it will then create a list of booruItems
+   */
   Future Search(String tags, int pageNum) async{
     String url = makeURL(tags);
     this.pageNum = pageNum;
@@ -28,9 +35,11 @@ class DanbooruHandler extends BooruHandler{
         // Create a BooruItem for each post in the list
         for (int i = 0; i < posts.length; i++) {
           var current = posts.elementAt(i);
-          if ((current
-              .findElements("file-url")
-              .length > 0)) {
+          /**
+           * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
+           * to go with the rest of the data so cannot be displayed and are pointless for the app
+           */
+          if ((current.findElements("file-url").length > 0)) {
             fetched.add(new BooruItem(current
                 .findElements("file-url")
                 .elementAt(0)
@@ -52,7 +61,7 @@ class DanbooruHandler extends BooruHandler{
         prevTags = tags;
         return fetched;
       }
-    }catch(e) {
+    } catch(e) {
       print(e);
       return fetched;
     }

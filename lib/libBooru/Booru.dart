@@ -3,6 +3,7 @@ import 'dart:io';
 class Booru {
   String name,faviconURL,type,baseURL;
   Booru(this.name,this.type,this.faviconURL,this.baseURL);
+
   Booru.fromFile(File booru){
     List<String> booruString = booru.readAsLinesSync();
     print(booruString);
