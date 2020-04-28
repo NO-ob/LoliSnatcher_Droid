@@ -11,9 +11,24 @@ import 'package:photo_view/photo_view.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(MaterialApp(
+      theme: ThemeData(
+        // Define the default brightness and colors.
+        brightness: Brightness.dark,
+        primaryColor: Colors.pink[200],
+        accentColor: Colors.pink[300],
+
+        textTheme: TextTheme(
+          headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
+          headline6: GoogleFonts.quicksand(fontSize: 36.0),
+          bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
+          bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
+        ),
+      ),
     navigatorKey: Get.key,
     home: Home(),
   ));
@@ -47,55 +62,53 @@ class _HomeState extends State<Home> {
           child: ListView(
             children:<Widget>[
               DrawerHeader(
-                child: Center(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: <Widget>[
-                      // App icon In the top of the drawer
-                      new Container(
-                        decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(fit: BoxFit.fill, image: new AssetImage('assets/images/drawer_icon.png'),),
-                        ),
-                      ),
-                      new Text("Loli Snatcher"),
-                    ],
-                  ),
+                decoration: new BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
                 ),
               ),
               Container(
                 width: double.infinity,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
+
                   children: <Widget>[
                     //Tags/Search field
                     new Expanded(
-                      child: TextField(
-                        controller: searchTagsController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Tags",
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(10,0,0,0),
+                        child: TextField(
+                          controller: searchTagsController,
+                          decoration: InputDecoration(
+                            hintText:"Enter Tags",
+                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                            border: new OutlineInputBorder(
+                              borderRadius: new BorderRadius.circular(50),
+                                gapPadding: 0,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    new Expanded(
-                      child: IconButton(
+                     IconButton(
+                        padding: new EdgeInsets.all(20),
                         icon: Icon(Icons.search),
                         onPressed: () {
                           // Setstate and update the tags variable so the widget rebuilds with the new tags
                           setState((){
                             //Set first run to false so a
                             firstRun = false;
+                            print("Booru = " + selectedBooru.name.toString());
                             tags = searchTagsController.text;
                           });
                         },
                       ),
-                    ),
-
                   ],
                 ),
               ),
               Container(
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     FutureBuilder(
@@ -112,7 +125,12 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Container(
+                alignment: Alignment.center,
                 child: FlatButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Theme.of(context).accentColor),
+                  ),
                   onPressed: (){
                     firstRun = false;
                     Get.to(SnatcherPage(searchTagsController.text,selectedBooru));
@@ -121,11 +139,29 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Container(
+                alignment: Alignment.center,
                 child: FlatButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(20),
+                    side: BorderSide(color: Theme.of(context).accentColor),
+                  ),
                   onPressed: (){
                     Get.to(SettingsPage(widget.settingsHandler));
                   },
                   child: Text("Settings"),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                child: FlatButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(20),
+                    side: BorderSide(color: Theme.of(context).accentColor),
+                  ),
+                  onPressed: (){
+                    Get.to(AboutPage());
+                  },
+                  child: Text("About"),
                 ),
               ),
             ],
@@ -242,15 +278,24 @@ class _SettingsPageState extends State<SettingsPage> {
           children: <Widget>[
             Container(
               width: double.infinity,
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Text("Default Tags: "),
+                  Text("Default Tags:      "),
                   new Expanded(
-                    child: TextField(
-                      controller: settingsTagsController,
-                      decoration: InputDecoration(
-                        hintText:"Enter Tags which are loaded when app is opened",
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: settingsTagsController,
+                        decoration: InputDecoration(
+                          hintText:"Tags searched when app opens",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -258,21 +303,30 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  Text("Limit : "),
+                  Text("Limit :            "),
                   new Expanded(
-                    child: TextField(
-                      controller: settingsLimitController,
-                      //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        WhitelistingTextInputFormatter.digitsOnly
-                      ],
-                      decoration: InputDecoration(
-                        hintText:"Images to fetch per page 0-100",
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: settingsLimitController,
+                        //The keyboard type and input formatter are used to make sure the user can only input a numerical value
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText: "Images to fetch per page 0-100",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -280,32 +334,33 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
               // This dropdown is used to change the quality of the images displayed on the home page
-              child: DropdownButton<String>(
-                value: previewMode,
-                icon: Icon(Icons.arrow_downward),
-                onChanged: (String newValue){
-                  setState((){
-                    previewMode = newValue;
-                  });
-                },
-                items: <String>["Sample","Thumbnail"].map<DropdownMenuItem<String>>((String value){
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+              child:  Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Preview Mode :     "),
+                  DropdownButton<String>(
+                    value: previewMode,
+                    icon: Icon(Icons.arrow_downward),
+                    onChanged: (String newValue){
+                      setState((){
+                        previewMode = newValue;
+                      });
+                    },
+                    items: <String>["Sample","Thumbnail"].map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
             ),
             Container(
-              child: FlatButton(
-                onPressed: (){
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
-                },
-                child: Text("Save"),
-              ),
-            ),
-            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
@@ -319,27 +374,52 @@ class _SettingsPageState extends State<SettingsPage> {
                       }
                     },
                   ),
-
-                  FlatButton(
-                    // This button loads the booru editor page
-                    onPressed: (){
-                      if(selectedBooru != null){
-                        Get.to(booruEdit(selectedBooru,widget.settingsHandler));
-                      }
-                      //get to booru edit page;
-                    },
-                    child: Text("Edit"),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10,10,10,10),
+                    child: FlatButton(                     // This button loads the booru editor page
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20),
+                        side: BorderSide(color: Theme.of(context).accentColor),
+                      ),
+                      onPressed: (){
+                        if(selectedBooru != null){
+                          Get.to(booruEdit(selectedBooru,widget.settingsHandler));
+                        }
+                        //get to booru edit page;
+                      },
+                      child: Text("Edit"),
+                    ),
                   ),
-                  FlatButton(
-                    onPressed: (){
-                        // Open the booru edtor page but with default values
-                        Get.to(booruEdit(new Booru("New","","",""),widget.settingsHandler));
-                      //get to booru edit page;
-                    },
-                    child: Text("Add new"),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10,10,10,10),
+                    child: FlatButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(20),
+                          side: BorderSide(color: Theme.of(context).accentColor),
+                        ),
+                        onPressed: (){
+                            // Open the booru edtor page but with default values
+                            Get.to(booruEdit(new Booru("New","","",""),widget.settingsHandler));
+                          //get to booru edit page;
+                        },
+                      child: Text("Add new"),
+                    ),
                   ),
                 ],
              ),
+            ),
+            Container(
+              alignment: Alignment.center,
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Theme.of(context).accentColor),
+                ),
+                onPressed: (){
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
+                },
+                child: Text("Save"),
+              ),
             ),
           ],
         ),
@@ -419,16 +499,25 @@ class _booruEditState extends State<booruEdit> {
         child: ListView(
           children: <Widget>[
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("Name: "),
                   new Expanded(
-                    child: TextField(
-                      controller: booruNameController,
-                      decoration: InputDecoration(
-                        hintText:"Enter Booru Name",
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: booruNameController,
+                        decoration: InputDecoration(
+                          hintText:"Enter Booru Name",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -436,16 +525,25 @@ class _booruEditState extends State<booruEdit> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("URL : "),
                   new Expanded(
-                    child: TextField(
-                      controller: booruURLController,
-                      decoration: InputDecoration(
-                        hintText:"Enter Booru URL",
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: booruURLController,
+                        decoration: InputDecoration(
+                          hintText:"Enter Booru URL",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -453,16 +551,25 @@ class _booruEditState extends State<booruEdit> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("Favicon : "),
                   new Expanded(
-                    child: TextField(
-                      controller: booruFaviconController,
-                      decoration: InputDecoration(
-                        hintText:"Enter Booru favicon URL",
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: booruFaviconController,
+                        decoration: InputDecoration(
+                          hintText:"Enter Booru favicon URL",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -470,9 +577,15 @@ class _booruEditState extends State<booruEdit> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              alignment: Alignment.center,
               child: Row(
                 children: <Widget>[
                   FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Theme.of(context).accentColor),
+                    ),
                     onPressed: () async{
                       //Call the booru test
                       String booruType = await booruTest(booruURLController.text);
@@ -482,9 +595,9 @@ class _booruEditState extends State<booruEdit> {
                           widget.booruType = booruType;
                         });
                         // Alert user about the results of the test
-                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
                       } else {
-                        Get.snackbar("No Data Returned","the Booru may not allow api access",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+                        Get.snackbar("No Data Returned","the Booru may not allow api access",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
                       }
                     },
                     child: Text("Test"),
@@ -508,6 +621,10 @@ class _booruEditState extends State<booruEdit> {
       return Container();
     } else {
       return FlatButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: new BorderRadius.circular(20),
+          side: BorderSide(color: Theme.of(context).accentColor),
+        ),
         onPressed:() async{
           getPerms();
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
@@ -574,8 +691,12 @@ class Images extends StatefulWidget {
 
 class _ImagesState extends State<Images> {
   BooruHandler booruHandler;
+  String prevTags;
+  Booru prevBooru;
   @override
   void initState(){
+    prevBooru = widget.booru;
+    prevTags = widget.tags;
     // Set booru handler depending on the type of the booru selected with the combo box
     switch(widget.booru.type){
       case("Moebooru"):
@@ -589,8 +710,13 @@ class _ImagesState extends State<Images> {
         break;
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.booru != prevBooru || widget.tags != prevTags){
+      initState();
+    }
+    print("Images booru: " + widget.booru.name);
     return FutureBuilder(
         future: booruHandler.Search(widget.tags, widget.pageNum),
         builder: (context, AsyncSnapshot snapshot) {
@@ -689,6 +815,12 @@ class _ImagePageState extends State<ImagePage>{
               writer.saveImage([widget.fetched[controller.page.toInt()]]);
             },
           ),
+          IconButton(
+            icon: Icon(Icons.public),
+            onPressed: (){
+              _launchURL(widget.fetched[controller.page.toInt()].postURL);
+            },
+          ),
         ],
       ),
       body: Center(
@@ -720,7 +852,7 @@ class _ImagePageState extends State<ImagePage>{
  * The dialog will not show if the user has already accepted perms
  */
 Future getPerms() async{
- return await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+ return await Permission.storage.request().isGranted;
 }
 
 
@@ -758,16 +890,25 @@ class _SnatcherPageState extends State<SnatcherPage> {
         child: ListView(
         children: <Widget>[
           Container(
+            margin: EdgeInsets.fromLTRB(10,10,10,10),
             width: double.infinity,
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Text("Tags: "),
                 new Expanded(
-                  child: TextField(
-                    controller: snatcherTagsController,
-                    decoration: InputDecoration(
-                      hintText:"Enter Tags",
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(10,0,0,0),
+                    child: TextField(
+                      controller: snatcherTagsController,
+                      decoration: InputDecoration(
+                        hintText:"Enter Tags",
+                        contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                        border: new OutlineInputBorder(
+                          borderRadius: new BorderRadius.circular(50),
+                          gapPadding: 0,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -775,20 +916,29 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
           ),
           Container(
+            margin: EdgeInsets.fromLTRB(10,10,10,10),
             width: double.infinity,
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Text("Amount: "),
                 new Expanded(
-                  child: TextField(
-                    controller: snatcherAmountController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    decoration: InputDecoration(
-                      hintText:"Enter amount of images to snatch",
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(10,0,0,0),
+                    child: TextField(
+                      controller: snatcherAmountController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      decoration: InputDecoration(
+                        hintText:"Amount of Images to Snatch",
+                        contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                        border: new OutlineInputBorder(
+                          borderRadius: new BorderRadius.circular(50),
+                          gapPadding: 0,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -796,20 +946,29 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
           ),
           Container(
+            margin: EdgeInsets.fromLTRB(10,10,10,10),
             width: double.infinity,
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Text("Sleep (MS): "),
                 new Expanded(
-                  child: TextField(
-                    controller: snatcherSleepController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      WhitelistingTextInputFormatter.digitsOnly
-                    ],
-                    decoration: InputDecoration(
-                      hintText:"Timeout between snatching (MS)",
+                  child: Container(
+                    margin: EdgeInsets.fromLTRB(10,0,0,0),
+                    child: TextField(
+                      controller: snatcherSleepController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        WhitelistingTextInputFormatter.digitsOnly
+                      ],
+                      decoration: InputDecoration(
+                        hintText:"Timeout between snatching (MS)",
+                        contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                        border: new OutlineInputBorder(
+                          borderRadius: new BorderRadius.circular(50),
+                          gapPadding: 0,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -817,7 +976,12 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
           ),
           Container(
+            alignment: Alignment.center,
             child: FlatButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(20),
+                side: BorderSide(color: Theme.of(context).accentColor),
+              ),
               /**
                * When the snatch button is pressed the snatch function is called and then
                * Get.back is used to close the snatcher window
@@ -845,7 +1009,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     } else {
       limit = 100;
     }
-    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
     switch(widget.booru.type){
       case("Moebooru"):
         booruHandler = new MoebooruHandler(widget.booru.baseURL,limit);
@@ -870,12 +1034,76 @@ class _SnatcherPageState extends State<SnatcherPage> {
     for (int n = 0; n < int.parse(amount); n ++){
       await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n]);});
     }
-
-    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
+  }
+}
+class AboutPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Snatcher")
+        ),
+        body:Center(
+          child: ListView(
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  child: Text("Loli Snatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo."),),
+                Container(
+                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  child: Row(
+                      children: <Widget>[
+                        Text("Contact: "),
+                        SelectableText("no.aisu@protonmail.com"),
+                      ],
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: (){
+                      _launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
+                    },
+                    child: Text("GitHub"),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  child: Text("A Big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),),
+                Container(
+                  alignment: Alignment.center,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: (){
+                      _launchURL("https://www.pixiv.net/en/users/28366691");
+                    },
+                    child: Text("Showers-U - Pixiv"),
+                  ),
+                ),
+           ],
+          ),
+        ),
+      );
   }
 }
 
 
+// function from url_launcher pub.dev page
 
+_launchURL(String url) async {
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
 
 

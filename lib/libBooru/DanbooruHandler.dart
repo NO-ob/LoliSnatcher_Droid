@@ -52,10 +52,10 @@ class DanbooruHandler extends BooruHandler{
                 .text, current
                 .findElements("tag-string")
                 .elementAt(0)
-                .text, current
+                .text, makePostURL(current
                 .findElements("id")
                 .elementAt(0)
-                .text));
+                .text)));
           }
         }
         prevTags = tags;
@@ -65,6 +65,10 @@ class DanbooruHandler extends BooruHandler{
       print(e);
       return fetched;
     }
+  }
+  // This will create a url to goto the images page in the browser
+  String makePostURL(String id){
+    return "$baseURL/posts/$id";
   }
   String makeURL(String tags){
     return "$baseURL/posts.xml?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";

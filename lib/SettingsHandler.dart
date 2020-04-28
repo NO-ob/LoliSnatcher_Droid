@@ -8,7 +8,7 @@ import 'libBooru/Booru.dart';
  * This class is used loading from and writing settings to files
  */
 class SettingsHandler {
-  String defTags = "",previewMode = "Sample";
+  String defTags = "rating:safe",previewMode = "Sample";
   int limit = 20;
   List<Booru> booruList;
   Future writeDefaults() async{
@@ -59,9 +59,7 @@ class SettingsHandler {
     await Directory(path).create(recursive:true);
     File settingsFile = new File(path+"settings.conf");
     var writer = settingsFile.openWrite();
-    if (defTags != ""){
-      writer.write("Default Tags = $defTags\n");
-    }
+    writer.write("Default Tags = $defTags\n");
     if (limit != ""){
       // Write limit if it between 0-100
       if (int.parse(limit) <= 100 && int.parse(limit) > 0){

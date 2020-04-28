@@ -40,7 +40,7 @@ class GelbooruHandler extends BooruHandler{
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
-          fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("sample_url"),current.getAttribute("preview_url"),current.getAttribute("tags"),current.getAttribute("id")));
+          fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("sample_url"),current.getAttribute("preview_url"),current.getAttribute("tags"),makePostURL(current.getAttribute("id"))));
         }
         prevTags = tags;
         return fetched;
@@ -50,6 +50,10 @@ class GelbooruHandler extends BooruHandler{
       return fetched;
     }
 
+    }
+    // This will create a url to goto the images page in the browser
+    String makePostURL(String id){
+      return "$baseURL/index.php?page=post&s=view&id=$id";
     }
     // This will create a url for the http request
     String makeURL(String tags){
