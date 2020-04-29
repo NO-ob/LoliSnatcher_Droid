@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:video_player/video_player.dart';
 void main() {
   runApp(MaterialApp(
       theme: ThemeData(
@@ -421,6 +421,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Text("Save"),
               ),
             ),
+            Container(
+              alignment: Alignment.center,
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Theme.of(context).accentColor),
+                ),
+                onPressed: (){
+                },
+                child: Text("Save Location"),
+              ),
+            ),
           ],
         ),
       ),
@@ -595,9 +607,9 @@ class _booruEditState extends State<booruEdit> {
                           widget.booruType = booruType;
                         });
                         // Alert user about the results of the test
-                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
+                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                       } else {
-                        Get.snackbar("No Data Returned","the Booru may not allow api access",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
+                        Get.snackbar("No Data Returned","the Booru may not allow api access",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                       }
                     },
                     child: Text("Test"),
@@ -769,10 +781,10 @@ class _ImagesState extends State<Images> {
    *
    */
   Widget sampleorThumb(BooruItem item){
-    if (widget.settingsHandler.previewMode == "Sample"){
-      return new Image.network(item.sampleURL,fit: BoxFit.cover,);
-    } else {
+    if (widget.settingsHandler.previewMode == "Thumbnail" || item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == "webm" || item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == "mp4"){
       return new Image.network(item.thumbnailURL,fit: BoxFit.cover,);
+    } else {
+      return new Image.network(item.sampleURL,fit: BoxFit.cover,);
     }
   }
 }
@@ -812,7 +824,8 @@ class _ImagePageState extends State<ImagePage>{
             onPressed: (){
               getPerms();
               // call a function to save the currently viewed image when the save button is pressed
-              writer.saveImage([widget.fetched[controller.page.toInt()]]);
+              writer.write(widget.fetched[controller.page.toInt()]);
+              Get.snackbar("Snatched ＼(^ o ^)／",widget.fetched[controller.page.toInt()].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
             },
           ),
           IconButton(
@@ -831,12 +844,16 @@ class _ImagePageState extends State<ImagePage>{
           controller: controller,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
-            return Container(
-              // Photoview is used as it makes the image zoomable
-              child: PhotoView(
-                imageProvider: NetworkImage(widget.fetched[index].fileURL),
-              ),
-            );
+            if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == "webm" || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == "mp4"){
+              return VideoApp(widget.fetched[index].fileURL);
+            } else {
+              return Container(
+                // Photoview is used as it makes the image zoomable
+                child: PhotoView(
+                  imageProvider: NetworkImage(widget.fetched[index].fileURL),
+                ),
+              );
+            }
           },
           itemCount: widget.fetched.length,
         ),
@@ -845,6 +862,79 @@ class _ImagePageState extends State<ImagePage>{
   }
 
 }
+
+
+/**
+ * None of the code in this widget is mine it's from the example at https://pub.dev/packages/video_player
+ */
+class VideoApp extends StatefulWidget {
+  String url;
+  VideoApp(this.url);
+  @override
+  _VideoAppState createState() => _VideoAppState();
+}
+
+class _VideoAppState extends State<VideoApp> {
+  VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.network(
+        widget.url)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {});
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Scaffold(
+        body: Center(
+          child: _controller.value.initialized
+              ? AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          )
+              : Container(),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            setState(() {
+              _controller.value.isPlaying
+                  ? _controller.pause()
+                  : _controller.play();
+            });
+          },
+          child: Icon(
+            _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * This launches the permissions dialogue to get storage permissions from the user
@@ -1009,7 +1099,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     } else {
       limit = 100;
     }
-    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
+    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
     switch(widget.booru.type){
       case("Moebooru"):
         booruHandler = new MoebooruHandler(widget.booru.baseURL,limit);
@@ -1033,8 +1123,12 @@ class _SnatcherPageState extends State<SnatcherPage> {
 
     for (int n = 0; n < int.parse(amount); n ++){
       await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n]);});
+      if (n%10 == 0 || n == int.parse(amount) - 1){
+        Get.snackbar("＼(^ o ^)／","Snatched $n / $amount",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+      }
     }
-    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black);
+    //
+    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
 }
 class AboutPage extends StatelessWidget {
@@ -1080,7 +1174,7 @@ class AboutPage extends StatelessWidget {
                   child: FlatButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
+                      side: BorderSide(color: Theme.of(context).accentColor,),
                     ),
                     onPressed: (){
                       _launchURL("https://www.pixiv.net/en/users/28366691");
