@@ -14,7 +14,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 - [x] Load new image previews on scroll
 - [x] View full sized image in an intent
 - [ ] View Tags and comments In an intent
-- [ ] Add Open in browser button to gallery
+- [x] Add Open in browser button to gallery
 - [x] Batch download Images from gelbooru
 - [x] Add support for danbooru
 - [x] Add settings
@@ -23,8 +23,8 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [x] Timeout between Snatching
     - [x] Default Tags
     - [ ] Custom File Names
-- [ ] Tidy UI
-    - [ ] Drawer
-    - [ ] Add Tablet / Widescreen mode (Drawer always open, no top bar)
-    - [ ] Settings and Snatcher Pages
+- [x] Tidy UI
+    - [x] Drawer
+    - [x] Add Tablet / Widescreen mode (Drawer always open, no top bar)
+    - [x] Settings and Snatcher Pages
 

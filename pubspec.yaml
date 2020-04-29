@@ -1,5 +1,5 @@
 name: LoliSnatcher
-description: A new Flutter project.
+description: Booru Client with the ability to batch download Images.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -33,6 +33,7 @@ dependencies:
   image: ^2.1.12
   google_fonts: ^1.0.0
   url_launcher: ^5.4.5
+
 flutter_icons:
   android: "launcher_icon"
   image_path: "assets/images/iconFG.png"
