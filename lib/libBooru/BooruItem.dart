@@ -1,8 +1,8 @@
 class BooruItem{
   String fileURL,sampleURL,thumbnailURL,tagString,postURL;
   int id,width,height;
-
-  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagString,this.postURL){
+  List tagsList;
+  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL){
   }
 
   String get file{

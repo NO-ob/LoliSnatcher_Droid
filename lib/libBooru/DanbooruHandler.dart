@@ -51,8 +51,8 @@ class DanbooruHandler extends BooruHandler{
                 .elementAt(0)
                 .text, current
                 .findElements("tag-string")
-                .elementAt(0)
-                .text, makePostURL(current
+                .elementAt(0).text.split(" ")
+                , makePostURL(current
                 .findElements("id")
                 .elementAt(0)
                 .text)));

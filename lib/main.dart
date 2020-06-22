@@ -4,6 +4,7 @@ import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
+import 'libBooru/e621Handler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
@@ -609,7 +610,7 @@ class _booruEditState extends State<booruEdit> {
                         // Alert user about the results of the test
                         Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                       } else {
-                        Get.snackbar("No Data Returned","the Booru may not allow api access",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                        Get.snackbar("No Data Returned","the Booru may not allow api access or the URL is incorrect ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                       }
                     },
                     child: Text("Test"),
@@ -680,6 +681,14 @@ class _booruEditState extends State<booruEdit> {
         print("Found Results as Danbooru");
       }
     }
+    test = new e621Handler(URL, 5);
+    testFetched = await test.Search(" ", 1);
+    if (testFetched != null) {
+      if (testFetched.length > 0) {
+        booruType = "e621";
+        print("Found Results as e621");
+      }
+    }
     // This can return anything it's needed for the future builder.
     return booruType;
   }
@@ -719,6 +728,9 @@ class _ImagesState extends State<Images> {
         break;
       case("Danbooru"):
         booruHandler = new DanbooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
+        break;
+      case("e621"):
+        booruHandler = new e621Handler(widget.booru.baseURL,widget.settingsHandler.limit);
         break;
     }
   }
@@ -1109,6 +1121,9 @@ class _SnatcherPageState extends State<SnatcherPage> {
         break;
       case("Danbooru"):
         booruHandler = new DanbooruHandler(widget.booru.baseURL,limit);
+        break;
+      case("e621"):
+        booruHandler = new e621Handler(widget.booru.baseURL,limit);
         break;
     }
     // Loop until the count variable is bigger or equal to amount
