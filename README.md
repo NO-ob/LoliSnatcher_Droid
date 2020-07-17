@@ -27,4 +27,10 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [x] Drawer
     - [x] Add Tablet / Widescreen mode (Drawer always open, no top bar)
     - [x] Settings and Snatcher Pages
-
+- [ ] More Booru
+    - [ ] Shimmie - https://rule34.paheal.net/
+    - [ ] Philomena - https://derpibooru.org/
+    - [ ] Szurubooru
+- [ ] UI Extra
+    - [ ] Add buttons for ratings isntead of typing it
+    - [ ] Add save location functionality
