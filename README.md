@@ -34,3 +34,4 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 - [ ] UI Extra
     - [ ] Add buttons for ratings isntead of typing it
     - [ ] Add save location functionality
+    - [ ] Make new boorus show without restarting
