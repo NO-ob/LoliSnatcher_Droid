@@ -31,7 +31,11 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [ ] Shimmie - https://rule34.paheal.net/
     - [ ] Philomena - https://derpibooru.org/
     - [ ] Szurubooru
+    - [ ] Danbooru Gold links - https://github.com/friendlyanon/decensooru/tree/master/batches
 - [ ] UI Extra
     - [ ] Add buttons for ratings isntead of typing it
     - [ ] Add save location functionality
     - [ ] Make new boorus show without restarting
+- [ ] Favourites
+    - [ ] Add favourites storing
+    - [ ] Implement importing from animeboxes
