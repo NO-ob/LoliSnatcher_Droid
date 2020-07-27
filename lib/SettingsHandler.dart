@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:ext_storage/ext_storage.dart';
 import 'package:get/get.dart';
 import 'libBooru/Booru.dart';
-
+import 'dart:io' show Platform;
 /**
  * This class is used loading from and writing settings to files
  */
@@ -11,8 +11,14 @@ class SettingsHandler {
   String defTags = "rating:safe",previewMode = "Sample";
   int limit = 20;
   List<Booru> booruList;
+  var path = "";
   Future writeDefaults() async{
-    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    if (Platform.isAndroid){
+      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    } else if (Platform.isLinux){
+      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
+
     if (!File(path+"settings.conf").existsSync()){
       await Directory(path).create(recursive:true);
       File settingsFile = new File(path+"settings.conf");
@@ -26,7 +32,11 @@ class SettingsHandler {
   }
 
   Future loadSettings() async{
-    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    if (Platform.isAndroid){
+      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    } else if (Platform.isLinux){
+      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
     File settingsFile = new File(path+"settings.conf");
     List<String> settings = settingsFile.readAsLinesSync();
     for (int i=0;i < settings.length; i++){
@@ -55,7 +65,11 @@ class SettingsHandler {
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
   void saveSettings(String defTags, String limit, String previewMode) async{
-    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    if (Platform.isAndroid){
+      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    } else if (Platform.isLinux){
+      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
     await Directory(path).create(recursive:true);
     File settingsFile = new File(path+"settings.conf");
     var writer = settingsFile.openWrite();
@@ -81,8 +95,11 @@ class SettingsHandler {
   Future getBooru() async{
     booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/")]);
     try {
-      var path = await ExtStorage.getExternalStorageDirectory() +
-          "/LoliSnatcher/config/";
+      if (Platform.isAndroid){
+        path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+      } else if (Platform.isLinux){
+        path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+      }
       var directory = new Directory(path);
       List files = directory.listSync();
       if (files != null) {
@@ -100,7 +117,11 @@ class SettingsHandler {
     return true;
   }
   Future saveBooru(Booru booru) async{
-    var path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    if (Platform.isAndroid){
+      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+    } else if (Platform.isLinux){
+      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
     await Directory(path).create(recursive:true);
     File booruFile = new File(path+"${booru.name}.booru");
     var writer = booruFile.openWrite();

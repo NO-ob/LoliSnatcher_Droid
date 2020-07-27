@@ -1,15 +1,17 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
-import 'dart:convert';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
-class e621Handler extends BooruHandler{
+/**
+ * Booru Handler for the Shimmie engine
+ */
+class ShimmieHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
-  e621Handler(String baseURL,int limit) : super(baseURL,limit);
+
+  // Dart constructors are weird so it has to call super with the args
+  ShimmieHandler(String baseURL,int limit) : super(baseURL,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -23,26 +25,26 @@ class e621Handler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/1.2.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml",  "user-agent":"LoliSnatcher_Droid/1.2.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+        var parsedResponse = xml.parse(response.body);
         /**
          * This creates a list of xml elements 'post' to extract only the post elements which contain
          * all the data needed about each image
          */
-        var posts = parsedResponse['posts'];
-        print("e621Handler::search ${parsedResponse['posts'].length}");
-
+        var posts = parsedResponse.findAllElements('post');
         // Create a BooruItem for each post in the list
-        for (int i =0; i < parsedResponse['posts'].length; i++){
-          var current = parsedResponse['posts'][i];
-          print(current['file']['url']);
+        for (int i =0; i < posts.length; i++){
+          var current = posts.elementAt(i);
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
-          if (current['file']['url'] != null){
-            fetched.add(new BooruItem(current['file']['url'],current['sample']['url'],current['preview']['url'],current['tags']['general'] + current['tags']['species'] + current['tags']['character'] + current['tags']['artist'] + current['tags']['meta'],makePostURL(current['id'].toString())));
+          if (!baseURL.contains("https://whyneko.com/booru")){
+            fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("preview_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id"))));
+          } else {
+            String cutURL = baseURL.split("/booru")[0];
+            fetched.add(new BooruItem(cutURL+current.getAttribute("file_url"),cutURL+current.getAttribute("preview_url"),cutURL+current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id"))));
           }
 
         }
@@ -57,11 +59,10 @@ class e621Handler extends BooruHandler{
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "$baseURL/posts/$id?";
+    return "$baseURL/post/view/$id";
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "$baseURL/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    return "$baseURL/api/danbooru/find_posts/index.xml?&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
 }
-

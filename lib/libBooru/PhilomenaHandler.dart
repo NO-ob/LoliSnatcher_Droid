@@ -1,15 +1,13 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'dart:convert';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
-class e621Handler extends BooruHandler{
+class PhilomenaHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
-  e621Handler(String baseURL,int limit) : super(baseURL,limit);
+  PhilomenaHandler(String baseURL,int limit) : super(baseURL,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -31,19 +29,13 @@ class e621Handler extends BooruHandler{
          * This creates a list of xml elements 'post' to extract only the post elements which contain
          * all the data needed about each image
          */
-        var posts = parsedResponse['posts'];
-        print("e621Handler::search ${parsedResponse['posts'].length}");
+        var posts = parsedResponse['images'];
+        print("PhilomenaHandler::search ${parsedResponse['images'].length}");
 
         // Create a BooruItem for each post in the list
-        for (int i =0; i < parsedResponse['posts'].length; i++){
-          var current = parsedResponse['posts'][i];
-          print(current['file']['url']);
-          /**
-           * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
-           */
-          if (current['file']['url'] != null){
-            fetched.add(new BooruItem(current['file']['url'],current['sample']['url'],current['preview']['url'],current['tags']['general'] + current['tags']['species'] + current['tags']['character'] + current['tags']['artist'] + current['tags']['meta'],makePostURL(current['id'].toString())));
-          }
+        for (int i =0; i < parsedResponse['images'].length; i++){
+          var current = parsedResponse['images'][i];
+          fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],current['tags'],makePostURL(current['id'].toString())));
 
         }
         prevTags = tags;
@@ -57,11 +49,12 @@ class e621Handler extends BooruHandler{
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "$baseURL/posts/$id?";
+    return "$baseURL/images/$id";
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "$baseURL/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
+    return "$baseURL/api/v1/json/search/images?q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
   }
 }
 

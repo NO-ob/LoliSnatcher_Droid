@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
+import 'libBooru/PhilomenaHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
+import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
@@ -15,6 +17,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:io' show Platform;
 void main() {
   runApp(MaterialApp(
       theme: ThemeData(
@@ -689,6 +692,22 @@ class _booruEditState extends State<booruEdit> {
         print("Found Results as e621");
       }
     }
+    test = new ShimmieHandler(URL, 5);
+    testFetched = await test.Search(" ", 1);
+    if (testFetched != null) {
+      if (testFetched.length > 0) {
+        booruType = "Shimmie";
+        print("Found Results as Shimmie");
+      }
+    }
+    test = new PhilomenaHandler(URL, 5);
+    testFetched = await test.Search("solo", 1);
+    if (testFetched != null) {
+      if (testFetched.length > 0) {
+        booruType = "Philomena";
+        print("Found Results as Philomena");
+      }
+    }
     // This can return anything it's needed for the future builder.
     return booruType;
   }
@@ -731,6 +750,13 @@ class _ImagesState extends State<Images> {
         break;
       case("e621"):
         booruHandler = new e621Handler(widget.booru.baseURL,widget.settingsHandler.limit);
+        break;
+      case("Shimmie"):
+        booruHandler = new ShimmieHandler(widget.booru.baseURL,widget.settingsHandler.limit);
+        break;
+      case("Philomena"):
+        widget.pageNum = 1;
+        booruHandler = new PhilomenaHandler(widget.booru.baseURL,widget.settingsHandler.limit);
         break;
     }
   }
@@ -954,7 +980,10 @@ class _VideoAppState extends State<VideoApp> {
  * The dialog will not show if the user has already accepted perms
  */
 Future getPerms() async{
- return await Permission.storage.request().isGranted;
+  if (Platform.isAndroid){
+    return await Permission.storage.request().isGranted;
+  }
+  print(Platform.environment['HOME']);
 }
 
 
@@ -1124,6 +1153,13 @@ class _SnatcherPageState extends State<SnatcherPage> {
         break;
       case("e621"):
         booruHandler = new e621Handler(widget.booru.baseURL,limit);
+        break;
+      case("Shimmie"):
+        booruHandler = new ShimmieHandler(widget.booru.baseURL,limit);
+        break;
+      case("Philomena"):
+        page = 1;
+        booruHandler = new PhilomenaHandler(widget.booru.baseURL,limit);
         break;
     }
     // Loop until the count variable is bigger or equal to amount
