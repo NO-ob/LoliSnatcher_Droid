@@ -1,4 +1,4 @@
-#If you know of a booru running on the Szurubooru engine please make an issue with the url
+# If you know of a booru running on the Szurubooru engine please make an issue with the url
 
 
 # LoliSnatcher Droid
