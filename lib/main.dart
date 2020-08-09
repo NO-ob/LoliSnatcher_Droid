@@ -13,11 +13,14 @@ import 'SettingsHandler.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:io' show Platform;
+import 'AboutPage.dart';
+import 'getPerms.dart';
+import 'Snatcher.dart';
+import 'SettingsPage.dart';
+import 'SearchGlobals.dart';
 void main() {
   runApp(MaterialApp(
       theme: ThemeData(
@@ -48,10 +51,9 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
-  String tags = "rating:safe";
-  int pageNum = 0;
+  List<SearchGlobals> searchGlobals = new List.from([new SearchGlobals(),new SearchGlobals()]);
+  int globalsIndex = 0;
   bool firstRun = true;
-  Booru selectedBooru;
   final searchTagsController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -102,8 +104,8 @@ class _HomeState extends State<Home> {
                           setState((){
                             //Set first run to false so a
                             firstRun = false;
-                            print("Booru = " + selectedBooru.name.toString());
-                            tags = searchTagsController.text;
+                            print("Booru = " + searchGlobals[globalsIndex].selectedBooru.name.toString());
+                            searchGlobals[globalsIndex].tags = searchTagsController.text;
                           });
                         },
                       ),
@@ -132,12 +134,31 @@ class _HomeState extends State<Home> {
                 alignment: Alignment.center,
                 child: FlatButton(
                   shape: RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(20),
+                    side: BorderSide(color: Theme.of(context).accentColor),
+                  ),
+                  onPressed: (){
+                    setState((){
+                      if(globalsIndex == 0){
+                        globalsIndex++;
+                      } else {
+                        globalsIndex--;
+                      }
+                    });
+                  },
+                  child: Text("Tab Toggle"),
+                ),
+              ),
+              Container(
+                alignment: Alignment.center,
+                child: FlatButton(
+                  shape: RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20),
                       side: BorderSide(color: Theme.of(context).accentColor),
                   ),
                   onPressed: (){
                     firstRun = false;
-                    Get.to(SnatcherPage(searchTagsController.text,selectedBooru));
+                    Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru));
                   },
                   child: Text("Snatcher"),
                 ),
@@ -183,16 +204,16 @@ class _HomeState extends State<Home> {
           future: ImagesFutures(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.connectionState == ConnectionState.done){
-              tags = widget.settingsHandler.defTags;
+              searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
               searchTagsController.text = widget.settingsHandler.defTags;
-              return Images(tags, widget.settingsHandler,selectedBooru);
+              return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
             } else {
               return Center(child: CircularProgressIndicator());
             }
           }
       );
     } else {
-      return Images(tags, widget.settingsHandler,selectedBooru);
+      return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
     }
 
 
@@ -211,17 +232,17 @@ class _HomeState extends State<Home> {
       await widget.settingsHandler.getBooru();
     }
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
-    if (selectedBooru == null){
-      selectedBooru = widget.settingsHandler.booruList[0];
+    if (searchGlobals[globalsIndex].selectedBooru == null){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
     }
     return Container(
       child: DropdownButton<Booru>(
-        value: selectedBooru,
+        value: searchGlobals[globalsIndex].selectedBooru,
         icon: Icon(Icons.arrow_downward),
         onChanged: (Booru newValue){
           print(newValue.baseURL);
           setState((){
-            selectedBooru = newValue;
+            searchGlobals[globalsIndex].selectedBooru = newValue;
           });
         },
         items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
@@ -243,475 +264,6 @@ class _HomeState extends State<Home> {
   }
 }
 
-/**
- * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
- */
-class SettingsPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  SettingsPage(this.settingsHandler);
-  @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  final settingsTagsController = TextEditingController();
-  final settingsLimitController = TextEditingController();
-  Booru selectedBooru;
-  String previewMode = "Sample";
-  @override
-  // These lines are done in init state as they only need to be run once when the widget is first loaded
-  void initState() {
-    super.initState();
-    widget.settingsHandler.loadSettings().whenComplete((){
-      settingsTagsController.text = widget.settingsHandler.defTags;
-      settingsLimitController.text = widget.settingsHandler.limit.toString();
-      if (widget.settingsHandler.previewMode != ""){
-        previewMode = widget.settingsHandler.previewMode;
-      }
-    });
-    getPerms();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: Text("Settings")
-      ),
-      body:Center(
-        child: ListView(
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Default Tags:      "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: settingsTagsController,
-                        decoration: InputDecoration(
-                          hintText:"Tags searched when app opens",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Limit :            "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: settingsLimitController,
-                        //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter.digitsOnly
-                        ],
-                        decoration: InputDecoration(
-                          hintText: "Images to fetch per page 0-100",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              // This dropdown is used to change the quality of the images displayed on the home page
-              child:  Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Preview Mode :     "),
-                  DropdownButton<String>(
-                    value: previewMode,
-                    icon: Icon(Icons.arrow_downward),
-                    onChanged: (String newValue){
-                      setState((){
-                        previewMode = newValue;
-                      });
-                    },
-                    items: <String>["Sample","Thumbnail"].map<DropdownMenuItem<String>>((String value){
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  FutureBuilder(
-                    future: BooruSelector(),
-                    builder: (context, AsyncSnapshot snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                        return snapshot.data;
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10,10,10,10),
-                    child: FlatButton(                     // This button loads the booru editor page
-                      shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Theme.of(context).accentColor),
-                      ),
-                      onPressed: (){
-                        if(selectedBooru != null){
-                          Get.to(booruEdit(selectedBooru,widget.settingsHandler));
-                        }
-                        //get to booru edit page;
-                      },
-                      child: Text("Edit"),
-                    ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10,10,10,10),
-                    child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(20),
-                          side: BorderSide(color: Theme.of(context).accentColor),
-                        ),
-                        onPressed: (){
-                            // Open the booru edtor page but with default values
-                            Get.to(booruEdit(new Booru("New","","",""),widget.settingsHandler));
-                          //get to booru edit page;
-                        },
-                      child: Text("Add new"),
-                    ),
-                  ),
-                ],
-             ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
-                ),
-                onPressed: (){
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
-                },
-                child: Text("Save"),
-              ),
-            ),
-            Container(
-              alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
-                ),
-                onPressed: (){
-                },
-                child: Text("Save Location"),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /**
-   * This is the same as the drop down used in the Home widget. The reason the code is reused instead of having a global widget is that
-   * it cant update the state of the parent widget if it is outside of the class.
-   */
-  Future BooruSelector() async{
-    if(widget.settingsHandler.booruList == null){
-      await widget.settingsHandler.getBooru();
-    }
-    if (selectedBooru == null){
-      selectedBooru = widget.settingsHandler.booruList[0];
-    }
-    return Container(
-      child: DropdownButton<Booru>(
-        value: selectedBooru,
-        icon: Icon(Icons.arrow_downward),
-        onChanged: (Booru newValue){
-          print(newValue.baseURL);
-          setState((){
-            selectedBooru = newValue;
-          });
-        },
-        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
-          return DropdownMenuItem<Booru>(
-            value: value,
-            child: Row(
-              children: <Widget>[
-                Text(value.name),
-                Image.network(value.faviconURL),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-}
-/**
- * This is the booru editor page.
- */
-class booruEdit extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  booruEdit(this.booru,this.settingsHandler);
-  Booru booru;
-  String booruType = "";
-  @override
-  _booruEditState createState() => _booruEditState();
-}
-
-class _booruEditState extends State<booruEdit> {
-  final booruNameController = TextEditingController();
-  final booruURLController = TextEditingController();
-  final booruFaviconController = TextEditingController();
-  @override
-  void initState() {
-    //Load settings from the Booru instance parsed to the widget and populate the text fields
-    if (widget.booru.name != "New"){
-      booruNameController.text = widget.booru.name;
-      booruURLController.text = widget.booru.baseURL;
-      booruFaviconController.text = widget.booru.faviconURL;
-    }
-    super.initState();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          title: Text("Booru Editor")
-      ),
-      body:Center(
-        child: ListView(
-          children: <Widget>[
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Name: "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruNameController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Booru Name",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("URL : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruURLController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Booru URL",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Favicon : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruFaviconController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Booru favicon URL",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              alignment: Alignment.center,
-              child: Row(
-                children: <Widget>[
-                  FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: () async{
-                      //Call the booru test
-                      String booruType = await booruTest(booruURLController.text);
-                      // If a booru type is returned set the widget state
-                      if(booruType != ""){
-                        setState((){
-                          widget.booruType = booruType;
-                        });
-                        // Alert user about the results of the test
-                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-                      } else {
-                        Get.snackbar("No Data Returned","the Booru may not allow api access or the URL is incorrect ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-                      }
-                    },
-                    child: Text("Test"),
-                  ),
-                  saveButton(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /**
-   * The save button is displayed once the test function has run and completed
-   * allowing the user to save the booru config otherwise an empty container is returned
-   */
-  Widget saveButton(){
-    if (widget.booruType == ""){
-      return Container();
-    } else {
-      return FlatButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: new BorderRadius.circular(20),
-          side: BorderSide(color: Theme.of(context).accentColor),
-        ),
-        onPressed:() async{
-          getPerms();
-          // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
-          await widget.settingsHandler.saveBooru(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
-        },
-        child: Text("Save"),
-      );
-    }
-  }
-
-  /**
-   * This function will use the Base URL the user has entered and call a search up to three times
-   * if the searches return null each time it tries the search it uses a different
-   * type of BooruHandler
-   */
-  Future<String> booruTest(String URL) async{
-    String booruType = "";
-    BooruHandler test = new GelbooruHandler(URL, 5);
-    List<BooruItem> testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0){
-        booruType = "Gelbooru";
-        print("Found Results as Gelbooru");
-        return booruType;
-      }
-    }
-    test = new MoebooruHandler(URL, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Moebooru";
-        print("Found Results as Moebooru");
-        return booruType;
-      }
-    }
-    test = new DanbooruHandler(URL, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Danbooru";
-        print("Found Results as Danbooru");
-      }
-    }
-    test = new e621Handler(URL, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "e621";
-        print("Found Results as e621");
-      }
-    }
-    test = new ShimmieHandler(URL, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Shimmie";
-        print("Found Results as Shimmie");
-      }
-    }
-    test = new PhilomenaHandler(URL, 5);
-    testFetched = await test.Search("solo", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Philomena";
-        print("Found Results as Philomena");
-      }
-    }
-    // This can return anything it's needed for the future builder.
-    return booruType;
-  }
-}
 
 
 /**
@@ -719,56 +271,75 @@ class _booruEditState extends State<booruEdit> {
  */
 
 class Images extends StatefulWidget {
-  final String tags;
-  Booru booru;
+  SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
-  Images(this.tags, this.settingsHandler,this.booru);
-  int pageNum = 0;
+  Images(this.settingsHandler,this.searchGlobals);
   List<BooruItem> selected = new List();
   @override
   _ImagesState createState() => _ImagesState();
 }
 
 class _ImagesState extends State<Images> {
-  BooruHandler booruHandler;
   String prevTags;
   Booru prevBooru;
+  ScrollController gridController = new ScrollController();
   @override
   void initState(){
-    prevBooru = widget.booru;
-    prevTags = widget.tags;
-    // Set booru handler depending on the type of the booru selected with the combo box
-    switch(widget.booru.type){
-      case("Moebooru"):
-        booruHandler = new MoebooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
-        break;
-      case("Gelbooru"):
-        booruHandler = new GelbooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
-        break;
-      case("Danbooru"):
-        booruHandler = new DanbooruHandler(widget.booru.baseURL,widget.settingsHandler.limit);
-        break;
-      case("e621"):
-        booruHandler = new e621Handler(widget.booru.baseURL,widget.settingsHandler.limit);
-        break;
-      case("Shimmie"):
-        booruHandler = new ShimmieHandler(widget.booru.baseURL,widget.settingsHandler.limit);
-        break;
-      case("Philomena"):
-        widget.pageNum = 1;
-        booruHandler = new PhilomenaHandler(widget.booru.baseURL,widget.settingsHandler.limit);
-        break;
+    prevBooru = widget.searchGlobals.selectedBooru;
+    prevTags = widget.searchGlobals.tags;
+    if (widget.searchGlobals.selectedBooru.type != widget.searchGlobals.handlerType){
+      widget.searchGlobals.handlerType = widget.searchGlobals.selectedBooru.type;
+      widget.searchGlobals.pageNum = 0;
+      widget.searchGlobals.scrollPosition = 0;
+      // Set booru handler depending on the type of the booru selected with the combo box
+      switch(widget.searchGlobals.selectedBooru.type) {
+        case("Moebooru"):
+          widget.searchGlobals.booruHandler = new MoebooruHandler(
+              widget.searchGlobals.selectedBooru.baseURL,
+              widget.settingsHandler.limit);
+          break;
+        case("Gelbooru"):
+          widget.searchGlobals.booruHandler = new GelbooruHandler(
+              widget.searchGlobals.selectedBooru.baseURL,
+              widget.settingsHandler.limit);
+          break;
+        case("Danbooru"):
+          widget.searchGlobals.booruHandler = new DanbooruHandler(
+              widget.searchGlobals.selectedBooru.baseURL,
+              widget.settingsHandler.limit);
+          break;
+        case("e621"):
+          widget.searchGlobals.booruHandler = new e621Handler(
+              widget.searchGlobals.selectedBooru.baseURL,
+              widget.settingsHandler.limit);
+          break;
+        case("Shimmie"):
+          widget.searchGlobals.booruHandler = new ShimmieHandler(
+              widget.searchGlobals.selectedBooru.baseURL,
+              widget.settingsHandler.limit);
+          break;
+        case("Philomena"):
+          widget.searchGlobals.pageNum = 1;
+          widget.searchGlobals.booruHandler = new PhilomenaHandler(
+              widget.searchGlobals.selectedBooru.baseURL,
+              widget.settingsHandler.limit);
+          break;
+      }
     }
+
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.booru != prevBooru || widget.tags != prevTags){
+    if (widget.searchGlobals.selectedBooru != prevBooru || widget.searchGlobals.tags != prevTags){
       initState();
     }
-    print("Images booru: " + widget.booru.name);
+    if (widget.searchGlobals.scrollPosition != 0){
+      gridController = new ScrollController(initialScrollOffset: widget.searchGlobals.scrollPosition);
+    }
+    print("Images booru: " + widget.searchGlobals.selectedBooru.name);
     return FutureBuilder(
-        future: booruHandler.Search(widget.tags, widget.pageNum),
+        future: widget.searchGlobals.booruHandler.Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
         builder: (context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -776,6 +347,7 @@ class _ImagesState extends State<Images> {
             // A notification listener is used to get the scroll position
             return new NotificationListener<ScrollUpdateNotification>(
             child: GridView.builder(
+              controller: gridController,
               itemCount: snapshot.data.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 /**The short if statement with the media query is used to decide whether to display 2 or 4
@@ -801,11 +373,13 @@ class _ImagesState extends State<Images> {
                 );
               },
             ),
+            // ignore: missing_return
             onNotification: (notif) {
+              widget.searchGlobals.scrollPosition = gridController.offset;
               // If at bottom edge update state with incremented pageNum
               if(notif.metrics.atEdge && notif.metrics.pixels > 0 ){
                 setState((){
-                  widget.pageNum++;
+                  widget.searchGlobals.pageNum++;
                 });
               }
             },
@@ -974,271 +548,8 @@ class _VideoAppState extends State<VideoApp> {
 
 
 
-/**
- * This launches the permissions dialogue to get storage permissions from the user
- * it is called before every operation which would require writing to storage which is why its in its own function
- * The dialog will not show if the user has already accepted perms
- */
-Future getPerms() async{
-  if (Platform.isAndroid){
-    return await Permission.storage.request().isGranted;
-  }
-  print(Platform.environment['HOME']);
-}
 
 
-/**
- * This is the page which allows the user to batch download images
- */
-class SnatcherPage extends StatefulWidget {
-  final String tags;
-  Booru booru;
-  SnatcherPage(this.tags,this.booru);
-  @override
-  _SnatcherPageState createState() => _SnatcherPageState();
-}
-
-class _SnatcherPageState extends State<SnatcherPage> {
-  final snatcherTagsController = TextEditingController();
-  final snatcherAmountController = TextEditingController();
-  final snatcherSleepController = TextEditingController();
-  @override
-  void initState() {
-    super.initState();
-    getPerms();
-    //If the user has searched tags on the main window they will be loaded into the tags field
-    if (widget.tags != ""){
-      snatcherTagsController.text = widget.tags;
-    }
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Snatcher")
-      ),
-      body:Center(
-        child: ListView(
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.fromLTRB(10,10,10,10),
-            width: double.infinity,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Text("Tags: "),
-                new Expanded(
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(10,0,0,0),
-                    child: TextField(
-                      controller: snatcherTagsController,
-                      decoration: InputDecoration(
-                        hintText:"Enter Tags",
-                        contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                        border: new OutlineInputBorder(
-                          borderRadius: new BorderRadius.circular(50),
-                          gapPadding: 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(10,10,10,10),
-            width: double.infinity,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Text("Amount: "),
-                new Expanded(
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(10,0,0,0),
-                    child: TextField(
-                      controller: snatcherAmountController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        WhitelistingTextInputFormatter.digitsOnly
-                      ],
-                      decoration: InputDecoration(
-                        hintText:"Amount of Images to Snatch",
-                        contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                        border: new OutlineInputBorder(
-                          borderRadius: new BorderRadius.circular(50),
-                          gapPadding: 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(10,10,10,10),
-            width: double.infinity,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Text("Sleep (MS): "),
-                new Expanded(
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(10,0,0,0),
-                    child: TextField(
-                      controller: snatcherSleepController,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: <TextInputFormatter>[
-                        WhitelistingTextInputFormatter.digitsOnly
-                      ],
-                      decoration: InputDecoration(
-                        hintText:"Timeout between snatching (MS)",
-                        contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                        border: new OutlineInputBorder(
-                          borderRadius: new BorderRadius.circular(50),
-                          gapPadding: 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            alignment: Alignment.center,
-            child: FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(20),
-                side: BorderSide(color: Theme.of(context).accentColor),
-              ),
-              /**
-               * When the snatch button is pressed the snatch function is called and then
-               * Get.back is used to close the snatcher window
-               */
-              onPressed: (){
-                Snatcher(snatcherTagsController.text,snatcherAmountController.text,int.parse(snatcherSleepController.text));
-                Get.back();
-                //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
-              },
-              child: Text("Snatch Images"),
-            ),
-          ),
-        ],
-        ),
-      ),
-    );
-  }
-  Future Snatcher(String tags, String amount, int timeout) async{
-    ImageWriter writer = new ImageWriter();
-    int count = 0, limit,page = 0;
-    BooruHandler booruHandler;
-    var booruItems;
-    if (int.parse(amount) <= 100){
-      limit = int.parse(amount);
-    } else {
-      limit = 100;
-    }
-    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-    switch(widget.booru.type){
-      case("Moebooru"):
-        booruHandler = new MoebooruHandler(widget.booru.baseURL,limit);
-        break;
-      case("Gelbooru"):
-        booruHandler = new GelbooruHandler(widget.booru.baseURL,limit);
-        break;
-      case("Danbooru"):
-        booruHandler = new DanbooruHandler(widget.booru.baseURL,limit);
-        break;
-      case("e621"):
-        booruHandler = new e621Handler(widget.booru.baseURL,limit);
-        break;
-      case("Shimmie"):
-        booruHandler = new ShimmieHandler(widget.booru.baseURL,limit);
-        break;
-      case("Philomena"):
-        page = 1;
-        booruHandler = new PhilomenaHandler(widget.booru.baseURL,limit);
-        break;
-    }
-    // Loop until the count variable is bigger or equal to amount
-    // The count variable is used instead of checking the length of booruItems because the amount of images stored on
-    // The booru may be less than the user wants which would result in an infinite loop since the length would never be big enough
-    while (count < int.parse(amount)){
-      booruItems = await Future.delayed(Duration(milliseconds: timeout), () {return booruHandler.Search(tags,page);});
-      page ++;
-      count += limit;
-      print(count);
-    }
-
-    for (int n = 0; n < int.parse(amount); n ++){
-      await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n]);});
-      if (n%10 == 0 || n == int.parse(amount) - 1){
-        Get.snackbar("＼(^ o ^)／","Snatched $n / $amount",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-      }
-    }
-    //
-    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-  }
-}
-class AboutPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Snatcher")
-        ),
-        body:Center(
-          child: ListView(
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Text("Loli Snatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo."),),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(
-                      children: <Widget>[
-                        Text("Contact: "),
-                        SelectableText("no.aisu@protonmail.com"),
-                      ],
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: (){
-                      _launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
-                    },
-                    child: Text("GitHub"),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Text("A Big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),),
-                Container(
-                  alignment: Alignment.center,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor,),
-                    ),
-                    onPressed: (){
-                      _launchURL("https://www.pixiv.net/en/users/28366691");
-                    },
-                    child: Text("Showers-U - Pixiv"),
-                  ),
-                ),
-           ],
-          ),
-        ),
-      );
-  }
-}
 
 
 // function from url_launcher pub.dev page
@@ -1250,5 +561,8 @@ _launchURL(String url) async {
     throw 'Could not launch $url';
   }
 }
+
+
+
 
 

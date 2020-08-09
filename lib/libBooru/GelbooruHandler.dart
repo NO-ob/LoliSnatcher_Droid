@@ -18,6 +18,9 @@ class GelbooruHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    if(this.pageNum == pageNum){
+      return fetched;
+    }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = new List();

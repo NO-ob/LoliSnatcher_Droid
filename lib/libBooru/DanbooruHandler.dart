@@ -19,6 +19,9 @@ class DanbooruHandler extends BooruHandler{
    */
   Future Search(String tags, int pageNum) async{
     String url = makeURL(tags);
+    if(this.pageNum == pageNum){
+      return fetched;
+    }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = new List();
