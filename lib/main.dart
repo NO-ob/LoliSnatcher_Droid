@@ -104,11 +104,60 @@ class _HomeState extends State<Home> {
                           setState((){
                             //Set first run to false so a
                             firstRun = false;
-                            print("Booru = " + searchGlobals[globalsIndex].selectedBooru.name.toString());
+                            Booru tmp = searchGlobals[globalsIndex].selectedBooru;
+                            searchGlobals[globalsIndex] = new SearchGlobals();
                             searchGlobals[globalsIndex].tags = searchTagsController.text;
+                            searchGlobals[globalsIndex].selectedBooru = tmp;
                           });
                         },
                       ),
+                  ],
+                ),
+              ),
+              Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text("Tab: "),
+                    DropdownButton<SearchGlobals>(
+                      value: searchGlobals[globalsIndex],
+                      icon: Icon(Icons.arrow_downward),
+                      onChanged: (SearchGlobals newValue){
+                        setState(() {
+                          globalsIndex = searchGlobals.indexOf(newValue);
+                          searchTagsController.text = newValue.tags;
+                        });
+                      },
+                      items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
+                        return DropdownMenuItem<SearchGlobals>(value: value, child: Text(value.tags));
+                      }).toList(),
+                    ),
+                    IconButton(
+                      padding: new EdgeInsets.all(20),
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        // add a new search global to the list
+                        setState((){
+                          searchGlobals.add(new SearchGlobals());
+                        });
+                      },
+                    ),
+                    IconButton(
+                      padding: new EdgeInsets.all(20),
+                      icon: Icon(Icons.delete_forever),
+                      onPressed: () {
+                        // Remove selected searchglobal from list
+                        setState((){
+                          if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
+                            globalsIndex --;
+                            searchGlobals.removeAt(globalsIndex + 1);
+                          } else if (searchGlobals.length > 1){
+                            searchGlobals.removeAt(globalsIndex);
+                          }
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -128,25 +177,6 @@ class _HomeState extends State<Home> {
                       },
                     ),
                   ],
-                ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                child: FlatButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20),
-                    side: BorderSide(color: Theme.of(context).accentColor),
-                  ),
-                  onPressed: (){
-                    setState((){
-                      if(globalsIndex == 0){
-                        globalsIndex++;
-                      } else {
-                        globalsIndex--;
-                      }
-                    });
-                  },
-                  child: Text("Tab Toggle"),
                 ),
               ),
               Container(
@@ -280,63 +310,64 @@ class Images extends StatefulWidget {
 }
 
 class _ImagesState extends State<Images> {
-  String prevTags;
-  Booru prevBooru;
-  ScrollController gridController = new ScrollController();
+  ScrollController gridController = ScrollController();
   @override
   void initState(){
-    prevBooru = widget.searchGlobals.selectedBooru;
-    prevTags = widget.searchGlobals.tags;
-    if (widget.searchGlobals.selectedBooru.type != widget.searchGlobals.handlerType){
-      widget.searchGlobals.handlerType = widget.searchGlobals.selectedBooru.type;
-      widget.searchGlobals.pageNum = 0;
-      widget.searchGlobals.scrollPosition = 0;
-      // Set booru handler depending on the type of the booru selected with the combo box
-      switch(widget.searchGlobals.selectedBooru.type) {
-        case("Moebooru"):
-          widget.searchGlobals.booruHandler = new MoebooruHandler(
-              widget.searchGlobals.selectedBooru.baseURL,
-              widget.settingsHandler.limit);
-          break;
-        case("Gelbooru"):
-          widget.searchGlobals.booruHandler = new GelbooruHandler(
-              widget.searchGlobals.selectedBooru.baseURL,
-              widget.settingsHandler.limit);
-          break;
-        case("Danbooru"):
-          widget.searchGlobals.booruHandler = new DanbooruHandler(
-              widget.searchGlobals.selectedBooru.baseURL,
-              widget.settingsHandler.limit);
-          break;
-        case("e621"):
-          widget.searchGlobals.booruHandler = new e621Handler(
-              widget.searchGlobals.selectedBooru.baseURL,
-              widget.settingsHandler.limit);
-          break;
-        case("Shimmie"):
-          widget.searchGlobals.booruHandler = new ShimmieHandler(
-              widget.searchGlobals.selectedBooru.baseURL,
-              widget.settingsHandler.limit);
-          break;
-        case("Philomena"):
-          widget.searchGlobals.pageNum = 1;
-          widget.searchGlobals.booruHandler = new PhilomenaHandler(
-              widget.searchGlobals.selectedBooru.baseURL,
-              widget.settingsHandler.limit);
-          break;
-      }
-    }
-
+    print("init state");
+        // Set booru handler depending on the type of the booru selected with the combo box
+        switch (widget.searchGlobals.selectedBooru.type) {
+          case("Moebooru"):
+            widget.searchGlobals.booruHandler = new MoebooruHandler(
+                widget.searchGlobals.selectedBooru.baseURL,
+                widget.settingsHandler.limit);
+            break;
+          case("Gelbooru"):
+            widget.searchGlobals.booruHandler = new GelbooruHandler(
+                widget.searchGlobals.selectedBooru.baseURL,
+                widget.settingsHandler.limit);
+            break;
+          case("Danbooru"):
+            widget.searchGlobals.booruHandler = new DanbooruHandler(
+                widget.searchGlobals.selectedBooru.baseURL,
+                widget.settingsHandler.limit);
+            break;
+          case("e621"):
+            widget.searchGlobals.booruHandler = new e621Handler(
+                widget.searchGlobals.selectedBooru.baseURL,
+                widget.settingsHandler.limit);
+            break;
+          case("Shimmie"):
+            widget.searchGlobals.booruHandler = new ShimmieHandler(
+                widget.searchGlobals.selectedBooru.baseURL,
+                widget.settingsHandler.limit);
+            break;
+          case("Philomena"):
+            widget.searchGlobals.pageNum = 1;
+            widget.searchGlobals.booruHandler = new PhilomenaHandler(
+                widget.searchGlobals.selectedBooru.baseURL,
+                widget.settingsHandler.limit);
+            break;
+        }
+        print("Booru init to " + widget.searchGlobals.selectedBooru.toString());
   }
+
 
   @override
   Widget build(BuildContext context) {
-    if (widget.searchGlobals.selectedBooru != prevBooru || widget.searchGlobals.tags != prevTags){
+    print(widget.searchGlobals.selectedBooru.toString());
+    if (widget.searchGlobals.booruHandler == null){
       initState();
     }
-    if (widget.searchGlobals.scrollPosition != 0){
-      gridController = new ScrollController(initialScrollOffset: widget.searchGlobals.scrollPosition);
+    if (gridController.hasClients) {
+      print("Jumping to " + widget.searchGlobals.scrollPosition.toString() + " search is " + widget.searchGlobals.tags);
+      gridController.jumpTo(widget.searchGlobals.scrollPosition);
+    } else if (widget.searchGlobals.scrollPosition != 0){
+      print("set scroll state to "  + widget.searchGlobals.scrollPosition.toString() + " search is " + widget.searchGlobals.tags);
+      setState(() {
+        gridController = new ScrollController(initialScrollOffset: widget.searchGlobals.scrollPosition);
+      });
     }
+
     print("Images booru: " + widget.searchGlobals.selectedBooru.name);
     return FutureBuilder(
         future: widget.searchGlobals.booruHandler.Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
@@ -355,6 +386,7 @@ class _ImagesState extends State<Images> {
                  */
               crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 4),
               itemBuilder: (BuildContext context, int index) {
+
                 return new Card(
                   child: new GridTile(
                     // Inkresponse is used so the tile can have an onclick function

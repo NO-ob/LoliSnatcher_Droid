@@ -1,5 +1,5 @@
 abstract class BooruHandler {
-  int pageNum = 0;
+  int pageNum;
   int limit = 20;
   String baseURL = "";
   String prevTags = "";

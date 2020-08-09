@@ -28,4 +28,8 @@ class Booru {
         }
       }
     }
+    @override
+    String toString() {
+      return ("Name: $name Type: $type BaseURL: $baseURL FaviconURL: $faviconURL");
+    }
   }

@@ -36,6 +36,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [ ] Szurubooru
     - [ ] Danbooru Gold links - https://github.com/friendlyanon/decensooru/tree/master/batches
 - [ ] UI Extra
+    - [x] Add Tabs/ Multiple Different Searches
     - [ ] Add buttons for ratings isntead of typing it
     - [ ] Add save location functionality
     - [ ] Make new boorus show without restarting
