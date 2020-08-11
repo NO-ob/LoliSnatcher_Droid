@@ -28,7 +28,7 @@ class DanbooruHandler extends BooruHandler{
     }
     print(url);
     try {
-      final response = await http.get(url, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.2.0"});
+      final response = await http.get(url, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.3.0"});
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);
         var posts = parsedResponse.findAllElements('post');
