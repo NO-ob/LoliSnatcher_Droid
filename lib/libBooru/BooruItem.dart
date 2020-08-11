@@ -18,3 +18,6 @@ class BooruItem{
     return tagString.split(" ");
   }
 }
+
+
+

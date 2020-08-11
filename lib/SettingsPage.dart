@@ -414,6 +414,7 @@ class _booruEditState extends State<booruEdit> {
           getPerms();
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
           await widget.settingsHandler.saveBooru(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
+          widget.settingsHandler.booruList.add(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
         },
         child: Text("Save"),
       );

@@ -45,19 +45,32 @@ void main() {
  * **/
 class Home extends StatefulWidget {
   SettingsHandler settingsHandler = new SettingsHandler();
+
   @override
   _HomeState createState() => _HomeState();
 }
 
 
 class _HomeState extends State<Home> {
-  List<SearchGlobals> searchGlobals = new List.from([new SearchGlobals(),new SearchGlobals()]);
+  List<SearchGlobals> searchGlobals = new List.from([new SearchGlobals(null,"gibDefaults")]);
   int globalsIndex = 0;
   bool firstRun = true;
   final searchTagsController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-      return Scaffold(
+    searchTagsController.text = searchGlobals[globalsIndex].tags;
+    if (searchGlobals[globalsIndex].newTab.value == "noListener"){
+      searchGlobals[globalsIndex].newTab.addListener((){
+        if (searchGlobals[globalsIndex].newTab.value != ""){
+          setState(() {
+            searchGlobals.add(new SearchGlobals(null, searchGlobals[globalsIndex].newTab.value));
+          });
+        }
+      });
+      searchGlobals[globalsIndex].newTab.value = "";
+    }
+
+    return Scaffold(
         appBar: AppBar(
           title: Text("Loli Snatcher"),
         ),
@@ -80,7 +93,7 @@ class _HomeState extends State<Home> {
 
                   children: <Widget>[
                     //Tags/Search field
-                    new Expanded(
+                    Expanded(
                       child: Container(
                         margin: EdgeInsets.fromLTRB(10,0,0,0),
                         child: TextField(
@@ -103,11 +116,7 @@ class _HomeState extends State<Home> {
                           // Setstate and update the tags variable so the widget rebuilds with the new tags
                           setState((){
                             //Set first run to false so a
-                            firstRun = false;
-                            Booru tmp = searchGlobals[globalsIndex].selectedBooru;
-                            searchGlobals[globalsIndex] = new SearchGlobals();
-                            searchGlobals[globalsIndex].tags = searchTagsController.text;
-                            searchGlobals[globalsIndex].selectedBooru = tmp;
+                            searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                           });
                         },
                       ),
@@ -120,32 +129,36 @@ class _HomeState extends State<Home> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     Text("Tab: "),
-                    DropdownButton<SearchGlobals>(
-                      value: searchGlobals[globalsIndex],
-                      icon: Icon(Icons.arrow_downward),
-                      onChanged: (SearchGlobals newValue){
-                        setState(() {
-                          globalsIndex = searchGlobals.indexOf(newValue);
-                          searchTagsController.text = newValue.tags;
-                        });
-                      },
-                      items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
-                        return DropdownMenuItem<SearchGlobals>(value: value, child: Text(value.tags));
-                      }).toList(),
+                    Expanded(
+                      child:
+                      DropdownButton<SearchGlobals>(
+                        value: searchGlobals[globalsIndex],
+                        isExpanded: true,
+                        icon: Icon(Icons.arrow_downward),
+                        onChanged: (SearchGlobals newValue){
+                          setState(() {
+                            globalsIndex = searchGlobals.indexOf(newValue);
+                            searchTagsController.text = newValue.tags;
+                          });
+                        },
+                        items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
+                          return DropdownMenuItem<SearchGlobals>(value: value, child: Text(value.tags));
+                        }).toList(),
+                      ),
                     ),
+
+
                     IconButton(
-                      padding: new EdgeInsets.all(20),
-                      icon: Icon(Icons.add),
+                      icon: Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
                       onPressed: () {
                         // add a new search global to the list
                         setState((){
-                          searchGlobals.add(new SearchGlobals());
+                          searchGlobals.add(new SearchGlobals(null,widget.settingsHandler.defTags));
                         });
                       },
                     ),
                     IconButton(
-                      padding: new EdgeInsets.all(20),
-                      icon: Icon(Icons.delete_forever),
+                      icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
                       onPressed: () {
                         // Remove selected searchglobal from list
                         setState((){
@@ -187,7 +200,6 @@ class _HomeState extends State<Home> {
                       side: BorderSide(color: Theme.of(context).accentColor),
                   ),
                   onPressed: (){
-                    firstRun = false;
                     Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru));
                   },
                   child: Text("Snatcher"),
@@ -234,6 +246,7 @@ class _HomeState extends State<Home> {
           future: ImagesFutures(),
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.connectionState == ConnectionState.done){
+              firstRun = false;
               searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
               searchTagsController.text = widget.settingsHandler.defTags;
               return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
@@ -259,6 +272,7 @@ class _HomeState extends State<Home> {
    * **/
   Future BooruSelector() async{
     if(widget.settingsHandler.booruList == null){
+      print("getbooru because null");
       await widget.settingsHandler.getBooru();
     }
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
@@ -395,7 +409,7 @@ class _ImagesState extends State<Images> {
                       child: sampleorThumb(snapshot.data[index]),
                       onTap: () {
                         // Load the image viewer
-                        Get.to(ImagePage(snapshot.data,index));
+                        Get.to(ImagePage(snapshot.data,index,widget.searchGlobals));
                       },
                       onLongPress: (){
                         widget.selected.add(snapshot.data[index]);
@@ -441,7 +455,8 @@ class _ImagesState extends State<Images> {
 class ImagePage extends StatefulWidget {
   final List fetched;
   final int index;
-  ImagePage(this.fetched,this.index);
+  SearchGlobals searchGlobals;
+  ImagePage(this.fetched,this.index,this.searchGlobals);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
@@ -476,6 +491,54 @@ class _ImagePageState extends State<ImagePage>{
             icon: Icon(Icons.public),
             onPressed: (){
               _launchURL(widget.fetched[controller.page.toInt()].postURL);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.info),
+            onPressed: (){
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context){
+                      return Dialog(
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.circular(20.0)),
+                        child: Container(
+                          margin: EdgeInsets.all(5),
+                          child: ListView.builder(
+                              itemCount: widget.fetched[controller.page.toInt()].tagsList.length,
+                              itemBuilder: (BuildContext context, int index){
+                                return Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(widget.fetched[controller.page.toInt()].tagsList[index]),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
+                                        onPressed: (){
+                                          setState(() {
+                                            widget.searchGlobals.tags += " " + widget.fetched[controller.page.toInt()].tagsList[index];
+                                            print("Add " + widget.fetched[controller.page.toInt()].tagsList[index] + " to current search");
+                                          });
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
+                                        onPressed: (){
+                                          setState(() {
+                                            widget.searchGlobals.newTab.value = widget.fetched[controller.page.toInt()].tagsList[index];
+                                            print("Add " + widget.fetched[controller.page.toInt()].tagsList[index] + " to new search");
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  );
+                              }
+                          ),
+                        ),
+                      );
+                    }
+                  );
             },
           ),
         ],
@@ -593,8 +656,6 @@ _launchURL(String url) async {
     throw 'Could not launch $url';
   }
 }
-
-
 
 
 

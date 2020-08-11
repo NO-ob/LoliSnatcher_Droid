@@ -16,7 +16,6 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 - [x] View image previews
 - [x] Load new image previews on scroll
 - [x] View full sized image in an intent
-- [ ] View Tags and comments In an intent
 - [x] Add Open in browser button to gallery
 - [x] Batch download Images from gelbooru
 - [x] Add support for danbooru
@@ -35,6 +34,10 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [x] Philomena - https://derpibooru.org/
     - [ ] Szurubooru
     - [ ] Danbooru Gold links - https://github.com/friendlyanon/decensooru/tree/master/batches
+- [x] Tags
+    - [x] View Tags in popup
+    - [x] Add a tag to current search
+    - [x] Add a tag to new search
 - [ ] UI Extra
     - [x] Add Tabs/ Multiple Different Searches
     - [ ] Add buttons for ratings isntead of typing it

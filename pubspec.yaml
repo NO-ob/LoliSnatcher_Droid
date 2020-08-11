@@ -27,7 +27,7 @@ dependencies:
   xml: ^4.3.0
   flutter_launcher_icons: ^0.7.5
   photo_view: ^0.9.2
-  get: ^3.4.1
+  get: ^3.4.4
   ext_storage: ^1.0.3
   permission_handler: ^5.0.1+1
   image: ^2.1.14
