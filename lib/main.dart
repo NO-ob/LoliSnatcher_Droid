@@ -52,7 +52,7 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
-  List<SearchGlobals> searchGlobals = new List.from([new SearchGlobals(null,"gibDefaults")]);
+  List<SearchGlobals> searchGlobals = new List.from([new SearchGlobals(null,"")]);
   int globalsIndex = 0;
   bool firstRun = true;
   final searchTagsController = TextEditingController();
