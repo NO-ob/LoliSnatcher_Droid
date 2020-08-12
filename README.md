@@ -40,9 +40,17 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [x] Add a tag to new search
 - [ ] UI Extra
     - [x] Add Tabs/ Multiple Different Searches
-    - [ ] Add buttons for ratings isntead of typing it
+    - [ ] Add buttons for ratings instead of typing it
     - [ ] Add save location functionality
-    - [ ] Make new boorus show without restarting
+    - [x] Make new boorus show without restarting
+    - [ ] Make more images load when reaching end of scrolling in full view
+    - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
 - [ ] Favourites
     - [ ] Add favourites storing
     - [ ] Implement importing from animeboxes
+- [ ] Bugs
+    - [ ] Zoomed image breaks scrolling in full view (I think this only happens when the next image is not loaded so preloading may fix it)
+    - [ ] Device doesn't vibrate when moving cursor
+
+
+

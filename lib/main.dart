@@ -7,6 +7,7 @@ import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
+import 'libBooru/NozomiHandler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
