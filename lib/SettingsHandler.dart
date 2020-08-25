@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:ext_storage/ext_storage.dart';
+import 'ServiceHandler.dart';
 import 'package:get/get.dart';
 import 'libBooru/Booru.dart';
 import 'dart:io' show Platform;
@@ -8,13 +8,14 @@ import 'dart:io' show Platform;
  * This class is used loading from and writing settings to files
  */
 class SettingsHandler {
+  ServiceHandler serviceHandler = new ServiceHandler();
   String defTags = "rating:safe",previewMode = "Sample";
   int limit = 20;
   List<Booru> booruList;
   var path = "";
   Future writeDefaults() async{
     if (Platform.isAndroid){
-      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }
@@ -33,7 +34,7 @@ class SettingsHandler {
 
   Future loadSettings() async{
     if (Platform.isAndroid){
-      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }
@@ -66,7 +67,7 @@ class SettingsHandler {
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
   void saveSettings(String defTags, String limit, String previewMode) async{
     if (Platform.isAndroid){
-      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }
@@ -96,7 +97,7 @@ class SettingsHandler {
     booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/")]);
     try {
       if (Platform.isAndroid){
-        path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+        path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
       } else if (Platform.isLinux){
         path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
       }
@@ -118,7 +119,7 @@ class SettingsHandler {
   }
   Future saveBooru(Booru booru) async{
     if (Platform.isAndroid){
-      path = await ExtStorage.getExternalStorageDirectory() + "/LoliSnatcher/config/";
+      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }
