@@ -25,6 +25,8 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final settingsTagsController = TextEditingController();
   final settingsLimitController = TextEditingController();
+  final settingsColumnsLandscapeController = TextEditingController();
+  final settingsColumnsPortraitController = TextEditingController();
   Booru selectedBooru;
   String previewMode = "Sample";
   @override
@@ -33,6 +35,8 @@ class _SettingsPageState extends State<SettingsPage> {
     super.initState();
     widget.settingsHandler.loadSettings().whenComplete((){
       settingsTagsController.text = widget.settingsHandler.defTags;
+      settingsColumnsPortraitController.text = widget.settingsHandler.portraitColumns.toString();
+      settingsColumnsLandscapeController.text = widget.settingsHandler.landscapeColumns.toString();
       settingsLimitController.text = widget.settingsHandler.limit.toString();
       if (widget.settingsHandler.previewMode != ""){
         previewMode = widget.settingsHandler.previewMode;
@@ -94,6 +98,66 @@ class _SettingsPageState extends State<SettingsPage> {
                         ],
                         decoration: InputDecoration(
                           hintText: "Images to fetch per page 0-100",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Preview Columns Portrait:      "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: settingsColumnsPortraitController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText:"Amount of images to show horizonatally",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Preview Columns Landscape:      "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: settingsColumnsLandscapeController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText:"Amount of images to show horizonatally",
                           contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
                           border: new OutlineInputBorder(
                             borderRadius: new BorderRadius.circular(50),
@@ -172,7 +236,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       onPressed: (){
                         // Open the booru edtor page but with default values
-                        Get.to(booruEdit(new Booru("New","","",""),widget.settingsHandler));
+                        Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
                         //get to booru edit page;
                       },
                       child: Text("Add new"),
@@ -189,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   side: BorderSide(color: Theme.of(context).accentColor),
                 ),
                 onPressed: (){
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text);
                 },
                 child: Text("Save"),
               ),
@@ -239,7 +303,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Row(
               children: <Widget>[
                 Text(value.name),
-                Image.network(value.faviconURL),
+                Image.network(value.faviconURL, width: 16),
               ],
             ),
           );
@@ -266,6 +330,7 @@ class _booruEditState extends State<booruEdit> {
   final booruFaviconController = TextEditingController();
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
+  final booruDefTagsController = TextEditingController();
   @override
   void initState() {
     //Load settings from the Booru instance parsed to the widget and populate the text fields
@@ -275,6 +340,7 @@ class _booruEditState extends State<booruEdit> {
       booruFaviconController.text = widget.booru.faviconURL;
       booruAPIKeyController.text = widget.booru.apiKey;
       booruUserIDController.text = widget.booru.userID;
+      booruDefTagsController.text = widget.booru.defTags;
     }
     super.initState();
   }
@@ -287,6 +353,39 @@ class _booruEditState extends State<booruEdit> {
       body:Center(
         child: ListView(
           children: <Widget>[
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              alignment: Alignment.center,
+              child: Row(
+                children: <Widget>[
+                  FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: () async{
+                      //Call the booru test
+                      String booruType = await booruTest(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,""));
+                      if(booruFaviconController.text == ""){
+                        booruFaviconController.text = booruURLController.text + "/favicon.ico";
+                      }
+                      // If a booru type is returned set the widget state
+                      if(booruType != ""){
+                        setState((){
+                          widget.booruType = booruType;
+                        });
+                        // Alert user about the results of the test
+                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                      } else {
+                        Get.snackbar("No Data Returned","the Booru may not allow api access or the URL is incorrect ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                      }
+                    },
+                    child: Text("Test"),
+                  ),
+                  saveButton(),
+                ],
+              ),
+            ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
@@ -366,6 +465,32 @@ class _booruEditState extends State<booruEdit> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Default Tags : "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: booruDefTagsController,
+                        decoration: InputDecoration(
+                          hintText:"Default search for booru",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
               child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
@@ -422,39 +547,6 @@ class _booruEditState extends State<booruEdit> {
                 ],
               ),
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              alignment: Alignment.center,
-              child: Row(
-                children: <Widget>[
-                  FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: () async{
-                      //Call the booru test
-                      String booruType = await booruTest(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
-                      if(booruFaviconController.text == ""){
-                        booruFaviconController.text = booruURLController.text + "/favicon.ico";
-                      }
-                      // If a booru type is returned set the widget state
-                      if(booruType != ""){
-                        setState((){
-                          widget.booruType = booruType;
-                        });
-                        // Alert user about the results of the test
-                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-                      } else {
-                        Get.snackbar("No Data Returned","the Booru may not allow api access or the URL is incorrect ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-                      }
-                    },
-                    child: Text("Test"),
-                  ),
-                  saveButton(),
-                ],
-              ),
-            ),
           ],
         ),
       ),
@@ -479,9 +571,9 @@ class _booruEditState extends State<booruEdit> {
           Booru newBooru;
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
           if(booruAPIKeyController.text == ""){
-            newBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text);
+            newBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
           } else {
-            newBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruAPIKeyController.text,booruUserIDController.text);
+            newBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
           }
           await widget.settingsHandler.saveBooru(newBooru);
           widget.settingsHandler.booruList.add(newBooru);

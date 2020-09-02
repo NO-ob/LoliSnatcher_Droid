@@ -4,10 +4,8 @@ import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/ShimmieHandler.dart';
-import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
-import 'libBooru/NozomiHandler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
@@ -59,7 +57,7 @@ class _HomeState extends State<Home> {
   final searchTagsController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    searchTagsController.text = searchGlobals[globalsIndex].tags;
+    //searchTagsController.text = searchGlobals[globalsIndex].tags;
     if (searchGlobals[globalsIndex].newTab.value == "noListener"){
       searchGlobals[globalsIndex].newTab.addListener((){
         if (searchGlobals[globalsIndex].newTab.value != ""){
@@ -287,6 +285,9 @@ class _HomeState extends State<Home> {
         onChanged: (Booru newValue){
           print(newValue.baseURL);
           setState((){
+            if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue.defTags != ""){
+              searchTagsController.text = newValue.defTags;
+            }
             searchGlobals[globalsIndex].selectedBooru = newValue;
           });
         },
@@ -401,7 +402,7 @@ class _ImagesState extends State<Images> {
                 /**The short if statement with the media query is used to decide whether to display 2 or 4
                  * thumbnails in a row of the grid depending on screen orientation
                  */
-              crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 4),
+              crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns),
               itemBuilder: (BuildContext context, int index) {
 
                 return new Card(

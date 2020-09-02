@@ -12,7 +12,7 @@ import 'dart:io' show Platform;
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   String defTags = "rating:safe",previewMode = "Sample";
-  int limit = 20;
+  int limit = 20, portraitColumns = 2,landscapeColumns = 4;
   List<Booru> booruList;
   var path = "";
   Future writeDefaults() async{
@@ -62,12 +62,24 @@ class SettingsHandler {
             print("Found Preview Mode " + settings[i].split(" = ")[1] );
           }
           break;
+        case("Portrait Columns"):
+          if (settings[i].split(" = ").length > 1){
+            portraitColumns = int.parse(settings[i].split(" = ")[1]);
+            print("Found Portrait Columns " + settings[i].split(" = ")[1] );
+          }
+          break;
+        case("Landscape Columns"):
+          if (settings[i].split(" = ").length > 1){
+            landscapeColumns = int.parse(settings[i].split(" = ")[1]);
+            print("Found Landscape Columns " + settings[i].split(" = ")[1] );
+          }
+          break;
       }
     }
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns) async{
     if (Platform.isAndroid){
       path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
@@ -77,6 +89,7 @@ class SettingsHandler {
     File settingsFile = new File(path+"settings.conf");
     var writer = settingsFile.openWrite();
     writer.write("Default Tags = $defTags\n");
+    this.defTags = defTags;
     if (limit != ""){
       // Write limit if it between 0-100
       if (int.parse(limit) <= 100 && int.parse(limit) > 0){
@@ -89,6 +102,10 @@ class SettingsHandler {
         return;
       }
     }
+    writer.write("Landscape Columns = $landscapeColumns\n");
+    this.landscapeColumns = int.parse(landscapeColumns);
+    writer.write("Portrait Columns = $portraitColumns\n");
+    this.portraitColumns = int.parse(portraitColumns);
     writer.write("Preview Mode = $previewMode\n");
     this.previewMode = previewMode;
     writer.close();
@@ -96,7 +113,7 @@ class SettingsHandler {
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
   Future getBooru() async{
-    booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/")]);
+    booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/","")]);
     try {
       if (Platform.isAndroid){
         path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
@@ -134,6 +151,7 @@ class SettingsHandler {
     writer.write("Base URL = ${booru.baseURL}\n");
     writer.write("API Key = ${booru.apiKey}\n");
     writer.write("User ID = ${booru.userID}\n");
+    writer.write("Default Tags = ${booru.defTags}\n");
     writer.close();
     return true;
   }

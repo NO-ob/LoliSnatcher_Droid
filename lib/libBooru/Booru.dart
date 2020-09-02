@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class Booru {
-  String name,faviconURL,type,baseURL,apiKey = "",userID = "";
-  Booru(this.name,this.type,this.faviconURL,this.baseURL);
-  Booru.withKey(this.name,this.type,this.faviconURL,this.baseURL,this.apiKey,this.userID);
+  String name,faviconURL,type,baseURL,apiKey = "",userID = "",defTags;
+  Booru(this.name,this.type,this.faviconURL,this.baseURL,this.defTags);
+  Booru.withKey(this.name,this.type,this.faviconURL,this.baseURL,this.defTags,this.apiKey,this.userID);
 
   Booru.fromFile(File booru){
     List<String> booruString = booru.readAsLinesSync();
@@ -34,6 +34,10 @@ class Booru {
           case("User ID"):
             print(booruString[i].split(" = ")[1]);
             this.userID = booruString[i].split(" = ")[1];
+            break;
+          case("Default Tags"):
+            print(booruString[i].split(" = ")[1]);
+            this.defTags = booruString[i].split(" = ")[1];
             break;
         }
       }
