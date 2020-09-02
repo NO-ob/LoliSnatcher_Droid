@@ -3,6 +3,7 @@ import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
+import 'Booru.dart';
 
 /**
  * Booru Handler for the Danbooru engine
@@ -11,14 +12,13 @@ class DanbooruHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
 
   // Dart constructors are weird so it has to call super with the args
-  DanbooruHandler(String baseURL,int limit) : super(baseURL,limit);
+  DanbooruHandler(Booru booru,int limit) : super(booru,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
   Future Search(String tags, int pageNum) async{
-    String url = makeURL(tags);
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -26,9 +26,10 @@ class DanbooruHandler extends BooruHandler{
     if (prevTags != tags){
       fetched = new List();
     }
+    String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.3.0"});
+      final response = await http.get(url, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.4.0"});
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);
         var posts = parsedResponse.findAllElements('post');
@@ -68,9 +69,14 @@ class DanbooruHandler extends BooruHandler{
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "$baseURL/posts/$id";
+    return "${booru.baseURL}/posts/$id";
   }
   String makeURL(String tags){
-    return "$baseURL/posts.xml?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    if (booru.apiKey == ""){
+      return "${booru.baseURL}/posts.xml?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    } else {
+      return "${booru.baseURL}/posts.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    }
+
   }
 }

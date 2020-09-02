@@ -264,6 +264,8 @@ class _booruEditState extends State<booruEdit> {
   final booruNameController = TextEditingController();
   final booruURLController = TextEditingController();
   final booruFaviconController = TextEditingController();
+  final booruAPIKeyController = TextEditingController();
+  final booruUserIDController = TextEditingController();
   @override
   void initState() {
     //Load settings from the Booru instance parsed to the widget and populate the text fields
@@ -271,6 +273,8 @@ class _booruEditState extends State<booruEdit> {
       booruNameController.text = widget.booru.name;
       booruURLController.text = widget.booru.baseURL;
       booruFaviconController.text = widget.booru.faviconURL;
+      booruAPIKeyController.text = widget.booru.apiKey;
+      booruUserIDController.text = widget.booru.userID;
     }
     super.initState();
   }
@@ -348,7 +352,64 @@ class _booruEditState extends State<booruEdit> {
                       child: TextField(
                         controller: booruFaviconController,
                         decoration: InputDecoration(
-                          hintText:"Enter Booru favicon URL",
+                          hintText:"(Autofills if blank)",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              width: double.infinity,
+              child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("API Key : "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: booruAPIKeyController,
+                        decoration: InputDecoration(
+                          hintText:"(Can be blank)",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("User ID : "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: booruUserIDController,
+                        decoration: InputDecoration(
+                          hintText:"(Can be Blank)",
                           contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
                           border: new OutlineInputBorder(
                             borderRadius: new BorderRadius.circular(50),
@@ -373,7 +434,10 @@ class _booruEditState extends State<booruEdit> {
                     ),
                     onPressed: () async{
                       //Call the booru test
-                      String booruType = await booruTest(booruURLController.text);
+                      String booruType = await booruTest(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
+                      if(booruFaviconController.text == ""){
+                        booruFaviconController.text = booruURLController.text + "/favicon.ico";
+                      }
                       // If a booru type is returned set the widget state
                       if(booruType != ""){
                         setState((){
@@ -412,9 +476,16 @@ class _booruEditState extends State<booruEdit> {
         ),
         onPressed:() async{
           getPerms();
+          Booru newBooru;
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
-          await widget.settingsHandler.saveBooru(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
-          widget.settingsHandler.booruList.add(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text));
+          if(booruAPIKeyController.text == ""){
+            newBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text);
+          } else {
+            newBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruAPIKeyController.text,booruUserIDController.text);
+          }
+          await widget.settingsHandler.saveBooru(newBooru);
+          widget.settingsHandler.booruList.add(newBooru);
+          Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
         },
         child: Text("Save"),
       );
@@ -426,9 +497,9 @@ class _booruEditState extends State<booruEdit> {
    * if the searches return null each time it tries the search it uses a different
    * type of BooruHandler
    */
-  Future<String> booruTest(String URL) async{
+  Future<String> booruTest(Booru booru) async{
     String booruType = "";
-    BooruHandler test = new GelbooruHandler(URL, 5);
+    BooruHandler test = new GelbooruHandler(booru, 5);
     List<BooruItem> testFetched = await test.Search(" ", 1);
     if (testFetched != null) {
       if (testFetched.length > 0){
@@ -437,7 +508,7 @@ class _booruEditState extends State<booruEdit> {
         return booruType;
       }
     }
-    test = new MoebooruHandler(URL, 5);
+    test = new MoebooruHandler(booru, 5);
     testFetched = await test.Search(" ", 1);
     if (testFetched != null) {
       if (testFetched.length > 0) {
@@ -446,7 +517,7 @@ class _booruEditState extends State<booruEdit> {
         return booruType;
       }
     }
-    test = new DanbooruHandler(URL, 5);
+    test = new DanbooruHandler(booru, 5);
     testFetched = await test.Search(" ", 1);
     if (testFetched != null) {
       if (testFetched.length > 0) {
@@ -454,7 +525,7 @@ class _booruEditState extends State<booruEdit> {
         print("Found Results as Danbooru");
       }
     }
-    test = new e621Handler(URL, 5);
+    test = new e621Handler(booru, 5);
     testFetched = await test.Search(" ", 1);
     if (testFetched != null) {
       if (testFetched.length > 0) {
@@ -462,7 +533,7 @@ class _booruEditState extends State<booruEdit> {
         print("Found Results as e621");
       }
     }
-    test = new ShimmieHandler(URL, 5);
+    test = new ShimmieHandler(booru, 5);
     testFetched = await test.Search(" ", 1);
     if (testFetched != null) {
       if (testFetched.length > 0) {
@@ -470,7 +541,7 @@ class _booruEditState extends State<booruEdit> {
         print("Found Results as Shimmie");
       }
     }
-    test = new PhilomenaHandler(URL, 5);
+    test = new PhilomenaHandler(booru, 5);
     testFetched = await test.Search("solo", 1);
     if (testFetched != null) {
       if (testFetched.length > 0) {

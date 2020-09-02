@@ -1,12 +1,14 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+
 class Booru {
-  String name,faviconURL,type,baseURL;
+  String name,faviconURL,type,baseURL,apiKey = "",userID = "";
   Booru(this.name,this.type,this.faviconURL,this.baseURL);
+  Booru.withKey(this.name,this.type,this.faviconURL,this.baseURL,this.apiKey,this.userID);
 
   Booru.fromFile(File booru){
     List<String> booruString = booru.readAsLinesSync();
-    print(booruString);
     for (int i=0;i < booruString.length; i++){
         switch(booruString[i].split(" = ")[0]){
           case("Booru Name"):
@@ -25,11 +27,19 @@ class Booru {
             print(booruString[i].split(" = ")[1]);
             this.baseURL = booruString[i].split(" = ")[1];
             break;
+          case("API Key"):
+            print(booruString[i].split(" = ")[1]);
+            this.apiKey = booruString[i].split(" = ")[1];
+            break;
+          case("User ID"):
+            print(booruString[i].split(" = ")[1]);
+            this.userID = booruString[i].split(" = ")[1];
+            break;
         }
       }
     }
     @override
     String toString() {
-      return ("Name: $name Type: $type BaseURL: $baseURL FaviconURL: $faviconURL");
+      return ("Name: $name Type: $type BaseURL: $baseURL FaviconURL: $faviconURL APIKey: $apiKey UserID: $userID");
     }
   }

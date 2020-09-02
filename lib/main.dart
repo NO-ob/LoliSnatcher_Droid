@@ -333,33 +333,34 @@ class _ImagesState extends State<Images> {
         switch (widget.searchGlobals.selectedBooru.type) {
           case("Moebooru"):
             widget.searchGlobals.booruHandler = new MoebooruHandler(
-                widget.searchGlobals.selectedBooru.baseURL,
+                widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
           case("Gelbooru"):
             widget.searchGlobals.booruHandler = new GelbooruHandler(
-                widget.searchGlobals.selectedBooru.baseURL,
+                widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
           case("Danbooru"):
+            widget.searchGlobals.pageNum = 1;
             widget.searchGlobals.booruHandler = new DanbooruHandler(
-                widget.searchGlobals.selectedBooru.baseURL,
+                widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
           case("e621"):
             widget.searchGlobals.booruHandler = new e621Handler(
-                widget.searchGlobals.selectedBooru.baseURL,
+                widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
           case("Shimmie"):
             widget.searchGlobals.booruHandler = new ShimmieHandler(
-                widget.searchGlobals.selectedBooru.baseURL,
+                widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
           case("Philomena"):
             widget.searchGlobals.pageNum = 1;
             widget.searchGlobals.booruHandler = new PhilomenaHandler(
-                widget.searchGlobals.selectedBooru.baseURL,
+                widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
         }
@@ -384,6 +385,7 @@ class _ImagesState extends State<Images> {
     }
 
     print("Images booru: " + widget.searchGlobals.selectedBooru.name);
+    print("Page : " + widget.searchGlobals.pageNum.toString());
     return FutureBuilder(
         future: widget.searchGlobals.booruHandler.Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
         builder: (context, AsyncSnapshot snapshot) {

@@ -170,23 +170,23 @@ class _SnatcherPageState extends State<SnatcherPage> {
     Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
     switch(widget.booru.type){
       case("Moebooru"):
-        booruHandler = new MoebooruHandler(widget.booru.baseURL,limit);
+        booruHandler = new MoebooruHandler(widget.booru,limit);
         break;
       case("Gelbooru"):
-        booruHandler = new GelbooruHandler(widget.booru.baseURL,limit);
+        booruHandler = new GelbooruHandler(widget.booru,limit);
         break;
       case("Danbooru"):
-        booruHandler = new DanbooruHandler(widget.booru.baseURL,limit);
+        booruHandler = new DanbooruHandler(widget.booru,limit);
         break;
       case("e621"):
-        booruHandler = new e621Handler(widget.booru.baseURL,limit);
+        booruHandler = new e621Handler(widget.booru,limit);
         break;
       case("Shimmie"):
-        booruHandler = new ShimmieHandler(widget.booru.baseURL,limit);
+        booruHandler = new ShimmieHandler(widget.booru,limit);
         break;
       case("Philomena"):
         page = 1;
-        booruHandler = new PhilomenaHandler(widget.booru.baseURL,limit);
+        booruHandler = new PhilomenaHandler(widget.booru,limit);
         break;
     }
     // Loop until the count variable is bigger or equal to amount

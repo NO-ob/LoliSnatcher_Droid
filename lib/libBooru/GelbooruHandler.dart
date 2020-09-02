@@ -3,6 +3,7 @@ import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
+import 'Booru.dart';
 
 /**
  * Booru Handler for the gelbooru engine
@@ -11,7 +12,7 @@ class GelbooruHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
 
   // Dart constructors are weird so it has to call super with the args
-  GelbooruHandler(String baseURL,int limit) : super(baseURL,limit);
+  GelbooruHandler(Booru booru,int limit): super(booru,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -56,10 +57,15 @@ class GelbooruHandler extends BooruHandler{
     }
     // This will create a url to goto the images page in the browser
     String makePostURL(String id){
-      return "$baseURL/index.php?page=post&s=view&id=$id";
+      return "${booru.baseURL}/index.php?page=post&s=view&id=$id";
     }
     // This will create a url for the http request
     String makeURL(String tags){
-      return "$baseURL/index.php?page=dapi&s=post&q=index&tags=$tags&limit=${limit.toString()}&pid=${pageNum.toString()}";
+      if (booru.apiKey == ""){
+        return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=$tags&limit=${limit.toString()}&pid=${pageNum.toString()}";
+      } else {
+        return "${booru.baseURL}/index.php?api_key=${booru.apiKey}&user_id=${booru.userID}&page=dapi&s=post&q=index&tags=$tags&limit=${limit.toString()}&pid=${pageNum.toString()}";
+      }
+
     }
 }

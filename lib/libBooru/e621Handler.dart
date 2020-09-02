@@ -1,15 +1,13 @@
 import 'dart:convert';
-
+import 'Booru.dart';
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import 'dart:async';
-import 'dart:convert';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class e621Handler extends BooruHandler{
   List<BooruItem> fetched = new List();
-  e621Handler(String baseURL,int limit) : super(baseURL,limit);
+  e621Handler(Booru booru,int limit) : super(booru,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -26,7 +24,7 @@ class e621Handler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/1.3.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/1.4.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -60,11 +58,15 @@ class e621Handler extends BooruHandler{
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "$baseURL/posts/$id?";
+    return "${booru.baseURL}/posts/$id?";
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "$baseURL/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    if (booru.apiKey == ""){
+      return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    } else {
+      return "${booru.baseURL}/posts.json?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    }
   }
 }
 

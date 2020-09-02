@@ -3,7 +3,7 @@ import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
-
+import 'Booru.dart';
 /**
  * Booru Handler for the Shimmie engine
  */
@@ -11,7 +11,7 @@ class ShimmieHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
 
   // Dart constructors are weird so it has to call super with the args
-  ShimmieHandler(String baseURL,int limit) : super(baseURL,limit);
+  ShimmieHandler(Booru booru,int limit) : super(booru,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -43,10 +43,10 @@ class ShimmieHandler extends BooruHandler{
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
-          if (!baseURL.contains("https://whyneko.com/booru")){
+          if (!booru.baseURL.contains("https://whyneko.com/booru")){
             fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("preview_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id"))));
           } else {
-            String cutURL = baseURL.split("/booru")[0];
+            String cutURL = booru.baseURL.split("/booru")[0];
             fetched.add(new BooruItem(cutURL+current.getAttribute("file_url"),cutURL+current.getAttribute("preview_url"),cutURL+current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id"))));
           }
 
@@ -62,10 +62,10 @@ class ShimmieHandler extends BooruHandler{
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "$baseURL/post/view/$id";
+    return "${booru.baseURL}/post/view/$id";
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "$baseURL/api/danbooru/find_posts/index.xml?&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    return "${booru.baseURL}/api/danbooru/find_posts/index.xml?&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
 }

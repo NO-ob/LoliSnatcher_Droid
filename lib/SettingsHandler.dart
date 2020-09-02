@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/material.dart';
+
 import 'ServiceHandler.dart';
 import 'package:get/get.dart';
 import 'libBooru/Booru.dart';
@@ -83,7 +85,7 @@ class SettingsHandler {
       } else {
         // Close writer and alert user
         writer.close();
-        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
         return;
       }
     }
@@ -91,7 +93,7 @@ class SettingsHandler {
     this.previewMode = previewMode;
     writer.close();
     await this.loadSettings();
-    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5));
+    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
   Future getBooru() async{
     booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/")]);
@@ -130,6 +132,8 @@ class SettingsHandler {
     writer.write("Booru Type = ${booru.type}\n");
     writer.write("Favicon URL = ${booru.faviconURL}\n");
     writer.write("Base URL = ${booru.baseURL}\n");
+    writer.write("API Key = ${booru.apiKey}\n");
+    writer.write("User ID = ${booru.userID}\n");
     writer.close();
     return true;
   }

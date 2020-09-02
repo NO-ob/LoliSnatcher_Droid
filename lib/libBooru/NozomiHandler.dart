@@ -3,7 +3,7 @@ import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
-
+import 'Booru.dart';
 /**
  * Booru Handler for Nozomi.la
  */
@@ -11,7 +11,7 @@ class NozomiHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
 
   // Dart constructors are weird so it has to call super with the args
-  NozomiHandler(String baseURL,int limit) : super(baseURL,limit);
+  NozomiHandler(Booru booru,int limit) : super(booru,limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -48,10 +48,10 @@ class NozomiHandler extends BooruHandler{
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "$baseURL/post/$id.html";
+    //return "$baseURL/post/$id.html";
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "$baseURL/search.html?q=$tags#${pageNum.toString()}";
+    //return "$baseURL/search.html?q=$tags#${pageNum.toString()}";
   }
 }
