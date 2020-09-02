@@ -11,7 +11,7 @@ import 'ImageWriter.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'getPerms.dart';
-
+import 'package:LoliSnatcher/SettingsHandler.dart';
 
 
 /**
@@ -20,7 +20,8 @@ import 'getPerms.dart';
 class SnatcherPage extends StatefulWidget {
   final String tags;
   Booru booru;
-  SnatcherPage(this.tags,this.booru);
+  SettingsHandler settingsHandler;
+  SnatcherPage(this.tags,this.booru,this.settingsHandler);
   @override
   _SnatcherPageState createState() => _SnatcherPageState();
 }
@@ -134,6 +135,24 @@ class _SnatcherPageState extends State<SnatcherPage> {
               ),
             ),
             Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  FutureBuilder(
+                    future: BooruSelector(),
+                    builder: (context, AsyncSnapshot snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                        return snapshot.data;
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Container(
               alignment: Alignment.center,
               child: FlatButton(
                 shape: RoundedRectangleBorder(
@@ -176,6 +195,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
         booruHandler = new GelbooruHandler(widget.booru,limit);
         break;
       case("Danbooru"):
+        page = 1;
         booruHandler = new DanbooruHandler(widget.booru,limit);
         break;
       case("e621"):
@@ -193,19 +213,55 @@ class _SnatcherPageState extends State<SnatcherPage> {
     // The count variable is used instead of checking the length of booruItems because the amount of images stored on
     // The booru may be less than the user wants which would result in an infinite loop since the length would never be big enough
     while (count < int.parse(amount)){
-      booruItems = await Future.delayed(Duration(milliseconds: timeout), () {return booruHandler.Search(tags,page);});
+      booruItems = await booruHandler.Search(tags,page);
       page ++;
-      count += limit;
+      count = booruItems.length;
       print(count);
     }
 
-    for (int n = 0; n < int.parse(amount); n ++){
+    for (int n = 0; n + 1 <= int.parse(amount); n ++){
       await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n]);});
-      if (n%10 == 0 || n == int.parse(amount) - 1){
-        Get.snackbar("＼(^ o ^)／","Snatched $n / $amount",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+      if ((n+1)%10 == 0 || n+1 == int.parse(amount)){
+        Get.snackbar("＼(^ o ^)／","Snatched ${n+1} / $amount",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
       }
     }
     //
     Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+  }
+
+  /** This Future function will call getBooru on the settingsHandler to load the booru configs
+   * After these are loaded it returns a drop down list which is used to select which booru to search
+   * **/
+  Future BooruSelector() async{
+    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
+    if (widget.booru == null){
+      widget.booru = widget.settingsHandler.booruList[0];
+    }
+    return Container(
+      child: DropdownButton<Booru>(
+        value: widget.booru,
+        icon: Icon(Icons.arrow_downward),
+        onChanged: (Booru newValue){
+          print(newValue.baseURL);
+          setState((){
+            widget.booru = newValue;
+          });
+        },
+        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+          // Return a dropdown item
+          return DropdownMenuItem<Booru>(
+            value: value,
+            child: Row(
+              children: <Widget>[
+                //Booru name
+                Text(value.name + ""),
+                //Booru Icon
+                Image.network(value.faviconURL, width: 16),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
 }

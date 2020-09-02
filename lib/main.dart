@@ -201,7 +201,7 @@ class _HomeState extends State<Home> {
                       side: BorderSide(color: Theme.of(context).accentColor),
                   ),
                   onPressed: (){
-                    Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru));
+                    Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler));
                   },
                   child: Text("Snatcher"),
                 ),
@@ -297,7 +297,7 @@ class _HomeState extends State<Home> {
             child: Row(
               children: <Widget>[
                 //Booru name
-                Text(value.name + " "),
+                Text(value.name + ""),
                 //Booru Icon
                 Image.network(value.faviconURL, width: 16),
               ],

@@ -17,7 +17,7 @@ class ImageWriter{
       }
       await Directory(path).create(recursive:true);
       File image = new File(path+item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
-      image.writeAsBytesSync(response.bodyBytes);
+      await image.writeAsBytes(response.bodyBytes);
       serviceHandler.callMediaScanner(image.path);
     }
     catch (e){
