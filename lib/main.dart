@@ -297,9 +297,9 @@ class _HomeState extends State<Home> {
             child: Row(
               children: <Widget>[
                 //Booru name
-                Text(value.name),
+                Text(value.name + " "),
                 //Booru Icon
-                Image.network(value.faviconURL),
+                Image.network(value.faviconURL, width: 16),
               ],
             ),
           );

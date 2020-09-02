@@ -14,6 +14,9 @@ class PhilomenaHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    if (tags == "" || tags == " "){
+      tags = "*";
+    }
     if(this.pageNum == pageNum){
       return fetched;
     }
