@@ -7,6 +7,7 @@ import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
+import 'libBooru/SzurubooruHandler.dart';
 import 'libBooru/Booru.dart';
 import 'getPerms.dart';
 import 'SettingsHandler.dart';
@@ -639,6 +640,14 @@ class _booruEditState extends State<booruEdit> {
       if (testFetched.length > 0) {
         booruType = "Philomena";
         print("Found Results as Philomena");
+      }
+    }
+    test = new SzurubooruHandler(booru, 5);
+    testFetched = await test.Search("solo", 1);
+    if (testFetched != null) {
+      if (testFetched.length > 0) {
+        booruType = "Szurubooru";
+        print("Found Results as Szurubooru");
       }
     }
     // This can return anything it's needed for the future builder.

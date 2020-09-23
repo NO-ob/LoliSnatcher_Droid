@@ -29,7 +29,7 @@ class GelbooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.4.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.5.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);

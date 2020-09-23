@@ -6,6 +6,7 @@ import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
+import 'libBooru/SzurubooruHandler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
@@ -20,6 +21,7 @@ import 'getPerms.dart';
 import 'Snatcher.dart';
 import 'SettingsPage.dart';
 import 'SearchGlobals.dart';
+
 void main() {
   runApp(MaterialApp(
       theme: ThemeData(
@@ -361,6 +363,12 @@ class _ImagesState extends State<Images> {
           case("Philomena"):
             widget.searchGlobals.pageNum = 1;
             widget.searchGlobals.booruHandler = new PhilomenaHandler(
+                widget.searchGlobals.selectedBooru,
+                widget.settingsHandler.limit);
+            break;
+          case("Szurubooru"):
+            widget.searchGlobals.pageNum = 0;
+            widget.searchGlobals.booruHandler = new SzurubooruHandler(
                 widget.searchGlobals.selectedBooru,
                 widget.settingsHandler.limit);
             break;
