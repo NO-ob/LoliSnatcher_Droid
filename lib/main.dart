@@ -64,7 +64,14 @@ class _HomeState extends State<Home> {
       searchGlobals[globalsIndex].newTab.addListener((){
         if (searchGlobals[globalsIndex].newTab.value != ""){
           setState(() {
-            searchGlobals.add(new SearchGlobals(null, searchGlobals[globalsIndex].newTab.value));
+            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
+          });
+        }
+      });
+      searchGlobals[globalsIndex].addTag.addListener((){
+        if (searchGlobals[globalsIndex].addTag.value != ""){
+          setState(() {
+            searchTagsController.text += searchGlobals[globalsIndex].addTag.value;
           });
         }
       });
@@ -529,7 +536,7 @@ class _ImagePageState extends State<ImagePage>{
                                         icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
                                         onPressed: (){
                                           setState(() {
-                                            widget.searchGlobals.tags += " " + widget.fetched[controller.page.toInt()].tagsList[index];
+                                            widget.searchGlobals.addTag.value = " " + widget.fetched[controller.page.toInt()].tagsList[index];
                                             print("Add " + widget.fetched[controller.page.toInt()].tagsList[index] + " to current search");
                                           });
                                         },

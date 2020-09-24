@@ -12,6 +12,7 @@ class SearchGlobals{
   double scrollPosition = 0;
   BooruHandler booruHandler;
   String handlerType;
+  ValueNotifier addTag = ValueNotifier("");
   ValueNotifier newTab = ValueNotifier("noListener");
   SearchGlobals(this.selectedBooru,this.tags);
 }
