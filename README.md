@@ -1,6 +1,3 @@
-# If you know of a booru running on the Szurubooru engine please make an issue with the url
-
-
 # LoliSnatcher Droid
 [![github-small](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -32,7 +29,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 - [ ] More Booru
     - [x] Shimmie - https://rule34.paheal.net/
     - [x] Philomena - https://derpibooru.org/
-    - [ ] Szurubooru
+    - [x] Szurubooru
     - [ ] Danbooru Gold links - https://github.com/friendlyanon/decensooru/tree/master/batches
 - [x] Tags
     - [x] View Tags in popup
