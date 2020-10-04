@@ -16,6 +16,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
+import 'package:preload_page_view/preload_page_view.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'AboutPage.dart';
 import 'getPerms.dart';
 import 'Snatcher.dart';
@@ -481,13 +483,13 @@ class ImagePage extends StatefulWidget {
 }
 
 class _ImagePageState extends State<ImagePage>{
-  PageController controller;
+  PreloadPageController controller;
   ImageWriter writer = new ImageWriter();
 
   @override
   void initState() {
     super.initState();
-    controller = PageController(
+    controller = PreloadPageController(
       initialPage: widget.index,
     );
   }
@@ -566,7 +568,8 @@ class _ImagePageState extends State<ImagePage>{
         /**
          * The pageView builder will created a page for each image in the booruList(fetched)
          */
-        child: PageView.builder(
+        child: PreloadPageView.builder(
+          preloadPagesCount: 2,
           controller: controller,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
@@ -574,9 +577,16 @@ class _ImagePageState extends State<ImagePage>{
               return VideoApp(widget.fetched[index].fileURL);
             } else {
               return Container(
-                // Photoview is used as it makes the image zoomable
-                child: PhotoView(
-                  imageProvider: NetworkImage(widget.fetched[index].fileURL),
+                // InteractiveViewer is used to make the image zoomable
+                child: InteractiveViewer(
+                  panEnabled: true,
+                  boundaryMargin: EdgeInsets.all(80),
+                  minScale: 0.5,
+                  maxScale: 4,
+                  child: FadeInImage.assetNetwork(
+                    placeholder: 'assets/images/loading.gif',
+                    image: widget.fetched[index].fileURL,
+                  ),
                 ),
               );
             }
@@ -588,8 +598,6 @@ class _ImagePageState extends State<ImagePage>{
   }
 
 }
-
-
 /**
  * None of the code in this widget is mine it's from the example at https://pub.dev/packages/video_player
  */
