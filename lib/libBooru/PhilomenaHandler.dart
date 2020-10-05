@@ -61,9 +61,9 @@ class PhilomenaHandler extends BooruHandler{
   String makeURL(String tags){
     //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
     if (booru.apiKey == ""){
-      return "${booru.baseURL}/api/v1/json/search/images?q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?filter_id=56027&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?filter_id=56027&key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
     }
 
   }
