@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
@@ -29,7 +30,7 @@ class GelbooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.5.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.6.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);
@@ -68,4 +69,29 @@ class GelbooruHandler extends BooruHandler{
       }
 
     }
+    String makeTagURL(String input){
+      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";
+    }
+    @override
+    Future tagSearch(String input) async {
+      List<String> searchTags = new List();
+      String url = makeTagURL(input);
+      try {
+        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+        // 200 is the success http response code
+        if (response.statusCode == 200) {
+          var parsedResponse = xml.parse(response.body).findAllElements('tag');
+          if (parsedResponse.length > 0){
+            for (int i=0; i < parsedResponse.length; i++){
+              searchTags.add(parsedResponse.elementAt(i).getAttribute("name"));
+            }
+          }
+        }
+      } catch(e) {
+        print(e);
+      }
+      print(searchTags.length);
+      return searchTags;
+    }
+
 }

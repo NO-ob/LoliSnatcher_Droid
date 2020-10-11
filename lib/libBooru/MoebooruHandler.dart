@@ -19,4 +19,8 @@ class MoebooruHandler extends GelbooruHandler{
       return "${booru.baseURL}/post.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
     }
   }
+  @override
+  String makeTagURL(String input){
+      return "${booru.baseURL}/tag.xml?limit=5&name=$input*";
+  }
 }

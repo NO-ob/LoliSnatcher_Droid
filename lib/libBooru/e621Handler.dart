@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
+
 import 'Booru.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -24,7 +26,7 @@ class e621Handler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/1.5.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -67,6 +69,30 @@ class e621Handler extends BooruHandler{
     } else {
       return "${booru.baseURL}/posts.json?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
     }
+  }
+  String makeTagURL(String input){
+    return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
+  }
+  @override
+  Future tagSearch(String input) async {
+    List<String> searchTags = new List();
+    String url = makeTagURL(input);
+    try {
+      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = jsonDecode(response.body);
+        if (parsedResponse.length > 0){
+          for (int i=0; i < parsedResponse.length; i++){
+            searchTags.add(parsedResponse[i]['name']);
+          }
+        }
+      }
+    } catch(e) {
+      print(e);
+    }
+    print(searchTags.length);
+    return searchTags;
   }
 }
 

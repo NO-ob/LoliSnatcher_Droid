@@ -7,6 +7,7 @@ import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
 import 'libBooru/SzurubooruHandler.dart';
+import 'libBooru/BooruHandler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
@@ -78,173 +79,162 @@ class _HomeState extends State<Home> {
       searchGlobals[globalsIndex].newTab.value = "";
     }
 
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("Loli Snatcher"),
-        ),
-        body: Center(
-          child: ImagesFuture(),
-        ),
-        drawer: Drawer(
-          child: ListView(
-            children:<Widget>[
-              DrawerHeader(
-                decoration: new BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+    return GestureDetector(
+        onTap: (){
+          FocusScope.of(context).unfocus();
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Loli Snatcher"),
+          ),
+          body: Center(
+            child: ImagesFuture(),
+          ),
+          drawer: Drawer(
+            child: ListView(
+              children:<Widget>[
+                DrawerHeader(
+                  decoration: new BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                  ),
                 ),
-              ),
-              Container(
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
+                Container(
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
 
-                  children: <Widget>[
-                    //Tags/Search field
-                    Expanded(
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10,0,0,0),
-                        child: TextField(
-                          controller: searchTagsController,
-                          decoration: InputDecoration(
-                            hintText:"Enter Tags",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                                gapPadding: 0,
-                            ),
-                          ),
+                    children: <Widget>[
+                      //Tags/Search field
+                      TagSearchBox(searchGlobals[globalsIndex], searchTagsController),
+                       IconButton(
+                          padding: new EdgeInsets.all(20),
+                          icon: Icon(Icons.search),
+                          onPressed: () {
+                            // Setstate and update the tags variable so the widget rebuilds with the new tags
+                            setState((){
+                              //Set first run to false so a
+                              searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+                ),
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      Text("Tab: "),
+                      Expanded(
+                        child:
+                        DropdownButton<SearchGlobals>(
+                          value: searchGlobals[globalsIndex],
+                          isExpanded: true,
+                          icon: Icon(Icons.arrow_downward),
+                          onChanged: (SearchGlobals newValue){
+                            setState(() {
+                              globalsIndex = searchGlobals.indexOf(newValue);
+                              searchTagsController.text = newValue.tags;
+                            });
+                          },
+                          items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
+                            return DropdownMenuItem<SearchGlobals>(value: value, child: Text(value.tags));
+                          }).toList(),
                         ),
                       ),
-                    ),
-                     IconButton(
-                        padding: new EdgeInsets.all(20),
-                        icon: Icon(Icons.search),
+
+
+                      IconButton(
+                        icon: Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
                         onPressed: () {
-                          // Setstate and update the tags variable so the widget rebuilds with the new tags
+                          // add a new search global to the list
                           setState((){
-                            //Set first run to false so a
-                            searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
+                            searchGlobals.add(new SearchGlobals(null,widget.settingsHandler.defTags));
                           });
                         },
                       ),
-                  ],
+                      IconButton(
+                        icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
+                        onPressed: () {
+                          // Remove selected searchglobal from list
+                          setState((){
+                            if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
+                              globalsIndex --;
+                              searchGlobals.removeAt(globalsIndex + 1);
+                            } else if (searchGlobals.length > 1){
+                              searchGlobals.removeAt(globalsIndex);
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Tab: "),
-                    Expanded(
-                      child:
-                      DropdownButton<SearchGlobals>(
-                        value: searchGlobals[globalsIndex],
-                        isExpanded: true,
-                        icon: Icon(Icons.arrow_downward),
-                        onChanged: (SearchGlobals newValue){
-                          setState(() {
-                            globalsIndex = searchGlobals.indexOf(newValue);
-                            searchTagsController.text = newValue.tags;
-                          });
-                        },
-                        items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
-                          return DropdownMenuItem<SearchGlobals>(value: value, child: Text(value.tags));
-                        }).toList(),
-                      ),
-                    ),
-
-
-                    IconButton(
-                      icon: Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
-                      onPressed: () {
-                        // add a new search global to the list
-                        setState((){
-                          searchGlobals.add(new SearchGlobals(null,widget.settingsHandler.defTags));
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
-                      onPressed: () {
-                        // Remove selected searchglobal from list
-                        setState((){
-                          if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
-                            globalsIndex --;
-                            searchGlobals.removeAt(globalsIndex + 1);
-                          } else if (searchGlobals.length > 1){
-                            searchGlobals.removeAt(globalsIndex);
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      FutureBuilder(
+                        future: BooruSelector(),
+                        builder: (context, AsyncSnapshot snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                            return snapshot.data;
+                          } else {
+                            return Center(child: CircularProgressIndicator());
                           }
-                        });
-                      },
-                    ),
-                  ],
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    FutureBuilder(
-                      future: BooruSelector(),
-                      builder: (context, AsyncSnapshot snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                          return snapshot.data;
-                        } else {
-                          return Center(child: CircularProgressIndicator());
-                        }
-                      },
+                Container(
+                  alignment: Alignment.center,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20),
+                        side: BorderSide(color: Theme.of(context).accentColor),
                     ),
-                  ],
+                    onPressed: (){
+                      Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler));
+                    },
+                    child: Text("Snatcher"),
+                  ),
                 ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                child: FlatButton(
-                  shape: RoundedRectangleBorder(
+                Container(
+                  alignment: Alignment.center,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20),
                       side: BorderSide(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: (){
+                      Get.to(SettingsPage(widget.settingsHandler));
+                    },
+                    child: Text("Settings"),
                   ),
-                  onPressed: (){
-                    Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler));
-                  },
-                  child: Text("Snatcher"),
                 ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                child: FlatButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20),
-                    side: BorderSide(color: Theme.of(context).accentColor),
+                Container(
+                  alignment: Alignment.center,
+                  child: FlatButton(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Theme.of(context).accentColor),
+                    ),
+                    onPressed: (){
+                      Get.to(AboutPage());
+                    },
+                    child: Text("About"),
                   ),
-                  onPressed: (){
-                    Get.to(SettingsPage(widget.settingsHandler));
-                  },
-                  child: Text("Settings"),
                 ),
-              ),
-              Container(
-                alignment: Alignment.center,
-                child: FlatButton(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20),
-                    side: BorderSide(color: Theme.of(context).accentColor),
-                  ),
-                  onPressed: (){
-                    Get.to(AboutPage());
-                  },
-                  child: Text("About"),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        )
+    );
   }
-
   /** If first run is true the default tags are loaded using the settings controller then parsed to the images widget
    * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
    * **/
@@ -320,7 +310,136 @@ class _HomeState extends State<Home> {
 }
 
 
+class TagSearchBox extends StatefulWidget {
+  SearchGlobals searchGlobals;
+  TextEditingController searchTagsController;
+  TagSearchBox(this.searchGlobals, this.searchTagsController);
+  @override
+  _TagSearchBoxState createState() => _TagSearchBoxState();
+}
 
+class _TagSearchBoxState extends State<TagSearchBox> {
+  FocusNode _focusNode;
+  OverlayEntry _overlayEntry;
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(_updateOverLay);
+  }
+  void _updateOverLay(){
+    if (_focusNode.hasFocus) {
+      this._overlayEntry = this._createOverlayEntry();
+      Overlay.of(context).insert(this._overlayEntry);
+    } else {
+      this._overlayEntry.remove();
+    }
+  }
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+  OverlayEntry _createOverlayEntry() {
+    RenderBox renderBox = context.findRenderObject();
+    setBooruHandler(widget.searchGlobals, 20);
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+    if (widget.searchGlobals.booruHandler.tagSearchEnabled){
+      return OverlayEntry(
+        builder: (context) => Positioned(
+          left: offset.dx,
+          top: offset.dy + size.height + 5.0,
+          width: size.width,
+          child: Material(
+            elevation: 4.0,
+            child: FutureBuilder(
+                future: widget.searchGlobals.booruHandler.tagSearch(widget.searchTagsController.text),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if ((snapshot.connectionState == ConnectionState.done) && snapshot.data.length > 0){
+                    print(snapshot.data);
+                    if (snapshot.data[0]!= null){
+                      return ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                                title: Text(snapshot.data[index]),
+                                onTap: (() {
+                                  FocusManager.instance.primaryFocus.unfocus();
+                                  widget.searchTagsController.text = snapshot.data[index];
+                                })
+                            );
+                          }
+                      );
+                    } else {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                }
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: TextField(
+          controller: widget.searchTagsController,
+          focusNode: this._focusNode,
+          onChanged: (text) {
+            setState((){
+              this._overlayEntry.remove();
+              this._updateOverLay();
+            });
+          },
+          decoration: InputDecoration(
+            hintText:"Enter Tags",
+            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+            border: new OutlineInputBorder(
+              borderRadius: new BorderRadius.circular(50),
+              gapPadding: 0,
+            ),
+          ),
+      )
+    );
+  }
+}
+void setBooruHandler(SearchGlobals searchGlobals, int limit){
+  switch (searchGlobals.selectedBooru.type) {
+    case("Moebooru"):
+      searchGlobals.booruHandler = new MoebooruHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Gelbooru"):
+      searchGlobals.booruHandler = new GelbooruHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Danbooru"):
+      searchGlobals.pageNum = 1;
+      searchGlobals.booruHandler = new DanbooruHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("e621"):
+      searchGlobals.booruHandler = new e621Handler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Shimmie"):
+      searchGlobals.booruHandler = new ShimmieHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Philomena"):
+      searchGlobals.pageNum = 1;
+      searchGlobals.booruHandler = new PhilomenaHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Szurubooru"):
+      searchGlobals.pageNum = 0;
+      searchGlobals.booruHandler = new SzurubooruHandler(searchGlobals.selectedBooru, limit);
+      break;
+  }
+
+}
 /**
  * This widget will create a booru handler and then generate a gridview of preview images using a future builder and the search function of the booru handler
  */
@@ -339,47 +458,7 @@ class _ImagesState extends State<Images> {
   @override
   void initState(){
     print("init state");
-        // Set booru handler depending on the type of the booru selected with the combo box
-        switch (widget.searchGlobals.selectedBooru.type) {
-          case("Moebooru"):
-            widget.searchGlobals.booruHandler = new MoebooruHandler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-          case("Gelbooru"):
-            widget.searchGlobals.booruHandler = new GelbooruHandler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-          case("Danbooru"):
-            widget.searchGlobals.pageNum = 1;
-            widget.searchGlobals.booruHandler = new DanbooruHandler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-          case("e621"):
-            widget.searchGlobals.booruHandler = new e621Handler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-          case("Shimmie"):
-            widget.searchGlobals.booruHandler = new ShimmieHandler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-          case("Philomena"):
-            widget.searchGlobals.pageNum = 1;
-            widget.searchGlobals.booruHandler = new PhilomenaHandler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-          case("Szurubooru"):
-            widget.searchGlobals.pageNum = 0;
-            widget.searchGlobals.booruHandler = new SzurubooruHandler(
-                widget.searchGlobals.selectedBooru,
-                widget.settingsHandler.limit);
-            break;
-        }
+        setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
         print("Booru init to " + widget.searchGlobals.selectedBooru.toString());
   }
 

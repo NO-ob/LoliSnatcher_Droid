@@ -9,7 +9,7 @@ import 'Booru.dart';
  */
 class ShimmieHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
-
+  bool tagSearchEnabled = false;
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
 
@@ -28,7 +28,7 @@ class ShimmieHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml",  "user-agent":"LoliSnatcher_Droid/1.4.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml",  "user-agent":"LoliSnatcher_Droid/1.6.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);
@@ -67,5 +67,16 @@ class ShimmieHandler extends BooruHandler{
   // This will create a url for the http request
   String makeURL(String tags){
     return "${booru.baseURL}/api/danbooru/find_posts/index.xml?&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+  }
+
+
+  String makeTagURL(String input){
+    return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
+  }
+  //No api documentation on finding tags
+  @override
+  Future tagSearch(String input) async {
+    List<String> searchTags = new List();
+    return searchTags;
   }
 }

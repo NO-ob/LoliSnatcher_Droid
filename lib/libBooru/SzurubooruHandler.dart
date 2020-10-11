@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
@@ -8,6 +9,7 @@ import 'BooruItem.dart';
 class SzurubooruHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
   SzurubooruHandler(Booru booru,int limit) : super(booru,limit);
+  bool tagSearchEnabled = false;
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -24,18 +26,14 @@ class SzurubooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.5.0"});
+      final response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        print(response.body);
         /**
          * This creates a list of xml elements 'post' to extract only the post elements which contain
          * all the data needed about each image
          */
-        var posts = parsedResponse['results'];
-        print("Szurubooru::search ${parsedResponse['results'].length}");
-
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse['results'].length; i++){
           var current = parsedResponse['results'][i];
@@ -69,6 +67,32 @@ class SzurubooruHandler extends BooruHandler{
     return "${booru.baseURL}/api/posts/?offset=${pageNum*limit}&limit=${limit.toString()}&query=$tags";
     }
 
+  String makeTagURL(String input){
+    return "${booru.baseURL}/api/tags/?offset=0&limit=5&query=$input";
+  }
+  @override
+  Future tagSearch(String input) async {
+    List<String> searchTags = new List();
+    String url = makeTagURL(input);
+    try {
+      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      print(response.body);
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+        print(parsedResponse);
+        if (parsedResponse.length > 0){
+          for (int i=0; i < parsedResponse.length; i++){
+            searchTags.add(parsedResponse[i]['name']);
+          }
+        }
+      }
+    } catch(e) {
+      print(e);
+    }
+    print(searchTags.length);
+    return searchTags;
+  }
   }
 
 
