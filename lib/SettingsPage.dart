@@ -202,6 +202,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
+                  Text("Booru:    "),
                   FutureBuilder(
                     future: BooruSelector(),
                     builder: (context, AsyncSnapshot snapshot) {

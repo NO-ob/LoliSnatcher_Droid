@@ -113,7 +113,7 @@ class _HomeState extends State<Home> {
                           onPressed: () {
                             // Setstate and update the tags variable so the widget rebuilds with the new tags
                             setState((){
-                              //Set first run to false so a
+                              FocusManager.instance.primaryFocus.unfocus();
                               searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                             });
                           },
@@ -239,25 +239,49 @@ class _HomeState extends State<Home> {
    * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
    * **/
   Widget ImagesFuture(){
-    if (firstRun){
-      return FutureBuilder(
-          future: ImagesFutures(),
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.connectionState == ConnectionState.done){
-              firstRun = false;
-              searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-              searchTagsController.text = widget.settingsHandler.defTags;
-              return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
-            } else {
-              return Center(child: CircularProgressIndicator());
-            }
-          }
+    WidgetsFlutterBinding.ensureInitialized();
+    if (widget.settingsHandler.booruList.isEmpty){
+      return Center(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+            Text("No Booru Configs Found"),
+            Container(
+              alignment: Alignment.center,
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Theme.of(context).accentColor),
+                ),
+                onPressed: (){
+                  Get.to(booruEdit(new Booru("","","","",""),widget.settingsHandler));
+                },
+                child: Text("Add Booru")
+              ),
+            ),
+          ]
+        )
       );
     } else {
-      return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+      if (firstRun){
+        return FutureBuilder(
+            future: ImagesFutures(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.connectionState == ConnectionState.done){
+                firstRun = false;
+                searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
+                searchTagsController.text = widget.settingsHandler.defTags;
+                return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }
+        );
+      } else {
+        return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+      }
     }
-
-
   }
   // Future used in the above future builder it calls getPerms and loadSettings
   Future ImagesFutures() async{

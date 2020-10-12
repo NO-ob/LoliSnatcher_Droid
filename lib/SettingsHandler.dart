@@ -13,7 +13,7 @@ class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   String defTags = "rating:safe",previewMode = "Sample";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4;
-  List<Booru> booruList;
+  List<Booru> booruList = new List();
   var path = "";
   Future writeDefaults() async{
     if (Platform.isAndroid){
@@ -113,7 +113,7 @@ class SettingsHandler {
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
   Future getBooru() async{
-    booruList = ([new Booru("Gelbooru","Gelbooru","https://gelbooru.com/favicon.ico","https://gelbooru.com/","")]);
+    booruList = new List<Booru>();
     try {
       if (Platform.isAndroid){
         path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
