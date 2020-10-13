@@ -29,7 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   Booru selectedBooru;
-  String previewMode = "Sample";
+  String previewMode;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -39,12 +39,11 @@ class _SettingsPageState extends State<SettingsPage> {
       settingsColumnsPortraitController.text = widget.settingsHandler.portraitColumns.toString();
       settingsColumnsLandscapeController.text = widget.settingsHandler.landscapeColumns.toString();
       settingsLimitController.text = widget.settingsHandler.limit.toString();
-      if (widget.settingsHandler.previewMode != ""){
-        previewMode = widget.settingsHandler.previewMode;
-      }
     });
+    previewMode = widget.settingsHandler.previewMode;
     getPerms();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -283,7 +282,7 @@ class _SettingsPageState extends State<SettingsPage> {
    * it cant update the state of the parent widget if it is outside of the class.
    */
   Future BooruSelector() async{
-    if(widget.settingsHandler.booruList == null){
+    if(widget.settingsHandler.booruList.isEmpty){
       await widget.settingsHandler.getBooru();
     }
     if (selectedBooru == null){
@@ -581,7 +580,6 @@ class _booruEditState extends State<booruEdit> {
             newBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
           }
           await widget.settingsHandler.saveBooru(newBooru);
-          widget.settingsHandler.booruList.add(newBooru);
           Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
         },
         child: Text("Save"),

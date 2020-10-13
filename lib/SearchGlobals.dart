@@ -15,4 +15,8 @@ class SearchGlobals{
   ValueNotifier addTag = ValueNotifier("");
   ValueNotifier newTab = ValueNotifier("noListener");
   SearchGlobals(this.selectedBooru,this.tags);
+  @override
+  String toString() {
+    return ("tags: $tags selectedBooru: ${selectedBooru.toString()} pageNum: $pageNum booruHandler: $booruHandler handlerType: $handlerType");
+  }
 }

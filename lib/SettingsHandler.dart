@@ -13,13 +13,11 @@ class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   String defTags = "rating:safe",previewMode = "Sample";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4;
-  List<Booru> booruList = new List();
+  List<Booru> booruList = new List<Booru>();
   var path = "";
   Future writeDefaults() async{
-    if (Platform.isAndroid){
-      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
-    } else if (Platform.isLinux){
-      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    if (path == ""){
+      path = await getExtDir();
     }
 
     if (!File(path+"settings.conf").existsSync()){
@@ -35,12 +33,10 @@ class SettingsHandler {
   }
 
   Future loadSettings() async{
-    if (Platform.isAndroid){
-      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
-    } else if (Platform.isLinux){
-      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    if (path == ""){
+      path = await getExtDir();
     }
-    await getBooru();
+    //await getBooru();
     File settingsFile = new File(path+"settings.conf");
     List<String> settings = settingsFile.readAsLinesSync();
     for (int i=0;i < settings.length; i++){
@@ -81,10 +77,8 @@ class SettingsHandler {
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
   void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns) async{
-    if (Platform.isAndroid){
-      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
-    } else if (Platform.isLinux){
-      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    if (path == ""){
+     path = await getExtDir();
     }
     await Directory(path).create(recursive:true);
     File settingsFile = new File(path+"settings.conf");
@@ -114,12 +108,10 @@ class SettingsHandler {
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
   Future getBooru() async{
-    booruList = new List();
+    booruList = new List<Booru>();
     try {
-      if (Platform.isAndroid){
-        path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
-      } else if (Platform.isLinux){
-        path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+      if (path == ""){
+        path = await getExtDir();
       }
       var directory = new Directory(path);
       List files = directory.listSync();
@@ -128,6 +120,7 @@ class SettingsHandler {
           if (files[i].path.contains(".booru")) {
             print(files[i].toString());
             booruList.add(Booru.fromFile(files[i]));
+            print(booruList);
           }
         }
       }
@@ -138,10 +131,8 @@ class SettingsHandler {
     return true;
   }
   Future saveBooru(Booru booru) async{
-    if (Platform.isAndroid){
-      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
-    } else if (Platform.isLinux){
-      path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    if (path == ""){
+      path = await getExtDir();
     }
     await Directory(path).create(recursive:true);
     File booruFile = new File(path+"${booru.name}.booru");
@@ -154,6 +145,15 @@ class SettingsHandler {
     writer.write("User ID = ${booru.userID}\n");
     writer.write("Default Tags = ${booru.defTags}\n");
     writer.close();
+    booruList.add(booru);
     return true;
+  }
+
+  Future getExtDir() async{
+    if (Platform.isAndroid){
+      return await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
+    } else if (Platform.isLinux){
+      return Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
   }
 }

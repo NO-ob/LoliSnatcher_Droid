@@ -239,7 +239,6 @@ class _HomeState extends State<Home> {
    * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
    * **/
   Widget ImagesFuture(){
-      if (firstRun){
         return FutureBuilder(
             future: ImagesFutures(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -259,7 +258,7 @@ class _HomeState extends State<Home> {
                                     side: BorderSide(color: Theme.of(context).accentColor),
                                   ),
                                   onPressed: (){
-                                    Get.to(booruEdit(new Booru("","","","",""),widget.settingsHandler));
+                                    Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
                                   },
                                   child: Text("Add Booru")
                               ),
@@ -267,21 +266,28 @@ class _HomeState extends State<Home> {
                           ]
                       )
                   );
+                } else if (firstRun){
+                    return FutureBuilder(
+                        future: ImagesFutures(),
+                        builder: (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done){
+                            firstRun = false;
+                            searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
+                            searchTagsController.text = widget.settingsHandler.defTags;
+                            return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        }
+                    );
                 } else {
-                  firstRun = false;
-                  searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-                  searchTagsController.text = widget.settingsHandler.defTags;
-                  return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
-                }
+                    return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+                  }
               } else {
                 return Center(child: CircularProgressIndicator());
               }
             }
         );
-      } else {
-        return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
-      }
-
   }
   // Future used in the above future builder it calls getPerms and loadSettings
   Future ImagesFutures() async{
@@ -293,13 +299,19 @@ class _HomeState extends State<Home> {
    * After these are loaded it returns a drop down list which is used to select which booru to search
    * **/
   Future BooruSelector() async{
+    if (widget.settingsHandler.path == ""){
+      widget.settingsHandler.path = await widget.settingsHandler.getExtDir();
+    }
     if(widget.settingsHandler.booruList.isEmpty){
       print("getbooru because null");
       await widget.settingsHandler.getBooru();
     }
+    print(searchGlobals[globalsIndex].toString());
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (searchGlobals[globalsIndex].selectedBooru == null){
+      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
     }
     return Container(
       child: DropdownButton<Booru>(
@@ -621,29 +633,37 @@ class _ImagePageState extends State<ImagePage>{
                           child: ListView.builder(
                               itemCount: widget.fetched[controller.page.toInt()].tagsList.length,
                               itemBuilder: (BuildContext context, int index){
-                                return Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(widget.fetched[controller.page.toInt()].tagsList[index]),
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
-                                        onPressed: (){
-                                          setState(() {
-                                            widget.searchGlobals.addTag.value = " " + widget.fetched[controller.page.toInt()].tagsList[index];
-                                          });
-                                        },
-                                      ),
-                                      IconButton(
-                                        icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
-                                        onPressed: (){
-                                          setState(() {
-                                            widget.searchGlobals.newTab.value = widget.fetched[controller.page.toInt()].tagsList[index];
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  );
+                                return Column(
+                                  children: <Widget>[
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(widget.fetched[controller.page.toInt()].tagsList[index]),
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
+                                          onPressed: (){
+                                            setState(() {
+                                              widget.searchGlobals.addTag.value = " " + widget.fetched[controller.page.toInt()].tagsList[index];
+                                            });
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
+                                          onPressed: (){
+                                            setState(() {
+                                              widget.searchGlobals.newTab.value = widget.fetched[controller.page.toInt()].tagsList[index];
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    Divider(
+                                      color: Colors.white,
+                                      height: 2,
+                                    ),
+                                  ]
+                                );
                               }
                           ),
                         ),
