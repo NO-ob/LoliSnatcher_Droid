@@ -367,7 +367,7 @@ class _booruEditState extends State<booruEdit> {
                     ),
                     onPressed: () async{
                       //Call the booru test
-                      if(!booruURLController.text.contains("http://") || !booruURLController.text.contains("https://")){
+                      if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
                         booruURLController.text = "https://" + booruURLController.text;
                       }
                       String booruType = await booruTest(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,""));
