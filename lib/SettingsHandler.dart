@@ -40,6 +40,7 @@ class SettingsHandler {
     } else if (Platform.isLinux){
       path = Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }
+    await getBooru();
     File settingsFile = new File(path+"settings.conf");
     List<String> settings = settingsFile.readAsLinesSync();
     for (int i=0;i < settings.length; i++){
@@ -113,7 +114,6 @@ class SettingsHandler {
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
   Future getBooru() async{
-    booruList = new List<Booru>();
     try {
       if (Platform.isAndroid){
         path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
@@ -137,6 +137,7 @@ class SettingsHandler {
     return true;
   }
   Future saveBooru(Booru booru) async{
+    booruList = new List();
     if (Platform.isAndroid){
       path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){

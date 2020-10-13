@@ -239,40 +239,40 @@ class _HomeState extends State<Home> {
    * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
    * **/
   Widget ImagesFuture(){
-    WidgetsFlutterBinding.ensureInitialized();
-    if (widget.settingsHandler.booruList.isEmpty){
-      return Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-            Text("No Booru Configs Found"),
-            Container(
-              alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
-                ),
-                onPressed: (){
-                  Get.to(booruEdit(new Booru("","","","",""),widget.settingsHandler));
-                },
-                child: Text("Add Booru")
-              ),
-            ),
-          ]
-        )
-      );
-    } else {
       if (firstRun){
         return FutureBuilder(
             future: ImagesFutures(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.done){
-                firstRun = false;
-                searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-                searchTagsController.text = widget.settingsHandler.defTags;
-                return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+                if (widget.settingsHandler.booruList.isEmpty){
+                  return Center(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: <Widget>[
+                            Text("No Booru Configs Found"),
+                            Container(
+                              alignment: Alignment.center,
+                              child: FlatButton(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: new BorderRadius.circular(20),
+                                    side: BorderSide(color: Theme.of(context).accentColor),
+                                  ),
+                                  onPressed: (){
+                                    Get.to(booruEdit(new Booru("","","","",""),widget.settingsHandler));
+                                  },
+                                  child: Text("Add Booru")
+                              ),
+                            ),
+                          ]
+                      )
+                  );
+                } else {
+                  firstRun = false;
+                  searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
+                  searchTagsController.text = widget.settingsHandler.defTags;
+                  return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+                }
               } else {
                 return Center(child: CircularProgressIndicator());
               }
@@ -281,7 +281,7 @@ class _HomeState extends State<Home> {
       } else {
         return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
       }
-    }
+
   }
   // Future used in the above future builder it calls getPerms and loadSettings
   Future ImagesFutures() async{
@@ -293,7 +293,7 @@ class _HomeState extends State<Home> {
    * After these are loaded it returns a drop down list which is used to select which booru to search
    * **/
   Future BooruSelector() async{
-    if(widget.settingsHandler.booruList == null){
+    if(widget.settingsHandler.booruList.isEmpty){
       print("getbooru because null");
       await widget.settingsHandler.getBooru();
     }
@@ -306,7 +306,6 @@ class _HomeState extends State<Home> {
         value: searchGlobals[globalsIndex].selectedBooru,
         icon: Icon(Icons.arrow_downward),
         onChanged: (Booru newValue){
-          print(newValue.baseURL);
           setState((){
             if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue.defTags != ""){
               searchTagsController.text = newValue.defTags;
@@ -381,7 +380,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 future: widget.searchGlobals.booruHandler.tagSearch(widget.searchTagsController.text),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if ((snapshot.connectionState == ConnectionState.done) && snapshot.data.length > 0){
-                    print(snapshot.data);
                     if (snapshot.data[0]!= null){
                       return ListView.builder(
                           padding: EdgeInsets.zero,
@@ -481,30 +479,23 @@ class _ImagesState extends State<Images> {
   ScrollController gridController = ScrollController();
   @override
   void initState(){
-    print("init state");
         setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
-        print("Booru init to " + widget.searchGlobals.selectedBooru.toString());
   }
 
 
   @override
   Widget build(BuildContext context) {
-    print(widget.searchGlobals.selectedBooru.toString());
     if (widget.searchGlobals.booruHandler == null){
       initState();
     }
     if (gridController.hasClients) {
-      print("Jumping to " + widget.searchGlobals.scrollPosition.toString() + " search is " + widget.searchGlobals.tags);
       gridController.jumpTo(widget.searchGlobals.scrollPosition);
     } else if (widget.searchGlobals.scrollPosition != 0){
-      print("set scroll state to "  + widget.searchGlobals.scrollPosition.toString() + " search is " + widget.searchGlobals.tags);
       setState(() {
         gridController = new ScrollController(initialScrollOffset: widget.searchGlobals.scrollPosition);
       });
     }
 
-    print("Images booru: " + widget.searchGlobals.selectedBooru.name);
-    print("Page : " + widget.searchGlobals.pageNum.toString());
     return FutureBuilder(
         future: widget.searchGlobals.booruHandler.Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
         builder: (context, AsyncSnapshot snapshot) {
@@ -640,7 +631,6 @@ class _ImagePageState extends State<ImagePage>{
                                         onPressed: (){
                                           setState(() {
                                             widget.searchGlobals.addTag.value = " " + widget.fetched[controller.page.toInt()].tagsList[index];
-                                            print("Add " + widget.fetched[controller.page.toInt()].tagsList[index] + " to current search");
                                           });
                                         },
                                       ),
@@ -649,7 +639,6 @@ class _ImagePageState extends State<ImagePage>{
                                         onPressed: (){
                                           setState(() {
                                             widget.searchGlobals.newTab.value = widget.fetched[controller.page.toInt()].tagsList[index];
-                                            print("Add " + widget.fetched[controller.page.toInt()].tagsList[index] + " to new search");
                                           });
                                         },
                                       ),
@@ -671,7 +660,6 @@ class _ImagePageState extends State<ImagePage>{
          */
         child: PreloadPageView.builder(
           preloadPagesCount: 2,
-          controller: controller,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == "webm" || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == "mp4"){
@@ -692,12 +680,14 @@ class _ImagePageState extends State<ImagePage>{
               );
             }
           },
+          controller: controller,
+          onPageChanged: (int index){
+          },
           itemCount: widget.fetched.length,
         ),
       ),
     );
   }
-
 }
 /**
  * None of the code in this widget is mine it's from the example at https://pub.dev/packages/video_player
