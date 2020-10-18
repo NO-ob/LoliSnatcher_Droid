@@ -48,8 +48,11 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [ ] Add favourites storing
     - [ ] Implement importing from animeboxes
 - [ ] Bugs
-    - [ ] Zoomed image breaks scrolling in full view (I think this only happens when the next image is not loaded so preloading may fix it)
+    - [x] Zoomed image breaks scrolling in full view (I think this only happens when the next image is not loaded so preloading may fix it)
     - [ ] Device doesn't vibrate when moving cursor
-
+    - [ ] previous and last image can overlap each other
+    - [ ] zooming in can crash the app
+    - [ ] pressing save twice creates 2 copies of the same booru
+    - [ ] no way to delete boorus, apparently
 
 
