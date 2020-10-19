@@ -148,6 +148,12 @@ class SettingsHandler {
     booruList.add(booru);
     return true;
   }
+  bool deleteBooru(Booru booru){
+    File booruFile = File(path+"${booru.name}.booru");
+    booruFile.deleteSync();
+    booruList.remove(booru);
+    return true;
+  }
 
   Future getExtDir() async{
     if (Platform.isAndroid){

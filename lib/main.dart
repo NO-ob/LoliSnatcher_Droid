@@ -8,6 +8,7 @@ import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
 import 'libBooru/SzurubooruHandler.dart';
 import 'libBooru/BooruHandler.dart';
+import 'libBooru/SankakuHandler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
@@ -313,6 +314,10 @@ class _HomeState extends State<Home> {
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
       searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
     }
+    if (!widget.settingsHandler.booruList.contains(searchGlobals[globalsIndex].selectedBooru)){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
+    }
     return Container(
       child: DropdownButton<Booru>(
         value: searchGlobals[globalsIndex].selectedBooru,
@@ -470,6 +475,10 @@ void setBooruHandler(SearchGlobals searchGlobals, int limit){
     case("Szurubooru"):
       searchGlobals.pageNum = 0;
       searchGlobals.booruHandler = new SzurubooruHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Sankaku"):
+      searchGlobals.pageNum = 1;
+      searchGlobals.booruHandler = new SankakuHandler(searchGlobals.selectedBooru, limit);
       break;
   }
 
@@ -682,14 +691,14 @@ class _ImagePageState extends State<ImagePage>{
           preloadPagesCount: 2,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
-            if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == "webm" || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == "mp4"){
+            if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("webm") || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("mp4")){
               return VideoApp(widget.fetched[index].fileURL);
             } else {
               return Container(
                 // InteractiveViewer is used to make the image zoomable
                 child: InteractiveViewer(
-                  panEnabled: true,
-                  boundaryMargin: EdgeInsets.all(80),
+                  panEnabled: false,
+                  boundaryMargin: EdgeInsets.zero,
                   minScale: 0.5,
                   maxScale: 4,
                   child: FadeInImage.assetNetwork(
@@ -702,6 +711,7 @@ class _ImagePageState extends State<ImagePage>{
           },
           controller: controller,
           onPageChanged: (int index){
+
           },
           itemCount: widget.fetched.length,
         ),

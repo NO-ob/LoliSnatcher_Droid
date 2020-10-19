@@ -44,15 +44,16 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [x] Make new boorus show without restarting
     - [ ] Make more images load when reaching end of scrolling in full view
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
+    - [x] Booru delete button
 - [ ] Favourites
     - [ ] Add favourites storing
     - [ ] Implement importing from animeboxes
 - [ ] Bugs
     - [x] Zoomed image breaks scrolling in full view (I think this only happens when the next image is not loaded so preloading may fix it)
-    - [ ] Device doesn't vibrate when moving cursor
+    - [x] pressing save twice creates 2 copies of the same booru
     - [ ] previous and last image can overlap each other
     - [ ] zooming in can crash the app
-    - [ ] pressing save twice creates 2 copies of the same booru
-    - [ ] no way to delete boorus, apparently
+
+
 
 

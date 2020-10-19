@@ -4,6 +4,7 @@ import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/ShimmieHandler.dart';
+import 'libBooru/SankakuHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
@@ -212,6 +213,14 @@ class _SettingsPageState extends State<SettingsPage> {
                       }
                     },
                   ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
                   Container(
                     margin: EdgeInsets.fromLTRB(10,10,10,10),
                     child: FlatButton(                     // This button loads the booru editor page
@@ -241,6 +250,23 @@ class _SettingsPageState extends State<SettingsPage> {
                         //get to booru edit page;
                       },
                       child: Text("Add new"),
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10,10,10,10),
+                    child: FlatButton(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20),
+                        side: BorderSide(color: Theme.of(context).accentColor),
+                      ),
+                      onPressed: (){
+                        // Open the booru edtor page but with default values
+                        if (widget.settingsHandler.deleteBooru(selectedBooru)){
+                          Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                        }
+                        //get to booru edit page;
+                      },
+                      child: Text("Delete"),
                     ),
                   ),
                 ],
@@ -366,6 +392,10 @@ class _booruEditState extends State<booruEdit> {
                     ),
                     onPressed: () async{
                       //Call the booru test
+                      if(booruURLController.text.contains("chan.sankakucomplex.com")){
+                        booruURLController.text = "https://capi-v2.sankakucomplex.com";
+                        booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+                      }
                       if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
                         booruURLController.text = "https://" + booruURLController.text;
                       }
@@ -573,14 +603,24 @@ class _booruEditState extends State<booruEdit> {
         onPressed:() async{
           getPerms();
           Booru newBooru;
+          bool booruExists = false;
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
+          for (int i=0; i < widget.settingsHandler.booruList.length; i++){
+            if (widget.settingsHandler.booruList[i].baseURL == booruURLController.text){
+              Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+              booruExists = true;
+            }
+          }
           if(booruAPIKeyController.text == ""){
             newBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
           } else {
             newBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
           }
-          await widget.settingsHandler.saveBooru(newBooru);
-          Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          if (!booruExists){
+            await widget.settingsHandler.saveBooru(newBooru);
+            Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          }
+
         },
         child: Text("Save"),
       );
@@ -650,6 +690,14 @@ class _booruEditState extends State<booruEdit> {
       if (testFetched.length > 0) {
         booruType = "Szurubooru";
         print("Found Results as Szurubooru");
+      }
+    }
+    test = new SankakuHandler(booru, 5);
+    testFetched = await test.Search("", 1);
+    if (testFetched != null) {
+      if (testFetched.length > 0) {
+        booruType = "Sankaku";
+        print("Found Results as Sankaku");
       }
     }
     // This can return anything it's needed for the future builder.

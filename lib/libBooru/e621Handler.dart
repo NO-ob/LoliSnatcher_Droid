@@ -40,7 +40,6 @@ class e621Handler extends BooruHandler{
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse['posts'].length; i++){
           var current = parsedResponse['posts'][i];
-          print(current['file']['url']);
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
