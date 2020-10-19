@@ -29,6 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsLimitController = TextEditingController();
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
+  final settingsPreloadController = TextEditingController();
   Booru selectedBooru;
   String previewMode;
   @override
@@ -40,6 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
       settingsColumnsPortraitController.text = widget.settingsHandler.portraitColumns.toString();
       settingsColumnsLandscapeController.text = widget.settingsHandler.landscapeColumns.toString();
       settingsLimitController.text = widget.settingsHandler.limit.toString();
+      settingsPreloadController.text = widget.settingsHandler.preloadCount.toString();
     });
     previewMode = widget.settingsHandler.previewMode;
     getPerms();
@@ -99,6 +101,37 @@ class _SettingsPageState extends State<SettingsPage> {
                         ],
                         decoration: InputDecoration(
                           hintText: "Images to fetch per page 0-100",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Gallery View Preload :            "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: settingsPreloadController,
+                        //The keyboard type and input formatter are used to make sure the user can only input a numerical value
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText: "Images to preload",
                           contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
                           border: new OutlineInputBorder(
                             borderRadius: new BorderRadius.circular(50),
@@ -262,7 +295,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       onPressed: (){
                         // Open the booru edtor page but with default values
                         if (widget.settingsHandler.deleteBooru(selectedBooru)){
-                          Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                          setState(() {
+                            Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                          });
                         }
                         //get to booru edit page;
                       },
@@ -280,7 +315,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   side: BorderSide(color: Theme.of(context).accentColor),
                 ),
                 onPressed: (){
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text);
                 },
                 child: Text("Save"),
               ),

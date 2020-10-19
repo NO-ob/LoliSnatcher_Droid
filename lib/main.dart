@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
@@ -543,7 +545,7 @@ class _ImagesState extends State<Images> {
                       child: sampleorThumb(snapshot.data[index]),
                       onTap: () {
                         // Load the image viewer
-                        Get.to(ImagePage(snapshot.data,index,widget.searchGlobals));
+                        Get.to(ImagePage(snapshot.data,index,widget.searchGlobals,widget.settingsHandler));
                       },
                       onLongPress: (){
                         widget.selected.add(snapshot.data[index]);
@@ -590,19 +592,24 @@ class ImagePage extends StatefulWidget {
   final List fetched;
   final int index;
   SearchGlobals searchGlobals;
-  ImagePage(this.fetched,this.index,this.searchGlobals);
+  SettingsHandler settingsHandler;
+  ImagePage(this.fetched,this.index,this.searchGlobals,this.settingsHandler);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
 
 class _ImagePageState extends State<ImagePage>{
   PreloadPageController controller;
+  PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
 
   @override
   void initState() {
     super.initState();
     controller = PreloadPageController(
+      initialPage: widget.index,
+    );
+    controllerLinux = PageController(
       initialPage: widget.index,
     );
   }
@@ -687,17 +694,18 @@ class _ImagePageState extends State<ImagePage>{
         /**
          * The pageView builder will created a page for each image in the booruList(fetched)
          */
-        child: PreloadPageView.builder(
-          preloadPagesCount: 2,
+        child: Platform.isAndroid ? PreloadPageView.builder(
+          preloadPagesCount: widget.settingsHandler.preloadCount,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("webm") || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("mp4")){
               return VideoApp(widget.fetched[index].fileURL);
             } else {
+              print(widget.fetched[index].fileURL);
               return Container(
                 // InteractiveViewer is used to make the image zoomable
                 child: InteractiveViewer(
-                  panEnabled: false,
+                  panEnabled: true,
                   boundaryMargin: EdgeInsets.zero,
                   minScale: 0.5,
                   maxScale: 4,
@@ -714,7 +722,36 @@ class _ImagePageState extends State<ImagePage>{
 
           },
           itemCount: widget.fetched.length,
-        ),
+        ) : PageView.builder(
+          controller: controllerLinux,
+          scrollDirection: Axis.horizontal,
+          itemBuilder: (context, index) {
+            if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("webm") || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("mp4")){
+              return Container(
+                child: Column(
+                  children: [
+                    Image.network(widget.fetched[index].thumbnailURL),
+                    Container(
+                      margin: EdgeInsets.fromLTRB(10,10,10,10),
+                      child: FlatButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(20),
+                          side: BorderSide(color: Theme.of(context).accentColor),
+                        ),
+                        onPressed: (){
+                          Process.run('mpv',[widget.fetched[index].fileURL]);
+                        },
+                        child: Text("Open in MPV"),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            } else {
+              return Image.network(widget.fetched[index].fileURL);
+            }
+          }
+      ),
       ),
     );
   }

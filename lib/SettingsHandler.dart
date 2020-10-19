@@ -12,7 +12,7 @@ import 'dart:io' show Platform;
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   String defTags = "rating:safe",previewMode = "Sample";
-  int limit = 20, portraitColumns = 2,landscapeColumns = 4;
+  int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
   List<Booru> booruList = new List<Booru>();
   var path = "";
   Future writeDefaults() async{
@@ -71,12 +71,18 @@ class SettingsHandler {
             print("Found Landscape Columns " + settings[i].split(" = ")[1] );
           }
           break;
+        case("Preload Count"):
+          if (settings[i].split(" = ").length > 1){
+            preloadCount = int.parse(settings[i].split(" = ")[1]);
+            print("Found Preload Count " + settings[i].split(" = ")[1] );
+          }
+          break;
       }
     }
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -103,6 +109,8 @@ class SettingsHandler {
     this.portraitColumns = int.parse(portraitColumns);
     writer.write("Preview Mode = $previewMode\n");
     this.previewMode = previewMode;
+    writer.write("Preload Count = $preloadCount\n");
+    this.preloadCount = int.parse(preloadCount);
     writer.close();
     await this.loadSettings();
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
