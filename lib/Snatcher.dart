@@ -220,7 +220,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     }
 
     for (int n = 0; n + 1 <= int.parse(amount); n ++){
-      await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n]);});
+      await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n],widget.settingsHandler.jsonWrite);});
       if ((n+1)%10 == 0 || n+1 == int.parse(amount)){
         Get.snackbar("＼(^ o ^)／","Snatched ${n+1} / $amount",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
       }

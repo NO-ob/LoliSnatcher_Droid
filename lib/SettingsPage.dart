@@ -30,6 +30,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
+  bool jsonWrite = false;
   Booru selectedBooru;
   String previewMode;
   @override
@@ -45,6 +46,9 @@ class _SettingsPageState extends State<SettingsPage> {
     });
     previewMode = widget.settingsHandler.previewMode;
     getPerms();
+    setState(() {
+      jsonWrite = widget.settingsHandler.jsonWrite;
+    });
   }
 
   @override
@@ -206,6 +210,21 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
+              child: Row(children: [
+                Text("Write Image JSON: "),
+                Checkbox(
+                  value: jsonWrite,
+                  onChanged: (newValue) {
+                    setState(() {
+                      jsonWrite = newValue;
+                    });
+                  },
+                  activeColor: Colors.pink[200],
+                )
+              ],)
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               // This dropdown is used to change the quality of the images displayed on the home page
               child:  Row(
@@ -315,7 +334,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   side: BorderSide(color: Theme.of(context).accentColor),
                 ),
                 onPressed: (){
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite);
                 },
                 child: Text("Save"),
               ),

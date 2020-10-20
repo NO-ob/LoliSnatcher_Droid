@@ -1,6 +1,5 @@
 class BooruItem{
   String fileURL,sampleURL,thumbnailURL,tagString,postURL;
-  int id,width,height;
   List tagsList;
   BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL){
   }
@@ -16,6 +15,9 @@ class BooruItem{
   }
   List<String> get tags{
     return tagString.split(" ");
+  }
+  toJSON(){
+    return {'postURL': "$postURL",'fileURL': "$fileURL", 'sampleURL': "$sampleURL", 'thumbnailURL': "$thumbnailURL", 'tags': tagsList};
   }
 }
 

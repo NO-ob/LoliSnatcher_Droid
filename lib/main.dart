@@ -624,7 +624,7 @@ class _ImagePageState extends State<ImagePage>{
             onPressed: (){
               getPerms();
               // call a function to save the currently viewed image when the save button is pressed
-              writer.write(widget.fetched[controller.page.toInt()]);
+              writer.write(widget.fetched[controller.page.toInt()],widget.settingsHandler.jsonWrite);
               Get.snackbar("Snatched ＼(^ o ^)／",widget.fetched[controller.page.toInt()].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
             },
           ),
