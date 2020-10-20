@@ -453,7 +453,13 @@ class _booruEditState extends State<booruEdit> {
                       if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
                         booruURLController.text = "https://" + booruURLController.text;
                       }
-                      String booruType = await booruTest(new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,""));
+                      Booru testBooru;
+                      if(booruAPIKeyController.text == ""){
+                        testBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
+                      } else {
+                        testBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
+                      }
+                      String booruType = await booruTest(testBooru);
                       if(booruFaviconController.text == ""){
                         booruFaviconController.text = booruURLController.text + "/favicon.ico";
                       }
@@ -661,8 +667,12 @@ class _booruEditState extends State<booruEdit> {
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
           for (int i=0; i < widget.settingsHandler.booruList.length; i++){
             if (widget.settingsHandler.booruList[i].baseURL == booruURLController.text){
-              Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-              booruExists = true;
+              if (widget.settingsHandler.booruList.contains(newBooru)){
+                booruExists = true;
+                Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+              } else {
+                widget.settingsHandler.booruList.removeAt(i);
+              }
             }
           }
           if(booruAPIKeyController.text == ""){
@@ -739,7 +749,7 @@ class _booruEditState extends State<booruEdit> {
       }
     }
     test = new SzurubooruHandler(booru, 5);
-    testFetched = await test.Search("solo", 1);
+    testFetched = await test.Search("*", 1);
     if (testFetched != null) {
       if (testFetched.length > 0) {
         booruType = "Szurubooru";

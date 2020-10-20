@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -26,8 +28,15 @@ class SzurubooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      var response;
+      if(booru.apiKey != "") {
+         response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))});
+      } else {
+         response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      }
+
       // 200 is the success http response code
+      log(response.body.toString());
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         /**
@@ -68,22 +77,22 @@ class SzurubooruHandler extends BooruHandler{
     }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/api/tags/?offset=0&limit=5&query=$input";
+    return "${booru.baseURL}/api/tags/?offset=0&limit=5&query=$input*";
   }
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = new List();
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))});
       print(response.body);
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        print(parsedResponse);
         if (parsedResponse.length > 0){
-          for (int i=0; i < parsedResponse.length; i++){
-            searchTags.add(parsedResponse[i]['name']);
+          for (int i=0; i < parsedResponse["results"].length; i++){
+            String tag = parsedResponse["results"][i]['names'][0].toString().replaceAll(r":", r"\:");;
+            searchTags.add(tag);
           }
         }
       }

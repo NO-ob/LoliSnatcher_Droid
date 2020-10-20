@@ -387,6 +387,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     setBooruHandler(widget.searchGlobals, 20);
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
+    if (widget.searchGlobals.booruHandler.booru.type == "Szurubooru" && widget.searchGlobals.booruHandler.booru.apiKey != "" && widget.searchGlobals.booruHandler.booru.userID != ""){
+      widget.searchGlobals.booruHandler.tagSearchEnabled = true;
+    }
     if (widget.searchGlobals.booruHandler.tagSearchEnabled){
       return OverlayEntry(
         builder: (context) => Positioned(
