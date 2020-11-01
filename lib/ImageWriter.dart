@@ -1,4 +1,7 @@
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:io';
@@ -36,5 +39,12 @@ class ImageWriter{
     }
     return (item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
   }
-
+  Future writeSelected(SearchGlobals searchGlobals, bool jsonWrite) async {
+    List fetched = searchGlobals.booruHandler.getFetched();
+    for (int i = 0; i < searchGlobals.selected.length; i++){
+      await write(fetched.elementAt(searchGlobals.selected[i]), jsonWrite);
+    }
+    searchGlobals.selected = new List();
+    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+  }
 }

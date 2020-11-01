@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/Booru.dart';
+import 'libBooru/BooruItem.dart';
 import 'package:get/get.dart';
 
 
@@ -14,6 +15,7 @@ class SearchGlobals{
   String handlerType;
   ValueNotifier addTag = ValueNotifier("");
   ValueNotifier newTab = ValueNotifier("noListener");
+  List selected = new List();
   SearchGlobals(this.selectedBooru,this.tags);
   @override
   String toString() {

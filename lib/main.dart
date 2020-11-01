@@ -89,6 +89,22 @@ class _HomeState extends State<Home> {
         child: Scaffold(
           appBar: AppBar(
             title: Text("Loli Snatcher"),
+            actions:<Widget>[
+              IconButton(
+                icon: Icon(Icons.save),
+                onPressed: (){
+                  getPerms();
+                  // call a function to save the currently viewed image when the save button is pressed
+                  if (searchGlobals[globalsIndex].selected.length > 0){
+                    ImageWriter writer = new ImageWriter();
+                    writer.writeSelected(searchGlobals[globalsIndex], widget.settingsHandler.jsonWrite);
+                  } else {
+                    Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                  }
+
+                },
+              )
+            ],
           ),
           body: Center(
             child: ImagesFuture(),
@@ -496,7 +512,6 @@ class Images extends StatefulWidget {
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
   Images(this.settingsHandler,this.searchGlobals);
-  List<BooruItem> selected = new List();
   @override
   _ImagesState createState() => _ImagesState();
 }
@@ -539,20 +554,38 @@ class _ImagesState extends State<Images> {
                  */
               crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns),
               itemBuilder: (BuildContext context, int index) {
-
+                bool isSelected = widget.searchGlobals.selected.contains(index);
                 return new Card(
                   child: new GridTile(
                     // Inkresponse is used so the tile can have an onclick function
-                    child: new InkResponse(
-                      enableFeedback: true,
-                      child: sampleorThumb(snapshot.data[index]),
-                      onTap: () {
-                        // Load the image viewer
-                        Get.to(ImagePage(snapshot.data,index,widget.searchGlobals,widget.settingsHandler));
-                      },
-                      onLongPress: (){
-                        widget.selected.add(snapshot.data[index]);
-                      },
+                    child: Material(
+                      borderOnForeground: true,
+                      child: Ink(
+                        decoration: isSelected ? BoxDecoration(border: Border.all(color: Theme.of(context).accentColor, width: 4.0),) : null,
+                          child: new InkResponse(
+                            enableFeedback: true,
+                            highlightShape: BoxShape.rectangle,
+                            containedInkWell: true,
+                            highlightColor: Theme.of(context).accentColor,
+                            child: sampleorThumb(snapshot.data[index]),
+                            onTap: () {
+                              // Load the image viewer
+                              Get.to(ImagePage(snapshot.data,index,widget.searchGlobals,widget.settingsHandler));
+                            },
+                            onLongPress: (){
+                              if (widget.searchGlobals.selected.contains(index)){
+                                setState(() {
+                                  widget.searchGlobals.selected.remove(index);
+                                });
+                              } else {
+                                setState(() {
+                                  widget.searchGlobals.selected.add(index);
+                                });
+
+                              }
+                            },
+                          ),
+                      ),
                     ),
                   ),
                 );
@@ -579,9 +612,9 @@ class _ImagesState extends State<Images> {
    */
   Widget sampleorThumb(BooruItem item){
     if (widget.settingsHandler.previewMode == "Thumbnail" || item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == "webm" || item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == "mp4"){
-      return new Image.network(item.thumbnailURL,fit: BoxFit.cover,);
+      return new Ink.image(image: NetworkImage(item.thumbnailURL), fit: BoxFit.cover,);
     } else {
-      return new Image.network(item.sampleURL,fit: BoxFit.cover,);
+      return new Ink.image(image: NetworkImage(item.sampleURL),fit: BoxFit.cover,);
     }
   }
 }
