@@ -45,6 +45,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [ ] Make more images load when reaching end of scrolling in full view
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
     - [x] Booru delete button
+    - [ ] Use stream builders when writing iamge to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
 - [ ] Favourites
     - [ ] Add favourites storing
     - [ ] Implement importing from animeboxes
