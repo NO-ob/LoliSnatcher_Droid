@@ -58,6 +58,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   List<SearchGlobals> searchGlobals = new List.from([new SearchGlobals(null,"")]);
+  FocusNode searchBoxFocus = new FocusNode();
   int globalsIndex = 0;
   bool firstRun = true;
   final searchTagsController = TextEditingController();
@@ -82,9 +83,12 @@ class _HomeState extends State<Home> {
       searchGlobals[globalsIndex].newTab.value = "";
     }
 
-    return GestureDetector(
-        onTap: (){
-          FocusScope.of(context).unfocus();
+    return Listener(
+        onPointerDown: (event){
+          if(searchBoxFocus.hasFocus){
+            print("destroyed overlay");
+            searchBoxFocus.unfocus();
+          }
         },
         child: Scaffold(
           appBar: AppBar(
@@ -125,14 +129,13 @@ class _HomeState extends State<Home> {
 
                     children: <Widget>[
                       //Tags/Search field
-                      TagSearchBox(searchGlobals[globalsIndex], searchTagsController),
+                      TagSearchBox(searchGlobals[globalsIndex], searchTagsController,searchBoxFocus),
                        IconButton(
                           padding: new EdgeInsets.all(20),
                           icon: Icon(Icons.search),
                           onPressed: () {
                             // Setstate and update the tags variable so the widget rebuilds with the new tags
                             setState((){
-                              FocusManager.instance.primaryFocus.unfocus();
                               searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                             });
                           },
@@ -371,31 +374,33 @@ class _HomeState extends State<Home> {
 class TagSearchBox extends StatefulWidget {
   SearchGlobals searchGlobals;
   TextEditingController searchTagsController;
-  TagSearchBox(this.searchGlobals, this.searchTagsController);
+  FocusNode _focusNode;
+  TagSearchBox(this.searchGlobals, this.searchTagsController, this._focusNode);
   @override
   _TagSearchBoxState createState() => _TagSearchBoxState();
 }
 
 class _TagSearchBoxState extends State<TagSearchBox> {
-  FocusNode _focusNode;
   OverlayEntry _overlayEntry;
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
-    _focusNode.addListener(_updateOverLay);
+    widget._focusNode.addListener(_updateOverLay);
   }
   void _updateOverLay(){
-    if (_focusNode.hasFocus) {
+    if (widget._focusNode.hasFocus) {
+      print("textbox is focused");
       this._overlayEntry = this._createOverlayEntry();
       Overlay.of(context).insert(this._overlayEntry);
     } else {
-      this._overlayEntry.remove();
+      if (this._overlayEntry != null){
+        this._overlayEntry.remove();
+      }
     }
   }
   @override
   void dispose() {
-    _focusNode.dispose();
+    widget._focusNode.unfocus();
     super.dispose();
   }
   OverlayEntry _createOverlayEntry() {
@@ -431,9 +436,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             return ListTile(
                                 title: Text(snapshot.data[index]),
                                 onTap: (() {
-                                  FocusManager.instance.primaryFocus.unfocus();
+                                  widget._focusNode.unfocus();
                                   widget.searchTagsController.text = widget.searchTagsController.text.substring(0,widget.searchTagsController.text.lastIndexOf(" ")+1) + snapshot.data[index];
-                                  this._overlayEntry.remove();
                                 })
                             );
                           }
@@ -457,7 +461,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     return Expanded(
       child: TextField(
           controller: widget.searchTagsController,
-          focusNode: this._focusNode,
+          focusNode: widget._focusNode,
           onChanged: (text) {
             setState((){
               this._overlayEntry.remove();
@@ -574,7 +578,6 @@ class _ImagesState extends State<Images> {
                             highlightColor: Theme.of(context).accentColor,
                             child: sampleorThumb(snapshot.data[index]),
                             onTap: () {
-                              FocusScope.of(context).unfocus();
                               // Load the image viewer
                               Get.to(ImagePage(snapshot.data,index,widget.searchGlobals,widget.settingsHandler));
                             },
