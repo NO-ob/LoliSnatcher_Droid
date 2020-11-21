@@ -433,6 +433,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                                 onTap: (() {
                                   FocusManager.instance.primaryFocus.unfocus();
                                   widget.searchTagsController.text = widget.searchTagsController.text.substring(0,widget.searchTagsController.text.lastIndexOf(" ")+1) + snapshot.data[index];
+                                  this._overlayEntry.remove();
                                 })
                             );
                           }
@@ -573,6 +574,7 @@ class _ImagesState extends State<Images> {
                             highlightColor: Theme.of(context).accentColor,
                             child: sampleorThumb(snapshot.data[index]),
                             onTap: () {
+                              FocusScope.of(context).unfocus();
                               // Load the image viewer
                               Get.to(ImagePage(snapshot.data,index,widget.searchGlobals,widget.settingsHandler));
                             },
