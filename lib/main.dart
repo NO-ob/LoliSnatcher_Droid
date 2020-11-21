@@ -407,6 +407,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       widget.searchGlobals.booruHandler.tagSearchEnabled = true;
     }
     if (widget.searchGlobals.booruHandler.tagSearchEnabled){
+      String input = widget.searchTagsController.text;
+      if (input.split(" ").length > 1){
+        input = input.split(" ")[input.split(" ").length - 1];
+      }
       return OverlayEntry(
         builder: (context) => Positioned(
           left: offset.dx,
@@ -415,7 +419,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           child: Material(
             elevation: 4.0,
             child: FutureBuilder(
-                future: widget.searchGlobals.booruHandler.tagSearch(widget.searchTagsController.text),
+                future: widget.searchGlobals.booruHandler.tagSearch(input),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if ((snapshot.connectionState == ConnectionState.done) && snapshot.data.length > 0){
                     if (snapshot.data[0]!= null){
@@ -428,7 +432,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                                 title: Text(snapshot.data[index]),
                                 onTap: (() {
                                   FocusManager.instance.primaryFocus.unfocus();
-                                  widget.searchTagsController.text = snapshot.data[index];
+                                  widget.searchTagsController.text = widget.searchTagsController.text.substring(0,widget.searchTagsController.text.lastIndexOf(" ")+1) + snapshot.data[index];
                                 })
                             );
                           }
