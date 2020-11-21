@@ -7,7 +7,7 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 
 Thanks to Showers-U for letting me use their art for an icon check them out on pixiv : https://www.pixiv.net/en/users/28366691
 
-![github-small](https://github.com/NO-ob/LoliSnatcher_Droid/blob/b6ed6795951895c7ec8ddae68697f6dd50653c02/demo.gif)
+![github-small](https://loli.rehab/images/posts/loliSnatcherDroid/preview.png)
 
 
 ## To Do
@@ -45,6 +45,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [ ] Make more images load when reaching end of scrolling in full view
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
     - [x] Booru delete button
+    - [ ] Use stream builders when writing iamge to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
 - [ ] Favourites
     - [ ] Add favourites storing
     - [ ] Implement importing from animeboxes
