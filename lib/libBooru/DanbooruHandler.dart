@@ -90,7 +90,7 @@ class DanbooruHandler extends BooruHandler{
       final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+        List<dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
           for (int i=0; i < parsedResponse.length; i++){
             searchTags.add(parsedResponse[i]['name']);

@@ -18,6 +18,9 @@ class ShimmieHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    if(tags == " " || tags == ""){
+      tags="*";
+    }
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -28,15 +31,19 @@ class ShimmieHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml",  "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      final response = await http.get(url,headers: {"Accept": "application/xml",  "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
+        print(response.body);
         var parsedResponse = xml.parse(response.body);
         /**
          * This creates a list of xml elements 'post' to extract only the post elements which contain
          * all the data needed about each image
          */
         var posts = parsedResponse.findAllElements('post');
+        if (posts.length < 1){
+          posts = parsedResponse.findAllElements('tag');
+        }
         // Create a BooruItem for each post in the list
         for (int i =0; i < posts.length; i++){
           var current = posts.elementAt(i);
@@ -53,6 +60,8 @@ class ShimmieHandler extends BooruHandler{
         }
         prevTags = tags;
         return fetched;
+      } else {
+        print(response.statusCode);
       }
     } catch(e) {
       print(e);

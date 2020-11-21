@@ -734,6 +734,7 @@ class _booruEditState extends State<booruEdit> {
     }
     test = new ShimmieHandler(booru, 5);
     testFetched = await test.Search(" ", 1);
+    print(testFetched);
     if (testFetched != null) {
       if (testFetched.length > 0) {
         booruType = "Shimmie";
