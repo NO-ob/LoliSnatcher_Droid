@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'libBooru/GelbooruHandler.dart';
@@ -18,6 +19,7 @@ import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'AboutPage.dart';
@@ -421,6 +423,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           left: offset.dx,
           top: offset.dy + size.height + 5.0,
           width: size.width,
+          height: 300,
           child: Material(
             elevation: 4.0,
             child: FutureBuilder(
@@ -552,62 +555,77 @@ class _ImagesState extends State<Images> {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           } else {
+            /**The short if statement with the media query is used to decide whether to display 2 or 4
+              * thumbnails in a row of the grid depending on screen orientation
+              */
+            int columnsCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns;
+
             // A notification listener is used to get the scroll position
             return new NotificationListener<ScrollUpdateNotification>(
-            child: GridView.builder(
+            child: Scrollbar( // TO DO: Make it draggable
               controller: gridController,
-              itemCount: snapshot.data.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                /**The short if statement with the media query is used to decide whether to display 2 or 4
-                 * thumbnails in a row of the grid depending on screen orientation
-                 */
-              crossAxisCount: (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns),
-              itemBuilder: (BuildContext context, int index) {
-                bool isSelected = widget.searchGlobals.selected.contains(index);
-                return new Card(
-                  child: new GridTile(
-                    // Inkresponse is used so the tile can have an onclick function
-                    child: Material(
-                      borderOnForeground: true,
-                      child: Ink(
-                        decoration: isSelected ? BoxDecoration(border: Border.all(color: Theme.of(context).accentColor, width: 4.0),) : null,
-                          child: new InkResponse(
-                            enableFeedback: true,
-                            highlightShape: BoxShape.rectangle,
-                            containedInkWell: true,
-                            highlightColor: Theme.of(context).accentColor,
-                            child: sampleorThumb(snapshot.data[index]),
-                            onTap: () {
-                              // Load the image viewer
-                              Get.to(ImagePage(snapshot.data,index,widget.searchGlobals,widget.settingsHandler));
-                            },
-                            onLongPress: (){
-                              if (widget.searchGlobals.selected.contains(index)){
-                                setState(() {
-                                  widget.searchGlobals.selected.remove(index);
-                                });
-                              } else {
-                                setState(() {
-                                  widget.searchGlobals.selected.add(index);
-                                });
+              isAlwaysShown: true,
+              child: GridView.builder(
+                controller: gridController,
+                itemCount: snapshot.data.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columnsCount),
+                itemBuilder: (BuildContext context, int index) {
+                  bool isSelected = widget.searchGlobals.selected.contains(index);
+                  return new Card(
+                    child: new GridTile(
+                      // Inkresponse is used so the tile can have an onclick function
+                      child: Material(
+                        borderOnForeground: true,
+                        child: Ink(
+                          decoration: isSelected ? BoxDecoration(border: Border.all(color: Theme.of(context).accentColor, width: 4.0),) : null,
+                            child: new InkResponse(
+                              enableFeedback: true,
+                              highlightShape: BoxShape.rectangle,
+                              containedInkWell: true,
+                              highlightColor: Theme.of(context).accentColor,
+                              child: sampleorThumb(snapshot.data[index], columnsCount),
+                              onTap: () {
+                                // Load the image viewer
+                                Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, gridController, columnsCount));
+                              },
+                              onLongPress: (){
+                                if (widget.searchGlobals.selected.contains(index)){
+                                  setState(() {
+                                    widget.searchGlobals.selected.remove(index);
+                                  });
+                                } else {
+                                  setState(() {
+                                    widget.searchGlobals.selected.add(index);
+                                  });
 
-                              }
-                            },
-                          ),
+                                }
+                              },
+                            ),
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
             // ignore: missing_return
             onNotification: (notif) {
               widget.searchGlobals.scrollPosition = gridController.offset;
+              // print('SCROLL NOTIFICATION');
+              // print(gridController.position.maxScrollExtent);
+              // print(notif.metrics); // pixels before viewport, in viewport, after viewport
+
               // If at bottom edge update state with incremented pageNum
-              if(notif.metrics.atEdge && notif.metrics.pixels > 0 ){
+              bool isNotAtStart = notif.metrics.pixels > 0;
+              bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
+              bool isAtEdge = notif.metrics.atEdge;
+              if((isNotAtStart || !isScreenFilled) && isAtEdge){
+                // bug: if scrolled again after new page started loading - triggers multiple page loads
+                // bug: endlessly triggers new page loads when reached last page
                 setState((){
                   widget.searchGlobals.pageNum++;
                 });
+                Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
               }
             },
           );
@@ -615,16 +633,51 @@ class _ImagesState extends State<Images> {
         });
   }
 
-  /**This will return an Image from the booruItem and will use either the sample url
+  /**
+   * This will return an Image from the booruItem and will use either the sample url
    * or the thumbnail url depending on the users settings (sampleURL is much higher quality)
    *
    */
-  Widget sampleorThumb(BooruItem item){
-    if (widget.settingsHandler.previewMode == "Thumbnail" || item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == "webm" || item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == "mp4"){
-      return new Ink.image(image: NetworkImage(item.thumbnailURL), fit: BoxFit.cover,);
-    } else {
-      return new Ink.image(image: NetworkImage(item.sampleURL),fit: BoxFit.cover,);
-    }
+  Widget sampleorThumb(BooruItem item, int columnCount){
+    final List<String> thumbExts = ['webm', 'mp4', 'gif'];
+    final bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || thumbExts.any((val) => item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == val);
+
+    return Image.network(
+      isThumb ? item.thumbnailURL : item.sampleURL,
+      fit: BoxFit.cover,
+      loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
+        if (loadingProgress == null) {
+          return child;
+        } else {
+          bool hasProgressData = loadingProgress.expectedTotalBytes != null;
+          double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
+          String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'No size data';
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 100 / columnCount,
+                width: 100 / columnCount,
+                child: CircularProgressIndicator(
+                  strokeWidth: 16 / columnCount,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                  value: percentDone,
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(bottom: 10)),
+              columnCount < 4 // Text element overflows if too many thumbnails are shown
+                ? Text(
+                  percentDoneText,
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                )
+                : Container(),
+            ],
+          );
+        }
+      },
+    );
   }
 }
 
@@ -638,7 +691,9 @@ class ImagePage extends StatefulWidget {
   final int index;
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
-  ImagePage(this.fetched,this.index,this.searchGlobals,this.settingsHandler);
+  ScrollController gridController;
+  int columnsCount;
+  ImagePage(this.fetched,this.index,this.searchGlobals,this.settingsHandler, this.gridController, this.columnsCount);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
@@ -647,6 +702,7 @@ class _ImagePageState extends State<ImagePage>{
   PreloadPageController controller;
   PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
+  int viewedIndex = 0;
 
   @override
   void initState() {
@@ -657,12 +713,38 @@ class _ImagePageState extends State<ImagePage>{
     controllerLinux = PageController(
       initialPage: widget.index,
     );
+
+    viewedIndex = widget.index;
+    jumpToItem(widget.index);
   }
+
+  void jumpToItem(int item) {
+    int totalItems = widget.fetched.length;
+    if(totalItems > 0) {
+      final viewportHeight = widget.gridController.position.viewportDimension;
+      final totalHeight = widget.gridController.position.maxScrollExtent + viewportHeight;
+
+      final rowCount = (totalItems / widget.columnsCount).ceil();
+      final rowHeight = totalHeight / rowCount;
+
+      final rowsPerViewport = (viewportHeight + 30) / rowHeight; // add some height to trigger page load a bit early
+
+      final currentRow = (item / widget.columnsCount).floor();
+      // scroll to the row of the current item
+      // but if we can't scroll to the top of this row (rows left < rowsPerViewport) - scroll to the max and trigger page load
+      final scrollToValue = (rowCount - currentRow) < rowsPerViewport ? totalHeight : max((rowHeight * currentRow), 0.0);
+      // print('SCROLL CONTROLLER');
+      // print(widget.gridController.position);
+      // print(newValue);
+      widget.gridController.jumpTo(scrollToValue);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Image Viewer"),
+        title: Text((viewedIndex+1).toString()+'/'+widget.fetched.length.toString()),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
@@ -694,37 +776,44 @@ class _ImagePageState extends State<ImagePage>{
                           child: ListView.builder(
                               itemCount: widget.fetched[controller.page.toInt()].tagsList.length,
                               itemBuilder: (BuildContext context, int index){
-                                return Column(
-                                  children: <Widget>[
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(widget.fetched[controller.page.toInt()].tagsList[index]),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
-                                          onPressed: (){
-                                            setState(() {
-                                              widget.searchGlobals.addTag.value = " " + widget.fetched[controller.page.toInt()].tagsList[index];
-                                            });
-                                          },
-                                        ),
-                                        IconButton(
-                                          icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
-                                          onPressed: (){
-                                            setState(() {
-                                              widget.searchGlobals.newTab.value = widget.fetched[controller.page.toInt()].tagsList[index];
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    Divider(
-                                      color: Colors.white,
-                                      height: 2,
-                                    ),
-                                  ]
-                                );
+                                String currentTag = widget.fetched[controller.page.toInt()].tagsList[index];
+                                if(currentTag != '') {
+                                  return Column(
+                                    children: <Widget>[
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(currentTag),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
+                                            onPressed: (){
+                                              setState(() {
+                                                widget.searchGlobals.addTag.value = " " + currentTag;
+                                              });
+                                              Get.snackbar("Added tag to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
+                                            onPressed: (){
+                                              setState(() {
+                                                widget.searchGlobals.newTab.value = currentTag;
+                                              });
+                                              Get.snackbar("Added new search tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      Divider(
+                                        color: Colors.white,
+                                        height: 2,
+                                      ),
+                                    ]
+                                  );
+                                } else { // Render nothing if currentTag is an empty string
+                                  return Column();
+                                }
                               }
                           ),
                         ),
@@ -743,28 +832,72 @@ class _ImagePageState extends State<ImagePage>{
           preloadPagesCount: widget.settingsHandler.preloadCount,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
-            if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("webm") || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("mp4")){
-              return VideoApp(widget.fetched[index].fileURL);
+            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == val);
+            int preloadCount = widget.settingsHandler.preloadCount;
+            if (isVideo) {
+              return VideoApp(widget.fetched[index].fileURL, index, viewedIndex, preloadCount);
             } else {
               print(widget.fetched[index].fileURL);
-              return Container(
-                // InteractiveViewer is used to make the image zoomable
-                child: InteractiveViewer(
-                  panEnabled: true,
-                  boundaryMargin: EdgeInsets.zero,
-                  minScale: 0.5,
-                  maxScale: 4,
-                  child: FadeInImage.assetNetwork(
-                    placeholder: 'assets/images/loading.gif',
-                    image: widget.fetched[index].fileURL,
+              bool isViewed = viewedIndex == index;
+              bool isNear = (viewedIndex - index).abs() <= preloadCount;
+              // Render only if viewed or in preloadCount range
+              if(isViewed || isNear) {
+                return Container(
+                  // InteractiveViewer is used to make the image zoomable
+                  child: InteractiveViewer(
+                    panEnabled: true,
+                    boundaryMargin: EdgeInsets.zero,
+                    minScale: 0.5,
+                    maxScale: 8,
+                    child: Image.network(
+                      widget.fetched[index].fileURL,
+                      loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        } else {
+                          bool hasProgressData = loadingProgress.expectedTotalBytes != null;
+                          double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
+                          String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'No size data';
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 120,
+                                width: 120,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 12,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                                  value: percentDone,
+                                ),
+                              ),
+                              Padding(padding: EdgeInsets.only(bottom: 15)),
+                              Text(
+                                percentDoneText,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
                   ),
-                ),
-              );
+                );
+              } else {
+                return Container();
+              }
             }
           },
           controller: controller,
           onPageChanged: (int index){
+            setState(() {
+              viewedIndex = index;
+            });
 
+            // Scroll to current item in GridView while viewer is open, will also trigger new page loading
+            jumpToItem(index);
+            // print('Page changed ' + index.toString());
           },
           itemCount: widget.fetched.length,
         ) : PageView.builder(
@@ -805,58 +938,111 @@ class _ImagePageState extends State<ImagePage>{
  * None of the code in this widget is mine it's from the example at https://pub.dev/packages/video_player
  */
 class VideoApp extends StatefulWidget {
-  String url;
-  VideoApp(this.url);
+  final String url;
+  final int index;
+  final int viewedIndex;
+  final int preloadCount;
+  VideoApp(this.url, this.index, this.viewedIndex, this.preloadCount);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
 
 class _VideoAppState extends State<VideoApp> {
   VideoPlayerController _controller;
+  ChewieController _chewieController;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(
-        widget.url)
-      ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        setState(() {});
-      });
+    initPlayer();
+  }
+
+  Future<void> initPlayer() async {
+    _controller = VideoPlayerController.network(widget.url);
+    await _controller.initialize();
+
+    // Player wrapper to allow controls, looping...
+    _chewieController = ChewieController(
+      videoPlayerController: _controller,
+      // autoplay is disabled here, because videos started playing randomly, but videos will still autoplay when in view (see isViewed check later)
+      autoPlay: false,
+      looping: true,
+      showControls: true,
+      materialProgressColors: ChewieProgressColors(
+        playedColor: Colors.blue,
+        handleColor: Colors.blue,
+        backgroundColor: Colors.grey,
+        bufferedColor: Colors.white,
+      ),
+      placeholder: Container(
+        color: Colors.black,
+      ),
+
+      // Specify this to allow any orientation in fullscreen, otherwise it will decide for itself based on video dimensions
+      // deviceOrientationsOnEnterFullScreen: [
+      //     DeviceOrientation.landscapeLeft,
+      //     DeviceOrientation.landscapeRight,
+      //     DeviceOrientation.portraitUp,
+      //     DeviceOrientation.portraitDown,
+      // ],
+    );
+
+    // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+    setState(() {});
+
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Scaffold(
-        body: Center(
-          child: _controller.value.initialized
-              ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
+    bool isViewed = widget.viewedIndex == widget.index;
+    bool isNear = (widget.viewedIndex - widget.index).abs() <= widget.preloadCount;
+    bool initialized = _chewieController != null && _chewieController.videoPlayerController.value.initialized;
+    String vWidth = '?';
+    String vHeight = '?';
+    if(initialized) {
+      vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
+      vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
+      if (isViewed) {
+        _controller.play();
+      } else {
+        _controller.pause();
+      }
+    }
+
+    // Render only if viewed or in preloadCount range
+    if(isViewed || isNear) {
+      return Container(
+        child: Scaffold(
+          body: Column(
+            children: <Widget>[
+              Expanded(
+                child: Center(
+                  child: initialized
+                    ? Chewie(controller: _chewieController)
+                    : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Image(image: AssetImage('assets/images/loading.gif'))
+                      ],
+                    ),
+                ),
+              ),
+              // Show video dimensions on the bottom
+              Text(vWidth+'x'+vHeight),
+            ],
           )
-              : Container(),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _controller.value.isPlaying
-                  ? _controller.pause()
-                  : _controller.play();
-            });
-          },
-          child: Icon(
-            _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-          ),
-        ),
-      ),
-    );
+      );
+    } else {
+      return Container();
+    }
   }
 
   @override
   void dispose() {
-    super.dispose();
     _controller.dispose();
+    _chewieController.dispose();
+    super.dispose();
   }
 }
 
