@@ -136,10 +136,14 @@ class _HomeState extends State<Home> {
                           padding: new EdgeInsets.all(20),
                           icon: Icon(Icons.search),
                           onPressed: () {
+                            if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
+                              searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
+                              setState((){
+                                searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
+                              });
+                            }
                             // Setstate and update the tags variable so the widget rebuilds with the new tags
-                            setState((){
-                              searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
-                            });
+
                           },
                         ),
                     ],
@@ -284,7 +288,7 @@ class _HomeState extends State<Home> {
                                   onPressed: (){
                                     Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
                                   },
-                                  child: Text("Add Booru")
+                                  child: Text("Open Settings")
                               ),
                             ),
                           ]
@@ -323,11 +327,17 @@ class _HomeState extends State<Home> {
    * After these are loaded it returns a drop down list which is used to select which booru to search
    * **/
   Future BooruSelector() async{
+    if (widget.settingsHandler.prefBooru == ""){
+      await widget.settingsHandler.loadSettings();
+    }
     if (widget.settingsHandler.path == ""){
       widget.settingsHandler.path = await widget.settingsHandler.getExtDir();
     }
     if(widget.settingsHandler.booruList.isEmpty){
       print("getbooru because null");
+      await widget.settingsHandler.getBooru();
+    }
+    if (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name){
       await widget.settingsHandler.getBooru();
     }
     print(searchGlobals[globalsIndex].toString());
@@ -411,6 +421,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
     if (widget.searchGlobals.booruHandler.booru.type == "Szurubooru" && widget.searchGlobals.booruHandler.booru.apiKey != "" && widget.searchGlobals.booruHandler.booru.userID != ""){
+      widget.searchGlobals.booruHandler.tagSearchEnabled = true;
+    } else if (widget.searchGlobals.booruHandler.booru.type == "Shimmie" && widget.searchGlobals.booruHandler.booru.baseURL.contains("rule34.paheal.net")){
       widget.searchGlobals.booruHandler.tagSearchEnabled = true;
     }
     if (widget.searchGlobals.booruHandler.tagSearchEnabled){
@@ -531,8 +543,12 @@ class Images extends StatefulWidget {
 class _ImagesState extends State<Images> {
   ScrollController gridController = ScrollController();
   @override
-  void initState(){
-        setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
+  void initState() {
+    // Stops previous pages being forgotten when switching tabs
+    if (widget.searchGlobals.booruHandler != null) {
+    } else {
+      setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
+    }
   }
 
 
@@ -559,7 +575,7 @@ class _ImagesState extends State<Images> {
               * thumbnails in a row of the grid depending on screen orientation
               */
             int columnsCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns;
-
+            print(widget.searchGlobals.booruHandler.fetched.elementAt(0).fileURL);
             // A notification listener is used to get the scroll position
             return new NotificationListener<ScrollUpdateNotification>(
             child: Scrollbar( // TO DO: Make it draggable
@@ -641,7 +657,6 @@ class _ImagesState extends State<Images> {
   Widget sampleorThumb(BooruItem item, int columnCount){
     final List<String> thumbExts = ['webm', 'mp4', 'gif'];
     final bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || thumbExts.any((val) => item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == val);
-
     return Image.network(
       isThumb ? item.thumbnailURL : item.sampleURL,
       fit: BoxFit.cover,

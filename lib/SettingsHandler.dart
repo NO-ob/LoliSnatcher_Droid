@@ -11,7 +11,7 @@ import 'dart:io' show Platform;
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
-  String defTags = "rating:safe",previewMode = "Sample";
+  String defTags = "rating:safe",previewMode = "Sample",prefBooru = "";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
   List<Booru> booruList = new List<Booru>();
   var path = "";
@@ -39,61 +39,70 @@ class SettingsHandler {
     }
     //await getBooru();
     File settingsFile = new File(path+"settings.conf");
-    List<String> settings = settingsFile.readAsLinesSync();
-    for (int i=0;i < settings.length; i++){
-      switch(settings[i].split(" = ")[0]){
-        case("Default Tags"):
-          if (settings[i].split(" = ").length > 1){
-            defTags = settings[i].split(" = ")[1];
-            print("Found Default Tags " + settings[i].split(" = ")[1]);
-          }
-          break;
-        case("Limit"):
-          if (settings[i].split(" = ").length > 1){
-            limit = int.parse(settings[i].split(" = ")[1]);
-            print("Found Limit " + settings[i].split(" = ")[1] );
-          }
-          break;
-        case("Preview Mode"):
-          if (settings[i].split(" = ").length > 1){
-            previewMode = settings[i].split(" = ")[1];
-            print("Found Preview Mode " + settings[i].split(" = ")[1] );
-          }
-          break;
-        case("Portrait Columns"):
-          if (settings[i].split(" = ").length > 1){
-            portraitColumns = int.parse(settings[i].split(" = ")[1]);
-            print("Found Portrait Columns " + settings[i].split(" = ")[1] );
-          }
-          break;
-        case("Landscape Columns"):
-          if (settings[i].split(" = ").length > 1){
-            landscapeColumns = int.parse(settings[i].split(" = ")[1]);
-            print("Found Landscape Columns " + settings[i].split(" = ")[1] );
-          }
-          break;
-        case("Preload Count"):
-          if (settings[i].split(" = ").length > 1){
-            preloadCount = int.parse(settings[i].split(" = ")[1]);
-            print("Found Preload Count " + settings[i].split(" = ")[1] );
-          }
-          break;
-        case("Write Json"):
-          if (settings[i].split(" = ").length > 1){
-            if (settings[i].split(" = ")[1] == "true"){
-              jsonWrite = true;
-            } else {
-              jsonWrite = false;
+    if (settingsFile.existsSync()){
+      List<String> settings = settingsFile.readAsLinesSync();
+      for (int i=0;i < settings.length; i++){
+        switch(settings[i].split(" = ")[0]){
+          case("Default Tags"):
+            if (settings[i].split(" = ").length > 1){
+              defTags = settings[i].split(" = ")[1];
+              print("Found Default Tags " + settings[i].split(" = ")[1]);
             }
-            print("Found jsonWrite " + settings[i].split(" = ")[1] );
-          }
-          break;
+            break;
+          case("Limit"):
+            if (settings[i].split(" = ").length > 1){
+              limit = int.parse(settings[i].split(" = ")[1]);
+              print("Found Limit " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Preview Mode"):
+            if (settings[i].split(" = ").length > 1){
+              previewMode = settings[i].split(" = ")[1];
+              print("Found Preview Mode " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Portrait Columns"):
+            if (settings[i].split(" = ").length > 1){
+              portraitColumns = int.parse(settings[i].split(" = ")[1]);
+              print("Found Portrait Columns " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Landscape Columns"):
+            if (settings[i].split(" = ").length > 1){
+              landscapeColumns = int.parse(settings[i].split(" = ")[1]);
+              print("Found Landscape Columns " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Preload Count"):
+            if (settings[i].split(" = ").length > 1){
+              preloadCount = int.parse(settings[i].split(" = ")[1]);
+              print("Found Preload Count " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Write Json"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                jsonWrite = true;
+              } else {
+                jsonWrite = false;
+              }
+              print("Found jsonWrite " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Pref Booru"):
+            if (settings[i].split(" = ").length > 1){
+              prefBooru = settings[i].split(" = ")[1];
+              print("Found Pref Booru " + settings[i].split(" = ")[1] );
+            }
+            break;
+        }
       }
     }
+
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -124,12 +133,17 @@ class SettingsHandler {
     this.preloadCount = int.parse(preloadCount);
     writer.write("Write Json = $jsonWrite\n");
     this.jsonWrite = jsonWrite;
+    writer.write("Pref Booru = $prefBooru\n");
+    this.prefBooru = prefBooru;
     writer.close();
     await this.loadSettings();
+    await getBooru();
     Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
   Future getBooru() async{
     booruList = new List<Booru>();
+    print("in getBooru");
+    int prefIndex = 0;
     try {
       if (path == ""){
         path = await getExtDir();
@@ -141,8 +155,20 @@ class SettingsHandler {
           if (files[i].path.contains(".booru")) {
             print(files[i].toString());
             booruList.add(Booru.fromFile(files[i]));
-            print(booruList);
           }
+        }
+      }
+      if (prefBooru != ""){
+        int prefIndex = booruList.indexWhere((booru)=>booru.name == prefBooru);
+        if (prefIndex != 0){
+          print("Booru pref found in booruList");
+          Booru tmp = booruList.elementAt(0);
+          Booru tmp2 = booruList.elementAt(prefIndex);
+          booruList.remove(tmp);
+          booruList.remove(tmp2);
+          booruList.insert(0, tmp2);
+          booruList.insert(prefIndex, tmp);
+          print(booruList);
         }
       }
     } catch (e){

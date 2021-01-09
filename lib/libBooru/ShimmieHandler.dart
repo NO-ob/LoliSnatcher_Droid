@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
@@ -12,7 +14,6 @@ class ShimmieHandler extends BooruHandler{
   bool tagSearchEnabled = false;
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
-
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
@@ -80,12 +81,28 @@ class ShimmieHandler extends BooruHandler{
 
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
+    if (booru.baseURL.contains("rule34.paheal.net")){
+      return "${booru.baseURL}/api/internal/autocomplete?s=$input&limit=5";
+    } else {
+      return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
+    }
   }
   //No api documentation on finding tags
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = new List();
+    String url = makeTagURL(input);
+    print("shimmie tag search");
+    try {
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(new RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
+      }
+    } catch(e) {
+      print(e);
+    }
+    print(searchTags.length);
     return searchTags;
   }
 }
