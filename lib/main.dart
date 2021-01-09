@@ -10,6 +10,7 @@ import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
 import 'libBooru/SzurubooruHandler.dart';
+import 'libBooru/HydrusHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/SankakuHandler.dart';
 import 'libBooru/Booru.dart';
@@ -527,6 +528,10 @@ void setBooruHandler(SearchGlobals searchGlobals, int limit){
     case("Sankaku"):
       searchGlobals.pageNum = 1;
       searchGlobals.booruHandler = new SankakuHandler(searchGlobals.selectedBooru, limit);
+      break;
+    case("Hydrus"):
+      searchGlobals.pageNum = 1;
+      searchGlobals.booruHandler = new HydrusHandler(searchGlobals.selectedBooru, limit);
       break;
   }
 

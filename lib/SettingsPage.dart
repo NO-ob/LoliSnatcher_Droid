@@ -4,6 +4,7 @@ import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
 import 'libBooru/ShimmieHandler.dart';
+import 'libBooru/HydrusHandler.dart';
 import 'libBooru/SankakuHandler.dart';
 import 'libBooru/BooruHandler.dart';
 import 'libBooru/BooruItem.dart';
@@ -340,7 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Text("Save"),
               ),
             ),
-            Container(
+           /* Container(
               alignment: Alignment.center,
               child: FlatButton(
                 shape: RoundedRectangleBorder(
@@ -351,7 +352,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 },
                 child: Text("Save Location"),
               ),
-            ),
+            ),*/
           ],
         ),
       ),
@@ -413,6 +414,8 @@ class _booruEditState extends State<booruEdit> {
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
+  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus"];
+  String selectedBooruType = "Not Sure";
   @override
   void initState() {
     //Load settings from the Booru instance parsed to the widget and populate the text fields
@@ -423,6 +426,7 @@ class _booruEditState extends State<booruEdit> {
       booruAPIKeyController.text = widget.booru.apiKey;
       booruUserIDController.text = widget.booru.userID;
       booruDefTagsController.text = widget.booru.defTags;
+      selectedBooruType = widget.booru.type;
     }
     super.initState();
   }
@@ -460,7 +464,7 @@ class _booruEditState extends State<booruEdit> {
                       } else {
                         testBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
                       }
-                      String booruType = await booruTest(testBooru);
+                      String booruType = await booruTest(testBooru, selectedBooruType, booruTypes);
                       if(booruFaviconController.text == ""){
                         booruFaviconController.text = booruURLController.text + "/favicon.ico";
                       }
@@ -468,11 +472,12 @@ class _booruEditState extends State<booruEdit> {
                       if(booruType != ""){
                         setState((){
                           widget.booruType = booruType;
+                          selectedBooruType = booruType;
                         });
                         // Alert user about the results of the test
                         Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                       } else {
-                        Get.snackbar("No Data Returned","the Booru may not allow api access or the URL is incorrect ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                        Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                       }
                     },
                     child: Text("Test"),
@@ -533,6 +538,36 @@ class _booruEditState extends State<booruEdit> {
                 ],
               ),
             ),
+
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Booru Type : "),
+                  Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: DropdownButton<String>(
+                        value: selectedBooruType,
+                        icon: Icon(Icons.arrow_downward),
+                        onChanged: (String newValue) {
+                          setState(() {
+                            selectedBooruType = newValue;
+                          });
+                        },
+                        items: booruTypes.map<DropdownMenuItem<String>>((String value){
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                ],
+              ),
+            ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
@@ -589,6 +624,32 @@ class _booruEditState extends State<booruEdit> {
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
               child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
+            ),
+            FlatButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: new BorderRadius.circular(20),
+                side: BorderSide(color: Theme.of(context).accentColor),
+              ),
+              onPressed: () async{
+                if (selectedBooruType == "Hydrus"){
+                  HydrusHandler hydrus = new HydrusHandler(new Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
+                  String accessKey = await hydrus.getAccessKey();
+                  if (accessKey != ""){
+                    Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                    booruAPIKeyController.text = accessKey;
+                  } else {
+                    Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                  }
+                } else {
+                  Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                }
+              },
+              child: Text("Get Hydrus Api Key"),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              width: double.infinity,
+              child: Text("To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request"),
             ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
@@ -697,73 +758,61 @@ class _booruEditState extends State<booruEdit> {
    * if the searches return null each time it tries the search it uses a different
    * type of BooruHandler
    */
-  Future<String> booruTest(Booru booru) async{
+  Future<String> booruTest(Booru booru, String userBooruType, List<String> booruTypes) async{
     String booruType = "";
-    BooruHandler test = new GelbooruHandler(booru, 5);
-    List<BooruItem> testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0){
-        booruType = "Gelbooru";
-        print("Found Results as Gelbooru");
-        return booruType;
-      }
+    BooruHandler test;
+    List<BooruItem> testFetched;
+    switch(userBooruType){
+      case("Moebooru"):
+        test = new MoebooruHandler(booru, 5);
+        testFetched = await test.Search(" ", 1);
+        break;
+      case("Gelbooru"):
+        test = new GelbooruHandler(booru, 5);
+        testFetched = await test.Search(" ", 1);
+        break;
+      case("Danbooru"):
+        test = new DanbooruHandler(booru, 5);
+        testFetched = await test.Search(" ", 1);
+        break;
+      case("e621"):
+        test = new e621Handler(booru, 5);
+        testFetched = await test.Search(" ", 1);
+        break;
+      case("Shimmie"):
+        test = new ShimmieHandler(booru, 5);
+        testFetched = await test.Search(" ", 1);
+        break;
+      case("Philomena"):
+        test = new PhilomenaHandler(booru, 5);
+        testFetched = await test.Search("solo", 1);
+        break;
+      case("Szurubooru"):
+        test = new SzurubooruHandler(booru, 5);
+        testFetched = await test.Search("*", 1);
+        break;
+      case("Sankaku"):
+        test = new SankakuHandler(booru, 5);
+        testFetched = await test.Search("", 1);
+      break;
+      case("Hydrus"):
+        test = new HydrusHandler(booru, 5);
+        testFetched = await test.Search("", 1);
+        break;
+      case("Not Sure"):
+        for(int i = 1; i < booruTypes.length; i++){
+          if (booruType == ""){
+            booruType = await booruTest(booru, booruTypes.elementAt(i), booruTypes);
+          }
+        }
     }
-    test = new MoebooruHandler(booru, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Moebooru";
-        print("Found Results as Moebooru");
-        return booruType;
-      }
-    }
-    test = new DanbooruHandler(booru, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Danbooru";
-        print("Found Results as Danbooru");
-      }
-    }
-    test = new e621Handler(booru, 5);
-    testFetched = await test.Search(" ", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "e621";
-        print("Found Results as e621");
-      }
-    }
-    test = new ShimmieHandler(booru, 5);
-    testFetched = await test.Search(" ", 1);
-    print(testFetched);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Shimmie";
-        print("Found Results as Shimmie");
-      }
-    }
-    test = new PhilomenaHandler(booru, 5);
-    testFetched = await test.Search("solo", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Philomena";
-        print("Found Results as Philomena");
-      }
-    }
-    test = new SzurubooruHandler(booru, 5);
-    testFetched = await test.Search("*", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Szurubooru";
-        print("Found Results as Szurubooru");
-      }
-    }
-    test = new SankakuHandler(booru, 5);
-    testFetched = await test.Search("", 1);
-    if (testFetched != null) {
-      if (testFetched.length > 0) {
-        booruType = "Sankaku";
-        print("Found Results as Sankaku");
+    if (booruType == "") {
+      if (testFetched != null) {
+        if (testFetched.length > 0) {
+          booruType = userBooruType;
+          print("Found Results as $userBooruType");
+          return booruType;
+        }
       }
     }
     // This can return anything it's needed for the future builder.

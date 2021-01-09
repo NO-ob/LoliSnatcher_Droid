@@ -39,7 +39,7 @@ class AboutPage extends StatelessWidget {
             ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
-              child: Text("A Big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),),
+              child: Text("A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),),
             Container(
               alignment: Alignment.center,
               child: FlatButton(
@@ -53,6 +53,22 @@ class AboutPage extends StatelessWidget {
                 child: Text("Showers-U - Pixiv"),
               ),
             ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              child: Text("A big thanks to NANI-SORE for fixing a bunch of bugs and adding some needed features"),),
+            Container(
+              alignment: Alignment.center,
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Theme.of(context).accentColor,),
+                ),
+                onPressed: (){
+                  _launchURL("https://github.com/NANI-SORE");
+                },
+                child: Text("NANI-SORE - Github"),
+              ),
+            )
           ],
         ),
       ),
