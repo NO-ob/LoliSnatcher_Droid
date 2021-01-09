@@ -11,49 +11,20 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 
 
 ## To Do
-- [x] Search and retrieve data from gelbooru
-- [x] View image previews
-- [x] Load new image previews on scroll
-- [x] View full sized image in an intent
-- [x] Add Open in browser button to gallery
-- [x] Batch download Images from gelbooru
-- [x] Add support for danbooru
-- [x] Add settings
-    - [x] Amount of images to fetch in one go
-    - [x] More boorus
-    - [x] Timeout between Snatching
-    - [x] Default Tags
+
     - [ ] Custom File Names
-- [x] Tidy UI
-    - [x] Drawer
-    - [x] Add Tablet / Widescreen mode (Drawer always open, no top bar)
-    - [x] Settings and Snatcher Pages
-- [ ] More Booru
-    - [x] Shimmie - https://rule34.paheal.net/
-    - [x] Philomena - https://derpibooru.org/
-    - [x] Szurubooru
-    - [ ] Danbooru Gold links - https://github.com/friendlyanon/decensooru/tree/master/batches
-- [x] Tags
-    - [x] View Tags in popup
-    - [x] Add a tag to current search
-    - [x] Add a tag to new search
+    - [ ] Remember tabs
 - [ ] UI Extra
-    - [x] Add Tabs/ Multiple Different Searches
     - [ ] Add buttons for ratings instead of typing it
     - [ ] Add save location functionality
-    - [x] Make new boorus show without restarting
-    - [ ] Make more images load when reaching end of scrolling in full view
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
-    - [x] Booru delete button
-    - [ ] Use stream builders when writing iamge to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
+    - [ ] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
 - [ ] Favourites
     - [ ] Add favourites storing
     - [ ] Implement importing from animeboxes
 - [ ] Bugs
-    - [x] Zoomed image breaks scrolling in full view (I think this only happens when the next image is not loaded so preloading may fix it)
-    - [x] pressing save twice creates 2 copies of the same booru
     - [ ] previous and last image can overlap each other
-    - [ ] zooming in can crash the app
+    - [ ] Hydrus video support
 
 
 
