@@ -32,6 +32,7 @@ class GelbooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
+      int length = fetched.length;
       final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.6.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
@@ -42,7 +43,7 @@ class GelbooruHandler extends BooruHandler{
          */
         var posts = parsedResponse.findAllElements('post');
         // Create a BooruItem for each post in the list
-        for (int i =0; i < posts.length; i++){
+        for (int i = 0; i < posts.length; i++){
           var current = posts.elementAt(i);
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
@@ -50,6 +51,7 @@ class GelbooruHandler extends BooruHandler{
           fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("sample_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id"))));
         }
         prevTags = tags;
+        if (fetched.length == length){locked = true;}
         return fetched;
       }
     } catch(e) {

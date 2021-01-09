@@ -18,6 +18,7 @@ class SzurubooruHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -59,6 +60,7 @@ class SzurubooruHandler extends BooruHandler{
           fetched.add(new BooruItem("${booru.baseURL}/"+current['contentUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],tags,makePostURL(current['id'].toString())));
         }
         prevTags = tags;
+        if (fetched.length == length){locked = true;}
         return fetched;
       }
     } catch(e) {

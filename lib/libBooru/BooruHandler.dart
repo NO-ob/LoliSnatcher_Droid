@@ -4,6 +4,7 @@ abstract class BooruHandler {
   int pageNum;
   int limit = 20;
   String prevTags = "";
+  bool locked = false;
   Booru booru;
   List<BooruItem> fetched;
   bool tagSearchEnabled = true;

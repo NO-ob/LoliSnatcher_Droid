@@ -16,6 +16,7 @@ class SankakuHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -41,6 +42,7 @@ class SankakuHandler extends BooruHandler{
           fetched.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString())));
         }
         prevTags = tags;
+        if (fetched.length == length){locked = true;}
         return fetched;
       }
     } catch(e) {

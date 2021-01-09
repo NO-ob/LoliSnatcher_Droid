@@ -138,10 +138,13 @@ class _HomeState extends State<Home> {
                           onPressed: () {
                             if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
                               searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
-                              setState((){
-                                searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
-                              });
                             }
+                            setState((){
+                              if(searchTagsController.text.contains("loli")){
+                                Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                              }
+                              searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
+                            });
                             // Setstate and update the tags variable so the widget rebuilds with the new tags
 
                           },
@@ -575,7 +578,6 @@ class _ImagesState extends State<Images> {
               * thumbnails in a row of the grid depending on screen orientation
               */
             int columnsCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns;
-            print(widget.searchGlobals.booruHandler.fetched.elementAt(0).fileURL);
             // A notification listener is used to get the scroll position
             return new NotificationListener<ScrollUpdateNotification>(
             child: Scrollbar( // TO DO: Make it draggable
@@ -638,10 +640,14 @@ class _ImagesState extends State<Images> {
               if((isNotAtStart || !isScreenFilled) && isAtEdge){
                 // bug: if scrolled again after new page started loading - triggers multiple page loads
                 // bug: endlessly triggers new page loads when reached last page
-                setState((){
-                  widget.searchGlobals.pageNum++;
-                });
+                if (!widget.searchGlobals.booruHandler.locked){
+                  setState((){
+                      widget.searchGlobals.pageNum++;
+                  });
                 Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                } else {
+                  Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                }
               }
             },
           );
