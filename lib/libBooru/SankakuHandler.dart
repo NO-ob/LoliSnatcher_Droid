@@ -10,6 +10,7 @@ class SankakuHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
   SankakuHandler(Booru booru,int limit) : super(booru,limit);
   bool tagSearchEnabled = true;
+  String authToken = '';
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
@@ -27,7 +28,23 @@ class SankakuHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"});
+      if(authToken == '' && booru.userID != '' && booru.apiKey != '') {
+        authToken = await getAuthToken();
+      }
+      Map<String,String> headers = authToken == ''
+      ? {
+        "Content-Type":"application/json",
+        "Accept": "application/json",
+        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"
+      }
+      : {
+        "Content-Type":"application/json",
+        "Accept": "application/json",
+        "Authorization": authToken,
+        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"
+      };
+
+      final response = await http.get(url, headers: headers);
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
@@ -44,6 +61,8 @@ class SankakuHandler extends BooruHandler{
         prevTags = tags;
         if (fetched.length == length){locked = true;}
         return fetched;
+      } else {
+        print('Sankaku load fail ${response.statusCode}');
       }
     } catch(e) {
       print(e);
@@ -58,10 +77,34 @@ class SankakuHandler extends BooruHandler{
   // This will create a url for the http request
   String makeURL(String tags){
     return "${booru.baseURL}/posts?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+  }
+
+  // This will fetch authToken on the first load
+  Future<String> getAuthToken() async {
+    String token = '';
+    final response = await http.post(
+      '${booru.baseURL}/auth/token?lang=english',
+      headers: {'Content-Type': 'application/json', "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"},
+      body: jsonEncode({'login': booru.userID, 'password': booru.apiKey}),
+      encoding: Encoding.getByName("utf-8"),
+    );
+
+    if (response.statusCode == 200) {
+      var parsedResponse = jsonDecode(response.body);
+      if(parsedResponse['success']) {
+        print('Sankaku auth token loaded');
+        token = '${parsedResponse['token_type']} ${parsedResponse['access_token']}';
+      }
+    }
+    if(token == '') {
+      print('Sankaku auth error');
+      print(response.statusCode);
     }
 
+    return token;
+  }
+
   String makeTagURL(String input){
-    https://capi-v2.sankakucomplex.com/tags?name=cum_in
     return "${booru.baseURL}/tags?name=$input&limit=5";
   }
   @override
@@ -73,7 +116,7 @@ class SankakuHandler extends BooruHandler{
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
-        print(parsedResponse);
+        // print(parsedResponse);
         if (parsedResponse.length > 0){
           for (int i=0; i < parsedResponse.length; i++){
             searchTags.add(parsedResponse[i]['name']);
