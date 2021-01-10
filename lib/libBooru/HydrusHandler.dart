@@ -40,6 +40,9 @@ class HydrusHandler extends BooruHandler{
     if (_fileIDs == null) {
       try {
         final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+        //print("----------------Hydrus Search----------------------");
+        //print("Search url: " + url);
+        //print("Status code: " + response.statusCode.toString());
         if (response.statusCode == 200) {
           Map<String, dynamic> parsedResponse = jsonDecode(response.body);
           if (parsedResponse['file_ids'] != null) {
@@ -74,15 +77,17 @@ class HydrusHandler extends BooruHandler{
           fileIDString += ']';
           print(fileIDString);
           String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
-          print(url);
           final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+          //print("----------------Hydrus Search----------------------");
+          //print("Metadata url: " + url);
+          //print("Status code: " + response.statusCode.toString());
           if (response.statusCode == 200) {
             var parsedResponse = jsonDecode(response.body);
             for (int i = 0; i < parsedResponse['metadata'].length; i++){
               if (!parsedResponse['metadata'][i]['mime'].toString().contains("video")){
                 List<String> tagList = new List();
-                for (int x = 0; x < parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['my tags']['0'].length; x++){
-                  tagList.add(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['my tags']['0'][x].toString());
+                for (int x = 0; x < parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'].length; x++){
+                  tagList.add(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'][x].toString());
                 }
                 fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL"));
               } else {
