@@ -15,6 +15,7 @@ import 'Booru.dart';
 class HydrusHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
   bool tagSearchEnabled = false;
+  var _fileIDs;
   // Dart constructors are weird so it has to call super with the args
   HydrusHandler(Booru booru,int limit): super(booru,limit);
 
@@ -23,54 +24,83 @@ class HydrusHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    if (limit > 20){this.limit = 20;}
     if(this.pageNum == pageNum){
       return fetched;
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
+      print("maknig new fetched list");
       fetched = new List();
+      prevTags = tags;
     }
     String url = makeURL(tags);
     print(url);
-    try {
-      int length = fetched.length;
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
-      // 200 is the success http response code
-      if (response.statusCode == 200) {
-        Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        if (parsedResponse['file_ids'] != null) {
-          try {
-            url = "${booru.baseURL}/get_files/file_metadata?file_ids=${jsonEncode(parsedResponse['file_ids'])}";
-            final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
-            if (response.statusCode == 200) {
-              parsedResponse = jsonDecode(response.body);
-              print(parsedResponse['metadata']);
-              for (int i = 0; i < parsedResponse['metadata'].length; i++){
-                if (!parsedResponse['metadata'][i]['mime'].toString().contains("video")){
-                  List<String> tagList = new List();
-                  for (int x = 0; x < parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['my tags']['0'].length; x++){
-                    tagList.add(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['my tags']['0'][x].toString());
-                  }
-                  fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL"));
-                } else {
-                }
-                //print(fetched.elementAt(0).toJSON());
-              }
-            }
-          }catch(e){
 
+    if (_fileIDs == null) {
+      try {
+        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+        if (response.statusCode == 200) {
+          Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+          if (parsedResponse['file_ids'] != null) {
+            _fileIDs = parsedResponse['file_ids'];
+            return await getResultsPage(pageNum);
           }
+          prevTags = tags;
+          return fetched;
         }
-        prevTags = tags;
-        locked = true;
+      } catch(e) {
+        print(e);
         return fetched;
       }
-    } catch(e) {
-      print(e);
+    } else {
+      return await getResultsPage(pageNum);
+    }
+    }
+
+    Future getResultsPage(pageNum) async{
+      try {
+        int pageMax = (_fileIDs.length > limit ? (_fileIDs.length / limit).ceil() : 1);
+        if (pageNum >= pageMax){
+          locked = true;
+        } else {
+          int lowerBound = ((pageNum < 1) ? 0 : pageNum * limit);
+          int upperBound = (pageNum + 1< pageMax) ? (lowerBound + limit) : _fileIDs.length;
+          String fileIDString = '[';
+          for (int i = lowerBound; i < upperBound ; i++){
+            fileIDString += _fileIDs[i].toString();
+            if(i != upperBound - 1) {fileIDString +=',';}
+          }
+          fileIDString += ']';
+          print(fileIDString);
+          String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
+          print(url);
+          final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+          if (response.statusCode == 200) {
+            var parsedResponse = jsonDecode(response.body);
+            for (int i = 0; i < parsedResponse['metadata'].length; i++){
+              if (!parsedResponse['metadata'][i]['mime'].toString().contains("video")){
+                List<String> tagList = new List();
+                for (int x = 0; x < parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['my tags']['0'].length; x++){
+                  tagList.add(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['my tags']['0'][x].toString());
+                }
+                fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL"));
+              } else {
+
+              }
+            }
+            return fetched;
+          } else {
+            print("Getting metadata failed");
+          }
+        }
+      }catch(e){
+        print("Except caught when fetching metadata");
+        print(e);
+      }
       return fetched;
     }
 
-    }
     Future getAccessKey() async{
       String url = "${booru.baseURL}/request_new_permissions?name=LoliSnatcher&basic_permissions=[3]";
       try {
@@ -84,6 +114,7 @@ class HydrusHandler extends BooruHandler{
       }
       return "";
     }
+
     // This will create a url for the http request
     String makeURL(String tags){
       String tag;

@@ -530,7 +530,7 @@ void setBooruHandler(SearchGlobals searchGlobals, int limit){
       searchGlobals.booruHandler = new SankakuHandler(searchGlobals.selectedBooru, limit);
       break;
     case("Hydrus"):
-      searchGlobals.pageNum = 1;
+      searchGlobals.pageNum = 0;
       searchGlobals.booruHandler = new HydrusHandler(searchGlobals.selectedBooru, limit);
       break;
   }
