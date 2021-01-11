@@ -31,9 +31,9 @@ class SzurubooruHandler extends BooruHandler{
     try {
       var response;
       if(booru.apiKey != "") {
-         response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.7.0", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))});
+         response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))});
       } else {
-         response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.7.0"});
+         response = await http.get(url,headers: {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       }
 
       // 200 is the success http response code
@@ -86,7 +86,7 @@ class SzurubooruHandler extends BooruHandler{
     List<String> searchTags = new List();
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.7.0", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))});
+      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))});
       print(response.body);
       // 200 is the success http response code
       if (response.statusCode == 200) {

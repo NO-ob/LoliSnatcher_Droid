@@ -27,7 +27,7 @@ class e621Handler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -79,7 +79,7 @@ class e621Handler extends BooruHandler{
     List<String> searchTags = new List();
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);

@@ -39,7 +39,7 @@ class HydrusHandler extends BooruHandler{
 
     if (_fileIDs == null) {
       try {
-        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey});
         //print("----------------Hydrus Search----------------------");
         //print("Search url: " + url);
         //print("Status code: " + response.statusCode.toString());
@@ -78,7 +78,7 @@ class HydrusHandler extends BooruHandler{
           fileIDString += ']';
           print(fileIDString);
           String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
-          final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+          final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey});
           //print("----------------Hydrus Search----------------------");
           //print("Metadata url: " + url);
           //print("Status code: " + response.statusCode.toString());
@@ -109,7 +109,7 @@ class HydrusHandler extends BooruHandler{
     Future getAccessKey() async{
       String url = "${booru.baseURL}/request_new_permissions?name=LoliSnatcher&basic_permissions=[3]";
       try {
-        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0","Hydrus-Client-API-Access-Key" : booru.apiKey});
+        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey});
         if (response.statusCode == 200) {
           var parsedResponse = jsonDecode(response.body);
           return parsedResponse['access_key'].toString();

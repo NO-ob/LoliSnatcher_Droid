@@ -30,7 +30,7 @@ class DanbooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      final response = await http.get(url, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);
         var posts = parsedResponse.findAllElements('post');
@@ -92,7 +92,7 @@ class DanbooruHandler extends BooruHandler{
     List<String> searchTags = new List();
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/1.6.0"});
+      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);

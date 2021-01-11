@@ -96,7 +96,7 @@ class ShimmieHandler extends BooruHandler{
     String url = makeTagURL(input);
     print("shimmie tag search");
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/1.7.0"});
+      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(new RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
