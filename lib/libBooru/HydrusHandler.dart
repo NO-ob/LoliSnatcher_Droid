@@ -86,17 +86,13 @@ class HydrusHandler extends BooruHandler{
           if (response.statusCode == 200) {
             var parsedResponse = jsonDecode(response.body);
             for (int i = 0; i < parsedResponse['metadata'].length; i++){
-              if (!parsedResponse['metadata'][i]['mime'].toString().contains("video")){
                 List<String> tagList = new List();
                 //print(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']);
                 var responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'];
                 for (int x = 0; x < responseTags.length; x++){
                   tagList.add(responseTags[x].toString());
                 }
-                fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL"));
-              } else {
-
-              }
+                fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL", parsedResponse['metadata'][i]['ext'].toString().substring(1)));
             }
             return fetched;
           } else {
@@ -135,7 +131,7 @@ class HydrusHandler extends BooruHandler{
       } else {
         tag = "[${jsonEncode(tags)}]";
       }
-      return "${booru.baseURL}/get_files/search_files?system_archive=true&tags=$tag";
+      return "${booru.baseURL}/get_files/search_files?system_inbox=true&system_archive=true&tags=$tag";
     }
     String makeTagURL(String input){
       return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";

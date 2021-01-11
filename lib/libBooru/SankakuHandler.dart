@@ -56,7 +56,7 @@ class SankakuHandler extends BooruHandler{
             tags.add(current['tags'][x]['name'].toString());
           }
 
-          fetched.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString())));
+          fetched.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString()),current['file_url']));
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}

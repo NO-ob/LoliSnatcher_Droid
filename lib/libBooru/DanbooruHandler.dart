@@ -57,7 +57,10 @@ class DanbooruHandler extends BooruHandler{
                 , makePostURL(current
                 .findElements("id")
                 .elementAt(0)
-                .text)));
+                .text),getFileExt(current
+                    .findElements("file-url")
+                    .elementAt(0)
+                    .text)));
           }
         }
         prevTags = tags;

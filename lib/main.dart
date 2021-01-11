@@ -683,8 +683,7 @@ class _ImagesState extends State<Images> {
    *
    */
   Widget sampleorThumb(BooruItem item, int columnCount){
-    String itemExt = item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1);
-    List<dynamic> itemType = getFileTypeAndIcon(itemExt);
+    List<dynamic> itemType = getFileTypeAndIcon(item.fileExt);
     bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || (itemType[0] == 'gif' || itemType[0] == 'video');
     return Stack(
       alignment: Alignment.center,
@@ -909,7 +908,7 @@ class _ImagePageState extends State<ImagePage>{
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             String fileURL = widget.fetched[index].fileURL;
-            bool isVideo = ['webm', 'mp4'].any((val) => fileURL.substring(fileURL.lastIndexOf(".") + 1).contains(val));
+            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt == val);
             int preloadCount = widget.settingsHandler.preloadCount;
             if (isVideo) {
               return VideoApp(fileURL, index, viewedIndex, preloadCount);

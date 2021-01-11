@@ -1,7 +1,7 @@
 class BooruItem{
-  String fileURL,sampleURL,thumbnailURL,tagString,postURL;
+  String fileURL,sampleURL,thumbnailURL,tagString,postURL,fileExt;
   List tagsList;
-  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL){
+  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL, this.fileExt){
   }
 
   String get file{
@@ -17,7 +17,7 @@ class BooruItem{
     return tagString.split(" ");
   }
   toJSON(){
-    return {'postURL': "$postURL",'fileURL': "$fileURL", 'sampleURL': "$sampleURL", 'thumbnailURL': "$thumbnailURL", 'tags': tagsList};
+    return {'postURL': "$postURL",'fileURL': "$fileURL", 'sampleURL': "$sampleURL", 'thumbnailURL': "$thumbnailURL", 'tags': tagsList, 'fileExt': fileExt};
   }
 }
 

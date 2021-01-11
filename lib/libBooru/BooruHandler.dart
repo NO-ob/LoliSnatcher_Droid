@@ -14,5 +14,8 @@ abstract class BooruHandler {
   List getFetched(){
     return fetched;
   }
+  String getFileExt(fileURL){
+    return fileURL.substring(fileURL.lastIndexOf(".") + 1);
+  }
   tagSearch(String input) {}
 }
