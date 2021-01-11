@@ -11,17 +11,25 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 
 
 ## To Do
-
-    - [ ] Custom File Names
-    - [ ] Remember tabs
+- [ ] Database
+    - [ ] Move to android 11+ file storage
+    - [ ] Plan Database
+    - [ ] Migrate settings to database
+    - [ ] Migrate booruconfigs to database
+    - [ ] Make app build a database with default settings on first launch after getting write perms
+- [ ] Search remembering
+    - [ ] Add setting for remembering tabs
+    - [ ] Dump tab searchGlobals to database on search if setting enabled
+- [ ] Favourites
+    - [ ] Add heart icon to thumbnails
+    - [ ] Add function in booruHandlers to check if fileurl is in favourites
+    - [ ] Add heart button to image viewer
+    - [ ] Write/remove data from database when clicked
 - [ ] UI Extra
     - [ ] Add buttons for ratings instead of typing it
     - [ ] Add save location functionality
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
     - [ ] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
-- [ ] Favourites
-    - [ ] Add favourites storing
-    - [ ] Implement importing from animeboxes
 - [ ] Bugs
     - [ ] previous and last image can overlap each other
     - [ ] Hydrus video support
