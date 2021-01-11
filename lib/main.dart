@@ -23,6 +23,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:preload_page_view/preload_page_view.dart';
+import 'package:flutter/cupertino.dart';
 import 'AboutPage.dart';
 import 'getPerms.dart';
 import 'Snatcher.dart';
@@ -550,6 +551,7 @@ class Images extends StatefulWidget {
 
 class _ImagesState extends State<Images> {
   ScrollController gridController = ScrollController();
+  bool isLastPage = false;
   @override
   void initState() {
     // Stops previous pages being forgotten when switching tabs
@@ -650,7 +652,10 @@ class _ImagesState extends State<Images> {
                       widget.searchGlobals.pageNum++;
                   });
                 Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
-                } else {
+                } else if (!isLastPage) {
+                  setState((){
+                    isLastPage = true;
+                  });
                   Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
                 }
               }
@@ -660,17 +665,35 @@ class _ImagesState extends State<Images> {
         });
   }
 
+  List<dynamic> getFileTypeAndIcon(String fileExt) {
+    if(['jpg', 'jpeg', 'png'].any((val) => fileExt.contains(val))) {
+      return ['image', Icons.photo];
+    } else if (['webm', 'mp4'].any((val) => fileExt.contains(val))) {
+      return ['video', CupertinoIcons.videocam_fill];
+    } else if (['gif'].any((val) => fileExt.contains(val))) {
+      return ['gif', CupertinoIcons.play_fill];
+    } else {
+      return ['other', CupertinoIcons.question];
+    }
+  }
+
   /**
    * This will return an Image from the booruItem and will use either the sample url
    * or the thumbnail url depending on the users settings (sampleURL is much higher quality)
    *
    */
   Widget sampleorThumb(BooruItem item, int columnCount){
-    final List<String> thumbExts = ['webm', 'mp4', 'gif'];
-    final bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || thumbExts.any((val) => item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1) == val);
-    return Image.network(
+    String itemExt = item.fileURL.substring(item.fileURL.lastIndexOf(".") + 1);
+    List<dynamic> itemType = getFileTypeAndIcon(itemExt);
+    bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || (itemType[0] == 'gif' || itemType[0] == 'video');
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Image.network(
       isThumb ? item.thumbnailURL : item.sampleURL,
       fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
       loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
         if (loadingProgress == null) {
           return child;
@@ -703,6 +726,23 @@ class _ImagesState extends State<Images> {
           );
         }
       },
+        ),
+        Container(
+          alignment: Alignment.bottomRight,
+          child: Container(
+            padding: EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              // borderRadius: BorderRadius.circular(100)
+            ),
+            child: Icon(
+              itemType[1],
+              color: Colors.white,
+              size: 14,
+            ),
+          ),
+        ),
+      ]
     );
   }
 }
@@ -764,6 +804,16 @@ class _ImagePageState extends State<ImagePage>{
       // print(newValue);
       widget.gridController.jumpTo(scrollToValue);
     }
+  }
+
+  // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
+  static String formatBytes(int bytes, int decimals) {
+    if (bytes <= 0) return "0 B";
+    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    var i = (log(bytes) / log(1024)).floor();
+    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) +
+        ' ' +
+        suffixes[i];
   }
 
   @override
@@ -858,12 +908,13 @@ class _ImagePageState extends State<ImagePage>{
           preloadPagesCount: widget.settingsHandler.preloadCount,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
-            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1) == val);
+            String fileURL = widget.fetched[index].fileURL;
+            bool isVideo = ['webm', 'mp4'].any((val) => fileURL.substring(fileURL.lastIndexOf(".") + 1).contains(val));
             int preloadCount = widget.settingsHandler.preloadCount;
             if (isVideo) {
-              return VideoApp(widget.fetched[index].fileURL, index, viewedIndex, preloadCount);
+              return VideoApp(fileURL, index, viewedIndex, preloadCount);
             } else {
-              print(widget.fetched[index].fileURL);
+              print(fileURL);
               bool isViewed = viewedIndex == index;
               bool isNear = (viewedIndex - index).abs() <= preloadCount;
               // Render only if viewed or in preloadCount range
@@ -876,14 +927,17 @@ class _ImagePageState extends State<ImagePage>{
                     minScale: 0.5,
                     maxScale: 8,
                     child: Image.network(
-                      widget.fetched[index].fileURL,
+                      fileURL,
                       loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
                         if (loadingProgress == null) {
                           return child;
                         } else {
                           bool hasProgressData = loadingProgress.expectedTotalBytes != null;
                           double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
-                          String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'No size data';
+                          String loadedSize = formatBytes(loadingProgress.cumulativeBytesLoaded, 1);
+                          String expectedSize = formatBytes(loadingProgress.expectedTotalBytes, 1);
+                          String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'No size data';
+                          String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -901,6 +955,12 @@ class _ImagePageState extends State<ImagePage>{
                                 percentDoneText,
                                 style: TextStyle(
                                   fontSize: 24,
+                                ),
+                              ),
+                              Text(
+                                filesizeText,
+                                style: TextStyle(
+                                  fontSize: 20,
                                 ),
                               ),
                             ],
@@ -992,6 +1052,7 @@ class _VideoAppState extends State<VideoApp> {
       videoPlayerController: _controller,
       // autoplay is disabled here, because videos started playing randomly, but videos will still autoplay when in view (see isViewed check later)
       autoPlay: false,
+      allowedScreenSleep: false,
       looping: true,
       showControls: true,
       materialProgressColors: ChewieProgressColors(
@@ -1003,6 +1064,14 @@ class _VideoAppState extends State<VideoApp> {
       placeholder: Container(
         color: Colors.black,
       ),
+      errorBuilder: (context, errorMessage) {
+        return Center(
+          child: Text(
+            errorMessage,
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      },
 
       // Specify this to allow any orientation in fullscreen, otherwise it will decide for itself based on video dimensions
       // deviceOrientationsOnEnterFullScreen: [

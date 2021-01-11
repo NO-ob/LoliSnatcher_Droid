@@ -625,7 +625,13 @@ class _booruEditState extends State<booruEdit> {
               width: double.infinity,
               child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
             ),
-            FlatButton(
+            Container(
+              child: Column(
+                children: selectedBooruType == 'Hydrus'
+                ? [
+                  Container(
+                    width: double.infinity,
+                    child: FlatButton(
               shape: RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(20),
                 side: BorderSide(color: Theme.of(context).accentColor),
@@ -646,10 +652,15 @@ class _booruEditState extends State<booruEdit> {
               },
               child: Text("Get Hydrus Api Key"),
             ),
+                  ),
             Container(
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
               child: Text("To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request"),
+            ),
+                ]
+                : []
+              )
             ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
