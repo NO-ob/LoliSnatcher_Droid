@@ -30,7 +30,7 @@ class HydrusHandler extends BooruHandler{
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      print("maknig new fetched list");
+      print("making new fetched list");
       fetched = new List();
       prevTags = tags;
     }
@@ -131,7 +131,7 @@ class HydrusHandler extends BooruHandler{
       } else {
         tag = "[${jsonEncode(tags)}]";
       }
-      return "${booru.baseURL}/get_files/search_files?system_inbox=true&system_archive=true&tags=$tag";
+      return "${booru.baseURL}/get_files/search_files?tags=$tag";
     }
     String makeTagURL(String input){
       return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";

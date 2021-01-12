@@ -32,6 +32,7 @@ import 'SearchGlobals.dart';
 
 void main() {
   runApp(MaterialApp(
+    title: 'LoliSnatcher',
       theme: ThemeData(
         // Define the default brightness and colors.
         brightness: Brightness.dark,
@@ -826,14 +827,14 @@ class _ImagePageState extends State<ImagePage>{
             onPressed: (){
               getPerms();
               // call a function to save the currently viewed image when the save button is pressed
-              writer.write(widget.fetched[controller.page.toInt()],widget.settingsHandler.jsonWrite);
-              Get.snackbar("Snatched ＼(^ o ^)／",widget.fetched[controller.page.toInt()].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+              writer.write(widget.fetched[viewedIndex],widget.settingsHandler.jsonWrite);
+              Get.snackbar("Snatched ＼(^ o ^)／",widget.fetched[viewedIndex].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
             },
           ),
           IconButton(
             icon: Icon(Icons.public),
             onPressed: (){
-              _launchURL(widget.fetched[controller.page.toInt()].postURL);
+              _launchURL(widget.fetched[viewedIndex].postURL);
             },
           ),
           IconButton(
@@ -849,9 +850,9 @@ class _ImagePageState extends State<ImagePage>{
                         child: Container(
                           margin: EdgeInsets.all(5),
                           child: ListView.builder(
-                              itemCount: widget.fetched[controller.page.toInt()].tagsList.length,
+                              itemCount: widget.fetched[viewedIndex].tagsList.length,
                               itemBuilder: (BuildContext context, int index){
-                                String currentTag = widget.fetched[controller.page.toInt()].tagsList[index];
+                                String currentTag = widget.fetched[viewedIndex].tagsList[index];
                                 if(currentTag != '') {
                                   return Column(
                                     children: <Widget>[
@@ -908,12 +909,12 @@ class _ImagePageState extends State<ImagePage>{
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
             String fileURL = widget.fetched[index].fileURL;
-            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt == val);
+            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
             int preloadCount = widget.settingsHandler.preloadCount;
+            print(fileURL);
             if (isVideo) {
               return VideoApp(fileURL, index, viewedIndex, preloadCount);
             } else {
-              print(fileURL);
               bool isViewed = viewedIndex == index;
               bool isNear = (viewedIndex - index).abs() <= preloadCount;
               // Render only if viewed or in preloadCount range
@@ -1033,7 +1034,7 @@ class VideoApp extends StatefulWidget {
 }
 
 class _VideoAppState extends State<VideoApp> {
-  VideoPlayerController _controller;
+  VideoPlayerController _videoController;
   ChewieController _chewieController;
 
   @override
@@ -1043,12 +1044,12 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   Future<void> initPlayer() async {
-    _controller = VideoPlayerController.network(widget.url);
-    await _controller.initialize();
+    _videoController = VideoPlayerController.network(widget.url);
+    await _videoController.initialize();
 
     // Player wrapper to allow controls, looping...
     _chewieController = ChewieController(
-      videoPlayerController: _controller,
+      videoPlayerController: _videoController,
       // autoplay is disabled here, because videos started playing randomly, but videos will still autoplay when in view (see isViewed check later)
       autoPlay: false,
       allowedScreenSleep: false,
@@ -1097,9 +1098,9 @@ class _VideoAppState extends State<VideoApp> {
       vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
       vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
       if (isViewed) {
-        _controller.play();
+        _videoController.play();
       } else {
-        _controller.pause();
+        _videoController.pause();
       }
     }
 
@@ -1134,8 +1135,10 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _videoController.dispose();
+    if(_chewieController != null) {
     _chewieController.dispose();
+    }
     super.dispose();
   }
 }
