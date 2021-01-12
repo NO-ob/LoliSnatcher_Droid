@@ -31,7 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
-  bool jsonWrite = false;
+  bool jsonWrite = false, autoPlay = true;
   Booru selectedBooru;
   String previewMode;
   @override
@@ -49,6 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
     getPerms();
     setState(() {
       jsonWrite = widget.settingsHandler.jsonWrite;
+      autoPlay = widget.settingsHandler.autoPlayEnabled;
     });
   }
 
@@ -225,6 +226,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ],)
             ),
             Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Row(children: [
+                  Text("Video Auto Play: "),
+                  Checkbox(
+                    value: autoPlay,
+                    onChanged: (newValue) {
+                      setState(() {
+                        autoPlay = newValue;
+                      });
+                    },
+                    activeColor: Colors.pink[200],
+                  )
+                ],)
+            ),
+            Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               // This dropdown is used to change the quality of the images displayed on the home page
@@ -336,7 +352,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay);
                 },
                 child: Text("Save"),
               ),

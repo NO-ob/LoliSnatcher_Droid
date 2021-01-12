@@ -913,7 +913,7 @@ class _ImagePageState extends State<ImagePage>{
             int preloadCount = widget.settingsHandler.preloadCount;
             print(fileURL);
             if (isVideo) {
-              return VideoApp(fileURL, index, viewedIndex, preloadCount);
+              return VideoApp(fileURL, index, viewedIndex, preloadCount,widget.settingsHandler);
             } else {
               bool isViewed = viewedIndex == index;
               bool isNear = (viewedIndex - index).abs() <= preloadCount;
@@ -1028,7 +1028,8 @@ class VideoApp extends StatefulWidget {
   final int index;
   final int viewedIndex;
   final int preloadCount;
-  VideoApp(this.url, this.index, this.viewedIndex, this.preloadCount);
+  SettingsHandler settingsHandler;
+  VideoApp(this.url, this.index, this.viewedIndex, this.preloadCount,this.settingsHandler);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
@@ -1097,7 +1098,7 @@ class _VideoAppState extends State<VideoApp> {
     if(initialized) {
       vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
       vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
-      if (isViewed) {
+      if (isViewed && widget.settingsHandler.autoPlayEnabled) {
         _videoController.play();
       } else {
         _videoController.pause();
