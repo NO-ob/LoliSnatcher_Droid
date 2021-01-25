@@ -15,6 +15,7 @@ import 'getPerms.dart';
 import 'SettingsHandler.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 /**
  * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
  */
@@ -264,6 +265,22 @@ class _SettingsPageState extends State<SettingsPage> {
                     }).toList(),
                   ),
                 ],
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.fromLTRB(20,10,20,10),
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Theme.of(context).accentColor),
+                ),
+                onPressed: (){
+                  DefaultCacheManager manager = new DefaultCacheManager();
+                  manager.emptyCache();
+                  Get.snackbar("Thumbnail cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                },
+                child: Text("Clear thumbnail cache"),
               ),
             ),
             Container(
