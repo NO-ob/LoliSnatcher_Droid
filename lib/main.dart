@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
 import 'package:flutter/material.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
@@ -535,6 +536,10 @@ void setBooruHandler(SearchGlobals searchGlobals, int limit){
       searchGlobals.pageNum = 0;
       searchGlobals.booruHandler = new HydrusHandler(searchGlobals.selectedBooru, limit);
       break;
+    case("GelbooruV1"):
+      searchGlobals.pageNum = 0;
+      searchGlobals.booruHandler = new GelbooruV1Handler(searchGlobals.selectedBooru, limit);
+      break;
   }
 
 }
@@ -612,6 +617,7 @@ class _ImagesState extends State<Images> {
                               child: sampleorThumb(snapshot.data[index], columnsCount),
                               onTap: () {
                                 // Load the image viewer
+                                print(snapshot.data[index].fileURL);
                                 Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, gridController, columnsCount));
                               },
                               onLongPress: (){
@@ -834,7 +840,11 @@ class _ImagePageState extends State<ImagePage>{
           IconButton(
             icon: Icon(Icons.public),
             onPressed: (){
-              _launchURL(widget.fetched[viewedIndex].postURL);
+              if (Platform.isAndroid){
+                _launchURL(widget.fetched[viewedIndex].postURL);
+              } else if (Platform.isLinux){
+                Process.run('xdg-open',[widget.fetched[viewedIndex].postURL]);
+              }
             },
           ),
           IconButton(
@@ -926,7 +936,11 @@ class _ImagePageState extends State<ImagePage>{
                     boundaryMargin: EdgeInsets.zero,
                     minScale: 0.5,
                     maxScale: 8,
-                    child: Image.network(
+                    child: widget.settingsHandler.loadingGif ? FadeInImage.assetNetwork(
+                      placeholder: 'assets/images/loading.gif',
+                      image: widget.fetched[index].fileURL,
+                    ) :
+                    Image.network(
                       fileURL,
                       loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
                         if (loadingProgress == null) {
@@ -980,7 +994,6 @@ class _ImagePageState extends State<ImagePage>{
             setState(() {
               viewedIndex = index;
             });
-
             // Scroll to current item in GridView while viewer is open, will also trigger new page loading
             jumpToItem(index);
             // print('Page changed ' + index.toString());
@@ -990,7 +1003,9 @@ class _ImagePageState extends State<ImagePage>{
           controller: controllerLinux,
           scrollDirection: Axis.horizontal,
           itemBuilder: (context, index) {
-            if (widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("webm") || widget.fetched[index].fileURL.substring(widget.fetched[index].fileURL.lastIndexOf(".") + 1).contains("mp4")){
+            String fileURL = widget.fetched[index].fileURL;
+            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
+            if (isVideo){
               return Container(
                 child: Column(
                   children: [
@@ -1003,7 +1018,7 @@ class _ImagePageState extends State<ImagePage>{
                           side: BorderSide(color: Theme.of(context).accentColor),
                         ),
                         onPressed: (){
-                          Process.run('mpv',[widget.fetched[index].fileURL]);
+                          Process.run('mpv',["--loop",fileURL]);
                         },
                         child: Text("Open in MPV"),
                       ),
@@ -1012,7 +1027,7 @@ class _ImagePageState extends State<ImagePage>{
                 ),
               );
             } else {
-              return Image.network(widget.fetched[index].fileURL);
+              return Image.network(fileURL);
             }
           }
       ),

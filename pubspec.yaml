@@ -11,7 +11,7 @@ description: Booru Client with the ability to batch download Images.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.7.1+113
+version: 1.7.2+115
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
@@ -33,7 +33,10 @@ dependencies:
   url_launcher: ^5.5.0
   video_player: 0.11.1+4 # this is the last version without the need to update sdk, was 0.10.11+2
   chewie: ^0.10.4 # last version is 0.12.1+1, but it requires to update sdk, video_player and cupertino_icons
-  preload_page_view: ^0.1.4
+  preload_page_view:
+    git:
+      url: "https://github.com/crtl/preload_page_view.git"
+      ref: "fix-null-check-operators"
   flutter_icons:
 flutter_icons:
   android: "launcher_icon"
