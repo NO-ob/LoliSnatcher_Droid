@@ -47,7 +47,7 @@ class ImageWriter{
       var response = await http.get(fileURL);
       if(cachePath == ""){
         if (Platform.isAndroid){
-          cachePath = await serviceHandler.getCacheDir() + "/thumbnails/";
+          cachePath = await serviceHandler.getCacheDir() + "thumbnails/";
         } else if (Platform.isLinux){
           cachePath = Platform.environment['HOME'] + "/.loliSnatcher/cache/thumbnails/";
         }
@@ -68,7 +68,7 @@ class ImageWriter{
     try {
       if(cachePath == ""){
         if (Platform.isAndroid){
-          cachePath = await serviceHandler.getCacheDir() + "/thumbnails/";
+          cachePath = await serviceHandler.getCacheDir() + "thumbnails/";
         } else if (Platform.isLinux){
           cachePath = Platform.environment['HOME'] + "/.loliSnatcher/cache/thumbnails/";
         }

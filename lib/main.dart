@@ -1027,7 +1027,6 @@ class _MediaViewerState extends State<MediaViewer> {
           String fileURL = widget.settingsHandler.previewMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
           File preview = File(widget.settingsHandler.cachePath + "thumbnails/" + fileURL.substring(fileURL.lastIndexOf("/") + 1));
           print(widget.settingsHandler.cachePath + "thumbnails/" + fileURL.substring(fileURL.lastIndexOf("/") + 1));
-          print("Fading: $percentDone");
           return widget.settingsHandler.loadingGif ?
           Image(image: AssetImage('assets/images/loading.gif')) :
           (preview.existsSync() ?

@@ -46,7 +46,7 @@ class ServiceHandler{
     String result;
     try{
       if (Platform.isAndroid){
-        result = await platform.invokeMethod("getCachePath");
+        result = await platform.invokeMethod("getCachePath") + "/";
       } else if (Platform.isLinux){
         result = Platform.environment['HOME'] + "/.loliSnatcher/cache/";
       }
