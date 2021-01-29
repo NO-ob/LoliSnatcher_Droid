@@ -15,12 +15,11 @@ class SettingsHandler {
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
   List<Booru> booruList = new List<Booru>();
   var path = "";
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false;
   Future writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
     }
-
     if (!File(path+"settings.conf").existsSync()){
       await Directory(path).create(recursive:true);
       File settingsFile = new File(path+"settings.conf");
@@ -109,6 +108,16 @@ class SettingsHandler {
               print("Found Loading gif " + settings[i].split(" = ")[1] );
             }
             break;
+          case("Image Cache"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                imageCache = true;
+              } else {
+                imageCache = false;
+              }
+              print("Found Image Cache " + settings[i].split(" = ")[1] );
+            }
+            break;
           case("Pref Booru"):
             if (settings[i].split(" = ").length > 1){
               prefBooru = settings[i].split(" = ")[1];
@@ -122,7 +131,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -159,6 +168,8 @@ class SettingsHandler {
     this.autoPlayEnabled = autoPlay;
     writer.write("Loading Gif = $loadingGif\n");
     this.loadingGif = loadingGif;
+    writer.write("Image Cache = $imageCache\n");
+    this.imageCache = imageCache;
     writer.close();
     await this.loadSettings();
     await getBooru();

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'ServiceHandler.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
@@ -25,8 +26,7 @@ import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:esys_flutter_share/esys_flutter_share.dart';
+//import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'AboutPage.dart';
@@ -707,7 +707,7 @@ class _ImagesState extends State<Images> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        CachedNetworkImage(
+        widget.settingsHandler.imageCache ? CachedNetworkImage(
           imageUrl: thumbURL,
       fit: BoxFit.cover,
           width: double.infinity,
@@ -740,45 +740,44 @@ class _ImagesState extends State<Images> {
             ],
           );
         }
-        ),
-        // Image.network(
-        //   isThumb ? item.thumbnailURL : item.sampleURL,
-        //   fit: BoxFit.cover,
-        //   width: double.infinity,
-        //   height: double.infinity,
-        //   loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
-        //     if (loadingProgress == null) {
-        //       return child;
-        //     } else {
-        //       bool hasProgressData = loadingProgress.expectedTotalBytes != null;
-        //       double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
-        //       String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'No size data';
-        //       return Column(
-        //         mainAxisAlignment: MainAxisAlignment.center,
-        //         children: [
-        //           SizedBox(
-        //             height: 100 / columnCount,
-        //             width: 100 / columnCount,
-        //             child: CircularProgressIndicator(
-        //               strokeWidth: 16 / columnCount,
-        //               valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
-        //               value: percentDone,
-        //             ),
-        //           ),
-        //           Padding(padding: EdgeInsets.only(bottom: 10)),
-        //           columnCount < 4 // Text element overflows if too many thumbnails are shown
-        //             ? Text(
-        //               percentDoneText,
-        //               style: TextStyle(
-        //                 fontSize: 12,
-        //               ),
-        //             )
-        //             : Container(),
-        //         ],
-        //       );
-        //     }
-        //   },
-        // ),
+        ) : Image.network(
+          thumbURL,
+          fit: BoxFit.cover,
+           width: double.infinity,
+           height: double.infinity,
+           loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
+             if (loadingProgress == null) {
+               return child;
+             } else {
+               bool hasProgressData = loadingProgress.expectedTotalBytes != null;
+               double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
+               String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'Loading...';
+               return Column(
+                 mainAxisAlignment: MainAxisAlignment.center,
+                 children: [
+                   SizedBox(
+                     height: 100 / columnCount,
+                     width: 100 / columnCount,
+                     child: CircularProgressIndicator(
+                       strokeWidth: 16 / columnCount,
+                       valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                       value: percentDone,
+                     ),
+                   ),
+                   Padding(padding: EdgeInsets.only(bottom: 10)),
+                   columnCount < 4 // Text element overflows if too many thumbnails are shown
+                     ? Text(
+                       percentDoneText,
+                       style: TextStyle(
+                         fontSize: 12,
+                       ),
+                     )
+                     : Container(),
+                 ],
+               );
+             }
+           },
+         ),
         Container(
           alignment: Alignment.bottomRight,
           child: Container(
@@ -878,7 +877,8 @@ class _ImagePageState extends State<ImagePage>{
           IconButton(
             icon: Icon(Icons.share),
             onPressed: (){
-              Share.text('', widget.fetched[viewedIndex].fileURL, 'text/text');
+              ServiceHandler serviceHandler = new ServiceHandler();
+              serviceHandler.loadShareIntent(widget.fetched[viewedIndex].fileURL);
             },
           ),
           IconButton(
@@ -977,7 +977,7 @@ class _ImagePageState extends State<ImagePage>{
                 if (isVideo) {
                   return VideoApp(fileURL, index, viewedIndex, widget.settingsHandler);
                         } else {
-                  return MediaViewer(fileURL, index, viewedIndex);
+                  return MediaViewer(fileURL, index, viewedIndex,widget.settingsHandler);
                         }
               } else {
                 return Container(child: Text("You should not see this"));
@@ -1035,7 +1035,8 @@ class MediaViewer extends StatefulWidget {
   final String fileURL;
   final int index;
   final int viewedIndex;
-  MediaViewer(this.fileURL, this.index, this.viewedIndex);
+  SettingsHandler settingsHandler;
+  MediaViewer(this.fileURL, this.index, this.viewedIndex, this.settingsHandler);
 
   @override
   _MediaViewerState createState() => _MediaViewerState();
@@ -1096,7 +1097,9 @@ class _MediaViewerState extends State<MediaViewer> {
           String expectedSize = hasProgressData ? formatBytes(loadingProgress.expectedTotalBytes, 1) : '';
           String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'Loading...';
           String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
-          return Column(
+          return widget.settingsHandler.loadingGif ?
+           Image(image: AssetImage('assets/images/loading.gif')) :
+           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(

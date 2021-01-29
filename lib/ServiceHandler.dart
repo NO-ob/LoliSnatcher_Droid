@@ -22,4 +22,11 @@ class ServiceHandler{
     }
     return result;
   }
+  void loadShareIntent(String fileURL) async{
+    try{
+      await platform.invokeMethod("shareItem",{"fileURL": fileURL});
+    } catch(e){
+      print(e);
+    }
+  }
 }

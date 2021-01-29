@@ -28,6 +28,12 @@ class MainActivity: FlutterActivity() {
                 mediaScannerIntent.data = fileContentUri
                 sendBroadcast(mediaScannerIntent)
                 Log.i("MediaScanner called on ",call.argument("path"));
+            } else if (call.method == "shareItem") {
+                val intent= Intent()
+                intent.action=Intent.ACTION_SEND
+                intent.putExtra(Intent.EXTRA_TEXT,"" + call.argument("fileURL"))
+                intent.type="text/plain"
+                startActivity(Intent.createChooser(intent,"Share To:"))
             }
         }
     }

@@ -33,7 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
-  bool jsonWrite = false, autoPlay = true, loadingGif = false;
+  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false;
   Booru selectedBooru;
   String previewMode;
   @override
@@ -53,6 +53,7 @@ class _SettingsPageState extends State<SettingsPage> {
       jsonWrite = widget.settingsHandler.jsonWrite;
       autoPlay = widget.settingsHandler.autoPlayEnabled;
       loadingGif = widget.settingsHandler.loadingGif;
+      imageCache = widget.settingsHandler.imageCache;
     });
   }
 
@@ -285,6 +286,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Row(children: [
+                  Text("Thumbnail Cache: "),
+                  Checkbox(
+                    value: imageCache,
+                    onChanged: (newValue) {
+                      setState(() {
+                        imageCache = newValue;
+                      });
+                    },
+                    activeColor: Colors.pink[200],
+                  )
+                ],)
+            ),
+            Container(
               alignment: Alignment.centerLeft,
               margin: EdgeInsets.fromLTRB(20,10,20,10),
               child: FlatButton(
@@ -386,7 +402,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache);
                 },
                 child: Text("Save"),
               ),

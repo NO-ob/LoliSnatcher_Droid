@@ -36,7 +36,6 @@ dependencies:
   flutter_cache_manager: ^2.1.1
   video_player: 0.11.1+4 # this is the last version without the need to update sdk, was 0.10.11+2
   chewie: ^0.10.4 # last version is 0.12.1+1, but it requires to update sdk, video_player and cupertino_icons
-  esys_flutter_share: ^1.0.2
   preload_page_view:
     git:
       url: "https://github.com/crtl/preload_page_view.git"

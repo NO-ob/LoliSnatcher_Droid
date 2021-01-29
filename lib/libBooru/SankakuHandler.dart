@@ -30,6 +30,8 @@ class SankakuHandler extends BooruHandler{
     try {
       if(authToken == '' && booru.userID != '' && booru.apiKey != '') {
         authToken = await getAuthToken();
+        print("++++++++++++++++++++++++++++++++++++++++++++++++++");
+        print(authToken);
       }
       Map<String,String> headers = authToken == ''
       ? {
@@ -59,12 +61,15 @@ class SankakuHandler extends BooruHandler{
           String fileExt = current['file_type'].split('/')[1]; // image/jpeg
 
           fetched.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString()), fileExt));
+          //print(fetched[i].toJSON());
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}
         return fetched;
       } else {
         print('Sankaku load fail ${response.statusCode}');
+        print(response.body);
+
       }
     } catch(e) {
       print(e);
