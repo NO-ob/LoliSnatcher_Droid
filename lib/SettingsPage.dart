@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'libBooru/GelbooruHandler.dart';
+import 'libBooru/GelbooruV1Handler.dart';
 import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
 import 'libBooru/DanbooruHandler.dart';
@@ -32,7 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
-  bool jsonWrite = false, autoPlay = true;
+  bool jsonWrite = false, autoPlay = true, loadingGif = false;
   Booru selectedBooru;
   String previewMode;
   @override
@@ -51,6 +52,7 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       jsonWrite = widget.settingsHandler.jsonWrite;
       autoPlay = widget.settingsHandler.autoPlayEnabled;
+      loadingGif = widget.settingsHandler.loadingGif;
     });
   }
 
@@ -242,6 +244,21 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],)
             ),
             Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Row(children: [
+                  Text("Kanna loading Gif: "),
+                  Checkbox(
+                    value: loadingGif,
+                    onChanged: (newValue) {
+                      setState(() {
+                        loadingGif = newValue;
+                      });
+                    },
+                    activeColor: Colors.pink[200],
+                  )
+                ],)
+            ),
+            Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               // This dropdown is used to change the quality of the images displayed on the home page
@@ -369,7 +386,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif);
                 },
                 child: Text("Save"),
               ),
@@ -447,7 +464,7 @@ class _booruEditState extends State<booruEdit> {
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
-  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus"];
+  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","GelbooruV1","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus"];
   String selectedBooruType = "Not Sure";
   @override
   void initState() {
@@ -841,6 +858,10 @@ class _booruEditState extends State<booruEdit> {
       break;
       case("Hydrus"):
         test = new HydrusHandler(booru, 5);
+        testFetched = await test.Search("", 1);
+        break;
+      case("GelbooruV1"):
+        test = new GelbooruV1Handler(booru, 5);
         testFetched = await test.Search("", 1);
         break;
       case("Not Sure"):

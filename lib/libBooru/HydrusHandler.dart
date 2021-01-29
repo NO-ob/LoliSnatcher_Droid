@@ -42,6 +42,7 @@ class HydrusHandler extends BooruHandler{
         final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey});
         //print("----------------Hydrus Search----------------------");
         //print("Search url: " + url);
+        //print("Hydrus key: " + booru.apiKey);
         //print("Status code: " + response.statusCode.toString());
         //print(response.body);
         if (response.statusCode == 200) {
@@ -81,16 +82,19 @@ class HydrusHandler extends BooruHandler{
           final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey});
           //print("----------------Hydrus Search----------------------");
           //print("Metadata url: " + url);
+          //print("Hydrus key: " + booru.apiKey);
           //print("Status code: " + response.statusCode.toString());
           //print(response.body);
           if (response.statusCode == 200) {
             var parsedResponse = jsonDecode(response.body);
             for (int i = 0; i < parsedResponse['metadata'].length; i++){
                 List<String> tagList = new List();
-                //print(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']);
+                print(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']);
                 var responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'];
-                for (int x = 0; x < responseTags.length; x++){
-                  tagList.add(responseTags[x].toString());
+                if (responseTags != null){
+                  for (int x = 0; x < responseTags.length; x++){
+                    tagList.add(responseTags[x].toString());
+                  }
                 }
                 fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL", parsedResponse['metadata'][i]['ext'].toString().substring(1)));
             }
@@ -108,14 +112,20 @@ class HydrusHandler extends BooruHandler{
 
     Future getAccessKey() async{
       String url = "${booru.baseURL}/request_new_permissions?name=LoliSnatcher&basic_permissions=[3]";
+      print("Requesting key: " + url);
       try {
         final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey});
         if (response.statusCode == 200) {
           var parsedResponse = jsonDecode(response.body);
+          print("Key Request Successful: " + parsedResponse['access_key'].toString());
           return parsedResponse['access_key'].toString();
+        } else {
+          print("Key Request Failed: " + response.statusCode.toString());
+          print(response.body);
         }
       } catch (e){
         print("HydrusHandler::getAccessKey::AccessKeyError");
+        print("e");
       }
       return "";
     }

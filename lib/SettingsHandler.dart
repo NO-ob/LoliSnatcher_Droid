@@ -15,7 +15,7 @@ class SettingsHandler {
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
   List<Booru> booruList = new List<Booru>();
   var path = "";
-  bool jsonWrite = false, autoPlayEnabled = true;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false;
   Future writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -99,7 +99,16 @@ class SettingsHandler {
               print("Found Auto Play " + settings[i].split(" = ")[1] );
             }
             break;
-
+          case("Loading Gif"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                loadingGif = true;
+              } else {
+                loadingGif = false;
+              }
+              print("Found Loading gif " + settings[i].split(" = ")[1] );
+            }
+            break;
           case("Pref Booru"):
             if (settings[i].split(" = ").length > 1){
               prefBooru = settings[i].split(" = ")[1];
@@ -113,7 +122,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -148,6 +157,8 @@ class SettingsHandler {
     this.prefBooru = prefBooru;
     writer.write("Auto Play = $autoPlay\n");
     this.autoPlayEnabled = autoPlay;
+    writer.write("Loading Gif = $loadingGif\n");
+    this.loadingGif = loadingGif;
     writer.close();
     await this.loadSettings();
     await getBooru();
