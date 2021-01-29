@@ -19,7 +19,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0 # was ^0.1.3
@@ -32,6 +31,7 @@ dependencies:
   google_fonts: ^1.1.0
   url_launcher: ^5.5.0
   photo_view: ^0.10.3
+  html: ^0.14.0+4
   video_player: 0.11.1+4 # this is the last version without the need to update sdk, was 0.10.11+2
   chewie: ^0.10.4 # last version is 0.12.1+1, but it requires to update sdk, video_player and cupertino_icons
   preload_page_view:
