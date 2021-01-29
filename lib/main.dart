@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
@@ -18,11 +19,14 @@ import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'AboutPage.dart';
@@ -175,7 +179,16 @@ class _HomeState extends State<Home> {
                             });
                           },
                           items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
-                            return DropdownMenuItem<SearchGlobals>(value: value, child: Text(value.tags));
+                            bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru.faviconURL != null;
+                            return DropdownMenuItem<SearchGlobals>(
+                              value: value,
+                              child: Row(
+                                children: [
+                                  isNotEmptyBooru ? Image.network(value.selectedBooru.faviconURL, width: 16) : Text(''),
+                                  Text(" ${value.tags}"),
+                                ]
+                              )
+                            );
                           }).toList(),
                         ),
                       ),
@@ -652,8 +665,6 @@ class _ImagesState extends State<Images> {
               bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
               bool isAtEdge = notif.metrics.atEdge;
               if((isNotAtStart || !isScreenFilled) && isAtEdge){
-                // bug: if scrolled again after new page started loading - triggers multiple page loads
-                // bug: endlessly triggers new page loads when reached last page
                 if (!widget.searchGlobals.booruHandler.locked){
                   setState((){
                       widget.searchGlobals.pageNum++;
@@ -692,21 +703,19 @@ class _ImagesState extends State<Images> {
   Widget sampleorThumb(BooruItem item, int columnCount){
     List<dynamic> itemType = getFileTypeAndIcon(item.fileExt);
     bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || (itemType[0] == 'gif' || itemType[0] == 'video');
+    String thumbURL = isThumb ? item.thumbnailURL : item.sampleURL;
     return Stack(
       alignment: Alignment.center,
       children: [
-        Image.network(
-      isThumb ? item.thumbnailURL : item.sampleURL,
+        CachedNetworkImage(
+          imageUrl: thumbURL,
       fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
-      loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
-        if (loadingProgress == null) {
-          return child;
-        } else {
-          bool hasProgressData = loadingProgress.expectedTotalBytes != null;
-          double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
-          String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'No size data';
+          progressIndicatorBuilder: (BuildContext ctx, String thumbURL, DownloadProgress downloadProgress) {
+            bool hasProgressData = downloadProgress != null && downloadProgress.progress != null;
+            double percentDone = hasProgressData ? downloadProgress.progress : null;
+            String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'Loading...';
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -731,8 +740,45 @@ class _ImagesState extends State<Images> {
             ],
           );
         }
-      },
         ),
+        // Image.network(
+        //   isThumb ? item.thumbnailURL : item.sampleURL,
+        //   fit: BoxFit.cover,
+        //   width: double.infinity,
+        //   height: double.infinity,
+        //   loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
+        //     if (loadingProgress == null) {
+        //       return child;
+        //     } else {
+        //       bool hasProgressData = loadingProgress.expectedTotalBytes != null;
+        //       double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
+        //       String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'No size data';
+        //       return Column(
+        //         mainAxisAlignment: MainAxisAlignment.center,
+        //         children: [
+        //           SizedBox(
+        //             height: 100 / columnCount,
+        //             width: 100 / columnCount,
+        //             child: CircularProgressIndicator(
+        //               strokeWidth: 16 / columnCount,
+        //               valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+        //               value: percentDone,
+        //             ),
+        //           ),
+        //           Padding(padding: EdgeInsets.only(bottom: 10)),
+        //           columnCount < 4 // Text element overflows if too many thumbnails are shown
+        //             ? Text(
+        //               percentDoneText,
+        //               style: TextStyle(
+        //                 fontSize: 12,
+        //               ),
+        //             )
+        //             : Container(),
+        //         ],
+        //       );
+        //     }
+        //   },
+        // ),
         Container(
           alignment: Alignment.bottomRight,
           child: Container(
@@ -774,7 +820,7 @@ class _ImagePageState extends State<ImagePage>{
   PreloadPageController controller;
   PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
-  int viewedIndex = 0;
+  int viewedIndex;
 
   @override
   void initState() {
@@ -808,18 +854,10 @@ class _ImagePageState extends State<ImagePage>{
       // print('SCROLL CONTROLLER');
       // print(widget.gridController.position);
       // print(newValue);
+
+      // bug: sometimes stops working (gridController is not updated after state change? i.e. reentering app, changing rotation)
       widget.gridController.jumpTo(scrollToValue);
     }
-  }
-
-  // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
-  static String formatBytes(int bytes, int decimals) {
-    if (bytes <= 0) return "0 B";
-    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    var i = (log(bytes) / log(1024)).floor();
-    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) +
-        ' ' +
-        suffixes[i];
   }
 
   @override
@@ -835,6 +873,12 @@ class _ImagePageState extends State<ImagePage>{
               // call a function to save the currently viewed image when the save button is pressed
               writer.write(widget.fetched[viewedIndex],widget.settingsHandler.jsonWrite);
               Get.snackbar("Snatched ＼(^ o ^)／",widget.fetched[viewedIndex].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: (){
+              Share.text('', widget.fetched[viewedIndex].fileURL, 'text/text');
             },
           ),
           IconButton(
@@ -914,79 +958,29 @@ class _ImagePageState extends State<ImagePage>{
         /**
          * The pageView builder will created a page for each image in the booruList(fetched)
          */
-        child: Platform.isAndroid ? PreloadPageView.builder(
+        child: Platform.isAndroid ? PhotoViewGestureDetectorScope( // prevents triggering page change early when panning
+          axis: Axis.horizontal,
+          child: PreloadPageView.builder(
           preloadPagesCount: widget.settingsHandler.preloadCount,
           scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             String fileURL = widget.fetched[index].fileURL;
             bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
             int preloadCount = widget.settingsHandler.preloadCount;
-            print(fileURL);
-            if (isVideo) {
-              return VideoApp(fileURL, index, viewedIndex, preloadCount,widget.settingsHandler);
-            } else {
               bool isViewed = viewedIndex == index;
               bool isNear = (viewedIndex - index).abs() <= preloadCount;
+              print(fileURL);
+
               // Render only if viewed or in preloadCount range
               if(isViewed || isNear) {
-                return Container(
-                  // InteractiveViewer is used to make the image zoomable
-                  child: InteractiveViewer(
-                    panEnabled: true,
-                    boundaryMargin: EdgeInsets.zero,
-                    minScale: 0.5,
-                    maxScale: 8,
-                    child: widget.settingsHandler.loadingGif ? FadeInImage.assetNetwork(
-                      placeholder: 'assets/images/loading.gif',
-                      image: widget.fetched[index].fileURL,
-                    ) :
-                    Image.network(
-                      fileURL,
-                      loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
-                        if (loadingProgress == null) {
-                          return child;
+                if (isVideo) {
+                  return VideoApp(fileURL, index, viewedIndex, widget.settingsHandler);
                         } else {
-                          bool hasProgressData = loadingProgress.expectedTotalBytes != null;
-                          double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
-                          String loadedSize = formatBytes(loadingProgress.cumulativeBytesLoaded, 1);
-                          String expectedSize = formatBytes(loadingProgress.expectedTotalBytes, 1);
-                          String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'No size data';
-                          String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
-                          return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                height: 120,
-                                width: 120,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 12,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
-                                  value: percentDone,
-                                ),
-                              ),
-                              Padding(padding: EdgeInsets.only(bottom: 15)),
-                              Text(
-                                percentDoneText,
-                                style: TextStyle(
-                                  fontSize: 24,
-                                ),
-                              ),
-                              Text(
-                                filesizeText,
-                                style: TextStyle(
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ],
-                          );
+                  return MediaViewer(fileURL, index, viewedIndex);
                         }
-                      },
-                    ),
-                  ),
-                );
               } else {
-                return Container();
-              }
+                return Container(child: Text("You should not see this"));
             }
           },
           controller: controller,
@@ -999,6 +993,7 @@ class _ImagePageState extends State<ImagePage>{
             // print('Page changed ' + index.toString());
           },
           itemCount: widget.fetched.length,
+          )
         ) : PageView.builder(
           controller: controllerLinux,
           scrollDirection: Axis.horizontal,
@@ -1035,6 +1030,105 @@ class _ImagePageState extends State<ImagePage>{
     );
   }
 }
+
+class MediaViewer extends StatefulWidget {
+  final String fileURL;
+  final int index;
+  final int viewedIndex;
+  MediaViewer(this.fileURL, this.index, this.viewedIndex);
+
+  @override
+  _MediaViewerState createState() => _MediaViewerState();
+}
+
+
+class _MediaViewerState extends State<MediaViewer> {
+  PhotoViewScaleStateController scaleController;
+  PhotoViewController viewController;
+
+  @override
+  void initState() {
+    super.initState();
+    viewController = PhotoViewController(); //..outputStateStream.listen(onViewStateChanged);
+    scaleController = PhotoViewScaleStateController(); //..outputScaleStateStream.listen(onScaleStateChanged);
+  }
+
+  // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
+  static String formatBytes(int bytes, int decimals) {
+    if (bytes <= 0) return "0 B";
+    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    var i = (log(bytes) / log(1024)).floor();
+    return ((bytes / pow(1024, i)).toStringAsFixed(decimals)) +
+        ' ' +
+        suffixes[i];
+  }
+
+  // debug functions
+  void onScaleStateChanged(PhotoViewScaleState scaleState) {
+    print(scaleState);
+  }
+  void onViewStateChanged(PhotoViewControllerValue viewState) {
+    print(viewState);
+  }
+
+  Widget build(BuildContext context) {
+    if(widget.viewedIndex != widget.index) {
+      // reset zoom if not viewed
+      setState(() {
+        scaleController.scaleState = PhotoViewScaleState.initial;
+      });
+    }
+
+    return ClipRect( // Cut image to the size of the container
+      child: PhotoView(
+        imageProvider: NetworkImage(widget.fileURL),
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.covered * 8,
+        initialScale: PhotoViewComputedScale.contained,
+        basePosition: Alignment.center,
+        controller: viewController,
+        scaleStateController: scaleController,
+        enableRotation: false,
+        loadingBuilder: (BuildContext ctx, ImageChunkEvent loadingProgress) {
+          bool hasProgressData = loadingProgress != null && loadingProgress.expectedTotalBytes != null;
+          double percentDone = hasProgressData ? (loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes) : null;
+          String loadedSize = hasProgressData ? formatBytes(loadingProgress.cumulativeBytesLoaded, 1) : '';
+          String expectedSize = hasProgressData ? formatBytes(loadingProgress.expectedTotalBytes, 1) : '';
+          String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'Loading...';
+          String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 120,
+                width: 120,
+                child: CircularProgressIndicator(
+                  strokeWidth: 12,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                  value: percentDone,
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(bottom: 15)),
+              Text(
+                percentDoneText,
+                style: TextStyle(
+                  fontSize: 24,
+                ),
+              ),
+              Text(
+                filesizeText,
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 /**
  * None of the code in this widget is mine it's from the example at https://pub.dev/packages/video_player
  */
@@ -1042,9 +1136,8 @@ class VideoApp extends StatefulWidget {
   final String url;
   final int index;
   final int viewedIndex;
-  final int preloadCount;
   SettingsHandler settingsHandler;
-  VideoApp(this.url, this.index, this.viewedIndex, this.preloadCount,this.settingsHandler);
+  VideoApp(this.url, this.index, this.viewedIndex, this.settingsHandler);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
@@ -1106,26 +1199,32 @@ class _VideoAppState extends State<VideoApp> {
   @override
   Widget build(BuildContext context) {
     bool isViewed = widget.viewedIndex == widget.index;
-    bool isNear = (widget.viewedIndex - widget.index).abs() <= widget.preloadCount;
     bool initialized = _chewieController != null && _chewieController.videoPlayerController.value.initialized;
-    String vWidth = '?';
-    String vHeight = '?';
+    String vWidth = '';
+    String vHeight = '';
     if(initialized) {
       vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
       vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
-      if (isViewed && widget.settingsHandler.autoPlayEnabled) {
+      if (isViewed) {
+        // Reset video time if viewed
+        _videoController.seekTo(Duration());
+        if(widget.settingsHandler.autoPlayEnabled) {
+          // autoplay if viewed and setting is enabled
         _videoController.play();
+        }
       } else {
         _videoController.pause();
       }
     }
 
-    // Render only if viewed or in preloadCount range
-    if(isViewed || isNear) {
       return Container(
         child: Scaffold(
           body: Column(
             children: <Widget>[
+            // Show video dimensions on the top
+            // Container(
+            //   child: MediaQuery.of(context).orientation == Orientation.portrait ? Text(vWidth+'x'+vHeight) : null
+            // ),
               Expanded(
                 child: Center(
                   child: initialized
@@ -1138,19 +1237,15 @@ class _VideoAppState extends State<VideoApp> {
                     ),
                 ),
               ),
-              // Show video dimensions on the bottom
-              Text(vWidth+'x'+vHeight),
             ],
           )
         ),
       );
-    } else {
-      return Container();
-    }
   }
 
   @override
   void dispose() {
+    _videoController.pause();
     _videoController.dispose();
     if(_chewieController != null) {
     _chewieController.dispose();
