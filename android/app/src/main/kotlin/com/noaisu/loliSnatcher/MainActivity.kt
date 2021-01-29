@@ -2,14 +2,14 @@ package com.noaisu.loliSnatcher
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
-import android.util.Log
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
-import java.nio.file.Files
 
 
 class MainActivity: FlutterActivity() {
@@ -29,7 +29,6 @@ class MainActivity: FlutterActivity() {
                 val fileContentUri: Uri = Uri.parse("file://" + call.argument("path"))
                 mediaScannerIntent.data = fileContentUri
                 sendBroadcast(mediaScannerIntent)
-                Log.i("MediaScanner called on ",call.argument("path"));
             } else if (call.method == "shareItem") {
                 val intent= Intent()
                 intent.action=Intent.ACTION_SEND
@@ -39,10 +38,15 @@ class MainActivity: FlutterActivity() {
             } else if (call.method == "emptyCache") {
                 val dir: File = context.cacheDir
                 dir.deleteRecursively();
+            } else if (call.method == "getPicturesPath"){
+                result.success(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES).absolutePath);
+            }  else if (call.method == "getCachePath"){
+                result.success(context.cacheDir.absolutePath);
             }
         }
     }
-    private fun getExtDir(): String? {
+    private fun getExtDir(): String {
         return Environment.getExternalStorageDirectory().absolutePath;
     }
 }

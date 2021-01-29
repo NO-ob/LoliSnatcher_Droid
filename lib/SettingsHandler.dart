@@ -157,6 +157,9 @@ class SettingsHandler {
     writer.write("Portrait Columns = $portraitColumns\n");
     this.portraitColumns = int.parse(portraitColumns);
     writer.write("Preview Mode = $previewMode\n");
+    if (this.previewMode != previewMode) {
+      serviceHandler.emptyCache();
+    }
     this.previewMode = previewMode;
     writer.write("Preload Count = $preloadCount\n");
     this.preloadCount = int.parse(preloadCount);
@@ -240,6 +243,13 @@ class SettingsHandler {
   Future getExtDir() async{
     if (Platform.isAndroid){
       return await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
+    } else if (Platform.isLinux){
+      return Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
+  }
+  Future getDocumentsDir() async{
+    if (Platform.isAndroid){
+      return await serviceHandler.getDocumentsDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       return Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }

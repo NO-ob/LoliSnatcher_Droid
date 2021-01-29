@@ -39,6 +39,50 @@ class ImageWriter{
     }
     return (item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
   }
+  Future writeThumb(String fileURL) async{
+    try {
+      var response = await http.get(fileURL);
+      var path = "";
+      if (Platform.isAndroid){
+        path = await serviceHandler.getCacheDir() + "/thumbnails/";
+      } else if (Platform.isLinux){
+        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
+      }
+      await Directory(path).create(recursive:true);
+      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
+      File image = new File(path+fileName);
+      await image.writeAsBytes(response.bodyBytes);
+    } catch (e){
+      print("Image Writer Exception:: thumbnail write");
+      print(e);
+    }
+    return (fileURL.substring(fileURL.lastIndexOf("/") + 1));
+  }
+
+
+  Future getThumbPath(String fileURL) async{
+    try {
+      var path = "";
+      if (Platform.isAndroid){
+        path = path = await serviceHandler.getCacheDir() + "/thumbnails/";
+      } else if (Platform.isLinux){
+        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
+      }
+      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
+      bool thumbExists = await File(path+fileName).exists();
+      if (thumbExists){
+        print("found thumb for" + fileURL);
+        return path+fileName;
+      } else {
+        return null;
+      }
+    } catch (e){
+      print("Image Writer Exception");
+      print(e);
+      return null;
+    }
+  }
+
   Future writeSelected(SearchGlobals searchGlobals, bool jsonWrite) async {
     List fetched = searchGlobals.booruHandler.getFetched();
     for (int i = 0; i < searchGlobals.selected.length; i++){

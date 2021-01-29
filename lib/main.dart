@@ -25,8 +25,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-//import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'AboutPage.dart';
@@ -706,77 +704,7 @@ class _ImagesState extends State<Images> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        widget.settingsHandler.imageCache ? CachedNetworkImage(
-          imageUrl: thumbURL,
-      fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          progressIndicatorBuilder: (BuildContext ctx, String thumbURL, DownloadProgress downloadProgress) {
-            bool hasProgressData = downloadProgress != null && downloadProgress.progress != null;
-            double percentDone = hasProgressData ? downloadProgress.progress : null;
-            String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'Loading...';
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 100 / columnCount,
-                width: 100 / columnCount,
-                child: CircularProgressIndicator(
-                  strokeWidth: 16 / columnCount,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
-                  value: percentDone,
-                ),
-              ),
-              Padding(padding: EdgeInsets.only(bottom: 10)),
-              columnCount < 4 // Text element overflows if too many thumbnails are shown
-                ? Text(
-                  percentDoneText,
-                  style: TextStyle(
-                    fontSize: 12,
-                  ),
-                )
-                : Container(),
-            ],
-          );
-        }
-        ) : Image.network(
-          thumbURL,
-          fit: BoxFit.cover,
-           width: double.infinity,
-           height: double.infinity,
-           loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
-             if (loadingProgress == null) {
-               return child;
-             } else {
-               bool hasProgressData = loadingProgress.expectedTotalBytes != null;
-               double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
-               String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'Loading...';
-               return Column(
-                 mainAxisAlignment: MainAxisAlignment.center,
-                 children: [
-                   SizedBox(
-                     height: 100 / columnCount,
-                     width: 100 / columnCount,
-                     child: CircularProgressIndicator(
-                       strokeWidth: 16 / columnCount,
-                       valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
-                       value: percentDone,
-                     ),
-                   ),
-                   Padding(padding: EdgeInsets.only(bottom: 10)),
-                   columnCount < 4 // Text element overflows if too many thumbnails are shown
-                     ? Text(
-                       percentDoneText,
-                       style: TextStyle(
-                         fontSize: 12,
-                       ),
-                     )
-                     : Container(),
-                 ],
-               );
-             }
-           },
-         ),
+        CachedThumb(thumbURL,widget.settingsHandler,columnCount),
         Container(
           alignment: Alignment.bottomRight,
           child: Container(
@@ -1127,6 +1055,83 @@ class _MediaViewerState extends State<MediaViewer> {
           );
         },
       ),
+    );
+  }
+}
+
+class CachedThumb extends StatefulWidget {
+  ImageWriter imageWriter = ImageWriter();
+  String fileURL;
+  int columnCount;
+  SettingsHandler settingsHandler;
+  bool isThumb;
+  @override
+  _CachedThumbState createState() => _CachedThumbState();
+  CachedThumb(this.fileURL, this.settingsHandler, this.columnCount);
+}
+class _CachedThumbState extends State<CachedThumb> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: widget.imageWriter.getThumbPath(widget.fileURL),
+        builder: (context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.data != null) {
+              print("thumbnail found");
+              return Image.file(
+                File(snapshot.data),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              );
+            } else {
+              print("no thumbnail");
+              if (widget.settingsHandler.imageCache){
+                widget.imageWriter.writeThumb(widget.fileURL);
+              }
+              return Image.network(
+                widget.fileURL,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  } else {
+                    bool hasProgressData = loadingProgress.expectedTotalBytes != null;
+                    double percentDone = hasProgressData ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes : null;
+                    String percentDoneText = hasProgressData ? ((percentDone*100).toStringAsFixed(2) + '%') : 'Loading...';
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: 100 / widget.columnCount,
+                          width: 100 / widget.columnCount,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 16 / widget.columnCount,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                            value: percentDone,
+                          ),
+                        ),
+                        Padding(padding: EdgeInsets.only(bottom: 10)),
+                        widget.columnCount < 4 // Text element overflows if too many thumbnails are shown
+                            ? Text(
+                          percentDoneText,
+                          style: TextStyle(
+                            fontSize: 12,
+                          ),
+                        )
+                            : Container(),
+                      ],
+                    );
+                  }
+                },
+              );
+            }
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        }
     );
   }
 }

@@ -22,6 +22,33 @@ class ServiceHandler{
     }
     return result;
   }
+  Future<String> getDocumentsDir() async{
+    String result;
+    try{
+      result = await platform.invokeMethod("getDocumentsPath");
+    } catch(e){
+      print(e);
+    }
+    return result;
+  }
+  Future<String> getPicturesDir() async{
+    String result;
+    try{
+      result = await platform.invokeMethod("getPicturesPath");
+    } catch(e){
+      print(e);
+    }
+    return result;
+  }
+  Future<String> getCacheDir() async{
+    String result;
+    try{
+      result = await platform.invokeMethod("getCachePath");
+    } catch(e){
+      print(e);
+    }
+    return result;
+  }
   void loadShareIntent(String fileURL) async{
     try{
       await platform.invokeMethod("shareItem",{"fileURL": fileURL});
