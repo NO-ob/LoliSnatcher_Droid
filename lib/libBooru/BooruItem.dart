@@ -2,6 +2,9 @@ class BooruItem{
   String fileURL,sampleURL,thumbnailURL,tagString,postURL,fileExt;
   List tagsList;
   BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL, this.fileExt){
+    if (this.sampleURL.isEmpty){
+      this.sampleURL = this.thumbnailURL;
+    }
   }
 
   String get file{

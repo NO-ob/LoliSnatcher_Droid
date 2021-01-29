@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 
 
@@ -43,7 +45,11 @@ class ServiceHandler{
   Future<String> getCacheDir() async{
     String result;
     try{
-      result = await platform.invokeMethod("getCachePath");
+      if (Platform.isAndroid){
+        result = await platform.invokeMethod("getCachePath");
+      } else if (Platform.isLinux){
+        result = Platform.environment['HOME'] + "/.loliSnatcher/cache/";
+      }
     } catch(e){
       print(e);
     }
@@ -58,7 +64,13 @@ class ServiceHandler{
   }
   void emptyCache() async{
     try{
-      await platform.invokeMethod("emptyCache");
+      if (Platform.isAndroid){
+        await platform.invokeMethod("emptyCache");
+      } else if (Platform.isLinux){
+        File cacheDir = new File(await getCacheDir());
+        cacheDir.delete(recursive: true);
+      }
+
     } catch(e){
       print(e);
     }

@@ -904,7 +904,7 @@ class _ImagePageState extends State<ImagePage>{
                 if (isVideo) {
                   return VideoApp(fileURL, index, viewedIndex, widget.settingsHandler);
                         } else {
-                  return MediaViewer(fileURL, index, viewedIndex,widget.settingsHandler);
+                  return MediaViewer(widget.fetched[index], index, viewedIndex,widget.settingsHandler);
                         }
               } else {
                 return Container(child: Text("You should not see this"));
@@ -959,11 +959,11 @@ class _ImagePageState extends State<ImagePage>{
 }
 
 class MediaViewer extends StatefulWidget {
-  final String fileURL;
+  final BooruItem booruItem;
   final int index;
   final int viewedIndex;
   SettingsHandler settingsHandler;
-  MediaViewer(this.fileURL, this.index, this.viewedIndex, this.settingsHandler);
+  MediaViewer(this.booruItem, this.index, this.viewedIndex, this.settingsHandler);
 
   @override
   _MediaViewerState createState() => _MediaViewerState();
@@ -1009,7 +1009,7 @@ class _MediaViewerState extends State<MediaViewer> {
 
     return ClipRect( // Cut image to the size of the container
       child: PhotoView(
-        imageProvider: NetworkImage(widget.fileURL),
+        imageProvider: NetworkImage(widget.booruItem.fileURL),
         minScale: PhotoViewComputedScale.contained,
         maxScale: PhotoViewComputedScale.covered * 8,
         initialScale: PhotoViewComputedScale.contained,
@@ -1024,8 +1024,17 @@ class _MediaViewerState extends State<MediaViewer> {
           String expectedSize = hasProgressData ? formatBytes(loadingProgress.expectedTotalBytes, 1) : '';
           String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'Loading...';
           String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
+          String fileURL = widget.settingsHandler.previewMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
+          File preview = File(widget.settingsHandler.cachePath + "thumbnails/" + fileURL.substring(fileURL.lastIndexOf("/") + 1));
+          print(widget.settingsHandler.cachePath + "thumbnails/" + fileURL.substring(fileURL.lastIndexOf("/") + 1));
+          print("Fading: $percentDone");
           return widget.settingsHandler.loadingGif ?
-           Image(image: AssetImage('assets/images/loading.gif')) :
+          Image(image: AssetImage('assets/images/loading.gif')) :
+          (preview.existsSync() ?
+          Opacity(
+            opacity: percentDone == null ? 0 : percentDone,
+            child: Image(image: FileImage(preview)),
+          ) :
            Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1052,7 +1061,7 @@ class _MediaViewerState extends State<MediaViewer> {
                 ),
               ),
             ],
-          );
+          ));
         },
       ),
     );
@@ -1077,7 +1086,6 @@ class _CachedThumbState extends State<CachedThumb> {
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.data != null) {
-              print("thumbnail found");
               return Image.file(
                 File(snapshot.data),
                 fit: BoxFit.cover,
@@ -1085,7 +1093,6 @@ class _CachedThumbState extends State<CachedThumb> {
                 height: double.infinity,
               );
             } else {
-              print("no thumbnail");
               if (widget.settingsHandler.imageCache){
                 widget.imageWriter.writeThumb(widget.fileURL);
               }

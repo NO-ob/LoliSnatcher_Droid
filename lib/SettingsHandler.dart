@@ -11,7 +11,7 @@ import 'dart:io' show Platform;
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
-  String defTags = "rating:safe",previewMode = "Sample",prefBooru = "";
+  String defTags = "rating:safe",previewMode = "Sample",prefBooru = "", cachePath = "";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
   List<Booru> booruList = new List<Booru>();
   var path = "";
@@ -35,6 +35,9 @@ class SettingsHandler {
   Future loadSettings() async{
     if (path == ""){
       path = await getExtDir();
+    }
+    if (cachePath == ""){
+      cachePath = await serviceHandler.getCacheDir();
     }
     //await getBooru();
     File settingsFile = new File(path+"settings.conf");

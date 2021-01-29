@@ -9,15 +9,18 @@ import 'libBooru/BooruItem.dart';
 import 'ServiceHandler.dart';
 import 'dart:convert';
 class ImageWriter{
+  String path = "";
+  String cachePath = "";
   ServiceHandler serviceHandler = new ServiceHandler();
   Future write(BooruItem item, bool jsonWrite) async{
     try {
       var response = await http.get(item.fileURL);
-      var path = "";
-      if (Platform.isAndroid){
+      if(path == ""){
+        if (Platform.isAndroid){
           path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
-      } else if (Platform.isLinux){
+        } else if (Platform.isLinux){
           path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
+        }
       }
       await Directory(path).create(recursive:true);
       String fileName = item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1);
@@ -42,15 +45,16 @@ class ImageWriter{
   Future writeThumb(String fileURL) async{
     try {
       var response = await http.get(fileURL);
-      var path = "";
-      if (Platform.isAndroid){
-        path = await serviceHandler.getCacheDir() + "/thumbnails/";
-      } else if (Platform.isLinux){
-        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
+      if(cachePath == ""){
+        if (Platform.isAndroid){
+          cachePath = await serviceHandler.getCacheDir() + "/thumbnails/";
+        } else if (Platform.isLinux){
+          cachePath = Platform.environment['HOME'] + "/.loliSnatcher/cache/thumbnails/";
+        }
       }
-      await Directory(path).create(recursive:true);
+      await Directory(cachePath).create(recursive:true);
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      File image = new File(path+fileName);
+      File image = new File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes);
     } catch (e){
       print("Image Writer Exception:: thumbnail write");
@@ -62,17 +66,17 @@ class ImageWriter{
 
   Future getThumbPath(String fileURL) async{
     try {
-      var path = "";
-      if (Platform.isAndroid){
-        path = path = await serviceHandler.getCacheDir() + "/thumbnails/";
-      } else if (Platform.isLinux){
-        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
+      if(cachePath == ""){
+        if (Platform.isAndroid){
+          cachePath = await serviceHandler.getCacheDir() + "/thumbnails/";
+        } else if (Platform.isLinux){
+          cachePath = Platform.environment['HOME'] + "/.loliSnatcher/cache/thumbnails/";
+        }
       }
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      bool thumbExists = await File(path+fileName).exists();
+      bool thumbExists = await File(cachePath+fileName).exists();
       if (thumbExists){
-        print("found thumb for" + fileURL);
-        return path+fileName;
+        return cachePath+fileName;
       } else {
         return null;
       }
