@@ -115,7 +115,6 @@ class _HomeState extends State<Home> {
                   } else {
                     Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                   }
-
                 },
               )
             ],

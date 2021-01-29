@@ -8,6 +8,8 @@ import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
+import java.nio.file.Files
 
 
 class MainActivity: FlutterActivity() {
@@ -34,6 +36,9 @@ class MainActivity: FlutterActivity() {
                 intent.putExtra(Intent.EXTRA_TEXT,"" + call.argument("fileURL"))
                 intent.type="text/plain"
                 startActivity(Intent.createChooser(intent,"Share To:"))
+            } else if (call.method == "emptyCache") {
+                val dir: File = context.cacheDir
+                dir.deleteRecursively();
             }
         }
     }

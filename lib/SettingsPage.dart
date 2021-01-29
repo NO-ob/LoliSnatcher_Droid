@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/material.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/GelbooruV1Handler.dart';
@@ -16,7 +17,6 @@ import 'getPerms.dart';
 import 'SettingsHandler.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 /**
  * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
  */
@@ -28,6 +28,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final ServiceHandler serviceHandler = ServiceHandler();
   final settingsTagsController = TextEditingController();
   final settingsLimitController = TextEditingController();
   final settingsColumnsLandscapeController = TextEditingController();
@@ -309,8 +310,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   side: BorderSide(color: Theme.of(context).accentColor),
                 ),
                 onPressed: (){
-                  DefaultCacheManager manager = new DefaultCacheManager();
-                  manager.emptyCache();
+                  serviceHandler.emptyCache();
                   Get.snackbar("Thumbnail cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                 },
                 child: Text("Clear thumbnail cache"),

@@ -29,4 +29,11 @@ class ServiceHandler{
       print(e);
     }
   }
+  void emptyCache() async{
+    try{
+      await platform.invokeMethod("emptyCache");
+    } catch(e){
+      print(e);
+    }
+  }
 }
