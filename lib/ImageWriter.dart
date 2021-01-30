@@ -26,6 +26,7 @@ class ImageWriter{
       String fileName = item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1);
       File image = new File(path+fileName);
       await image.writeAsBytes(response.bodyBytes);
+      print("Image written: " + path+fileName);
       if (jsonWrite){
         File json = new File(path+fileName.split(".")[0]+".json");
         await json.writeAsString(jsonEncode(item.toJSON()));
@@ -42,6 +43,15 @@ class ImageWriter{
     }
     return (item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1));
   }
+
+  Stream<int> writeMultiple (List<BooruItem> snatched, bool jsonWrite) async*{
+    int snatchedCounter = 1;
+    for (int i = 0; i < snatched.length ; i++){
+      yield snatchedCounter++;
+      await write(snatched.elementAt(i), jsonWrite);
+    }
+  }
+
   Future writeThumb(String fileURL) async{
     try {
       var response = await http.get(fileURL);

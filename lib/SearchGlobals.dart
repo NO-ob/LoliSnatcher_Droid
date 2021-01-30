@@ -21,4 +21,12 @@ class SearchGlobals{
   String toString() {
     return ("tags: $tags selectedBooru: ${selectedBooru.toString()} pageNum: $pageNum booruHandler: $booruHandler handlerType: $handlerType");
   }
+  List<BooruItem> getSelected(){
+    List<BooruItem> selectedItems = new List();
+    for (int i=0; i < selected.length; i++){
+      print(booruHandler.fetched.elementAt(selected[i]));
+      selectedItems.add(booruHandler.fetched.elementAt(selected[i]));
+    }
+    return selectedItems;
+  }
 }

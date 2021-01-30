@@ -1,4 +1,8 @@
+//import 'dart:html';
+import 'package:LoliSnatcher/SnatchHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:flutter/material.dart';
+import 'libBooru/BooruItem.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
@@ -21,7 +25,8 @@ class SnatcherPage extends StatefulWidget {
   final String tags;
   Booru booru;
   SettingsHandler settingsHandler;
-  SnatcherPage(this.tags,this.booru,this.settingsHandler);
+  SnatchHandler snatchHandler;
+  SnatcherPage(this.tags,this.booru,this.settingsHandler, this.snatchHandler);
   @override
   _SnatcherPageState createState() => _SnatcherPageState();
 }
@@ -164,7 +169,10 @@ class _SnatcherPageState extends State<SnatcherPage> {
                  * Get.back is used to close the snatcher window
                  */
                 onPressed: (){
-                  Snatcher(snatcherTagsController.text,snatcherAmountController.text,int.parse(snatcherSleepController.text));
+                  if (snatcherSleepController.text.isEmpty){
+                    snatcherSleepController.text = 0.toString();
+                  }
+                  widget.snatchHandler.searchSnatch(snatcherTagsController.text,snatcherAmountController.text,int.parse(snatcherSleepController.text),widget.booru,widget.settingsHandler.jsonWrite);
                   Get.back();
                   //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
                 },
@@ -176,7 +184,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
       ),
     );
   }
-  Future Snatcher(String tags, String amount, int timeout) async{
+  /*Future Snatcher(String tags, String amount, int timeout) async{
     ImageWriter writer = new ImageWriter();
     int count = 0, limit,page = 0;
     BooruHandler booruHandler;
@@ -186,29 +194,10 @@ class _SnatcherPageState extends State<SnatcherPage> {
     } else {
       limit = 100;
     }
+    List temp = new BooruHandlerFactory().getBooruHandler(widget.booru, limit);
+    booruHandler = temp[0];
+    page = temp[1];
     Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-    switch(widget.booru.type){
-      case("Moebooru"):
-        booruHandler = new MoebooruHandler(widget.booru,limit);
-        break;
-      case("Gelbooru"):
-        booruHandler = new GelbooruHandler(widget.booru,limit);
-        break;
-      case("Danbooru"):
-        page = 1;
-        booruHandler = new DanbooruHandler(widget.booru,limit);
-        break;
-      case("e621"):
-        booruHandler = new e621Handler(widget.booru,limit);
-        break;
-      case("Shimmie"):
-        booruHandler = new ShimmieHandler(widget.booru,limit);
-        break;
-      case("Philomena"):
-        page = 1;
-        booruHandler = new PhilomenaHandler(widget.booru,limit);
-        break;
-    }
     // Loop until the count variable is bigger or equal to amount
     // The count variable is used instead of checking the length of booruItems because the amount of images stored on
     // The booru may be less than the user wants which would result in an infinite loop since the length would never be big enough
@@ -218,16 +207,46 @@ class _SnatcherPageState extends State<SnatcherPage> {
       count = booruItems.length;
       print(count);
     }
+    Scaffold.of(Get.context).showBottomSheet<void>(
+          (BuildContext context) {
+        return Container(
+          height:150,
+          child: StreamBuilder(
+              stream: writer.writeMultiple(booruItems, widget.settingsHandler.jsonWrite),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.none:
+                    return Text("No Connection");
+                    break;
+                  case ConnectionState.waiting:
+                    return Text("Waiting");
+                    break;
+                  case ConnectionState.active:
+                    return Text("Snatching: ${snapshot.data} / ${booruItems.length}");
+                    break;
+                  case ConnectionState.done:
+                    Get.back();
+                    break;
+                }
+                return Text("Done");
+              }
+          ),
+        );
+      },
+    );
 
-    for (int n = 0; n + 1 <= int.parse(amount); n ++){
-      await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n],widget.settingsHandler.jsonWrite);});
-      if ((n+1)%10 == 0 || n+1 == int.parse(amount)){
-        Get.snackbar("＼(^ o ^)／","Snatched ${n+1} / $amount",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-      }
-    }
+    //SnatcherOverlay(booruItems, widget.settingsHandler.jsonWrite);
+    //for (int n = 0; n + 1 <= int.parse(amount); n ++){
+     // print(booruItems[n].fileURL);
+      //await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n],widget.settingsHandler.jsonWrite);});
+      //if ((n+1)%10 == 0 || n+1 == int.parse(amount)){
+
+      //Get.snackbar(Row(),snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+     // }
+    //}
     //
-    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-  }
+    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+  }*/
 
   /** This Future function will call getBooru on the settingsHandler to load the booru configs
    * After these are loaded it returns a drop down list which is used to select which booru to search

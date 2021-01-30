@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ServiceHandler.dart';
+import 'libBooru/BooruHandlerFactory.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/MoebooruHandler.dart';
 import 'libBooru/PhilomenaHandler.dart';
@@ -58,7 +60,7 @@ void main() {
  * **/
 class Home extends StatefulWidget {
   SettingsHandler settingsHandler = new SettingsHandler();
-
+  SnatchHandler snatchHandler = new SnatchHandler();
   @override
   _HomeState createState() => _HomeState();
 }
@@ -69,7 +71,15 @@ class _HomeState extends State<Home> {
   FocusNode searchBoxFocus = new FocusNode();
   int globalsIndex = 0;
   bool firstRun = true;
+  bool isSnatching = false;
+  String snatchStatus = "";
   final searchTagsController = TextEditingController();
+  @override
+  void initState() {
+    super.initState();
+    widget.snatchHandler.addQueueHandler();
+  }
+
   @override
   Widget build(BuildContext context) {
     //searchTagsController.text = searchGlobals[globalsIndex].tags;
@@ -90,7 +100,6 @@ class _HomeState extends State<Home> {
       });
       searchGlobals[globalsIndex].newTab.value = "";
     }
-
     return Listener(
         onPointerDown: (event){
           if(searchBoxFocus.hasFocus){
@@ -100,16 +109,14 @@ class _HomeState extends State<Home> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: Text("Loli Snatcher"),
-            actions:<Widget>[
-              IconButton(
+            title: ActiveTitle(widget.snatchHandler),
+            actions:<Widget>[ IconButton(
                 icon: Icon(Icons.save),
                 onPressed: (){
                   getPerms();
                   // call a function to save the currently viewed image when the save button is pressed
                   if (searchGlobals[globalsIndex].selected.length > 0){
-                    ImageWriter writer = new ImageWriter();
-                    writer.writeSelected(searchGlobals[globalsIndex], widget.settingsHandler.jsonWrite);
+                    widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite);
                   } else {
                     Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                   }
@@ -243,7 +250,7 @@ class _HomeState extends State<Home> {
                         side: BorderSide(color: Theme.of(context).accentColor),
                     ),
                     onPressed: (){
-                      Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler));
+                      Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler, widget.snatchHandler));
                     },
                     child: Text("Snatcher"),
                   ),
@@ -398,7 +405,35 @@ class _HomeState extends State<Home> {
     );
   }
 }
+class ActiveTitle extends StatefulWidget {
+  SnatchHandler snatchHandler;
+  bool isSnatching = false;
+  String snatchStatus = "";
+  @override
+  _ActiveTitleState createState() => _ActiveTitleState();
+  ActiveTitle(this.snatchHandler);
+}
 
+class _ActiveTitleState extends State<ActiveTitle> {
+  @override
+  void initState(){
+      //widget.snatchHandler.snatchActive.value = false;
+      widget.snatchHandler.snatchActive.addListener((){
+        setState(() {
+          widget.isSnatching = widget.snatchHandler.snatchActive.value;
+        });
+      });
+      widget.snatchHandler.snatchStatus.addListener((){
+        setState(() {
+          widget.snatchStatus = widget.snatchHandler.snatchStatus.value;
+        });
+      });
+  }
+  @override
+  Widget build(BuildContext context) {
+    return widget.isSnatching ? Text("Snatching: ${widget.snatchStatus}") : Text("Loli Snatcher");
+  }
+}
 
 class TagSearchBox extends StatefulWidget {
   SearchGlobals searchGlobals;
@@ -491,7 +526,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: TextField(
+        child: TextField(
           controller: widget.searchTagsController,
           focusNode: widget._focusNode,
           onChanged: (text) {
@@ -508,50 +543,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               gapPadding: 0,
             ),
           ),
-      )
+        )
     );
   }
 }
 void setBooruHandler(SearchGlobals searchGlobals, int limit){
-  switch (searchGlobals.selectedBooru.type) {
-    case("Moebooru"):
-      searchGlobals.booruHandler = new MoebooruHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Gelbooru"):
-      searchGlobals.booruHandler = new GelbooruHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Danbooru"):
-      searchGlobals.pageNum = 1;
-      searchGlobals.booruHandler = new DanbooruHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("e621"):
-      searchGlobals.booruHandler = new e621Handler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Shimmie"):
-      searchGlobals.booruHandler = new ShimmieHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Philomena"):
-      searchGlobals.pageNum = 1;
-      searchGlobals.booruHandler = new PhilomenaHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Szurubooru"):
-      searchGlobals.pageNum = 0;
-      searchGlobals.booruHandler = new SzurubooruHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Sankaku"):
-      searchGlobals.pageNum = 1;
-      searchGlobals.booruHandler = new SankakuHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("Hydrus"):
-      searchGlobals.pageNum = 0;
-      searchGlobals.booruHandler = new HydrusHandler(searchGlobals.selectedBooru, limit);
-      break;
-    case("GelbooruV1"):
-      searchGlobals.pageNum = 0;
-      searchGlobals.booruHandler = new GelbooruV1Handler(searchGlobals.selectedBooru, limit);
-      break;
-  }
-
+  List temp = new BooruHandlerFactory().getBooruHandler(searchGlobals.selectedBooru, limit);
+  searchGlobals.booruHandler = temp[0];
+  searchGlobals.pageNum = temp[1];
 }
 /**
  * This widget will create a booru handler and then generate a gridview of preview images using a future builder and the search function of the booru handler

@@ -25,7 +25,7 @@ dependencies:
   http: ^0.12.1
   xml: ^4.3.0
   flutter_launcher_icons: ^0.7.5
-  get: ^3.4.4
+  get: ^3.24.0
   permission_handler: ^5.0.1+1
   image: ^2.1.18
   google_fonts: ^1.1.0
