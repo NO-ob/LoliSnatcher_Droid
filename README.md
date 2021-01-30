@@ -29,7 +29,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [ ] Add buttons for ratings instead of typing it
     - [ ] Add save location functionality
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
-    - [ ] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
+    - [x] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
 - [ ] Bugs
     - [ ] previous and last image can overlap each other
     - [ ] Hydrus video support
