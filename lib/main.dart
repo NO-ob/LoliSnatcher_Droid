@@ -1093,7 +1093,24 @@ class _CachedThumbState extends State<CachedThumb> {
               );
             } else {
               if (widget.settingsHandler.imageCache){
-                widget.imageWriter.writeThumb(widget.fileURL);
+                return FutureBuilder(
+                    future: widget.imageWriter.writeThumb(widget.fileURL),
+                    builder: (context, AsyncSnapshot snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        return Image.file(
+                          File(snapshot.data),
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                        );
+                      } else {
+                        return CircularProgressIndicator(
+                          strokeWidth: 12,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                        );
+                      }
+                  },
+                );
               }
               return Image.network(
                 widget.fileURL,

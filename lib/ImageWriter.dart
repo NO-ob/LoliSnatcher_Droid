@@ -60,7 +60,7 @@ class ImageWriter{
       print("Image Writer Exception:: thumbnail write");
       print(e);
     }
-    return (fileURL.substring(fileURL.lastIndexOf("/") + 1));
+    return (cachePath+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
 
 
