@@ -1212,7 +1212,7 @@ class _MediaViewerState extends State<MediaViewer> {
         basePosition: Alignment.center,
         controller: viewController,
         tightMode: true,
-        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero'),
+        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero'+widget.index.toString()),
         scaleStateController: scaleController,
         enableRotation: false,
         loadingBuilder: loadingElementBuilder,
