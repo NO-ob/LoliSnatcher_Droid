@@ -1,23 +1,13 @@
 import 'dart:io';
+import 'dart:ui';
 import 'dart:math';
 
 import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ServiceHandler.dart';
 import 'libBooru/BooruHandlerFactory.dart';
-import 'libBooru/GelbooruHandler.dart';
-import 'libBooru/MoebooruHandler.dart';
-import 'libBooru/PhilomenaHandler.dart';
-import 'libBooru/DanbooruHandler.dart';
-import 'libBooru/ShimmieHandler.dart';
 import 'libBooru/BooruItem.dart';
-import 'libBooru/e621Handler.dart';
-import 'libBooru/SzurubooruHandler.dart';
-import 'libBooru/HydrusHandler.dart';
-import 'libBooru/BooruHandler.dart';
-import 'libBooru/SankakuHandler.dart';
 import 'libBooru/Booru.dart';
 import 'ImageWriter.dart';
 import 'SettingsHandler.dart';
@@ -38,23 +28,24 @@ import 'SearchGlobals.dart';
 void main() {
   runApp(MaterialApp(
     title: 'LoliSnatcher',
-      theme: ThemeData(
-        // Define the default brightness and colors.
-        brightness: Brightness.dark,
-        primaryColor: Colors.pink[200],
-        accentColor: Colors.pink[300],
+    theme: ThemeData(
+      // Define the default brightness and colors.
+      brightness: Brightness.dark,
+      primaryColor: Colors.pink[200],
+      accentColor: Colors.pink[300],
 
-        textTheme: TextTheme(
-          headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
-          headline6: GoogleFonts.quicksand(fontSize: 36.0),
-          bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
-          bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
-        ),
+      textTheme: TextTheme(
+        headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
+        headline6: GoogleFonts.quicksand(fontSize: 36.0),
+        bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
+        bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
       ),
+    ),
     navigatorKey: Get.key,
     home: Home(),
   ));
 }
+
 /** The home widget is the main widget of the app and contains the Image Previews and the settings drawer.
  *
  * **/
@@ -567,12 +558,39 @@ class Images extends StatefulWidget {
 class _ImagesState extends State<Images> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
+
   @override
   void initState() {
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
       setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
+    }
+  }
+
+  void jumpToItem(int item, int totalItems) {
+    if(totalItems > 0) {
+      double viewportHeight = gridController.position.viewportDimension;
+      double totalHeight = gridController.position.maxScrollExtent + viewportHeight;
+
+      int columnsCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns;
+      int rowCount = (totalItems / columnsCount).ceil();
+      double rowHeight = totalHeight / rowCount;
+      double rowsPerViewport = viewportHeight / rowHeight;
+
+      int currentRow = (item / columnsCount).floor();
+      // scroll to the row of the current item
+      // but if we can't scroll to the top of this row (rows left < rowsPerViewport) - scroll to the max and trigger page load
+      bool isCloseToEdge = (rowCount - currentRow) <= rowsPerViewport;
+      double scrollToValue = isCloseToEdge ? totalHeight : max((rowHeight * currentRow), 0.0);
+
+      // print('SCROLL CONTROLLER');
+      // print(widget.gridController.position);
+      // print(newValue);
+
+      // bug: sometimes stops working (gridController is not updated after state change? i.e. reentering app, changing rotation)
+      // possibly fixed after moving this function to gridView
+      gridController.jumpTo(scrollToValue);
     }
   }
 
@@ -627,7 +645,22 @@ class _ImagesState extends State<Images> {
                               onTap: () {
                                 // Load the image viewer
                                 print(snapshot.data[index].fileURL);
-                                Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, gridController, columnsCount));
+
+                                Navigator.of(context).push(PageRouteBuilder(
+                                  opaque: false,
+                                  pageBuilder: (BuildContext context, Animation<double> anim1, Animation<double> anim2) {
+                                    return Dismissible(
+                                      direction: DismissDirection.vertical,
+                                      background: Container(color: Colors.black.withOpacity(0.3)),
+                                      key: const Key('key'),
+                                      onDismissed: (_) => Navigator.of(context).pop(),
+                                      child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem),
+                                    );
+                                  },
+                                  fullscreenDialog: true
+                                ));
+
+                                // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem));
                               },
                               onLongPress: (){
                                 if (widget.searchGlobals.selected.contains(index)){
@@ -638,7 +671,6 @@ class _ImagesState extends State<Images> {
                                   setState(() {
                                     widget.searchGlobals.selected.add(index);
                                   });
-
                                 }
                               },
                             ),
@@ -653,7 +685,7 @@ class _ImagesState extends State<Images> {
             onNotification: (notif) {
               widget.searchGlobals.scrollPosition = gridController.offset;
               // print('SCROLL NOTIFICATION');
-              // print(gridController.position.maxScrollExtent);
+              // print(widget.gridController.position.maxScrollExtent);
               // print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
               // If at bottom edge update state with incremented pageNum
@@ -665,12 +697,12 @@ class _ImagesState extends State<Images> {
                   setState((){
                       widget.searchGlobals.pageNum++;
                   });
-                Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
                 } else if (!isLastPage) {
                   setState((){
                     isLastPage = true;
                   });
-                  Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                  Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
                 }
               }
             },
@@ -703,7 +735,7 @@ class _ImagesState extends State<Images> {
     return Stack(
       alignment: Alignment.center,
       children: [
-        CachedThumb(thumbURL,widget.settingsHandler,columnCount),
+        CachedThumb(thumbURL, widget.settingsHandler, columnCount),
         Container(
           alignment: Alignment.bottomRight,
           child: Container(
@@ -724,28 +756,65 @@ class _ImagesState extends State<Images> {
   }
 }
 
+
+class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
+  String title;
+  List<Widget> actions;
+  bool visible;
+  HideableAppBar(this.title, this.actions, this.visible);
+
+  double defaultHeight = kToolbarHeight; //56.0
+  @override
+  Size get preferredSize => Size.fromHeight(defaultHeight);
+
+  @override
+  _HideableAppBarState createState() => _HideableAppBarState();
+}
+
+class _HideableAppBarState extends State<HideableAppBar> {
+  @override
+  Widget build(BuildContext context) {
+    print(widget.defaultHeight);
+    return AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeOutCirc,
+        height: widget.visible ? widget.defaultHeight * 1.75 : 0.0, //1.75 because for some reason it gets reduced to 32
+        child: AppBar(
+          toolbarHeight: 56.0,
+          leading: IconButton(
+            // to ignore icon change
+            icon: Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ), 
+          title: Text(widget.title),
+          actions: widget.actions,
+        ),
+    );
+  }
+}
+
 /**
  * The image page is what is dispalyed when an iamge is clicked it shows a full resolution
  * version of an image and allows scrolling left and right through the currently loaded booruItems
  *
  */
 class ImagePage extends StatefulWidget {
-  final List fetched;
-  final int index;
+  List fetched;
+  int index;
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
-  ScrollController gridController;
-  int columnsCount;
-  ImagePage(this.fetched,this.index,this.searchGlobals,this.settingsHandler, this.gridController, this.columnsCount);
+  Function jumpToItem;
+  ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.jumpToItem);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
 
-class _ImagePageState extends State<ImagePage>{
+class _ImagePageState extends State<ImagePage> {
   PreloadPageController controller;
   PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
   int viewedIndex;
+  bool showAppBar = true;
 
   @override
   void initState() {
@@ -758,128 +827,111 @@ class _ImagePageState extends State<ImagePage>{
     );
 
     viewedIndex = widget.index;
-    jumpToItem(widget.index);
-  }
-
-  void jumpToItem(int item) {
-    int totalItems = widget.fetched.length;
-    if(totalItems > 0) {
-      final viewportHeight = widget.gridController.position.viewportDimension;
-      final totalHeight = widget.gridController.position.maxScrollExtent + viewportHeight;
-
-      final rowCount = (totalItems / widget.columnsCount).ceil();
-      final rowHeight = totalHeight / rowCount;
-
-      final rowsPerViewport = (viewportHeight + 30) / rowHeight; // add some height to trigger page load a bit early
-
-      final currentRow = (item / widget.columnsCount).floor();
-      // scroll to the row of the current item
-      // but if we can't scroll to the top of this row (rows left < rowsPerViewport) - scroll to the max and trigger page load
-      final scrollToValue = (rowCount - currentRow) < rowsPerViewport ? totalHeight : max((rowHeight * currentRow), 0.0);
-      // print('SCROLL CONTROLLER');
-      // print(widget.gridController.position);
-      // print(newValue);
-
-      // bug: sometimes stops working (gridController is not updated after state change? i.e. reentering app, changing rotation)
-      widget.gridController.jumpTo(scrollToValue);
-    }
+    widget.jumpToItem(widget.index, widget.fetched.length);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text((viewedIndex+1).toString()+'/'+widget.fetched.length.toString()),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: (){
-              getPerms();
-              // call a function to save the currently viewed image when the save button is pressed
-              writer.write(widget.fetched[viewedIndex],widget.settingsHandler.jsonWrite);
-              Get.snackbar("Snatched ＼(^ o ^)／",widget.fetched[viewedIndex].fileURL,snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: (){
-              ServiceHandler serviceHandler = new ServiceHandler();
-              serviceHandler.loadShareIntent(widget.fetched[viewedIndex].fileURL);
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.public),
-            onPressed: (){
-              if (Platform.isAndroid){
-                _launchURL(widget.fetched[viewedIndex].postURL);
-              } else if (Platform.isLinux){
-                Process.run('xdg-open',[widget.fetched[viewedIndex].postURL]);
-              }
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.info),
-            onPressed: (){
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context){
-                      return Dialog(
-                        shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(20.0)),
-                        child: Container(
-                          margin: EdgeInsets.all(5),
-                          child: ListView.builder(
-                              itemCount: widget.fetched[viewedIndex].tagsList.length,
-                              itemBuilder: (BuildContext context, int index){
-                                String currentTag = widget.fetched[viewedIndex].tagsList[index];
-                                if(currentTag != '') {
-                                  return Column(
-                                    children: <Widget>[
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(currentTag),
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
-                                            onPressed: (){
-                                              setState(() {
-                                                widget.searchGlobals.addTag.value = " " + currentTag;
-                                              });
-                                              Get.snackbar("Added tag to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
-                                            onPressed: (){
-                                              setState(() {
-                                                widget.searchGlobals.newTab.value = currentTag;
-                                              });
-                                              Get.snackbar("Added new search tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      Divider(
-                                        color: Colors.white,
-                                        height: 2,
-                                      ),
-                                    ]
-                                  );
-                                } else { // Render nothing if currentTag is an empty string
-                                  return Column();
-                                }
-                              }
-                          ),
-                        ),
-                      );
-                    }
-                  );
-            },
-          ),
-        ],
+    String appBarTitle = (viewedIndex+1).toString()+'/'+widget.fetched.length.toString();
+    List<Widget> appBarActions = [
+      IconButton(
+        icon: Icon(Icons.save),
+        onPressed: () async {
+          getPerms();
+          // call a function to save the currently viewed image when the save button is pressed
+          Get.snackbar("Snatching started, please wait...", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          // TODO: show progress, maybe use system downloader?
+          dynamic snatchResult = await writer.write(widget.fetched[viewedIndex], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
+          if(snatchResult == null) {
+            Get.snackbar("This file was already snatched!", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          } else if (snatchResult is String) {
+            Get.snackbar("Snatched ＼(^ o ^)／", snatchResult, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          } else {
+            Get.snackbar("Snatching failed!", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.white, backgroundColor: Colors.red);
+          }
+        },
       ),
+      IconButton(
+        icon: Icon(Icons.share),
+        onPressed: (){
+          ServiceHandler serviceHandler = new ServiceHandler();
+          serviceHandler.loadShareIntent(widget.fetched[viewedIndex].fileURL);
+        },
+      ),
+      IconButton(
+        icon: Icon(Icons.public),
+        onPressed: (){
+          if (Platform.isAndroid){
+            _launchURL(widget.fetched[viewedIndex].postURL);
+          } else if (Platform.isLinux){
+            Process.run('xdg-open',[widget.fetched[viewedIndex].postURL]);
+          }
+        },
+      ),
+      IconButton(
+        icon: Icon(Icons.info),
+        onPressed: (){
+          showDialog(
+            context: context,
+            builder: (BuildContext context){
+              return Dialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+                child: Container(
+                  margin: EdgeInsets.all(5),
+                  child: ListView.builder(
+                    itemCount: widget.fetched[viewedIndex].tagsList.length,
+                    itemBuilder: (BuildContext context, int index){
+                      String currentTag = widget.fetched[viewedIndex].tagsList[index];
+                      if(currentTag != '') {
+                        return Column(
+                          children: <Widget>[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(currentTag),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.add, color: Theme.of(context).accentColor,),
+                                  onPressed: (){
+                                    setState(() {
+                                      widget.searchGlobals.addTag.value = " " + currentTag;
+                                    });
+                                    Get.snackbar("Added to current search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.fiber_new, color: Theme.of(context).accentColor),
+                                  onPressed: (){
+                                    setState(() {
+                                      widget.searchGlobals.newTab.value = currentTag;
+                                    });
+                                    Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                                  },
+                                ),
+                              ],
+                            ),
+                            Divider(
+                              color: Colors.white,
+                              height: 2,
+                            ),
+                          ]
+                        );
+                      } else { // Render nothing if currentTag is an empty string
+                        return Column();
+                      }
+                    }
+                  ),
+                ),
+              );
+            }
+          );
+        },
+      ),
+    ];
+
+    return Scaffold(
+      // bug: videos restart when appbar is toggled
+      appBar: HideableAppBar(appBarTitle, appBarActions, showAppBar),
       body: Center(
         /**
          * The pageView builder will created a page for each image in the booruList(fetched)
@@ -887,26 +939,32 @@ class _ImagePageState extends State<ImagePage>{
         child: Platform.isAndroid ? PhotoViewGestureDetectorScope( // prevents triggering page change early when panning
           axis: Axis.horizontal,
           child: PreloadPageView.builder(
-          preloadPagesCount: widget.settingsHandler.preloadCount,
-          scrollDirection: Axis.horizontal,
+            preloadPagesCount: widget.settingsHandler.preloadCount,
+            scrollDirection: Axis.horizontal,
             physics: const AlwaysScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            String fileURL = widget.fetched[index].fileURL;
-            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
-            int preloadCount = widget.settingsHandler.preloadCount;
+            itemBuilder: (context, index) {
+              String fileURL = widget.fetched[index].fileURL;
+              bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
+              int preloadCount = widget.settingsHandler.preloadCount;
               bool isViewed = viewedIndex == index;
               bool isNear = (viewedIndex - index).abs() <= preloadCount;
               print(fileURL);
 
               // Render only if viewed or in preloadCount range
               if(isViewed || isNear) {
-                if (isVideo) {
-                  return VideoApp(fileURL, index, viewedIndex, widget.settingsHandler);
-                        } else {
-                  return MediaViewer(widget.fetched[index], index, viewedIndex,widget.settingsHandler);
-                        }
+                return GestureDetector(
+                  onLongPress: () {
+                    print('longpress');
+                    setState(() {
+                      showAppBar = !showAppBar;
+                    });
+                  },
+                  child: isVideo
+                    ? VideoApp(widget.fetched[index], index, viewedIndex, widget.settingsHandler)
+                    : MediaViewer(widget.fetched[index], index, viewedIndex, widget.settingsHandler)
+                );
               } else {
-                return Container(child: Text("You should not see this"));
+                return Container();
             }
           },
           controller: controller,
@@ -915,7 +973,7 @@ class _ImagePageState extends State<ImagePage>{
               viewedIndex = index;
             });
             // Scroll to current item in GridView while viewer is open, will also trigger new page loading
-            jumpToItem(index);
+            widget.jumpToItem(index, widget.fetched.length);
             // print('Page changed ' + index.toString());
           },
           itemCount: widget.fetched.length,
@@ -998,6 +1056,110 @@ class _MediaViewerState extends State<MediaViewer> {
     print(viewState);
   }
 
+  Widget loadingElementBuilder(BuildContext ctx, ImageChunkEvent loadingProgress) {
+    bool hasProgressData = loadingProgress != null && loadingProgress.expectedTotalBytes != null;
+    double percentDone = hasProgressData ? (loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes) : null;
+    String loadedSize = hasProgressData ? formatBytes(loadingProgress.cumulativeBytesLoaded, 1) : '';
+    String expectedSize = hasProgressData ? formatBytes(loadingProgress.expectedTotalBytes, 1) : '';
+    String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'Loading...';
+    String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
+
+    String thumbnailFileURL = widget.settingsHandler.previewMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
+    File preview = File(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
+    // start opacity from 20%
+    double opacityValue = 0.2 + 0.8 * lerpDouble(0.0, 1.0, (percentDone == null ? 0 : percentDone));
+
+    // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
+    // print(opacityValue);
+
+    return Container(
+      decoration: new BoxDecoration(
+        color: Colors.black,
+        image: new DecorationImage(
+          image: preview.existsSync() ? FileImage(preview) : NetworkImage(thumbnailFileURL),
+          fit: BoxFit.contain,
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(opacityValue), BlendMode.dstATop)
+        ),
+      ),
+      child: new BackdropFilter(
+        filter: new ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: 10,
+                child: RotatedBox(
+                  quarterTurns: -1,
+                  child: LinearProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                    value: percentDone
+                  ),
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: widget.settingsHandler.loadingGif
+                  ? [Container(
+                    width: MediaQuery.of(context).size.width - 30,
+                    child: Image(image: AssetImage('assets/images/loading.gif'))
+                  )]
+                  : [
+                    Stack(children: [
+                      Text(
+                        percentDoneText,
+                        style: TextStyle(
+                          fontSize: 28,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = Colors.black,
+                        ),
+                      ),
+                      Text(
+                        percentDoneText,
+                        style: TextStyle(
+                          fontSize: 28,
+                        ),
+                      ),
+                    ]),
+                    Stack(children: [
+                      Text(
+                        filesizeText,
+                        style: TextStyle(
+                          fontSize: 24,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = Colors.black,
+                        ),
+                      ),
+                      Text(
+                        filesizeText,
+                        style: TextStyle(
+                          fontSize: 24,
+                        ),
+                      ),
+                    ]),
+                  ]
+              ),
+              SizedBox(
+                width: 10,
+                child: RotatedBox(
+                  quarterTurns: percentDone != null ? -1 : 1,
+                  child: LinearProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                    value: percentDone
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      )
+    );
+  }
+
   Widget build(BuildContext context) {
     if(widget.viewedIndex != widget.index) {
       // reset zoom if not viewed
@@ -1014,54 +1176,12 @@ class _MediaViewerState extends State<MediaViewer> {
         initialScale: PhotoViewComputedScale.contained,
         basePosition: Alignment.center,
         controller: viewController,
+        tightMode: true,
+        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero'),
         scaleStateController: scaleController,
         enableRotation: false,
-        loadingBuilder: (BuildContext ctx, ImageChunkEvent loadingProgress) {
-          bool hasProgressData = loadingProgress != null && loadingProgress.expectedTotalBytes != null;
-          double percentDone = hasProgressData ? (loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes) : null;
-          String loadedSize = hasProgressData ? formatBytes(loadingProgress.cumulativeBytesLoaded, 1) : '';
-          String expectedSize = hasProgressData ? formatBytes(loadingProgress.expectedTotalBytes, 1) : '';
-          String percentDoneText = hasProgressData ? ('${(percentDone*100).toStringAsFixed(2)}%') : 'Loading...';
-          String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
-          String fileURL = widget.settingsHandler.previewMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
-          File preview = File(widget.settingsHandler.cachePath + "thumbnails/" + fileURL.substring(fileURL.lastIndexOf("/") + 1));
-          print(widget.settingsHandler.cachePath + "thumbnails/" + fileURL.substring(fileURL.lastIndexOf("/") + 1));
-          return widget.settingsHandler.loadingGif ?
-          Image(image: AssetImage('assets/images/loading.gif')) :
-          (preview.existsSync() ?
-          Opacity(
-            opacity: percentDone == null ? 0 : percentDone,
-            child: Image(image: FileImage(preview)),
-          ) :
-           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 120,
-                width: 120,
-                child: CircularProgressIndicator(
-                  strokeWidth: 12,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
-                  value: percentDone,
-                ),
-              ),
-              Padding(padding: EdgeInsets.only(bottom: 15)),
-              Text(
-                percentDoneText,
-                style: TextStyle(
-                  fontSize: 24,
-                ),
-              ),
-              Text(
-                filesizeText,
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              ),
-            ],
-          ));
-        },
-      ),
+        loadingBuilder: loadingElementBuilder,
+      )
     );
   }
 }
@@ -1080,7 +1200,7 @@ class _CachedThumbState extends State<CachedThumb> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: widget.imageWriter.getThumbPath(widget.fileURL),
+        future: widget.imageWriter.getCachePath(widget.fileURL, 'thumbnails'),
         builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.data != null) {
@@ -1093,7 +1213,7 @@ class _CachedThumbState extends State<CachedThumb> {
             } else {
               if (widget.settingsHandler.imageCache){
                 return FutureBuilder(
-                    future: widget.imageWriter.writeThumb(widget.fileURL),
+                    future: widget.imageWriter.writeCache(widget.fileURL, 'thumbnails'),
                     builder: (context, AsyncSnapshot snapshot) {
                       if (snapshot.connectionState == ConnectionState.done) {
                         return Image.file(
@@ -1104,7 +1224,7 @@ class _CachedThumbState extends State<CachedThumb> {
                         );
                       } else {
                         return CircularProgressIndicator(
-                          strokeWidth: 12,
+                          strokeWidth: 16 / widget.columnCount,
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
                         );
                       }
@@ -1137,13 +1257,13 @@ class _CachedThumbState extends State<CachedThumb> {
                         ),
                         Padding(padding: EdgeInsets.only(bottom: 10)),
                         widget.columnCount < 4 // Text element overflows if too many thumbnails are shown
-                            ? Text(
-                          percentDoneText,
-                          style: TextStyle(
-                            fontSize: 12,
-                          ),
-                        )
-                            : Container(),
+                          ? Text(
+                            percentDoneText,
+                            style: TextStyle(
+                              fontSize: 12,
+                            ),
+                          )
+                          : Container(),
                       ],
                     );
                   }
@@ -1162,11 +1282,11 @@ class _CachedThumbState extends State<CachedThumb> {
  * None of the code in this widget is mine it's from the example at https://pub.dev/packages/video_player
  */
 class VideoApp extends StatefulWidget {
-  final String url;
+  final BooruItem booruItem;
   final int index;
   final int viewedIndex;
   SettingsHandler settingsHandler;
-  VideoApp(this.url, this.index, this.viewedIndex, this.settingsHandler);
+  VideoApp(this.booruItem, this.index, this.viewedIndex, this.settingsHandler);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
@@ -1174,6 +1294,9 @@ class VideoApp extends StatefulWidget {
 class _VideoAppState extends State<VideoApp> {
   VideoPlayerController _videoController;
   ChewieController _chewieController;
+  TapDownDetails doubleTapInfo;
+
+  // VideoPlayerValue _latestValue;
 
   @override
   void initState() {
@@ -1181,9 +1304,73 @@ class _VideoAppState extends State<VideoApp> {
     initPlayer();
   }
 
+  // void _updateState() {
+  //   print(_controller.value);
+  //   setState(() {
+  //     _latestValue = _controller.value;
+  //   });
+  // }
+
+  void doubleTapInfoWrite(TapDownDetails event) {
+    doubleTapInfo = event;
+  }
+  // TODO: make customControls and implement this there
+  void doubleTapAction() {
+    if(doubleTapInfo == null || _chewieController == null || !_chewieController.videoPlayerController.value.initialized) return;
+
+    // Detect on which side we tapped
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenMiddle = screenWidth / 2;
+    double sidesLimit = screenWidth / 6;
+    double tapPositionWidth = doubleTapInfo.localPosition.dx;
+    int tapSide;
+    if(tapPositionWidth > (screenMiddle + sidesLimit)) {
+      tapSide = 1;
+    } else if (tapPositionWidth < (screenMiddle - sidesLimit)) {
+      tapSide = -1;
+    } else {
+      tapSide = 0;
+    }
+
+    // Decide how much we will skip depending on video length
+    int videoDuration = _videoController.value.duration.inSeconds;
+    int skipSeconds;
+    if(videoDuration <= 5) {
+      skipSeconds = 0;
+    } else if(videoDuration <= 10) {
+      skipSeconds = 1;
+    } else if(videoDuration <= 60) {
+      skipSeconds = 5;
+    } else if(videoDuration <= 120) {
+      skipSeconds = 10;
+    } else {
+      skipSeconds = 15;
+    }
+
+    if(tapSide != 0 && skipSeconds != 0) {
+      int videoPositionMillisecs = _videoController.value.position.inMilliseconds;
+      int videoDurationMillisecs = _videoController.value.duration.inMilliseconds;
+      // Calculate new time with skip and limit it to range (0 to duration of video) (in milliseconds for accuracy)
+      int newTime = min(max(0, videoPositionMillisecs + (skipSeconds * 1000 * tapSide)), videoDurationMillisecs);
+      print(newTime);
+      // Skip set amount of seconds if we tapped on left/right third of the screen or play/pause if in the middle
+      _videoController.seekTo(new Duration(milliseconds: newTime));
+      if(videoDurationMillisecs == newTime) {
+        Get.snackbar("", "Reached video end", snackStyle: SnackStyle.GROUNDED, snackPosition: SnackPosition.TOP, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+      } else if(newTime == 0) {
+        Get.snackbar("", "Reached video start", snackStyle: SnackStyle.GROUNDED, snackPosition: SnackPosition.TOP, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+      } else {
+        Get.snackbar("", "${tapSide == 1 ? 'Skipped' : 'Rewind'} $skipSeconds second${skipSeconds > 1 ? 's' : ''}", snackStyle: SnackStyle.GROUNDED, snackPosition: SnackPosition.TOP, duration: Duration(seconds: 1), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+      }
+    } else {
+      _videoController.value.isPlaying ? _videoController.pause() : _videoController.play();
+    }
+  }
+
   Future<void> initPlayer() async {
-    _videoController = VideoPlayerController.network(widget.url);
+    _videoController = VideoPlayerController.network(widget.booruItem.fileURL);
     await _videoController.initialize();
+    // _videoController.addListener(_updateState);
 
     // Player wrapper to allow controls, looping...
     _chewieController = ChewieController(
@@ -1225,51 +1412,129 @@ class _VideoAppState extends State<VideoApp> {
 
   }
 
+  Widget loadingElementBuilder() {
+    String thumbnailFileURL = widget.settingsHandler.previewMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
+    File preview = File(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
+    double opacityValue = 0.66;
+
+    // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
+    // print(opacityValue);
+
+    return Container(
+      decoration: new BoxDecoration(
+        color: Colors.black,
+        image: new DecorationImage(
+          image: preview.existsSync() ? FileImage(preview) : NetworkImage(thumbnailFileURL),
+          fit: BoxFit.contain,
+          colorFilter: new ColorFilter.mode(Colors.black.withOpacity(opacityValue), BlendMode.dstATop)
+        ),
+      ),
+      child: new BackdropFilter(
+        filter: new ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: 10,
+                child: RotatedBox(
+                  quarterTurns: -1,
+                  child: LinearProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                    // value: percentDone
+                  ),
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: widget.settingsHandler.loadingGif
+                  ? [Container(
+                    width: MediaQuery.of(context).size.width - 30,
+                    child: Image(image: AssetImage('assets/images/loading.gif'))
+                  )]
+                  : [
+                    Stack(children: [
+                      Text(
+                        'Loading...', // percentDoneText,
+                        style: TextStyle(
+                          fontSize: 28,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 4
+                            ..color = Colors.black,
+                        ),
+                      ),
+                      Text(
+                        'Loading...', // percentDoneText,
+                        style: TextStyle(
+                          fontSize: 28,
+                        ),
+                      ),
+                    ]),
+                  ]
+              ),
+              SizedBox(
+                width: 10,
+                child: RotatedBox(
+                  quarterTurns: 1,
+                  child: LinearProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                    // value: percentDone
+                  ),
+                ),
+              ),
+            ],
+          ),
+        )
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isViewed = widget.viewedIndex == widget.index;
     bool initialized = _chewieController != null && _chewieController.videoPlayerController.value.initialized;
     String vWidth = '';
     String vHeight = '';
+
     if(initialized) {
-      vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
-      vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
+      // vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
+      // vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
       if (isViewed) {
-        // Reset video time if viewed
+        // Reset video time if in view
         _videoController.seekTo(Duration());
         if(widget.settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-        _videoController.play();
+          _videoController.play();
         }
       } else {
         _videoController.pause();
       }
     }
 
-      return Container(
-        child: Scaffold(
-          body: Column(
-            children: <Widget>[
+    return Container(
+      child: Scaffold(
+        body: Column(
+          children: <Widget>[
             // Show video dimensions on the top
             // Container(
             //   child: MediaQuery.of(context).orientation == Orientation.portrait ? Text(vWidth+'x'+vHeight) : null
             // ),
-              Expanded(
-                child: Center(
-                  child: initialized
-                    ? Chewie(controller: _chewieController)
-                    : Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Image(image: AssetImage('assets/images/loading.gif'))
-                      ],
-                    ),
-                ),
+            Expanded(
+              child: Center(
+                child: initialized
+                  ? GestureDetector(
+                    onDoubleTapDown: doubleTapInfoWrite,
+                    onDoubleTap: doubleTapAction,
+                    child: Chewie(controller: _chewieController)
+                  )
+                  : loadingElementBuilder()
               ),
-            ],
-          )
-        ),
-      );
+            ),
+          ],
+        )
+      ),
+    );
   }
 
   @override
@@ -1277,7 +1542,7 @@ class _VideoAppState extends State<VideoApp> {
     _videoController.pause();
     _videoController.dispose();
     if(_chewieController != null) {
-    _chewieController.dispose();
+      _chewieController.dispose();
     }
     super.dispose();
   }
