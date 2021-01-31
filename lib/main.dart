@@ -84,6 +84,7 @@ class _PreloaderState extends State<Preloader> {
 class Home extends StatefulWidget {
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler = new SnatchHandler();
+  BooruSelector booruSelector;
   @override
   _HomeState createState() => _HomeState();
   Home(this.settingsHandler);
@@ -96,12 +97,15 @@ class _HomeState extends State<Home> {
   int globalsIndex = 0;
   bool firstRun = true;
   bool isSnatching = false;
+
   String snatchStatus = "";
   final searchTagsController = TextEditingController();
   @override
   void initState() {
     super.initState();
     widget.snatchHandler.addQueueHandler();
+    print("new booru selector added");
+    widget.booruSelector = new BooruSelector(widget.settingsHandler);
   }
 
   @override
@@ -123,6 +127,16 @@ class _HomeState extends State<Home> {
         }
       });
       searchGlobals[globalsIndex].newTab.value = "";
+    }
+    if (widget.booruSelector.selectedBooruNotifier.value == "noListener"){
+      print("Listener added to booruselector");
+      widget.booruSelector.selectedBooruNotifier.addListener((){
+        if (widget.booruSelector.selectedBooruNotifier.value != null){
+          setState(() {
+            searchGlobals[globalsIndex].selectedBooru = widget.booruSelector.selectedBooru;
+          });
+        }
+      });
     }
     return Listener(
         onPointerDown: (event){
@@ -253,7 +267,7 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      BooruSelector(widget.settingsHandler, searchGlobals[globalsIndex], searchTagsController.text),
+                      widget.booruSelector,
                     ],
                   ),
                 ),
@@ -307,7 +321,7 @@ class _HomeState extends State<Home> {
    * **/
   Widget ImagesFuture(){
         return FutureBuilder(
-            future: ImagesFutures(),
+            future: widget.settingsHandler.initialize(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.done){
                 if (widget.settingsHandler.booruList.isEmpty){
@@ -335,12 +349,15 @@ class _HomeState extends State<Home> {
                   );
                 } else if (firstRun){
                     return FutureBuilder(
-                        future: ImagesFutures(),
+                        future: widget.settingsHandler.initialize(),
                         builder: (BuildContext context, AsyncSnapshot snapshot) {
                           if (snapshot.connectionState == ConnectionState.done){
                             firstRun = false;
                             searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
                             searchTagsController.text = widget.settingsHandler.defTags;
+                            if (searchGlobals[globalsIndex].selectedBooru == null){
+                              searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+                            }
                             return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
                           } else {
                             return Center(child: CircularProgressIndicator());
@@ -348,6 +365,7 @@ class _HomeState extends State<Home> {
                         }
                     );
                 } else {
+
                     return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
                   }
               } else {
@@ -355,15 +373,6 @@ class _HomeState extends State<Home> {
               }
             }
         );
-  }
-  // Future used in the above future builder it calls getPerms and loadSettings
-  Future ImagesFutures() async{
-    await getPerms();
-    await widget.settingsHandler.loadSettings();
-    if (searchGlobals[globalsIndex].selectedBooru == null){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
-    }
-    return true;
   }
 }
 class ActiveTitle extends StatefulWidget {

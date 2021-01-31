@@ -17,18 +17,10 @@ class BooruSelector extends StatefulWidget {
 class _BooruSelectorState extends State<BooruSelector> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
-    print("++++++++++++++++++++++++++++++++++++++++");
-    if (widget.selectedBooru != null){
-      print("Selected booru is ${widget.selectedBooru.name}");
-    } else {
-      print("Selected booru is null");
-    }
-
     return FutureBuilder(
       future: BooruSelector(),
       builder: (context, AsyncSnapshot snapshot) {
@@ -45,15 +37,15 @@ class _BooruSelectorState extends State<BooruSelector> {
    * **/
   Future BooruSelector() async{
     await widget.settingsHandler.getBooru();
-    if (widget.selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
-      widget.selectedBooru = widget.settingsHandler.booruList[0];
-      widget.selectedBooruNotifier.value = widget.selectedBooru;
-    }
     print("+++++++++++FUTURE+++++++++++++");
     if (widget.selectedBooru != null){
       print("Selected booru is ${widget.selectedBooru.name}");
     } else {
       print("Selected booru is null");
+    }
+    if (widget.selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
+      widget.selectedBooru = widget.settingsHandler.booruList[0];
+      //widget.selectedBooruNotifier.value = widget.selectedBooru;
     }
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     return Container(
@@ -61,10 +53,10 @@ class _BooruSelectorState extends State<BooruSelector> {
         value: widget.selectedBooru,
         icon: Icon(Icons.arrow_downward),
         onChanged: (Booru newValue){
-          widget.selectedBooruNotifier.value = widget.selectedBooru;
           setState((){
-              print("setting selected booru to: ${widget.settingsHandler.booruList[0].name}");
+              print("setting selected booru to: ${newValue.name}");
               widget.selectedBooru = newValue;
+              widget.selectedBooruNotifier.value = newValue;
           });
         },
         items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){

@@ -261,6 +261,8 @@ class SettingsHandler {
   Future initialize() async{
     await getPerms();
     await loadSettings();
-    await getBooru();
+    if (booruList.isEmpty){
+      await getBooru();
+    }
   }
 }
