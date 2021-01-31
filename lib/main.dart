@@ -789,8 +789,8 @@ class _ImagesState extends State<Images> {
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
   List<Widget> actions;
-  bool visible;
-  HideableAppBar(this.title, this.actions, this.visible);
+  SearchGlobals searchGlobals;
+  HideableAppBar(this.title, this.actions, this.searchGlobals);
 
   double defaultHeight = kToolbarHeight; //56.0
   @override
@@ -802,12 +802,21 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _HideableAppBarState extends State<HideableAppBar> {
   @override
+  void initState() {
+    super.initState();
+    widget.searchGlobals.displayAppbar.addListener(() {
+      setState(() {
+      });
+    });
+  }
+  @override
   Widget build(BuildContext context) {
     print(widget.defaultHeight);
-    return AnimatedContainer(
+    print("build visibility ${widget.searchGlobals.displayAppbar.value} ");
+    return widget.searchGlobals.displayAppbar.value ? AnimatedContainer(
         duration: Duration(milliseconds: 200),
         curve: Curves.easeOutCirc,
-        height: widget.visible ? widget.defaultHeight * 1.75 : 0.0, //1.75 because for some reason it gets reduced to 32
+        height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight * 1.75 : 0.0, //1.75 because for some reason it gets reduced to 32
         child: AppBar(
           toolbarHeight: 56.0,
           leading: IconButton(
@@ -818,7 +827,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           title: Text(widget.title),
           actions: widget.actions,
         ),
-    );
+    ) : Container(height:0);
   }
 }
 
@@ -843,7 +852,6 @@ class _ImagePageState extends State<ImagePage> {
   PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
   int viewedIndex;
-  bool showAppBar = true;
 
   @override
   void initState() {
@@ -960,7 +968,7 @@ class _ImagePageState extends State<ImagePage> {
 
     return Scaffold(
       // bug: videos restart when appbar is toggled
-      appBar: HideableAppBar(appBarTitle, appBarActions, showAppBar),
+      appBar: HideableAppBar(appBarTitle, appBarActions, widget.searchGlobals),
       body: Center(
         /**
          * The pageView builder will created a page for each image in the booruList(fetched)
@@ -984,9 +992,7 @@ class _ImagePageState extends State<ImagePage> {
                 return GestureDetector(
                   onLongPress: () {
                     print('longpress');
-                    setState(() {
-                      showAppBar = !showAppBar;
-                    });
+                      widget.searchGlobals.displayAppbar.value = !widget.searchGlobals.displayAppbar.value;
                   },
                   child: isVideo
                     ? VideoApp(widget.fetched[index], index, viewedIndex, widget.settingsHandler)

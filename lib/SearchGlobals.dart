@@ -15,6 +15,7 @@ class SearchGlobals{
   String handlerType;
   ValueNotifier addTag = ValueNotifier("");
   ValueNotifier newTab = ValueNotifier("noListener");
+  ValueNotifier displayAppbar = ValueNotifier(true);
   List selected = new List();
   SearchGlobals(this.selectedBooru,this.tags);
   @override
