@@ -812,8 +812,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   @override
   Widget build(BuildContext context) {
     print(widget.defaultHeight);
-    print("build visibility ${widget.searchGlobals.displayAppbar.value} ");
-    return widget.searchGlobals.displayAppbar.value ? AnimatedContainer(
+    return AnimatedContainer(
         duration: Duration(milliseconds: 200),
         curve: Curves.easeOutCirc,
         height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight * 1.75 : 0.0, //1.75 because for some reason it gets reduced to 32
@@ -827,7 +826,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           title: Text(widget.title),
           actions: widget.actions,
         ),
-    ) : Container(height:0);
+    );
   }
 }
 
