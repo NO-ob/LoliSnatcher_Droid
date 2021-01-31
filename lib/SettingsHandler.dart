@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:LoliSnatcher/getPerms.dart';
 import 'package:flutter/material.dart';
 
 import 'ServiceHandler.dart';
@@ -256,5 +257,10 @@ class SettingsHandler {
     } else if (Platform.isLinux){
       return Platform.environment['HOME'] + "/.loliSnatcher/config/";
     }
+  }
+  Future initialize() async{
+    await getPerms();
+    await loadSettings();
+    await getBooru();
   }
 }

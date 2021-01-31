@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
+import 'package:LoliSnatcher/widgets/BooruSelector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ServiceHandler.dart';
@@ -52,17 +53,40 @@ void main() {
         ),
       ),
     navigatorKey: Get.key,
-    home: Home(),
+    home: Preloader(),
   ));
 }
-/** The home widget is the main widget of the app and contains the Image Previews and the settings drawer.
- *
- * **/
-class Home extends StatefulWidget {
+// Added a preloader to load booruconfigs and settings other wise the booruselector misbehaves
+class Preloader extends StatefulWidget {
   SettingsHandler settingsHandler = new SettingsHandler();
+  @override
+  _PreloaderState createState() => _PreloaderState();
+}
+
+class _PreloaderState extends State<Preloader> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: widget.settingsHandler.initialize(),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          if (snapshot.connectionState == ConnectionState.done){
+            return Home(widget.settingsHandler);
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        }
+    );
+  }
+}
+/** The home widget is the main widget of the app and contains the Image Previews and the settings drawer.
+  *
+  * **/
+class Home extends StatefulWidget {
+  SettingsHandler settingsHandler;
   SnatchHandler snatchHandler = new SnatchHandler();
   @override
   _HomeState createState() => _HomeState();
+  Home(this.settingsHandler);
 }
 
 
@@ -229,16 +253,7 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      FutureBuilder(
-                        future: BooruSelector(),
-                        builder: (context, AsyncSnapshot snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                            return snapshot.data;
-                          } else {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                        },
-                      ),
+                      BooruSelector(widget.settingsHandler, searchGlobals[globalsIndex], searchTagsController.text),
                     ],
                   ),
                 ),
@@ -345,64 +360,10 @@ class _HomeState extends State<Home> {
   Future ImagesFutures() async{
     await getPerms();
     await widget.settingsHandler.loadSettings();
-    return true;
-  }
-  /** This Future function will call getBooru on the settingsHandler to load the booru configs
-   * After these are loaded it returns a drop down list which is used to select which booru to search
-   * **/
-  Future BooruSelector() async{
-    if (widget.settingsHandler.prefBooru == ""){
-      await widget.settingsHandler.loadSettings();
-    }
-    if (widget.settingsHandler.path == ""){
-      widget.settingsHandler.path = await widget.settingsHandler.getExtDir();
-    }
-    if(widget.settingsHandler.booruList.isEmpty){
-      print("getbooru because null");
-      await widget.settingsHandler.getBooru();
-    }
-    if (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name){
-      await widget.settingsHandler.getBooru();
-    }
-    print(searchGlobals[globalsIndex].toString());
-    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (searchGlobals[globalsIndex].selectedBooru == null){
-      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
     }
-    if (!widget.settingsHandler.booruList.contains(searchGlobals[globalsIndex].selectedBooru)){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
-    }
-    return Container(
-      child: DropdownButton<Booru>(
-        value: searchGlobals[globalsIndex].selectedBooru,
-        icon: Icon(Icons.arrow_downward),
-        onChanged: (Booru newValue){
-          setState((){
-            if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue.defTags != ""){
-              searchTagsController.text = newValue.defTags;
-            }
-            searchGlobals[globalsIndex].selectedBooru = newValue;
-          });
-        },
-        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
-          // Return a dropdown item
-          return DropdownMenuItem<Booru>(
-            value: value,
-            child: Row(
-              children: <Widget>[
-                //Booru name
-                Text(value.name + ""),
-                //Booru Icon
-                Image.network(value.faviconURL, width: 16),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    return true;
   }
 }
 class ActiveTitle extends StatefulWidget {
