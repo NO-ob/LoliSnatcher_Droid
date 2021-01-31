@@ -21,10 +21,10 @@ class SnatchHandler  {
   ValueNotifier snatchStatus = ValueNotifier("");
   ValueNotifier queuedItems = ValueNotifier(0);
   List queuedList = new List();
+  List booruNameList = new List();
   bool jsonWrite = false;
-  BooruHandler currentBooru;
   void addQueueHandler(){
-    if (!queuedItems.hasListeners){
+    if (!queuedItems.hasListeners) {
       print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
       print("queuedItems listener added");
       queuedItems.addListener(() {
@@ -33,15 +33,14 @@ class SnatchHandler  {
         trySnatch();
       });
     }
-
   }
-  Future snatch(List<BooruItem> booruItems, bool jsonWrite) async{
+  Future snatch(List<BooruItem> booruItems, bool jsonWrite, String booruName) async{
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
     print("snatching");
     if (!snatchActive.value){
       snatchActive.value = true;
       ImageWriter writer = new ImageWriter();
-      writer.writeMultiple(booruItems, jsonWrite, currentBooru.booru.name).listen(
+      writer.writeMultiple(booruItems, jsonWrite, booruName).listen(
             (data) {
           snatchStatus.value = "$data / ${booruItems.length}";
         },
@@ -56,15 +55,16 @@ class SnatchHandler  {
   void trySnatch(){
     if (!snatchActive.value && queuedItems.value > 0){
       queuedItems.value --;
-      snatch(queuedList.removeLast() , jsonWrite);
+      snatch(queuedList.removeLast(),jsonWrite,booruNameList.removeLast());
     }
   }
-  void queue(List<BooruItem> booruItems, bool jsonWrite){
+  void queue(List<BooruItem> booruItems, bool jsonWrite, String booruName){
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
        print("adding items to queue");
       this.jsonWrite = jsonWrite;
       if (booruItems.isNotEmpty){
         queuedList.add(booruItems);
+        booruNameList.add(booruName);
         queuedItems.value ++;
       }
   }
@@ -79,7 +79,6 @@ class SnatchHandler  {
     }
     List temp = new BooruHandlerFactory().getBooruHandler(booru, limit);
     booruHandler = temp[0];
-    currentBooru = booruHandler;
     page = temp[1];
     Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
     while (count < int.parse(amount)){
@@ -88,36 +87,7 @@ class SnatchHandler  {
       count = booruItems.length;
       print(count);
     }
-    queue(booruItems, jsonWrite);
-    /*Scaffold.of(Get.context).showBottomSheet<void>(
-          (BuildContext context) {
-        return Container(
-          height:150,
-          child: StreamBuilder(
-              stream: writer.writeMultiple(booruItems, widget.settingsHandler.jsonWrite),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.none:
-                    return Text("No Connection");
-                    break;
-                  case ConnectionState.waiting:
-                    return Text("Waiting");
-                    break;
-                  case ConnectionState.active:
-                    return Text("Snatching: ${snapshot.data} / ${booruItems.length}");
-                    break;
-                  case ConnectionState.done:
-                    Get.back();
-                    break;
-                }
-                return Text("Done");
-              }
-          ),
-        );
-      },
-    );*/
-
-
+    queue(booruItems, jsonWrite, booru.name);
     //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
 }

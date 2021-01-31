@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
-import 'package:LoliSnatcher/widgets/BooruSelector.dart';
+import 'package:LoliSnatcher/widgets/BooruSelectorBroken.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ServiceHandler.dart';
@@ -76,7 +76,6 @@ class _PreloaderState extends State<Preloader> {
 class Home extends StatefulWidget {
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler = new SnatchHandler();
-  BooruSelector booruSelector;
   @override
   _HomeState createState() => _HomeState();
   Home(this.settingsHandler);
@@ -96,8 +95,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     widget.snatchHandler.addQueueHandler();
-    print("new booru selector added");
-    widget.booruSelector = new BooruSelector(widget.settingsHandler);
   }
 
   @override
@@ -120,7 +117,7 @@ class _HomeState extends State<Home> {
       });
       searchGlobals[globalsIndex].newTab.value = "";
     }
-    if (widget.booruSelector.selectedBooruNotifier.value == "noListener"){
+    /*if (widget.booruSelector.selectedBooruNotifier.value == "noListener"){
       print("Listener added to booruselector");
       widget.booruSelector.selectedBooruNotifier.addListener((){
         if (widget.booruSelector.selectedBooruNotifier.value != null){
@@ -129,7 +126,7 @@ class _HomeState extends State<Home> {
           });
         }
       });
-    }
+    }*/
     return Listener(
         onPointerDown: (event){
           if(searchBoxFocus.hasFocus){
@@ -146,7 +143,7 @@ class _HomeState extends State<Home> {
                   getPerms();
                   // call a function to save the currently viewed image when the save button is pressed
                   if (searchGlobals[globalsIndex].selected.length > 0){
-                    widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite);
+                    widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru.name);
                   } else {
                     Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                   }
@@ -259,7 +256,16 @@ class _HomeState extends State<Home> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      widget.booruSelector,
+                      FutureBuilder(
+                        future: BooruSelector(),
+                        builder: (context, AsyncSnapshot snapshot) {
+                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                            return snapshot.data;
+                          } else {
+                            return Center(child: CircularProgressIndicator());
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
@@ -366,7 +372,65 @@ class _HomeState extends State<Home> {
             }
         );
   }
+  /** This Future function will call getBooru on the settingsHandler to load the booru configs
+   * After these are loaded it returns a drop down list which is used to select which booru to search
+   * **/
+  Future BooruSelector() async{
+    if (widget.settingsHandler.prefBooru == ""){
+      await widget.settingsHandler.loadSettings();
+    }
+    if (widget.settingsHandler.path == ""){
+      widget.settingsHandler.path = await widget.settingsHandler.getExtDir();
+    }
+    if(widget.settingsHandler.booruList.isEmpty){
+      print("getbooru because null");
+      await widget.settingsHandler.getBooru();
+    }
+    if (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name){
+      await widget.settingsHandler.getBooru();
+    }
+    print(searchGlobals[globalsIndex].toString());
+    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
+    if (searchGlobals[globalsIndex].selectedBooru == null){
+      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
+    }
+    if (!widget.settingsHandler.booruList.contains(searchGlobals[globalsIndex].selectedBooru)){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
+    }
+    return Container(
+      child: DropdownButton<Booru>(
+        value: searchGlobals[globalsIndex].selectedBooru,
+        icon: Icon(Icons.arrow_downward),
+        onChanged: (Booru newValue){
+          setState((){
+            if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue.defTags != ""){
+              searchTagsController.text = newValue.defTags;
+            }
+            searchGlobals[globalsIndex].selectedBooru = newValue;
+          });
+        },
+        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+          // Return a dropdown item
+          return DropdownMenuItem<Booru>(
+            value: value,
+            child: Row(
+              children: <Widget>[
+                //Booru name
+                Text(value.name + ""),
+                //Booru Icon
+                Image.network(value.faviconURL, width: 16),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
 }
+
 class ActiveTitle extends StatefulWidget {
   SnatchHandler snatchHandler;
   bool isSnatching = false;
