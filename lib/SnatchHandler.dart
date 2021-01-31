@@ -22,6 +22,7 @@ class SnatchHandler  {
   ValueNotifier queuedItems = ValueNotifier(0);
   List queuedList = new List();
   bool jsonWrite = false;
+  BooruHandler currentBooru;
   void addQueueHandler(){
     if (!queuedItems.hasListeners){
       print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
@@ -40,7 +41,7 @@ class SnatchHandler  {
     if (!snatchActive.value){
       snatchActive.value = true;
       ImageWriter writer = new ImageWriter();
-      writer.writeMultiple(booruItems, jsonWrite).listen(
+      writer.writeMultiple(booruItems, jsonWrite, currentBooru.booru.name).listen(
             (data) {
           snatchStatus.value = "$data / ${booruItems.length}";
         },
@@ -78,6 +79,7 @@ class SnatchHandler  {
     }
     List temp = new BooruHandlerFactory().getBooruHandler(booru, limit);
     booruHandler = temp[0];
+    currentBooru = booruHandler;
     page = temp[1];
     Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
     while (count < int.parse(amount)){
@@ -86,7 +88,7 @@ class SnatchHandler  {
       count = booruItems.length;
       print(count);
     }
-    queue(booruItems,jsonWrite);
+    queue(booruItems, jsonWrite);
     /*Scaffold.of(Get.context).showBottomSheet<void>(
           (BuildContext context) {
         return Container(
