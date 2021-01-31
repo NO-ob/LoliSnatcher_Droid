@@ -103,16 +103,12 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].newTab.value == "noListener"){
       searchGlobals[globalsIndex].newTab.addListener((){
         if (searchGlobals[globalsIndex].newTab.value != ""){
-          setState(() {
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
-          });
         }
       });
       searchGlobals[globalsIndex].addTag.addListener((){
         if (searchGlobals[globalsIndex].addTag.value != ""){
-          setState(() {
             searchTagsController.text += searchGlobals[globalsIndex].addTag.value;
-          });
         }
       });
       searchGlobals[globalsIndex].newTab.value = "";
@@ -200,8 +196,8 @@ class _HomeState extends State<Home> {
                       Expanded(
                         child:
                         DropdownButton<SearchGlobals>(
-                          value: searchGlobals[globalsIndex],
                           isExpanded: true,
+                          value: searchGlobals[globalsIndex],
                           icon: Icon(Icons.arrow_downward),
                           onChanged: (SearchGlobals newValue){
                             setState(() {
@@ -209,16 +205,21 @@ class _HomeState extends State<Home> {
                               searchTagsController.text = newValue.tags;
                             });
                           },
+                          onTap: (){
+                            setState(() {
+
+                            });
+                          },
                           items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
                             bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru.faviconURL != null;
                             return DropdownMenuItem<SearchGlobals>(
                               value: value,
-                              child: Row(
-                                children: [
-                                  isNotEmptyBooru ? Image.network(value.selectedBooru.faviconURL, width: 16) : Text(''),
-                                  Text(" ${value.tags}"),
-                                ]
-                              )
+                                child: Row(
+                                    children: [
+                                      isNotEmptyBooru ? Image.network(value.selectedBooru.faviconURL, width: 16) : Text(''),
+                                      Expanded(child: Text(" ${value.tags}", overflow: TextOverflow.ellipsis,)),
+                                    ]
+                                ),
                             );
                           }).toList(),
                         ),
@@ -680,19 +681,12 @@ class _ImagesState extends State<Images> {
                               onTap: () {
                                 // Load the image viewer
                                 print(snapshot.data[index].fileURL);
-
-                                Navigator.of(context).push(PageRouteBuilder(
-                                  opaque: false,
-                                  pageBuilder: (BuildContext context, Animation<double> anim1, Animation<double> anim2) {
-                                    return Dismissible(
-                                      direction: DismissDirection.vertical,
-                                      background: Container(color: Colors.black.withOpacity(0.3)),
-                                      key: const Key('key'),
-                                      onDismissed: (_) => Navigator.of(context).pop(),
-                                      child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem),
-                                    );
-                                  },
-                                  fullscreenDialog: true
+                                Get.dialog(Dismissible(
+                                  direction: DismissDirection.vertical,
+                                  background: Container(color: Colors.black.withOpacity(0.3)),
+                                  key: const Key('key'),
+                                  onDismissed: (_) => Navigator.of(context).pop(),
+                                  child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem),
                                 ));
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem));
