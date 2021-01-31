@@ -103,16 +103,12 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].newTab.value == "noListener"){
       searchGlobals[globalsIndex].newTab.addListener((){
         if (searchGlobals[globalsIndex].newTab.value != ""){
-          setState(() {
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
-          });
         }
       });
       searchGlobals[globalsIndex].addTag.addListener((){
         if (searchGlobals[globalsIndex].addTag.value != ""){
-          setState(() {
             searchTagsController.text += searchGlobals[globalsIndex].addTag.value;
-          });
         }
       });
       searchGlobals[globalsIndex].newTab.value = "";
@@ -207,6 +203,11 @@ class _HomeState extends State<Home> {
                             setState(() {
                               globalsIndex = searchGlobals.indexOf(newValue);
                               searchTagsController.text = newValue.tags;
+                            });
+                          },
+                          onTap: (){
+                            setState(() {
+
                             });
                           },
                           items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
