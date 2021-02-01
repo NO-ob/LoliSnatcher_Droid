@@ -84,11 +84,12 @@ class GelbooruHandler extends BooruHandler{
         final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
         // 200 is the success http response code
         if (response.statusCode == 200) {
-          var parsedResponse = jsonDecode(response.body);
-          if (parsedResponse.length > 0){
-            for (int i=0; i < parsedResponse.length; i++){
-              print(parsedResponse.elementAt(i));
-              //searchTags.add(parsedResponse.elementAt(i).getAttribute("name"));
+          var parsedResponse = xml.parse(response.body);
+          var tags = parsedResponse.findAllElements("tag");
+          print(response.body);
+          if (tags.length > 0){
+            for (int i=0; i < tags.length; i++){
+              searchTags.add(tags.elementAt(i).getAttribute("name").trim());
             }
           }
         }
