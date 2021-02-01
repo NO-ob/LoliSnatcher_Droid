@@ -807,7 +807,8 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
   List<Widget> actions;
   SearchGlobals searchGlobals;
-  HideableAppBar(this.title, this.actions, this.searchGlobals);
+  bool autoHide;
+  HideableAppBar(this.title, this.actions, this.searchGlobals, this.autoHide);
 
   double defaultHeight = kToolbarHeight; //56.0
   @override
@@ -823,7 +824,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   void initState() {
     super.initState();
     setSt = () {setState(() {});};
-    // widget.searchGlobals.displayAppbar.value = true;
+    widget.searchGlobals.displayAppbar.value = !widget.autoHide;
     widget.searchGlobals.displayAppbar.addListener(setSt);
   }
   @override
@@ -986,7 +987,7 @@ class _ImagePageState extends State<ImagePage> {
     ];
 
     return Scaffold(
-      appBar: HideableAppBar(appBarTitle, appBarActions, widget.searchGlobals),
+      appBar: HideableAppBar(appBarTitle, appBarActions, widget.searchGlobals,widget.settingsHandler.autoHideImageBar),
       backgroundColor: Colors.transparent,
       body: Dismissible(
         direction: DismissDirection.vertical,

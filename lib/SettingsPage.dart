@@ -34,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
-  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false;
+  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, autoHideImageBar = false;
   Booru selectedBooru;
   String previewMode;
   @override
@@ -55,6 +55,7 @@ class _SettingsPageState extends State<SettingsPage> {
       autoPlay = widget.settingsHandler.autoPlayEnabled;
       loadingGif = widget.settingsHandler.loadingGif;
       imageCache = widget.settingsHandler.imageCache;
+      autoHideImageBar = widget.settingsHandler.autoHideImageBar;
     });
   }
 
@@ -317,6 +318,21 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Row(children: [
+                  Text("Auto Hide Gallery Bar: "),
+                  Checkbox(
+                    value: autoHideImageBar,
+                    onChanged: (newValue) {
+                      setState(() {
+                        autoHideImageBar = newValue;
+                      });
+                    },
+                    activeColor: Colors.pink[200],
+                  )
+                ],)
+            ),
+            Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Row(
                 mainAxisSize: MainAxisSize.max,
@@ -402,7 +418,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache,autoHideImageBar);
                 },
                 child: Text("Save"),
               ),

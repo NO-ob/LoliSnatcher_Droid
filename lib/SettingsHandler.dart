@@ -17,7 +17,7 @@ class SettingsHandler {
   int SDKVer = 0;
   List<Booru> booruList = new List<Booru>();
   var path = "";
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false,autoHideImageBar = false;
   Future writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -133,6 +133,16 @@ class SettingsHandler {
               print("Found Pref Booru " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Autohide Bar"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                autoHideImageBar = true;
+              } else {
+                autoHideImageBar = false;
+              }
+              print("Auto hide image bar " + settings[i].split(" = ")[1] );
+            }
+
         }
       }
     }
@@ -140,7 +150,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool autoHideImageBar) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -182,6 +192,8 @@ class SettingsHandler {
     this.loadingGif = loadingGif;
     writer.write("Image Cache = $imageCache\n");
     this.imageCache = imageCache;
+    writer.write("Autohide Bar = $autoHideImageBar\n");
+    this.autoHideImageBar = autoHideImageBar;
     writer.close();
     await this.loadSettings();
     await getBooru();
