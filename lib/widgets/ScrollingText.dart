@@ -12,13 +12,22 @@ class ScrollingText extends StatefulWidget {
 class _ScrollingTextState extends State<ScrollingText> {
   String displayText;
   int counter = 0;
-  int bufferCounter = 0;
   String bufferText = "";
   bool forward = true;
   @override
+  void initState(){
+    counter = 0;
+    bufferText = "";
+    forward = true;
+  }
+  @override
   Widget build(BuildContext context) {
-    if (counter+widget.size - 1 > widget.text.length && (counter == 0)){
-      return Text(widget.text,textAlign: TextAlign.left);
+    if (counter+widget.size - 1 > widget.text.length && counter != 0){
+      setState(() {
+        initState();
+      });
+    } else if (counter+widget.size - 1 > widget.text.length){
+      return Text(widget.text, textAlign: TextAlign.left);
     } else {
       switch(widget.mode){
         case ("bounce"):
