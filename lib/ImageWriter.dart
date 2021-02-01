@@ -12,7 +12,7 @@ class ImageWriter{
   String path = "";
   String cachePath = "";
   ServiceHandler serviceHandler = new ServiceHandler();
-
+  int SDKVer = 0;
   /**
    * return null - file already exists
    * return String - file saved
@@ -31,6 +31,14 @@ class ImageWriter{
         path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
       }
     }
+    if(SDKVer == 0){
+      if (Platform.isAndroid){
+        SDKVer = await serviceHandler.getSDKVersion();
+        print(SDKVer);
+      } else if (Platform.isLinux){
+        SDKVer = 1;
+      }
+    }
 
     // Don't do anything if file already exists
     File image = new File(path+fileName);
@@ -39,23 +47,34 @@ class ImageWriter{
 
     try {
       var response = await http.get(item.fileURL);
+      if(SDKVer < 30){
+        await Directory(path).create(recursive:true);
+        await image.writeAsBytes(response.bodyBytes);
+        print("Image written: " + path+fileName);
+        if (jsonWrite){
+          File json = new File(path+fileName.split(".")[0]+".json");
+          await json.writeAsString(jsonEncode(item.toJSON()));
+        }
+        try {
+          serviceHandler.callMediaScanner(image.path);
+        } catch (e){
+          print("Image not found");
+          return e;
+        }
+      } else {
+        print("files ext is " + item.fileExt);
+        if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
+          var writeResp = await serviceHandler.writeImage(response.bodyBytes,fileName.split(".")[0],"image", item.fileExt);
+          if (writeResp != null){
+            print("write response: $writeResp");
+            return (fileName);
+          }
+        } else {
+          Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          return 0;
+        }
 
-      await Directory(path).create(recursive:true);
-
-      await image.writeAsBytes(response.bodyBytes);
-      print("Image written: " + path+fileName);
-      if (jsonWrite){
-        File json = new File(path+fileName.split(".")[0]+".json");
-        await json.writeAsString(jsonEncode(item.toJSON()));
       }
-
-      try {
-        serviceHandler.callMediaScanner(image.path);
-      } catch (e){
-        print("Image not found");
-        return e;
-      }
-
     } catch (e){
       print("Image Writer Exception");
       print(e);
@@ -70,6 +89,7 @@ class ImageWriter{
       yield snatchedCounter++;
       await write(snatched.elementAt(i), jsonWrite, booruName);
     }
+    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
 
   Future writeCache(String fileURL, String typeFolder) async{
@@ -114,14 +134,5 @@ class ImageWriter{
       print(e);
       return null;
     }
-  }
-
-  Future writeSelected(SearchGlobals searchGlobals, bool jsonWrite) async {
-    List fetched = searchGlobals.booruHandler.getFetched();
-    for (int i = 0; i < searchGlobals.selected.length; i++){
-      await write(fetched.elementAt(searchGlobals.selected[i]), jsonWrite, searchGlobals.selectedBooru.name);
-    }
-    searchGlobals.selected = new List();
-    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
 }

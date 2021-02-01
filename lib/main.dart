@@ -801,13 +801,17 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
+  Function setSt;
   @override
   void initState() {
     super.initState();
-    widget.searchGlobals.displayAppbar.addListener(() {
-      setState(() {
-      });
-    });
+    setSt = () {setState(() {});};
+    widget.searchGlobals.displayAppbar.addListener(setSt);
+  }
+  @override
+  void dispose(){
+    widget.searchGlobals.displayAppbar.removeListener(setSt);
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {

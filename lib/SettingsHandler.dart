@@ -14,6 +14,7 @@ class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   String defTags = "rating:safe",previewMode = "Sample",prefBooru = "", cachePath = "";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
+  int SDKVer = 0;
   List<Booru> booruList = new List<Booru>();
   var path = "";
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false;
@@ -36,6 +37,10 @@ class SettingsHandler {
   Future loadSettings() async{
     if (path == ""){
       path = await getExtDir();
+      print("found path $path");
+    }
+    if (SDKVer == 0){
+      SDKVer = await getSDKVer();
     }
     if (cachePath == ""){
       cachePath = await serviceHandler.getCacheDir();
@@ -249,6 +254,13 @@ class SettingsHandler {
       return await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       return Platform.environment['HOME'] + "/.loliSnatcher/config/";
+    }
+  }
+  Future getSDKVer() async{
+    if (Platform.isAndroid){
+      return await serviceHandler.getSDKVersion();
+    } else if (Platform.isLinux){
+      return 1;
     }
   }
   Future getDocumentsDir() async{

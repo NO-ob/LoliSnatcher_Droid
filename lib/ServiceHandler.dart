@@ -24,6 +24,15 @@ class ServiceHandler{
     }
     return result;
   }
+  Future<int> getSDKVersion() async{
+    int result;
+    try{
+      result = await platform.invokeMethod("getSdkVersion");
+    } catch(e){
+      print(e);
+    }
+    return result;
+  }
   Future<String> getDocumentsDir() async{
     String result;
     try{
@@ -74,5 +83,14 @@ class ServiceHandler{
     } catch(e){
       print(e);
     }
+  }
+  Future<String> writeImage(var imageData, fileName, mediaType, fileExt) async{
+    String result;
+    try{
+      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt});
+    } catch(e){
+      print(e);
+    }
+    return result;
   }
 }
