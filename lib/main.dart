@@ -103,7 +103,9 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].newTab.value == "noListener"){
       searchGlobals[globalsIndex].newTab.addListener((){
         if (searchGlobals[globalsIndex].newTab.value != ""){
+          setState(() {
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
+          });
         }
       });
       searchGlobals[globalsIndex].addTag.addListener((){
@@ -595,16 +597,22 @@ class Images extends StatefulWidget {
 class _ImagesState extends State<Images> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
-
+  Function jumpTo;
   @override
   void initState() {
+    jumpTo = (){jumpToItem(widget.searchGlobals.viewedIndex.value, widget.searchGlobals.booruHandler.fetched.length);};
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
       setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
     }
+    widget.searchGlobals.viewedIndex.addListener(jumpTo);
   }
-
+  @override
+  void dispose(){
+    widget.searchGlobals.viewedIndex.removeListener(jumpTo);
+    super.dispose();
+  }
   void jumpToItem(int item, int totalItems) {
     if(totalItems > 0) {
       double viewportHeight = gridController.position.viewportDimension;
@@ -687,7 +695,7 @@ class _ImagesState extends State<Images> {
                                   background: Container(color: Colors.black.withOpacity(0.3)),
                                   key: const Key('key'),
                                   onDismissed: (_) => Navigator.of(context).pop(),
-                                  child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem,widget.snatchHandler),
+                                  child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler,widget.snatchHandler),
                                 ));
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem));
@@ -846,8 +854,8 @@ class ImagePage extends StatefulWidget {
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler;
-  Function jumpToItem;
-  ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.jumpToItem,this.snatchHandler);
+  //Function jumpToItem;
+  ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler,this.snatchHandler);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
@@ -856,7 +864,6 @@ class _ImagePageState extends State<ImagePage> {
   PreloadPageController controller;
   PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
-  int viewedIndex;
 
   @override
   void initState() {
@@ -867,14 +874,13 @@ class _ImagePageState extends State<ImagePage> {
     controllerLinux = PageController(
       initialPage: widget.index,
     );
-
-    viewedIndex = widget.index;
-    widget.jumpToItem(widget.index, widget.fetched.length);
+    widget.searchGlobals.viewedIndex.value = widget.index;
+    //widget.jumpToItem(widget.index, widget.fetched.length);
   }
 
   @override
   Widget build(BuildContext context) {
-    String appBarTitle = (viewedIndex+1).toString()+'/'+widget.fetched.length.toString();
+    String appBarTitle = (widget.searchGlobals.viewedIndex.value+1).toString()+'/'+widget.fetched.length.toString();
     List<Widget> appBarActions = [
       IconButton(
         icon: Icon(Icons.save),
@@ -882,7 +888,7 @@ class _ImagePageState extends State<ImagePage> {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
           // TODO: show progress, maybe use system downloader?
-          widget.snatchHandler.queue([widget.fetched[viewedIndex]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
           //snatchResult = await writer.write(widget.fetched[viewedIndex], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
           /*if(snatchResult == null) {
             Get.snackbar("This file was already snatched!", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
@@ -897,16 +903,16 @@ class _ImagePageState extends State<ImagePage> {
         icon: Icon(Icons.share),
         onPressed: (){
           ServiceHandler serviceHandler = new ServiceHandler();
-          serviceHandler.loadShareIntent(widget.fetched[viewedIndex].fileURL);
+          serviceHandler.loadShareIntent(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
         },
       ),
       IconButton(
         icon: Icon(Icons.public),
         onPressed: (){
           if (Platform.isAndroid){
-            _launchURL(widget.fetched[viewedIndex].postURL);
+            _launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
           } else if (Platform.isLinux){
-            Process.run('xdg-open',[widget.fetched[viewedIndex].postURL]);
+            Process.run('xdg-open',[widget.fetched[widget.searchGlobals.viewedIndex.value].postURL]);
           }
         },
       ),
@@ -921,9 +927,9 @@ class _ImagePageState extends State<ImagePage> {
                 child: Container(
                   margin: EdgeInsets.all(5),
                   child: ListView.builder(
-                    itemCount: widget.fetched[viewedIndex].tagsList.length,
+                    itemCount: widget.fetched[widget.searchGlobals.viewedIndex.value].tagsList.length,
                     itemBuilder: (BuildContext context, int index){
-                      String currentTag = widget.fetched[viewedIndex].tagsList[index];
+                      String currentTag = widget.fetched[widget.searchGlobals.viewedIndex.value].tagsList[index];
                       if(currentTag != '') {
                         return Column(
                           children: <Widget>[
@@ -988,8 +994,8 @@ class _ImagePageState extends State<ImagePage> {
               String fileURL = widget.fetched[index].fileURL;
               bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
               int preloadCount = widget.settingsHandler.preloadCount;
-              bool isViewed = viewedIndex == index;
-              bool isNear = (viewedIndex - index).abs() <= preloadCount;
+              bool isViewed = widget.searchGlobals.viewedIndex.value == index;
+              bool isNear = (widget.searchGlobals.viewedIndex.value - index).abs() <= preloadCount;
               print(fileURL);
 
               // Render only if viewed or in preloadCount range
@@ -1000,8 +1006,8 @@ class _ImagePageState extends State<ImagePage> {
                       widget.searchGlobals.displayAppbar.value = !widget.searchGlobals.displayAppbar.value;
                   },
                   child: isVideo
-                    ? VideoApp(widget.fetched[index], index, viewedIndex, widget.settingsHandler)
-                    : MediaViewer(widget.fetched[index], index, viewedIndex, widget.settingsHandler)
+                    ? VideoApp(widget.fetched[index], index, widget.searchGlobals.viewedIndex.value, widget.settingsHandler)
+                    : MediaViewer(widget.fetched[index], index, widget.searchGlobals.viewedIndex.value, widget.settingsHandler)
                 );
               } else {
                 return Container();
@@ -1010,10 +1016,10 @@ class _ImagePageState extends State<ImagePage> {
           controller: controller,
           onPageChanged: (int index){
             setState(() {
-              viewedIndex = index;
+              widget.searchGlobals.viewedIndex.value = index;
             });
             // Scroll to current item in GridView while viewer is open, will also trigger new page loading
-            widget.jumpToItem(index, widget.fetched.length);
+            //widget.jumpToItem(index, widget.fetched.length);
             // print('Page changed ' + index.toString());
           },
           itemCount: widget.fetched.length,
