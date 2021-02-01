@@ -208,18 +208,18 @@ class _HomeState extends State<Home> {
                             });
                           },
                           onTap: (){
-                            setState(() {
-
-                            });
+                            setState(() { });
                           },
                           items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
                             bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru.faviconURL != null;
+                            String tagText = " ${value.tags}";
                             return DropdownMenuItem<SearchGlobals>(
                               value: value,
                                 child: Row(
                                     children: [
                                       isNotEmptyBooru ? Image.network(value.selectedBooru.faviconURL, width: 16) : Text(''),
-                                      Expanded(child: Text(" ${value.tags}", overflow: TextOverflow.ellipsis,)),
+                                      Expanded(child: Text(tagText, maxLines: 3, overflow: TextOverflow.fade)
+                                      ),
                                     ]
                                 ),
                             );
@@ -233,19 +233,22 @@ class _HomeState extends State<Home> {
                         onPressed: () {
                           // add a new search global to the list
                           setState((){
-                            searchGlobals.add(new SearchGlobals(null,widget.settingsHandler.defTags));
+                            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
+                            // searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set empty booru
                           });
                         },
                       ),
                       IconButton(
                         icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
                         onPressed: () {
-                          // Remove selected searchglobal from list
+                          // Remove selected searchglobal from list and apply nearest to search bar
                           setState((){
                             if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
                               globalsIndex --;
+                              searchTagsController.text = searchGlobals[globalsIndex].tags;
                               searchGlobals.removeAt(globalsIndex + 1);
                             } else if (searchGlobals.length > 1){
+                              searchTagsController.text = searchGlobals[globalsIndex + 1].tags;
                               searchGlobals.removeAt(globalsIndex);
                             }
                           });
@@ -412,7 +415,8 @@ class _HomeState extends State<Home> {
             if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue.defTags != ""){
               searchTagsController.text = newValue.defTags;
             }
-            searchGlobals[globalsIndex].selectedBooru = newValue;
+            // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
+            searchGlobals[globalsIndex] = new SearchGlobals(newValue, searchTagsController.text); // Set new booru and search with current tags
           });
         },
         items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
@@ -566,7 +570,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           },
           decoration: InputDecoration(
             hintText:"Enter Tags",
-            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+            contentPadding: new EdgeInsets.fromLTRB(15,0,15,0), // left,top,right,bottom
             border: new OutlineInputBorder(
               borderRadius: new BorderRadius.circular(50),
               gapPadding: 0,
@@ -633,8 +637,6 @@ class _ImagesState extends State<Images> {
       // print(widget.gridController.position);
       // print(newValue);
 
-      // bug: sometimes stops working (gridController is not updated after state change? i.e. reentering app, changing rotation)
-      // possibly fixed after moving this function to gridView
       gridController.jumpTo(scrollToValue);
     }
   }
@@ -665,7 +667,7 @@ class _ImagesState extends State<Images> {
             int columnsCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? widget.settingsHandler.portraitColumns : widget.settingsHandler.landscapeColumns;
             // A notification listener is used to get the scroll position
             return new NotificationListener<ScrollUpdateNotification>(
-            child: Scrollbar( // TO DO: Make it draggable
+            child: Scrollbar( // TODO: Make it draggable
               controller: gridController,
               isAlwaysShown: true,
               child: GridView.builder(
@@ -690,15 +692,21 @@ class _ImagesState extends State<Images> {
                               onTap: () {
                                 // Load the image viewer
                                 print(snapshot.data[index].fileURL);
-                                Get.dialog(Dismissible(
-                                  direction: DismissDirection.vertical,
-                                  background: Container(color: Colors.black.withOpacity(0.3)),
-                                  key: const Key('key'),
-                                  onDismissed: (_) => Navigator.of(context).pop(),
-                                  child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler,widget.snatchHandler),
-                                ));
+                                // Get.dialog(Dismissible(
+                                //   direction: DismissDirection.vertical,
+                                //   background: Container(color: Colors.black.withOpacity(0.3)),
+                                //   key: const Key('key'),
+                                //   onDismissed: (_) => Navigator.of(context).pop(),
+                                //   child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
+                                // ));
 
-                                // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem));
+                                Get.dialog(
+                                  ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
+                                  transitionDuration: Duration(milliseconds: 200),
+                                  // barrierColor: Colors.transparent
+                                );
+
+                                // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler));
                               },
                               onLongPress: (){
                                 if (widget.searchGlobals.selected.contains(index)){
@@ -815,10 +823,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
   void initState() {
     super.initState();
     setSt = () {setState(() {});};
+    // widget.searchGlobals.displayAppbar.value = true;
     widget.searchGlobals.displayAppbar.addListener(setSt);
   }
   @override
-  void dispose(){
+  void dispose() {
     widget.searchGlobals.displayAppbar.removeListener(setSt);
     super.dispose();
   }
@@ -827,10 +836,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
     print(widget.defaultHeight);
     return AnimatedContainer(
         duration: Duration(milliseconds: 200),
-        curve: Curves.easeOutCirc,
-        height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight * 1.75 : 0.0, //1.75 because for some reason it gets reduced to 32
+        curve: Curves.linear,
+        height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
         child: AppBar(
-          toolbarHeight: 56.0,
+          // toolbarHeight: widget.defaultHeight,
           leading: IconButton(
             // to ignore icon change
             icon: Icon(Icons.arrow_back, color: Colors.black),
@@ -854,7 +863,7 @@ class ImagePage extends StatefulWidget {
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler;
-  //Function jumpToItem;
+
   ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler,this.snatchHandler);
   @override
   _ImagePageState createState() => _ImagePageState();
@@ -875,7 +884,6 @@ class _ImagePageState extends State<ImagePage> {
       initialPage: widget.index,
     );
     widget.searchGlobals.viewedIndex.value = widget.index;
-    //widget.jumpToItem(widget.index, widget.fetched.length);
   }
 
   @override
@@ -944,7 +952,7 @@ class _ImagePageState extends State<ImagePage> {
                                     setState(() {
                                       widget.searchGlobals.addTag.value = " " + currentTag;
                                     });
-                                    Get.snackbar("Added to current search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                                    Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
                                   },
                                 ),
                                 IconButton(
@@ -978,85 +986,91 @@ class _ImagePageState extends State<ImagePage> {
     ];
 
     return Scaffold(
-      // bug: videos restart when appbar is toggled
       appBar: HideableAppBar(appBarTitle, appBarActions, widget.searchGlobals),
-      body: Center(
+      backgroundColor: Colors.transparent,
+      body: Dismissible(
+        direction: DismissDirection.vertical,
+        // background: Container(color: Colors.black.withOpacity(0.3)),
+        key: const Key('imagePageDismissibleKey'),
+        resizeDuration: null, // Duration(milliseconds: 100),
+        // dismissThresholds: {DismissDirection.vertical: 0.33},
+        onDismissed: (_) => Navigator.of(context).pop(),
+        child: Center(
         /**
          * The pageView builder will created a page for each image in the booruList(fetched)
          */
-        child: Platform.isAndroid ? PhotoViewGestureDetectorScope( // prevents triggering page change early when panning
-          axis: Axis.horizontal,
-          child: PreloadPageView.builder(
-            preloadPagesCount: widget.settingsHandler.preloadCount,
+          child: Platform.isAndroid ? PhotoViewGestureDetectorScope( // prevents triggering page change early when panning
+            axis: Axis.horizontal,
+            child: PreloadPageView.builder(
+              preloadPagesCount: widget.settingsHandler.preloadCount,
+              scrollDirection: Axis.horizontal,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                String fileURL = widget.fetched[index].fileURL;
+                bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
+                int preloadCount = widget.settingsHandler.preloadCount;
+                bool isViewed = widget.searchGlobals.viewedIndex.value == index;
+                bool isNear = (widget.searchGlobals.viewedIndex.value - index).abs() <= preloadCount;
+                print(fileURL);
+
+                // Render only if viewed or in preloadCount range
+                if(isViewed || isNear) {
+                  return GestureDetector(
+                    onLongPress: () {
+                      print('longpress');
+                      widget.searchGlobals.displayAppbar.value = !widget.searchGlobals.displayAppbar.value;
+                    },
+                    child: isVideo
+                      ? VideoApp(widget.fetched[index], index, widget.searchGlobals.viewedIndex.value, widget.settingsHandler)
+                      : MediaViewer(widget.fetched[index], index, widget.searchGlobals.viewedIndex.value, widget.settingsHandler)
+                  );
+                } else {
+                  return Container();
+              }
+            },
+            controller: controller,
+            onPageChanged: (int index){
+              setState(() {
+                widget.searchGlobals.viewedIndex.value = index;
+              });
+              // print('Page changed ' + index.toString());
+            },
+            itemCount: widget.fetched.length,
+            )
+          ) : PageView.builder(
+            controller: controllerLinux,
             scrollDirection: Axis.horizontal,
-            physics: const AlwaysScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               String fileURL = widget.fetched[index].fileURL;
               bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
-              int preloadCount = widget.settingsHandler.preloadCount;
-              bool isViewed = widget.searchGlobals.viewedIndex.value == index;
-              bool isNear = (widget.searchGlobals.viewedIndex.value - index).abs() <= preloadCount;
-              print(fileURL);
-
-              // Render only if viewed or in preloadCount range
-              if(isViewed || isNear) {
-                return GestureDetector(
-                  onLongPress: () {
-                    print('longpress');
-                      widget.searchGlobals.displayAppbar.value = !widget.searchGlobals.displayAppbar.value;
-                  },
-                  child: isVideo
-                    ? VideoApp(widget.fetched[index], index, widget.searchGlobals.viewedIndex.value, widget.settingsHandler)
-                    : MediaViewer(widget.fetched[index], index, widget.searchGlobals.viewedIndex.value, widget.settingsHandler)
+              if (isVideo){
+                return Container(
+                  child: Column(
+                    children: [
+                      Image.network(widget.fetched[index].thumbnailURL),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(10,10,10,10),
+                        child: FlatButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(20),
+                            side: BorderSide(color: Theme.of(context).accentColor),
+                          ),
+                          onPressed: (){
+                            Process.run('mpv',["--loop",fileURL]);
+                          },
+                          child: Text("Open in MPV"),
+                        ),
+                      )
+                    ],
+                  ),
                 );
               } else {
-                return Container();
+                return Image.network(fileURL);
+              }
             }
-          },
-          controller: controller,
-          onPageChanged: (int index){
-            setState(() {
-              widget.searchGlobals.viewedIndex.value = index;
-            });
-            // Scroll to current item in GridView while viewer is open, will also trigger new page loading
-            //widget.jumpToItem(index, widget.fetched.length);
-            // print('Page changed ' + index.toString());
-          },
-          itemCount: widget.fetched.length,
-          )
-        ) : PageView.builder(
-          controller: controllerLinux,
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (context, index) {
-            String fileURL = widget.fetched[index].fileURL;
-            bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
-            if (isVideo){
-              return Container(
-                child: Column(
-                  children: [
-                    Image.network(widget.fetched[index].thumbnailURL),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10,10,10,10),
-                      child: FlatButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(20),
-                          side: BorderSide(color: Theme.of(context).accentColor),
-                        ),
-                        onPressed: (){
-                          Process.run('mpv',["--loop",fileURL]);
-                        },
-                        child: Text("Open in MPV"),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            } else {
-              return Image.network(fileURL);
-            }
-          }
-      ),
-      ),
+          ),
+        ),
+      )
     );
   }
 }
