@@ -44,7 +44,6 @@ class ImageWriter{
     File image = new File(path+fileName);
     bool fileExists = await image.exists();
     if(fileExists) return null;
-
     try {
       var response = await http.get(item.fileURL);
       if(SDKVer < 30){
@@ -85,9 +84,22 @@ class ImageWriter{
 
   Stream<int> writeMultiple (List<BooruItem> snatched, bool jsonWrite, String booruName) async*{
     int snatchedCounter = 1;
+    List<String> existsList = new List();
+    List<String> failedList = new List();
     for (int i = 0; i < snatched.length ; i++){
       yield snatchedCounter++;
-      await write(snatched.elementAt(i), jsonWrite, booruName);
+      var snatchResult = await write(snatched.elementAt(i), jsonWrite, booruName);
+      if (snatchResult == null){
+        existsList.add(snatched[i].fileURL);
+      } else if (snatchResult is !String) {
+        failedList.add(snatched[i].fileURL);
+      }
+    }
+    if (existsList.length > 0){
+      Get.snackbar("These files were already snatched!", existsList.join(","), snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+    }
+    if (failedList.length > 0){
+      Get.snackbar("Snatching failed for URLS: ", failedList.join(","), snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.white, backgroundColor: Colors.red);
     }
     Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }

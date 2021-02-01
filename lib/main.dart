@@ -357,7 +357,7 @@ class _HomeState extends State<Home> {
                             if (searchGlobals[globalsIndex].selectedBooru == null){
                               searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
                             }
-                            return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+                            return Images(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
                           } else {
                             return Center(child: CircularProgressIndicator());
                           }
@@ -365,7 +365,7 @@ class _HomeState extends State<Home> {
                     );
                 } else {
 
-                    return Images(widget.settingsHandler,searchGlobals[globalsIndex]);
+                    return Images(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
                   }
               } else {
                 return Center(child: CircularProgressIndicator());
@@ -586,7 +586,8 @@ void setBooruHandler(SearchGlobals searchGlobals, int limit){
 class Images extends StatefulWidget {
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
-  Images(this.settingsHandler,this.searchGlobals);
+  SnatchHandler snatchHandler;
+  Images(this.settingsHandler,this.searchGlobals,this.snatchHandler);
   @override
   _ImagesState createState() => _ImagesState();
 }
@@ -686,7 +687,7 @@ class _ImagesState extends State<Images> {
                                   background: Container(color: Colors.black.withOpacity(0.3)),
                                   key: const Key('key'),
                                   onDismissed: (_) => Navigator.of(context).pop(),
-                                  child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem),
+                                  child: ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem,widget.snatchHandler),
                                 ));
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, jumpToItem));
@@ -844,8 +845,9 @@ class ImagePage extends StatefulWidget {
   int index;
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
+  SnatchHandler snatchHandler;
   Function jumpToItem;
-  ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.jumpToItem);
+  ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.jumpToItem,this.snatchHandler);
   @override
   _ImagePageState createState() => _ImagePageState();
 }
@@ -879,16 +881,16 @@ class _ImagePageState extends State<ImagePage> {
         onPressed: () async {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
-          Get.snackbar("Snatching started, please wait...", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
           // TODO: show progress, maybe use system downloader?
-          dynamic snatchResult = await writer.write(widget.fetched[viewedIndex], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
-          if(snatchResult == null) {
+          widget.snatchHandler.queue([widget.fetched[viewedIndex]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
+          //snatchResult = await writer.write(widget.fetched[viewedIndex], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name);
+          /*if(snatchResult == null) {
             Get.snackbar("This file was already snatched!", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
           } else if (snatchResult is String) {
             Get.snackbar("Snatched ＼(^ o ^)／", snatchResult, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
           } else {
             Get.snackbar("Snatching failed!", widget.fetched[viewedIndex].fileURL, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.white, backgroundColor: Colors.red);
-          }
+          }*/
         },
       ),
       IconButton(

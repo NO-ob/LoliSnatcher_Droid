@@ -59,13 +59,16 @@ class SnatchHandler  {
     }
   }
   void queue(List<BooruItem> booruItems, bool jsonWrite, String booruName){
-        print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
-       print("adding items to queue");
       this.jsonWrite = jsonWrite;
       if (booruItems.isNotEmpty){
         queuedList.add(booruItems);
         booruNameList.add(booruName);
         queuedItems.value ++;
+        if (booruItems.length > 1){
+          Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length} Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+        } else {
+          Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+        }
       }
   }
   Future searchSnatch(String tags, String amount, int timeout, Booru booru, bool jsonWrite) async{
