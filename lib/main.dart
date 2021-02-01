@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorBroken.dart';
+import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ServiceHandler.dart';
@@ -219,7 +220,7 @@ class _HomeState extends State<Home> {
                                 child: Row(
                                     children: [
                                       isNotEmptyBooru ? Image.network(value.selectedBooru.faviconURL, width: 16) : Text(''),
-                                      Expanded(child: Text(" ${value.tags}", overflow: TextOverflow.ellipsis,)),
+                                      Expanded(child: ScrollingText("${value.tags}", 15,"infinite")),
                                     ]
                                 ),
                             );
