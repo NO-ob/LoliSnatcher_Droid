@@ -815,6 +815,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   void initState() {
     super.initState();
     setSt = () {setState(() {});};
+    widget.searchGlobals.displayAppbar.value = true;
     widget.searchGlobals.displayAppbar.addListener(setSt);
   }
   @override
