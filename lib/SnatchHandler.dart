@@ -84,7 +84,7 @@ class SnatchHandler  {
     booruHandler = temp[0];
     page = temp[1];
     Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-    while (count < int.parse(amount)){
+    while (count < int.parse(amount) && !booruHandler.locked){
       booruItems = await booruHandler.Search(tags,page);
       page ++;
       count = booruItems.length;
