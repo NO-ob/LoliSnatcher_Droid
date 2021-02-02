@@ -1012,7 +1012,7 @@ class _ImagePageState extends State<ImagePage> {
               physics: const AlwaysScrollableScrollPhysics(),
               itemBuilder: (context, index) {
                 String fileURL = widget.fetched[index].fileURL;
-                bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
+                bool isVideo = widget.fetched[index].isVideo();
                 int preloadCount = widget.settingsHandler.preloadCount;
                 bool isViewed = widget.searchGlobals.viewedIndex.value == index;
                 bool isNear = (widget.searchGlobals.viewedIndex.value - index).abs() <= preloadCount;
@@ -1047,7 +1047,7 @@ class _ImagePageState extends State<ImagePage> {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               String fileURL = widget.fetched[index].fileURL;
-              bool isVideo = ['webm', 'mp4'].any((val) => widget.fetched[index].fileExt.contains(val));
+              bool isVideo = widget.fetched[index].isVideo();
               if (isVideo){
                 return Container(
                   child: Column(

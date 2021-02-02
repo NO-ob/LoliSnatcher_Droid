@@ -62,16 +62,16 @@ class ImageWriter{
         }
       } else {
         print("files ext is " + item.fileExt);
-        if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
-          var writeResp = await serviceHandler.writeImage(response.bodyBytes,fileName.split(".")[0],"image", item.fileExt);
+        //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
+          var writeResp = await serviceHandler.writeImage(response.bodyBytes,fileName.split(".")[0],item.mediaType, item.fileExt);
           if (writeResp != null){
             print("write response: $writeResp");
             return (fileName);
           }
-        } else {
-          Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-          return 0;
-        }
+        //} else {
+         // Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+         // return 0;
+        //}
 
       }
     } catch (e){

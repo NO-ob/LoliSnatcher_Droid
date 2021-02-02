@@ -55,15 +55,14 @@ class MainActivity: FlutterActivity() {
                 result.success(android.os.Build.VERSION.SDK_INT);
             }
             else if (call.method == "writeImage"){
-                var imageData = call.argument<ByteArray>("imageData");
+                var imageBytes = call.argument<ByteArray>("imageData");
                 val fileName = call.argument<String>("fileName");
                 val  mediaType = call.argument<String>("mediaType");
                 val  fileExt = call.argument<String>("fileExt");
-                var bmp = imageData?.size?.let { BitmapFactory.decodeByteArray(imageData,0, it) };
 
-                if (bmp != null && imageData != null && mediaType != null && fileExt != null && fileName != null){
+                if (imageBytes!= null && mediaType != null && fileExt != null && fileName != null){
                     print("writing file");
-                    writeImage(bmp,fileName,mediaType,fileExt);
+                    writeImage(imageBytes,fileName,mediaType,fileExt);
                     result.success(fileName);
                 } else {
                     print("a value is null");
@@ -83,21 +82,31 @@ class MainActivity: FlutterActivity() {
     }
 
     @Throws(IOException::class)
-    private fun writeImage(bitmap: Bitmap, name: String, mediaType: String, fileExt: String) {
+    private fun writeImage(fileBytes: ByteArray, name: String, mediaType: String, fileExt: String) {
         val fos: OutputStream?
         val resolver = contentResolver
         val contentValues = ContentValues()
-        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
-        contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$mediaType/$fileExt")
-        contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
-        val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        val imageUri: Uri?
+        if(mediaType == "image"){
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$mediaType/$fileExt")
+            contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
+            imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        } else {
+            contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "$name.$fileExt")
+            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$mediaType/$fileExt")
+            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
+            imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+        }
+
         if (imageUri != null){
             fos = resolver.openOutputStream(imageUri);
-            if (fileExt.toUpperCase() == "PNG"){
+            fos?.write(fileBytes);
+                    /*if (fileExt.toUpperCase() == "PNG"){
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             } else if (fileExt.toUpperCase() == "JPG" || fileExt.toUpperCase() == "JPEG") {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-            }
+            }*/
             Objects.requireNonNull(fos)?.close()
         }
     }
