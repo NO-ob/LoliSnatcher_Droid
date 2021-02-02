@@ -102,11 +102,6 @@ class MainActivity: FlutterActivity() {
         if (imageUri != null){
             fos = resolver.openOutputStream(imageUri);
             fos?.write(fileBytes);
-                    /*if (fileExt.toUpperCase() == "PNG"){
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            } else if (fileExt.toUpperCase() == "JPG" || fileExt.toUpperCase() == "JPEG") {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-            }*/
             Objects.requireNonNull(fos)?.close()
         }
     }
