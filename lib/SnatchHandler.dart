@@ -23,6 +23,9 @@ class SnatchHandler  {
   List queuedList = new List();
   List booruNameList = new List();
   bool jsonWrite = false;
+  SnatchHandler(){
+    addQueueHandler();
+  }
   void addQueueHandler(){
     if (!queuedItems.hasListeners) {
       print("+++++++++++++++++++++++++++++++++++++++++++++++++++");

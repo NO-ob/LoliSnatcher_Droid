@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
+import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorBroken.dart';
 import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 import 'package:flutter/material.dart';
@@ -89,13 +90,13 @@ class _HomeState extends State<Home> {
   int globalsIndex = 0;
   bool firstRun = true;
   bool isSnatching = false;
-
+  ActiveTitle activeTitle;
   String snatchStatus = "";
   final searchTagsController = TextEditingController();
   @override
   void initState() {
     super.initState();
-    widget.snatchHandler.addQueueHandler();
+    activeTitle = ActiveTitle(widget.snatchHandler);
   }
 
   @override
@@ -135,7 +136,7 @@ class _HomeState extends State<Home> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: ActiveTitle(widget.snatchHandler),
+            title: activeTitle,
             actions:<Widget>[ IconButton(
                 icon: Icon(Icons.save),
                 onPressed: (){
@@ -143,6 +144,9 @@ class _HomeState extends State<Home> {
                   // call a function to save the currently viewed image when the save button is pressed
                   if (searchGlobals[globalsIndex].selected.length > 0){
                     widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru.name);
+                    setState(() {
+                      searchGlobals[globalsIndex].selected = new List();
+                    });
                   } else {
                     Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                   }
@@ -438,35 +442,7 @@ class _HomeState extends State<Home> {
   }
 }
 
-class ActiveTitle extends StatefulWidget {
-  SnatchHandler snatchHandler;
-  bool isSnatching = false;
-  String snatchStatus = "";
-  @override
-  _ActiveTitleState createState() => _ActiveTitleState();
-  ActiveTitle(this.snatchHandler);
-}
 
-class _ActiveTitleState extends State<ActiveTitle> {
-  @override
-  void initState(){
-      //widget.snatchHandler.snatchActive.value = false;
-      widget.snatchHandler.snatchActive.addListener((){
-        setState(() {
-          widget.isSnatching = widget.snatchHandler.snatchActive.value;
-        });
-      });
-      widget.snatchHandler.snatchStatus.addListener((){
-        setState(() {
-          widget.snatchStatus = widget.snatchHandler.snatchStatus.value;
-        });
-      });
-  }
-  @override
-  Widget build(BuildContext context) {
-    return widget.isSnatching ? Text("Snatching: ${widget.snatchStatus}") : Text("Loli Snatcher");
-  }
-}
 
 class TagSearchBox extends StatefulWidget {
   SearchGlobals searchGlobals;
