@@ -86,7 +86,6 @@ class GelbooruHandler extends BooruHandler{
         if (response.statusCode == 200) {
           var parsedResponse = xml.parse(response.body);
           var tags = parsedResponse.findAllElements("tag");
-          print(response.body);
           if (tags.length > 0){
             for (int i=0; i < tags.length; i++){
               searchTags.add(tags.elementAt(i).getAttribute("name").trim());
@@ -96,7 +95,6 @@ class GelbooruHandler extends BooruHandler{
       } catch(e) {
         print(e);
       }
-      print(searchTags.length);
       return searchTags;
     }
 

@@ -14,11 +14,17 @@ class _ScrollingTextState extends State<ScrollingText> {
   int counter = 0;
   String bufferText = "";
   bool forward = true;
+  bool disposed = false;
   @override
   void initState(){
     counter = 0;
     bufferText = "";
     forward = true;
+  }
+  @override
+  void dispose(){
+    disposed = true;
+    super.dispose();
   }
   @override
   Widget build(BuildContext context) {
@@ -45,61 +51,67 @@ class _ScrollingTextState extends State<ScrollingText> {
   }
   void bounce(){
     Future.delayed(const Duration(milliseconds: 250), () {
-      if ((counter+(widget.size) >= widget.text.length)) {
-        setState(() {
-          forward = false;
-        });
-      } else if (!forward && counter == 0){
-        setState(() {
-          forward = true;
-        });
-      }
-      if (forward){
-        setState(() {
-          counter ++;
-        });
-      } else {
-        setState(() {
-          counter --;
-        });
+      if (!disposed){
+        if ((counter+(widget.size) >= widget.text.length)) {
+          setState(() {
+            forward = false;
+          });
+        } else if (!forward && counter == 0){
+          setState(() {
+            forward = true;
+          });
+        }
+        if (forward){
+          setState(() {
+            counter ++;
+          });
+        } else {
+          setState(() {
+            counter --;
+          });
+        }
       }
     });
     displayText = " " + widget.text.substring(counter, counter +widget.size);
   }
   void scroll() {
     Future.delayed(const Duration(milliseconds: 250), () {
-      if ((counter + (widget.size) < widget.text.length)) {
-        setState(() {
-          counter++;
-        });
-      } else {
-        counter = 0;
+      if(!disposed){
+        if ((counter + (widget.size) < widget.text.length)) {
+          setState(() {
+            counter++;
+          });
+        } else {
+          counter = 0;
+        }
       }
     });
     displayText = " " + widget.text.substring(counter, counter + widget.size);
   }
   void infinite() {
     Future.delayed(const Duration(milliseconds: 250), () {
-      if (bufferText.length < 1){
-        if ((counter + (widget.size) < widget.text.length)) {
-          setState(() {
-            counter++;
-          });
+      if(!disposed){
+        if (bufferText.length < 1){
+          if ((counter + (widget.size) < widget.text.length)) {
+            setState(() {
+              counter++;
+            });
+          } else {
+            setState(() {
+              bufferText = displayText;
+            });
+          }
         } else {
-          setState(() {
-            bufferText = displayText;
-          });
-        }
-      } else {
-        if (bufferText.length > 1){
-          setState(() {
-            bufferText = bufferText.substring(1,bufferText.length);
-          });
-        } else {
-          setState(() {
-            bufferText = "";
-            counter = 0;
-          });
+          if (bufferText.length > 1){
+            setState(() {
+              bufferText = bufferText.substring(1,bufferText.length);
+            });
+          } else {
+            setState(() {
+              bufferText = "";
+              counter = 0;
+            });
+          }
         }
       }
     });
