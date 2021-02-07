@@ -12,12 +12,12 @@ import 'dart:io' show Platform;
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
-  String defTags = "rating:safe",previewMode = "Sample",prefBooru = "", cachePath = "";
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2;
   int SDKVer = 0;
   List<Booru> booruList = new List<Booru>();
   var path = "";
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false,autoHideImageBar = false;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
   Future writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -127,6 +127,22 @@ class SettingsHandler {
               print("Found Image Cache " + settings[i].split(" = ")[1] );
             }
             break;
+          case("Media Cache"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                mediaCache = true;
+              } else {
+                mediaCache = false;
+              }
+              print("Found Image Cache " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Video Cache Mode"):
+            if (settings[i].split(" = ").length > 1){
+              videoCacheMode = settings[i].split(" = ")[1];
+              print("Found Video Cache Mode " + settings[i].split(" = ")[1] );
+            }
+            break;
           case("Pref Booru"):
             if (settings[i].split(" = ").length > 1){
               prefBooru = settings[i].split(" = ")[1];
@@ -150,7 +166,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool autoHideImageBar) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -192,6 +208,13 @@ class SettingsHandler {
     this.loadingGif = loadingGif;
     writer.write("Image Cache = $imageCache\n");
     this.imageCache = imageCache;
+    writer.write("Media Cache = $mediaCache\n");
+    this.mediaCache = mediaCache;
+    if (this.mediaCache != mediaCache) {
+      serviceHandler.emptyCache();
+    }
+    writer.write("Video Cache Mode = $videoCacheMode\n");
+    this.videoCacheMode = videoCacheMode;
     writer.write("Autohide Bar = $autoHideImageBar\n");
     this.autoHideImageBar = autoHideImageBar;
     writer.close();

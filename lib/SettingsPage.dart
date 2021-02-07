@@ -34,9 +34,9 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
-  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, autoHideImageBar = false;
+  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
   Booru selectedBooru;
-  String previewMode;
+  String previewMode, videoCacheMode;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -49,12 +49,14 @@ class _SettingsPageState extends State<SettingsPage> {
       settingsPreloadController.text = widget.settingsHandler.preloadCount.toString();
     });
     previewMode = widget.settingsHandler.previewMode;
+    videoCacheMode = widget.settingsHandler.videoCacheMode;
     getPerms();
     setState(() {
       jsonWrite = widget.settingsHandler.jsonWrite;
       autoPlay = widget.settingsHandler.autoPlayEnabled;
       loadingGif = widget.settingsHandler.loadingGif;
       imageCache = widget.settingsHandler.imageCache;
+      mediaCache = widget.settingsHandler.mediaCache;
       autoHideImageBar = widget.settingsHandler.autoHideImageBar;
     });
   }
@@ -265,7 +267,7 @@ class _SettingsPageState extends State<SettingsPage> {
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
               // This dropdown is used to change the quality of the images displayed on the home page
-              child:  Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("Preview Mode :     "),
@@ -288,7 +290,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                margin: EdgeInsets.fromLTRB(10,10,10,2),
                 child: Row(children: [
                   Text("Thumbnail Cache: "),
                   Checkbox(
@@ -303,6 +305,58 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],)
             ),
             Container(
+                margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                child: Row(children: [
+                  Text("Media Cache: "),
+                  Checkbox(
+                    value: mediaCache,
+                    onChanged: (newValue) {
+                      setState(() {
+                        mediaCache = newValue;
+                      });
+                    },
+                    activeColor: Colors.pink[200],
+                  )
+                ],)
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
+              width: double.infinity,
+              // This dropdown is used to change how we fetch and cache videos
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Video Cache Mode :     "),
+                  DropdownButton<String>(
+                    value: videoCacheMode,
+                    icon: Icon(Icons.arrow_downward),
+                    onChanged: (String newValue){
+                      setState((){
+                        videoCacheMode = newValue;
+                      });
+                    },
+                    items: <String>["Stream","Cache","Stream+Cache"].map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
+              width: double.infinity,
+              child: Column(children: [
+                Text("Video Cache Modes:"),
+                Text("- Stream - Don't cache, start playing as soon as possible"),
+                Text("- Cache - Saves to device storage, plays only when download is complete"),
+                Text("- Stream+Cache - Mix of both, but currently leads to double download"),
+                Text("[Note]: Videos will cache only if Media Cache is enabled"),
+              ])
+            ),
+            Container(
               alignment: Alignment.centerLeft,
               margin: EdgeInsets.fromLTRB(20,10,20,10),
               child: FlatButton(
@@ -312,9 +366,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   serviceHandler.emptyCache();
-                  Get.snackbar("Thumbnail cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                  Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
                 },
-                child: Text("Clear thumbnail cache"),
+                child: Text("Clear cache"),
               ),
             ),
             Container(
@@ -418,7 +472,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache,autoHideImageBar);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar);
                 },
                 child: Text("Save"),
               ),
