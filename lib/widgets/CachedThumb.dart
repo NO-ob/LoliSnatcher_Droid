@@ -84,11 +84,17 @@ class _CachedThumbState extends State<CachedThumb> {
 
   Widget loadingElementBuilder(
       BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
+    if (loadingProgress == null) {
+      // Resulting image for network loaded thumbnail
+      return child;
+    }
     bool hasProgressData = (loadingProgress != null &&
             loadingProgress.expectedTotalBytes != null) ||
         (widget.settingsHandler.imageCache && _total != null && _total > 0);
-    bool isProgressFromCaching =
-        widget.settingsHandler.imageCache && hasProgressData && _total != null && _total > 0;
+    bool isProgressFromCaching = widget.settingsHandler.imageCache &&
+        hasProgressData &&
+        _total != null &&
+        _total > 0;
     int expectedBytes = hasProgressData
         ? (isProgressFromCaching
             ? _received
@@ -130,21 +136,25 @@ class _CachedThumbState extends State<CachedThumb> {
 
   @override
   Widget build(BuildContext context) {
-    return (_image == null && widget.settingsHandler.imageCache)
-        ? Center(
-            child: loadingElementBuilder(context, Container(), null),
-          )
-        : (widget.settingsHandler.imageCache
-            ? Image.file(
-                _image,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              )
-            : Image.network(widget.thumbURL,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                loadingBuilder: loadingElementBuilder));
+    // Load from network if caching is disabled
+    if (!widget.settingsHandler.imageCache) {
+      return Image.network(widget.thumbURL,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+          loadingBuilder: loadingElementBuilder);
+    } else {
+      // Show progress until image is saved to/retrieved from cache
+      if (_image == null) {
+        return Center(child: loadingElementBuilder(context, null, null));
+      } else {
+        return Image.file(
+          _image,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        );
+      }
+    }
   }
 }
