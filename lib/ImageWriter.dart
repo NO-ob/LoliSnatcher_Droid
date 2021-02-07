@@ -10,7 +10,7 @@ import 'ServiceHandler.dart';
 import 'dart:convert';
 class ImageWriter{
   String path = "";
-  String cachePath = "";
+  String cacheRootPath = "";
   ServiceHandler serviceHandler = new ServiceHandler();
   int SDKVer = 0;
   /**
@@ -24,13 +24,8 @@ class ImageWriter{
     String fileName = booruName + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
     // print(fileName);
 
-    if(path == ""){
-      if (Platform.isAndroid){
-        path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
-      } else if (Platform.isLinux){
-        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
-      }
-    }
+    await setPaths();
+
     if(SDKVer == 0){
       if (Platform.isAndroid){
         SDKVer = await serviceHandler.getSDKVersion();
@@ -63,7 +58,7 @@ class ImageWriter{
       } else {
         print("files ext is " + item.fileExt);
         //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
-          var writeResp = await serviceHandler.writeImage(response.bodyBytes,fileName.split(".")[0],item.mediaType, item.fileExt);
+          var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt);
           if (writeResp != null){
             print("write response: $writeResp");
             return (fileName);
@@ -106,16 +101,13 @@ class ImageWriter{
   }
 
   Future writeCache(String fileURL, String typeFolder) async{
+    String cachePath;
     try {
       var response = await http.get(fileURL);
-      if(cachePath == ""){
-        if (Platform.isAndroid){
-          cachePath = await serviceHandler.getCacheDir() + typeFolder + "/";
-        } else if (Platform.isLinux){
-          cachePath = Platform.environment['HOME'] + "/.loliSnatcher/cache/$typeFolder/";
-        }
-      }
+      await setPaths();
+      cachePath = cacheRootPath + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
+
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
       File image = new File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes);
@@ -126,15 +118,32 @@ class ImageWriter{
     return (cachePath+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
 
-  Future getCachePath(String fileURL, String typeFolder) async{
+  Future writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder) async{
+    File image;
+    String cachePath;
     try {
-      if(cachePath == ""){
-        if (Platform.isAndroid){
-          cachePath = await serviceHandler.getCacheDir() + typeFolder + "/";
-        } else if (Platform.isLinux){
-          cachePath = Platform.environment['HOME'] + "/.loliSnatcher/cache/$typeFolder/";
-        }
-      }
+      await setPaths();
+      cachePath = cacheRootPath + typeFolder + "/";
+      await Directory(cachePath).create(recursive:true);
+
+      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
+      image = new File(cachePath+fileName);
+      await image.writeAsBytes(bytes);
+    } catch (e){
+      print("Image Writer Exception:: cache write");
+      print(e);
+      return null;
+    }
+    return image;
+  }
+
+  Future getCachePath(String fileURL, String typeFolder) async{
+    String cachePath;
+    try {
+      await setPaths();
+      cachePath = cacheRootPath + typeFolder + "/";
+      print(cachePath);
+
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
       bool fileExists = await File(cachePath+fileName).exists();
       if (fileExists){
@@ -147,5 +156,26 @@ class ImageWriter{
       print(e);
       return null;
     }
+  }
+
+
+  void setPaths() async {
+    if(path == ""){
+      if (Platform.isAndroid){
+        path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
+      } else if (Platform.isLinux){
+        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
+      }
+    }
+
+    if(cacheRootPath == ""){
+      if (Platform.isAndroid){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      } else if (Platform.isLinux){
+        cacheRootPath = Platform.environment['HOME'] + "/.loliSnatcher/cache/";
+      }
+    }
+
+    return;
   }
 }

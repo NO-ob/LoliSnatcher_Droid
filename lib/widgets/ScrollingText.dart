@@ -11,13 +11,15 @@ class ScrollingText extends StatefulWidget {
 
 class _ScrollingTextState extends State<ScrollingText> {
   String displayText;
-  int counter = 0;
+  int counter = 0, pauseCounter = 0, pauseThreshold = 8;
   String bufferText = "";
-  bool forward = true;
-  bool disposed = false;
+  bool forward = true, disposed = false;
+  static const int stepDelay = 200;
   @override
   void initState(){
+    super.initState();
     counter = 0;
+    pauseCounter = 0;
     bufferText = "";
     forward = true;
   }
@@ -26,6 +28,7 @@ class _ScrollingTextState extends State<ScrollingText> {
     disposed = true;
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     if (counter+widget.size - 1 > widget.text.length && counter != 0){
@@ -45,12 +48,15 @@ class _ScrollingTextState extends State<ScrollingText> {
         case ("infinite"):
           infinite();
           break;
+        case ("infiniteWithPause"):
+          infiniteWithPause();
+          break;
       }
     }
-    return Text(" " + displayText,textAlign: TextAlign.left);
+    return Text(" " + displayText, textAlign: TextAlign.left);
   }
   void bounce(){
-    Future.delayed(const Duration(milliseconds: 250), () {
+    Future.delayed(const Duration(milliseconds: stepDelay), () {
       if (!disposed){
         if ((counter+(widget.size) >= widget.text.length)) {
           setState(() {
@@ -75,8 +81,8 @@ class _ScrollingTextState extends State<ScrollingText> {
     displayText = " " + widget.text.substring(counter, counter +widget.size);
   }
   void scroll() {
-    Future.delayed(const Duration(milliseconds: 250), () {
-      if(!disposed){
+    Future.delayed(const Duration(milliseconds: stepDelay), () {
+      if (!disposed){
         if ((counter + (widget.size) < widget.text.length)) {
           setState(() {
             counter++;
@@ -89,8 +95,8 @@ class _ScrollingTextState extends State<ScrollingText> {
     displayText = " " + widget.text.substring(counter, counter + widget.size);
   }
   void infinite() {
-    Future.delayed(const Duration(milliseconds: 250), () {
-      if(!disposed){
+    Future.delayed(const Duration(milliseconds: stepDelay), () {
+      if (!disposed){
         if (bufferText.length < 1){
           if ((counter + (widget.size) < widget.text.length)) {
             setState(() {
@@ -120,5 +126,49 @@ class _ScrollingTextState extends State<ScrollingText> {
     } else {
       displayText = bufferText + " " + widget.text.substring(0, widget.size - (bufferText.length - 1));
     }
+  }
+  void infiniteWithPause() async {
+    Future.delayed(const Duration(milliseconds: stepDelay), () {
+      if (!disposed) {
+        if(counter == 0 && pauseCounter <= pauseThreshold) {
+          setState(() {
+            pauseCounter++;
+          });
+        } else if (bufferText.length < 1){
+          if ((counter + (widget.size) < widget.text.length)) {
+            setState(() {
+              counter++;
+            });
+          } else {
+            setState(() {
+              bufferText = displayText;
+            });
+          }
+        } else {
+          if (bufferText.length > 1){
+            setState(() {
+              bufferText = bufferText.substring(1,bufferText.length);
+            });
+          } else {
+            setState(() {
+              bufferText = "";
+              counter = 0;
+              pauseCounter = 0;
+            });
+          }
+        }
+      }
+    });
+
+    if (bufferText.length < 1){
+      displayText = " " + widget.text.substring(counter, counter + widget.size);
+    } else {
+      displayText = bufferText + " " + widget.text.substring(0, widget.size - (bufferText.length - 1));
+    }
+
+    if(counter == 0 && pauseCounter <= pauseThreshold) {
+      displayText = displayText + '...';
+    }
+    
   }
 }

@@ -1,7 +1,16 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../SearchGlobals.dart';
-import '../main.dart';
+import 'package:flutter/cupertino.dart';
+
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
+
+void setBooruHandler(SearchGlobals searchGlobals, int limit) {
+  List temp = new BooruHandlerFactory()
+      .getBooruHandler(searchGlobals.selectedBooru, limit);
+  searchGlobals.booruHandler = temp[0];
+  searchGlobals.pageNum = temp[1];
+}
 
 class TagSearchBox extends StatefulWidget {
   SearchGlobals searchGlobals;
@@ -19,38 +28,44 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     super.initState();
     widget._focusNode.addListener(_updateOverLay);
   }
-  void _updateOverLay(){
+
+  void _updateOverLay() {
     if (widget._focusNode.hasFocus) {
       print("textbox is focused");
       this._overlayEntry = this._createOverlayEntry();
-      if (this._overlayEntry != null){
+      if (this._overlayEntry != null) {
         Overlay.of(context).insert(this._overlayEntry);
       }
     } else {
-      if (this._overlayEntry != null){
+      if (this._overlayEntry != null) {
         this._overlayEntry.remove();
       }
     }
   }
+
   @override
   void dispose() {
-    widget._focusNode.removeListener(_updateOverLay);
     widget._focusNode.unfocus();
     super.dispose();
   }
+
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject();
     setBooruHandler(widget.searchGlobals, 20);
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
-    if (widget.searchGlobals.booruHandler.booru.type == "Szurubooru" && widget.searchGlobals.booruHandler.booru.apiKey != "" && widget.searchGlobals.booruHandler.booru.userID != ""){
+    if (widget.searchGlobals.booruHandler.booru.type == "Szurubooru" &&
+        widget.searchGlobals.booruHandler.booru.apiKey != "" &&
+        widget.searchGlobals.booruHandler.booru.userID != "") {
       widget.searchGlobals.booruHandler.tagSearchEnabled = true;
-    } else if (widget.searchGlobals.booruHandler.booru.type == "Shimmie" && widget.searchGlobals.booruHandler.booru.baseURL.contains("rule34.paheal.net")){
+    } else if (widget.searchGlobals.booruHandler.booru.type == "Shimmie" &&
+        widget.searchGlobals.booruHandler.booru.baseURL
+            .contains("rule34.paheal.net")) {
       widget.searchGlobals.booruHandler.tagSearchEnabled = true;
     }
-    if (widget.searchGlobals.booruHandler.tagSearchEnabled){
+    if (widget.searchGlobals.booruHandler.tagSearchEnabled) {
       String input = widget.searchTagsController.text;
-      if (input.split(" ").length > 1){
+      if (input.split(" ").length > 1) {
         input = input.split(" ")[input.split(" ").length - 1];
       }
       return OverlayEntry(
@@ -64,8 +79,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             child: FutureBuilder(
                 future: widget.searchGlobals.booruHandler.tagSearch(input),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if ((snapshot.connectionState == ConnectionState.done) && snapshot.data.length > 0){
-                    if (snapshot.data[0]!= null){
+                  if ((snapshot.connectionState == ConnectionState.done) &&
+                      snapshot.data.length > 0) {
+                    if (snapshot.data[0] != null) {
                       return ListView.builder(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true,
@@ -75,19 +91,23 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                                 title: Text(snapshot.data[index]),
                                 onTap: (() {
                                   widget._focusNode.unfocus();
-                                  widget.searchTagsController.text = widget.searchTagsController.text.substring(0,widget.searchTagsController.text.lastIndexOf(" ")+1) + snapshot.data[index];
-                                })
-                            );
-                          }
-                      );
+                                  widget.searchTagsController.text = widget
+                                          .searchTagsController.text
+                                          .substring(
+                                              0,
+                                              widget.searchTagsController.text
+                                                      .lastIndexOf(" ") +
+                                                  1) +
+                                      snapshot.data[index];
+                                }));
+                          });
                     } else {
                       return Center(child: CircularProgressIndicator());
                     }
                   } else {
                     return Center(child: CircularProgressIndicator());
                   }
-                }
-            ),
+                }),
           ),
         ),
       );
@@ -98,25 +118,25 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   Widget build(BuildContext context) {
     return Expanded(
         child: TextField(
-          controller: widget.searchTagsController,
-          focusNode: widget._focusNode,
-          onChanged: (text) {
-            setState((){
-              if (this._overlayEntry != null){
-                this._overlayEntry.remove();
-              }
-              this._updateOverLay();
-            });
-          },
-          decoration: InputDecoration(
-            hintText:"Enter Tags",
-            contentPadding: new EdgeInsets.fromLTRB(15,0,15,0), // left,top,right,bottom
-            border: new OutlineInputBorder(
-              borderRadius: new BorderRadius.circular(50),
-              gapPadding: 0,
-            ),
-          ),
-        )
-    );
+      controller: widget.searchTagsController,
+      focusNode: widget._focusNode,
+      onChanged: (text) {
+        setState(() {
+          if (this._overlayEntry != null) {
+            this._overlayEntry.remove();
+          }
+          this._updateOverLay();
+        });
+      },
+      decoration: InputDecoration(
+        hintText: "Enter Tags",
+        contentPadding:
+            new EdgeInsets.fromLTRB(15, 0, 15, 0), // left,top,right,bottom
+        border: new OutlineInputBorder(
+          borderRadius: new BorderRadius.circular(50),
+          gapPadding: 0,
+        ),
+      ),
+    ));
   }
 }
