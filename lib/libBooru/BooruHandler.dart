@@ -6,7 +6,7 @@ abstract class BooruHandler {
   String prevTags = "";
   bool locked = false;
   Booru booru;
-  String verStr = "1.7.1";
+  String verStr = "1.7.4";
   List<BooruItem> fetched;
   bool tagSearchEnabled = true;
   BooruHandler(this.booru,this.limit);
