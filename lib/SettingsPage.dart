@@ -13,6 +13,7 @@ import 'libBooru/BooruItem.dart';
 import 'libBooru/e621Handler.dart';
 import 'libBooru/SzurubooruHandler.dart';
 import 'libBooru/Booru.dart';
+import 'widgets/InfoDialog.dart';
 import 'getPerms.dart';
 import 'SettingsHandler.dart';
 import 'package:get/get.dart';
@@ -34,6 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsLandscapeController = TextEditingController();
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
+  final settingsSnatchCooldownController = TextEditingController();
   bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
   Booru selectedBooru;
   String previewMode, videoCacheMode;
@@ -47,6 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
       settingsColumnsLandscapeController.text = widget.settingsHandler.landscapeColumns.toString();
       settingsLimitController.text = widget.settingsHandler.limit.toString();
       settingsPreloadController.text = widget.settingsHandler.preloadCount.toString();
+      settingsSnatchCooldownController.text = widget.settingsHandler.snatchCooldown.toString();
     });
     previewMode = widget.settingsHandler.previewMode;
     videoCacheMode = widget.settingsHandler.videoCacheMode;
@@ -219,6 +222,36 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
+              width: double.infinity,
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Snatch Cooldown (MS):      "),
+                  new Expanded(
+                    child: Container(
+                      margin: EdgeInsets.fromLTRB(10,0,0,0),
+                      child: TextField(
+                        controller: settingsSnatchCooldownController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          WhitelistingTextInputFormatter.digitsOnly
+                        ],
+                        decoration: InputDecoration(
+                          hintText:"Timeout between snatching images",
+                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: new OutlineInputBorder(
+                            borderRadius: new BorderRadius.circular(50),
+                            gapPadding: 0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Row(children: [
                 Text("Write Image JSON: "),
@@ -342,20 +375,25 @@ class _SettingsPageState extends State<SettingsPage> {
                       );
                     }).toList(),
                   ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Theme.of(context).accentColor),
+                    onPressed: () {
+                        Get.dialog(
+                          InfoDialog("Video Cache Modes",
+                              [
+                                Text("- Stream - Don't cache, start playing as soon as possible"),
+                                Text("- Cache - Saves to device storage, plays only when download is complete"),
+                                Text("- Stream+Cache - Mix of both, but currently leads to double download"),
+                                Text("[Note]: Videos will cache only if Media Cache is enabled")
+                              ]
+                          )
+                        );
+                    },
+                  ),
                 ],
               ),
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
-              width: double.infinity,
-              child: Column(children: [
-                Text("Video Cache Modes:"),
-                Text("- Stream - Don't cache, start playing as soon as possible"),
-                Text("- Cache - Saves to device storage, plays only when download is complete"),
-                Text("- Stream+Cache - Mix of both, but currently leads to double download"),
-                Text("[Note]: Videos will cache only if Media Cache is enabled"),
-              ])
-            ),
+
             Container(
               alignment: Alignment.centerLeft,
               margin: EdgeInsets.fromLTRB(20,10,20,10),
@@ -472,7 +510,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar,settingsSnatchCooldownController.text);
                 },
                 child: Text("Save"),
               ),

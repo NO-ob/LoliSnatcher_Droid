@@ -77,18 +77,20 @@ class ImageWriter{
     return (fileName);
   }
 
-  Stream<int> writeMultiple (List<BooruItem> snatched, bool jsonWrite, String booruName) async*{
+  Stream<int> writeMultiple (List<BooruItem> snatched, bool jsonWrite, String booruName, int cooldown) async*{
     int snatchedCounter = 1;
     List<String> existsList = new List();
     List<String> failedList = new List();
     for (int i = 0; i < snatched.length ; i++){
-      yield snatchedCounter++;
-      var snatchResult = await write(snatched.elementAt(i), jsonWrite, booruName);
-      if (snatchResult == null){
+      await Future.delayed(Duration(milliseconds: cooldown), () async{
+        var snatchResult = await write(snatched.elementAt(i), jsonWrite, booruName);
+        if (snatchResult == null){
         existsList.add(snatched[i].fileURL);
-      } else if (snatchResult is !String) {
+        } else if (snatchResult is !String) {
         failedList.add(snatched[i].fileURL);
-      }
+        }
+      });
+      yield snatchedCounter++;
     }
     Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2),colorText: Colors.black, backgroundColor: Colors.pink[200]);
     if (existsList.length > 0){

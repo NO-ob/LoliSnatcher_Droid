@@ -21,8 +21,10 @@ class SnatchHandler  {
   ValueNotifier snatchStatus = ValueNotifier("");
   ValueNotifier queuedItems = ValueNotifier(0);
   List queuedList = new List();
+  List<int> cooldownList = new List();
   List booruNameList = new List();
   bool jsonWrite = false;
+  int cooldown = 250;
   SnatchHandler(){
     addQueueHandler();
   }
@@ -37,13 +39,13 @@ class SnatchHandler  {
       });
     }
   }
-  Future snatch(List<BooruItem> booruItems, bool jsonWrite, String booruName) async{
+  Future snatch(List<BooruItem> booruItems, bool jsonWrite, String booruName,int cooldown) async{
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
     print("snatching");
     if (!snatchActive.value){
       snatchActive.value = true;
       ImageWriter writer = new ImageWriter();
-      writer.writeMultiple(booruItems, jsonWrite, booruName).listen(
+      writer.writeMultiple(booruItems, jsonWrite, booruName, cooldown).listen(
             (data) {
           snatchStatus.value = "$data / ${booruItems.length}";
         },
@@ -58,13 +60,14 @@ class SnatchHandler  {
   void trySnatch(){
     if (!snatchActive.value && queuedItems.value > 0){
       queuedItems.value --;
-      snatch(queuedList.removeLast(),jsonWrite,booruNameList.removeLast());
+      snatch(queuedList.removeLast(),jsonWrite,booruNameList.removeLast(),cooldownList.removeLast());
     }
   }
-  void queue(List<BooruItem> booruItems, bool jsonWrite, String booruName){
+  void queue(List<BooruItem> booruItems, bool jsonWrite, String booruName, int cooldown){
       this.jsonWrite = jsonWrite;
       if (booruItems.isNotEmpty){
         queuedList.add(booruItems);
+        cooldownList.add(cooldown);
         booruNameList.add(booruName);
         queuedItems.value ++;
         if (booruItems.length > 1){
@@ -74,7 +77,7 @@ class SnatchHandler  {
         }
       }
   }
-  Future searchSnatch(String tags, String amount, int timeout, Booru booru, bool jsonWrite) async{
+  Future searchSnatch(String tags, String amount, int cooldown, Booru booru, bool jsonWrite) async{
     int count = 0, limit,page = 0;
     BooruHandler booruHandler;
     var booruItems;
@@ -93,7 +96,7 @@ class SnatchHandler  {
       count = booruItems.length;
       print(count);
     }
-    queue(booruItems, jsonWrite, booru.name);
+    queue(booruItems, jsonWrite, booru.name, cooldown);
     //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
   }
 }

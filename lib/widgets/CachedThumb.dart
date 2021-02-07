@@ -84,7 +84,7 @@ class _CachedThumbState extends State<CachedThumb> {
 
   Widget loadingElementBuilder(
       BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
-    if (loadingProgress == null) {
+    if (loadingProgress == null && !widget.settingsHandler.imageCache) {
       // Resulting image for network loaded thumbnail
       return child;
     }

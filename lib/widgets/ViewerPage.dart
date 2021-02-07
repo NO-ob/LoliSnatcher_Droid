@@ -175,10 +175,7 @@ class _ImagePageState extends State<ImagePage> {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
           // TODO: show progress, maybe use system downloader?
-          widget.snatchHandler.queue(
-              [widget.fetched[widget.searchGlobals.viewedIndex.value]],
-              widget.settingsHandler.jsonWrite,
-              widget.searchGlobals.selectedBooru.name);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name,widget.settingsHandler.snatchCooldown);
         },
       ),
       IconButton(
@@ -209,20 +206,13 @@ class _ImagePageState extends State<ImagePage> {
               context: context,
               builder: (BuildContext context) {
                 return Dialog(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
                   child: Container(
                     margin: EdgeInsets.all(5),
                     child: ListView.builder(
-                        itemCount: widget
-                            .fetched[widget.searchGlobals.viewedIndex.value]
-                            .tagsList
-                            .length,
+                        itemCount: widget.fetched[widget.searchGlobals.viewedIndex.value].tagsList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          String currentTag = widget
-                              .fetched[widget.searchGlobals.viewedIndex.value]
-                              .tagsList[index];
-
+                          String currentTag = widget.fetched[widget.searchGlobals.viewedIndex.value].tagsList[index];
                           if (currentTag != '') {
                             return Column(children: <Widget>[
                               Row(

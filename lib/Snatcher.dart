@@ -43,6 +43,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     if (widget.tags != ""){
       snatcherTagsController.text = widget.tags;
     }
+    snatcherSleepController.text = widget.settingsHandler.snatchCooldown.toString();
   }
   @override
   Widget build(BuildContext context) {
@@ -184,69 +185,6 @@ class _SnatcherPageState extends State<SnatcherPage> {
       ),
     );
   }
-  /*Future Snatcher(String tags, String amount, int timeout) async{
-    ImageWriter writer = new ImageWriter();
-    int count = 0, limit,page = 0;
-    BooruHandler booruHandler;
-    var booruItems;
-    if (int.parse(amount) <= 100){
-      limit = int.parse(amount);
-    } else {
-      limit = 100;
-    }
-    List temp = new BooruHandlerFactory().getBooruHandler(widget.booru, limit);
-    booruHandler = temp[0];
-    page = temp[1];
-    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-    // Loop until the count variable is bigger or equal to amount
-    // The count variable is used instead of checking the length of booruItems because the amount of images stored on
-    // The booru may be less than the user wants which would result in an infinite loop since the length would never be big enough
-    while (count < int.parse(amount)){
-      booruItems = await booruHandler.Search(tags,page);
-      page ++;
-      count = booruItems.length;
-      print(count);
-    }
-    Scaffold.of(Get.context).showBottomSheet<void>(
-          (BuildContext context) {
-        return Container(
-          height:150,
-          child: StreamBuilder(
-              stream: writer.writeMultiple(booruItems, widget.settingsHandler.jsonWrite),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.none:
-                    return Text("No Connection");
-                    break;
-                  case ConnectionState.waiting:
-                    return Text("Waiting");
-                    break;
-                  case ConnectionState.active:
-                    return Text("Snatching: ${snapshot.data} / ${booruItems.length}");
-                    break;
-                  case ConnectionState.done:
-                    Get.back();
-                    break;
-                }
-                return Text("Done");
-              }
-          ),
-        );
-      },
-    );
-
-    //SnatcherOverlay(booruItems, widget.settingsHandler.jsonWrite);
-    //for (int n = 0; n + 1 <= int.parse(amount); n ++){
-     // print(booruItems[n].fileURL);
-      //await Future.delayed(Duration(milliseconds: timeout), () {writer.write(booruItems[n],widget.settingsHandler.jsonWrite);});
-      //if ((n+1)%10 == 0 || n+1 == int.parse(amount)){
-
-      //Get.snackbar(Row(),snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 1),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-     // }
-    //}
-    //
-    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
-  }*/
 
   /** This Future function will call getBooru on the settingsHandler to load the booru configs
    * After these are loaded it returns a drop down list which is used to select which booru to search
