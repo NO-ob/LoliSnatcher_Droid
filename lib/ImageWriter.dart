@@ -64,7 +64,7 @@ class ImageWriter{
             return (fileName);
           }
         //} else {
-         // Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+         // Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
          // return 0;
         //}
 
@@ -92,9 +92,9 @@ class ImageWriter{
       });
       yield snatchedCounter++;
     }
-    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+    Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2),colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
     if (existsList.length > 0){
-      Get.snackbar("Some files were already snatched!", "File Count: ${existsList.length}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+      Get.snackbar("Some files were already snatched!", "File Count: ${existsList.length}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
     }
     if (failedList.length > 0){
       Get.snackbar("Snatching failed for some files! ", "File Count: ${failedList.length}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.white, backgroundColor: Colors.red);

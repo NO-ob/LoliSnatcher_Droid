@@ -32,6 +32,7 @@ dependencies:
   url_launcher: ^5.5.0
   photo_view: ^0.10.3
   html: ^0.14.0+4
+  flutter_staggered_grid_view: ^0.3.4
   video_player: 0.11.1+4 # this is the last version without the need to update sdk, was 0.10.11+2
   chewie: ^0.10.4 # last version is 0.12.1+1, but it requires to update sdk, video_player and cupertino_icons
   preload_page_view:

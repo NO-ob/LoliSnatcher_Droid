@@ -235,7 +235,7 @@ class _ImagePageState extends State<ImagePage> {
                                           snackPosition: SnackPosition.BOTTOM,
                                           duration: Duration(seconds: 2),
                                           colorText: Colors.black,
-                                          backgroundColor: Colors.pink[200]);
+                                          backgroundColor: Theme.of(context).primaryColor);
                                     },
                                   ),
                                   IconButton(
@@ -251,7 +251,7 @@ class _ImagePageState extends State<ImagePage> {
                                           snackPosition: SnackPosition.BOTTOM,
                                           duration: Duration(seconds: 2),
                                           colorText: Colors.black,
-                                          backgroundColor: Colors.pink[200]);
+                                          backgroundColor: Theme.of(context).primaryColor);
                                     },
                                   ),
                                 ],

@@ -12,7 +12,7 @@ import 'dart:io' show Platform;
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "";
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
   List<Booru> booruList = new List<Booru>();
@@ -165,6 +165,12 @@ class SettingsHandler {
               print("Found Snatch cooldown " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Preview Display"):
+            if (settings[i].split(" = ").length > 1){
+              previewDisplay = settings[i].split(" = ")[1];
+              print("Found Preview Display Mode " + settings[i].split(" = ")[1] );
+            }
+            break;
 
         }
       }
@@ -173,7 +179,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -190,7 +196,7 @@ class SettingsHandler {
       } else {
         // Close writer and alert user
         writer.close();
-        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
         return;
       }
     }
@@ -226,10 +232,12 @@ class SettingsHandler {
     this.autoHideImageBar = autoHideImageBar;
     writer.write("Snatch Cooldown  = $snatchCooldown\n");
     this.snatchCooldown = int.parse(snatchCooldown);
+    writer.write("Preview Display = $previewDisplay\n");
+    this.previewDisplay = previewDisplay;
     writer.close();
     await this.loadSettings();
     await getBooru();
-    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
   }
   Future getBooru() async{
     booruList = new List<Booru>();

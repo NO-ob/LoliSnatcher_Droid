@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:LoliSnatcher/widgets/StaggeredView.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -140,7 +141,7 @@ class _HomeState extends State<Home> {
                       searchGlobals[globalsIndex].selected = new List();
                     });
                   } else {
-                    Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+                    Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
                   }
                 },
               )
@@ -175,7 +176,7 @@ class _HomeState extends State<Home> {
                             }
                             setState((){
                               if(searchTagsController.text.contains("loli")){
-                                Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200] );
+                                Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor );
                               }
                               searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                             });
@@ -365,14 +366,23 @@ class _HomeState extends State<Home> {
                       if (searchGlobals[globalsIndex].selectedBooru == null){
                         searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
                       }
-                      return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+                      if (widget.settingsHandler.previewDisplay == "Waterfall"){
+                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+                      } else {
+                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+                      }
+
                     } else {
                       return Center(child: CircularProgressIndicator());
                     }
                   }
               );
           } else {
+            if (widget.settingsHandler.previewDisplay == "Waterfall"){
               return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+            } else {
+              return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+            }
           }
         } else {
           return Center(child: CircularProgressIndicator());

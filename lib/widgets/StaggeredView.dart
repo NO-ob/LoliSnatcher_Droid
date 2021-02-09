@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -22,16 +23,16 @@ void setBooruHandler(SearchGlobals searchGlobals, int limit) {
   searchGlobals.pageNum = temp[1];
 }
 
-class WaterfallView extends StatefulWidget {
+class StaggeredView extends StatefulWidget {
   final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final SnatchHandler snatchHandler;
-  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
+  StaggeredView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
   @override
-  _WaterfallState createState() => _WaterfallState();
+  _StaggeredState createState() => _StaggeredState();
 }
 
-class _WaterfallState extends State<WaterfallView> {
+class _StaggeredState extends State<StaggeredView> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
   Function jumpTo;
@@ -92,27 +93,21 @@ class _WaterfallState extends State<WaterfallView> {
                 // TODO: Make it draggable
                 controller: gridController,
                 isAlwaysShown: true,
-                child: GridView.builder(
+                child: StaggeredGridView.countBuilder(
                   controller: gridController,
                   itemCount: snapshot.data.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: columnsCount),
+                  crossAxisCount: columnsCount * 2,
                   itemBuilder: (BuildContext context, int index) {
                     bool isSelected =
                         widget.searchGlobals.selected.contains(index);
-                    return new Card(
-                      child: new GridTile(
+                    print("using staggered view");
+                    return Container(
                         // Inkresponse is used so the tile can have an onclick function
                         child: Material(
                           borderOnForeground: true,
                           child: Ink(
-                            decoration: isSelected
-                                ? BoxDecoration(
-                                    border: Border.all(
-                                        color: Theme.of(context).accentColor,
-                                        width: 4.0),
-                                  )
-                                : null,
+                            decoration: isSelected ?
+                            BoxDecoration(border: Border.all(color: Theme.of(context).accentColor, width: 4.0),) : null,
                             child: new InkResponse(
                               enableFeedback: true,
                               highlightShape: BoxShape.rectangle,
@@ -122,14 +117,8 @@ class _WaterfallState extends State<WaterfallView> {
                               onTap: () {
                                 // Load the image viewer
                                 print(snapshot.data[index].fileURL);
-
                                 Get.dialog(
-                                  ImagePage(
-                                      snapshot.data,
-                                      index,
-                                      widget.searchGlobals,
-                                      widget.settingsHandler,
-                                      widget.snatchHandler),
+                                  ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
                                   transitionDuration:
                                       Duration(milliseconds: 200),
                                   // barrierColor: Colors.transparent
@@ -152,30 +141,26 @@ class _WaterfallState extends State<WaterfallView> {
                             ),
                           ),
                         ),
-                      ),
-                    );
+                      );
                   },
+                  staggeredTileBuilder: (int index) =>
+                  new StaggeredTile.fit(2),
+                  mainAxisSpacing: 4.0,
+                  crossAxisSpacing: 4.0,
                 ),
               ),
               onNotification: (notif) {
                 widget.searchGlobals.scrollPosition = gridController.offset;
-                // print('SCROLL NOTIFICATION');
-                // print(widget.gridController.position.maxScrollExtent);
-                // print(notif.metrics); // pixels before viewport, in viewport, after viewport
-
                 // If at bottom edge update state with incremented pageNum
                 bool isNotAtStart = notif.metrics.pixels > 0;
-                bool isScreenFilled = notif.metrics.extentBefore > 0 ||
-                    notif.metrics.extentAfter >
-                        0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
+                bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
                 bool isAtEdge = notif.metrics.atEdge;
                 if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
                   if (!widget.searchGlobals.booruHandler.locked) {
                     setState(() {
                       widget.searchGlobals.pageNum++;
                     });
-                    Get.snackbar("Loading next page...",
-                        'Page #' + widget.searchGlobals.pageNum.toString(),
+                    Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(),
                         snackPosition: SnackPosition.TOP,
                         duration: Duration(seconds: 2),
                         colorText: Colors.black,
@@ -197,6 +182,5 @@ class _WaterfallState extends State<WaterfallView> {
           }
         });
   }
-
 
 }

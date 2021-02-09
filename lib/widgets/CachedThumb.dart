@@ -88,26 +88,13 @@ class _CachedThumbState extends State<CachedThumb> {
       // Resulting image for network loaded thumbnail
       return child;
     }
-    bool hasProgressData = (loadingProgress != null &&
-            loadingProgress.expectedTotalBytes != null) ||
-        (widget.settingsHandler.imageCache && _total != null && _total > 0);
-    bool isProgressFromCaching = widget.settingsHandler.imageCache &&
-        hasProgressData &&
-        _total != null &&
-        _total > 0;
-    int expectedBytes = hasProgressData
-        ? (isProgressFromCaching
-            ? _received
-            : loadingProgress.cumulativeBytesLoaded)
-        : null;
-    int totalBytes = hasProgressData
-        ? (isProgressFromCaching ? _total : loadingProgress.expectedTotalBytes)
-        : null;
+    bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (widget.settingsHandler.imageCache && _total != null && _total > 0);
+    bool isProgressFromCaching = widget.settingsHandler.imageCache && hasProgressData && _total != null && _total > 0;
+    int expectedBytes = hasProgressData ? (isProgressFromCaching ? _received : loadingProgress.cumulativeBytesLoaded) : null;
+    int totalBytes = hasProgressData ? (isProgressFromCaching ? _total : loadingProgress.expectedTotalBytes) : null;
 
     double percentDone = hasProgressData ? expectedBytes / totalBytes : null;
-    String percentDoneText = hasProgressData
-        ? ((percentDone * 100).toStringAsFixed(2) + '%')
-        : 'Loading...';
+    String percentDoneText = hasProgressData ? ((percentDone * 100).toStringAsFixed(2) + '%') : 'Loading...';
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -121,8 +108,7 @@ class _CachedThumbState extends State<CachedThumb> {
           ),
         ),
         Padding(padding: EdgeInsets.only(bottom: 10)),
-        widget.columnCount <
-                4 // Text element overflows if too many thumbnails are shown
+        widget.columnCount < 4 // Text element overflows if too many thumbnails are shown
             ? Text(
                 percentDoneText,
                 style: TextStyle(
@@ -139,9 +125,9 @@ class _CachedThumbState extends State<CachedThumb> {
     // Load from network if caching is disabled
     if (!widget.settingsHandler.imageCache) {
       return Image.network(widget.thumbURL,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
+          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
           loadingBuilder: loadingElementBuilder);
     } else {
       // Show progress until image is saved to/retrieved from cache
@@ -150,9 +136,9 @@ class _CachedThumbState extends State<CachedThumb> {
       } else {
         return Image.file(
           _image,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
+          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
         );
       }
     }

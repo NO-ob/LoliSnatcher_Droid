@@ -71,9 +71,9 @@ class SnatchHandler  {
         booruNameList.add(booruName);
         queuedItems.value ++;
         if (booruItems.length > 1){
-          Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
         } else {
-          Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Colors.pink[200]);
+          Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
         }
       }
   }
@@ -89,7 +89,7 @@ class SnatchHandler  {
     List temp = new BooruHandlerFactory().getBooruHandler(booru, limit);
     booruHandler = temp[0];
     page = temp[1];
-    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
     while (count < int.parse(amount) && !booruHandler.locked){
       booruItems = await booruHandler.Search(tags,page);
       page ++;
@@ -97,7 +97,7 @@ class SnatchHandler  {
       print(count);
     }
     queue(booruItems, jsonWrite, booru.name, cooldown);
-    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Colors.pink[200]);
+    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
   }
 }
 
