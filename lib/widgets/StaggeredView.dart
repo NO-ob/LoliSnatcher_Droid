@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get/get.dart';
 
@@ -122,7 +123,7 @@ class _StaggeredState extends State<StaggeredView> {
                                   transitionDuration:
                                       Duration(milliseconds: 200),
                                   // barrierColor: Colors.transparent
-                                );
+                                ).whenComplete(() => SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values));
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                               },

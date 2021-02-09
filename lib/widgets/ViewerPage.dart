@@ -174,7 +174,6 @@ class _ImagePageState extends State<ImagePage> {
         onPressed: () async {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
-          // TODO: show progress, maybe use system downloader?
           widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name,widget.settingsHandler.snatchCooldown);
         },
       ),

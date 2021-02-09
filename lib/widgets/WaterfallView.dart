@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -125,15 +126,11 @@ class _WaterfallState extends State<WaterfallView> {
 
                                 Get.dialog(
                                   ImagePage(
-                                      snapshot.data,
-                                      index,
-                                      widget.searchGlobals,
-                                      widget.settingsHandler,
-                                      widget.snatchHandler),
+                                      snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
                                   transitionDuration:
                                       Duration(milliseconds: 200),
                                   // barrierColor: Colors.transparent
-                                );
+                                ).whenComplete(() => SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values));
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                               },
