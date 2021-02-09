@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:flutter/services.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
@@ -40,6 +41,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    //Hide status bar and bottom navbar
+    !widget.searchGlobals.displayAppbar.value ? SystemChrome.setEnabledSystemUIOverlays([]) : SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     return AnimatedContainer(
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,
