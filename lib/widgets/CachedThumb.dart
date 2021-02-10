@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
+import 'package:get/get.dart';
 import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
@@ -126,7 +126,7 @@ class _CachedThumbState extends State<CachedThumb> {
     if (!widget.settingsHandler.imageCache) {
       return Image.network(widget.thumbURL,
           fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
-          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
           height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
           loadingBuilder: loadingElementBuilder);
     } else {
@@ -137,7 +137,7 @@ class _CachedThumbState extends State<CachedThumb> {
         return Image.file(
           _image,
           fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
-          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
           height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
         );
       }

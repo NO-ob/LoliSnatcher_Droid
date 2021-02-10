@@ -17,11 +17,11 @@ class _ScrollingTextState extends State<ScrollingText> {
   static const int stepDelay = 200;
   @override
   void initState(){
-    super.initState();
     counter = 0;
     pauseCounter = 0;
     bufferText = "";
     forward = true;
+    super.initState();
   }
   @override
   void dispose(){
