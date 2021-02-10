@@ -151,171 +151,188 @@ class _HomeState extends State<Home> {
             child: ImagesFuture(),
           ),
           drawer: Drawer(
-            child: ListView(
+            child: Column(
               children:<Widget>[
-                DrawerHeader(
-                  decoration: new BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
+                Expanded(
+                    child: ListView(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
 
-                    children: <Widget>[
-                      //Tags/Search field
-                      TagSearchBox(searchGlobals[globalsIndex], searchTagsController,searchBoxFocus),
-                       IconButton(
-                          padding: new EdgeInsets.all(20),
-                          icon: Icon(Icons.search),
-                          onPressed: () {
-                            if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
-                              searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
-                            }
-                            setState((){
-                              if(searchTagsController.text.contains("loli")){
-                                Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor );
-                              }
-                              searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
-                            });
-                            // Setstate and update the tags variable so the widget rebuilds with the new tags
+                            children: <Widget>[
+                              //Tags/Search field
+                              TagSearchBox(searchGlobals[globalsIndex], searchTagsController,searchBoxFocus),
+                              IconButton(
+                                padding: new EdgeInsets.all(20),
+                                icon: Icon(Icons.search),
+                                onPressed: () {
+                                  if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
+                                    searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
+                                  }
+                                  setState((){
+                                    if(searchTagsController.text.contains("loli")){
+                                      Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor );
+                                    }
+                                    searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
+                                  });
+                                  // Setstate and update the tags variable so the widget rebuilds with the new tags
 
-                          },
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                    ],
-                  ),
-                ),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      Text("Tab: "),
-                      Expanded(
-                        child:
-                        DropdownButton<SearchGlobals>(
-                          isExpanded: true,
-                          value: searchGlobals[globalsIndex],
-                          icon: Icon(Icons.arrow_downward),
-                          onChanged: (SearchGlobals newValue){
-                            setState(() {
-                              globalsIndex = searchGlobals.indexOf(newValue);
-                              searchTagsController.text = newValue.tags;
-                            });
-                          },
-                          onTap: (){
-                            setState(() { });
-                          },
-                          items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
-                            bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru.faviconURL != null;
-                            print(value.tags);
-                            String tagText = " ${value.tags}";
-                            return DropdownMenuItem<SearchGlobals>(
-                              value: value,
-                                child: Row(
-                                    children: [
-                                      isNotEmptyBooru ? Image.network(
-                                        value.selectedBooru.faviconURL,
-                                        width: 16,
-                                        errorBuilder: (_, __, ___) {
-                                          return Icon(Icons.broken_image, size: 18);
-                                        },
-                                      ) : Text(''),
-                                      Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause")),
-                                    ]
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              Text("Tab: "),
+                              Expanded(
+                                child:
+                                DropdownButton<SearchGlobals>(
+                                  isExpanded: true,
+                                  value: searchGlobals[globalsIndex],
+                                  icon: Icon(Icons.arrow_downward),
+                                  onChanged: (SearchGlobals newValue){
+                                    setState(() {
+                                      globalsIndex = searchGlobals.indexOf(newValue);
+                                      searchTagsController.text = newValue.tags;
+                                    });
+                                  },
+                                  onTap: (){
+                                    setState(() { });
+                                  },
+                                  items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
+                                    bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru.faviconURL != null;
+                                    print(value.tags);
+                                    String tagText = " ${value.tags}";
+                                    return DropdownMenuItem<SearchGlobals>(
+                                      value: value,
+                                      child: Row(
+                                          children: [
+                                            isNotEmptyBooru ? Image.network(
+                                              value.selectedBooru.faviconURL,
+                                              width: 16,
+                                              errorBuilder: (_, __, ___) {
+                                                return Icon(Icons.broken_image, size: 18);
+                                              },
+                                            ) : Text(''),
+                                            Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause")),
+                                          ]
+                                      ),
+                                    );
+                                  }).toList(),
                                 ),
-                            );
-                          }).toList(),
+                              ),
+
+
+                              IconButton(
+                                icon: Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
+                                onPressed: () {
+                                  // add a new search global to the list
+                                  setState((){
+                                    searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
+                                    // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
+                                  });
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
+                                onPressed: () {
+                                  // Remove selected searchglobal from list and apply nearest to search bar
+                                  setState((){
+                                    if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
+                                      globalsIndex --;
+                                      searchTagsController.text = searchGlobals[globalsIndex].tags;
+                                      searchGlobals.removeAt(globalsIndex + 1);
+                                    } else if (searchGlobals.length > 1){
+                                      searchTagsController.text = searchGlobals[globalsIndex + 1].tags;
+                                      searchGlobals.removeAt(globalsIndex);
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-
-
-                      IconButton(
-                        icon: Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
-                        onPressed: () {
-                          // add a new search global to the list
-                          setState((){
-                            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
-                            // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
-                          });
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
-                        onPressed: () {
-                          // Remove selected searchglobal from list and apply nearest to search bar
-                          setState((){
-                            if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
-                              globalsIndex --;
-                              searchTagsController.text = searchGlobals[globalsIndex].tags;
-                              searchGlobals.removeAt(globalsIndex + 1);
-                            } else if (searchGlobals.length > 1){
-                              searchTagsController.text = searchGlobals[globalsIndex + 1].tags;
-                              searchGlobals.removeAt(globalsIndex);
-                            }
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+                        Container(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              FutureBuilder(
+                                future: BooruSelector(),
+                                builder: (context, AsyncSnapshot snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                                    return snapshot.data;
+                                  } else {
+                                    return Center(child: CircularProgressIndicator());
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(20),
+                              side: BorderSide(color: Theme.of(context).accentColor),
+                            ),
+                            onPressed: (){
+                              Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler, widget.snatchHandler));
+                            },
+                            child: Text("Snatcher"),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(20),
+                              side: BorderSide(color: Theme.of(context).accentColor),
+                            ),
+                            onPressed: (){
+                              Get.to(SettingsPage(widget.settingsHandler));
+                            },
+                            child: Text("Settings"),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: new BorderRadius.circular(20),
+                              side: BorderSide(color: Theme.of(context).accentColor),
+                            ),
+                            onPressed: (){
+                              Get.to(AboutPage());
+                            },
+                            child: Text("About"),
+                          ),
+                        ),
+                      ],
+                    )
                 ),
                 Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      FutureBuilder(
-                        future: BooruSelector(),
-                        builder: (context, AsyncSnapshot snapshot) {
-                          if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                            return snapshot.data;
-                          } else {
-                            return Center(child: CircularProgressIndicator());
-                          }
-                        },
+                  child: Align(
+                    alignment: FractionalOffset.bottomCenter,
+                    child: Container(
+                      child: Column(
+                        children: [
+                          DrawerHeader(
+                          decoration: new BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Theme.of(context).accentColor),
                     ),
-                    onPressed: (){
-                      Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler, widget.snatchHandler));
-                    },
-                    child: Text("Snatcher"),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: (){
-                      Get.to(SettingsPage(widget.settingsHandler));
-                    },
-                    child: Text("Settings"),
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  child: FlatButton(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
-                    ),
-                    onPressed: (){
-                      Get.to(AboutPage());
-                    },
-                    child: Text("About"),
                   ),
                 ),
               ],
