@@ -31,6 +31,7 @@ class BooruHandlerFactory{
         booruHandler = new e621Handler(booru, limit);
         break;
       case("Shimmie"):
+        pageNum = 1;
         booruHandler = new ShimmieHandler(booru, limit);
         break;
       case("Philomena"):

@@ -26,7 +26,7 @@ import 'libBooru/BooruHandler.dart';
 void main() {
   runApp(GetMaterialApp(
     title: 'LoliSnatcher',
-    // debugShowCheckedModeBanner: false, // hide debug banner in the corner
+    debugShowCheckedModeBanner: false, // hide debug banner in the corner
     theme: //ThemeData(brightness: Brightness.light,primaryColor: SettingsHandler.themes[3].primary, accentColor: SettingsHandler.themes[3].accent,textTheme: SettingsHandler.themes[3].text),
     ThemeData(
       // Define the default brightness and colors.
@@ -193,7 +193,8 @@ class _HomeState extends State<Home> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              Text("Tab: "),
+                              const SizedBox(width: 5),
+                              const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
                               Expanded(
                                 child:
                                 DropdownButton<SearchGlobals>(
@@ -223,7 +224,7 @@ class _HomeState extends State<Home> {
                                               errorBuilder: (_, __, ___) {
                                                 return Icon(Icons.broken_image, size: 18);
                                               },
-                                            ) : Text(''),
+                                            ) : Icon(CupertinoIcons.question, size: 18),
                                             Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause")),
                                           ]
                                       ),

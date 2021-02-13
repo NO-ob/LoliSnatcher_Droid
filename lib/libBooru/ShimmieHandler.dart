@@ -53,7 +53,7 @@ class ShimmieHandler extends BooruHandler{
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if (!booru.baseURL.contains("https://whyneko.com/booru")){
-            fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("preview_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),current.getAttribute("file_url")));
+            fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("preview_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),getFileExt(current.getAttribute("file_url"))));
           } else {
             String cutURL = booru.baseURL.split("/booru")[0];
             fetched.add(new BooruItem(cutURL+current.getAttribute("file_url"),cutURL+current.getAttribute("preview_url"),cutURL+current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),getFileExt(current.getAttribute("file_url"))));
@@ -84,7 +84,7 @@ class ShimmieHandler extends BooruHandler{
 
   String makeTagURL(String input){
     if (booru.baseURL.contains("rule34.paheal.net")){
-      return "${booru.baseURL}/api/internal/autocomplete?s=$input&limit=5";
+      return "${booru.baseURL}/api/internal/autocomplete?s=$input"; // doesn't allow limit, but sorts by popularity
     } else {
       return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
     }

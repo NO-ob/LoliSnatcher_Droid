@@ -111,6 +111,10 @@ class ImageWriter{
       await Directory(cachePath).create(recursive:true);
 
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
+      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+        String unthumbedURL = fileURL.replaceAll('/thumb', '');
+        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+      }
       File image = new File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes);
     } catch (e){
@@ -129,6 +133,10 @@ class ImageWriter{
       await Directory(cachePath).create(recursive:true);
 
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
+      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+        String unthumbedURL = fileURL.replaceAll('/thumb', '');
+        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+      }
       image = new File(cachePath+fileName);
       await image.writeAsBytes(bytes);
     } catch (e){
@@ -147,6 +155,10 @@ class ImageWriter{
       print(cachePath);
 
       String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
+      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+        String unthumbedURL = fileURL.replaceAll('/thumb', '');
+        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+      }
       bool fileExists = await File(cachePath+fileName).exists();
       if (fileExists){
         return cachePath+fileName;

@@ -156,7 +156,7 @@ class _MediaViewerState extends State<MediaViewer> {
                   Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),
         ),
         child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+            filter: new ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

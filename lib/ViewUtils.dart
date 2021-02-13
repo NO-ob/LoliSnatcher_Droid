@@ -4,8 +4,6 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'SettingsHandler.dart';
 import 'libBooru/BooruItem.dart';
@@ -51,7 +49,7 @@ class ViewUtils {
       ),
     ]);
   }
-  static void jumpToItem(int item, SearchGlobals searchGlobals, ScrollController gridController, SettingsHandler settingsHandler, context) {
+  static void jumpToItem(int item, SearchGlobals searchGlobals, ScrollController gridController, SettingsHandler settingsHandler, BuildContext context) {
     int totalItems = searchGlobals.booruHandler.fetched.length;
     if (totalItems > 0) {
       double viewportHeight = gridController.position.viewportDimension;
@@ -77,8 +75,7 @@ class ViewUtils {
       // print(newValue);
 
       //gridController.jumpTo(scrollToValue);
-      gridController.animateTo(scrollToValue,
-          duration: Duration(milliseconds: 300), curve: Curves.linear);
+      gridController.animateTo(scrollToValue, duration: Duration(milliseconds: 300), curve: Curves.linear);
     }
   }
 }
