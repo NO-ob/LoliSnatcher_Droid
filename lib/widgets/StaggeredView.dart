@@ -108,12 +108,12 @@ class _StaggeredState extends State<StaggeredView> {
                           borderOnForeground: true,
                           child: Ink(
                             decoration: isSelected ?
-                            BoxDecoration(border: Border.all(color: Theme.of(context).accentColor, width: 4.0),) : null,
+                            BoxDecoration(border: Border.all(color: Get.context.theme.accentColor, width: 4.0),) : null,
                             child: new InkResponse(
                               enableFeedback: true,
                               highlightShape: BoxShape.rectangle,
                               containedInkWell: true,
-                              highlightColor: Theme.of(context).accentColor,
+                              highlightColor: Get.context.theme.accentColor,
                               child: ViewUtils.sampleorThumb(snapshot.data[index], columnsCount,widget.settingsHandler),
                               onTap: () {
                                 // Load the image viewer
@@ -165,7 +165,7 @@ class _StaggeredState extends State<StaggeredView> {
                         snackPosition: SnackPosition.TOP,
                         duration: Duration(seconds: 2),
                         colorText: Colors.black,
-                        backgroundColor: Theme.of(context).primaryColor);
+                        backgroundColor: Get.context.theme.primaryColor);
                   } else if (!isLastPage) {
                     setState(() {
                       isLastPage = true;
@@ -174,7 +174,7 @@ class _StaggeredState extends State<StaggeredView> {
                         snackPosition: SnackPosition.TOP,
                         duration: Duration(seconds: 2),
                         colorText: Colors.black,
-                        backgroundColor: Theme.of(context).primaryColor);
+                        backgroundColor: Get.context.theme.primaryColor);
                   }
                 }
                 return true;

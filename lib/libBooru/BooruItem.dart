@@ -13,16 +13,6 @@ class BooruItem{
       this.mediaType = "image";
     }
   }
-
-  String get file{
-    return fileURL;
-  }
-  String get sample{
-    return sampleURL;
-  }
-  String get thumbnail {
-    return thumbnailURL;
-  }
   List<String> get tags{
     return tagString.split(" ");
   }

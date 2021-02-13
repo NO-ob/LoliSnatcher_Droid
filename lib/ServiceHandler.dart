@@ -71,6 +71,9 @@ class ServiceHandler{
       print(e);
     }
   }
+  static void displayToast (String str){
+    platform.invokeMethod("toast",{"toastStr" : str});
+  }
   void emptyCache() async{
     try{
       if (Platform.isAndroid){

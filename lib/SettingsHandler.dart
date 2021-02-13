@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'ServiceHandler.dart';
 import 'package:get/get.dart';
+import 'ThemeItem.dart';
 import 'libBooru/Booru.dart';
 import 'dart:io' show Platform;
 /**
@@ -15,7 +16,17 @@ class SettingsHandler {
   String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
+  String verStr = "1.7.5";
   List<Booru> booruList = new List<Booru>();
+  static List<ThemeItem> themes = [
+    new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),
+    new ThemeItem("Purple", Colors.deepPurple[600], Colors.deepPurple[800]),
+    new ThemeItem("Blue", Colors.lightBlue, Colors.lightBlue[600]),
+    new ThemeItem("Teal", Colors.teal, Colors.teal[600]),
+    new ThemeItem("Red", Colors.red[700], Colors.red[800]),
+    new ThemeItem("Green", Colors.green, Colors.green[700]),
+  ];
+  String themeMode = "dark";
   var path = "";
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
   Future writeDefaults() async{
@@ -196,7 +207,7 @@ class SettingsHandler {
       } else {
         // Close writer and alert user
         writer.close();
-        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
+        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
         return;
       }
     }
@@ -237,7 +248,7 @@ class SettingsHandler {
     writer.close();
     await this.loadSettings();
     await getBooru();
-    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(Get.context).primaryColor);
+    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
   }
   Future getBooru() async{
     booruList = new List<Booru>();

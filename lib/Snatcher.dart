@@ -163,7 +163,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
+                  side: BorderSide(color: Get.context.theme.accentColor),
                 ),
                 /**
                  * When the snatch button is pressed the snatch function is called and then

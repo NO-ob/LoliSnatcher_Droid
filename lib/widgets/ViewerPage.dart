@@ -150,7 +150,7 @@ class _ImagePageState extends State<ImagePage> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Theme.of(context).accentColor),
+                        side: BorderSide(color: Get.context.theme.accentColor),
                       ),
                       onPressed: () {
                         Process.run('mpv', ["--loop", fileURL]);
@@ -222,7 +222,7 @@ class _ImagePageState extends State<ImagePage> {
                                   IconButton(
                                     icon: Icon(
                                       Icons.add,
-                                      color: Theme.of(context).accentColor,
+                                      color: Get.context.theme.accentColor,
                                     ),
                                     onPressed: () {
                                       setState(() {
@@ -234,12 +234,12 @@ class _ImagePageState extends State<ImagePage> {
                                           snackPosition: SnackPosition.BOTTOM,
                                           duration: Duration(seconds: 2),
                                           colorText: Colors.black,
-                                          backgroundColor: Theme.of(context).primaryColor);
+                                          backgroundColor: Get.context.theme.primaryColor);
                                     },
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.fiber_new,
-                                        color: Theme.of(context).accentColor),
+                                        color: Get.context.theme.accentColor),
                                     onPressed: () {
                                       setState(() {
                                         widget.searchGlobals.newTab.value =
@@ -250,7 +250,7 @@ class _ImagePageState extends State<ImagePage> {
                                           snackPosition: SnackPosition.BOTTOM,
                                           duration: Duration(seconds: 2),
                                           colorText: Colors.black,
-                                          backgroundColor: Theme.of(context).primaryColor);
+                                          backgroundColor: Get.context.theme.primaryColor);
                                     },
                                   ),
                                 ],

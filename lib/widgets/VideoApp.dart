@@ -199,14 +199,14 @@ class _VideoAppState extends State<VideoApp> {
             snackPosition: SnackPosition.TOP,
             duration: Duration(seconds: 1),
             colorText: Colors.black,
-            backgroundColor: Theme.of(context).primaryColor);
+            backgroundColor: Get.context.theme.primaryColor);
       } else if (newTime == 0) {
         Get.snackbar("", "Reached video start",
             snackStyle: SnackStyle.GROUNDED,
             snackPosition: SnackPosition.TOP,
             duration: Duration(seconds: 1),
             colorText: Colors.black,
-            backgroundColor: Theme.of(context).primaryColor);
+            backgroundColor: Get.context.theme.primaryColor);
       } else {
         Get.snackbar("",
             "${tapSide == 1 ? 'Skipped' : 'Rewind'} $skipSeconds second${skipSeconds > 1 ? 's' : ''}",
@@ -214,7 +214,7 @@ class _VideoAppState extends State<VideoApp> {
             snackPosition: SnackPosition.TOP,
             duration: Duration(seconds: 1),
             colorText: Colors.black,
-            backgroundColor: Theme.of(context).primaryColor);
+            backgroundColor: Get.context.theme.primaryColor);
       }
     } else {
       _videoController.value.isPlaying

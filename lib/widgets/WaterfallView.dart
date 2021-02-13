@@ -110,7 +110,7 @@ class _WaterfallState extends State<WaterfallView> {
                             decoration: isSelected
                                 ? BoxDecoration(
                                     border: Border.all(
-                                        color: Theme.of(context).accentColor,
+                                        color: Get.context.theme.accentColor,
                                         width: 4.0),
                                   )
                                 : null,
@@ -118,7 +118,7 @@ class _WaterfallState extends State<WaterfallView> {
                               enableFeedback: true,
                               highlightShape: BoxShape.rectangle,
                               containedInkWell: true,
-                              highlightColor: Theme.of(context).accentColor,
+                              highlightColor: Get.context.theme.accentColor,
                               child: ViewUtils.sampleorThumb(snapshot.data[index], columnsCount,widget.settingsHandler),
                               onTap: () {
                                 // Load the image viewer
@@ -176,7 +176,7 @@ class _WaterfallState extends State<WaterfallView> {
                         snackPosition: SnackPosition.TOP,
                         duration: Duration(seconds: 2),
                         colorText: Colors.black,
-                        backgroundColor: Theme.of(context).primaryColor);
+                        backgroundColor: Get.context.theme.primaryColor);
                   } else if (!isLastPage) {
                     setState(() {
                       isLastPage = true;
@@ -185,7 +185,7 @@ class _WaterfallState extends State<WaterfallView> {
                         snackPosition: SnackPosition.TOP,
                         duration: Duration(seconds: 2),
                         colorText: Colors.black,
-                        backgroundColor: Theme.of(context).primaryColor);
+                        backgroundColor: Get.context.theme.primaryColor);
                   }
                 }
                 return true;

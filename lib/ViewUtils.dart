@@ -32,7 +32,7 @@ class ViewUtils {
     bool isThumb = settingsHandler.previewMode == "Thumbnail" ||
         (itemType[0] == 'gif' || itemType[0] == 'video');
     String thumbURL = isThumb ? item.thumbnailURL : item.sampleURL;
-    return Stack(alignment: Alignment.center, children: [
+    return Stack(alignment: settingsHandler.previewDisplay == "Waterfall" ? Alignment.center : Alignment.bottomCenter, children: [
       CachedThumb(thumbURL, settingsHandler, columnCount),
       Container(
         alignment: Alignment.bottomRight,

@@ -20,12 +20,15 @@ import 'package:LoliSnatcher/widgets/BooruSelectorBroken.dart';
 import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 import 'package:LoliSnatcher/widgets/WaterfallView.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
+import 'ServiceHandler.dart';
+import 'libBooru/BooruHandler.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(GetMaterialApp(
     title: 'LoliSnatcher',
     // debugShowCheckedModeBanner: false, // hide debug banner in the corner
-    theme: ThemeData(
+    theme: //ThemeData(brightness: Brightness.light,primaryColor: SettingsHandler.themes[3].primary, accentColor: SettingsHandler.themes[3].accent,textTheme: SettingsHandler.themes[3].text),
+    ThemeData(
       // Define the default brightness and colors.
       brightness: Brightness.dark,
       primaryColor: Colors.pink[200],
@@ -141,7 +144,7 @@ class _HomeState extends State<Home> {
                       searchGlobals[globalsIndex].selected = new List();
                     });
                   } else {
-                    Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                    Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                   }
                 },
               )
@@ -171,9 +174,10 @@ class _HomeState extends State<Home> {
                                   if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
                                     searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
                                   }
+                                  ServiceHandler.displayToast("Toast test");
                                   setState((){
                                     if(searchTagsController.text.contains("loli")){
-                                      Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor );
+                                      Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
                                     }
                                     searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                                   });
@@ -230,7 +234,7 @@ class _HomeState extends State<Home> {
 
 
                               IconButton(
-                                icon: Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
+                                icon: Icon(Icons.add_circle_outline, color: Get.context.theme.accentColor),
                                 onPressed: () {
                                   // add a new search global to the list
                                   setState((){
@@ -240,7 +244,7 @@ class _HomeState extends State<Home> {
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.remove_circle_outline, color: Theme.of(context).accentColor),
+                                icon: Icon(Icons.remove_circle_outline, color: Get.context.theme.accentColor),
                                 onPressed: () {
                                   // Remove selected searchglobal from list and apply nearest to search bar
                                   setState((){
@@ -281,7 +285,7 @@ class _HomeState extends State<Home> {
                           child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Theme.of(context).accentColor),
+                              side: BorderSide(color: Get.context.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler, widget.snatchHandler));
@@ -294,7 +298,7 @@ class _HomeState extends State<Home> {
                           child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Theme.of(context).accentColor),
+                              side: BorderSide(color: Get.context.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(SettingsPage(widget.settingsHandler));
@@ -307,7 +311,7 @@ class _HomeState extends State<Home> {
                           child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Theme.of(context).accentColor),
+                              side: BorderSide(color: Get.context.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(AboutPage());
@@ -326,10 +330,11 @@ class _HomeState extends State<Home> {
                         children: [
                           DrawerHeader(
                           decoration: new BoxDecoration(
-                            color: Theme.of(context).primaryColor,
+                            color: Get.context.theme.primaryColor,
                             image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
                             ),
                           ),
+                          Text("Version: ${widget.settingsHandler.verStr}" )
                         ],
                       ),
                     ),
@@ -361,7 +366,7 @@ class _HomeState extends State<Home> {
                         child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Theme.of(context).accentColor),
+                              side: BorderSide(color: Get.context.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));

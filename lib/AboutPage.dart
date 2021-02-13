@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:core';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
 
 class AboutPage extends StatelessWidget {
   @override
@@ -29,7 +30,7 @@ class AboutPage extends StatelessWidget {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
+                  side: BorderSide(color: Get.context.theme.accentColor),
                 ),
                 onPressed: (){
                   _launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
@@ -45,7 +46,7 @@ class AboutPage extends StatelessWidget {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor,),
+                  side: BorderSide(color: Get.context.theme.accentColor,),
                 ),
                 onPressed: (){
                   _launchURL("https://www.pixiv.net/en/users/28366691");
@@ -61,7 +62,7 @@ class AboutPage extends StatelessWidget {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor,),
+                  side: BorderSide(color: Get.context.theme.accentColor,),
                 ),
                 onPressed: (){
                   _launchURL("https://github.com/NANI-SORE");

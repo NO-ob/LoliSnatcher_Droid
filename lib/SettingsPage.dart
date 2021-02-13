@@ -263,7 +263,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       jsonWrite = newValue;
                     });
                   },
-                  activeColor: Theme.of(context).primaryColor,
+                  activeColor: Get.context.theme.primaryColor,
                 )
               ],)
             ),
@@ -278,7 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         autoPlay = newValue;
                       });
                     },
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: Get.context.theme.primaryColor,
                   )
                 ],)
             ),
@@ -293,7 +293,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         loadingGif = newValue;
                       });
                     },
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: Get.context.theme.primaryColor,
                   )
                 ],)
             ),
@@ -360,7 +360,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         imageCache = newValue;
                       });
                     },
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: Get.context.theme.primaryColor,
                   )
                 ],)
             ),
@@ -375,7 +375,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         mediaCache = newValue;
                       });
                     },
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: Get.context.theme.primaryColor,
                   )
                 ],)
             ),
@@ -403,7 +403,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }).toList(),
                   ),
                   IconButton(
-                    icon: Icon(Icons.info, color: Theme.of(context).accentColor),
+                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
                     onPressed: () {
                         Get.dialog(
                           InfoDialog("Video Cache Modes",
@@ -427,11 +427,11 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
+                  side: BorderSide(color: Get.context.theme.accentColor),
                 ),
                 onPressed: (){
                   serviceHandler.emptyCache();
-                  Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                  Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                 },
                 child: Text("Clear cache"),
               ),
@@ -447,7 +447,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         autoHideImageBar = newValue;
                       });
                     },
-                    activeColor: Theme.of(context).primaryColor,
+                    activeColor: Get.context.theme.primaryColor,
                   )
                 ],)
             ),
@@ -480,7 +480,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: FlatButton(                     // This button loads the booru editor page
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Theme.of(context).accentColor),
+                        side: BorderSide(color: Get.context.theme.accentColor),
                       ),
                       onPressed: (){
                         if(selectedBooru != null){
@@ -496,7 +496,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Theme.of(context).accentColor),
+                        side: BorderSide(color: Get.context.theme.accentColor),
                       ),
                       onPressed: (){
                         // Open the booru edtor page but with default values
@@ -511,13 +511,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Theme.of(context).accentColor),
+                        side: BorderSide(color: Get.context.theme.accentColor),
                       ),
                       onPressed: (){
                         // Open the booru edtor page but with default values
                         if (widget.settingsHandler.deleteBooru(selectedBooru)){
                           setState(() {
-                            Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                            Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                           });
                         }
                         //get to booru edit page;
@@ -533,7 +533,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
+                  side: BorderSide(color: Get.context.theme.accentColor),
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
@@ -547,7 +547,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Theme.of(context).accentColor),
+                  side: BorderSide(color: Get.context.theme.accentColor),
                 ),
                 onPressed: (){
                 },
@@ -648,7 +648,7 @@ class _booruEditState extends State<booruEdit> {
                   FlatButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Theme.of(context).accentColor),
+                      side: BorderSide(color: Get.context.theme.accentColor),
                     ),
                     onPressed: () async{
                       //Call the booru test
@@ -676,9 +676,9 @@ class _booruEditState extends State<booruEdit> {
                           selectedBooruType = booruType;
                         });
                         // Alert user about the results of the test
-                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                       } else {
-                        Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                        Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                       }
                     },
                     child: Text("Test"),
@@ -835,20 +835,20 @@ class _booruEditState extends State<booruEdit> {
                     child: FlatButton(
               shape: RoundedRectangleBorder(
                 borderRadius: new BorderRadius.circular(20),
-                side: BorderSide(color: Theme.of(context).accentColor),
+                side: BorderSide(color: Get.context.theme.accentColor),
               ),
               onPressed: () async{
                 if (selectedBooruType == "Hydrus"){
                   HydrusHandler hydrus = new HydrusHandler(new Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
                   String accessKey = await hydrus.getAccessKey();
                   if (accessKey != ""){
-                    Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                    Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                     booruAPIKeyController.text = accessKey;
                   } else {
-                    Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                    Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                   }
                 } else {
-                  Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                  Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                 }
               },
               child: Text("Get Hydrus Api Key"),
@@ -932,7 +932,7 @@ class _booruEditState extends State<booruEdit> {
       return FlatButton(
         shape: RoundedRectangleBorder(
           borderRadius: new BorderRadius.circular(20),
-          side: BorderSide(color: Theme.of(context).accentColor),
+          side: BorderSide(color: Get.context.theme.accentColor),
         ),
         onPressed:() async{
           getPerms();
@@ -943,7 +943,7 @@ class _booruEditState extends State<booruEdit> {
             if (widget.settingsHandler.booruList[i].baseURL == booruURLController.text){
               if (widget.settingsHandler.booruList.contains(newBooru)){
                 booruExists = true;
-                Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+                Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
               } else {
                 widget.settingsHandler.booruList.removeAt(i);
               }
@@ -956,7 +956,7 @@ class _booruEditState extends State<booruEdit> {
           }
           if (!booruExists){
             await widget.settingsHandler.saveBooru(newBooru);
-            Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Theme.of(context).primaryColor);
+            Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
           }
 
         },
