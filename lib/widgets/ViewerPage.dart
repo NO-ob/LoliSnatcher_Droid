@@ -50,7 +50,9 @@ class _ImagePageState extends State<ImagePage> {
     controllerLinux = PageController(
       initialPage: widget.index,
     );
-    widget.searchGlobals.viewedIndex.value = widget.index;
+    setState(() {
+      widget.searchGlobals.viewedIndex.value = widget.index;
+    });
   }
 
   @override
@@ -67,14 +69,11 @@ class _ImagePageState extends State<ImagePage> {
           // background: Container(color: Colors.black.withOpacity(0.3)),
           key: const Key('imagePageDismissibleKey'),
           resizeDuration: null, // Duration(milliseconds: 100),
-          // dismissThresholds: {DismissDirection.vertical: 0.33},
+          dismissThresholds: {DismissDirection.up: 0.2, DismissDirection.down: 0.2}, // Amount of swiped away which triggers dismiss
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
-            /**
-         * The pageView builder will created a page for each image in the booruList(fetched)
-         */
-            child:
-                Platform.isAndroid ? androidPageBuilder() : linuxPageBuilder(),
+            // The pageView builder will created a page for each image in the booruList(fetched)
+            child: Platform.isAndroid ? androidPageBuilder() : linuxPageBuilder(),
           ),
         ));
   }
@@ -96,6 +95,7 @@ class _ImagePageState extends State<ImagePage> {
                 (widget.searchGlobals.viewedIndex.value - index).abs() <=
                     preloadCount;
             print(fileURL);
+            // print('isVideo: '+isVideo.toString());
 
             // Render only if viewed or in preloadCount range
             if (isViewed || isNear) {

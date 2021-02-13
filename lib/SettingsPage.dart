@@ -833,32 +833,32 @@ class _booruEditState extends State<booruEdit> {
                   Container(
                     width: double.infinity,
                     child: FlatButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(20),
-                side: BorderSide(color: Get.context.theme.accentColor),
-              ),
-              onPressed: () async{
-                if (selectedBooruType == "Hydrus"){
-                  HydrusHandler hydrus = new HydrusHandler(new Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
-                  String accessKey = await hydrus.getAccessKey();
-                  if (accessKey != ""){
-                    Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
-                    booruAPIKeyController.text = accessKey;
-                  } else {
-                    Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
-                  }
-                } else {
-                  Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
-                }
-              },
-              child: Text("Get Hydrus Api Key"),
-            ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20),
+                        side: BorderSide(color: Get.context.theme.accentColor),
+                      ),
+                      onPressed: () async{
+                        if (selectedBooruType == "Hydrus"){
+                          HydrusHandler hydrus = new HydrusHandler(new Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
+                          String accessKey = await hydrus.getAccessKey();
+                          if (accessKey != ""){
+                            Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            booruAPIKeyController.text = accessKey;
+                          } else {
+                            Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                          }
+                        } else {
+                          Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                        }
+                      },
+                      child: Text("Get Hydrus Api Key"),
+                    ),
                   ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-              width: double.infinity,
-              child: Text("To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request"),
-            ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    width: double.infinity,
+                    child: Text("To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request"),
+                  ),
                 ]
                 : []
               )

@@ -31,18 +31,25 @@ class _HideableAppBarState extends State<HideableAppBar> {
     };
     widget.searchGlobals.displayAppbar.value = !widget.autoHide;
     widget.searchGlobals.displayAppbar.addListener(setSt);
+
+    // Hide system ui on first render
+    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   @override
   void dispose() {
     widget.searchGlobals.displayAppbar.removeListener(setSt);
+
+    // Return system ui after closing viewer
+    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     //Hide status bar and bottom navbar
-    !widget.searchGlobals.displayAppbar.value ? SystemChrome.setEnabledSystemUIOverlays([]) : SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    // Bug: triggers restate => forces video restart, animation lags
+    // !widget.searchGlobals.displayAppbar.value ? SystemChrome.setEnabledSystemUIOverlays([]) : SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     return AnimatedContainer(
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,

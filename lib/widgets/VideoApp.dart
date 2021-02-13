@@ -6,13 +6,14 @@ import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/widgets/LoliControls.dart';
 
 class VideoApp extends StatefulWidget {
   final BooruItem booruItem;
@@ -27,7 +28,6 @@ class VideoApp extends StatefulWidget {
 class _VideoAppState extends State<VideoApp> {
   VideoPlayerController _videoController;
   ChewieController _chewieController;
-  TapDownDetails doubleTapInfo;
 
   // VideoPlayerValue _latestValue;
 
@@ -142,86 +142,6 @@ class _VideoAppState extends State<VideoApp> {
   //   });
   // }
 
-  void doubleTapInfoWrite(TapDownDetails event) {
-    doubleTapInfo = event;
-  }
-
-  // TODO: make customControls and implement this there
-  void doubleTapAction() {
-    if (doubleTapInfo == null ||
-        _chewieController == null ||
-        !_chewieController.videoPlayerController.value.initialized) return;
-
-    // Detect on which side we tapped
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenMiddle = screenWidth / 2;
-    double sidesLimit = screenWidth / 6;
-    double tapPositionWidth = doubleTapInfo.localPosition.dx;
-    int tapSide;
-    if (tapPositionWidth > (screenMiddle + sidesLimit)) {
-      tapSide = 1;
-    } else if (tapPositionWidth < (screenMiddle - sidesLimit)) {
-      tapSide = -1;
-    } else {
-      tapSide = 0;
-    }
-
-    // Decide how much we will skip depending on video length
-    int videoDuration = _videoController.value.duration.inSeconds;
-    int skipSeconds;
-    if (videoDuration <= 5) {
-      skipSeconds = 0;
-    } else if (videoDuration <= 10) {
-      skipSeconds = 1;
-    } else if (videoDuration <= 60) {
-      skipSeconds = 5;
-    } else if (videoDuration <= 120) {
-      skipSeconds = 10;
-    } else {
-      skipSeconds = 15;
-    }
-
-    if (tapSide != 0 && skipSeconds != 0) {
-      int videoPositionMillisecs =
-          _videoController.value.position.inMilliseconds;
-      int videoDurationMillisecs =
-          _videoController.value.duration.inMilliseconds;
-      // Calculate new time with skip and limit it to range (0 to duration of video) (in milliseconds for accuracy)
-      int newTime = min(
-          max(0, videoPositionMillisecs + (skipSeconds * 1000 * tapSide)),
-          videoDurationMillisecs);
-      // print(newTime);
-      // Skip set amount of seconds if we tapped on left/right third of the screen or play/pause if in the middle
-      _videoController.seekTo(new Duration(milliseconds: newTime));
-      if (videoDurationMillisecs == newTime) {
-        Get.snackbar("", "Reached video end",
-            snackStyle: SnackStyle.GROUNDED,
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 1),
-            colorText: Colors.black,
-            backgroundColor: Get.context.theme.primaryColor);
-      } else if (newTime == 0) {
-        Get.snackbar("", "Reached video start",
-            snackStyle: SnackStyle.GROUNDED,
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 1),
-            colorText: Colors.black,
-            backgroundColor: Get.context.theme.primaryColor);
-      } else {
-        Get.snackbar("",
-            "${tapSide == 1 ? 'Skipped' : 'Rewind'} $skipSeconds second${skipSeconds > 1 ? 's' : ''}",
-            snackStyle: SnackStyle.GROUNDED,
-            snackPosition: SnackPosition.TOP,
-            duration: Duration(seconds: 1),
-            colorText: Colors.black,
-            backgroundColor: Get.context.theme.primaryColor);
-      }
-    } else {
-      _videoController.value.isPlaying
-          ? _videoController.pause()
-          : _videoController.play();
-    }
-  }
 
   Future<void> initPlayer() async {
     // Start from cache if was already cached or only caching is allowed
@@ -243,9 +163,16 @@ class _VideoAppState extends State<VideoApp> {
       allowedScreenSleep: false,
       looping: true,
       showControls: true,
+      customControls:
+        LoliControls(),
+        // MaterialControls(),
+        // CupertinoControls(
+        //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
+        //   iconColor: Color.fromARGB(255, 200, 200, 200)
+        // ),
       materialProgressColors: ChewieProgressColors(
-        playedColor: Colors.blue,
-        handleColor: Colors.blue,
+        playedColor: Get.context.theme.primaryColor,
+        handleColor: Get.context.theme.primaryColor,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white,
       ),
@@ -320,7 +247,7 @@ class _VideoAppState extends State<VideoApp> {
                   Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),
         ),
         child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 2.0, sigmaY: 2.0),
+            filter: new ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -403,8 +330,8 @@ class _VideoAppState extends State<VideoApp> {
     bool isViewed = widget.viewedIndex == widget.index;
     bool initialized = _chewieController != null &&
         _chewieController.videoPlayerController.value.initialized;
-    String vWidth = '';
-    String vHeight = '';
+    // String vWidth = '';
+    // String vHeight = '';
 
     if (initialized) {
       // vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
@@ -421,25 +348,13 @@ class _VideoAppState extends State<VideoApp> {
       }
     }
 
-    return Container(
-      child: Scaffold(
-          body: Column(
-        children: <Widget>[
-          // Show video dimensions on the top
-          // Container(
-          //   child: MediaQuery.of(context).orientation == Orientation.portrait ? Text(vWidth+'x'+vHeight) : null
-          // ),
-          Expanded(
-            child: Center(
-                child: initialized
-                    ? GestureDetector(
-                        onDoubleTapDown: doubleTapInfoWrite,
-                        onDoubleTap: doubleTapAction,
-                        child: Chewie(controller: _chewieController))
-                    : loadingElementBuilder()),
-          ),
-        ],
-      )),
-    );
+    // Show video dimensions on the top
+    // Container(
+    //   child: MediaQuery.of(context).orientation == Orientation.portrait ? Text(vWidth+'x'+vHeight) : null
+    // ),
+
+    return initialized
+      ? Chewie(controller: _chewieController)
+      : loadingElementBuilder();
   }
 }

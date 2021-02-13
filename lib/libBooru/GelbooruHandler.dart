@@ -74,21 +74,39 @@ class GelbooruHandler extends BooruHandler{
 
     }
     String makeTagURL(String input){
-      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";
+      if (booru.baseURL.contains("rule34.xxx")){
+        return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
+      } else {
+        return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";
+      }
     }
     @override
     Future tagSearch(String input) async {
       List<String> searchTags = new List();
       String url = makeTagURL(input);
       try {
-        final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
-        // 200 is the success http response code
-        if (response.statusCode == 200) {
-          var parsedResponse = xml.parse(response.body);
-          var tags = parsedResponse.findAllElements("tag");
-          if (tags.length > 0){
-            for (int i=0; i < tags.length; i++){
-              searchTags.add(tags.elementAt(i).getAttribute("name").trim());
+        if (booru.baseURL.contains("rule34.xxx")){
+          final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+          // 200 is the success http response code
+          if (response.statusCode == 200) {
+            var parsedResponse = jsonDecode(response.body);
+            print(parsedResponse);
+            if (parsedResponse.length > 0){
+              for (int i=0; i < parsedResponse.length; i++){
+                searchTags.add(parsedResponse.elementAt(i)["value"]);
+              }
+            }
+          }
+        } else {
+          final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
+          // 200 is the success http response code
+          if (response.statusCode == 200) {
+            var parsedResponse = xml.parse(response.body);
+            var tags = parsedResponse.findAllElements("tag");
+            if (tags.length > 0){
+              for (int i=0; i < tags.length; i++){
+                searchTags.add(tags.elementAt(i).getAttribute("name").trim());
+              }
             }
           }
         }
