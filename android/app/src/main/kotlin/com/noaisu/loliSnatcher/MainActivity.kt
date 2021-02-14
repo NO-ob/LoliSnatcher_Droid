@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.view.Gravity
 import android.widget.Toast
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterActivity
@@ -72,7 +73,9 @@ class MainActivity: FlutterActivity() {
 
             } else if (call.method == "toast"){
                 val toastString: String? = call.argument("toastStr");
-                Toast.makeText(this, toastString, Toast.LENGTH_SHORT).show()
+                val toast: Toast = Toast.makeText(this, toastString, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.TOP or Gravity.CENTER, 0, 30);
+                toast.show();
             }
 
 

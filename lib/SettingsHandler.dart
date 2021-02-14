@@ -207,7 +207,8 @@ class SettingsHandler {
       } else {
         // Close writer and alert user
         writer.close();
-        Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+        ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit");
+        //Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
         return;
       }
     }
@@ -248,7 +249,8 @@ class SettingsHandler {
     writer.close();
     await this.loadSettings();
     await getBooru();
-    Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+    ServiceHandler.displayToast("Settings Saved! \n Some changes may not take effect until the app is restarted");
+    //Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
   }
   Future getBooru() async{
     booruList = new List<Booru>();

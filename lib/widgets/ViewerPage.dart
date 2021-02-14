@@ -51,6 +51,8 @@ class _ImagePageState extends State<ImagePage> {
       initialPage: widget.index,
     );
     setState(() {
+      print("widget index: ${widget.index}");
+      print("searchglobals index: ${widget.searchGlobals.viewedIndex.value}");
       widget.searchGlobals.viewedIndex.value = widget.index;
     });
   }
@@ -226,15 +228,10 @@ class _ImagePageState extends State<ImagePage> {
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        widget.searchGlobals.addTag.value =
-                                            " " + currentTag;
+                                        widget.searchGlobals.addTag.value = " " + currentTag;
                                       });
-                                      Get.snackbar("Added to search",
-                                          "Tag: " + currentTag,
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          duration: Duration(seconds: 2),
-                                          colorText: Colors.black,
-                                          backgroundColor: Get.context.theme.primaryColor);
+                                      ServiceHandler.displayToast("Added to search \n Tag: "+ currentTag);
+                                      //Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                                     },
                                   ),
                                   IconButton(
@@ -245,12 +242,8 @@ class _ImagePageState extends State<ImagePage> {
                                         widget.searchGlobals.newTab.value =
                                             currentTag;
                                       });
-                                      Get.snackbar(
-                                          "Added new tab", "Tag: " + currentTag,
-                                          snackPosition: SnackPosition.BOTTOM,
-                                          duration: Duration(seconds: 2),
-                                          colorText: Colors.black,
-                                          backgroundColor: Get.context.theme.primaryColor);
+                                      ServiceHandler.displayToast("Added new tab \n Tag: " + currentTag);
+                                      //Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                                     },
                                   ),
                                 ],

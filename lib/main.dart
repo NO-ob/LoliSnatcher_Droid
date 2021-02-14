@@ -144,7 +144,8 @@ class _HomeState extends State<Home> {
                       searchGlobals[globalsIndex].selected = new List();
                     });
                   } else {
-                    Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                    ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
+                    //Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                   }
                 },
               )
@@ -177,7 +178,8 @@ class _HomeState extends State<Home> {
                                   ServiceHandler.displayToast("Toast test");
                                   setState((){
                                     if(searchTagsController.text.contains("loli")){
-                                      Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
+                                      ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
+                                      //Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
                                     }
                                     searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                                   });

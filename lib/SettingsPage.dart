@@ -431,7 +431,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   serviceHandler.emptyCache();
-                  Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                  ServiceHandler.displayToast("Cache cleared! \n Restart may be required!");
+                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                 },
                 child: Text("Clear cache"),
               ),
@@ -517,7 +518,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         // Open the booru edtor page but with default values
                         if (widget.settingsHandler.deleteBooru(selectedBooru)){
                           setState(() {
-                            Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            ServiceHandler.displayToast("Booru Deleted! \n Dropdown will update on search");
+                            //Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                           });
                         }
                         //get to booru edit page;
@@ -676,9 +678,11 @@ class _booruEditState extends State<booruEdit> {
                           selectedBooruType = booruType;
                         });
                         // Alert user about the results of the test
-                        Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                        ServiceHandler.displayToast("Booru Type is $booruType \nClick the save button to save this config");
+                        //Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                       } else {
-                        Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                        ServiceHandler.displayToast("No Data Returned \n Booru Information may be incorrect or the booru doesn't allow api access ");
+                        //Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                       }
                     },
                     child: Text("Test"),
@@ -842,13 +846,16 @@ class _booruEditState extends State<booruEdit> {
                           HydrusHandler hydrus = new HydrusHandler(new Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
                           String accessKey = await hydrus.getAccessKey();
                           if (accessKey != ""){
-                            Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            ServiceHandler.displayToast("Access Key Requested \n Click okay on hydrus then apply. You can then test");
+                            //Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                             booruAPIKeyController.text = accessKey;
                           } else {
-                            Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            ServiceHandler.displayToast("Couldn't get access key \n Do you have the request window open in hydrus?");
+                            //Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                           }
                         } else {
-                          Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                          ServiceHandler.displayToast("Hydrus Only \n This button only works for Hydrus");
+                          //Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                         }
                       },
                       child: Text("Get Hydrus Api Key"),
@@ -943,7 +950,8 @@ class _booruEditState extends State<booruEdit> {
             if (widget.settingsHandler.booruList[i].baseURL == booruURLController.text){
               if (widget.settingsHandler.booruList.contains(newBooru)){
                 booruExists = true;
-                Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                ServiceHandler.displayToast("Booru Already Exists \n It has not been added");
+                //Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
               } else {
                 widget.settingsHandler.booruList.removeAt(i);
               }
@@ -956,7 +964,8 @@ class _booruEditState extends State<booruEdit> {
           }
           if (!booruExists){
             await widget.settingsHandler.saveBooru(newBooru);
-            Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+            ServiceHandler.displayToast("Booru Saved! \n It will show in the dropdowns after a search");
+            //Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
           }
 
         },

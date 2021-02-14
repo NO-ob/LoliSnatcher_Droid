@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -123,7 +124,6 @@ class _WaterfallState extends State<WaterfallView> {
                               onTap: () {
                                 // Load the image viewer
                                 print(snapshot.data[index].fileURL);
-
                                 Get.dialog(
                                   ImagePage(
                                       snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
@@ -171,21 +171,14 @@ class _WaterfallState extends State<WaterfallView> {
                     setState(() {
                       widget.searchGlobals.pageNum++;
                     });
-                    Get.snackbar("Loading next page...",
-                        'Page #' + widget.searchGlobals.pageNum.toString(),
-                        snackPosition: SnackPosition.TOP,
-                        duration: Duration(seconds: 2),
-                        colorText: Colors.black,
-                        backgroundColor: Get.context.theme.primaryColor);
+                    ServiceHandler.displayToast("Loading next page...\n Page #" + widget.searchGlobals.pageNum.toString());
+                    //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                   } else if (!isLastPage) {
                     setState(() {
                       isLastPage = true;
                     });
-                    Get.snackbar("No More Files", '(T⌓T)',
-                        snackPosition: SnackPosition.TOP,
-                        duration: Duration(seconds: 2),
-                        colorText: Colors.black,
-                        backgroundColor: Get.context.theme.primaryColor);
+                    ServiceHandler.displayToast("No More Files \n (T⌓T)");
+                    //Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                   }
                 }
                 return true;

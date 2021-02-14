@@ -51,6 +51,7 @@ class ViewUtils {
   }
   static void jumpToItem(int item, SearchGlobals searchGlobals, ScrollController gridController, SettingsHandler settingsHandler, BuildContext context) {
     int totalItems = searchGlobals.booruHandler.fetched.length;
+    print("jump to item called index is: $item");
     if (totalItems > 0) {
       double viewportHeight = gridController.position.viewportDimension;
       double totalHeight =

@@ -1,4 +1,5 @@
 //import 'dart:html';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:flutter/material.dart';
 import 'libBooru/BooruItem.dart';
@@ -71,9 +72,11 @@ class SnatchHandler  {
         booruNameList.add(booruName);
         queuedItems.value ++;
         if (booruItems.length > 1){
-          Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+          ServiceHandler.displayToast("Items added to snatch queue\n Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}");
+          //Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
         } else {
-          Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+          ServiceHandler.displayToast("Item added to snatch queue\n ${booruItems[0].fileURL} \n Queue Position: ${queuedItems.value}");
+          //Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
         }
       }
   }
@@ -89,7 +92,8 @@ class SnatchHandler  {
     List temp = new BooruHandlerFactory().getBooruHandler(booru, limit);
     booruHandler = temp[0];
     page = temp[1];
-    Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+    ServiceHandler.displayToast("Snatching Images \n Do not close the app!");
+    //Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
     while (count < int.parse(amount) && !booruHandler.locked){
       booruItems = await booruHandler.Search(tags,page);
       page ++;
