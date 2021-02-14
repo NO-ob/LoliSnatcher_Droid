@@ -133,7 +133,8 @@ class _HomeState extends State<Home> {
         child: Scaffold(
           appBar: AppBar(
             title: activeTitle,
-            actions:<Widget>[ IconButton(
+            actions: <Widget>[
+              IconButton(
                 icon: Icon(Icons.save),
                 onPressed: (){
                   getPerms();
@@ -330,13 +331,14 @@ class _HomeState extends State<Home> {
                     child: Container(
                       child: Column(
                         children: [
+                          Text("Version: ${widget.settingsHandler.verStr}" ),
                           DrawerHeader(
-                          decoration: new BoxDecoration(
-                            color: Get.context.theme.primaryColor,
-                            image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                            margin: null,
+                            decoration: new BoxDecoration(
+                              color: Get.context.theme.primaryColor,
+                              image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
                             ),
                           ),
-                          Text("Version: ${widget.settingsHandler.verStr}" )
                         ],
                       ),
                     ),

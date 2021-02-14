@@ -31,11 +31,11 @@ class _ScrollingTextState extends State<ScrollingText> {
 
   @override
   Widget build(BuildContext context) {
-    if (counter+widget.size - 1 > widget.text.length && counter != 0){
+    if ((counter + widget.size) > widget.text.length && counter != 0){
       setState(() {
         initState();
       });
-    } else if (counter+widget.size - 1 > widget.text.length){
+    } else if ((counter + widget.size) > widget.text.length){
       return Text(widget.text, textAlign: TextAlign.left);
     } else {
       switch(widget.mode){
@@ -53,7 +53,7 @@ class _ScrollingTextState extends State<ScrollingText> {
           break;
       }
     }
-    return Text(" " + displayText, textAlign: TextAlign.left);
+    return Text(displayText, textAlign: TextAlign.left);
   }
   void bounce(){
     Future.delayed(const Duration(milliseconds: stepDelay), () {
@@ -161,7 +161,7 @@ class _ScrollingTextState extends State<ScrollingText> {
     });
 
     if (bufferText.length < 1){
-      displayText = " " + widget.text.substring(counter, counter + widget.size);
+      displayText = widget.text.substring(counter, counter + widget.size);
     } else {
       displayText = bufferText + " " + widget.text.substring(0, widget.size - (bufferText.length - 1));
     }

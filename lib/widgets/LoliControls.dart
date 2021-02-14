@@ -702,16 +702,7 @@ class _LoliControlsState extends State<LoliControls>
       _startDoubleTapTimer();
       _cancelAndRestartTimer();
     } else {
-      if (controller.value.isPlaying) {
-        playPauseIconAnimationController.reverse();
-        _hideStuff = false;
-        _hideTimer?.cancel();
-        controller.pause();
-      } else {
-        _cancelAndRestartTimer();
-        playPauseIconAnimationController.forward();
-        controller.play();
-      }
+      _playPause();
     }
   }
 
