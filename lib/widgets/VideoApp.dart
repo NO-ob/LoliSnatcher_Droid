@@ -164,8 +164,8 @@ class _VideoAppState extends State<VideoApp> {
       looping: true,
       showControls: true,
       customControls:
-        //LoliControls(),
-         MaterialControls(),
+        LoliControls(),
+        // MaterialControls(),
         // CupertinoControls(
         //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
         //   iconColor: Color.fromARGB(255, 200, 200, 200)
