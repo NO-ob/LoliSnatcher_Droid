@@ -175,7 +175,6 @@ class _HomeState extends State<Home> {
                                   if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
                                     searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
                                   }
-                                  ServiceHandler.displayToast("Toast test");
                                   setState((){
                                     if(searchTagsController.text.contains("loli")){
                                       ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");

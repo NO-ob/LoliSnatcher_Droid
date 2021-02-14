@@ -41,23 +41,26 @@ class _LoliControlsState extends State<LoliControls>
   int _lastDoubleTapAmount = 0;
   int _lastDoubleTapSide = 0;
   String _doubleTapExtraMessage;
-
+  ValueNotifier durationNotifier = new ValueNotifier(Duration.zero);
   @override
   Widget build(BuildContext context) {
-    if (_latestValue.hasError) {
-      return chewieController.errorBuilder != null
-          ? chewieController.errorBuilder(
-              context,
-              chewieController.videoPlayerController.value.errorDescription,
-            )
-          : const Center(
-              child: Icon(
-                Icons.error,
-                color: Colors.white,
-                size: 42,
-              ),
-            );
+    if (_latestValue != null){
+      if (_latestValue.hasError) {
+        return chewieController.errorBuilder != null
+            ? chewieController.errorBuilder(
+          context,
+          chewieController.videoPlayerController.value.errorDescription,
+        )
+            : const Center(
+          child: Icon(
+            Icons.error,
+            color: Colors.white,
+            size: 42,
+          ),
+        );
+      }
     }
+
 
     return MouseRegion(
       onHover: (_) {
@@ -148,7 +151,7 @@ class _LoliControlsState extends State<LoliControls>
               children: <Widget>[
                 if (chewieController.isLive)
                   const SizedBox()
-                else 
+                else
                   ...[
                     const SizedBox(width: 20),
                     _buildProgressBar(),
@@ -175,7 +178,7 @@ class _LoliControlsState extends State<LoliControls>
                         alignment: Alignment.center,
                         child: chewieController.isLive
                           ? Expanded(child: const Text('LIVE'))
-                          : _buildPosition(iconColor),
+                          : durationDisplay(controller.value.position,controller.value.duration, durationNotifier),//_buildPosition(iconColor),
                       ),
                     ]
                   )
@@ -220,7 +223,7 @@ class _LoliControlsState extends State<LoliControls>
             children: [
               if (chewieController.isLive)
                 const SizedBox()
-              else 
+              else
                 _buildProgressBar(),
             ],
           )
@@ -479,8 +482,7 @@ class _LoliControlsState extends State<LoliControls>
       ),
     );
   }
-
-  Widget _buildPosition(Color iconColor) {
+  /*Widget _buildPosition(Color iconColor) {
     final position = _latestValue != null && _latestValue.position != null
         ? _latestValue.position
         : Duration.zero;
@@ -494,7 +496,7 @@ class _LoliControlsState extends State<LoliControls>
         fontSize: 14.0,
       ),
     );
-  }
+  }*/
 
   String formatDurationShorter(Duration position) {
     final ms = position.inMilliseconds;
@@ -541,8 +543,8 @@ class _LoliControlsState extends State<LoliControls>
 
   Future<void> _initialize() async {
     controller.addListener(_updateState);
-
-    _updateState();
+    _latestValue = controller.value;
+    //_updateState();
 
     if ((controller.value != null && controller.value.isPlaying) ||
         chewieController.autoPlay) {
@@ -614,9 +616,8 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   void _updateState() {
-    setState(() {
       _latestValue = controller.value;
-    });
+      durationNotifier.value = controller.value.position;
   }
 
   void _startDoubleTapTimer() {
@@ -801,6 +802,42 @@ class _PlaybackSpeedDialog extends StatelessWidget {
           itemCount: _speeds.length,
         )
       ],
+    );
+  }
+}
+class durationDisplay extends StatefulWidget {
+  ValueNotifier durationNotifier;
+  Duration position = Duration.zero;
+  Duration duration = Duration.zero;
+  @override
+  _durationDisplayState createState() => _durationDisplayState();
+  durationDisplay(this.position,this.duration,this.durationNotifier);
+}
+
+class _durationDisplayState extends State<durationDisplay> {
+  Function durationListener;
+  @override
+  void initState() {
+    durationListener = (() {
+        setState(() {
+          widget.position = widget.durationNotifier.value;
+        });
+    });
+    widget.durationNotifier.addListener(durationListener);
+    super.initState();
+  }
+  @override
+  void dispose(){
+    widget.durationNotifier.removeListener(durationListener);
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Text('${formatDuration(widget.position)} / ${formatDuration(widget.duration)}',
+      //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
+      style: const TextStyle(
+        fontSize: 14.0,
+      ),
     );
   }
 }
