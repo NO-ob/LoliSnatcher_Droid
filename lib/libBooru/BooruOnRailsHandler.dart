@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:LoliSnatcher/libBooru/PhilomenaHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -6,14 +7,10 @@ import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
-class PhilomenaHandler extends BooruHandler{
+class BooruOnRailsHandler extends BooruHandler {
+  bool tagSearchEnabled = false;
   List<BooruItem> fetched = new List();
-  PhilomenaHandler(Booru booru,int limit) : super(booru,limit);
-
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
+  BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
   Future Search(String tags,int pageNum) async{
     int length = fetched.length;
     if (tags == "" || tags == " "){
@@ -33,11 +30,19 @@ class PhilomenaHandler extends BooruHandler{
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        print("PhilomenaHandler::search ${parsedResponse['images'].length}");
+        var posts = parsedResponse['search'];
+        print("BooruOnRails::search ${posts.length}");
         // Create a BooruItem for each post in the list
-        for (int i =0; i < parsedResponse['images'].length; i++){
-          var current = parsedResponse['images'][i];
-          fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],current['tags'],makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+        for (int i =0; i < posts.length; i++){
+          var current = posts[i];
+          List<String> currentTags = current['tags'].split(", ");
+          for (int x = 0; x< currentTags.length; x++){
+            if (currentTags[x].contains(" ")){
+              currentTags[x] = currentTags[x].replaceAll(" ", "+");
+            }
+          }
+          fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}
@@ -47,25 +52,27 @@ class PhilomenaHandler extends BooruHandler{
       print(e);
       return fetched;
     }
-
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
-    return "${booru.baseURL}/images/$id";
+    return "${booru.baseURL}/$id";
   }
+
+
+
   // This will create a url for the http request
   String makeURL(String tags){
-    //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
+    //https://twibooru.org/search.json?&key=&q=*&perpage=5&page=1
     if (booru.apiKey == ""){
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=56027&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/search.json?q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=56027&key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/search.json?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
     }
 
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/api/v1/json/search/tags?q=$input&per_page=5";
+    return "${booru.baseURL}/tags.json?q=$input";
   }
   @override
   Future tagSearch(String input) async {
@@ -78,11 +85,10 @@ class PhilomenaHandler extends BooruHandler{
       final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        var tags = parsedResponse['tags'];
+        List<dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
-          for (int i=0; i < tags.length; i++){
-            searchTags.add(tags[i]['slug'].toString());
+          for (int i=0; i < 5; i++){
+            searchTags.add(parsedResponse[i]['slug'].toString());
           }
         }
       }

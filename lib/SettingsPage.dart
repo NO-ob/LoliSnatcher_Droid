@@ -1,5 +1,6 @@
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/material.dart';
+import 'libBooru/BooruOnRailsHandler.dart';
 import 'libBooru/GelbooruHandler.dart';
 import 'libBooru/GelbooruV1Handler.dart';
 import 'libBooru/MoebooruHandler.dart';
@@ -617,7 +618,7 @@ class _booruEditState extends State<booruEdit> {
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
-  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","GelbooruV1","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus"];
+  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","GelbooruV1","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus","BooruOnRails"];
   String selectedBooruType = "Not Sure";
   @override
   void initState() {
@@ -1023,6 +1024,10 @@ class _booruEditState extends State<booruEdit> {
       case("GelbooruV1"):
         test = new GelbooruV1Handler(booru, 5);
         testFetched = await test.Search("", 1);
+        break;
+      case("BooruOnRails"):
+        test = new BooruOnRailsHandler(booru, 5);
+        testFetched = await test.Search("*", 1);
         break;
       case("Not Sure"):
         for(int i = 1; i < booruTypes.length; i++){

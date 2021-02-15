@@ -2,6 +2,7 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 
 import 'Booru.dart';
 import 'BooruItem.dart';
+import 'BooruOnRailsHandler.dart';
 import 'DanbooruHandler.dart';
 import 'GelbooruHandler.dart';
 import 'GelbooruV1Handler.dart';
@@ -50,6 +51,9 @@ class BooruHandlerFactory{
         break;
       case("GelbooruV1"):
         booruHandler = new GelbooruV1Handler(booru, limit);
+        break;
+      case("BooruOnRails"):
+        booruHandler = new BooruOnRailsHandler(booru, limit);
         break;
     }
     print(booruHandler.booru.toString());
