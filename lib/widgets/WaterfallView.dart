@@ -156,17 +156,15 @@ class _WaterfallState extends State<WaterfallView> {
               ),
               onNotification: (notif) {
                 widget.searchGlobals.scrollPosition = gridController.offset;
-                // print('SCROLL NOTIFICATION');
-                // print(widget.gridController.position.maxScrollExtent);
-                // print(notif.metrics); // pixels before viewport, in viewport, after viewport
+                 //print('SCROLL NOTIFICATION');
+                 //print(gridController.position.maxScrollExtent);
+                 //print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
                 // If at bottom edge update state with incremented pageNum
                 bool isNotAtStart = notif.metrics.pixels > 0;
-                bool isScreenFilled = notif.metrics.extentBefore > 0 ||
-                    notif.metrics.extentAfter >
-                        0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
-                bool isAtEdge = notif.metrics.atEdge;
-                if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
+                bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent * 0.85;
+                bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
+                if ((isNotAtStart || !isScreenFilled) && isNearEdge) {
                   if (!widget.searchGlobals.booruHandler.locked) {
                     setState(() {
                       widget.searchGlobals.pageNum++;

@@ -100,9 +100,7 @@ class _StaggeredState extends State<StaggeredView> {
                   itemCount: snapshot.data.length,
                   crossAxisCount: columnsCount * 2,
                   itemBuilder: (BuildContext context, int index) {
-                    bool isSelected =
-                        widget.searchGlobals.selected.contains(index);
-                    print("using staggered view");
+                    bool isSelected = widget.searchGlobals.selected.contains(index);
                     return Container(
                         // Inkresponse is used so the tile can have an onclick function
                         child: Material(
@@ -155,9 +153,10 @@ class _StaggeredState extends State<StaggeredView> {
                 widget.searchGlobals.scrollPosition = gridController.offset;
                 // If at bottom edge update state with incremented pageNum
                 bool isNotAtStart = notif.metrics.pixels > 0;
+                bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent * 0.85;
                 bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
-                bool isAtEdge = notif.metrics.atEdge;
-                if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
+                //notif.metrics.maxScrollExtent
+                if ((isNotAtStart || !isScreenFilled) && isNearEdge) {
                   if (!widget.searchGlobals.booruHandler.locked) {
                     setState(() {
                       widget.searchGlobals.pageNum++;

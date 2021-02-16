@@ -331,14 +331,18 @@ class _HomeState extends State<Home> {
                     child: Container(
                       child: Column(
                         children: [
-                          Text("Version: ${widget.settingsHandler.verStr}" ),
-                          DrawerHeader(
-                            margin: null,
-                            decoration: new BoxDecoration(
-                              color: Get.context.theme.primaryColor,
-                              image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                          (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 600) ?
+                          Container():
+                          Column(children: [
+                            Text("Version: ${widget.settingsHandler.verStr}" ),
+                            DrawerHeader(
+                              margin: null,
+                              decoration: new BoxDecoration(
+                                color: Get.context.theme.primaryColor,
+                                image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                              ),
                             ),
-                          ),
+                          ],)
                         ],
                       ),
                     ),

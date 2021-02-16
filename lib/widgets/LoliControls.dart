@@ -543,8 +543,7 @@ class _LoliControlsState extends State<LoliControls>
 
   Future<void> _initialize() async {
     controller.addListener(_updateState);
-    _latestValue = controller.value;
-    //_updateState();
+    _updateState();
 
     if ((controller.value != null && controller.value.isPlaying) ||
         chewieController.autoPlay) {
@@ -563,7 +562,6 @@ class _LoliControlsState extends State<LoliControls>
   void _onExpandCollapse() {
     setState(() {
       _hideStuff = true;
-
       chewieController.toggleFullScreen();
       _showAfterExpandCollapseTimer =
           Timer(const Duration(milliseconds: 300), () {
@@ -616,8 +614,8 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   void _updateState() {
-      _latestValue = controller.value;
-      durationNotifier.value = controller.value.position;
+    durationNotifier.value = controller.value.position;
+    _latestValue = controller.value;
   }
 
   void _startDoubleTapTimer() {
