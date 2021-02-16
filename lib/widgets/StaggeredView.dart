@@ -63,7 +63,7 @@ class _StaggeredState extends State<StaggeredView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-
+    kbFocusNode.requestFocus();
     if (widget.searchGlobals.booruHandler == null) {
       initState();
     }
@@ -174,7 +174,9 @@ class _StaggeredState extends State<StaggeredView> {
                   bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 80;
                   bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
                   //notif.metrics.maxScrollExtent
-                  if ((isNotAtStart || !isScreenFilled) && isNearEdge && !widget.searchGlobals.booruHandler.isActive) {
+                  //print("Booru search is active: ${widget.searchGlobals.booruHandler.isActive}");
+                  //print("Near Edge: ${widget.searchGlobals.booruHandler.isActive}");
+                  if ((isNotAtStart || !isScreenFilled) && isNearEdge) {
                     if (!widget.searchGlobals.booruHandler.locked) {
                       setState(() {
                         widget.searchGlobals.pageNum++;
