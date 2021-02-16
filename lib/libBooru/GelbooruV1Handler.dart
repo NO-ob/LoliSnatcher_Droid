@@ -23,6 +23,7 @@ class GelbooruV1Handler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    isActive = true;
     if(tags == " " || tags == ""){
       tags="all";
     }
@@ -57,10 +58,12 @@ class GelbooruV1Handler extends BooruHandler{
         // Create a BooruItem for each post in the list
         prevTags = tags;
         if (fetched.length == length){locked = true;}
+        isActive = false;
         return fetched;
       }
     } catch(e) {
       print(e);
+      isActive = false;
       return fetched;
     }
 

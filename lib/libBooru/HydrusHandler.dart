@@ -24,6 +24,7 @@ class HydrusHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    isActive = true;
     if (limit > 20){this.limit = 20;}
     if(this.pageNum == pageNum){
       return fetched;
@@ -52,10 +53,12 @@ class HydrusHandler extends BooruHandler{
             return await getResultsPage(pageNum);
           }
           prevTags = tags;
+          isActive = false;
           return fetched;
         }
       } catch(e) {
         print(e);
+        isActive = false;
         return fetched;
       }
     } else {
@@ -98,6 +101,7 @@ class HydrusHandler extends BooruHandler{
                 }
                 fetched.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL", parsedResponse['metadata'][i]['ext'].toString().substring(1)));
             }
+            isActive = false;
             return fetched;
           } else {
             print("Getting metadata failed");
@@ -107,6 +111,7 @@ class HydrusHandler extends BooruHandler{
         print("Except caught when fetching metadata");
         print(e);
       }
+      isActive = false;
       return fetched;
     }
 

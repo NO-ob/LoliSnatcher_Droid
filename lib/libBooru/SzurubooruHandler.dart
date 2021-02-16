@@ -18,6 +18,7 @@ class SzurubooruHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    isActive = true;
     int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
@@ -61,10 +62,12 @@ class SzurubooruHandler extends BooruHandler{
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}
+        isActive = false;
         return fetched;
       }
     } catch(e) {
       print(e);
+      isActive = false;
       return fetched;
     }
 

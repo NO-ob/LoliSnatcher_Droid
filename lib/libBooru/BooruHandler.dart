@@ -9,6 +9,7 @@ abstract class BooruHandler {
   String verStr = "1.7.5";
   List<BooruItem> fetched;
   bool tagSearchEnabled = true;
+  bool isActive = false;
   BooruHandler(this.booru,this.limit);
   Future Search(String tags, int pageNum){}
   String makeURL(String tags){}

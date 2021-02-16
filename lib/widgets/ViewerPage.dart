@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
@@ -23,24 +24,24 @@ import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
  * version of an image and allows scrolling left and right through the currently loaded booruItems
  *
  */
-class ImagePage extends StatefulWidget {
+class ViewerPage extends StatefulWidget {
   List fetched;
   int index;
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler;
 
-  ImagePage(this.fetched, this.index, this.searchGlobals, this.settingsHandler,
+  ViewerPage(this.fetched, this.index, this.searchGlobals, this.settingsHandler,
       this.snatchHandler);
   @override
-  _ImagePageState createState() => _ImagePageState();
+  _ViewerPageState createState() => _ViewerPageState();
 }
 
-class _ImagePageState extends State<ImagePage> {
+class _ViewerPageState extends State<ViewerPage> {
   PreloadPageController controller;
   PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
-
+  FocusNode kbFocusNode = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -79,60 +80,77 @@ class _ImagePageState extends State<ImagePage> {
           ),
         ));
   }
-
+  @override
+  void dispose(){
+    kbFocusNode.dispose();
+    super.dispose();
+  }
   Widget androidPageBuilder() {
-    return PhotoViewGestureDetectorScope(
+    return new RawKeyboardListener(
+      autofocus: true,
+      focusNode: kbFocusNode,
+      onKey: (RawKeyEvent event){
+        if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
+          controller.jumpToPage(widget.searchGlobals.viewedIndex.value - 1);
+        } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
+          controller.jumpToPage(widget.searchGlobals.viewedIndex.value + 1);
+        } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name,widget.settingsHandler.snatchCooldown);
+        }
+      },
+      child:PhotoViewGestureDetectorScope(
         // prevents triggering page change early when panning
-        axis: Axis.horizontal,
-        child: PreloadPageView.builder(
-          preloadPagesCount: widget.settingsHandler.preloadCount,
-          scrollDirection: Axis.horizontal,
-          physics: const AlwaysScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            String fileURL = widget.fetched[index].fileURL;
-            bool isVideo = widget.fetched[index].isVideo();
-            int preloadCount = widget.settingsHandler.preloadCount;
-            bool isViewed = widget.searchGlobals.viewedIndex.value == index;
-            bool isNear =
-                (widget.searchGlobals.viewedIndex.value - index).abs() <=
-                    preloadCount;
-            print(fileURL);
-            // print('isVideo: '+isVideo.toString());
+          axis: Axis.horizontal,
+          child: PreloadPageView.builder(
+            preloadPagesCount: widget.settingsHandler.preloadCount,
+            scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              String fileURL = widget.fetched[index].fileURL;
+              bool isVideo = widget.fetched[index].isVideo();
+              int preloadCount = widget.settingsHandler.preloadCount;
+              bool isViewed = widget.searchGlobals.viewedIndex.value == index;
+              bool isNear =
+                  (widget.searchGlobals.viewedIndex.value - index).abs() <=
+                      preloadCount;
+              print(fileURL);
+              // print('isVideo: '+isVideo.toString());
 
-            // Render only if viewed or in preloadCount range
-            if (isViewed || isNear) {
-              // Cut to the size of the container, prevents overlapping
-              return ClipRect(
-                  child: GestureDetector(
-                      onLongPress: () {
-                        print('longpress');
-                        widget.searchGlobals.displayAppbar.value =
-                            !widget.searchGlobals.displayAppbar.value;
-                      },
-                      child: isVideo
-                          ? VideoApp(
-                              widget.fetched[index],
-                              index,
-                              widget.searchGlobals.viewedIndex.value,
-                              widget.settingsHandler)
-                          : MediaViewer(
-                              widget.fetched[index],
-                              index,
-                              widget.searchGlobals.viewedIndex.value,
-                              widget.settingsHandler)));
-            } else {
-              return Container();
-            }
-          },
-          controller: controller,
-          onPageChanged: (int index) {
-            setState(() {
-              widget.searchGlobals.viewedIndex.value = index;
-            });
-            // print('Page changed ' + index.toString());
-          },
-          itemCount: widget.fetched.length,
-        ));
+              // Render only if viewed or in preloadCount range
+              if (isViewed || isNear) {
+                // Cut to the size of the container, prevents overlapping
+                return ClipRect(
+                    child: GestureDetector(
+                        onLongPress: () {
+                          print('longpress');
+                          widget.searchGlobals.displayAppbar.value =
+                          !widget.searchGlobals.displayAppbar.value;
+                        },
+                        child: isVideo
+                            ? VideoApp(
+                            widget.fetched[index],
+                            index,
+                            widget.searchGlobals.viewedIndex.value,
+                            widget.settingsHandler)
+                            : MediaViewer(
+                            widget.fetched[index],
+                            index,
+                            widget.searchGlobals.viewedIndex.value,
+                            widget.settingsHandler)));
+              } else {
+                return Container();
+              }
+            },
+            controller: controller,
+            onPageChanged: (int index) {
+              setState(() {
+                widget.searchGlobals.viewedIndex.value = index;
+              });
+              // print('Page changed ' + index.toString());
+            },
+            itemCount: widget.fetched.length,
+          )) ,
+    );
   }
 
   Widget linuxPageBuilder() {

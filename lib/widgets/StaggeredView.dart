@@ -37,6 +37,7 @@ class StaggeredView extends StatefulWidget {
 class _StaggeredState extends State<StaggeredView> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
+  FocusNode kbFocusNode = FocusNode();
   Function jumpTo;
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _StaggeredState extends State<StaggeredView> {
   @override
   void dispose() {
     widget.searchGlobals.viewedIndex.removeListener(jumpTo);
+    kbFocusNode.dispose();
     super.dispose();
   }
 
@@ -90,18 +92,30 @@ class _StaggeredState extends State<StaggeredView> {
               * thumbnails in a row of the grid depending on screen orientation
               */
             // A notification listener is used to get the scroll position
-            return new NotificationListener<ScrollUpdateNotification>(
-              child: Scrollbar(
-                // TODO: Make it draggable
-                controller: gridController,
-                isAlwaysShown: true,
-                child: StaggeredGridView.countBuilder(
+            return new RawKeyboardListener(
+                autofocus: true,
+                focusNode: kbFocusNode,
+                onKey: (RawKeyEvent event){
+                  if (event.runtimeType == RawKeyDownEvent){
+                    if(event.isKeyPressed(LogicalKeyboardKey.arrowDown) || event.isKeyPressed(LogicalKeyboardKey.keyJ)){
+                      gridController.animateTo(gridController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+                    } else if(event.isKeyPressed(LogicalKeyboardKey.arrowUp) || event.isKeyPressed(LogicalKeyboardKey.keyK)){
+                      gridController.animateTo(gridController.offset - 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+                    }
+                  }
+                },
+              child:NotificationListener<ScrollUpdateNotification>(
+                child: Scrollbar(
+                  // TODO: Make it draggable
                   controller: gridController,
-                  itemCount: snapshot.data.length,
-                  crossAxisCount: columnsCount * 2,
-                  itemBuilder: (BuildContext context, int index) {
-                    bool isSelected = widget.searchGlobals.selected.contains(index);
-                    return Container(
+                  isAlwaysShown: true,
+                  child: StaggeredGridView.countBuilder(
+                    controller: gridController,
+                    itemCount: snapshot.data.length,
+                    crossAxisCount: columnsCount * 2,
+                    itemBuilder: (BuildContext context, int index) {
+                      bool isSelected = widget.searchGlobals.selected.contains(index);
+                      return Container(
                         // Inkresponse is used so the tile can have an onclick function
                         child: Material(
                           borderOnForeground: true,
@@ -117,12 +131,16 @@ class _StaggeredState extends State<StaggeredView> {
                               onTap: () {
                                 // Load the image viewer
                                 print(snapshot.data[index].fileURL);
+                                kbFocusNode.unfocus();
                                 Get.dialog(
-                                  ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
+                                  ViewerPage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
                                   transitionDuration:
-                                      Duration(milliseconds: 200),
+                                  Duration(milliseconds: 200),
                                   // barrierColor: Colors.transparent
-                                ).whenComplete(() => SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values));
+                                ).whenComplete(() {
+                                  SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+                                  kbFocusNode.requestFocus();
+                                });
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                               },
@@ -142,37 +160,38 @@ class _StaggeredState extends State<StaggeredView> {
                           ),
                         ),
                       );
-                  },
-                  staggeredTileBuilder: (int index) =>
-                  new StaggeredTile.fit(2),
-                  mainAxisSpacing: 4.0,
-                  crossAxisSpacing: 4.0,
+                    },
+                    staggeredTileBuilder: (int index) =>
+                    new StaggeredTile.fit(2),
+                    mainAxisSpacing: 4.0,
+                    crossAxisSpacing: 4.0,
+                  ),
                 ),
-              ),
-              onNotification: (notif) {
-                widget.searchGlobals.scrollPosition = gridController.offset;
-                // If at bottom edge update state with incremented pageNum
-                bool isNotAtStart = notif.metrics.pixels > 0;
-                bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent * 0.85;
-                bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
-                //notif.metrics.maxScrollExtent
-                if ((isNotAtStart || !isScreenFilled) && isNearEdge) {
-                  if (!widget.searchGlobals.booruHandler.locked) {
-                    setState(() {
-                      widget.searchGlobals.pageNum++;
-                    });
-                    ServiceHandler.displayToast("Loading next page...\n Page #" + widget.searchGlobals.pageNum.toString());
-                    //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(),snackPosition: SnackPosition.TOP,duration: Duration(seconds: 2),colorText: Colors.black,backgroundColor: Get.context.theme.primaryColor);
-                  } else if (!isLastPage) {
-                    setState(() {
-                      isLastPage = true;
-                    });
-                    ServiceHandler.displayToast("No More Files \n (T⌓T)");
-                    // Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                onNotification: (notif) {
+                  widget.searchGlobals.scrollPosition = gridController.offset;
+                  // If at bottom edge update state with incremented pageNum
+                  bool isNotAtStart = notif.metrics.pixels > 0;
+                  bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 80;
+                  bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
+                  //notif.metrics.maxScrollExtent
+                  if ((isNotAtStart || !isScreenFilled) && isNearEdge && !widget.searchGlobals.booruHandler.isActive) {
+                    if (!widget.searchGlobals.booruHandler.locked) {
+                      setState(() {
+                        widget.searchGlobals.pageNum++;
+                      });
+                      ServiceHandler.displayToast("Loading next page...\n Page #" + widget.searchGlobals.pageNum.toString());
+                      //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(),snackPosition: SnackPosition.TOP,duration: Duration(seconds: 2),colorText: Colors.black,backgroundColor: Get.context.theme.primaryColor);
+                    } else if (!isLastPage) {
+                      setState(() {
+                        isLastPage = true;
+                      });
+                      ServiceHandler.displayToast("No More Files \n (T⌓T)");
+                      // Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                    }
                   }
-                }
-                return true;
-              },
+                  return true;
+                },
+              ),
             );
           }
         });

@@ -19,6 +19,7 @@ class ShimmieHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    isActive = true;
     int length = fetched.length;
     if(tags == " " || tags == ""){
       tags="*";
@@ -62,12 +63,14 @@ class ShimmieHandler extends BooruHandler{
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}
+        isActive = false;
         return fetched;
       } else {
         print(response.statusCode);
       }
     } catch(e) {
       print(e);
+      isActive = false;
       return fetched;
     }
 

@@ -22,6 +22,7 @@ class GelbooruHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    isActive = true;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -52,10 +53,12 @@ class GelbooruHandler extends BooruHandler{
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}
+        isActive = false;
         return fetched;
       }
     } catch(e) {
       print(e);
+      isActive = false;
       return fetched;
     }
 

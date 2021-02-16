@@ -87,6 +87,12 @@ class ServiceHandler{
       print(e);
     }
   }
+  static void makeImmersive(){
+    platform.invokeMethod("systemUIMode",{"mode":"immersive"});
+  }
+  static void makeNormal(){
+    platform.invokeMethod("systemUIMode",{"mode":"normal"});
+  }
   Future<String> writeImage(var imageData, fileName, mediaType, fileExt) async{
     String result;
     try{
