@@ -62,7 +62,7 @@ class _ViewerPageState extends State<ViewerPage> {
   Widget build(BuildContext context) {
     String appBarTitle =
         "${(widget.searchGlobals.viewedIndex.value + 1).toString()} / ${widget.fetched.length.toString()}";
-
+    kbFocusNode.requestFocus();
     return Scaffold(
         appBar: HideableAppBar(appBarTitle, appBarActions(),
             widget.searchGlobals, widget.settingsHandler.autoHideImageBar),

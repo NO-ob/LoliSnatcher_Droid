@@ -34,10 +34,10 @@ class _MediaViewerState extends State<MediaViewer> {
   File _image;
   List<int> _bytes = [];
   StreamSubscription _subscription;
-
+  String imageURL;
   Future<void> _downloadImage() async {
     final String filePath =
-        await imageWriter.getCachePath(widget.booruItem.fileURL, 'media');
+        await imageWriter.getCachePath(imageURL, 'media');
 
     // If file is in cache - load
     print(filePath);
@@ -53,7 +53,7 @@ class _MediaViewerState extends State<MediaViewer> {
 
     // Otherwise start loading and subscribe to progress
     _response = await Client()
-        .send(Request('GET', Uri.parse(widget.booruItem.fileURL)));
+        .send(Request('GET', Uri.parse(imageURL)));
     _total = _response.contentLength;
 
     _subscription = _response.stream.listen((value) {
@@ -66,7 +66,7 @@ class _MediaViewerState extends State<MediaViewer> {
       if (_received > (_total * 0.95)) {
         // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
         final File cacheFile = await imageWriter.writeCacheFromBytes(
-            widget.booruItem.fileURL, _bytes, 'media');
+            imageURL, _bytes, 'media');
         if (cacheFile != null) {
           setState(() {
             _image = cacheFile;
@@ -81,6 +81,11 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void initState() {
     super.initState();
+    if (widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL){
+      imageURL = widget.booruItem.sampleURL;
+    } else {
+      imageURL = widget.booruItem.fileURL;
+    }
     viewController =
         PhotoViewController(); //..outputStateStream.listen(onViewStateChanged);
     scaleController =
@@ -260,7 +265,7 @@ class _MediaViewerState extends State<MediaViewer> {
         : PhotoView(
             imageProvider: widget.settingsHandler.mediaCache
                 ? FileImage(_image)
-                : NetworkImage(widget.booruItem.fileURL),
+                : NetworkImage(imageURL),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,

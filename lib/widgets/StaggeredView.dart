@@ -171,11 +171,14 @@ class _StaggeredState extends State<StaggeredView> {
                   widget.searchGlobals.scrollPosition = gridController.offset;
                   // If at bottom edge update state with incremented pageNum
                   bool isNotAtStart = notif.metrics.pixels > 0;
-                  bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 80;
+                  bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 25;
                   bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
                   //notif.metrics.maxScrollExtent
                   //print("Booru search is active: ${widget.searchGlobals.booruHandler.isActive}");
                   //print("Near Edge: ${widget.searchGlobals.booruHandler.isActive}");
+                  //print(notif.metrics.pixels);
+                  //print("At Edge: ${notif.metrics.atEdge}");
+                  //print(gridController.position.maxScrollExtent);
                   if ((isNotAtStart || !isScreenFilled) && isNearEdge) {
                     if (!widget.searchGlobals.booruHandler.locked) {
                       setState(() {

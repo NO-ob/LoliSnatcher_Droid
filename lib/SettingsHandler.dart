@@ -13,7 +13,7 @@ import 'dart:io' show Platform;
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall";
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
   String verStr = "1.7.5";
@@ -182,6 +182,12 @@ class SettingsHandler {
               print("Found Preview Display Mode " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Gallery Mode"):
+            if (settings[i].split(" = ").length > 1){
+              galleryMode = settings[i].split(" = ")[1];
+              print("Found Gallery Mode " + settings[i].split(" = ")[1] );
+            }
+            break;
 
         }
       }
@@ -190,7 +196,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay, String galleryMode) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -246,6 +252,8 @@ class SettingsHandler {
     this.snatchCooldown = int.parse(snatchCooldown);
     writer.write("Preview Display = $previewDisplay\n");
     this.previewDisplay = previewDisplay;
+    writer.write("Gallery Mode = $galleryMode\n");
+    this.galleryMode = galleryMode;
     writer.close();
     await this.loadSettings();
     await getBooru();

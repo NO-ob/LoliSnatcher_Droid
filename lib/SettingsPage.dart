@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsSnatchCooldownController = TextEditingController();
   bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
   Booru selectedBooru;
-  String previewMode, videoCacheMode,previewDisplay;
+  String previewMode, videoCacheMode,previewDisplay,galleryMode;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -55,6 +55,7 @@ class _SettingsPageState extends State<SettingsPage> {
     previewMode = widget.settingsHandler.previewMode;
     previewDisplay = widget.settingsHandler.previewDisplay;
     videoCacheMode = widget.settingsHandler.videoCacheMode;
+    galleryMode = widget.settingsHandler.galleryMode;
     getPerms();
     setState(() {
       jsonWrite = widget.settingsHandler.jsonWrite;
@@ -351,6 +352,32 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
             Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              // This dropdown is used to change the quality of the images displayed on the home page
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("Gallery Mode :     "),
+                  DropdownButton<String>(
+                    value: galleryMode,
+                    icon: Icon(Icons.arrow_downward),
+                    onChanged: (String newValue){
+                      setState((){
+                        galleryMode = newValue;
+                      });
+                    },
+                    items: <String>["Sample","Full Res"].map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,2),
                 child: Row(children: [
                   Text("Thumbnail Cache: "),
@@ -540,7 +567,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay, galleryMode);
                 },
                 child: Text("Save"),
               ),
