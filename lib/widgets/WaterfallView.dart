@@ -63,10 +63,11 @@ class _WaterfallState extends State<WaterfallView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-    if (!widget.searchBoxFocus.hasFocus){
+    //
+    if (FocusScope.of(context).focusedChild == null){
+      print("kb focus node requesting focus");
       kbFocusNode.requestFocus();
     }
-    //
     if (widget.searchGlobals.booruHandler == null) {
       initState();
     }
@@ -95,7 +96,7 @@ class _WaterfallState extends State<WaterfallView> {
               */
             // A notification listener is used to get the scroll position
             return RawKeyboardListener(
-              autofocus: true,
+              autofocus: false,
               focusNode: kbFocusNode,
               onKey: (RawKeyEvent event){
                 if (event.runtimeType == RawKeyDownEvent){

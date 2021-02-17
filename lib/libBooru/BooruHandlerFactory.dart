@@ -19,6 +19,7 @@ class BooruHandlerFactory{
   List getBooruHandler(Booru booru, int limit){
     switch (booru.type) {
       case("Moebooru"):
+        pageNum = 1;
         booruHandler = new MoebooruHandler(booru, limit);
         break;
       case("Gelbooru"):

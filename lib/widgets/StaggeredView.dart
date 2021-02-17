@@ -64,7 +64,8 @@ class _StaggeredState extends State<StaggeredView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-    if (!widget.searchBoxFocus.hasFocus){
+    if (FocusScope.of(context).focusedChild == null){
+      print("kb focus node requesting focus");
       kbFocusNode.requestFocus();
     }
     if (widget.searchGlobals.booruHandler == null) {
@@ -96,7 +97,7 @@ class _StaggeredState extends State<StaggeredView> {
               */
             // A notification listener is used to get the scroll position
             return RawKeyboardListener(
-                autofocus: true,
+                autofocus: false,
                 focusNode: kbFocusNode,
                 onKey: (RawKeyEvent event){
                   if (event.runtimeType == RawKeyDownEvent){
