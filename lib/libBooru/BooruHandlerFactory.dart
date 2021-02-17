@@ -53,6 +53,7 @@ class BooruHandlerFactory{
         booruHandler = new GelbooruV1Handler(booru, limit);
         break;
       case("BooruOnRails"):
+        pageNum = 1;
         booruHandler = new BooruOnRailsHandler(booru, limit);
         break;
     }

@@ -29,7 +29,8 @@ class StaggeredView extends StatefulWidget {
   final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final SnatchHandler snatchHandler;
-  StaggeredView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
+  final FocusNode searchBoxFocus;
+  StaggeredView(this.settingsHandler, this.searchGlobals, this.snatchHandler,this.searchBoxFocus);
   @override
   _StaggeredState createState() => _StaggeredState();
 }
@@ -63,7 +64,9 @@ class _StaggeredState extends State<StaggeredView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-    kbFocusNode.requestFocus();
+    if (!widget.searchBoxFocus.hasFocus){
+      kbFocusNode.requestFocus();
+    }
     if (widget.searchGlobals.booruHandler == null) {
       initState();
     }
@@ -92,7 +95,7 @@ class _StaggeredState extends State<StaggeredView> {
               * thumbnails in a row of the grid depending on screen orientation
               */
             // A notification listener is used to get the scroll position
-            return new RawKeyboardListener(
+            return RawKeyboardListener(
                 autofocus: true,
                 focusNode: kbFocusNode,
                 onKey: (RawKeyEvent event){

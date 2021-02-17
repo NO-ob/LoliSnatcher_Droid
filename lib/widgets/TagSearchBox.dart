@@ -128,6 +128,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           this._updateOverLay();
         });
       },
+      onEditingComplete: (){
+        widget._focusNode.unfocus();
+      },
       decoration: InputDecoration(
         hintText: "Enter Tags",
         contentPadding:

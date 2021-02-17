@@ -397,9 +397,9 @@ class _HomeState extends State<Home> {
                         searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
                       }
                       if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
                       } else {
-                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
                       }
 
                     } else {
@@ -409,9 +409,9 @@ class _HomeState extends State<Home> {
               );
           } else {
             if (widget.settingsHandler.previewDisplay == "Waterfall"){
-              return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+              return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
             } else {
-              return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+              return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
             }
           }
         } else {

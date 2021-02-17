@@ -28,7 +28,8 @@ class WaterfallView extends StatefulWidget {
   final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final SnatchHandler snatchHandler;
-  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
+  final FocusNode searchBoxFocus;
+  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler, this.searchBoxFocus);
   @override
   _WaterfallState createState() => _WaterfallState();
 }
@@ -62,7 +63,10 @@ class _WaterfallState extends State<WaterfallView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-    kbFocusNode.requestFocus();
+    if (!widget.searchBoxFocus.hasFocus){
+      kbFocusNode.requestFocus();
+    }
+    //
     if (widget.searchGlobals.booruHandler == null) {
       initState();
     }
@@ -79,7 +83,6 @@ class _WaterfallState extends State<WaterfallView> {
         (MediaQuery.of(context).orientation == Orientation.portrait)
             ? widget.settingsHandler.portraitColumns
             : widget.settingsHandler.landscapeColumns;
-
     return FutureBuilder(
         future: widget.searchGlobals.booruHandler
             .Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
@@ -91,7 +94,7 @@ class _WaterfallState extends State<WaterfallView> {
               * thumbnails in a row of the grid depending on screen orientation
               */
             // A notification listener is used to get the scroll position
-            return new RawKeyboardListener(
+            return RawKeyboardListener(
               autofocus: true,
               focusNode: kbFocusNode,
               onKey: (RawKeyEvent event){
