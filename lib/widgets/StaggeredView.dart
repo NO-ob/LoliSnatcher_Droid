@@ -134,7 +134,6 @@ class _StaggeredState extends State<StaggeredView> {
                               child: ViewUtils.sampleorThumb(snapshot.data[index], columnsCount,widget.settingsHandler),
                               onTap: () {
                                 // Load the image viewer
-                                print(snapshot.data[index].fileURL);
                                 kbFocusNode.unfocus();
                                 Get.dialog(
                                   ViewerPage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),

@@ -65,11 +65,9 @@ class MainActivity: FlutterActivity() {
                 val  fileExt = call.argument<String>("fileExt");
 
                 if (imageBytes!= null && mediaType != null && fileExt != null && fileName != null){
-                    print("writing file");
                     writeImage(imageBytes,fileName,mediaType,fileExt);
                     result.success(fileName);
                 } else {
-                    print("a value is null");
                     result.success(null);
                 }
 

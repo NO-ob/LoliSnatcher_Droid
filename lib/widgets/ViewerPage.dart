@@ -113,7 +113,6 @@ class _ViewerPageState extends State<ViewerPage> {
               bool isNear =
                   (widget.searchGlobals.viewedIndex.value - index).abs() <=
                       preloadCount;
-              print(fileURL);
               // print('isVideo: '+isVideo.toString());
 
               // Render only if viewed or in preloadCount range
@@ -203,6 +202,15 @@ class _ViewerPageState extends State<ViewerPage> {
           ServiceHandler serviceHandler = new ServiceHandler();
           serviceHandler.loadShareIntent(
               widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+        },
+      ),
+      IconButton(
+        icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
+        onPressed: () {
+          setState(() {
+            widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
+            widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value]);
+          });
         },
       ),
       IconButton(

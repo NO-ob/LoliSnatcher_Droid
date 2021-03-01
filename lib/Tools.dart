@@ -30,4 +30,7 @@ class Tools {
         ' ' +
         suffixes[i];
   }
+  static int boolToInt(bool boolean){
+    return boolean ? 1 : 0;
+  }
 }

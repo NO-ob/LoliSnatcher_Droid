@@ -2,6 +2,8 @@ class BooruItem{
   String fileURL,sampleURL,thumbnailURL,tagString,postURL,fileExt;
   List tagsList;
   String mediaType;
+  bool isSnatched = false, isFavourite = false;
+
   BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL, String fileExt){
     if (this.sampleURL.isEmpty){
       this.sampleURL = this.thumbnailURL;

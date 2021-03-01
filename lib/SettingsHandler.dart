@@ -8,11 +8,14 @@ import 'package:get/get.dart';
 import 'ThemeItem.dart';
 import 'libBooru/Booru.dart';
 import 'dart:io' show Platform;
+
+import 'libBooru/DBHandler.dart';
 /**
  * This class is used loading from and writing settings to files
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
+  DBHandler dbHandler = new DBHandler();
   String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
@@ -28,7 +31,7 @@ class SettingsHandler {
   ];
   String themeMode = "dark";
   var path = "";
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true;
   Future writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -49,6 +52,9 @@ class SettingsHandler {
     if (path == ""){
       path = await getExtDir();
       print("found path $path");
+      if(dbEnabled){
+        dbHandler.dbConnect(path);
+      }
     }
     if (SDKVer == 0){
       SDKVer = await getSDKVer();
