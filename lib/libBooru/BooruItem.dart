@@ -1,5 +1,5 @@
 class BooruItem{
-  String fileURL,sampleURL,thumbnailURL,tagString,postURL,fileExt;
+  String fileURL,sampleURL,thumbnailURL,postURL,fileExt;
   List tagsList;
   String mediaType;
   bool isSnatched = false, isFavourite = false;
@@ -14,9 +14,6 @@ class BooruItem{
     } else {
       this.mediaType = "image";
     }
-  }
-  List<String> get tags{
-    return tagString.split(" ");
   }
   bool isVideo(){
     return (this.mediaType == "video");

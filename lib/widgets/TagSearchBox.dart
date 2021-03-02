@@ -1,28 +1,31 @@
 import 'dart:ui';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 
-void setBooruHandler(SearchGlobals searchGlobals, int limit) {
-  List temp = new BooruHandlerFactory()
-      .getBooruHandler(searchGlobals.selectedBooru, limit);
-  searchGlobals.booruHandler = temp[0];
-  searchGlobals.pageNum = temp[1];
-}
 
 class TagSearchBox extends StatefulWidget {
   SearchGlobals searchGlobals;
   TextEditingController searchTagsController;
   FocusNode _focusNode;
-  TagSearchBox(this.searchGlobals, this.searchTagsController, this._focusNode);
+  SettingsHandler settingsHandler;
+  TagSearchBox(this.searchGlobals, this.searchTagsController, this._focusNode, this.settingsHandler);
   @override
   _TagSearchBoxState createState() => _TagSearchBoxState();
 }
 
 class _TagSearchBoxState extends State<TagSearchBox> {
   OverlayEntry _overlayEntry;
+
+  void setBooruHandler() {
+    List temp = new BooruHandlerFactory()
+        .getBooruHandler(widget.searchGlobals.selectedBooru, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+    widget.searchGlobals.booruHandler = temp[0];
+    widget.searchGlobals.pageNum = temp[1];
+  }
   @override
   void initState() {
     super.initState();
@@ -51,7 +54,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   OverlayEntry _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject();
-    setBooruHandler(widget.searchGlobals, 20);
+    setBooruHandler();
+    widget.searchGlobals.booruHandler.limit = 20;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
     if (widget.searchGlobals.booruHandler.booru.type == "Szurubooru" &&

@@ -17,12 +17,6 @@ import 'package:LoliSnatcher/widgets/ViewerPage.dart';
 import '../Tools.dart';
 import '../ViewUtils.dart';
 
-void setBooruHandler(SearchGlobals searchGlobals, int limit) {
-  List temp = new BooruHandlerFactory()
-      .getBooruHandler(searchGlobals.selectedBooru, limit);
-  searchGlobals.booruHandler = temp[0];
-  searchGlobals.pageNum = temp[1];
-}
 
 class WaterfallView extends StatefulWidget {
   final SearchGlobals searchGlobals;
@@ -39,6 +33,12 @@ class _WaterfallState extends State<WaterfallView> {
   bool isLastPage = false;
   FocusNode kbFocusNode = FocusNode();
   Function jumpTo;
+  void setBooruHandler() {
+    List temp = new BooruHandlerFactory()
+        .getBooruHandler(widget.searchGlobals.selectedBooru, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+    widget.searchGlobals.booruHandler = temp[0];
+    widget.searchGlobals.pageNum = temp[1];
+  }
   @override
   void initState() {
     super.initState();
@@ -48,7 +48,7 @@ class _WaterfallState extends State<WaterfallView> {
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
-      setBooruHandler(widget.searchGlobals, widget.settingsHandler.limit);
+      setBooruHandler();
     }
     widget.searchGlobals.viewedIndex.addListener(jumpTo);
   }

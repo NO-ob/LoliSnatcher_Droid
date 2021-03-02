@@ -168,7 +168,7 @@ class _HomeState extends State<Home> {
 
                             children: <Widget>[
                               //Tags/Search field
-                              TagSearchBox(searchGlobals[globalsIndex], searchTagsController,searchBoxFocus),
+                              TagSearchBox(searchGlobals[globalsIndex], searchTagsController,searchBoxFocus, widget.settingsHandler),
                               IconButton(
                                 padding: new EdgeInsets.all(20),
                                 icon: Icon(Icons.search),

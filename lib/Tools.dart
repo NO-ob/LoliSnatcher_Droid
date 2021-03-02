@@ -33,4 +33,7 @@ class Tools {
   static int boolToInt(bool boolean){
     return boolean ? 1 : 0;
   }
+  static bool intToBool(int boolean){
+    return boolean != 0 ? true : false;
+  }
 }

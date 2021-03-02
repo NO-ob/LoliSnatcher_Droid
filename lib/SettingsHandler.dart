@@ -284,6 +284,9 @@ class SettingsHandler {
           }
         }
       }
+      if (dbEnabled && booruList.isNotEmpty){
+        booruList.add(new Booru("Favourites", "Favourites", "", "", defTags));
+      }
       if (prefBooru != ""){
         int prefIndex = booruList.indexWhere((booru)=>booru.name == prefBooru);
         if (prefIndex != 0){
@@ -300,7 +303,6 @@ class SettingsHandler {
     } catch (e){
       print(e);
     }
-
     return true;
   }
   Future saveBooru(Booru booru) async{
