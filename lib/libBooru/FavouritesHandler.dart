@@ -21,7 +21,6 @@ class FavouritesHandler extends BooruHandler{
       fetched = new List();
     }
     fetched.addAll(await dbHandler.searchDB(tags,fetched.length.toString(),limit.toString()));
-    print("Fetched length is ${fetched.length}");
     prevTags = tags;
     if (fetched.length == length){locked = true;}
     isActive = false;

@@ -6,6 +6,8 @@ import '../Tools.dart';
 class DBHandler{
   Database db;
   DBHandler();
+
+  //Connects to the database file and create the database if the tables dont exist
   void dbConnect(String path)async{
     db = await openDatabase(path+"store.db", version: 1,
         onCreate: (Database db, int version) async{
@@ -31,6 +33,9 @@ class DBHandler{
     );
     await deleteUntracked();
   }
+
+
+  //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   void updateBooruItem(BooruItem item) async{
     print("updateBooruItem called fileURL is:" + item.fileURL);
     String itemID = await getItemID(item.fileURL);
@@ -44,6 +49,8 @@ class DBHandler{
     }
   }
 
+
+  //Gets a BooruItem id from the database based on a fileurl
   Future<String> getItemID(String fileURL) async{
     var result = await db.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
     print("getItemID id is: $result");
@@ -53,6 +60,8 @@ class DBHandler{
       return "";
     }
   }
+
+  //Gets a list of BooruItem from the database
   Future<List<BooruItem>> searchDB(String tagString, String offset, String limit) async {
     List<String> tags;
     var result;
@@ -68,20 +77,11 @@ class DBHandler{
           "SELECT booruItemID as id FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
               "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
               "HAVING COUNT(*) = ${tags.length} LIMIT $limit OFFSET $offset",tags);
-      print(result);
     } else {
       result = await db.rawQuery(
           "SELECT id FROM BooruItem LIMIT $limit OFFSET $offset");
     }
     if (result.isNotEmpty){
-      // piece of shit
-      /*await result.forEach((item) async{
-        BooruItem temp = await getBooruItem(item["id"]);
-        if(temp != null){
-          print("DB Got item: ${temp.fileURL}");
-          fetched.add(temp);
-        }
-      });*/
       for(int i=0; i < result.length; i++){
         BooruItem temp = await getBooruItem(result[i]["id"]);
         if(temp != null){
@@ -91,6 +91,8 @@ class DBHandler{
     }
     return fetched;
   }
+
+  //Creates a BooruItem from a BooruItem id
   Future<BooruItem> getBooruItem(int itemID) async{
     var metaData = await db.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?)",[itemID]);
     BooruItem item;
@@ -107,6 +109,8 @@ class DBHandler{
       return null;
     }
   }
+
+  //Adds tags for a BooruItem to the database
   void updateTags(List<String> tags, String itemID) async{
     String id = "";
     tags.forEach((tag) async{
@@ -119,6 +123,7 @@ class DBHandler{
     });
   }
 
+  //Gets a tag id from the database
   Future<String> getTagID(String tagName) async{
     var result = await db.rawQuery("SELECT id FROM Tag WHERE name IN (?)",[tagName]);
     print("getTagID id is: $result");
@@ -128,7 +133,7 @@ class DBHandler{
       return "";
     }
   }
-
+  // Deletes booruItems which are no longer favourited or snatched
   Future<bool> deleteUntracked() async{
     var result = await db.rawQuery("SELECT id FROM BooruItem WHERE isFavourite = 0 and isSnatched = 0");
     if (result.isNotEmpty){
@@ -138,7 +143,8 @@ class DBHandler{
     }
     return true;
   }
-
+  
+  //Deletes a BooruItem and its tags from the database
   void deleteItem(int itemID) async{
     print("DBHandler deleting: $itemID");
     await db.rawDelete("DELETE FROM BooruItem WHERE id IN (?)",[itemID]);
