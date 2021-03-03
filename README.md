@@ -11,29 +11,28 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 
 
 ## To Do
-- [ ] Database
-    - [ ] Move to android 11+ file storage
-    - [ ] Plan Database
-    - [ ] Migrate settings to database
-    - [ ] Migrate booruconfigs to database
-    - [ ] Make app build a database with default settings on first launch after getting write perms
+- [x] Database
+    - [x] Move to android 11+ file storage
+    - [x] Plan Database
 - [ ] Search remembering
     - [ ] Add setting for remembering tabs
     - [ ] Dump tab searchGlobals to database on search if setting enabled
-- [ ] Favourites
+- [x] Favourites
     - [ ] Add heart icon to thumbnails
-    - [ ] Add function in booruHandlers to check if fileurl is in favourites
-    - [ ] Add heart button to image viewer
-    - [ ] Write/remove data from database when clicked
+    - [x] Add function in booruHandlers to check if fileurl is in favourites
+    - [x] Add heart button to image viewer
+    - [x] Write/remove data from database when clicked
 - [ ] UI Extra
     - [ ] Add buttons for ratings instead of typing it
     - [ ] Add save location functionality
     - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
-    - [ ] Add option to make thumbs show at normal aspect ratio instead of square
+    - [x] Add option to make thumbs show at normal aspect ratio instead of square
     - [x] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
+    - [ ] Themes
 - [ ] Bugs
-    - [ ] previous and last image can overlap each other
-    - [ ] Hydrus video support
+    - [ ] Buttons on about page do not work in android 11
+    - [ ] Loading can get locked and ininitely loads in the preview grid
+
 
 
 

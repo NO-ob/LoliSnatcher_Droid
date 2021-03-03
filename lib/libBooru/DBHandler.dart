@@ -143,7 +143,7 @@ class DBHandler{
     }
     return true;
   }
-  
+
   //Deletes a BooruItem and its tags from the database
   void deleteItem(int itemID) async{
     print("DBHandler deleting: $itemID");
