@@ -62,7 +62,6 @@ class SettingsHandler {
     if (cachePath == ""){
       cachePath = await serviceHandler.getCacheDir();
     }
-    //await getBooru();
     File settingsFile = new File(path+"settings.conf");
     if (settingsFile.existsSync()){
       List<String> settings = settingsFile.readAsLinesSync();
@@ -198,7 +197,6 @@ class SettingsHandler {
         }
       }
     }
-
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
@@ -266,6 +264,7 @@ class SettingsHandler {
     ServiceHandler.displayToast("Settings Saved! \n Some changes may not take effect until the app is restarted");
     //Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
   }
+
   Future getBooru() async{
     booruList = new List<Booru>();
     print("in getBooru");
@@ -287,7 +286,7 @@ class SettingsHandler {
       if (dbEnabled && booruList.isNotEmpty){
         booruList.add(new Booru("Favourites", "Favourites", "", "", defTags));
       }
-      if (prefBooru != ""){
+      if (prefBooru != "" && booruList.isNotEmpty){
         int prefIndex = booruList.indexWhere((booru)=>booru.name == prefBooru);
         if (prefIndex != 0){
           print("Booru pref found in booruList");
@@ -297,6 +296,7 @@ class SettingsHandler {
           booruList.remove(tmp2);
           booruList.insert(0, tmp2);
           booruList.insert(prefIndex, tmp);
+          print("booruList is");
           print(booruList);
         }
       }
@@ -305,6 +305,7 @@ class SettingsHandler {
     }
     return true;
   }
+
   Future saveBooru(Booru booru) async{
     if (path == ""){
       path = await getExtDir();

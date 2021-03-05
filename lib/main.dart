@@ -427,14 +427,11 @@ class _HomeState extends State<Home> {
     if (widget.settingsHandler.prefBooru == ""){
       await widget.settingsHandler.loadSettings();
     }
-    if (widget.settingsHandler.path == ""){
-      widget.settingsHandler.path = await widget.settingsHandler.getExtDir();
-    }
     if(widget.settingsHandler.booruList.isEmpty){
       print("getbooru because null");
       await widget.settingsHandler.getBooru();
     }
-    if (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name){
+    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name)){
       await widget.settingsHandler.getBooru();
     }
     print(searchGlobals[globalsIndex].toString());
@@ -458,7 +455,9 @@ class _HomeState extends State<Home> {
               searchTagsController.text = newValue.defTags;
             }
             // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
-            searchGlobals[globalsIndex] = new SearchGlobals(newValue, searchTagsController.text); // Set new booru and search with current tags
+            searchGlobals[globalsIndex] = new SearchGlobals(newValue, searchTagsController.text);
+            print("booru set to ${searchGlobals[globalsIndex].selectedBooru.name}");
+            // Set new booru and search with current tags
           });
         },
         items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){

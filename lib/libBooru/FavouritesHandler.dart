@@ -6,7 +6,6 @@ import 'BooruItem.dart';
 class FavouritesHandler extends BooruHandler{
   List<BooruItem> fetched = new List();
   DBHandler dbHandler;
-  bool tagSearchEnabled = false;
   FavouritesHandler(Booru booru,int limit): super(booru,limit);
 
 
@@ -32,6 +31,10 @@ class FavouritesHandler extends BooruHandler{
   }
   String getFileExt(fileURL){
   }
-  tagSearch(String input) {
+
+  tagSearch(String input) async{
+    List<String> tags = new List();
+    tags = await dbHandler.getTags(input, limit);
+    return tags;
   }
 }

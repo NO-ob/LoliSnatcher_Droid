@@ -183,9 +183,10 @@ class _WaterfallState extends State<WaterfallView> {
 
                   // If at bottom edge update state with incremented pageNum
                   bool isNotAtStart = notif.metrics.pixels > 0;
-                  bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 25;
+                  //bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 25;
+                  bool isAtEdge = notif.metrics.atEdge;
                   bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
-                  if ((isNotAtStart || !isScreenFilled) && isNearEdge) {
+                  if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
                     if (!widget.searchGlobals.booruHandler.locked) {
                       setState(() {
                         widget.searchGlobals.pageNum++;

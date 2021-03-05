@@ -62,6 +62,9 @@ class DanbooruHandler extends BooruHandler{
                     .findElements("file-url")
                     .elementAt(0)
                     .text)));
+            if(dbHandler != null){
+              setTrackedValues(fetched.length - 1);
+            }
           }
         }
         prevTags = tags;

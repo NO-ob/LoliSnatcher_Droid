@@ -94,7 +94,7 @@ class DBHandler{
 
   //Creates a BooruItem from a BooruItem id
   Future<BooruItem> getBooruItem(int itemID) async{
-    var metaData = await db.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?)",[itemID]);
+    var metaData = await db.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?) AND isFavourite = 1",[itemID]);
     BooruItem item;
     List<String> tagsList = new List();
     if (metaData.isNotEmpty){
@@ -132,6 +132,30 @@ class DBHandler{
     } else {
       return "";
     }
+  }
+  //Get a list of tags from the database based on an input
+  Future<List<String>> getTags(String queryStr, int limit) async{
+    List<String> tags = new List();
+    var result = await db.rawQuery("SELECT name FROM Tag WHERE name LIKE (?) LIMIT $limit",["$queryStr%"]);
+    if (result.isNotEmpty){
+      for (int i = 0; i < result.length; i++){
+        tags.add(result[i]["name"]);
+      }
+    }
+    return tags;
+  }
+
+  //Return a list of boolean for isSnatched and isFavourite
+  Future<List<bool>> getTrackedValues(String fileURL) async{
+    List<bool> values = [false,false];
+    var result = await db.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+    if (result.isNotEmpty){
+      print("file url is: $fileURL");
+      print(result.toString());
+      values[0] = Tools.intToBool(result.first["isSnatched"]);
+      values[1] = Tools.intToBool(result.first["isFavourite"]);
+    }
+    return values;
   }
   // Deletes booruItems which are no longer favourited or snatched
   Future<bool> deleteUntracked() async{

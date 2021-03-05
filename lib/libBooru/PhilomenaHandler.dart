@@ -39,6 +39,9 @@ class PhilomenaHandler extends BooruHandler{
         for (int i =0; i < parsedResponse['images'].length; i++){
           var current = parsedResponse['images'][i];
           fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],current['tags'],makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+          if(dbHandler != null){
+            setTrackedValues(fetched.length - 1);
+          }
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}

@@ -61,9 +61,9 @@ class BooruHandlerFactory{
         break;
       case("Favourites"):
         booruHandler = new FavouritesHandler(booru, limit);
-        booruHandler.dbHandler = dbHandler;
         break;
     }
+    booruHandler.dbHandler = dbHandler;
     print(booruHandler.booru.toString());
     return [booruHandler,pageNum];
   }
