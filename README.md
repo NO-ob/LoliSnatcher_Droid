@@ -11,17 +11,9 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
 
 
 ## To Do
-- [x] Database
-    - [x] Move to android 11+ file storage
-    - [x] Plan Database
 - [ ] Search remembering
     - [ ] Add setting for remembering tabs
     - [ ] Dump tab searchGlobals to database on search if setting enabled
-- [x] Favourites
-    - [ ] Add heart icon to thumbnails
-    - [x] Add function in booruHandlers to check if fileurl is in favourites
-    - [x] Add heart button to image viewer
-    - [x] Write/remove data from database when clicked
 - [ ] UI Extra
     - [ ] Add buttons for ratings instead of typing it
     - [ ] Add save location functionality
