@@ -267,12 +267,12 @@ class _MediaViewerState extends State<MediaViewer> {
       provider = NetworkImage(imageURL);
     }
 
-    return (_image == null && widget.settingsHandler.mediaCache)
+    return (widget.settingsHandler.mediaCache)
         ? Center(
             child: Text("Error"),
           )
         : PhotoView(
-            imageProvider: provider,
+            imageProvider: NetworkImage(imageURL),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,
@@ -283,7 +283,7 @@ class _MediaViewerState extends State<MediaViewer> {
             heroAttributes: PhotoViewHeroAttributes(
                 tag: 'imageHero' + widget.index.toString()),
             scaleStateController: scaleController,
-            loadingBuilder: loadingElementBuilder,
+            //loadingBuilder: loadingElementBuilder,
           );
   }
 }
