@@ -434,7 +434,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       Get.dialog(
                           InfoDialog("Preview Mode",
                               [
-                                Text("The preview mode changes the resolution of iamges in the preview grid"),
+                                Text("The preview mode changes the resolution of images in the preview grid"),
                                 Text(" - Sample - Medium resolution"),
                                 Text(" - Thumbnail - Low resolution"),
                               ]
@@ -474,7 +474,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       Get.dialog(
                           InfoDialog("Gallery Mode",
                               [
-                                Text("The preview mode changes the resolution of iamges in the preview grid"),
+                                Text("The preview mode changes the resolution of images in the gallery viewer"),
                                 Text(" - Sample - Medium resolution"),
                                 Text(" - Full Res - Full resolution"),
                               ]
