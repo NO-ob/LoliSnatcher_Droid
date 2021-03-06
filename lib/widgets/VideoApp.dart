@@ -26,23 +26,23 @@ class VideoApp extends StatefulWidget {
 }
 
 class _VideoAppState extends State<VideoApp> {
-  VideoPlayerController _videoController;
-  ChewieController _chewieController;
+  late VideoPlayerController _videoController;
+  late ChewieController _chewieController;
 
   // VideoPlayerValue _latestValue;
 
-  String cacheMode;
+  late String cacheMode;
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
   bool isFromCache = false;
-  StreamedResponse _response;
-  File _video;
+  late StreamedResponse _response;
+  late File _video;
   List<int> _bytes = [];
-  StreamSubscription _subscription;
+  late StreamSubscription _subscription;
 
   Future<void> _downloadImage() async {
     final String filePath =
-        await imageWriter.getCachePath(widget.booruItem.fileURL, 'media');
+        await imageWriter.getCachePath(widget.booruItem.fileURL!, 'media');
 
     // If file is in cache - load
     print(filePath);
@@ -66,12 +66,12 @@ class _VideoAppState extends State<VideoApp> {
 
     // Otherwise start loading and subscribe to progress
     _response = await Client()
-        .send(Request('GET', Uri.parse(widget.booruItem.fileURL)));
-    _total = _response.contentLength;
+        .send(Request('GET', Uri.parse(widget.booruItem.fileURL!)));
+    _total = _response.contentLength!;
 
     _subscription = _response.stream.listen((value) {
       //Restate only when just Caching or video is not initialized from network yet
-      if (cacheMode == 'Cache' || !(_videoController.value != null && _videoController.value.initialized)) {
+      if (cacheMode == 'Cache' || !(_videoController.value != null && _videoController.value.isInitialized)) {
         setState(() {
           _bytes.addAll(value);
           _received += value.length;
@@ -85,7 +85,7 @@ class _VideoAppState extends State<VideoApp> {
       if (_received > (_total * 0.95)) {
         // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
         final File cacheFile = await imageWriter.writeCacheFromBytes(
-            widget.booruItem.fileURL, _bytes, 'media');
+            widget.booruItem.fileURL!, _bytes, 'media');
         if (cacheFile != null) {
           //Restate only when just Caching
           if (cacheMode == 'Cache') {
@@ -110,7 +110,7 @@ class _VideoAppState extends State<VideoApp> {
   @override
   void initState() {
     super.initState();
-    cacheMode = widget.settingsHandler.videoCacheMode;
+    cacheMode = widget.settingsHandler.videoCacheMode!;
     if (!widget.settingsHandler.mediaCache) {
       initPlayer();
       return;
@@ -150,7 +150,7 @@ class _VideoAppState extends State<VideoApp> {
     } else {
       // Otherwise load from network
       _videoController =
-          VideoPlayerController.network(widget.booruItem.fileURL);
+          VideoPlayerController.network(widget.booruItem.fileURL!);
     }
     await _videoController.initialize();
     // _videoController.addListener(_updateState);
@@ -203,11 +203,11 @@ class _VideoAppState extends State<VideoApp> {
 
   Widget loadingElementBuilder() {
     bool hasProgressData =
-        widget.settingsHandler.mediaCache && _total != null && _total > 0;
-    int expectedBytes = hasProgressData ? _received : null;
-    int totalBytes = hasProgressData ? _total : null;
+        widget.settingsHandler.mediaCache && _total > 0;
+    int expectedBytes = (hasProgressData ? _received : null)!;
+    int totalBytes = (hasProgressData ? _total : null)!;
 
-    double percentDone = hasProgressData ? (expectedBytes / totalBytes) : null;
+    double percentDone = (hasProgressData ? (expectedBytes / totalBytes) : null)!;
     String loadedSize =
         hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     String expectedSize =
@@ -219,7 +219,7 @@ class _VideoAppState extends State<VideoApp> {
     String filesizeText =
         hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    String thumbnailFileURL = widget.booruItem.thumbnailURL; // sample can be a video
+    String thumbnailFileURL = widget.booruItem.thumbnailURL!; // sample can be a video
     // widget.settingsHandler.previewMode == "Sample"
     //     ? widget.booruItem.sampleURL
     //     : widget.booruItem.thumbnailURL;
@@ -258,7 +258,7 @@ class _VideoAppState extends State<VideoApp> {
                       quarterTurns: -1,
                       child: LinearProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
                           value: percentDone),
                     ),
                   ),
@@ -316,7 +316,7 @@ class _VideoAppState extends State<VideoApp> {
                       quarterTurns: percentDone != null ? -1 : 1,
                       child: LinearProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
                           value: percentDone),
                     ),
                   ),
@@ -329,7 +329,7 @@ class _VideoAppState extends State<VideoApp> {
   Widget build(BuildContext context) {
     bool isViewed = widget.viewedIndex == widget.index;
     bool initialized = _chewieController != null &&
-        _chewieController.videoPlayerController.value.initialized;
+        _chewieController.videoPlayerController.value.isInitialized;
     // String vWidth = '';
     // String vHeight = '';
 

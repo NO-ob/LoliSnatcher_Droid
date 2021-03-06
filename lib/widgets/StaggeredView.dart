@@ -46,19 +46,19 @@ class _StaggeredState extends State<StaggeredView> {
   void initState() {
     super.initState();
     jumpTo = () {
-      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
+      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
     };
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
       setBooruHandler();
     }
-    widget.searchGlobals.viewedIndex.addListener(jumpTo);
+    widget.searchGlobals.viewedIndex!.addListener(jumpTo);
   }
 
   @override
   void dispose() {
-    widget.searchGlobals.viewedIndex.removeListener(jumpTo);
+    widget.searchGlobals.viewedIndex!.removeListener(jumpTo);
     kbFocusNode.dispose();
     super.dispose();
   }

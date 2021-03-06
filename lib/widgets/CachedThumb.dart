@@ -51,7 +51,7 @@ class _CachedThumbState extends State<CachedThumb> {
         _received += value.length;
       });
     });
-    _subscription.onDone(() async {
+    _subscription!.onDone(() async {
       if (_received > (_total * 0.95)) {
         // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
         final File cacheFile = await imageWriter.writeCacheFromBytes(
@@ -132,7 +132,7 @@ class _CachedThumbState extends State<CachedThumb> {
     } else {
       // Show progress until image is saved to/retrieved from cache
       if (_image == null) {
-        return Center(child: loadingElementBuilder(context, Container(),));
+        return Center(child: loadingElementBuilder(context, Container(),null));
       } else {
         return Image.file(
           _image!,
