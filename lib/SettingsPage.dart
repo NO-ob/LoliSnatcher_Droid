@@ -737,7 +737,7 @@ class _SettingsPageState extends State<SettingsPage> {
             value: value,
             child: Row(
               children: <Widget>[
-                Text(value!.name!),
+                Text(value.name!),
                 Image.network(value.faviconURL!, width: 16),
               ],
             ),

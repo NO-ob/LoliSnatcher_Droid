@@ -82,7 +82,8 @@ class ServiceHandler{
       if (Platform.isAndroid){
         await platform.invokeMethod("emptyCache");
       } else if (Platform.isLinux){
-        File cacheDir = new File((await getCacheDir())!);
+        String cacheD = await getCacheDir();
+        File cacheDir = new File(cacheD);
         cacheDir.delete(recursive: true);
       }
 

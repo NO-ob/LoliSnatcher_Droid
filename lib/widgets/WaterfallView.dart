@@ -32,7 +32,6 @@ class _WaterfallState extends State<WaterfallView> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
   FocusNode kbFocusNode = FocusNode();
-  Function jumpTo = ((){});
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
         .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
@@ -42,9 +41,6 @@ class _WaterfallState extends State<WaterfallView> {
   @override
   void initState() {
     super.initState();
-    jumpTo = () {
-      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
-    };
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
@@ -52,7 +48,9 @@ class _WaterfallState extends State<WaterfallView> {
     }
     widget.searchGlobals.viewedIndex!.addListener(jumpTo);
   }
-
+  void jumpTo(){
+    ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
+  }
   @override
   void dispose() {
     widget.searchGlobals.viewedIndex!.removeListener(jumpTo);

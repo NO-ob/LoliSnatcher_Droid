@@ -43,7 +43,7 @@ class _CachedThumbState extends State<CachedThumb> {
 
     // Otherwise start loading and subscribe to progress
     _response = await Client().send(Request('GET', Uri.parse(widget.thumbURL)));
-    _total = _response!.contentLength;
+    _total = _response!.contentLength!;
 
     _subscription = _response!.stream.listen((value) {
       setState(() {
@@ -128,11 +128,11 @@ class _CachedThumbState extends State<CachedThumb> {
           fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
           width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
           height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
-          loadingBuilder: loadingElementBuilder);
+          );
     } else {
       // Show progress until image is saved to/retrieved from cache
       if (_image == null) {
-        return Center(child: loadingElementBuilder(context, Container(),null));
+        return Center(child: Text("Error"));
       } else {
         return Image.file(
           _image!,

@@ -41,7 +41,7 @@ class HydrusHandler extends BooruHandler{
     if (_fileIDs == null) {
       try {
         Uri uri = Uri.parse(url);
-        final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru!.apiKey!});
+        final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
         //print("----------------Hydrus Search----------------------");
         //print("Search url: " + url);
         //print("Hydrus key: " + booru.apiKey);

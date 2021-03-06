@@ -33,7 +33,6 @@ class _StaggeredState extends State<StaggeredView> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
   FocusNode kbFocusNode = FocusNode();
-  Function jumpTo;
 
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
@@ -45,9 +44,6 @@ class _StaggeredState extends State<StaggeredView> {
   @override
   void initState() {
     super.initState();
-    jumpTo = () {
-      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
-    };
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
@@ -55,7 +51,9 @@ class _StaggeredState extends State<StaggeredView> {
     }
     widget.searchGlobals.viewedIndex!.addListener(jumpTo);
   }
-
+  void jumpTo(){
+    ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
+  }
   @override
   void dispose() {
     widget.searchGlobals.viewedIndex!.removeListener(jumpTo);

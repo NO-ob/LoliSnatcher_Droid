@@ -29,7 +29,7 @@ class ImageWriter{
 
     if(SDKVer == 0){
       if (Platform.isAndroid){
-        SDKVer = (await serviceHandler.getSDKVersion())!;
+        SDKVer = await serviceHandler.getSDKVersion();
         print(SDKVer);
       } else if (Platform.isLinux){
         SDKVer = 1;

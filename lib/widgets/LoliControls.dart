@@ -1,4 +1,4 @@
-import 'dart:async';
+/*import 'dart:async';
 import 'dart:math';
 
 import 'package:chewie/src/chewie_player.dart';
@@ -804,14 +804,13 @@ class durationDisplay extends StatefulWidget {
 }
 
 class _durationDisplayState extends State<durationDisplay> {
-  late Function durationListener;
+  void durationListener(){
+    setState(() {
+      widget.position = widget.durationNotifier.value;
+    });
+  }
   @override
   void initState() {
-    durationListener = (() {
-        setState(() {
-          widget.position = widget.durationNotifier.value;
-        });
-    });
     widget.durationNotifier.addListener(durationListener);
     super.initState();
   }
@@ -829,4 +828,5 @@ class _durationDisplayState extends State<durationDisplay> {
       ),
     );
   }
-}
+}*/
+

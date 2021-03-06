@@ -81,7 +81,7 @@ class GelbooruHandler extends BooruHandler{
 
     }
     String makeTagURL(String input){
-      if (booru!.baseURL!.contains("rule34.xxx")){
+      if (booru.baseURL!.contains("rule34.xxx")){
         return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
       } else {
         return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";
@@ -92,7 +92,7 @@ class GelbooruHandler extends BooruHandler{
       List<String> searchTags = [];
       String url = makeTagURL(input);
       try {
-        if (booru!.baseURL!.contains("rule34.xxx")){
+        if (booru.baseURL!.contains("rule34.xxx")){
           Uri uri = Uri.parse(url);
           final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
           // 200 is the success http response code

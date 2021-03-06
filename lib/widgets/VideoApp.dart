@@ -128,10 +128,10 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   void dispose() {
-    _videoController?.pause();
-    _videoController?.dispose();
-    _chewieController?.dispose();
-    _subscription?.cancel();
+    _videoController.pause();
+    _videoController.dispose();
+    _chewieController.dispose();
+    _subscription.cancel();
     super.dispose();
   }
 
@@ -164,8 +164,8 @@ class _VideoAppState extends State<VideoApp> {
       looping: true,
       showControls: true,
       customControls:
-        LoliControls(),
-        // MaterialControls(),
+        //LoliControls(),
+        MaterialControls(),
         // CupertinoControls(
         //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
         //   iconColor: Color.fromARGB(255, 200, 200, 200)
@@ -206,8 +206,10 @@ class _VideoAppState extends State<VideoApp> {
         widget.settingsHandler.mediaCache && _total > 0;
     int expectedBytes = (hasProgressData ? _received : null)!;
     int totalBytes = (hasProgressData ? _total : null)!;
-
-    double percentDone = (hasProgressData ? (expectedBytes / totalBytes) : null)!;
+    double percentDone = 0;
+    if (hasProgressData){
+      percentDone = expectedBytes / totalBytes;
+    }
     String loadedSize =
         hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     String expectedSize =
@@ -226,22 +228,23 @@ class _VideoAppState extends State<VideoApp> {
     File preview = File(
         "${widget.settingsHandler.cachePath}thumbnails/${thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1)}");
     // start opacity from 20%
-    double opacityValue = hasProgressData
-        ? 0.2 +
-            0.8 * lerpDouble(0.0, 1.0, (percentDone == null ? 0 : percentDone))
-        : 0.66;
+    double opacityValue = 1;
+    //double opacityValue = hasProgressData ? 0.2 + 0.8 * lerpDouble(0.0, 1.0,percentDone) : 0.66;
 
 
     // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
     // print(opacityValue);
-
+    late ImageProvider provider;
+    if (preview.existsSync()){
+      provider = FileImage(preview);
+    } else {
+      provider = NetworkImage(thumbnailFileURL);
+    }
     return Container(
         decoration: new BoxDecoration(
           color: Colors.black,
           image: new DecorationImage(
-              image: preview.existsSync()
-                  ? FileImage(preview)
-                  : NetworkImage(thumbnailFileURL),
+              image: provider,
               fit: BoxFit.contain,
               colorFilter: new ColorFilter.mode(
                   Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),

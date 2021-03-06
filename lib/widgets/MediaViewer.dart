@@ -99,7 +99,7 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void dispose() {
     super.dispose();
-    _subscription?.cancel();
+    _subscription.cancel();
   }
 
   // debug functions
@@ -148,14 +148,17 @@ class _MediaViewerState extends State<MediaViewer> {
 
     // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
     // print(opacityValue);
-
+    late ImageProvider provider;
+    if (preview.existsSync()){
+      provider = FileImage(preview);
+    } else {
+      provider = NetworkImage(thumbnailFileURL);
+    }
     return Container(
         decoration: new BoxDecoration(
           color: Colors.black,
           image: new DecorationImage(
-              image: preview.existsSync()
-                  ? FileImage(preview)
-                  : NetworkImage(thumbnailFileURL),
+              image: provider,
               fit: BoxFit.contain,
               colorFilter: new ColorFilter.mode(
                   Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),
@@ -257,15 +260,19 @@ class _MediaViewerState extends State<MediaViewer> {
     //     child: loadingElementBuilder(context, null),
     //   ),
     // )
+    late ImageProvider provider;
+    if (widget.settingsHandler.mediaCache){
+      provider = FileImage(_image);
+    } else {
+      provider = NetworkImage(imageURL);
+    }
 
     return (_image == null && widget.settingsHandler.mediaCache)
         ? Center(
-            child: loadingElementBuilder(context, null),
+            child: Text("Error"),
           )
         : PhotoView(
-            imageProvider: widget.settingsHandler.mediaCache
-                ? FileImage(_image)
-                : NetworkImage(imageURL),
+            imageProvider: provider,
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,

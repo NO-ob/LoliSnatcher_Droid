@@ -35,7 +35,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void _updateOverLay() {
     if (widget._focusNode.hasFocus) {
       print("textbox is focused");
-      this._overlayEntry = this._createOverlayEntry();
+      //this._overlayEntry = this._createOverlayEntry();
       if (this._overlayEntry != null) {
         Overlay.of(context)!.insert(this._overlayEntry!);
       }
@@ -51,7 +51,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     widget._focusNode.unfocus();
     super.dispose();
   }
-
+/*
   OverlayEntry _createOverlayEntry() {
     RenderObject renderBox = context.findRenderObject()!;
     setBooruHandler();
@@ -116,7 +116,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         ),
       );
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
