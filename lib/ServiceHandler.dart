@@ -93,6 +93,15 @@ class ServiceHandler{
   static void makeNormal(){
     platform.invokeMethod("systemUIMode",{"mode":"normal"});
   }
+
+  static void launchURL(String url){
+    if(Platform.isAndroid){
+      platform.invokeMethod("launchURL", {"url":"$url"});
+    } else if (Platform.isLinux) {
+      Process.run('xdg-open', [url]);
+    }
+  }
+
   Future<String> writeImage(var imageData, fileName, mediaType, fileExt) async{
     String result;
     try{

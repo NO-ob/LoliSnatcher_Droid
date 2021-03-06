@@ -204,6 +204,7 @@ class _ViewerPageState extends State<ViewerPage> {
               widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
         },
       ),
+      widget.settingsHandler.dbEnabled ?
       IconButton(
         icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
         onPressed: () {
@@ -212,18 +213,11 @@ class _ViewerPageState extends State<ViewerPage> {
             widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value]);
           });
         },
-      ),
+      ) : Container(),
       IconButton(
         icon: Icon(Icons.public),
         onPressed: () {
-          if (Platform.isAndroid) {
-            Tools.launchURL(
-                widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
-          } else if (Platform.isLinux) {
-            Process.run('xdg-open', [
-              widget.fetched[widget.searchGlobals.viewedIndex.value].postURL
-            ]);
-          }
+            ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
         },
       ),
       IconButton(

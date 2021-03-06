@@ -52,9 +52,6 @@ class SettingsHandler {
     if (path == ""){
       path = await getExtDir();
       print("found path $path");
-      if(dbEnabled){
-        dbHandler.dbConnect(path);
-      }
     }
     if (SDKVer == 0){
       SDKVer = await getSDKVer();
@@ -206,6 +203,11 @@ class SettingsHandler {
 
         }
       }
+    }
+    if(dbEnabled){
+      dbHandler.dbConnect(path);
+    } else {
+      dbHandler = new DBHandler();
     }
     return true;
   }

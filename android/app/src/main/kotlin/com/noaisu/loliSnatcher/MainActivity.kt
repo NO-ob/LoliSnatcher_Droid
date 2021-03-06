@@ -2,6 +2,8 @@ package com.noaisu.loliSnatcher
 
 import android.content.ContentValues
 import android.content.Intent
+import android.content.Intent.ACTION_VIEW
+import android.content.Intent.CATEGORY_BROWSABLE
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -77,7 +79,7 @@ class MainActivity: FlutterActivity() {
                 toast.setGravity(Gravity.TOP or Gravity.CENTER, 0, 30);
                 toast.show();
 
-            }else if (call.method == "systemUIMode"){
+            } else if (call.method == "systemUIMode"){
                 val modeString: String? = call.argument("mode");
                 if (modeString.equals("immersive")){
                     window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
@@ -95,6 +97,14 @@ class MainActivity: FlutterActivity() {
                             or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
+                }
+            } else if (call.method == "launchURL"){
+                val urlString: String? = call.argument("url");
+                if (!urlString.isNullOrBlank()){
+                    val uri = Uri.parse(urlString);
+                    val urlLauncher = Intent(CATEGORY_BROWSABLE, uri);
+                    urlLauncher.action = ACTION_VIEW;
+                    startActivity(urlLauncher);
                 }
             }
 

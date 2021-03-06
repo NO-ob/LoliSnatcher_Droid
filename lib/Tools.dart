@@ -9,18 +9,6 @@ import 'SettingsHandler.dart';
 import 'libBooru/BooruItem.dart';
 
 class Tools {
-  static void launchURL(String url) async {
-    try {
-      if (await canLaunch(url)) {
-        await launch(url);
-      } else {
-        throw 'Could not launch $url';
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
-
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
   static String formatBytes(int bytes, int decimals) {
     if (bytes <= 0) return "0 B";

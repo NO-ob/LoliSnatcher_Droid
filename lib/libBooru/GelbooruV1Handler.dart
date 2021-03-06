@@ -53,7 +53,7 @@ class GelbooruV1Handler extends BooruHandler{
              * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
              */
             fetched.add(new BooruItem(fileURL,fileURL,thumbURL,tags,makePostURL(id),getFileExt(fileURL)));
-            if(dbHandler != null){
+            if(dbHandler.db != null){
               setTrackedValues(fetched.length - 1);
             }
           }

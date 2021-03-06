@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:core';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:get/get.dart';
+
+import 'ServiceHandler.dart';
 
 class AboutPage extends StatelessWidget {
   @override
@@ -33,7 +34,7 @@ class AboutPage extends StatelessWidget {
                   side: BorderSide(color: Get.context.theme.accentColor),
                 ),
                 onPressed: (){
-                  _launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
+                  ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
                 },
                 child: Text("GitHub"),
               ),
@@ -49,7 +50,7 @@ class AboutPage extends StatelessWidget {
                   side: BorderSide(color: Get.context.theme.accentColor,),
                 ),
                 onPressed: (){
-                  _launchURL("https://www.pixiv.net/en/users/28366691");
+                  ServiceHandler.launchURL("https://www.pixiv.net/en/users/28366691");
                 },
                 child: Text("Showers-U - Pixiv"),
               ),
@@ -65,7 +66,7 @@ class AboutPage extends StatelessWidget {
                   side: BorderSide(color: Get.context.theme.accentColor,),
                 ),
                 onPressed: (){
-                  _launchURL("https://github.com/NANI-SORE");
+                  ServiceHandler.launchURL("https://github.com/NANI-SORE");
                 },
                 child: Text("NANI-SORE - Github"),
               ),
@@ -74,15 +75,5 @@ class AboutPage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-// function from url_launcher pub.dev page
-
-_launchURL(String url) async {
-  if (await canLaunch(url)) {
-    await launch(url);
-  } else {
-    throw 'Could not launch $url';
   }
 }

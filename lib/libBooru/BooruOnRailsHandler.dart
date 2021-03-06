@@ -42,7 +42,7 @@ class BooruOnRailsHandler extends BooruHandler {
             }
           }
           fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
-          if(dbHandler != null){
+          if(dbHandler.db != null){
             setTrackedValues(fetched.length - 1);
           }
         }

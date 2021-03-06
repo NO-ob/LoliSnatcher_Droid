@@ -59,7 +59,7 @@ class ShimmieHandler extends BooruHandler{
             String cutURL = booru.baseURL.split("/booru")[0];
             fetched.add(new BooruItem(cutURL+current.getAttribute("file_url"),cutURL+current.getAttribute("preview_url"),cutURL+current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),getFileExt(current.getAttribute("file_url"))));
           }
-          if(dbHandler != null){
+          if(dbHandler.db != null){
             setTrackedValues(fetched.length - 1);
           }
 

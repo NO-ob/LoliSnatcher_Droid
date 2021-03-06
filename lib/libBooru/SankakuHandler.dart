@@ -62,7 +62,7 @@ class SankakuHandler extends BooruHandler{
           String fileExt = current['file_type'].split('/')[1]; // image/jpeg
 
           fetched.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString()), fileExt));
-          if(dbHandler != null){
+          if(dbHandler.db != null){
             setTrackedValues(fetched.length - 1);
           }
         }
