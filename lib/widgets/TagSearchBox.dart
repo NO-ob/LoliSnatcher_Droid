@@ -18,11 +18,11 @@ class TagSearchBox extends StatefulWidget {
 }
 
 class _TagSearchBoxState extends State<TagSearchBox> {
-  OverlayEntry _overlayEntry;
+  OverlayEntry? _overlayEntry;
 
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
-        .getBooruHandler(widget.searchGlobals.selectedBooru, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+        .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
     widget.searchGlobals.booruHandler = temp[0];
     widget.searchGlobals.pageNum = temp[1];
   }
@@ -37,11 +37,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       print("textbox is focused");
       this._overlayEntry = this._createOverlayEntry();
       if (this._overlayEntry != null) {
-        Overlay.of(context).insert(this._overlayEntry);
+        Overlay.of(context)!.insert(this._overlayEntry!);
       }
     } else {
       if (this._overlayEntry != null) {
-        this._overlayEntry.remove();
+        this._overlayEntry!.remove();
       }
     }
   }
@@ -53,21 +53,21 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   OverlayEntry _createOverlayEntry() {
-    RenderBox renderBox = context.findRenderObject();
+    RenderObject renderBox = context.findRenderObject()!;
     setBooruHandler();
-    widget.searchGlobals.booruHandler.limit = 20;
+    widget.searchGlobals.booruHandler!.limit = 20;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
-    if (widget.searchGlobals.booruHandler.booru.type == "Szurubooru" &&
-        widget.searchGlobals.booruHandler.booru.apiKey != "" &&
-        widget.searchGlobals.booruHandler.booru.userID != "") {
-      widget.searchGlobals.booruHandler.tagSearchEnabled = true;
-    } else if (widget.searchGlobals.booruHandler.booru.type == "Shimmie" &&
-        widget.searchGlobals.booruHandler.booru.baseURL
+    if (widget.searchGlobals.booruHandler!.booru.type == "Szurubooru" &&
+        widget.searchGlobals.booruHandler!.booru.apiKey != "" &&
+        widget.searchGlobals.booruHandler!.booru.userID != "") {
+      widget.searchGlobals.booruHandler!.tagSearchEnabled = true;
+    } else if (widget.searchGlobals.booruHandler!.booru.type == "Shimmie" &&
+        widget.searchGlobals.booruHandler!.booru.baseURL!
             .contains("rule34.paheal.net")) {
-      widget.searchGlobals.booruHandler.tagSearchEnabled = true;
+      widget.searchGlobals.booruHandler!.tagSearchEnabled = true;
     }
-    if (widget.searchGlobals.booruHandler.tagSearchEnabled) {
+    if (widget.searchGlobals.booruHandler!.tagSearchEnabled) {
       String input = widget.searchTagsController.text;
       if (input.split(" ").length > 1) {
         input = input.split(" ")[input.split(" ").length - 1];
@@ -81,7 +81,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           child: Material(
             elevation: 4.0,
             child: FutureBuilder(
-                future: widget.searchGlobals.booruHandler.tagSearch(input),
+                future: widget.searchGlobals.booruHandler!.tagSearch(input),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if ((snapshot.connectionState == ConnectionState.done) &&
                       snapshot.data.length > 0) {
@@ -127,7 +127,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       onChanged: (text) {
         setState(() {
           if (this._overlayEntry != null) {
-            this._overlayEntry.remove();
+            this._overlayEntry!.remove();
           }
           this._updateOverLay();
         });

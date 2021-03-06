@@ -10,7 +10,7 @@ class InfoDialog extends StatefulWidget {
 }
 
 class _InfoDialogState extends State<InfoDialog> {
-  List<Widget> widgets = new List();
+  List<Widget> widgets = [];
   @override
   void initState(){
     super.initState();

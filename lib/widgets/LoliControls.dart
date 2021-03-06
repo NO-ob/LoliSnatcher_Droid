@@ -19,37 +19,37 @@ class LoliControls extends StatefulWidget {
 
 class _LoliControlsState extends State<LoliControls>
     with SingleTickerProviderStateMixin {
-  VideoPlayerValue _latestValue;
-  double _latestVolume;
+  late VideoPlayerValue _latestValue;
+  late double _latestVolume;
   bool _hideStuff = true;
-  Timer _hideTimer;
-  Timer _initTimer;
-  Timer _showAfterExpandCollapseTimer;
+  late Timer _hideTimer;
+  late Timer _initTimer;
+  late Timer _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
 
   final barHeight = 48.0;
   final marginSize = 5.0;
 
-  VideoPlayerController controller;
-  ChewieController chewieController;
-  AnimationController playPauseIconAnimationController;
+  late VideoPlayerController controller;
+  late ChewieController chewieController;
+  late AnimationController playPauseIconAnimationController;
 
   bool _doubleTapped = false;
-  Timer _doubleTapHideTimer;
-  TapDownDetails _doubleTapInfo;
+  late Timer _doubleTapHideTimer;
+  late TapDownDetails _doubleTapInfo;
   int _lastDoubleTapAmount = 0;
   int _lastDoubleTapSide = 0;
-  String _doubleTapExtraMessage;
+  late String _doubleTapExtraMessage;
   ValueNotifier durationNotifier = new ValueNotifier(Duration.zero);
   @override
   Widget build(BuildContext context) {
     if (_latestValue != null){
       if (_latestValue.hasError) {
         return chewieController.errorBuilder != null
-            ? chewieController.errorBuilder(
+            ? chewieController.errorBuilder!(
           context,
-          chewieController.videoPlayerController.value.errorDescription,
+          chewieController.videoPlayerController.value.errorDescription!,
         )
             : const Center(
           child: Icon(
@@ -137,7 +137,7 @@ class _LoliControlsState extends State<LoliControls>
   AnimatedOpacity _buildBottomBar(
     BuildContext context,
   ) {
-    final iconColor = Theme.of(context).textTheme.button.color;
+    final iconColor = Theme.of(context).textTheme.button!.color;
 
     return AnimatedOpacity(
       opacity: _hideStuff ? 0.0 : 1.0,
@@ -246,7 +246,7 @@ class _LoliControlsState extends State<LoliControls>
           setState(() {
             _lastDoubleTapAmount = 0;
             _lastDoubleTapSide = 0;
-            _doubleTapExtraMessage = null;
+            _doubleTapExtraMessage = "";
           });
         }
       },
@@ -398,7 +398,7 @@ class _LoliControlsState extends State<LoliControls>
           useRootNavigator: true,
           builder: (context) => _PlaybackSpeedDialog(
             speeds: chewieController.playbackSpeeds,
-            selected: _latestValue.playbackSpeed,
+            selected: _latestValue.playbackSpeed, key: null,
           ),
         );
 
@@ -589,7 +589,7 @@ class _LoliControlsState extends State<LoliControls>
       } else {
         _cancelAndRestartTimer();
 
-        if (!controller.value.initialized) {
+        if (!controller.value.isInitialized) {
           controller.initialize().then((_) {
             controller.play();
             playPauseIconAnimationController.forward();
@@ -635,7 +635,7 @@ class _LoliControlsState extends State<LoliControls>
   void _doubleTapAction() {
     if (_doubleTapInfo == null ||
         chewieController == null ||
-        !chewieController.videoPlayerController.value.initialized) return;
+        !chewieController.videoPlayerController.value.isInitialized) return;
 
     // Detect on which side we tapped
     double screenWidth = MediaQuery.of(context).size.width;
@@ -688,7 +688,7 @@ class _LoliControlsState extends State<LoliControls>
           isAtVideoEdge = true;
           _doubleTapExtraMessage = 'Start';
         } else {
-          _doubleTapExtraMessage = null;
+          _doubleTapExtraMessage = "";
         }
 
         // Add to last skip amount if it's still visible
@@ -735,9 +735,9 @@ class _LoliControlsState extends State<LoliControls>
 
 class _PlaybackSpeedDialog extends StatelessWidget {
   const _PlaybackSpeedDialog({
-    Key key,
-    @required List<double> speeds,
-    @required double selected,
+    required Key key,
+    required List<double> speeds,
+    required double selected,
   })  : _speeds = speeds,
         _selected = selected,
         super(key: key);
@@ -804,7 +804,7 @@ class durationDisplay extends StatefulWidget {
 }
 
 class _durationDisplayState extends State<durationDisplay> {
-  Function durationListener;
+  late Function durationListener;
   @override
   void initState() {
     durationListener = (() {

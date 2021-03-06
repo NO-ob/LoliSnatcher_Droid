@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 class Booru {
-  String name,faviconURL,type,baseURL,apiKey = "",userID = "",defTags;
+  String? name,faviconURL,type,baseURL,apiKey = "",userID = "",defTags;
   Booru(this.name,this.type,this.faviconURL,this.baseURL,this.defTags);
   Booru.withKey(this.name,this.type,this.faviconURL,this.baseURL,this.defTags,this.apiKey,this.userID);
 

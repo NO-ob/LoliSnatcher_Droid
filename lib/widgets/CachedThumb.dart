@@ -21,10 +21,10 @@ class _CachedThumbState extends State<CachedThumb> {
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
   bool isFromCache = false;
-  StreamedResponse _response;
-  File _image;
+  StreamedResponse? _response;
+  File? _image;
   List<int> _bytes = [];
-  StreamSubscription _subscription;
+  StreamSubscription? _subscription;
 
   Future<void> _downloadImage() async {
     final String filePath =
@@ -43,9 +43,9 @@ class _CachedThumbState extends State<CachedThumb> {
 
     // Otherwise start loading and subscribe to progress
     _response = await Client().send(Request('GET', Uri.parse(widget.thumbURL)));
-    _total = _response.contentLength;
+    _total = _response!.contentLength;
 
-    _subscription = _response.stream.listen((value) {
+    _subscription = _response!.stream.listen((value) {
       setState(() {
         _bytes.addAll(value);
         _received += value.length;
@@ -90,10 +90,10 @@ class _CachedThumbState extends State<CachedThumb> {
     }
     bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (widget.settingsHandler.imageCache && _total != null && _total > 0);
     bool isProgressFromCaching = widget.settingsHandler.imageCache && hasProgressData && _total != null && _total > 0;
-    int expectedBytes = hasProgressData ? (isProgressFromCaching ? _received : loadingProgress.cumulativeBytesLoaded) : null;
-    int totalBytes = hasProgressData ? (isProgressFromCaching ? _total : loadingProgress.expectedTotalBytes) : null;
+    int expectedBytes = (hasProgressData ? (isProgressFromCaching ? _received : loadingProgress.cumulativeBytesLoaded) : null)!;
+    int totalBytes = (hasProgressData ? (isProgressFromCaching ? _total : loadingProgress.expectedTotalBytes) : null)!;
 
-    double percentDone = hasProgressData ? expectedBytes / totalBytes : null;
+    double percentDone = (hasProgressData ? expectedBytes / totalBytes : null)!;
     String percentDoneText = hasProgressData ? ((percentDone * 100).toStringAsFixed(2) + '%') : 'Loading...';
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -103,7 +103,7 @@ class _CachedThumbState extends State<CachedThumb> {
           width: 100 / widget.columnCount,
           child: CircularProgressIndicator(
             strokeWidth: 16 / widget.columnCount,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
             value: percentDone,
           ),
         ),
@@ -132,10 +132,10 @@ class _CachedThumbState extends State<CachedThumb> {
     } else {
       // Show progress until image is saved to/retrieved from cache
       if (_image == null) {
-        return Center(child: loadingElementBuilder(context, null, null));
+        return Center(child: loadingElementBuilder(context, Container(),));
       } else {
         return Image.file(
-          _image,
+          _image!,
           fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
           width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
           height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,

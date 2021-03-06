@@ -7,26 +7,26 @@ import 'package:get/get.dart';
 
 
 class SearchGlobals{
-  String tags = "";
-  Booru selectedBooru;
+  String? tags = "";
+  Booru? selectedBooru;
   int pageNum = 0;
   double scrollPosition = 0;
-  BooruHandler booruHandler;
-  String handlerType;
-  ValueNotifier addTag = ValueNotifier("");
-  ValueNotifier newTab = ValueNotifier("noListener");
-  ValueNotifier displayAppbar = ValueNotifier(true);
-  ValueNotifier viewedIndex = ValueNotifier(0);
-  List selected = new List();
+  BooruHandler? booruHandler;
+  String? handlerType;
+  ValueNotifier? addTag = ValueNotifier("");
+  ValueNotifier? newTab = ValueNotifier("noListener");
+  ValueNotifier? displayAppbar = ValueNotifier(true);
+  ValueNotifier? viewedIndex = ValueNotifier(0);
+  List? selected = [];
   SearchGlobals(this.selectedBooru,this.tags);
   @override
   String toString() {
     return ("tags: $tags selectedBooru: ${selectedBooru.toString()} pageNum: $pageNum booruHandler: $booruHandler handlerType: $handlerType");
   }
   List<BooruItem> getSelected(){
-    List<BooruItem> selectedItems = new List();
-    for (int i=0; i < selected.length; i++){
-      selectedItems.add(booruHandler.fetched.elementAt(selected[i]));
+    List<BooruItem>? selectedItems = [];
+    for (int i=0; i < selected!.length; i++){
+      selectedItems.add(booruHandler!.fetched!.elementAt(selected![i]));
     }
     return selectedItems;
   }

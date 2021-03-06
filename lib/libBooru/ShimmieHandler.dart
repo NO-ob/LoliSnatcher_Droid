@@ -10,7 +10,7 @@ import 'Booru.dart';
  * Booru Handler for the Shimmie engine
  */
 class ShimmieHandler extends BooruHandler{
-  List<BooruItem> fetched = new List();
+  List<BooruItem>? fetched = [];
   bool tagSearchEnabled = false;
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
@@ -20,7 +20,7 @@ class ShimmieHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched.length;
+    int length = fetched!.length;
     if(tags == " " || tags == ""){
       tags="*";
     }
@@ -29,12 +29,13 @@ class ShimmieHandler extends BooruHandler{
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = new List();
+      fetched = [];
     }
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/xml",  "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/xml",  "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         print(response.body);
@@ -53,19 +54,19 @@ class ShimmieHandler extends BooruHandler{
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
-          if (!booru.baseURL.contains("https://whyneko.com/booru")){
-            fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("preview_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),getFileExt(current.getAttribute("file_url"))));
+          if (!booru.baseURL!.contains("https://whyneko.com/booru")){
+            fetched!.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("preview_url"),current.getAttribute("preview_url"),current.getAttribute("tags")!.split(" "),makePostURL(current.getAttribute("id")!),getFileExt(current.getAttribute("file_url"))));
           } else {
-            String cutURL = booru.baseURL.split("/booru")[0];
-            fetched.add(new BooruItem(cutURL+current.getAttribute("file_url"),cutURL+current.getAttribute("preview_url"),cutURL+current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),getFileExt(current.getAttribute("file_url"))));
+            String cutURL = booru.baseURL!.split("/booru")[0];
+            fetched!.add(new BooruItem(cutURL+current.getAttribute("file_url")!,cutURL+current.getAttribute("preview_url")!,cutURL+current.getAttribute("preview_url")!,current.getAttribute("tags")!.split(" "),makePostURL(current.getAttribute("id")!),getFileExt(current.getAttribute("file_url"))));
           }
-          if(dbHandler.db != null){
-            setTrackedValues(fetched.length - 1);
+          if(dbHandler!.db != null){
+            setTrackedValues(fetched!.length - 1);
           }
 
         }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched!.length == length){locked = true;}
         isActive = false;
         return fetched;
       } else {
@@ -89,7 +90,7 @@ class ShimmieHandler extends BooruHandler{
 
 
   String makeTagURL(String input){
-    if (booru.baseURL.contains("rule34.paheal.net")){
+    if (booru.baseURL!.contains("rule34.paheal.net")){
       return "${booru.baseURL}/api/internal/autocomplete?s=$input"; // doesn't allow limit, but sorts by popularity
     } else {
       return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
@@ -98,11 +99,12 @@ class ShimmieHandler extends BooruHandler{
   //No api documentation on finding tags
   @override
   Future tagSearch(String input) async {
-    List<String> searchTags = new List();
+    List<String> searchTags = [];
     String url = makeTagURL(input);
     print("shimmie tag search");
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       print(response.body);
       if (response.statusCode == 200) {

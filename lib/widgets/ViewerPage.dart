@@ -38,8 +38,8 @@ class ViewerPage extends StatefulWidget {
 }
 
 class _ViewerPageState extends State<ViewerPage> {
-  PreloadPageController controller;
-  PageController controllerLinux;
+  late PreloadPageController controller;
+  late PageController controllerLinux;
   ImageWriter writer = new ImageWriter();
   FocusNode kbFocusNode = FocusNode();
   @override
@@ -53,15 +53,15 @@ class _ViewerPageState extends State<ViewerPage> {
     );
     setState(() {
       print("widget index: ${widget.index}");
-      print("searchglobals index: ${widget.searchGlobals.viewedIndex.value}");
-      widget.searchGlobals.viewedIndex.value = widget.index;
+      print("searchglobals index: ${widget.searchGlobals.viewedIndex!.value}");
+      widget.searchGlobals.viewedIndex!.value = widget.index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     String appBarTitle =
-        "${(widget.searchGlobals.viewedIndex.value + 1).toString()} / ${widget.fetched.length.toString()}";
+        "${(widget.searchGlobals.viewedIndex!.value + 1).toString()} / ${widget.fetched.length.toString()}";
     kbFocusNode.requestFocus();
     return Scaffold(
         appBar: HideableAppBar(appBarTitle, appBarActions(),
@@ -91,11 +91,11 @@ class _ViewerPageState extends State<ViewerPage> {
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event){
         if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
-          controller.jumpToPage(widget.searchGlobals.viewedIndex.value - 1);
+          controller.jumpToPage(widget.searchGlobals.viewedIndex!.value - 1);
         } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
-          controller.jumpToPage(widget.searchGlobals.viewedIndex.value + 1);
+          controller.jumpToPage(widget.searchGlobals.viewedIndex!.value + 1);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name,widget.settingsHandler.snatchCooldown);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
         }
       },
       child:PhotoViewGestureDetectorScope(
@@ -109,9 +109,9 @@ class _ViewerPageState extends State<ViewerPage> {
               String fileURL = widget.fetched[index].fileURL;
               bool isVideo = widget.fetched[index].isVideo();
               int preloadCount = widget.settingsHandler.preloadCount;
-              bool isViewed = widget.searchGlobals.viewedIndex.value == index;
+              bool isViewed = widget.searchGlobals.viewedIndex!.value == index;
               bool isNear =
-                  (widget.searchGlobals.viewedIndex.value - index).abs() <=
+                  (widget.searchGlobals.viewedIndex!.value - index).abs() <=
                       preloadCount;
               // print('isVideo: '+isVideo.toString());
 
@@ -122,19 +122,19 @@ class _ViewerPageState extends State<ViewerPage> {
                     child: GestureDetector(
                         onLongPress: () {
                           print('longpress');
-                          widget.searchGlobals.displayAppbar.value =
-                          !widget.searchGlobals.displayAppbar.value;
+                          widget.searchGlobals.displayAppbar!.value =
+                          !widget.searchGlobals.displayAppbar!.value;
                         },
                         child: isVideo
                             ? VideoApp(
                             widget.fetched[index],
                             index,
-                            widget.searchGlobals.viewedIndex.value,
+                            widget.searchGlobals.viewedIndex!.value,
                             widget.settingsHandler)
                             : MediaViewer(
                             widget.fetched[index],
                             index,
-                            widget.searchGlobals.viewedIndex.value,
+                            widget.searchGlobals.viewedIndex!.value,
                             widget.settingsHandler)));
               } else {
                 return Container();
@@ -143,7 +143,7 @@ class _ViewerPageState extends State<ViewerPage> {
             controller: controller,
             onPageChanged: (int index) {
               setState(() {
-                widget.searchGlobals.viewedIndex.value = index;
+                widget.searchGlobals.viewedIndex!.value = index;
               });
               // print('Page changed ' + index.toString());
             },
@@ -169,7 +169,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context.theme.accentColor),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
                       ),
                       onPressed: () {
                         Process.run('mpv', ["--loop", fileURL]);
@@ -193,7 +193,7 @@ class _ViewerPageState extends State<ViewerPage> {
         onPressed: () async {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru.name,widget.settingsHandler.snatchCooldown);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
         },
       ),
       IconButton(
@@ -201,23 +201,23 @@ class _ViewerPageState extends State<ViewerPage> {
         onPressed: () {
           ServiceHandler serviceHandler = new ServiceHandler();
           serviceHandler.loadShareIntent(
-              widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+              widget.fetched[widget.searchGlobals.viewedIndex!.value].fileURL);
         },
       ),
       widget.settingsHandler.dbEnabled ?
       IconButton(
-        icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
+        icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite ? Icons.favorite : Icons.favorite_border),
         onPressed: () {
           setState(() {
-            widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
-            widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value]);
+            widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite;
+            widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value]);
           });
         },
       ) : Container(),
       IconButton(
         icon: Icon(Icons.public),
         onPressed: () {
-            ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+            ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);
         },
       ),
       IconButton(
@@ -231,9 +231,9 @@ class _ViewerPageState extends State<ViewerPage> {
                   child: Container(
                     margin: EdgeInsets.all(5),
                     child: ListView.builder(
-                        itemCount: widget.fetched[widget.searchGlobals.viewedIndex.value].tagsList.length,
+                        itemCount: widget.fetched[widget.searchGlobals.viewedIndex!.value].tagsList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          String currentTag = widget.fetched[widget.searchGlobals.viewedIndex.value].tagsList[index];
+                          String currentTag = widget.fetched[widget.searchGlobals.viewedIndex!.value].tagsList[index];
                           if (currentTag != '') {
                             return Column(children: <Widget>[
                               Row(
@@ -244,26 +244,26 @@ class _ViewerPageState extends State<ViewerPage> {
                                   IconButton(
                                     icon: Icon(
                                       Icons.add,
-                                      color: Get.context.theme.accentColor,
+                                      color: Get.context!.theme.accentColor,
                                     ),
                                     onPressed: () {
                                       setState(() {
-                                        widget.searchGlobals.addTag.value = " " + currentTag;
+                                        widget.searchGlobals.addTag!.value = " " + currentTag;
                                       });
                                       ServiceHandler.displayToast("Added to search \n Tag: "+ currentTag);
-                                      //Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                                      //Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                                     },
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.fiber_new,
-                                        color: Get.context.theme.accentColor),
+                                        color: Get.context!.theme.accentColor),
                                     onPressed: () {
                                       setState(() {
-                                        widget.searchGlobals.newTab.value =
+                                        widget.searchGlobals.newTab!.value =
                                             currentTag;
                                       });
                                       ServiceHandler.displayToast("Added new tab \n Tag: " + currentTag);
-                                      //Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                                      //Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                                     },
                                   ),
                                 ],

@@ -163,7 +163,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 /**
                  * When the snatch button is pressed the snatch function is called and then
@@ -192,19 +192,19 @@ class _SnatcherPageState extends State<SnatcherPage> {
   Future BooruSelector() async{
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (widget.booru == null){
-      widget.booru = widget.settingsHandler.booruList[0];
+      widget.booru = widget.settingsHandler.booruList![0];
     }
     return Container(
       child: DropdownButton<Booru>(
         value: widget.booru,
         icon: Icon(Icons.arrow_downward),
-        onChanged: (Booru newValue){
-          print(newValue.baseURL);
+        onChanged: (Booru? newValue){
+          print(newValue!.baseURL);
           setState((){
             widget.booru = newValue;
           });
         },
-        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+        items: widget.settingsHandler.booruList!.map<DropdownMenuItem<Booru>>((Booru value){
           // Return a dropdown item
           return DropdownMenuItem<Booru>(
             value: value,
@@ -214,7 +214,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 value.type == "Favourites" ?
                 Icon(Icons.favorite,color: Colors.red, size: 18) :
                 Image.network(
-                  value.faviconURL,
+                  value.faviconURL!,
                   width: 16,
                   errorBuilder: (_, __, ___) {
                     return Icon(Icons.broken_image, size: 18);

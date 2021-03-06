@@ -8,7 +8,7 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class e621Handler extends BooruHandler{
-  List<BooruItem> fetched = new List();
+  List<BooruItem>? fetched = [];
   e621Handler(Booru booru,int limit) : super(booru,limit);
 
   /**
@@ -17,18 +17,19 @@ class e621Handler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched.length;
+    int length = fetched!.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = new List();
+      fetched = [];
     }
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -46,15 +47,15 @@ class e621Handler extends BooruHandler{
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if (current['file']['url'] != null){
-            fetched.add(new BooruItem(current['file']['url'],current['sample']['url'],current['preview']['url'],current['tags']['general'] + current['tags']['species'] + current['tags']['character'] + current['tags']['artist'] + current['tags']['meta'],makePostURL(current['id'].toString()),getFileExt(current['file']['url'])));
-            if(dbHandler.db != null){
-              setTrackedValues(fetched.length - 1);
+            fetched!.add(new BooruItem(current['file']['url'],current['sample']['url'],current['preview']['url'],current['tags']['general'] + current['tags']['species'] + current['tags']['character'] + current['tags']['artist'] + current['tags']['meta'],makePostURL(current['id'].toString()),getFileExt(current['file']['url'])));
+            if(dbHandler!.db != null){
+              setTrackedValues(fetched!.length - 1);
             }
           }
 
         }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched!.length == length){locked = true;}
         isActive = false;
         return fetched;
       }
@@ -82,10 +83,11 @@ class e621Handler extends BooruHandler{
   }
   @override
   Future tagSearch(String input) async {
-    List<String> searchTags = new List();
+    List<String> searchTags = [];
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);

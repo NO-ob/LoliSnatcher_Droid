@@ -31,7 +31,7 @@ class AboutPage extends StatelessWidget {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
                   ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
@@ -47,7 +47,7 @@ class AboutPage extends StatelessWidget {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor,),
+                  side: BorderSide(color: Get.context!.theme.accentColor,),
                 ),
                 onPressed: (){
                   ServiceHandler.launchURL("https://www.pixiv.net/en/users/28366691");
@@ -63,7 +63,7 @@ class AboutPage extends StatelessWidget {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor,),
+                  side: BorderSide(color: Get.context!.theme.accentColor,),
                 ),
                 onPressed: (){
                   ServiceHandler.launchURL("https://github.com/NANI-SORE");

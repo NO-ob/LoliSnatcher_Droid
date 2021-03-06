@@ -24,17 +24,17 @@ class MediaViewer extends StatefulWidget {
 }
 
 class _MediaViewerState extends State<MediaViewer> {
-  PhotoViewScaleStateController scaleController;
-  PhotoViewController viewController;
+  late PhotoViewScaleStateController scaleController;
+  late PhotoViewController viewController;
 
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
   bool isFromCache = false;
-  StreamedResponse _response;
-  File _image;
+  late StreamedResponse _response;
+  late File _image;
   List<int> _bytes = [];
-  StreamSubscription _subscription;
-  String imageURL;
+  late StreamSubscription _subscription;
+  late String imageURL;
   Future<void> _downloadImage() async {
     final String filePath =
         await imageWriter.getCachePath(imageURL, 'media');
@@ -54,7 +54,7 @@ class _MediaViewerState extends State<MediaViewer> {
     // Otherwise start loading and subscribe to progress
     _response = await Client()
         .send(Request('GET', Uri.parse(imageURL)));
-    _total = _response.contentLength;
+    _total = _response.contentLength!;
 
     _subscription = _response.stream.listen((value) {
       setState(() {
@@ -81,10 +81,10 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void initState() {
     super.initState();
-    if (widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL){
-      imageURL = widget.booruItem.sampleURL;
+    if (widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL!.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL){
+      imageURL = widget.booruItem.sampleURL!;
     } else {
-      imageURL = widget.booruItem.fileURL;
+      imageURL = widget.booruItem.fileURL!;
     }
     viewController =
         PhotoViewController(); //..outputStateStream.listen(onViewStateChanged);
@@ -118,16 +118,16 @@ class _MediaViewerState extends State<MediaViewer> {
         (widget.settingsHandler.mediaCache && _total != null && _total > 0);
     bool isProgressFromCaching =
         widget.settingsHandler.mediaCache && hasProgressData && _total != null && _total > 0;
-    int expectedBytes = hasProgressData
+    int expectedBytes = (hasProgressData
         ? (isProgressFromCaching
             ? _received
             : loadingProgress.cumulativeBytesLoaded)
-        : null;
-    int totalBytes = hasProgressData
+        : null)!;
+    int totalBytes = (hasProgressData
         ? (isProgressFromCaching ? _total : loadingProgress.expectedTotalBytes)
-        : null;
+        : null)!;
 
-    double percentDone = hasProgressData ? (expectedBytes / totalBytes) : null;
+    double percentDone = (hasProgressData ? (expectedBytes / totalBytes) : null)!;
     String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
@@ -137,14 +137,14 @@ class _MediaViewerState extends State<MediaViewer> {
     String filesizeText =
         hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    String thumbnailFileURL = widget.settingsHandler.previewMode == "Sample"
+    String thumbnailFileURL = (widget.settingsHandler.previewMode == "Sample"
         ? widget.booruItem.sampleURL
-        : widget.booruItem.thumbnailURL;
+        : widget.booruItem.thumbnailURL)!;
     File preview = File(
         "${widget.settingsHandler.cachePath}thumbnails/${thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1)}");
     // start opacity from 20%
     double opacityValue = 0.2 +
-        0.8 * lerpDouble(0.0, 1.0, (percentDone == null ? 0 : percentDone));
+        0.8 * lerpDouble(0.0, 1.0, (percentDone == null ? 0 : percentDone))!.toDouble();
 
     // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
     // print(opacityValue);
@@ -172,7 +172,7 @@ class _MediaViewerState extends State<MediaViewer> {
                       quarterTurns: -1,
                       child: LinearProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
                           value: percentDone),
                     ),
                   ),
@@ -230,7 +230,7 @@ class _MediaViewerState extends State<MediaViewer> {
                       quarterTurns: percentDone != null ? -1 : 1,
                       child: LinearProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
                           value: percentDone),
                     ),
                   ),

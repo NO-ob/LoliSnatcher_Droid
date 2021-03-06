@@ -26,12 +26,12 @@ class ViewUtils {
   *
   */
   static Widget sampleorThumb(BooruItem item, int columnCount, SettingsHandler settingsHandler) {
-    List<dynamic> itemType = getFileTypeAndIcon(item.fileExt);
+    List<dynamic>? itemType = getFileTypeAndIcon(item.fileExt!);
     bool isThumb = settingsHandler.previewMode == "Thumbnail" ||
         (itemType[0] == 'gif' || itemType[0] == 'video');
-    String thumbURL = isThumb ? item.thumbnailURL : item.sampleURL;
+    String? thumbURL = isThumb ? item.thumbnailURL : item.sampleURL;
     return Stack(alignment: settingsHandler.previewDisplay == "Waterfall" ? Alignment.center : Alignment.bottomCenter, children: [
-      CachedThumb(thumbURL, settingsHandler, columnCount),
+      CachedThumb(thumbURL!, settingsHandler, columnCount),
       Container(
         alignment: Alignment.bottomRight,
         child: Container(
@@ -67,7 +67,7 @@ class ViewUtils {
     ]);
   }
   static void jumpToItem(int item, SearchGlobals searchGlobals, ScrollController gridController, SettingsHandler settingsHandler, BuildContext context) {
-    int totalItems = searchGlobals.booruHandler.fetched.length;
+    int? totalItems = searchGlobals.booruHandler!.fetched!.length;
     print("jump to item called index is: $item");
     if (totalItems > 0) {
       double viewportHeight = gridController.position.viewportDimension;

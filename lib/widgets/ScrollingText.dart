@@ -10,7 +10,7 @@ class ScrollingText extends StatefulWidget {
 }
 
 class _ScrollingTextState extends State<ScrollingText> {
-  String displayText;
+  String? displayText;
   int counter = 0, pauseCounter = 0, pauseThreshold = 8;
   String bufferText = "";
   bool forward = true, disposed = false;
@@ -53,7 +53,7 @@ class _ScrollingTextState extends State<ScrollingText> {
           break;
       }
     }
-    return Text(displayText, textAlign: TextAlign.left);
+    return Text(displayText!, textAlign: TextAlign.left);
   }
   void bounce(){
     Future.delayed(const Duration(milliseconds: stepDelay), () {
@@ -104,7 +104,7 @@ class _ScrollingTextState extends State<ScrollingText> {
             });
           } else {
             setState(() {
-              bufferText = displayText;
+              bufferText = displayText!;
             });
           }
         } else {
@@ -141,7 +141,7 @@ class _ScrollingTextState extends State<ScrollingText> {
             });
           } else {
             setState(() {
-              bufferText = displayText;
+              bufferText = displayText!;
             });
           }
         } else {
@@ -167,7 +167,7 @@ class _ScrollingTextState extends State<ScrollingText> {
     }
 
     if(counter == 0 && pauseCounter <= pauseThreshold) {
-      displayText = displayText + '...';
+      displayText = displayText! + '...';
     }
     
   }

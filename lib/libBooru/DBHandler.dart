@@ -4,7 +4,7 @@ import 'package:sqflite/sqflite.dart';
 import '../Tools.dart';
 
 class DBHandler{
-  Database db;
+  Database? db;
   DBHandler();
 
   //Connects to the database file and create the database if the tables dont exist
@@ -37,15 +37,15 @@ class DBHandler{
 
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   void updateBooruItem(BooruItem item) async{
-    print("updateBooruItem called fileURL is:" + item.fileURL);
-    String itemID = await getItemID(item.fileURL);
+    print("updateBooruItem called fileURL is:" + item.fileURL!);
+    String itemID = await getItemID(item.fileURL!);
     if (itemID.isEmpty){
-      var result = await db.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
+      var result = await db!.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
           [item.thumbnailURL,item.sampleURL,item.fileURL,item.postURL,item.mediaType,Tools.boolToInt(item.isSnatched),Tools.boolToInt(item.isFavourite)]);
       itemID = result.toString();
-      updateTags(item.tagsList, itemID);
+      updateTags(item.tagsList!, itemID);
     } else {
-      await db.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?",[Tools.boolToInt(item.isSnatched),Tools.boolToInt(item.isFavourite),itemID]);
+      await db!.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?",[Tools.boolToInt(item.isSnatched),Tools.boolToInt(item.isFavourite),itemID]);
     }
   }
 
@@ -54,9 +54,9 @@ class DBHandler{
   Future<String> getItemID(String fileURL) async{
     var result;
     if (fileURL.contains("s.sankakucomplex.com")){
-      result = await db.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)",[fileURL.split("?")[0]+"%"]);
+      result = await db!.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)",[fileURL.split("?")[0]+"%"]);
     } else {
-      result = await db.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+      result = await db!.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
     }
     print("getItemID id is: $result");
     if (result.isNotEmpty){
@@ -70,7 +70,7 @@ class DBHandler{
   Future<List<BooruItem>> searchDB(String tagString, String offset, String limit) async {
     List<String> tags;
     var result;
-    List<BooruItem> fetched = new List();
+    List<BooruItem> fetched = [];
     String questionMarks = "?";
     print("Searching DB for tags ${tagString}");
     if (tagString.isNotEmpty){
@@ -78,36 +78,34 @@ class DBHandler{
       for (int i = 1; i < tags.length; i++){
         questionMarks += ",?";
       }
-      result = await db.rawQuery(
+      result = await db!.rawQuery(
           "SELECT booruItemID as id FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
               "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
               "HAVING COUNT(*) = ${tags.length} LIMIT $limit OFFSET $offset",tags);
     } else {
-      result = await db.rawQuery(
+      result = await db!.rawQuery(
           "SELECT id FROM BooruItem LIMIT $limit OFFSET $offset");
     }
     if (result.isNotEmpty){
       for(int i=0; i < result.length; i++){
-        BooruItem temp = await getBooruItem(result[i]["id"]);
-        if(temp != null){
-          fetched.add(temp);
-        }
+        BooruItem? temp = await getBooruItem(result[i]["id"]);
+        fetched.add(temp!);
       }
     }
     return fetched;
   }
 
   //Creates a BooruItem from a BooruItem id
-  Future<BooruItem> getBooruItem(int itemID) async{
-    var metaData = await db.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?) AND isFavourite = 1",[itemID]);
+  Future<BooruItem?> getBooruItem(int itemID) async{
+    var metaData = await db!.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?) AND isFavourite = 1",[itemID]);
     BooruItem item;
-    List<String> tagsList = new List();
+    List<String> tagsList = [];
     if (metaData.isNotEmpty){
-      item = new BooruItem(metaData.first["fileURL"], metaData.first["fileURL"], metaData.first["thumbnailURL"], null,  metaData.first["postURL"], metaData.first["fileURL"].substring(metaData.first["fileURL"].lastIndexOf(".") + 1));
-      var tags = await db.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)",[itemID]);
-      tags.forEach((tag) {tagsList.add(tag["name"]);});
-      item.isSnatched = Tools.intToBool(metaData.first["isSnatched"]);
-      item.isFavourite = Tools.intToBool(metaData.first["isFavourite"]);
+      item = new BooruItem(metaData.first["fileURL"].toString(), metaData.first["fileURL"].toString(), metaData.first["thumbnailURL"].toString(), null,  metaData.first["postURL"].toString(), metaData.first["fileURL"].toString().substring(metaData.first["fileURL"].toString().lastIndexOf(".") + 1));
+      var tags = await db!.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)",[itemID]);
+      tags.forEach((tag) {tagsList.add(tag["name"].toString());});
+      item.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+      item.isFavourite = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
       item.tagsList = tagsList;
       return item;
     } else {
@@ -115,27 +113,27 @@ class DBHandler{
     }
   }
   void clearSnatched() async{
-    await db.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
+    await db!.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
   }
   void clearFavourites() async{
-    await db.rawUpdate("UPDATE BooruItem SET isFavourite = 0");
+    await db!.rawUpdate("UPDATE BooruItem SET isFavourite = 0");
   }
   //Adds tags for a BooruItem to the database
-  void updateTags(List<String> tags, String itemID) async{
+  void updateTags(List tags, String itemID) async{
     String id = "";
     tags.forEach((tag) async{
       id = await getTagID(tag);
       if (id.isEmpty){
-        var result = await db.rawInsert("INSERT INTO Tag(name) VALUES(?)",[tag]);
+        var result = await db!.rawInsert("INSERT INTO Tag(name) VALUES(?)",[tag]);
         id = result.toString();
       }
-      await db.rawInsert("INSERT INTO ImageTag(tagID, booruItemID) VALUES(?,?)",[id,itemID]);
+      await db!.rawInsert("INSERT INTO ImageTag(tagID, booruItemID) VALUES(?,?)",[id,itemID]);
     });
   }
 
   //Gets a tag id from the database
   Future<String> getTagID(String tagName) async{
-    var result = await db.rawQuery("SELECT id FROM Tag WHERE name IN (?)",[tagName]);
+    var result = await db!.rawQuery("SELECT id FROM Tag WHERE name IN (?)",[tagName]);
     print("getTagID id is: $result");
     if (result.isNotEmpty){
       return result.first["id"].toString();
@@ -145,11 +143,11 @@ class DBHandler{
   }
   //Get a list of tags from the database based on an input
   Future<List<String>> getTags(String queryStr, int limit) async{
-    List<String> tags = new List();
-    var result = await db.rawQuery("SELECT name FROM Tag WHERE name LIKE (?) LIMIT $limit",["$queryStr%"]);
+    List<String> tags = [];
+    var result = await db!.rawQuery("SELECT name FROM Tag WHERE name LIKE (?) LIMIT $limit",["$queryStr%"]);
     if (result.isNotEmpty){
       for (int i = 0; i < result.length; i++){
-        tags.add(result[i]["name"]);
+        tags.add(result[i]["name"].toString());
       }
     }
     return tags;
@@ -160,9 +158,9 @@ class DBHandler{
     List<bool> values = [false,false];
     var result;
     if (fileURL.contains("s.sankakucomplex.com")){
-      result = await db.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)",[fileURL.split("?")[0]+"%"]);
+      result = await db!.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)",[fileURL.split("?")[0]+"%"]);
     } else {
-      result = await db.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+      result = await db!.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
     }
 
     if (result.isNotEmpty){
@@ -175,10 +173,10 @@ class DBHandler{
   }
   // Deletes booruItems which are no longer favourited or snatched
   Future<bool> deleteUntracked() async{
-    var result = await db.rawQuery("SELECT id FROM BooruItem WHERE isFavourite = 0 and isSnatched = 0");
+    var result = await db!.rawQuery("SELECT id FROM BooruItem WHERE isFavourite = 0 and isSnatched = 0");
     if (result.isNotEmpty){
       result.forEach((element) async{
-        deleteItem(element["id"]);
+        deleteItem(int.parse(element["id"].toString()));
       });
     }
     return true;
@@ -187,7 +185,7 @@ class DBHandler{
   //Deletes a BooruItem and its tags from the database
   void deleteItem(int itemID) async{
     print("DBHandler deleting: $itemID");
-    await db.rawDelete("DELETE FROM BooruItem WHERE id IN (?)",[itemID]);
-    await db.rawDelete("DELETE FROM ImageTag WHERE booruItemID IN (?)",[itemID]);
+    await db!.rawDelete("DELETE FROM BooruItem WHERE id IN (?)",[itemID]);
+    await db!.rawDelete("DELETE FROM ImageTag WHERE booruItemID IN (?)",[itemID]);
   }
 }

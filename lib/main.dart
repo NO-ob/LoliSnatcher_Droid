@@ -16,7 +16,6 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
-import 'package:LoliSnatcher/widgets/BooruSelectorBroken.dart';
 import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 import 'package:LoliSnatcher/widgets/WaterfallView.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
@@ -86,7 +85,7 @@ class _HomeState extends State<Home> {
   int globalsIndex = 0;
   bool firstRun = true;
   bool isSnatching = false;
-  ActiveTitle activeTitle;
+  ActiveTitle? activeTitle;
   String snatchStatus = "";
   final searchTagsController = TextEditingController();
   @override
@@ -99,20 +98,20 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     //searchTagsController.text = searchGlobals[globalsIndex].tags;
-    if (searchGlobals[globalsIndex].newTab.value == "noListener"){
-      searchGlobals[globalsIndex].newTab.addListener((){
-        if (searchGlobals[globalsIndex].newTab.value != ""){
+    if (searchGlobals[globalsIndex].newTab!.value == "noListener"){
+      searchGlobals[globalsIndex].newTab!.addListener((){
+        if (searchGlobals[globalsIndex].newTab!.value != ""){
           setState(() {
-            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
+            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
           });
         }
       });
-      searchGlobals[globalsIndex].addTag.addListener((){
-        if (searchGlobals[globalsIndex].addTag.value != ""){
-            searchTagsController.text += searchGlobals[globalsIndex].addTag.value;
+      searchGlobals[globalsIndex].addTag!.addListener((){
+        if (searchGlobals[globalsIndex].addTag!.value != ""){
+            searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
         }
       });
-      searchGlobals[globalsIndex].newTab.value = "";
+      searchGlobals[globalsIndex].newTab!.value = "";
     }
     /*if (widget.booruSelector.selectedBooruNotifier.value == "noListener"){
       print("Listener added to booruselector");
@@ -140,14 +139,14 @@ class _HomeState extends State<Home> {
                 onPressed: (){
                   getPerms();
                   // call a function to save the currently viewed image when the save button is pressed
-                  if (searchGlobals[globalsIndex].selected.length > 0){
-                    widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru.name,widget.settingsHandler.snatchCooldown);
+                  if (searchGlobals[globalsIndex].selected!.length > 0){
+                    widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
                     setState(() {
-                      searchGlobals[globalsIndex].selected = new List();
+                      searchGlobals[globalsIndex].selected = [];
                     });
                   } else {
                     ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
-                    //Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                    //Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                   }
                 },
               )
@@ -174,13 +173,13 @@ class _HomeState extends State<Home> {
                                 padding: new EdgeInsets.all(20),
                                 icon: Icon(Icons.search),
                                 onPressed: () {
-                                  if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
-                                    searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
+                                  if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList!.isNotEmpty){
+                                    searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList!.elementAt(0);
                                   }
                                   setState((){
                                     if(searchTagsController.text.contains("loli")){
                                       ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
-                                      //Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
+                                      //Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor );
                                     }
                                     searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru,searchTagsController.text);
                                   });
@@ -204,27 +203,27 @@ class _HomeState extends State<Home> {
                                   isExpanded: true,
                                   value: searchGlobals[globalsIndex],
                                   icon: Icon(Icons.arrow_downward),
-                                  onChanged: (SearchGlobals newValue){
+                                  onChanged: (SearchGlobals? newValue){
                                     setState(() {
-                                      globalsIndex = searchGlobals.indexOf(newValue);
-                                      searchTagsController.text = newValue.tags;
+                                      globalsIndex = searchGlobals.indexOf(newValue!);
+                                      searchTagsController.text = newValue.tags!;
                                     });
                                   },
                                   onTap: (){
                                     setState(() { });
                                   },
                                   items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
-                                    bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru.faviconURL != null;
+                                    bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru!.faviconURL != null;
                                     print(value.tags);
                                     String tagText = " ${value.tags}";
                                     return DropdownMenuItem<SearchGlobals>(
                                       value: value,
                                       child: Row(
                                           children: [
-                                            isNotEmptyBooru ?( value.selectedBooru.type == "Favourites" ?
+                                            isNotEmptyBooru ?( value.selectedBooru!.type == "Favourites" ?
                                             Icon(Icons.favorite,color: Colors.red, size: 18)  :
                                             Image.network(
-                                              value.selectedBooru.faviconURL,
+                                              value.selectedBooru!.faviconURL!,
                                               width: 16,
                                               errorBuilder: (_, __, ___) {
                                                 return Icon(Icons.broken_image, size: 18);
@@ -240,7 +239,7 @@ class _HomeState extends State<Home> {
 
 
                               IconButton(
-                                icon: Icon(Icons.add_circle_outline, color: Get.context.theme.accentColor),
+                                icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor),
                                 onPressed: () {
                                   // add a new search global to the list
                                   setState((){
@@ -250,16 +249,16 @@ class _HomeState extends State<Home> {
                                 },
                               ),
                               IconButton(
-                                icon: Icon(Icons.remove_circle_outline, color: Get.context.theme.accentColor),
+                                icon: Icon(Icons.remove_circle_outline, color: Get.context!.theme.accentColor),
                                 onPressed: () {
                                   // Remove selected searchglobal from list and apply nearest to search bar
                                   setState((){
                                     if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
                                       globalsIndex --;
-                                      searchTagsController.text = searchGlobals[globalsIndex].tags;
+                                      searchTagsController.text = searchGlobals[globalsIndex].tags!;
                                       searchGlobals.removeAt(globalsIndex + 1);
                                     } else if (searchGlobals.length > 1){
-                                      searchTagsController.text = searchGlobals[globalsIndex + 1].tags;
+                                      searchTagsController.text = searchGlobals[globalsIndex + 1].tags!;
                                       searchGlobals.removeAt(globalsIndex);
                                     }
                                   });
@@ -291,10 +290,10 @@ class _HomeState extends State<Home> {
                           child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Get.context.theme.accentColor),
+                              side: BorderSide(color: Get.context!.theme.accentColor),
                             ),
                             onPressed: (){
-                              Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler, widget.snatchHandler));
+                              Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
                             },
                             child: Text("Snatcher"),
                           ),
@@ -304,7 +303,7 @@ class _HomeState extends State<Home> {
                           child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Get.context.theme.accentColor),
+                              side: BorderSide(color: Get.context!.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(SettingsPage(widget.settingsHandler));
@@ -317,7 +316,7 @@ class _HomeState extends State<Home> {
                           child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Get.context.theme.accentColor),
+                              side: BorderSide(color: Get.context!.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(AboutPage());
@@ -341,9 +340,10 @@ class _HomeState extends State<Home> {
                             DrawerHeader(
                               margin: null,
                               decoration: new BoxDecoration(
-                                color: Get.context.theme.primaryColor,
+                                color: Get.context!.theme.primaryColor,
                                 image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
                               ),
+                              child: Container(width: 0,height: 0,),
                             ),
                           ],)
                         ],
@@ -365,7 +365,7 @@ class _HomeState extends State<Home> {
       future: widget.settingsHandler.initialize(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done){
-          if (widget.settingsHandler.booruList.isEmpty){
+          if (widget.settingsHandler.booruList!.isEmpty){
             return Center(
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -377,7 +377,7 @@ class _HomeState extends State<Home> {
                         child: FlatButton(
                             shape: RoundedRectangleBorder(
                               borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Get.context.theme.accentColor),
+                              side: BorderSide(color: Get.context!.theme.accentColor),
                             ),
                             onPressed: (){
                               Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
@@ -395,9 +395,9 @@ class _HomeState extends State<Home> {
                     if (snapshot.connectionState == ConnectionState.done){
                       firstRun = false;
                       searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-                      searchTagsController.text = widget.settingsHandler.defTags;
+                      searchTagsController.text = widget.settingsHandler.defTags!;
                       if (searchGlobals[globalsIndex].selectedBooru == null){
-                        searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+                        searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
                       }
                       if (widget.settingsHandler.previewDisplay == "Waterfall"){
                         return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
@@ -430,40 +430,40 @@ class _HomeState extends State<Home> {
     if (widget.settingsHandler.prefBooru == ""){
       await widget.settingsHandler.loadSettings();
     }
-    if(widget.settingsHandler.booruList.isEmpty){
+    if(widget.settingsHandler.booruList!.isEmpty){
       print("getbooru because null");
       await widget.settingsHandler.getBooru();
     }
-    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name)){
+    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList!.elementAt(0).name)){
       await widget.settingsHandler.getBooru();
     }
     print(searchGlobals[globalsIndex].toString());
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (searchGlobals[globalsIndex].selectedBooru == null){
-      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
+      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList![0].toString());
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
     }
-    if (!widget.settingsHandler.booruList.contains(searchGlobals[globalsIndex].selectedBooru)){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
+    if (!widget.settingsHandler.booruList!.contains(searchGlobals[globalsIndex].selectedBooru)){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
     }
     return Container(
       child: DropdownButton<Booru>(
         value: searchGlobals[globalsIndex].selectedBooru,
         icon: Icon(Icons.arrow_downward),
-        onChanged: (Booru newValue){
+        onChanged: (Booru? newValue){
           setState((){
-            if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue.defTags != ""){
-              searchTagsController.text = newValue.defTags;
+            if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
+              searchTagsController.text = newValue.defTags!;
             }
             // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
             searchGlobals[globalsIndex] = new SearchGlobals(newValue, searchTagsController.text);
-            print("booru set to ${searchGlobals[globalsIndex].selectedBooru.name}");
+            print("booru set to ${searchGlobals[globalsIndex].selectedBooru!.name}");
             // Set new booru and search with current tags
           });
         },
-        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+        items: widget.settingsHandler.booruList!.map<DropdownMenuItem<Booru>>((Booru value){
           // Return a dropdown item
           return DropdownMenuItem<Booru>(
             value: value,
@@ -473,7 +473,7 @@ class _HomeState extends State<Home> {
                 value.type == "Favourites" ?
                 Icon(Icons.favorite,color: Colors.red, size: 18) :
                 Image.network(
-                  value.faviconURL,
+                  value.faviconURL!,
                   width: 16,
                   errorBuilder: (_, __, ___) {
                     return Icon(Icons.broken_image, size: 18);

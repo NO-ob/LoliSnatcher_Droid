@@ -22,15 +22,15 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
-  Function setSt;
+  Function setSt = (){};
   @override
   void initState() {
     super.initState();
     setSt = () {
       setState(() {});
     };
-    widget.searchGlobals.displayAppbar.value = !widget.autoHide;
-    widget.searchGlobals.displayAppbar.addListener(setSt);
+    widget.searchGlobals.displayAppbar!.value = !widget.autoHide;
+    widget.searchGlobals.displayAppbar!.addListener(setSt);
 
     // Hide system ui on first render
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -38,7 +38,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   @override
   void dispose() {
-    widget.searchGlobals.displayAppbar.removeListener(setSt);
+    widget.searchGlobals.displayAppbar!.removeListener(setSt);
 
     // Return system ui after closing viewer
     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
@@ -54,7 +54,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,
       height:
-          widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
+          widget.searchGlobals.displayAppbar!.value ? widget.defaultHeight : 0.0,
       child: AppBar(
         // toolbarHeight: widget.defaultHeight,
         leading: IconButton(

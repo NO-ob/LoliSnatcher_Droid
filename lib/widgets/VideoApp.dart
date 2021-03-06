@@ -171,8 +171,8 @@ class _VideoAppState extends State<VideoApp> {
         //   iconColor: Color.fromARGB(255, 200, 200, 200)
         // ),
       materialProgressColors: ChewieProgressColors(
-        playedColor: Get.context.theme.primaryColor,
-        handleColor: Get.context.theme.primaryColor,
+        playedColor: Get.context!.theme.primaryColor,
+        handleColor: Get.context!.theme.primaryColor,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white,
       ),

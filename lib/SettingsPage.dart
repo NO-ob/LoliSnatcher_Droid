@@ -39,14 +39,14 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsPreloadController = TextEditingController();
   final settingsSnatchCooldownController = TextEditingController();
   bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true;
-  Booru selectedBooru;
-  String previewMode, videoCacheMode,previewDisplay,galleryMode;
+  Booru? selectedBooru;
+  String? previewMode, videoCacheMode,previewDisplay,galleryMode;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
     super.initState();
     widget.settingsHandler.loadSettings().whenComplete((){
-      settingsTagsController.text = widget.settingsHandler.defTags;
+      settingsTagsController.text = widget.settingsHandler.defTags!;
       settingsColumnsPortraitController.text = widget.settingsHandler.portraitColumns.toString();
       settingsColumnsLandscapeController.text = widget.settingsHandler.landscapeColumns.toString();
       settingsLimitController.text = widget.settingsHandler.limit.toString();
@@ -264,10 +264,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   value: jsonWrite,
                   onChanged: (newValue) {
                     setState(() {
-                      jsonWrite = newValue;
+                      jsonWrite = newValue!;
                     });
                   },
-                  activeColor: Get.context.theme.primaryColor,
+                  activeColor: Get.context!.theme.primaryColor,
                 )
               ],)
             ),
@@ -279,13 +279,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: dbEnabled,
                     onChanged: (newValue) {
                       setState(() {
-                        dbEnabled = newValue;
+                        dbEnabled = newValue!;
                       });
                     },
-                    activeColor: Get.context.theme.primaryColor,
+                    activeColor: Get.context!.theme.primaryColor,
                   ),
                   IconButton(
-                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                     onPressed: () {
                       Get.dialog(
                           InfoDialog("Database",
@@ -305,12 +305,12 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
                   serviceHandler.deleteDB(widget.settingsHandler);
                   ServiceHandler.displayToast("Database Deleted! \n An app restart is required!");
-                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                 },
                 child: Text("Delete Database"),
               ),
@@ -321,7 +321,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
                   if (widget.settingsHandler.dbHandler.db != null){
@@ -338,7 +338,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
                   if (widget.settingsHandler.dbHandler.db != null){
@@ -357,10 +357,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: autoPlay,
                     onChanged: (newValue) {
                       setState(() {
-                        autoPlay = newValue;
+                        autoPlay = newValue!;
                       });
                     },
-                    activeColor: Get.context.theme.primaryColor,
+                    activeColor: Get.context!.theme.primaryColor,
                   )
                 ],)
             ),
@@ -372,10 +372,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: loadingGif,
                     onChanged: (newValue) {
                       setState(() {
-                        loadingGif = newValue;
+                        loadingGif = newValue!;
                       });
                     },
-                    activeColor: Get.context.theme.primaryColor,
+                    activeColor: Get.context!.theme.primaryColor,
                   )
                 ],)
             ),
@@ -390,7 +390,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   DropdownButton<String>(
                     value: previewDisplay,
                     icon: Icon(Icons.arrow_downward),
-                    onChanged: (String newValue){
+                    onChanged: (String? newValue){
                       setState((){
                         previewDisplay = newValue;
                       });
@@ -416,7 +416,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   DropdownButton<String>(
                     value: previewMode,
                     icon: Icon(Icons.arrow_downward),
-                    onChanged: (String newValue){
+                    onChanged: (String? newValue){
                       setState((){
                         previewMode = newValue;
                       });
@@ -429,7 +429,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }).toList(),
                   ),
                   IconButton(
-                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                     onPressed: () {
                       Get.dialog(
                           InfoDialog("Preview Mode",
@@ -456,7 +456,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   DropdownButton<String>(
                     value: galleryMode,
                     icon: Icon(Icons.arrow_downward),
-                    onChanged: (String newValue){
+                    onChanged: (String? newValue){
                       setState((){
                         galleryMode = newValue;
                       });
@@ -469,7 +469,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }).toList(),
                   ),
                   IconButton(
-                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                     onPressed: () {
                       Get.dialog(
                           InfoDialog("Gallery Mode",
@@ -493,10 +493,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: imageCache,
                     onChanged: (newValue) {
                       setState(() {
-                        imageCache = newValue;
+                        imageCache = newValue!;
                       });
                     },
-                    activeColor: Get.context.theme.primaryColor,
+                    activeColor: Get.context!.theme.primaryColor,
                   )
                 ],)
             ),
@@ -508,10 +508,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: mediaCache,
                     onChanged: (newValue) {
                       setState(() {
-                        mediaCache = newValue;
+                        mediaCache = newValue!;
                       });
                     },
-                    activeColor: Get.context.theme.primaryColor,
+                    activeColor: Get.context!.theme.primaryColor,
                   )
                 ],)
             ),
@@ -526,7 +526,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   DropdownButton<String>(
                     value: videoCacheMode,
                     icon: Icon(Icons.arrow_downward),
-                    onChanged: (String newValue){
+                    onChanged: (String? newValue){
                       setState((){
                         videoCacheMode = newValue;
                       });
@@ -539,7 +539,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }).toList(),
                   ),
                   IconButton(
-                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                     onPressed: () {
                         Get.dialog(
                           InfoDialog("Video Cache Modes",
@@ -563,12 +563,12 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
                   serviceHandler.emptyCache();
                   ServiceHandler.displayToast("Cache cleared! \n Restart may be required!");
-                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                 },
                 child: Text("Clear cache"),
               ),
@@ -581,10 +581,10 @@ class _SettingsPageState extends State<SettingsPage> {
                     value: autoHideImageBar,
                     onChanged: (newValue) {
                       setState(() {
-                        autoHideImageBar = newValue;
+                        autoHideImageBar = newValue!;
                       });
                     },
-                    activeColor: Get.context.theme.primaryColor,
+                    activeColor: Get.context!.theme.primaryColor,
                   )
                 ],)
             ),
@@ -605,7 +605,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                   IconButton(
-                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                     onPressed: () {
                       Get.dialog(
                           InfoDialog("Booru",
@@ -630,11 +630,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: FlatButton(                     // This button loads the booru editor page
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context.theme.accentColor),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
                       ),
                       onPressed: (){
                         if(selectedBooru != null){
-                          Get.to(booruEdit(selectedBooru,widget.settingsHandler));
+                          Get.to(booruEdit(selectedBooru!,widget.settingsHandler));
                         }
                         //get to booru edit page;
                       },
@@ -646,7 +646,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context.theme.accentColor),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
                       ),
                       onPressed: (){
                         // Open the booru edtor page but with default values
@@ -661,14 +661,14 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context.theme.accentColor),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
                       ),
                       onPressed: (){
                         // Open the booru edtor page but with default values
-                        if (widget.settingsHandler.deleteBooru(selectedBooru)){
+                        if (widget.settingsHandler.deleteBooru(selectedBooru!)){
                           setState(() {
                             ServiceHandler.displayToast("Booru Deleted! \n Dropdown will update on search");
-                            //Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            //Get.snackbar("Booru Deleted!","Dropdown will update on search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                           });
                         }
                         //get to booru edit page;
@@ -684,11 +684,11 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
-                  if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay, galleryMode, dbEnabled);
+                  if (selectedBooru == null && widget.settingsHandler.booruList!.isNotEmpty){selectedBooru = widget.settingsHandler.booruList!.elementAt(0);}
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode!,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru!.name!, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode!, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay!, galleryMode!, dbEnabled);
                 },
                 child: Text("Save"),
               ),
@@ -698,7 +698,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: FlatButton(
                 shape: RoundedRectangleBorder(
                   borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
                 ),
                 onPressed: (){
                 },
@@ -716,29 +716,29 @@ class _SettingsPageState extends State<SettingsPage> {
    * it cant update the state of the parent widget if it is outside of the class.
    */
   Future BooruSelector() async{
-    if(widget.settingsHandler.booruList.isEmpty){
+    if(widget.settingsHandler.booruList!.isEmpty){
       await widget.settingsHandler.getBooru();
     }
     if (selectedBooru == null){
-      selectedBooru = widget.settingsHandler.booruList[0];
+      selectedBooru = widget.settingsHandler.booruList![0];
     }
     return Container(
       child: DropdownButton<Booru>(
         value: selectedBooru,
         icon: Icon(Icons.arrow_downward),
-        onChanged: (Booru newValue){
-          print(newValue.baseURL);
+        onChanged: (Booru? newValue){
+          print(newValue!.baseURL);
           setState((){
             selectedBooru = newValue;
           });
         },
-        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+        items: widget.settingsHandler.booruList!.map<DropdownMenuItem<Booru>>((Booru value){
           return DropdownMenuItem<Booru>(
             value: value,
             child: Row(
               children: <Widget>[
-                Text(value.name),
-                Image.network(value.faviconURL, width: 16),
+                Text(value!.name!),
+                Image.network(value.faviconURL!, width: 16),
               ],
             ),
           );
@@ -772,13 +772,13 @@ class _booruEditState extends State<booruEdit> {
   void initState() {
     //Load settings from the Booru instance parsed to the widget and populate the text fields
     if (widget.booru.name != "New"){
-      booruNameController.text = widget.booru.name;
-      booruURLController.text = widget.booru.baseURL;
-      booruFaviconController.text = widget.booru.faviconURL;
-      booruAPIKeyController.text = widget.booru.apiKey;
-      booruUserIDController.text = widget.booru.userID;
-      booruDefTagsController.text = widget.booru.defTags;
-      selectedBooruType = widget.booru.type;
+      booruNameController.text = widget.booru.name!;
+      booruURLController.text = widget.booru.baseURL!;
+      booruFaviconController.text = widget.booru.faviconURL!;
+      booruAPIKeyController.text = widget.booru.apiKey!;
+      booruUserIDController.text = widget.booru.userID!;
+      booruDefTagsController.text = widget.booru.defTags!;
+      selectedBooruType = widget.booru.type!;
     }
     super.initState();
   }
@@ -799,7 +799,7 @@ class _booruEditState extends State<booruEdit> {
                   FlatButton(
                     shape: RoundedRectangleBorder(
                       borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context.theme.accentColor),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
                     ),
                     onPressed: () async{
                       //Call the booru test
@@ -828,10 +828,10 @@ class _booruEditState extends State<booruEdit> {
                         });
                         // Alert user about the results of the test
                         ServiceHandler.displayToast("Booru Type is $booruType \nClick the save button to save this config");
-                        //Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                        //Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                       } else {
                         ServiceHandler.displayToast("No Data Returned \n Booru Information may be incorrect or the booru doesn't allow api access ");
-                        //Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                        //Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                       }
                     },
                     child: Text("Test"),
@@ -905,9 +905,9 @@ class _booruEditState extends State<booruEdit> {
                       child: DropdownButton<String>(
                         value: selectedBooruType,
                         icon: Icon(Icons.arrow_downward),
-                        onChanged: (String newValue) {
+                        onChanged: (String? newValue) {
                           setState(() {
-                            selectedBooruType = newValue;
+                            selectedBooruType = newValue!;
                           });
                         },
                         items: booruTypes.map<DropdownMenuItem<String>>((String value){
@@ -988,7 +988,7 @@ class _booruEditState extends State<booruEdit> {
                     child: FlatButton(
                       shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context.theme.accentColor),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
                       ),
                       onPressed: () async{
                         if (selectedBooruType == "Hydrus"){
@@ -996,15 +996,15 @@ class _booruEditState extends State<booruEdit> {
                           String accessKey = await hydrus.getAccessKey();
                           if (accessKey != ""){
                             ServiceHandler.displayToast("Access Key Requested \n Click okay on hydrus then apply. You can then test");
-                            //Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            //Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                             booruAPIKeyController.text = accessKey;
                           } else {
                             ServiceHandler.displayToast("Couldn't get access key \n Do you have the request window open in hydrus?");
-                            //Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                            //Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                           }
                         } else {
                           ServiceHandler.displayToast("Hydrus Only \n This button only works for Hydrus");
-                          //Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                          //Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                         }
                       },
                       child: Text("Get Hydrus Api Key"),
@@ -1088,21 +1088,21 @@ class _booruEditState extends State<booruEdit> {
       return FlatButton(
         shape: RoundedRectangleBorder(
           borderRadius: new BorderRadius.circular(20),
-          side: BorderSide(color: Get.context.theme.accentColor),
+          side: BorderSide(color: Get.context!.theme.accentColor),
         ),
         onPressed:() async{
           getPerms();
-          Booru newBooru;
+          Booru? newBooru;
           bool booruExists = false;
           // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
-          for (int i=0; i < widget.settingsHandler.booruList.length; i++){
-            if (widget.settingsHandler.booruList[i].baseURL == booruURLController.text){
-              if (widget.settingsHandler.booruList.contains(newBooru)){
+          for (int i=0; i < widget.settingsHandler.booruList!.length; i++){
+            if (widget.settingsHandler.booruList![i].baseURL == booruURLController.text){
+              if (widget.settingsHandler.booruList!.contains(newBooru)){
                 booruExists = true;
                 ServiceHandler.displayToast("Booru Already Exists \n It has not been added");
-                //Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                //Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
               } else {
-                widget.settingsHandler.booruList.removeAt(i);
+                widget.settingsHandler.booruList!.removeAt(i);
               }
             }
           }
@@ -1114,7 +1114,7 @@ class _booruEditState extends State<booruEdit> {
           if (!booruExists){
             await widget.settingsHandler.saveBooru(newBooru);
             ServiceHandler.displayToast("Booru Saved! \n It will show in the dropdowns after a search");
-            //Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+            //Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
           }
 
         },
@@ -1131,7 +1131,7 @@ class _booruEditState extends State<booruEdit> {
   Future<String> booruTest(Booru booru, String userBooruType, List<String> booruTypes) async{
     String booruType = "";
     BooruHandler test;
-    List<BooruItem> testFetched;
+    List<BooruItem>? testFetched = [];
     switch(userBooruType){
       case("Moebooru"):
         test = new MoebooruHandler(booru, 5);

@@ -32,10 +32,10 @@ class _WaterfallState extends State<WaterfallView> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
   FocusNode kbFocusNode = FocusNode();
-  Function jumpTo;
+  Function jumpTo = ((){});
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
-        .getBooruHandler(widget.searchGlobals.selectedBooru, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+        .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
     widget.searchGlobals.booruHandler = temp[0];
     widget.searchGlobals.pageNum = temp[1];
   }
@@ -43,19 +43,19 @@ class _WaterfallState extends State<WaterfallView> {
   void initState() {
     super.initState();
     jumpTo = () {
-      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
+      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
     };
     // Stops previous pages being forgotten when switching tabs
     if (widget.searchGlobals.booruHandler != null) {
     } else {
       setBooruHandler();
     }
-    widget.searchGlobals.viewedIndex.addListener(jumpTo);
+    widget.searchGlobals.viewedIndex!.addListener(jumpTo);
   }
 
   @override
   void dispose() {
-    widget.searchGlobals.viewedIndex.removeListener(jumpTo);
+    widget.searchGlobals.viewedIndex!.removeListener(jumpTo);
     kbFocusNode.dispose();
     super.dispose();
   }
@@ -85,8 +85,8 @@ class _WaterfallState extends State<WaterfallView> {
             ? widget.settingsHandler.portraitColumns
             : widget.settingsHandler.landscapeColumns;
     return FutureBuilder(
-        future: widget.searchGlobals.booruHandler
-            .Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
+        future: widget.searchGlobals.booruHandler!
+            .Search(widget.searchGlobals.tags!, widget.searchGlobals.pageNum),
         builder: (context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -119,7 +119,7 @@ class _WaterfallState extends State<WaterfallView> {
                         crossAxisCount: columnsCount),
                     itemBuilder: (BuildContext context, int index) {
                       bool isSelected =
-                      widget.searchGlobals.selected.contains(index);
+                      widget.searchGlobals.selected!.contains(index);
                       return new Card(
                         child: new GridTile(
                           // Inkresponse is used so the tile can have an onclick function
@@ -129,7 +129,7 @@ class _WaterfallState extends State<WaterfallView> {
                               decoration: isSelected
                                   ? BoxDecoration(
                                 border: Border.all(
-                                    color: Get.context.theme.accentColor,
+                                    color: Get.context!.theme.accentColor,
                                     width: 4.0),
                               )
                                   : null,
@@ -137,7 +137,7 @@ class _WaterfallState extends State<WaterfallView> {
                                 enableFeedback: true,
                                 highlightShape: BoxShape.rectangle,
                                 containedInkWell: true,
-                                highlightColor: Get.context.theme.accentColor,
+                                highlightColor: Get.context!.theme.accentColor,
                                 child: ViewUtils.sampleorThumb(snapshot.data[index], columnsCount,widget.settingsHandler),
                                 onTap: () {
                                   // Load the image viewer
@@ -156,14 +156,14 @@ class _WaterfallState extends State<WaterfallView> {
                                   // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                                 },
                                 onLongPress: () {
-                                  if (widget.searchGlobals.selected
+                                  if (widget.searchGlobals.selected!
                                       .contains(index)) {
                                     setState(() {
-                                      widget.searchGlobals.selected.remove(index);
+                                      widget.searchGlobals.selected!.remove(index);
                                     });
                                   } else {
                                     setState(() {
-                                      widget.searchGlobals.selected.add(index);
+                                      widget.searchGlobals.selected!.add(index);
                                     });
                                   }
                                 },
@@ -187,18 +187,18 @@ class _WaterfallState extends State<WaterfallView> {
                   bool isAtEdge = notif.metrics.atEdge;
                   bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
                   if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
-                    if (!widget.searchGlobals.booruHandler.locked) {
+                    if (!widget.searchGlobals.booruHandler!.locked) {
                       setState(() {
                         widget.searchGlobals.pageNum++;
                       });
                       ServiceHandler.displayToast("Loading next page...\n Page #" + widget.searchGlobals.pageNum.toString());
-                      //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                      //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                     } else if (!isLastPage) {
                       setState(() {
                         isLastPage = true;
                       });
                       ServiceHandler.displayToast("No More Files \n (T⌓T)");
-                      //Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                      //Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                     }
                   }
                   return true;
