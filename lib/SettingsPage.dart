@@ -328,7 +328,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     widget.settingsHandler.dbHandler.clearSnatched();
                     ServiceHandler.displayToast("Snatched Cleared! \n An app restart may be required!");
                   }
-                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                 },
                 child: Text("Clear Snatched"),
               ),
@@ -346,7 +345,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     widget.settingsHandler.dbHandler.clearFavourites();
                     ServiceHandler.displayToast("Favourites Cleared! \n An app restart may be required!");
                   }
-                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                 },
                 child: Text("Clear Favourites"),
               ),
