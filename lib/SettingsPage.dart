@@ -37,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsColumnsPortraitController = TextEditingController();
   final settingsPreloadController = TextEditingController();
   final settingsSnatchCooldownController = TextEditingController();
-  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false;
+  bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true;
   Booru selectedBooru;
   String previewMode, videoCacheMode,previewDisplay,galleryMode;
   @override
@@ -64,6 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
       imageCache = widget.settingsHandler.imageCache;
       mediaCache = widget.settingsHandler.mediaCache;
       autoHideImageBar = widget.settingsHandler.autoHideImageBar;
+      dbEnabled = widget.settingsHandler.dbEnabled;
     });
   }
 
@@ -268,6 +269,21 @@ class _SettingsPageState extends State<SettingsPage> {
                   activeColor: Get.context.theme.primaryColor,
                 )
               ],)
+            ),
+            Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Row(children: [
+                  Text("Enable Database: "),
+                  Checkbox(
+                    value: dbEnabled,
+                    onChanged: (newValue) {
+                      setState(() {
+                        dbEnabled = newValue;
+                      });
+                    },
+                    activeColor: Get.context.theme.primaryColor,
+                  )
+                ],)
             ),
             Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
@@ -567,7 +583,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){selectedBooru = widget.settingsHandler.booruList.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay, galleryMode);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru.name, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay, galleryMode, dbEnabled);
                 },
                 child: Text("Save"),
               ),

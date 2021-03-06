@@ -193,6 +193,16 @@ class SettingsHandler {
               print("Found Gallery Mode " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Enable Database"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                dbEnabled = true;
+              } else {
+                dbEnabled = false;
+              }
+              print("Found dbEnabled " + settings[i].split(" = ")[1] );
+            }
+            break;
 
         }
       }
@@ -200,7 +210,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay, String galleryMode) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay, String galleryMode, bool dbEnabled) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -258,6 +268,8 @@ class SettingsHandler {
     this.previewDisplay = previewDisplay;
     writer.write("Gallery Mode = $galleryMode\n");
     this.galleryMode = galleryMode;
+    writer.write("Enable Database = $dbEnabled\n");
+    this.dbEnabled = dbEnabled;
     writer.close();
     await this.loadSettings();
     await getBooru();

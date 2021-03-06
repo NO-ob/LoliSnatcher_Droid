@@ -38,7 +38,7 @@ class ImageWriter{
     // Don't do anything if file already exists
     File image = new File(path+fileName);
     bool fileExists = await image.exists();
-    if(fileExists) return null;
+    if(fileExists || item.isSnatched) return null;
     try {
       var response = await http.get(item.fileURL);
       if(SDKVer < 30){
