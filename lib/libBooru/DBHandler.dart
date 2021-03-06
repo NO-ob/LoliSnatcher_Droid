@@ -114,7 +114,12 @@ class DBHandler{
       return null;
     }
   }
-
+  void clearSnatched() async{
+    await db.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
+  }
+  void clearFavourites() async{
+    await db.rawUpdate("UPDATE BooruItem SET isFavourite = 0");
+  }
   //Adds tags for a BooruItem to the database
   void updateTags(List<String> tags, String itemID) async{
     String id = "";

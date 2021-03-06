@@ -309,10 +309,46 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   serviceHandler.deleteDB(widget.settingsHandler);
-                  ServiceHandler.displayToast("Database Deleted! \n An app restart be required!");
+                  ServiceHandler.displayToast("Database Deleted! \n An app restart is required!");
                   //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
                 },
                 child: Text("Delete Database"),
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.fromLTRB(20,10,20,10),
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Get.context.theme.accentColor),
+                ),
+                onPressed: (){
+                  if (widget.settingsHandler.dbHandler.db != null){
+                    widget.settingsHandler.dbHandler.clearSnatched();
+                    ServiceHandler.displayToast("Snatched Cleared! \n An app restart may be required!");
+                  }
+                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                },
+                child: Text("Clear Snatched"),
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.fromLTRB(20,10,20,10),
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Get.context.theme.accentColor),
+                ),
+                onPressed: (){
+                  if (widget.settingsHandler.dbHandler.db != null){
+                    widget.settingsHandler.dbHandler.clearFavourites();
+                    ServiceHandler.displayToast("Favourites Cleared! \n An app restart may be required!");
+                  }
+                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                },
+                child: Text("Clear Favourites"),
               ),
             ),
             Container(

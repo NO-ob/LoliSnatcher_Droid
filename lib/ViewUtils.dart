@@ -43,17 +43,23 @@ class ViewUtils {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                itemType[1],
-                color: Colors.white,
-                size: 14,
-              ),
               item.isFavourite ?
               Icon(
                 Icons.favorite,
                 color: Colors.red,
                 size: 14,
               ) : Container(width: 0,height: 0,),
+              item.isSnatched ?
+              Icon(
+                Icons.save_alt,
+                color: Colors.white,
+                size: 14,
+              ) : Container(width: 0,height: 0,),
+              Icon(
+                itemType[1],
+                color: Colors.white,
+                size: 14,
+              ),
             ],
           ),
         ),
