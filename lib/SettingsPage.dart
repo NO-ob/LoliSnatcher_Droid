@@ -1,4 +1,5 @@
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:flutter/material.dart';
 import 'libBooru/BooruOnRailsHandler.dart';
 import 'libBooru/GelbooruHandler.dart';
@@ -297,6 +298,22 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                   ),
                 ],)
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              margin: EdgeInsets.fromLTRB(20,10,20,10),
+              child: FlatButton(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Get.context.theme.accentColor),
+                ),
+                onPressed: (){
+                  serviceHandler.deleteDB(widget.settingsHandler);
+                  ServiceHandler.displayToast("Database Deleted! \n An app restart be required!");
+                  //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                },
+                child: Text("Delete Database"),
+              ),
             ),
             Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),

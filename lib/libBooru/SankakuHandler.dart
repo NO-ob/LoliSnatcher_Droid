@@ -54,7 +54,7 @@ class SankakuHandler extends BooruHandler{
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse.length; i++){
           var current = parsedResponse[i];
-          List tags = new List();
+          List<String> tags = new List();
           for (int x=0; x < current['tags'].length; x++) {
             tags.add(current['tags'][x]['name'].toString());
           }
@@ -65,6 +65,7 @@ class SankakuHandler extends BooruHandler{
           if(dbHandler.db != null){
             setTrackedValues(fetched.length - 1);
           }
+          print(fetched[fetched.length - 1].toString());
         }
         prevTags = tags;
         if (fetched.length == length){locked = true;}

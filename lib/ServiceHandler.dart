@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/services.dart';
+
+import 'libBooru/DBHandler.dart';
 
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
@@ -85,6 +88,13 @@ class ServiceHandler{
 
     } catch(e){
       print(e);
+    }
+  }
+  void deleteDB(SettingsHandler settingsHandler) async{
+    if (Platform.isAndroid){
+      File dbFile = new File(settingsHandler.path + "store.db");
+      print(settingsHandler.path);
+      await dbFile.delete();
     }
   }
   static void makeImmersive(){

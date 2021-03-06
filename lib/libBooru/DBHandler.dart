@@ -52,7 +52,12 @@ class DBHandler{
 
   //Gets a BooruItem id from the database based on a fileurl
   Future<String> getItemID(String fileURL) async{
-    var result = await db.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+    var result;
+    if (fileURL.contains("s.sankakucomplex.com")){
+      result = await db.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)",[fileURL.split("?")[0]+"%"]);
+    } else {
+      result = await db.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+    }
     print("getItemID id is: $result");
     if (result.isNotEmpty){
       return result.first["id"].toString();
@@ -148,7 +153,13 @@ class DBHandler{
   //Return a list of boolean for isSnatched and isFavourite
   Future<List<bool>> getTrackedValues(String fileURL) async{
     List<bool> values = [false,false];
-    var result = await db.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+    var result;
+    if (fileURL.contains("s.sankakucomplex.com")){
+      result = await db.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)",[fileURL.split("?")[0]+"%"]);
+    } else {
+      result = await db.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
+    }
+
     if (result.isNotEmpty){
       print("file url is: $fileURL");
       print(result.toString());
