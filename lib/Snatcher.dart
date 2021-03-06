@@ -210,10 +210,18 @@ class _SnatcherPageState extends State<SnatcherPage> {
             value: value,
             child: Row(
               children: <Widget>[
-                //Booru name
-                Text(value.name + ""),
                 //Booru Icon
-                Image.network(value.faviconURL, width: 16),
+                value.type == "Favourites" ?
+                Icon(Icons.favorite,color: Colors.red, size: 18) :
+                Image.network(
+                  value.faviconURL,
+                  width: 16,
+                  errorBuilder: (_, __, ___) {
+                    return Icon(Icons.broken_image, size: 18);
+                  },
+                ),
+                //Booru name
+                Text(" ${value.name}"),
               ],
             ),
           );

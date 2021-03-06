@@ -282,7 +282,20 @@ class _SettingsPageState extends State<SettingsPage> {
                       });
                     },
                     activeColor: Get.context.theme.primaryColor,
-                  )
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    onPressed: () {
+                      Get.dialog(
+                          InfoDialog("Database",
+                              [
+                                Text("The database will store favourites and also track if an item is snatched"),
+                                Text("If an item is snatched it wont be snatched again"),
+                              ]
+                          )
+                      );
+                    },
+                  ),
                 ],)
             ),
             Container(
@@ -364,6 +377,20 @@ class _SettingsPageState extends State<SettingsPage> {
                       );
                     }).toList(),
                   ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    onPressed: () {
+                      Get.dialog(
+                          InfoDialog("Preview Mode",
+                              [
+                                Text("The preview mode changes the resolution of iamges in the preview grid"),
+                                Text(" - Sample - Medium resolution"),
+                                Text(" - Thumbnail - Low resolution"),
+                              ]
+                          )
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -389,6 +416,20 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Text(value),
                       );
                     }).toList(),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    onPressed: () {
+                      Get.dialog(
+                          InfoDialog("Gallery Mode",
+                              [
+                                Text("The preview mode changes the resolution of iamges in the preview grid"),
+                                Text(" - Sample - Medium resolution"),
+                                Text(" - Full Res - Full resolution"),
+                              ]
+                          )
+                      );
+                    },
                   ),
                 ],
               ),
@@ -510,6 +551,19 @@ class _SettingsPageState extends State<SettingsPage> {
                       } else {
                         return Center(child: CircularProgressIndicator());
                       }
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Get.context.theme.accentColor),
+                    onPressed: () {
+                      Get.dialog(
+                          InfoDialog("Booru",
+                              [
+                                Text("The booru selected here when saving will be set as default"),
+                                Text("The default booru will be first to appear in the dropdown boxes"),
+                              ]
+                          )
+                      );
                     },
                   ),
                 ],

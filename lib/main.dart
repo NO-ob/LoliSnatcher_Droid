@@ -93,6 +93,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     activeTitle = ActiveTitle(widget.snatchHandler);
+    widget.snatchHandler.settingsHandler = widget.settingsHandler;
   }
 
   @override
@@ -220,13 +221,15 @@ class _HomeState extends State<Home> {
                                       value: value,
                                       child: Row(
                                           children: [
-                                            isNotEmptyBooru ? Image.network(
+                                            isNotEmptyBooru ?( value.selectedBooru.type == "Favourites" ?
+                                            Icon(Icons.favorite,color: Colors.red, size: 18)  :
+                                            Image.network(
                                               value.selectedBooru.faviconURL,
                                               width: 16,
                                               errorBuilder: (_, __, ___) {
                                                 return Icon(Icons.broken_image, size: 18);
                                               },
-                                            ) : Icon(CupertinoIcons.question, size: 18),
+                                            ) ): Icon(CupertinoIcons.question, size: 18),
                                             Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause")),
                                           ]
                                       ),
@@ -467,6 +470,8 @@ class _HomeState extends State<Home> {
             child: Row(
               children: <Widget>[
                 //Booru Icon
+                value.type == "Favourites" ?
+                Icon(Icons.favorite,color: Colors.red, size: 18) :
                 Image.network(
                   value.faviconURL,
                   width: 16,

@@ -26,6 +26,7 @@ class SnatchHandler  {
   List booruNameList = new List();
   bool jsonWrite = false;
   int cooldown = 250;
+  SettingsHandler settingsHandler;
   SnatchHandler(){
     addQueueHandler();
   }
@@ -40,13 +41,13 @@ class SnatchHandler  {
       });
     }
   }
-  Future snatch(List<BooruItem> booruItems, bool jsonWrite, String booruName,int cooldown) async{
+  Future snatch(List<BooruItem> booruItems, SettingsHandler settingsHandler, String booruName,int cooldown) async{
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
     print("snatching");
     if (!snatchActive.value){
       snatchActive.value = true;
       ImageWriter writer = new ImageWriter();
-      writer.writeMultiple(booruItems, jsonWrite, booruName, cooldown).listen(
+      writer.writeMultiple(booruItems, settingsHandler, booruName, cooldown).listen(
             (data) {
           snatchStatus.value = "$data / ${booruItems.length}";
         },
@@ -61,7 +62,7 @@ class SnatchHandler  {
   void trySnatch(){
     if (!snatchActive.value && queuedItems.value > 0){
       queuedItems.value --;
-      snatch(queuedList.removeLast(),jsonWrite,booruNameList.removeLast(),cooldownList.removeLast());
+      snatch(queuedList.removeLast(),settingsHandler,booruNameList.removeLast(),cooldownList.removeLast());
     }
   }
   void queue(List<BooruItem> booruItems, bool jsonWrite, String booruName, int cooldown){

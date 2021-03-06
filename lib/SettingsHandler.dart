@@ -19,7 +19,7 @@ class SettingsHandler {
   String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
-  String verStr = "1.7.5";
+  String verStr = "1.7.6";
   List<Booru> booruList = new List<Booru>();
   static List<ThemeItem> themes = [
     new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),
@@ -298,7 +298,7 @@ class SettingsHandler {
         }
       }
       if (dbEnabled && booruList.isNotEmpty){
-        booruList.add(new Booru("Favourites", "Favourites", "", "", defTags));
+        booruList.add(new Booru("Favourites", "Favourites", "", "", ""));
       }
       if (prefBooru != "" && booruList.isNotEmpty){
         int prefIndex = booruList.indexWhere((booru)=>booru.name == prefBooru);

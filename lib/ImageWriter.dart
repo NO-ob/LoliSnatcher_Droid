@@ -1,4 +1,5 @@
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,7 @@ class ImageWriter{
    * return String - file saved
    * return Error - something went wrong
    */
-  Future write(BooruItem item, bool jsonWrite, String booruName) async{
+  Future write(BooruItem item, SettingsHandler settingsHandler, String booruName) async{
     int queryLastIndex = item.fileURL.lastIndexOf("?");
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
     String fileName = booruName + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
@@ -45,9 +46,13 @@ class ImageWriter{
         await Directory(path).create(recursive:true);
         await image.writeAsBytes(response.bodyBytes);
         print("Image written: " + path+fileName);
-        if (jsonWrite){
+        if (settingsHandler.jsonWrite){
           File json = new File(path+fileName.split(".")[0]+".json");
           await json.writeAsString(jsonEncode(item.toJSON()));
+        }
+        item.isSnatched = true;
+        if (settingsHandler.dbEnabled){
+          settingsHandler.dbHandler.updateBooruItem(item);
         }
         try {
           serviceHandler.callMediaScanner(image.path);
@@ -61,6 +66,10 @@ class ImageWriter{
           var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt);
           if (writeResp != null){
             print("write response: $writeResp");
+            item.isSnatched = true;
+            if (settingsHandler.dbEnabled){
+              settingsHandler.dbHandler.updateBooruItem(item);
+            }
             return (fileName);
           }
         //} else {
@@ -77,13 +86,13 @@ class ImageWriter{
     return (fileName);
   }
 
-  Stream<int> writeMultiple (List<BooruItem> snatched, bool jsonWrite, String booruName, int cooldown) async*{
+  Stream<int> writeMultiple (List<BooruItem> snatched, SettingsHandler settingsHandler, String booruName, int cooldown) async*{
     int snatchedCounter = 1;
     List<String> existsList = new List();
     List<String> failedList = new List();
     for (int i = 0; i < snatched.length ; i++){
       await Future.delayed(Duration(milliseconds: cooldown), () async{
-        var snatchResult = await write(snatched.elementAt(i), jsonWrite, booruName);
+        var snatchResult = await write(snatched.elementAt(i), settingsHandler, booruName);
         if (snatchResult == null){
         existsList.add(snatched[i].fileURL);
         } else if (snatchResult is !String) {
