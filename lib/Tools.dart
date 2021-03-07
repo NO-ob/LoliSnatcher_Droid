@@ -1,11 +1,4 @@
 import 'dart:math';
-import 'package:LoliSnatcher/widgets/CachedThumb.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import 'SettingsHandler.dart';
-import 'libBooru/BooruItem.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9

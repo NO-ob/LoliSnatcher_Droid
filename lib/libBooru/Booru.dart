@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-
 class Booru {
   String? name,faviconURL,type,baseURL,apiKey = "",userID = "",defTags;
   Booru(this.name,this.type,this.faviconURL,this.baseURL,this.defTags);

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,14 +8,10 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ViewUtils.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
-
-import '../Tools.dart';
-import '../ViewUtils.dart';
 
 
 class StaggeredView extends StatefulWidget {

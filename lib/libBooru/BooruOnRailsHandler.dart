@@ -91,7 +91,7 @@ class BooruOnRailsHandler extends BooruHandler {
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
-          for (int i=0; i < 5; i++){
+          for (int i=0; i < 10; i++) {
             searchTags.add(parsedResponse[i]['slug'].toString());
           }
         }

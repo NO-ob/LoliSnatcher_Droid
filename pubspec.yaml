@@ -29,18 +29,17 @@ dependencies:
   permission_handler: ^6.0.0
   image: ^3.0.1
   google_fonts: ^2.0.0
-  photo_view:
+  photo_view: # ^0.10.3
     git:
-      url: "https://github.com/DevNico/photo_view.git"
+      url: "https://github.com/NANI-SORE/photo_view.git"
   html: ^0.15.0
   flutter_staggered_grid_view: ^0.4.0-nullsafety.3
   video_player: ^2.0.0
   chewie: ^1.0.0
   sqflite: ^2.0.0+2
-  preload_page_view:
-    git:
-      url: "https://github.com/octomato/preload_page_view.git"
-  flutter_icons:
+  # preload_page_view: ^0.1.5
+
+flutter_icons:
 flutter_icons:
   android: "launcher_icon"
   image_path: "assets/images/iconFG.png"

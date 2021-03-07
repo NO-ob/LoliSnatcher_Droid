@@ -119,7 +119,7 @@ class SankakuHandler extends BooruHandler{
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/tags?name=$input&limit=5";
+    return "${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=10";
   }
   @override
   Future tagSearch(String input) async {

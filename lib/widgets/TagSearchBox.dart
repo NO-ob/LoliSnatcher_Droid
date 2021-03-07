@@ -12,7 +12,8 @@ class TagSearchBox extends StatefulWidget {
   TextEditingController searchTagsController;
   FocusNode _focusNode;
   SettingsHandler settingsHandler;
-  TagSearchBox(this.searchGlobals, this.searchTagsController, this._focusNode, this.settingsHandler);
+  Function searchAction;
+  TagSearchBox(this.searchGlobals, this.searchTagsController, this._focusNode, this.settingsHandler, this.searchAction);
   @override
   _TagSearchBoxState createState() => _TagSearchBoxState();
 }
@@ -32,10 +33,19 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     widget._focusNode.addListener(_updateOverLay);
   }
 
+  void updateOverlay() {
+    setState(() {
+      if (this._overlayEntry != null) {
+        this._overlayEntry!.remove();
+      }
+      this._updateOverLay();
+    });
+  }
+
   void _updateOverLay() {
     if (widget._focusNode.hasFocus) {
       print("textbox is focused");
-      //this._overlayEntry = this._createOverlayEntry();
+      this._overlayEntry = this._createOverlayEntry();
       if (this._overlayEntry != null) {
         Overlay.of(context)!.insert(this._overlayEntry!);
       }
@@ -51,9 +61,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     widget._focusNode.unfocus();
     super.dispose();
   }
-/*
-  OverlayEntry _createOverlayEntry() {
-    RenderObject renderBox = context.findRenderObject()!;
+
+  OverlayEntry? _createOverlayEntry() {
+    RenderBox renderBox = context.findRenderObject()! as RenderBox;
     setBooruHandler();
     widget.searchGlobals.booruHandler!.limit = 20;
     var size = renderBox.size;
@@ -69,8 +79,12 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     }
     if (widget.searchGlobals.booruHandler!.tagSearchEnabled) {
       String input = widget.searchTagsController.text;
-      if (input.split(" ").length > 1) {
-        input = input.split(" ")[input.split(" ").length - 1];
+      List<String> splitInput = input.split(" ");
+      String lastTag = input;
+      if (splitInput.length > 1) {
+        // Get last tag in the input and remove minus (exclude symbol)
+        // TODO /bug?: use the tag behind the current cursor position, not the last tag
+        lastTag = splitInput[splitInput.length - 1].replaceAll(new RegExp(r'^-'), '');
       }
       return OverlayEntry(
         builder: (context) => Positioned(
@@ -81,7 +95,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           child: Material(
             elevation: 4.0,
             child: FutureBuilder(
-                future: widget.searchGlobals.booruHandler!.tagSearch(input),
+                future: widget.searchGlobals.booruHandler!.tagSearch(lastTag),
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
                   if ((snapshot.connectionState == ConnectionState.done) &&
                       snapshot.data.length > 0) {
@@ -94,15 +108,15 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             return ListTile(
                                 title: Text(snapshot.data[index]),
                                 onTap: (() {
-                                  widget._focusNode.unfocus();
-                                  widget.searchTagsController.text = widget
-                                          .searchTagsController.text
-                                          .substring(
-                                              0,
-                                              widget.searchTagsController.text
-                                                      .lastIndexOf(" ") +
-                                                  1) +
-                                      snapshot.data[index];
+                                  // widget._focusNode.unfocus();
+                                  // Keep minus if its in the beggining of current (last) tag
+                                  bool isExclude = new RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
+                                  String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + snapshot.data[index] + " ";
+                                  widget.searchTagsController.text = newInput;
+
+                                  // Set the cursor to the end of the search and reset the overlay data
+                                  widget.searchTagsController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
+                                  updateOverlay();
                                 }));
                           });
                     } else {
@@ -116,34 +130,40 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         ),
       );
     }
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: TextField(
-      controller: widget.searchTagsController,
-      focusNode: widget._focusNode,
-      onChanged: (text) {
-        setState(() {
-          if (this._overlayEntry != null) {
-            this._overlayEntry!.remove();
-          }
-          this._updateOverLay();
-        });
-      },
-      onEditingComplete: (){
-        widget._focusNode.unfocus();
-      },
-      decoration: InputDecoration(
-        hintText: "Enter Tags",
-        contentPadding:
-            new EdgeInsets.fromLTRB(15, 0, 15, 0), // left,top,right,bottom
-        border: new OutlineInputBorder(
-          borderRadius: new BorderRadius.circular(50),
-          gapPadding: 0,
+      child: TextField(
+        controller: widget.searchTagsController,
+        focusNode: widget._focusNode,
+        onChanged: (text) {
+          updateOverlay();
+        },
+        onSubmitted: (String text) {
+          widget.searchAction(text);
+          widget._focusNode.unfocus();
+        },
+        onEditingComplete: (){
+          widget._focusNode.unfocus();
+        },
+        decoration: InputDecoration(
+          hintText: "Enter Tags",
+          suffixIcon: widget.searchTagsController.text.length > 0
+            ? IconButton(
+              padding: const EdgeInsets.all(5),
+              onPressed: () => widget.searchTagsController.clear(),
+              icon: Icon(Icons.clear),
+            )
+            : Container(width: 0.0),
+          contentPadding: EdgeInsets.fromLTRB(15, 0, 0, 0), // left,top,right,bottom
+          border: new OutlineInputBorder(
+            borderRadius: new BorderRadius.circular(50),
+            gapPadding: 0,
+          ),
         ),
-      ),
-    ));
+      )
+    );
   }
 }

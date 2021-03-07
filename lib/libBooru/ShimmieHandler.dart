@@ -93,7 +93,7 @@ class ShimmieHandler extends BooruHandler{
     if (booru.baseURL!.contains("rule34.paheal.net")){
       return "${booru.baseURL}/api/internal/autocomplete?s=$input"; // doesn't allow limit, but sorts by popularity
     } else {
-      return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
+      return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10";
     }
   }
   //No api documentation on finding tags

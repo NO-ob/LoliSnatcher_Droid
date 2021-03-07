@@ -1,4 +1,4 @@
-/*import 'dart:async';
+import 'dart:async';
 import 'dart:math';
 
 import 'package:chewie/src/chewie_player.dart';
@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class LoliControls extends StatefulWidget {
-  const LoliControls({Key key}) : super(key: key);
+  const LoliControls({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -20,11 +20,11 @@ class LoliControls extends StatefulWidget {
 class _LoliControlsState extends State<LoliControls>
     with SingleTickerProviderStateMixin {
   late VideoPlayerValue _latestValue;
-  late double _latestVolume;
+  double? _latestVolume;
   bool _hideStuff = true;
-  late Timer _hideTimer;
-  late Timer _initTimer;
-  late Timer _showAfterExpandCollapseTimer;
+  Timer? _hideTimer;
+  Timer? _initTimer;
+  Timer? _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
 
@@ -32,33 +32,37 @@ class _LoliControlsState extends State<LoliControls>
   final marginSize = 5.0;
 
   late VideoPlayerController controller;
-  late ChewieController chewieController;
-  late AnimationController playPauseIconAnimationController;
+  ChewieController? _chewieController;
+  // We know that _chewieController is set in didChangeDependencies
+  ChewieController get chewieController => _chewieController!;
+  late AnimationController playPauseIconAnimationController =
+  AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 400),
+    reverseDuration: const Duration(milliseconds: 400),
+  );
 
   bool _doubleTapped = false;
-  late Timer _doubleTapHideTimer;
-  late TapDownDetails _doubleTapInfo;
+  Timer? _doubleTapHideTimer;
+  TapDownDetails? _doubleTapInfo;
   int _lastDoubleTapAmount = 0;
   int _lastDoubleTapSide = 0;
-  late String _doubleTapExtraMessage;
-  ValueNotifier durationNotifier = new ValueNotifier(Duration.zero);
+  String _doubleTapExtraMessage = '';
+
   @override
   Widget build(BuildContext context) {
-    if (_latestValue != null){
-      if (_latestValue.hasError) {
-        return chewieController.errorBuilder != null
-            ? chewieController.errorBuilder!(
-          context,
-          chewieController.videoPlayerController.value.errorDescription!,
-        )
-            : const Center(
-          child: Icon(
-            Icons.error,
-            color: Colors.white,
-            size: 42,
-          ),
-        );
-      }
+    if (_latestValue.hasError) {
+      return chewieController.errorBuilder?.call(
+        context,
+        chewieController.videoPlayerController.value.errorDescription!,
+      ) ??
+          const Center(
+            child: Icon(
+              Icons.error,
+              color: Colors.white,
+              size: 42,
+            ),
+          );
     }
 
 
@@ -75,17 +79,7 @@ class _LoliControlsState extends State<LoliControls>
           child: Column(
             children: <Widget>[
               _buildDoubleTapMessage(),
-              if (_latestValue != null &&
-                      !_latestValue.isPlaying &&
-                      _latestValue.duration == null ||
-                  _latestValue.isBuffering)
-                const Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                )
-              else
-                _buildHitArea(),
+              _buildHitArea(),
               Stack(
                 alignment: AlignmentDirectional.bottomStart,
                 children: [
@@ -116,15 +110,9 @@ class _LoliControlsState extends State<LoliControls>
 
   @override
   void didChangeDependencies() {
-    final _oldController = chewieController;
-    chewieController = ChewieController.of(context);
+    final _oldController = _chewieController;
+    _chewieController = ChewieController.of(context);
     controller = chewieController.videoPlayerController;
-
-    playPauseIconAnimationController ??= AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-      reverseDuration: const Duration(milliseconds: 400),
-    );
 
     if (_oldController != chewieController) {
       _dispose();
@@ -178,7 +166,7 @@ class _LoliControlsState extends State<LoliControls>
                         alignment: Alignment.center,
                         child: chewieController.isLive
                           ? Expanded(child: const Text('LIVE'))
-                          : durationDisplay(controller.value.position,controller.value.duration, durationNotifier),//_buildPosition(iconColor),
+                          : _buildPosition(iconColor),
                       ),
                     ]
                   )
@@ -236,8 +224,8 @@ class _LoliControlsState extends State<LoliControls>
   AnimatedOpacity _buildDoubleTapMessage() {
     String tapSideSymbol = _lastDoubleTapSide > 0 ? '>>' : '<<';
     bool isOneSecond = _lastDoubleTapAmount == 1;
-    String msgText = _doubleTapExtraMessage != null
-    ? "${_doubleTapExtraMessage != null ? "Reached Video $_doubleTapExtraMessage" : ""}"
+    String msgText = _doubleTapExtraMessage != ''
+    ? "${_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : ""}"
     : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
     return AnimatedOpacity(
       opacity: _doubleTapped ? 1.0 : 0.0,
@@ -331,7 +319,7 @@ class _LoliControlsState extends State<LoliControls>
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          if (_latestValue != null && _latestValue.isPlaying) {
+          if (_latestValue.isPlaying) {
             if (_displayTapped) {
               setState(() {
                 _hideStuff = true;
@@ -350,34 +338,45 @@ class _LoliControlsState extends State<LoliControls>
         child: Container(
           color: Colors.transparent,
           child: Center(
-            child: AnimatedOpacity(
-              opacity:
-                  _latestValue != null && !_latestValue.isPlaying && !_dragging
-                      ? 1.0
-                      : 0.0,
-              duration: const Duration(milliseconds: 300),
-              child: GestureDetector(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
-                    borderRadius: BorderRadius.circular(48.0),
+            child: Stack(
+              children: [
+                if (_latestValue.isBuffering)
+                  const Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: IconButton(
-                        icon: isFinished
-                            ? const Icon(Icons.replay, size: 32.0)
-                            : AnimatedIcon(
-                                icon: AnimatedIcons.play_pause,
-                                progress: playPauseIconAnimationController,
-                                size: 32.0,
-                              ),
-                        onPressed: () {
-                          _playPause();
-                        }),
+                AnimatedOpacity(
+                  opacity:
+                      (!_latestValue.isPlaying && !_dragging)
+                          ? 1.0
+                          : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: GestureDetector(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(48.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: IconButton(
+                          icon: isFinished
+                              ? const Icon(Icons.replay, size: 32.0)
+                              : AnimatedIcon(
+                                  icon: AnimatedIcons.play_pause,
+                                  progress: playPauseIconAnimationController,
+                                  size: 32.0,
+                                ),
+                          onPressed: () {
+                            _playPause();
+                          }
+                        ),
+                      )
+                    ),
                   ),
-                ),
-              ),
+                )
+              ]
             ),
           ),
         ),
@@ -398,7 +397,8 @@ class _LoliControlsState extends State<LoliControls>
           useRootNavigator: true,
           builder: (context) => _PlaybackSpeedDialog(
             speeds: chewieController.playbackSpeeds,
-            selected: _latestValue.playbackSpeed, key: null,
+            selected: _latestValue.playbackSpeed,
+            key: Key('playbackSpeedKey'),
           ),
         );
 
@@ -455,9 +455,7 @@ class _LoliControlsState extends State<LoliControls>
               right: 8.0,
             ),
             child: Icon(
-              (_latestValue != null && _latestValue.volume > 0)
-                  ? Icons.volume_up
-                  : Icons.volume_off,
+              _latestValue.volume > 0 ? Icons.volume_up : Icons.volume_off,
             ),
           ),
         ),
@@ -482,13 +480,10 @@ class _LoliControlsState extends State<LoliControls>
       ),
     );
   }
-  /*Widget _buildPosition(Color iconColor) {
-    final position = _latestValue != null && _latestValue.position != null
-        ? _latestValue.position
-        : Duration.zero;
-    final duration = _latestValue != null && _latestValue.duration != null
-        ? _latestValue.duration
-        : Duration.zero;
+
+  Widget _buildPosition(Color? iconColor) {
+    final position = _latestValue.position;
+    final duration = _latestValue.duration;
 
     return Text('${formatDuration(position)} / ${formatDuration(duration)}',
       //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
@@ -496,9 +491,9 @@ class _LoliControlsState extends State<LoliControls>
         fontSize: 14.0,
       ),
     );
-  }*/
+  }
 
-  String formatDurationShorter(Duration position) {
+  String formatDurationShorter(Duration position) { //unused
     final ms = position.inMilliseconds;
 
     int seconds = ms ~/ 1000;
@@ -543,10 +538,10 @@ class _LoliControlsState extends State<LoliControls>
 
   Future<void> _initialize() async {
     controller.addListener(_updateState);
+
     _updateState();
 
-    if ((controller.value != null && controller.value.isPlaying) ||
-        chewieController.autoPlay) {
+    if (controller.value.isPlaying || chewieController.autoPlay) {
       _startHideTimer();
     }
 
@@ -573,12 +568,7 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   void _playPause() {
-    bool isFinished;
-    if (_latestValue.duration != null) {
-      isFinished = _latestValue.position >= _latestValue.duration;
-    } else {
-      isFinished = false;
-    }
+    final bool isFinished = _latestValue.position >= _latestValue.duration;
 
     setState(() {
       if (controller.value.isPlaying) {
@@ -614,8 +604,9 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   void _updateState() {
-    durationNotifier.value = controller.value.position;
-    _latestValue = controller.value;
+    setState(() {
+      _latestValue = controller.value;
+    });
   }
 
   void _startDoubleTapTimer() {
@@ -633,15 +624,13 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   void _doubleTapAction() {
-    if (_doubleTapInfo == null ||
-        chewieController == null ||
-        !chewieController.videoPlayerController.value.isInitialized) return;
+    if (_doubleTapInfo == null || !controller.value.isInitialized) return;
 
     // Detect on which side we tapped
     double screenWidth = MediaQuery.of(context).size.width;
     double screenMiddle = screenWidth / 2;
     double sidesLimit = screenWidth / 6;
-    double tapPositionWidth = _doubleTapInfo.localPosition.dx;
+    double tapPositionWidth = _doubleTapInfo!.localPosition.dx;
     int tapSide;
     bool isAtVideoEdge = false;
     if (tapPositionWidth > (screenMiddle + sidesLimit)) {
@@ -664,7 +653,7 @@ class _LoliControlsState extends State<LoliControls>
     } else if (videoDuration <= 120) {
       skipSeconds = 10;
     } else {
-      skipSeconds = 15;
+      skipSeconds = 10;
     }
 
     if (tapSide != 0 && skipSeconds != 0) {
@@ -794,39 +783,4 @@ class _PlaybackSpeedDialog extends StatelessWidget {
     );
   }
 }
-class durationDisplay extends StatefulWidget {
-  ValueNotifier durationNotifier;
-  Duration position = Duration.zero;
-  Duration duration = Duration.zero;
-  @override
-  _durationDisplayState createState() => _durationDisplayState();
-  durationDisplay(this.position,this.duration,this.durationNotifier);
-}
-
-class _durationDisplayState extends State<durationDisplay> {
-  void durationListener(){
-    setState(() {
-      widget.position = widget.durationNotifier.value;
-    });
-  }
-  @override
-  void initState() {
-    widget.durationNotifier.addListener(durationListener);
-    super.initState();
-  }
-  @override
-  void dispose(){
-    widget.durationNotifier.removeListener(durationListener);
-    super.dispose();
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Text('${formatDuration(widget.position)} / ${formatDuration(widget.duration)}',
-      //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
-      style: const TextStyle(
-        fontSize: 14.0,
-      ),
-    );
-  }
-}*/
 
