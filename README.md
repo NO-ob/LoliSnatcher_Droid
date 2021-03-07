@@ -22,8 +22,7 @@ Thanks to Showers-U for letting me use their art for an icon check them out on p
     - [x] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
     - [ ] Themes
 - [ ] Bugs
-    - [ ] Buttons on about page do not work in android 11
-    - [ ] Loading can get locked and ininitely loads in the preview grid
+    - [ ] Preview grid refreshes when tag textbox is focused
 
 
 
