@@ -1,21 +1,12 @@
 //import 'dart:html';
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:flutter/material.dart';
-import 'libBooru/BooruItem.dart';
-import 'libBooru/GelbooruHandler.dart';
-import 'libBooru/MoebooruHandler.dart';
-import 'libBooru/PhilomenaHandler.dart';
-import 'libBooru/DanbooruHandler.dart';
-import 'libBooru/ShimmieHandler.dart';
-import 'libBooru/BooruHandler.dart';
-import 'libBooru/e621Handler.dart';
-import 'libBooru/Booru.dart';
-import 'ImageWriter.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
-import 'getPerms.dart';
+import 'package:flutter/material.dart';
+
+import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 
 /**
@@ -94,7 +85,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                         controller: snatcherAmountController,
                         keyboardType: TextInputType.number,
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.digitsOnly
                         ],
                         decoration: InputDecoration(
                           hintText:"Amount of Images to Snatch",
@@ -124,7 +115,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                         controller: snatcherSleepController,
                         keyboardType: TextInputType.number,
                         inputFormatters: <TextInputFormatter>[
-                          WhitelistingTextInputFormatter.digitsOnly
+                          FilteringTextInputFormatter.digitsOnly
                         ],
                         decoration: InputDecoration(
                           hintText:"Timeout between snatching (MS)",
@@ -160,10 +151,12 @@ class _SnatcherPageState extends State<SnatcherPage> {
             ),
             Container(
               alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
                 ),
                 /**
                  * When the snatch button is pressed the snatch function is called and then
@@ -177,7 +170,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   Get.back();
                   //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
                 },
-                child: Text("Snatch Images"),
+                child: Text("Snatch Images", style: TextStyle(color: Colors.white)),
               ),
             ),
           ],
@@ -211,9 +204,9 @@ class _SnatcherPageState extends State<SnatcherPage> {
             child: Row(
               children: <Widget>[
                 //Booru Icon
-                value.type == "Favourites" ?
-                Icon(Icons.favorite,color: Colors.red, size: 18) :
-                Image.network(
+                value.type == "Favourites"
+                ? Icon(Icons.favorite,color: Colors.red, size: 18)
+                : Image.network(
                   value.faviconURL!,
                   width: 16,
                   errorBuilder: (_, __, ___) {

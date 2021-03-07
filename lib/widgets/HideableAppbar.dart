@@ -1,10 +1,9 @@
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:flutter/services.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
@@ -13,7 +12,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   bool autoHide;
   HideableAppBar(this.title, this.actions, this.searchGlobals, this.autoHide);
 
-  double defaultHeight = kToolbarHeight; //56.0
+  final double defaultHeight = kToolbarHeight; //56.0
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
 
@@ -60,7 +59,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(widget.title),
+        title: FittedBox(fit: BoxFit.fitWidth, child: Text(widget.title)),
         actions: widget.actions,
       ),
     );

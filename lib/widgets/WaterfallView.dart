@@ -1,5 +1,3 @@
-import 'dart:math';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,13 +7,10 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
+import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
-
-import '../Tools.dart';
-import '../ViewUtils.dart';
 
 
 class WaterfallView extends StatefulWidget {
@@ -61,7 +56,7 @@ class _WaterfallState extends State<WaterfallView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-    //
+
     if (FocusScope.of(context).focusedChild == null){
       print("kb focus node requesting focus");
       kbFocusNode.requestFocus();
@@ -116,8 +111,7 @@ class _WaterfallState extends State<WaterfallView> {
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columnsCount),
                     itemBuilder: (BuildContext context, int index) {
-                      bool isSelected =
-                      widget.searchGlobals.selected!.contains(index);
+                      bool isSelected = widget.searchGlobals.selected!.contains(index);
                       return new Card(
                         child: new GridTile(
                           // Inkresponse is used so the tile can have an onclick function
@@ -141,10 +135,8 @@ class _WaterfallState extends State<WaterfallView> {
                                   // Load the image viewer
                                   kbFocusNode.unfocus();
                                   Get.dialog(
-                                    ViewerPage(
-                                        snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
-                                    transitionDuration:
-                                    Duration(milliseconds: 200),
+                                    ViewerPage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
+                                    transitionDuration: Duration(milliseconds: 200),
                                     // barrierColor: Colors.transparent
                                   ).whenComplete(() {
                                     SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
@@ -154,8 +146,7 @@ class _WaterfallState extends State<WaterfallView> {
                                   // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                                 },
                                 onLongPress: () {
-                                  if (widget.searchGlobals.selected!
-                                      .contains(index)) {
+                                  if (widget.searchGlobals.selected!.contains(index)) {
                                     setState(() {
                                       widget.searchGlobals.selected!.remove(index);
                                     });

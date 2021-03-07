@@ -1,10 +1,5 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import 'package:html/parser.dart';
-import 'package:html/dom.dart';
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';

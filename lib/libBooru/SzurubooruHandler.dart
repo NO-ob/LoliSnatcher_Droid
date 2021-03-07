@@ -87,7 +87,7 @@ class SzurubooruHandler extends BooruHandler{
     }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/api/tags/?offset=0&limit=5&query=$input*";
+    return "${booru.baseURL}/api/tags/?offset=0&limit=10&query=$input*";
   }
   @override
   Future tagSearch(String input) async {

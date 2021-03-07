@@ -1,14 +1,11 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:async';
 import 'dart:io';
-import 'libBooru/BooruItem.dart';
-import 'ServiceHandler.dart';
+import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 class ImageWriter{
   String? path = "";
   String? cacheRootPath = "";
@@ -124,11 +121,7 @@ class ImageWriter{
       cachePath = cacheRootPath! + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-        String unthumbedURL = fileURL.replaceAll('/thumb', '');
-        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
-      }
+      String fileName = parseThumbUrlToName(fileURL);
       File image = new File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes);
     } catch (e){
@@ -146,11 +139,7 @@ class ImageWriter{
       cachePath = cacheRootPath! + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-        String unthumbedURL = fileURL.replaceAll('/thumb', '');
-        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
-      }
+      String fileName = parseThumbUrlToName(fileURL);
       image = new File(cachePath+fileName);
       await image.writeAsBytes(bytes);
     } catch (e){
@@ -161,18 +150,40 @@ class ImageWriter{
     return image;
   }
 
-  Future getCachePath(String fileURL, String typeFolder) async{
+  // Deletes file from given cache folder
+  // returns true if successful, false if there was an exception and null if file didn't exist
+  Future deleteFromCache(String fileURL, String typeFolder) async{
+    File file;
     String cachePath;
     try {
       setPaths();
       cachePath = cacheRootPath! + typeFolder + "/";
       print(cachePath);
 
-      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-        String unthumbedURL = fileURL.replaceAll('/thumb', '');
-        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+      String fileName = parseThumbUrlToName(fileURL);
+      bool fileExists = await File(cachePath+fileName).exists();
+      if (fileExists){
+        file = new File(cachePath+fileName);
+        file.delete();
+        return true;
+      } else {
+        return null;
       }
+    } catch (e){
+      print("Image Writer Exception");
+      print(e);
+      return false;
+    }
+  }
+
+  Future getCachePath(String fileURL, String typeFolder) async{
+    String cachePath;
+    try {
+      await setPaths();
+      cachePath = cacheRootPath! + typeFolder + "/";
+      print(cachePath);
+
+      String fileName = parseThumbUrlToName(fileURL);
       bool fileExists = await File(cachePath+fileName).exists();
       if (fileExists){
         return cachePath+fileName;
@@ -186,8 +197,19 @@ class ImageWriter{
     }
   }
 
+  String parseThumbUrlToName(thumbURL) {
+    int queryLastIndex = thumbURL.lastIndexOf("?"); // Sankaku fix
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
+    String result = thumbURL.substring(thumbURL.lastIndexOf("/") + 1, lastIndex);
+    if(result.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+      String unthumbedURL = thumbURL.replaceAll('/thumb', '');
+      result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+    }
+    return result;
+  }
 
-  void setPaths() async {
+
+  Future<void> setPaths() async {
     if(path == ""){
       if (Platform.isAndroid){
         path = await serviceHandler.getExtDir()+ "/Pictures/LoliSnatcher/";

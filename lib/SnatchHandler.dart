@@ -1,23 +1,17 @@
 //import 'dart:html';
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:flutter/material.dart';
-import 'libBooru/BooruItem.dart';
-import 'libBooru/GelbooruHandler.dart';
-import 'libBooru/MoebooruHandler.dart';
-import 'libBooru/PhilomenaHandler.dart';
-import 'libBooru/DanbooruHandler.dart';
-import 'libBooru/ShimmieHandler.dart';
-import 'libBooru/BooruHandler.dart';
-import 'libBooru/e621Handler.dart';
-import 'libBooru/Booru.dart';
-import 'ImageWriter.dart';
-import 'package:get/get.dart';
-import 'package:flutter/services.dart';
-import 'getPerms.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
 
-class SnatchHandler  {
+import 'package:LoliSnatcher/ImageWriter.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+
+
+class SnatchHandler {
   ValueNotifier? snatchActive = ValueNotifier(false);
   ValueNotifier? snatchStatus = ValueNotifier("");
   ValueNotifier? queuedItems = ValueNotifier(0);

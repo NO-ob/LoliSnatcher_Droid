@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class ScrollingText extends StatefulWidget {
   String text;
   int size;
   String mode;
+  Color textColor;
   @override
   _ScrollingTextState createState() => _ScrollingTextState();
-  ScrollingText(this.text,this.size,this.mode);
+  ScrollingText(this.text, this.size, this.mode,this.textColor);
 }
 
 class _ScrollingTextState extends State<ScrollingText> {
@@ -31,12 +33,14 @@ class _ScrollingTextState extends State<ScrollingText> {
 
   @override
   Widget build(BuildContext context) {
-    if ((counter + widget.size) > widget.text.length && counter != 0){
-      setState(() {
-        initState();
-      });
-    } else if ((counter + widget.size) > widget.text.length){
-      return Text(widget.text, textAlign: TextAlign.left);
+    if ((counter + widget.size) > widget.text.length){
+      if(counter != 0) {
+        setState(() {
+          initState();
+        });
+      } else {
+        return Text(widget.text, textAlign: TextAlign.left, style: TextStyle(color: widget.textColor));
+      }
     } else {
       switch(widget.mode){
         case ("bounce"):
@@ -53,7 +57,7 @@ class _ScrollingTextState extends State<ScrollingText> {
           break;
       }
     }
-    return Text(displayText!, textAlign: TextAlign.left);
+    return Text(displayText!, textAlign: TextAlign.left, style: TextStyle(color: widget.textColor));
   }
   void bounce(){
     Future.delayed(const Duration(milliseconds: stepDelay), () {

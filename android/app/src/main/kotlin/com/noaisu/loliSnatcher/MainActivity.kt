@@ -6,6 +6,8 @@ import android.content.Intent.ACTION_VIEW
 import android.content.Intent.CATEGORY_BROWSABLE
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -15,6 +17,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.NonNull
+import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -42,12 +45,39 @@ class MainActivity: FlutterActivity() {
                 val fileContentUri: Uri = Uri.parse("file://" + call.argument("path"))
                 mediaScannerIntent.data = fileContentUri
                 sendBroadcast(mediaScannerIntent)
-            } else if (call.method == "shareItem") {
-                val intent= Intent()
-                intent.action=Intent.ACTION_SEND
-                intent.putExtra(Intent.EXTRA_TEXT,"" + call.argument("fileURL"))
-                intent.type="text/plain"
-                startActivity(Intent.createChooser(intent,"Share To:"))
+            } else if (call.method == "shareText") {
+                val text: String? = call.argument("text")
+                val title: String? = call.argument("title")
+                val shareTextIntent = Intent.createChooser(Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, text)
+                    // putExtra(Intent.EXTRA_TITLE, title)
+                    type = "text/plain"
+                }, null)
+                startActivity(shareTextIntent)
+                result.success(true)
+            } else if (call.method == "shareFile") {
+                val path: String? = call.argument("path")
+                val contentUri = FileProvider.getUriForFile(context, BuildConfig.APPLICATION_ID + ".fileprovider", File(path))
+
+                val shareFileIntent = Intent.createChooser(Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = call.argument("mimeType")
+
+                    // putExtra(Intent.EXTRA_TITLE, "Test")
+                    // data = contentUri
+                    putExtra(Intent.EXTRA_STREAM, contentUri)
+                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                }, null)
+
+                // Grant read/write permission to chooser
+                val resInfoList: List<ResolveInfo> = context.getPackageManager().queryIntentActivities(shareFileIntent, PackageManager.MATCH_DEFAULT_ONLY)
+                for (resolveInfo in resInfoList) {
+                    val packageName = resolveInfo.activityInfo.packageName
+                    context.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                startActivity(shareFileIntent)
+                result.success(true)
             } else if (call.method == "emptyCache") {
                 val dir: File = context.cacheDir
                 dir.deleteRecursively();
@@ -63,8 +93,8 @@ class MainActivity: FlutterActivity() {
             else if (call.method == "writeImage"){
                 var imageBytes = call.argument<ByteArray>("imageData");
                 val fileName = call.argument<String>("fileName");
-                val  mediaType = call.argument<String>("mediaType");
-                val  fileExt = call.argument<String>("fileExt");
+                val mediaType = call.argument<String>("mediaType");
+                val fileExt = call.argument<String>("fileExt");
 
                 if (imageBytes!= null && mediaType != null && fileExt != null && fileName != null){
                     writeImage(imageBytes,fileName,mediaType,fileExt);

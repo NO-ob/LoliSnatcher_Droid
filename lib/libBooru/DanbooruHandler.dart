@@ -92,7 +92,7 @@ class DanbooruHandler extends BooruHandler{
 
   }
   String makeTagURL(String input){
-    return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=5";
+    return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10";
   }
   @override
   Future tagSearch(String input) async {

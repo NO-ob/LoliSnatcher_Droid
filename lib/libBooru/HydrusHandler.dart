@@ -155,7 +155,7 @@ class HydrusHandler extends BooruHandler{
       return "${booru.baseURL}/get_files/search_files?tags=$tag";
     }
     String makeTagURL(String input){
-      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";
+      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10";
     }
 
 }

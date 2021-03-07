@@ -67,11 +67,23 @@ class ServiceHandler{
     }
     return result;
   }
-  void loadShareIntent(String fileURL) async{
+  Future<void> loadShareTextIntent(String text) async{
     try{
-      await platform.invokeMethod("shareItem",{"fileURL": fileURL});
+      await platform.invokeMethod("shareText",{"text": text});
+      return;
     } catch(e){
       print(e);
+      return;
+    }
+  }
+  Future<void> loadShareFileIntent(String filePath, String mimeType) async{
+    try{
+      await platform.invokeMethod("shareFile", {"path": filePath, "mimeType": mimeType});
+      return;
+      // print('share closed');
+    } catch(e){
+      print(e);
+      return;
     }
   }
   static void displayToast (String str){

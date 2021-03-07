@@ -72,7 +72,7 @@ class PhilomenaHandler extends BooruHandler{
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/api/v1/json/search/tags?q=$input&per_page=5";
+    return "${booru.baseURL}/api/v1/json/search/tags?q=$input&per_page=10";
   }
   @override
   Future tagSearch(String input) async {
