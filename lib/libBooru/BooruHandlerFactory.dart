@@ -64,7 +64,6 @@ class BooruHandlerFactory{
         break;
     }
     booruHandler!.dbHandler = dbHandler;
-    print(booruHandler!.booru.toString());
     return [booruHandler,pageNum];
   }
 }

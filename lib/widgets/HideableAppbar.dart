@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 
+import '../ServiceHandler.dart';
+
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
   List<Widget> actions;
@@ -15,7 +17,6 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final double defaultHeight = kToolbarHeight; //56.0
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
-
   @override
   _HideableAppBarState createState() => _HideableAppBarState();
 }
@@ -28,7 +29,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
     widget.searchGlobals.displayAppbar!.addListener(setSt);
 
     // Hide system ui on first render
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    //ServiceHandler.makeImmersive();
   }
   void setSt(){
     setState(() {});
@@ -38,7 +40,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
     widget.searchGlobals.displayAppbar!.removeListener(setSt);
 
     // Return system ui after closing viewer
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     super.dispose();
   }
 

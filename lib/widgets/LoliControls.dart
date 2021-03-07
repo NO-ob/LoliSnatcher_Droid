@@ -341,7 +341,7 @@ class _LoliControlsState extends State<LoliControls>
             child: Stack(
               children: [
                 if (_latestValue.isBuffering)
-                  const Expanded(
+                  Container(
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),

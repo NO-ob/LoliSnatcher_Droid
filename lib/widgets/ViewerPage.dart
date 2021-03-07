@@ -66,7 +66,7 @@ class _ViewerPageState extends State<ViewerPage> {
   @override
   Widget build(BuildContext context) {
     String appBarTitle = "${(widget.searchGlobals.viewedIndex!.value + 1).toString()}/${widget.fetched.length.toString()}";
-    kbFocusNode.requestFocus();
+    //kbFocusNode.requestFocus();
     return Scaffold(
       appBar: HideableAppBar(appBarTitle, appBarActions(), widget.searchGlobals, widget.settingsHandler.autoHideImageBar),
       backgroundColor: Colors.transparent,
@@ -291,35 +291,25 @@ class _ViewerPageState extends State<ViewerPage> {
           widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru!.name!, widget.settingsHandler.snatchCooldown);
         },
       ),
-      GestureDetector(
-        onTap: () async {
-          String shareSetting = widget.settingsHandler.shareAction!;
-          switch(shareSetting) {
-            case 'Post URL':
-              shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);
-              break;
-            case 'File URL':
-              shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].fileURL);
-              break;
-            case 'File':
-              shareFileAction();
-              break;
-
-            case 'Ask':
-            default:
-              showShareDialog();
-              break;
-          }
-        },
-        onLongPress: () {
-          // Ignore share setting on long press
-          showShareDialog(showTip: false);
-        },
-        child: Icon(
-          Icons.share,
-          // icon color sets incorrectly when it's inside gesturedetector, so we force it
-          color: Get.context!.theme.primaryIconTheme.color,
-        )
+      IconButton(icon: Icon(Icons.share),
+          onPressed: () {
+            String shareSetting = widget.settingsHandler.shareAction!;
+            switch(shareSetting) {
+              case 'Post URL':
+                shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);
+                break;
+              case 'File URL':
+                shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].fileURL);
+                break;
+              case 'File':
+                shareFileAction();
+                break;
+              case 'Ask':
+              default:
+                showShareDialog();
+                break;
+            }
+          },
       ),
       widget.settingsHandler.dbEnabled ?
       IconButton(

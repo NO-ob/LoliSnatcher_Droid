@@ -69,8 +69,8 @@ class _PreloaderState extends State<Preloader> {
   }
 }
 /** The home widget is the main widget of the app and contains the Image Previews and the settings drawer.
-  *
-  * **/
+ *
+ * **/
 class Home extends StatefulWidget {
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler = new SnatchHandler();
@@ -164,7 +164,7 @@ class _HomeState extends State<Home> {
       });
       searchGlobals[globalsIndex].addTag!.addListener((){
         if (searchGlobals[globalsIndex].addTag!.value != ""){
-            searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
+          searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
         }
       });
       searchGlobals[globalsIndex].newTab!.value = "";
@@ -269,17 +269,17 @@ class _HomeState extends State<Home> {
                                       child: Row(
                                           children: [
                                             isNotEmptyBooru
-                                            ? (value.selectedBooru!.type == "Favourites"
-                                              ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                                              : Image.network(
-                                                  value.selectedBooru!.faviconURL!,
-                                                  width: 16,
-                                                  errorBuilder: (_, __, ___) {
-                                                    return Icon(Icons.broken_image, size: 18);
-                                                  }
-                                                )
-                                              )
-                                            : Icon(CupertinoIcons.question, size: 18),
+                                                ? (value.selectedBooru!.type == "Favourites"
+                                                ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                                                : Image.network(
+                                                value.selectedBooru!.faviconURL!,
+                                                width: 16,
+                                                errorBuilder: (_, __, ___) {
+                                                  return Icon(Icons.broken_image, size: 18);
+                                                }
+                                            )
+                                            )
+                                                : Icon(CupertinoIcons.question, size: 18),
                                             const SizedBox(width: 3),
                                             Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
                                           ]
@@ -341,10 +341,10 @@ class _HomeState extends State<Home> {
                           alignment: Alignment.center,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(20),
-                                  side: BorderSide(color: Get.context!.theme.accentColor),
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(20),
+                                side: BorderSide(color: Get.context!.theme.accentColor),
+                              ),
                             ),
                             onPressed: (){
                               Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
@@ -356,10 +356,10 @@ class _HomeState extends State<Home> {
                           alignment: Alignment.center,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(20),
-                                  side: BorderSide(color: Get.context!.theme.accentColor),
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(20),
+                                side: BorderSide(color: Get.context!.theme.accentColor),
+                              ),
                             ),
                             onPressed: (){
                               Get.to(SettingsPage(widget.settingsHandler));
@@ -371,10 +371,10 @@ class _HomeState extends State<Home> {
                           alignment: Alignment.center,
                           child: TextButton(
                             style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(20),
-                                  side: BorderSide(color: Get.context!.theme.accentColor),
-                                ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(20),
+                                side: BorderSide(color: Get.context!.theme.accentColor),
+                              ),
                             ),
                             onPressed: (){
                               Get.to(AboutPage());
@@ -392,16 +392,16 @@ class _HomeState extends State<Home> {
                       child: Column(
                         children: [
                           (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 600)
-                          ? Container()
-                          : Column(children: [
+                              ? Container()
+                              : Column(children: [
                             Text("Version: ${widget.settingsHandler.verStr}" ),
                             DrawerHeader(
-                              margin: null,
+                              margin: EdgeInsets.zero,
                               decoration: new BoxDecoration(
                                 color: Get.context!.theme.primaryColor,
                                 image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
                               ),
-                              child: Container(width: 0,height: 0,),
+                              child: Container(),
                             ),
                           ],)
                         ],
@@ -420,35 +420,35 @@ class _HomeState extends State<Home> {
    * **/
   Widget ImagesFuture(){
     return FutureBuilder(
-      future: widget.settingsHandler.initialize(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.connectionState == ConnectionState.done){
-          if (widget.settingsHandler.booruList!.isEmpty){
-            return Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      Text("No Booru Configs Found"),
-                      Container(
-                        alignment: Alignment.center,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
+        future: widget.settingsHandler.initialize(),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.done){
+            if (widget.settingsHandler.booruList!.isEmpty){
+              return Center(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        Text("No Booru Configs Found"),
+                        Container(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                            style: TextButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: new BorderRadius.circular(20),
                                 side: BorderSide(color: Get.context!.theme.accentColor),
                               ),
+                            ),
+                            onPressed: (){
+                              Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
+                            },
+                            child: Text("Open Settings", style: TextStyle(color: Colors.white)),
                           ),
-                          onPressed: (){
-                            Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
-                          },
-                          child: Text("Open Settings", style: TextStyle(color: Colors.white)),
                         ),
-                      ),
-                    ]
-                )
-            );
-          } else if (firstRun){
+                      ]
+                  )
+              );
+            } else if (firstRun){
               return FutureBuilder(
                   future: widget.settingsHandler.initialize(),
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -460,7 +460,7 @@ class _HomeState extends State<Home> {
                         searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
                       }
                       if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
+                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
                       } else {
                         return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
                       }
@@ -470,17 +470,17 @@ class _HomeState extends State<Home> {
                     }
                   }
               );
-          } else {
-            if (widget.settingsHandler.previewDisplay == "Waterfall"){
-              return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
             } else {
-              return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
+              if (widget.settingsHandler.previewDisplay == "Waterfall"){
+                return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
+              } else {
+                return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
+              }
             }
+          } else {
+            return Center(child: CircularProgressIndicator());
           }
-        } else {
-          return Center(child: CircularProgressIndicator());
         }
-      }
     );
   }
   /** This Future function will call getBooru on the settingsHandler to load the booru configs

@@ -17,8 +17,7 @@ class WaterfallView extends StatefulWidget {
   final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final SnatchHandler snatchHandler;
-  final FocusNode searchBoxFocus;
-  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler, this.searchBoxFocus);
+  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
   @override
   _WaterfallState createState() => _WaterfallState();
 }
@@ -37,10 +36,6 @@ class _WaterfallState extends State<WaterfallView> {
   void initState() {
     super.initState();
     // Stops previous pages being forgotten when switching tabs
-    if (widget.searchGlobals.booruHandler != null) {
-    } else {
-      setBooruHandler();
-    }
     widget.searchGlobals.viewedIndex!.addListener(jumpTo);
   }
   void jumpTo(){
@@ -62,7 +57,7 @@ class _WaterfallState extends State<WaterfallView> {
       kbFocusNode.requestFocus();
     }
     if (widget.searchGlobals.booruHandler == null) {
-      initState();
+      setBooruHandler();
     }
     if (gridController.hasClients) {
       gridController.jumpTo(widget.searchGlobals.scrollPosition);
@@ -139,7 +134,7 @@ class _WaterfallState extends State<WaterfallView> {
                                     transitionDuration: Duration(milliseconds: 200),
                                     // barrierColor: Colors.transparent
                                   ).whenComplete(() {
-                                    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+                                    //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
                                     kbFocusNode.requestFocus();
                                   });
 

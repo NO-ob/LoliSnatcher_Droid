@@ -135,35 +135,35 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: TextField(
-        controller: widget.searchTagsController,
-        focusNode: widget._focusNode,
-        onChanged: (text) {
-          updateOverlay();
-        },
-        onSubmitted: (String text) {
-          widget.searchAction(text);
-          widget._focusNode.unfocus();
-        },
-        onEditingComplete: (){
-          widget._focusNode.unfocus();
-        },
-        decoration: InputDecoration(
-          hintText: "Enter Tags",
-          suffixIcon: widget.searchTagsController.text.length > 0
-            ? IconButton(
+        child: TextField(
+          controller: widget.searchTagsController,
+          focusNode: widget._focusNode,
+          onChanged: (text) {
+            updateOverlay();
+          },
+          onSubmitted: (String text) {
+            widget.searchAction(text);
+            widget._focusNode.unfocus();
+          },
+          onEditingComplete: (){
+            widget._focusNode.unfocus();
+          },
+          decoration: InputDecoration(
+            hintText: "Enter Tags",
+            suffixIcon: widget.searchTagsController.text.length > 0
+                ? IconButton(
               padding: const EdgeInsets.all(5),
               onPressed: () => widget.searchTagsController.clear(),
               icon: Icon(Icons.clear),
             )
-            : Container(width: 0.0),
-          contentPadding: EdgeInsets.fromLTRB(15, 0, 0, 0), // left,top,right,bottom
-          border: new OutlineInputBorder(
-            borderRadius: new BorderRadius.circular(50),
-            gapPadding: 0,
+                : Container(width: 0.0),
+            contentPadding: EdgeInsets.fromLTRB(15, 0, 0, 0), // left,top,right,bottom
+            border: new OutlineInputBorder(
+              borderRadius: new BorderRadius.circular(50),
+              gapPadding: 0,
+            ),
           ),
-        ),
-      )
+        )
     );
   }
 }

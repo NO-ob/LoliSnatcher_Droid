@@ -52,6 +52,7 @@ class _MediaViewerState extends State<MediaViewer> {
     if (filePath != null) {
       final File file = File(filePath);
       setState(() {
+        print("setSt MediaViewer::_downloadsImage");
         // multiple restates in the same function is usually bad practice, but we need this to notify user how the file is loaded while we await for bytes
         isFromCache = true;
       });

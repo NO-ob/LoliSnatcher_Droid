@@ -136,7 +136,7 @@ class _StaggeredState extends State<StaggeredView> {
                                   Duration(milliseconds: 200),
                                   // barrierColor: Colors.transparent
                                 ).whenComplete(() {
-                                  SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+                                  //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
                                   kbFocusNode.requestFocus();
                                 });
 

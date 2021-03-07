@@ -59,29 +59,29 @@ class _CachedThumbState extends State<CachedThumb> {
     });
 
     _subscription = _response!.stream.listen(
-      (value) {
-        setState(() {
-          _bytes.addAll(value);
-          _received += value.length;
-        });
-      },
-      onError: (e) {
-        print(e);
-      },
-      cancelOnError: true,
-      onDone: () async {
-        if (_received > (_total * 0.95)) {
-          // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-          setState((){
-            _totalBytes = Uint8List.fromList(_bytes);
+          (value) {
+          setState(() {
+            _bytes.addAll(value);
+            _received += value.length;
           });
-          if (widget.settingsHandler.imageCache) {
-            await imageWriter.writeCacheFromBytes(widget.thumbURL, _bytes, 'thumbnails');
+        },
+        onError: (e) {
+          print(e);
+        },
+        cancelOnError: true,
+        onDone: () async {
+          if (_received > (_total * 0.95)) {
+            // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
+            setState((){
+              _totalBytes = Uint8List.fromList(_bytes);
+            });
+            if (widget.settingsHandler.imageCache) {
+              await imageWriter.writeCacheFromBytes(widget.thumbURL, _bytes, 'thumbnails');
+            }
+          } else {
+            print('Thumbnail load incomplete');
           }
-        } else {
-          print('Thumbnail load incomplete');
         }
-      }
     );
   }
 
@@ -126,11 +126,11 @@ class _CachedThumbState extends State<CachedThumb> {
         Padding(padding: EdgeInsets.only(bottom: 10)),
         widget.columnCount < 4 // Text element overflows if too many thumbnails are shown
             ? Text(
-                percentDoneText,
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              )
+          percentDoneText,
+          style: TextStyle(
+            fontSize: 12,
+          ),
+        )
             : Container(),
       ],
     );
@@ -139,6 +139,36 @@ class _CachedThumbState extends State<CachedThumb> {
   @override
   Widget build(BuildContext context) {
     // Show progress until image bytes are fetched (either from network or cache)
+    /*_client = IOClient();
+    return FutureBuilder(
+        future: _client!.send(Request('GET', Uri.parse(widget.thumbURL))),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          if (snapshot.connectionState == ConnectionState.done){
+            int contentlen = snapshot.data.contentLength;
+            num recieved = 0;
+            return StreamBuilder(
+                stream: snapshot.data.stream,
+                builder: (BuildContext context, AsyncSnapshot snapshot){
+                    if(snapshot.hasData){
+                      _bytes += snapshot.data;
+                      if(snapshot.connectionState == ConnectionState.done){
+                        return Image.memory(
+                            Uint8List.fromList(_bytes),
+                          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
+                          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
+                          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+                        );
+                      } else {
+                        return Text("Snapshot is active ${_bytes.length} / $contentlen / ${snapshot.data.length}");
+                      }
+                    } else {
+                      return Text("No Data");
+                    }
+
+            });
+          }
+          return Container();
+        });*/
     if (_totalBytes.length == 0) {
       return loadingElementBuilder(context, Center(child: Text("Error")), null);
     } else {

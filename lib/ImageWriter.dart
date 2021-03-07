@@ -22,7 +22,11 @@ class ImageWriter{
     String fileName = booruName + '_' + item.fileURL!.substring(item.fileURL!.lastIndexOf("/") + 1, lastIndex);
     // print(fileName);
 
-    setPaths();
+    if (cacheRootPath == ""){
+      cacheRootPath = await serviceHandler.getCacheDir();
+    } else if (path == ""){
+      path = await serviceHandler.getExtDir();
+    }
 
     if(SDKVer == 0){
       if (Platform.isAndroid){
@@ -117,7 +121,9 @@ class ImageWriter{
     Uri fileURI = Uri.parse(fileURL);
     try {
       var response = await http.get(fileURI);
-      setPaths();
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
       cachePath = cacheRootPath! + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
 
@@ -135,8 +141,11 @@ class ImageWriter{
     File image;
     String cachePath;
     try {
-      setPaths();
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
       cachePath = cacheRootPath! + typeFolder + "/";
+      print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
 
       String fileName = parseThumbUrlToName(fileURL);
@@ -156,7 +165,9 @@ class ImageWriter{
     File file;
     String cachePath;
     try {
-      setPaths();
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
       cachePath = cacheRootPath! + typeFolder + "/";
       print(cachePath);
 
@@ -179,8 +190,10 @@ class ImageWriter{
   Future getCachePath(String fileURL, String typeFolder) async{
     String cachePath;
     try {
-      await setPaths();
-      cachePath = cacheRootPath! + typeFolder + "/";
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
+      cachePath = await cacheRootPath! + typeFolder + "/";
       print(cachePath);
 
       String fileName = parseThumbUrlToName(fileURL);
@@ -206,26 +219,5 @@ class ImageWriter{
       result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
     }
     return result;
-  }
-
-
-  Future<void> setPaths() async {
-    if(path == ""){
-      if (Platform.isAndroid){
-        path = await serviceHandler.getExtDir()+ "/Pictures/LoliSnatcher/";
-      } else if (Platform.isLinux){
-        path = Platform.environment['HOME']! + "/Pictures/LoliSnatcher/";
-      }
-    }
-
-    if(cacheRootPath == ""){
-      if (Platform.isAndroid){
-        cacheRootPath = await serviceHandler.getCacheDir();
-      } else if (Platform.isLinux){
-        cacheRootPath = Platform.environment['HOME']! + "/.loliSnatcher/cache/";
-      }
-    }
-
-    return;
   }
 }
