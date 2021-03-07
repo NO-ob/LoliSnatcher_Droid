@@ -7,7 +7,7 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class SankakuHandler extends BooruHandler{
-  List<BooruItem> fetched = new List();
+  List<BooruItem>? fetched = [];
   SankakuHandler(Booru booru,int limit) : super(booru,limit);
   bool tagSearchEnabled = true;
   String authToken = '';
@@ -18,13 +18,13 @@ class SankakuHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched.length;
+    int length = fetched!.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = new List();
+      fetched = [];
     }
     String url = makeURL(tags);
     print(url);
@@ -46,29 +46,29 @@ class SankakuHandler extends BooruHandler{
         "Authorization": authToken,
         "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"
       };
-
-      final response = await http.get(url, headers: headers);
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri, headers: headers);
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse.length; i++){
           var current = parsedResponse[i];
-          List<String> tags = new List();
+          List<String> tags = [];
           for (int x=0; x < current['tags'].length; x++) {
             tags.add(current['tags'][x]['name'].toString());
           }
 
           String fileExt = current['file_type'].split('/')[1]; // image/jpeg
 
-          fetched.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString()), fileExt));
-          if(dbHandler.db != null){
-            setTrackedValues(fetched.length - 1);
+          fetched!.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString()), fileExt));
+          if(dbHandler!.db != null){
+            setTrackedValues(fetched!.length - 1);
           }
-          print(fetched[fetched.length - 1].toString());
+          print(fetched![fetched!.length - 1].toString());
         }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched!.length == length){locked = true;}
         isActive = false;
         return fetched;
       } else {
@@ -95,8 +95,9 @@ class SankakuHandler extends BooruHandler{
   // This will fetch authToken on the first load
   Future<String> getAuthToken() async {
     String token = '';
+    Uri uri = Uri.parse('${booru.baseURL}/auth/token?lang=english');
     final response = await http.post(
-      '${booru.baseURL}/auth/token?lang=english',
+      uri,
       headers: {'Content-Type': 'application/json', "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"},
       body: jsonEncode({'login': booru.userID, 'password': booru.apiKey}),
       encoding: Encoding.getByName("utf-8"),
@@ -118,14 +119,15 @@ class SankakuHandler extends BooruHandler{
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/tags?name=$input&limit=5";
+    return "${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=10";
   }
   @override
   Future tagSearch(String input) async {
-    List<String> searchTags = new List();
+    List<String> searchTags = [];
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);

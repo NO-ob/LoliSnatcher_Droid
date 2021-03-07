@@ -9,10 +9,10 @@ import 'BooruItem.dart';
 
 class BooruOnRailsHandler extends BooruHandler {
   bool tagSearchEnabled = false;
-  List<BooruItem> fetched = new List();
+  List<BooruItem>? fetched = [];
   BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
   Future Search(String tags,int pageNum) async{
-    int length = fetched.length;
+    int length = fetched!.length;
     if (tags == "" || tags == " "){
       tags = "*";
     }
@@ -21,12 +21,13 @@ class BooruOnRailsHandler extends BooruHandler {
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = new List();
+      fetched = [];
     }
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -41,13 +42,13 @@ class BooruOnRailsHandler extends BooruHandler {
               currentTags[x] = currentTags[x].replaceAll(" ", "+");
             }
           }
-          fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
-          if(dbHandler.db != null){
-            setTrackedValues(fetched.length - 1);
+          fetched!.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+          if(dbHandler!.db != null){
+            setTrackedValues(fetched!.length - 1);
           }
         }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched!.length == length){locked = true;}
         return fetched;
       }
     } catch(e) {
@@ -78,18 +79,19 @@ class BooruOnRailsHandler extends BooruHandler {
   }
   @override
   Future tagSearch(String input) async {
-    List<String> searchTags = new List();
+    List<String> searchTags = [];
     if (input == ""){
       input = "*";
     }
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
-          for (int i=0; i < 5; i++){
+          for (int i=0; i < 10; i++) {
             searchTags.add(parsedResponse[i]['slug'].toString());
           }
         }

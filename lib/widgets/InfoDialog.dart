@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 class InfoDialog extends StatefulWidget {
   String title;
   List<Widget> bodyWidgets;
+  CrossAxisAlignment horizontalAlignment;
   @override
   _InfoDialogState createState() => _InfoDialogState();
-  InfoDialog(this.title,this.bodyWidgets);
+  InfoDialog(this.title,this.bodyWidgets,this.horizontalAlignment);
 }
 
 class _InfoDialogState extends State<InfoDialog> {
-  List<Widget> widgets = new List();
+  List<Widget> widgets = [];
   @override
   void initState(){
     super.initState();
@@ -28,6 +29,7 @@ class _InfoDialogState extends State<InfoDialog> {
             Container(
                 margin: EdgeInsets.all(10),
                 child: Column(
+                  crossAxisAlignment: widget.horizontalAlignment,
                   children: widget.bodyWidgets,
                 )
             )

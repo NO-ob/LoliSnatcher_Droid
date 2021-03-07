@@ -1,10 +1,11 @@
-
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:flutter/services.dart';
+
+import '../ServiceHandler.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
@@ -13,35 +14,32 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   bool autoHide;
   HideableAppBar(this.title, this.actions, this.searchGlobals, this.autoHide);
 
-  double defaultHeight = kToolbarHeight; //56.0
+  final double defaultHeight = kToolbarHeight; //56.0
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
-
   @override
   _HideableAppBarState createState() => _HideableAppBarState();
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
-  Function setSt;
   @override
   void initState() {
     super.initState();
-    setSt = () {
-      setState(() {});
-    };
-    widget.searchGlobals.displayAppbar.value = !widget.autoHide;
-    widget.searchGlobals.displayAppbar.addListener(setSt);
+    widget.searchGlobals.displayAppbar!.value = !widget.autoHide;
+    widget.searchGlobals.displayAppbar!.addListener(setSt);
 
     // Hide system ui on first render
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    //ServiceHandler.makeImmersive();
   }
-
+  void setSt(){
+    setState(() {});
+  }
   @override
   void dispose() {
-    widget.searchGlobals.displayAppbar.removeListener(setSt);
+    widget.searchGlobals.displayAppbar!.removeListener(setSt);
 
     // Return system ui after closing viewer
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     super.dispose();
   }
 
@@ -54,7 +52,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,
       height:
-          widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
+          widget.searchGlobals.displayAppbar!.value ? widget.defaultHeight : 0.0,
       child: AppBar(
         // toolbarHeight: widget.defaultHeight,
         leading: IconButton(
@@ -62,7 +60,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(widget.title),
+        title: FittedBox(fit: BoxFit.fitWidth, child: Text(widget.title)),
         actions: widget.actions,
       ),
     );

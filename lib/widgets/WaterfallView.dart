@@ -1,5 +1,3 @@
-import 'dart:math';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,21 +7,17 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
+import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
-
-import '../Tools.dart';
-import '../ViewUtils.dart';
 
 
 class WaterfallView extends StatefulWidget {
   final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final SnatchHandler snatchHandler;
-  final FocusNode searchBoxFocus;
-  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler, this.searchBoxFocus);
+  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
   @override
   _WaterfallState createState() => _WaterfallState();
 }
@@ -32,30 +26,24 @@ class _WaterfallState extends State<WaterfallView> {
   ScrollController gridController = ScrollController();
   bool isLastPage = false;
   FocusNode kbFocusNode = FocusNode();
-  Function jumpTo;
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
-        .getBooruHandler(widget.searchGlobals.selectedBooru, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+        .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
     widget.searchGlobals.booruHandler = temp[0];
     widget.searchGlobals.pageNum = temp[1];
   }
   @override
   void initState() {
     super.initState();
-    jumpTo = () {
-      ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
-    };
     // Stops previous pages being forgotten when switching tabs
-    if (widget.searchGlobals.booruHandler != null) {
-    } else {
-      setBooruHandler();
-    }
-    widget.searchGlobals.viewedIndex.addListener(jumpTo);
+    widget.searchGlobals.viewedIndex!.addListener(jumpTo);
   }
-
+  void jumpTo(){
+    ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex!.value,widget.searchGlobals,gridController,widget.settingsHandler,context);
+  }
   @override
   void dispose() {
-    widget.searchGlobals.viewedIndex.removeListener(jumpTo);
+    widget.searchGlobals.viewedIndex!.removeListener(jumpTo);
     kbFocusNode.dispose();
     super.dispose();
   }
@@ -63,13 +51,13 @@ class _WaterfallState extends State<WaterfallView> {
   @override
   Widget build(BuildContext context) {
     // super.build(context);
-    //
+
     if (FocusScope.of(context).focusedChild == null){
       print("kb focus node requesting focus");
       kbFocusNode.requestFocus();
     }
     if (widget.searchGlobals.booruHandler == null) {
-      initState();
+      setBooruHandler();
     }
     if (gridController.hasClients) {
       gridController.jumpTo(widget.searchGlobals.scrollPosition);
@@ -85,8 +73,8 @@ class _WaterfallState extends State<WaterfallView> {
             ? widget.settingsHandler.portraitColumns
             : widget.settingsHandler.landscapeColumns;
     return FutureBuilder(
-        future: widget.searchGlobals.booruHandler
-            .Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum),
+        future: widget.searchGlobals.booruHandler!
+            .Search(widget.searchGlobals.tags!, widget.searchGlobals.pageNum),
         builder: (context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -118,8 +106,7 @@ class _WaterfallState extends State<WaterfallView> {
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: columnsCount),
                     itemBuilder: (BuildContext context, int index) {
-                      bool isSelected =
-                      widget.searchGlobals.selected.contains(index);
+                      bool isSelected = widget.searchGlobals.selected!.contains(index);
                       return new Card(
                         child: new GridTile(
                           // Inkresponse is used so the tile can have an onclick function
@@ -129,7 +116,7 @@ class _WaterfallState extends State<WaterfallView> {
                               decoration: isSelected
                                   ? BoxDecoration(
                                 border: Border.all(
-                                    color: Get.context.theme.accentColor,
+                                    color: Get.context!.theme.accentColor,
                                     width: 4.0),
                               )
                                   : null,
@@ -137,33 +124,30 @@ class _WaterfallState extends State<WaterfallView> {
                                 enableFeedback: true,
                                 highlightShape: BoxShape.rectangle,
                                 containedInkWell: true,
-                                highlightColor: Get.context.theme.accentColor,
+                                highlightColor: Get.context!.theme.accentColor,
                                 child: ViewUtils.sampleorThumb(snapshot.data[index], columnsCount,widget.settingsHandler),
                                 onTap: () {
                                   // Load the image viewer
                                   kbFocusNode.unfocus();
                                   Get.dialog(
-                                    ViewerPage(
-                                        snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
-                                    transitionDuration:
-                                    Duration(milliseconds: 200),
+                                    ViewerPage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
+                                    transitionDuration: Duration(milliseconds: 200),
                                     // barrierColor: Colors.transparent
                                   ).whenComplete(() {
-                                    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+                                    //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
                                     kbFocusNode.requestFocus();
                                   });
 
                                   // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                                 },
                                 onLongPress: () {
-                                  if (widget.searchGlobals.selected
-                                      .contains(index)) {
+                                  if (widget.searchGlobals.selected!.contains(index)) {
                                     setState(() {
-                                      widget.searchGlobals.selected.remove(index);
+                                      widget.searchGlobals.selected!.remove(index);
                                     });
                                   } else {
                                     setState(() {
-                                      widget.searchGlobals.selected.add(index);
+                                      widget.searchGlobals.selected!.add(index);
                                     });
                                   }
                                 },
@@ -187,18 +171,18 @@ class _WaterfallState extends State<WaterfallView> {
                   bool isAtEdge = notif.metrics.atEdge;
                   bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
                   if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
-                    if (!widget.searchGlobals.booruHandler.locked) {
+                    if (!widget.searchGlobals.booruHandler!.locked) {
                       setState(() {
                         widget.searchGlobals.pageNum++;
                       });
                       ServiceHandler.displayToast("Loading next page...\n Page #" + widget.searchGlobals.pageNum.toString());
-                      //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                      //Get.snackbar("Loading next page...", 'Page #' + widget.searchGlobals.pageNum.toString(), snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                     } else if (!isLastPage) {
                       setState(() {
                         isLastPage = true;
                       });
                       ServiceHandler.displayToast("No More Files \n (T⌓T)");
-                      //Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+                      //Get.snackbar("No More Files", '(T⌓T)', snackPosition: SnackPosition.TOP, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                     }
                   }
                   return true;

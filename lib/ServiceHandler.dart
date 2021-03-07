@@ -19,7 +19,7 @@ class ServiceHandler{
   }
   // Calls androids native  get storage dir function
   Future<String> getExtDir() async{
-    String result;
+    String result = "";
     try{
       result = await platform.invokeMethod("getExtPath");
     } catch(e){
@@ -28,7 +28,7 @@ class ServiceHandler{
     return result;
   }
   Future<int> getSDKVersion() async{
-    int result;
+    int result = 0;
     try{
       result = await platform.invokeMethod("getSdkVersion");
     } catch(e){
@@ -37,7 +37,7 @@ class ServiceHandler{
     return result;
   }
   Future<String> getDocumentsDir() async{
-    String result;
+    String result = "";
     try{
       result = await platform.invokeMethod("getDocumentsPath");
     } catch(e){
@@ -46,7 +46,7 @@ class ServiceHandler{
     return result;
   }
   Future<String> getPicturesDir() async{
-    String result;
+    String result = "";
     try{
       result = await platform.invokeMethod("getPicturesPath");
     } catch(e){
@@ -55,23 +55,35 @@ class ServiceHandler{
     return result;
   }
   Future<String> getCacheDir() async{
-    String result;
+    String result = "";
     try{
       if (Platform.isAndroid){
         result = await platform.invokeMethod("getCachePath") + "/";
       } else if (Platform.isLinux){
-        result = Platform.environment['HOME'] + "/.loliSnatcher/cache/";
+        result = Platform.environment['HOME']! + "/.loliSnatcher/cache/";
       }
     } catch(e){
       print(e);
     }
     return result;
   }
-  void loadShareIntent(String fileURL) async{
+  Future<void> loadShareTextIntent(String text) async{
     try{
-      await platform.invokeMethod("shareItem",{"fileURL": fileURL});
+      await platform.invokeMethod("shareText",{"text": text});
+      return;
     } catch(e){
       print(e);
+      return;
+    }
+  }
+  Future<void> loadShareFileIntent(String filePath, String mimeType) async{
+    try{
+      await platform.invokeMethod("shareFile", {"path": filePath, "mimeType": mimeType});
+      return;
+      // print('share closed');
+    } catch(e){
+      print(e);
+      return;
     }
   }
   static void displayToast (String str){
@@ -82,7 +94,8 @@ class ServiceHandler{
       if (Platform.isAndroid){
         await platform.invokeMethod("emptyCache");
       } else if (Platform.isLinux){
-        File cacheDir = new File(await getCacheDir());
+        String cacheD = await getCacheDir();
+        File cacheDir = new File(cacheD);
         cacheDir.delete(recursive: true);
       }
 
@@ -112,8 +125,8 @@ class ServiceHandler{
     }
   }
 
-  Future<String> writeImage(var imageData, fileName, mediaType, fileExt) async{
-    String result;
+  Future<String?> writeImage(var imageData, fileName, mediaType, fileExt) async{
+    String? result;
     try{
       result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt});
     } catch(e){

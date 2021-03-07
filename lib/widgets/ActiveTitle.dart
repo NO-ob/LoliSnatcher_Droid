@@ -12,24 +12,27 @@ class ActiveTitle extends StatefulWidget {
 }
 
 class _ActiveTitleState extends State<ActiveTitle> {
-  Function snatchActive,snatchStatus;
 
   @override
   void initState(){
-    snatchActive = (){setState(() {
-      widget.isSnatching = widget.snatchHandler.snatchActive.value;
-    });};
-    snatchStatus = (){setState(() {
-      widget.snatchStatus = widget.snatchHandler.snatchStatus.value;
-    });};
     //widget.snatchHandler.snatchActive.value = false;
-    widget.snatchHandler.snatchActive.addListener(snatchActive);
-    widget.snatchHandler.snatchStatus.addListener(snatchStatus);
+    widget.snatchHandler.snatchActive!.addListener(snatchActive);
+    widget.snatchHandler.snatchStatus!.addListener(snatchStatus);
+  }
+  void snatchActive() {
+    setState(() {
+      widget.isSnatching = widget.snatchHandler.snatchActive!.value;
+    });
+  }
+  void snatchStatus(){
+    setState(() {
+      widget.snatchStatus = widget.snatchHandler.snatchStatus!.value;
+    });
   }
   @override
   void dispose(){
-    widget.snatchHandler.snatchStatus.removeListener(snatchActive);
-    widget.snatchHandler.snatchStatus.removeListener(snatchStatus);
+    widget.snatchHandler.snatchStatus!.removeListener(snatchActive);
+    widget.snatchHandler.snatchStatus!.removeListener(snatchStatus);
     super.dispose();
   }
   @override

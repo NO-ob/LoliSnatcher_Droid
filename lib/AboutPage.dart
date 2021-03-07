@@ -28,15 +28,17 @@ class AboutPage extends StatelessWidget {
             ),
             Container(
               alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
                 ),
                 onPressed: (){
                   ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
                 },
-                child: Text("GitHub"),
+                child: Text('GitHub', style: TextStyle(color: Colors.white))
               ),
             ),
             Container(
@@ -44,15 +46,17 @@ class AboutPage extends StatelessWidget {
               child: Text("A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),),
             Container(
               alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor,),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
                 ),
                 onPressed: (){
                   ServiceHandler.launchURL("https://www.pixiv.net/en/users/28366691");
                 },
-                child: Text("Showers-U - Pixiv"),
+                child: Text("Showers-U - Pixiv", style: TextStyle(color: Colors.white)),
               ),
             ),
             Container(
@@ -60,15 +64,17 @@ class AboutPage extends StatelessWidget {
               child: Text("A big thanks to NANI-SORE for fixing a bunch of bugs and adding some needed features"),),
             Container(
               alignment: Alignment.center,
-              child: FlatButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context.theme.accentColor,),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
                 ),
                 onPressed: (){
                   ServiceHandler.launchURL("https://github.com/NANI-SORE");
                 },
-                child: Text("NANI-SORE - Github"),
+                child: Text("NANI-SORE - Github", style: TextStyle(color: Colors.white)),
               ),
             )
           ],

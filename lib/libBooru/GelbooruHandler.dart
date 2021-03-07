@@ -12,7 +12,7 @@ import 'Booru.dart';
  * Booru Handler for the gelbooru engine
  */
 class GelbooruHandler extends BooruHandler{
-  List<BooruItem> fetched = new List();
+  List<BooruItem>? fetched = [];
 
   // Dart constructors are weird so it has to call super with the args
   GelbooruHandler(Booru booru,int limit): super(booru,limit);
@@ -28,13 +28,14 @@ class GelbooruHandler extends BooruHandler{
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = new List();
+      fetched = [];
     }
     String url = makeURL(tags);
     print(url);
     try {
-      int length = fetched.length;
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      int length = fetched!.length;
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = xml.parse(response.body);
@@ -49,13 +50,13 @@ class GelbooruHandler extends BooruHandler{
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
-          fetched.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("sample_url"),current.getAttribute("preview_url"),current.getAttribute("tags").split(" "),makePostURL(current.getAttribute("id")),getFileExt(current.getAttribute("file_url"))));
-          if(dbHandler.db != null){
-            setTrackedValues(fetched.length - 1);
+          fetched!.add(new BooruItem(current.getAttribute("file_url"),current.getAttribute("sample_url"),current.getAttribute("preview_url"),current.getAttribute("tags")!.split(" "),makePostURL(current.getAttribute("id")!),getFileExt(current.getAttribute("file_url"))));
+          if(dbHandler!.db != null){
+            setTrackedValues(fetched!.length - 1);
           }
         }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched!.length == length){locked = true;}
         isActive = false;
         return fetched;
       }
@@ -80,19 +81,20 @@ class GelbooruHandler extends BooruHandler{
 
     }
     String makeTagURL(String input){
-      if (booru.baseURL.contains("rule34.xxx")){
+      if (booru.baseURL!.contains("rule34.xxx")){
         return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
       } else {
-        return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=5";
+        return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10";
       }
     }
     @override
     Future tagSearch(String input) async {
-      List<String> searchTags = new List();
+      List<String> searchTags = [];
       String url = makeTagURL(input);
       try {
-        if (booru.baseURL.contains("rule34.xxx")){
-          final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+        if (booru.baseURL!.contains("rule34.xxx")){
+          Uri uri = Uri.parse(url);
+          final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
           // 200 is the success http response code
           if (response.statusCode == 200) {
             var parsedResponse = jsonDecode(response.body);
@@ -104,14 +106,15 @@ class GelbooruHandler extends BooruHandler{
             }
           }
         } else {
-          final response = await http.get(url,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
+          Uri uri = Uri.parse(url);
+          final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
           // 200 is the success http response code
           if (response.statusCode == 200) {
             var parsedResponse = xml.parse(response.body);
             var tags = parsedResponse.findAllElements("tag");
             if (tags.length > 0){
               for (int i=0; i < tags.length; i++){
-                searchTags.add(tags.elementAt(i).getAttribute("name").trim());
+                searchTags.add(tags.elementAt(i).getAttribute("name")!.trim());
               }
             }
           }

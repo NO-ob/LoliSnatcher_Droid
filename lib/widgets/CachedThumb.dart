@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart';
+import 'package:http/io_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
@@ -20,101 +24,113 @@ class CachedThumb extends StatefulWidget {
 class _CachedThumbState extends State<CachedThumb> {
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
-  bool isFromCache = false;
-  StreamedResponse _response;
-  File _image;
+  bool? isFromCache;
+  IOClient? _client;
+  StreamedResponse? _response;
+  StreamSubscription? _subscription;
   List<int> _bytes = [];
-  StreamSubscription _subscription;
+  Uint8List _totalBytes = Uint8List(0);
 
+  /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
-    final String filePath =
-        await imageWriter.getCachePath(widget.thumbURL, 'thumbnails');
+    final String? filePath = await imageWriter.getCachePath(widget.thumbURL, 'thumbnails');
 
     // If file is in cache - load
     if (filePath != null) {
       final File file = File(filePath);
-      await file.readAsBytes();
       setState(() {
-        _image = file;
+        // multiple restates in the same function is usually bad practice, but we need this to notify user how the file is loaded while we await for bytes
         isFromCache = true;
+      });
+      Uint8List tempBytes = await file.readAsBytes();
+      setState(() {
+        _totalBytes = tempBytes;
       });
       return;
     }
 
     // Otherwise start loading and subscribe to progress
-    _response = await Client().send(Request('GET', Uri.parse(widget.thumbURL)));
-    _total = _response.contentLength;
+    _client = IOClient();
+    _response = await _client!.send(Request('GET', Uri.parse(widget.thumbURL)));
+    _total = _response!.contentLength!;
 
-    _subscription = _response.stream.listen((value) {
-      setState(() {
-        _bytes.addAll(value);
-        _received += value.length;
-      });
+    setState(() {
+      isFromCache = false;
     });
-    _subscription.onDone(() async {
-      if (_received > (_total * 0.95)) {
-        // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-        final File cacheFile = await imageWriter.writeCacheFromBytes(
-            widget.thumbURL, _bytes, 'thumbnails');
-        if (cacheFile != null) {
+
+    _subscription = _response!.stream.listen(
+          (value) {
           setState(() {
-            _image = cacheFile;
+            _bytes.addAll(value);
+            _received += value.length;
           });
+        },
+        onError: (e) {
+          print(e);
+        },
+        cancelOnError: true,
+        onDone: () async {
+          if (_received > (_total * 0.95)) {
+            // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
+            setState((){
+              _totalBytes = Uint8List.fromList(_bytes);
+            });
+            if (widget.settingsHandler.imageCache) {
+              await imageWriter.writeCacheFromBytes(widget.thumbURL, _bytes, 'thumbnails');
+            }
+          } else {
+            print('Thumbnail load incomplete');
+          }
         }
-      } else {
-        print('Thumbnail load incomplete'); // Throw an error, allow to retry?
-      }
-    });
+    );
   }
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.settingsHandler.imageCache) {
-      _downloadImage();
-    }
+    _downloadImage();
   }
 
   @override
   void dispose() {
     super.dispose();
     _subscription?.cancel();
+    _client?.close();
   }
 
-  Widget loadingElementBuilder(
-      BuildContext ctx, Widget child, ImageChunkEvent loadingProgress) {
-    if (loadingProgress == null && !widget.settingsHandler.imageCache) {
-      // Resulting image for network loaded thumbnail
-      return child;
-    }
-    bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (widget.settingsHandler.imageCache && _total != null && _total > 0);
-    bool isProgressFromCaching = widget.settingsHandler.imageCache && hasProgressData && _total != null && _total > 0;
-    int expectedBytes = hasProgressData ? (isProgressFromCaching ? _received : loadingProgress.cumulativeBytesLoaded) : null;
-    int totalBytes = hasProgressData ? (isProgressFromCaching ? _total : loadingProgress.expectedTotalBytes) : null;
+  Widget loadingElementBuilder(BuildContext ctx, Widget child, ImageChunkEvent? loadingProgress) {
+    // if (loadingProgress == null && !widget.settingsHandler.imageCache) {
+    //   // Resulting image for network loaded thumbnail
+    //   return child;
+    // }
+    bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (_total > 0);
+    bool isProgressFromCaching = hasProgressData && _total > 0;
+    int? expectedBytes = (hasProgressData ? (isProgressFromCaching ? _received : loadingProgress!.cumulativeBytesLoaded) : null);
+    int? totalBytes = (hasProgressData ? (isProgressFromCaching ? _total : loadingProgress!.expectedTotalBytes) : null);
 
-    double percentDone = hasProgressData ? expectedBytes / totalBytes : null;
-    String percentDoneText = hasProgressData ? ((percentDone * 100).toStringAsFixed(2) + '%') : 'Loading...';
+    double? percentDone = (hasProgressData ? expectedBytes! / totalBytes! : null);
+    String percentDoneText = hasProgressData ? ((percentDone! * 100).toStringAsFixed(2) + '%') : 'Loading...';
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+      children: (isFromCache == null || isFromCache == true) ? [] : [
         SizedBox(
           height: 100 / widget.columnCount,
           width: 100 / widget.columnCount,
           child: CircularProgressIndicator(
             strokeWidth: 16 / widget.columnCount,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
             value: percentDone,
           ),
         ),
         Padding(padding: EdgeInsets.only(bottom: 10)),
         widget.columnCount < 4 // Text element overflows if too many thumbnails are shown
             ? Text(
-                percentDoneText,
-                style: TextStyle(
-                  fontSize: 12,
-                ),
-              )
+          percentDoneText,
+          style: TextStyle(
+            fontSize: 12,
+          ),
+        )
             : Container(),
       ],
     );
@@ -122,25 +138,46 @@ class _CachedThumbState extends State<CachedThumb> {
 
   @override
   Widget build(BuildContext context) {
-    // Load from network if caching is disabled
-    if (!widget.settingsHandler.imageCache) {
-      return Image.network(widget.thumbURL,
-          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
-          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
-          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
-          loadingBuilder: loadingElementBuilder);
+    // Show progress until image bytes are fetched (either from network or cache)
+    /*_client = IOClient();
+    return FutureBuilder(
+        future: _client!.send(Request('GET', Uri.parse(widget.thumbURL))),
+        builder: (BuildContext context, AsyncSnapshot snapshot){
+          if (snapshot.connectionState == ConnectionState.done){
+            int contentlen = snapshot.data.contentLength;
+            num recieved = 0;
+            return StreamBuilder(
+                stream: snapshot.data.stream,
+                builder: (BuildContext context, AsyncSnapshot snapshot){
+                    if(snapshot.hasData){
+                      _bytes += snapshot.data;
+                      if(snapshot.connectionState == ConnectionState.done){
+                        return Image.memory(
+                            Uint8List.fromList(_bytes),
+                          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
+                          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
+                          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+                        );
+                      } else {
+                        return Text("Snapshot is active ${_bytes.length} / $contentlen / ${snapshot.data.length}");
+                      }
+                    } else {
+                      return Text("No Data");
+                    }
+
+            });
+          }
+          return Container();
+        });*/
+    if (_totalBytes.length == 0) {
+      return loadingElementBuilder(context, Center(child: Text("Error")), null);
     } else {
-      // Show progress until image is saved to/retrieved from cache
-      if (_image == null) {
-        return Center(child: loadingElementBuilder(context, null, null));
-      } else {
-        return Image.file(
-          _image,
-          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
-          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
-          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
-        );
-      }
+      return Image.memory(
+        _totalBytes,
+        fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
+        width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
+        height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+      );
     }
   }
 }

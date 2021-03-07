@@ -21,7 +21,7 @@ class MoebooruHandler extends GelbooruHandler{
   }
   @override
   String makeTagURL(String input){
-      return "${booru.baseURL}/tag.xml?limit=5&name=$input*";
+      return "${booru.baseURL}/tag.xml?limit=10&name=$input*";
   }
 
 }

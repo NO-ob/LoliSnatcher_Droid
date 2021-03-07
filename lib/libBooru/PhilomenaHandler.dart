@@ -7,7 +7,7 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class PhilomenaHandler extends BooruHandler{
-  List<BooruItem> fetched = new List();
+  List<BooruItem>? fetched = [];
   PhilomenaHandler(Booru booru,int limit) : super(booru,limit);
 
   /**
@@ -16,7 +16,7 @@ class PhilomenaHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched.length;
+    int length = fetched!.length;
     if (tags == "" || tags == " "){
       tags = "*";
     }
@@ -25,12 +25,13 @@ class PhilomenaHandler extends BooruHandler{
     }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = new List();
+      fetched = [];
     }
     String url = makeURL(tags);
     print(url);
     try {
-      final response = await http.get(url,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -38,13 +39,13 @@ class PhilomenaHandler extends BooruHandler{
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse['images'].length; i++){
           var current = parsedResponse['images'][i];
-          fetched.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],current['tags'],makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
-          if(dbHandler.db != null){
-            setTrackedValues(fetched.length - 1);
+          fetched!.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],current['tags'],makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+          if(dbHandler!.db != null){
+            setTrackedValues(fetched!.length - 1);
           }
         }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched!.length == length){locked = true;}
         isActive = false;
         return fetched;
       }
@@ -71,17 +72,18 @@ class PhilomenaHandler extends BooruHandler{
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/api/v1/json/search/tags?q=$input&per_page=5";
+    return "${booru.baseURL}/api/v1/json/search/tags?q=$input&per_page=10";
   }
   @override
   Future tagSearch(String input) async {
-    List<String> searchTags = new List();
+    List<String> searchTags = [];
     if (input == ""){
       input = "*";
     }
     String url = makeTagURL(input);
     try {
-      final response = await http.get(url,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);

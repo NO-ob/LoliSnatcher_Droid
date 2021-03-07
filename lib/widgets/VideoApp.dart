@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:ui';
-import 'dart:math';
 import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:http/io_client.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
@@ -19,33 +22,47 @@ class VideoApp extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final int viewedIndex;
-  SettingsHandler settingsHandler;
+  final SettingsHandler settingsHandler;
   VideoApp(this.booruItem, this.index, this.viewedIndex, this.settingsHandler);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
 
 class _VideoAppState extends State<VideoApp> {
-  VideoPlayerController _videoController;
-  ChewieController _chewieController;
+  PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
+  PhotoViewController viewController = PhotoViewController();
+  late VideoPlayerController _videoController;
+  ChewieController? _chewieController;
 
   // VideoPlayerValue _latestValue;
 
-  String cacheMode;
+  String? cacheMode;
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
-  bool isFromCache = false;
-  StreamedResponse _response;
-  File _video;
+  int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
+  Timer? _checkInterval, _debounceBytes;
+  bool isFromCache = false, isStopped = false;
+
+  IOClient? _client;
+  StreamedResponse? _response;
+  StreamSubscription? _subscription;
+
   List<int> _bytes = [];
-  StreamSubscription _subscription;
+  File? _video;
 
-  Future<void> _downloadImage() async {
-    final String filePath =
-        await imageWriter.getCachePath(widget.booruItem.fileURL, 'media');
+  /// Author: [Nani-Sore] ///
+  Future<void> _downloadVideo() async {
+    _checkInterval?.cancel();
+    _checkInterval = Timer.periodic(new Duration(seconds: 1), (timer) {
+      // force restate every second to refresh all timers/indicators, even when loading has stopped
+      setState(() {});
+    });
+    isStopped = false;
+    _startedAt = DateTime.now().millisecondsSinceEpoch;
 
+    final String? filePath = await imageWriter.getCachePath(widget.booruItem.fileURL!, 'media');
     // If file is in cache - load
-    print(filePath);
+    // print(filePath);
     if (filePath != null) {
       final File file = File(filePath);
       await file.readAsBytes();
@@ -59,101 +76,172 @@ class _VideoAppState extends State<VideoApp> {
       return;
     }
 
-    // Start video if not cached and we use both methods of loading
-    if (cacheMode == 'Stream+Cache') {
+    // Start video now if stream mode is involved
+    if(!widget.settingsHandler.mediaCache) {
+      // Media caching disabled - don't cache videos
       initPlayer();
+      return;
+    } else {
+      switch (cacheMode) {
+        case 'Cache':
+          // Cache to device from custom request
+          break;
+
+        case 'Stream+Cache':
+          // Load and stream from default player network request, cache to device from custom request
+          // TODO: change video handler to allow viewing and caching from single network request
+          initPlayer();
+          break;
+
+        case 'Stream':
+        default:
+          // Only stream, notice the return
+          initPlayer();
+          return;
+      }
     }
 
     // Otherwise start loading and subscribe to progress
-    _response = await Client()
-        .send(Request('GET', Uri.parse(widget.booruItem.fileURL)));
-    _total = _response.contentLength;
+    _client = IOClient();
+    _response = await _client!.send(Request('GET', Uri.parse(widget.booruItem.fileURL!)));
+    _total = _response!.contentLength!;
 
-    _subscription = _response.stream.listen((value) {
-      //Restate only when just Caching or video is not initialized from network yet
-      if (cacheMode == 'Cache' || !(_videoController.value != null && _videoController.value.initialized)) {
-        setState(() {
-          _bytes.addAll(value);
-          _received += value.length;
-        });
-      } else {
-        _bytes.addAll(value);
-        _received += value.length;
-      }
-    });
-    _subscription.onDone(() async {
-      if (_received > (_total * 0.95)) {
+    _subscription = _response!.stream.listen(
+      _onBytesAdded,
+      onError: (e) {
+        killLoading();
+        print(e);
+      },
+      cancelOnError: true,
+      onDone: () async {
         // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-        final File cacheFile = await imageWriter.writeCacheFromBytes(
-            widget.booruItem.fileURL, _bytes, 'media');
-        if (cacheFile != null) {
-          //Restate only when just Caching
-          if (cacheMode == 'Cache') {
-            setState(() {
+        if (_received > (_total * 0.95)) {
+          final File? cacheFile = await imageWriter.writeCacheFromBytes(
+              widget.booruItem.fileURL!, _bytes, 'media');
+          if (cacheFile != null) {
+            //Restate only when just Caching
+            if (cacheMode == 'Cache') {
+              setState(() {
+                _video = cacheFile;
+                // Start video after caching
+                initPlayer();
+              });
+            } else {
               _video = cacheFile;
-            });
-          } else {
-            _video = cacheFile;
+            }
           }
-        }
 
-        // Start video after caching
-        if (cacheMode == 'Cache') {
-          initPlayer();
+          // clear bytes array
+          // _bytes = []
+        } else {
+          //TODO: show error message
+          killLoading();
+          print('Image load incomplete'); // Throw an error, allow to retry?
         }
-      } else {
-        print('Image load incomplete'); // Throw an error, allow to retry?
       }
-    });
+    );
+  }
+
+  /// Author: [Nani-Sore] ///
+  void _onBytesAdded(List<int> addedBytes) {
+    // always save incoming bytes, but restate only after [debounceDelay]MS
+    const int debounceDelay = 50;
+    bool isActive = _debounceBytes?.isActive ?? false;
+    bool isAllowedToRestate = cacheMode == 'Cache' || !(_videoController.value.isInitialized);
+    if (isActive || !isAllowedToRestate) {
+      _bytes.addAll(addedBytes);
+      _received += addedBytes.length;
+    } else {
+      setState(() {
+        _bytes.addAll(addedBytes);
+        _received += addedBytes.length;
+      });
+      _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    cacheMode = widget.settingsHandler.videoCacheMode;
-    if (!widget.settingsHandler.mediaCache) {
-      initPlayer();
-      return;
-    }
-    switch (cacheMode) {
-      case "Stream":
-        initPlayer();
-        break;
-      case "Cache":
-      case "Stream+Cache":
-        _downloadImage();
-        break;
-    }
+    initVideo();
+  }
+
+  void initVideo() {
+    // viewController..outputStateStream.listen(onViewStateChanged);
+    // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+    cacheMode = widget.settingsHandler.videoCacheMode!;
+    _downloadVideo();
+  }
+
+  void killLoading() {
+    _debounceBytes?.cancel();
+    _checkInterval?.cancel();
+    _subscription?.cancel();
+    _client?.close();
+
+    setState(() {
+      _total = 0;
+      _received = 0;
+
+      _prevReceivedAmount = 0;
+      _lastReceivedAmount = 0;
+      _lastReceivedTime = 0;
+      _startedAt = 0;
+
+      isFromCache = false;
+      isStopped = true;
+
+      _video = null;
+      _bytes = [];
+    });
   }
 
   @override
   void dispose() {
-    _videoController?.pause();
-    _videoController?.dispose();
+    _debounceBytes?.cancel();
+    _checkInterval?.cancel();
+
+    _videoController.pause();
+    _videoController.dispose();
     _chewieController?.dispose();
+
     _subscription?.cancel();
+    _client?.close();
     super.dispose();
   }
 
+
+  // debug functions
+  void onScaleStateChanged(PhotoViewScaleState scaleState) {
+    print(scaleState);
+  }
+
+  void onViewStateChanged(PhotoViewControllerValue viewState) {
+    print(viewState);
+  }
+
   // void _updateState() {
-  //   print(_controller.value);
+  //   print(_videoController.value);
   //   setState(() {
-  //     _latestValue = _controller.value;
+  //     _latestValue = _videoController.value;
   //   });
   // }
 
 
   Future<void> initPlayer() async {
     // Start from cache if was already cached or only caching is allowed
+    // mixWithOthers: true, allows to not interrupt audio sources from other apps
     if (widget.settingsHandler.mediaCache && _video != null) {
-      _videoController = VideoPlayerController.file(_video);
+      _videoController = VideoPlayerController.file(_video!, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
     } else {
       // Otherwise load from network
-      _videoController =
-          VideoPlayerController.network(widget.booruItem.fileURL);
+      _videoController = VideoPlayerController.network(widget.booruItem.fileURL!, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
     }
-    await _videoController.initialize();
+    await Future.wait([_videoController.initialize()]);
     // _videoController.addListener(_updateState);
+
+    // Stop force restating loading indicators when video is initialized
+    _checkInterval?.cancel();
 
     // Player wrapper to allow controls, looping...
     _chewieController = ChewieController(
@@ -171,8 +259,8 @@ class _VideoAppState extends State<VideoApp> {
         //   iconColor: Color.fromARGB(255, 200, 200, 200)
         // ),
       materialProgressColors: ChewieProgressColors(
-        playedColor: Get.context.theme.primaryColor,
-        handleColor: Get.context.theme.primaryColor,
+        playedColor: Get.context!.theme.primaryColor,
+        handleColor: Get.context!.theme.primaryColor,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white,
       ),
@@ -201,25 +289,38 @@ class _VideoAppState extends State<VideoApp> {
     setState(() {});
   }
 
+  /// Author: [Nani-Sore] ///
   Widget loadingElementBuilder() {
-    bool hasProgressData =
-        widget.settingsHandler.mediaCache && _total != null && _total > 0;
-    int expectedBytes = hasProgressData ? _received : null;
-    int totalBytes = hasProgressData ? _total : null;
+    bool hasProgressData = widget.settingsHandler.mediaCache && _total > 0;
+    int expectedBytes = hasProgressData ? _received : 0;
+    int totalBytes = hasProgressData ? _total : 0;
 
-    double percentDone = hasProgressData ? (expectedBytes / totalBytes) : null;
-    String loadedSize =
-        hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
-    String expectedSize =
-        hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
+    double speedCheckInterval = 1000 / 4;
+    int nowMils = DateTime.now().millisecondsSinceEpoch;
+    if((nowMils - _lastReceivedTime) > speedCheckInterval && hasProgressData) {
+      _prevReceivedAmount = _lastReceivedAmount;
+      _lastReceivedAmount = expectedBytes;
+
+      _lastReceivedTime = nowMils;
+    }
+
+    double? percentDone = hasProgressData ? (expectedBytes / totalBytes) : null;
+    String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
+    String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
+
+    int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
+    String expectedSpeedText = hasProgressData ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
+    double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
+    String expectedTimeText = (hasProgressData && expectedTime > 0) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
+    int sinceStart = Duration(milliseconds: nowMils - _startedAt).inSeconds;
+    String sinceStartText = "Started " + sinceStart.toString() + " second${sinceStart == 1 ? '' : 's'} ago";
 
     String percentDoneText = hasProgressData
-        ? ('${(percentDone * 100).toStringAsFixed(2)}%')
-        : 'Loading...';
-    String filesizeText =
-        hasProgressData ? ('$loadedSize / $expectedSize') : '';
+        ? (percentDone == 1 ? 'Rendering...' : '${(percentDone! * 100).toStringAsFixed(2)}%')
+        : 'Loading${isFromCache ? ' from cache' : ''}...';
+    String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    String thumbnailFileURL = widget.booruItem.thumbnailURL; // sample can be a video
+    String thumbnailFileURL = widget.booruItem.thumbnailURL!; // sample can be a video
     // widget.settingsHandler.previewMode == "Sample"
     //     ? widget.booruItem.sampleURL
     //     : widget.booruItem.thumbnailURL;
@@ -227,21 +328,23 @@ class _VideoAppState extends State<VideoApp> {
         "${widget.settingsHandler.cachePath}thumbnails/${thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1)}");
     // start opacity from 20%
     double opacityValue = hasProgressData
-        ? 0.2 +
-            0.8 * lerpDouble(0.0, 1.0, (percentDone == null ? 0 : percentDone))
+        ? 0.2 + 0.8 * lerpDouble(0.0, 1.0, percentDone ?? 0.66)!
         : 0.66;
-
-
     // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
     // print(opacityValue);
 
+
+    late ImageProvider provider;
+    if (preview.existsSync()){
+      provider = FileImage(preview);
+    } else {
+      provider = NetworkImage(thumbnailFileURL);
+    }
     return Container(
         decoration: new BoxDecoration(
           color: Colors.black,
           image: new DecorationImage(
-              image: preview.existsSync()
-                  ? FileImage(preview)
-                  : NetworkImage(thumbnailFileURL),
+              image: provider,
               fit: BoxFit.contain,
               colorFilter: new ColorFilter.mode(
                   Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),
@@ -258,7 +361,7 @@ class _VideoAppState extends State<VideoApp> {
                       quarterTurns: -1,
                       child: LinearProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
                           value: percentDone),
                     ),
                   ),
@@ -268,11 +371,17 @@ class _VideoAppState extends State<VideoApp> {
                           ? [
                               Container(
                                   width: MediaQuery.of(context).size.width - 30,
-                                  child: Image(
-                                      image: AssetImage(
-                                          'assets/images/loading.gif')))
+                                  child: Image(image: AssetImage('assets/images/loading.gif')))
                             ]
-                          : [
+                          : (isStopped
+                            ? [TextButton.icon(
+                                icon: Icon(Icons.play_arrow),
+                                label: Text('Restart loading', style: TextStyle(color: Colors.white)),
+                                onPressed: () {
+                                  setState(() { initVideo(); });
+                                },
+                              )]
+                            : [
                               Stack(children: [
                                 Text(
                                   percentDoneText,
@@ -309,14 +418,77 @@ class _VideoAppState extends State<VideoApp> {
                                   ),
                                 ),
                               ]),
-                            ]),
+                              Stack(children: [
+                                Text(
+                                  expectedSpeedText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 4
+                                      ..color = Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  expectedSpeedText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ]),
+                              Stack(children: [
+                                Text(
+                                  expectedTimeText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 4
+                                      ..color = Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  expectedTimeText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ]),
+                              Stack(children: [
+                                Text(
+                                  sinceStartText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    foreground: Paint()
+                                      ..style = PaintingStyle.stroke
+                                      ..strokeWidth = 4
+                                      ..color = Colors.black,
+                                  ),
+                                ),
+                                Text(
+                                  sinceStartText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ]),
+                              (widget.settingsHandler.mediaCache && cacheMode != 'Stream')
+                                ? TextButton.icon(
+                                  icon: Icon(Icons.stop),
+                                  label: Text('Stop loading', style: TextStyle(color: Colors.white)),
+                                  onPressed: killLoading,
+                                )
+                                : Text('')
+                            ]
+                          )
+                  ),
                   SizedBox(
                     width: 10,
                     child: RotatedBox(
                       quarterTurns: percentDone != null ? -1 : 1,
                       child: LinearProgressIndicator(
                           valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]),
+                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
                           value: percentDone),
                     ),
                   ),
@@ -329,9 +501,16 @@ class _VideoAppState extends State<VideoApp> {
   Widget build(BuildContext context) {
     bool isViewed = widget.viewedIndex == widget.index;
     bool initialized = _chewieController != null &&
-        _chewieController.videoPlayerController.value.initialized;
+        _chewieController!.videoPlayerController.value.isInitialized;
     // String vWidth = '';
     // String vHeight = '';
+
+    if (!isViewed) {
+      // reset zoom if not viewed
+      setState(() {
+        scaleController.scaleState = PhotoViewScaleState.initial;
+      });
+    }
 
     if (initialized) {
       // vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
@@ -354,7 +533,18 @@ class _VideoAppState extends State<VideoApp> {
     // ),
 
     return initialized
-      ? Chewie(controller: _chewieController)
+      ? PhotoView.customChild(
+          child: Chewie(controller: _chewieController!),
+          minScale: PhotoViewComputedScale.contained,
+          maxScale: PhotoViewComputedScale.covered * 8,
+          initialScale: PhotoViewComputedScale.contained,
+          enableRotation: false,
+          basePosition: Alignment.center,
+          controller: viewController,
+          // tightMode: true,
+          heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
+          scaleStateController: scaleController,
+        )
       : loadingElementBuilder();
   }
 }

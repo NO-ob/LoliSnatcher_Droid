@@ -16,9 +16,9 @@ import 'ShimmieHandler.dart';
 import 'SzurubooruHandler.dart';
 import 'e621Handler.dart';
 class BooruHandlerFactory{
-  BooruHandler booruHandler;
+  BooruHandler? booruHandler;
   int pageNum = 0;
-  List getBooruHandler(Booru booru, int limit, DBHandler dbHandler){
+  List getBooruHandler(Booru booru, int limit, DBHandler? dbHandler){
     switch (booru.type) {
       case("Moebooru"):
         pageNum = 1;
@@ -63,8 +63,7 @@ class BooruHandlerFactory{
         booruHandler = new FavouritesHandler(booru, limit);
         break;
     }
-    booruHandler.dbHandler = dbHandler;
-    print(booruHandler.booru.toString());
+    booruHandler!.dbHandler = dbHandler;
     return [booruHandler,pageNum];
   }
 }

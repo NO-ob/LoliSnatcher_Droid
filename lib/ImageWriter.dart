@@ -1,17 +1,14 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:async';
 import 'dart:io';
-import 'libBooru/BooruItem.dart';
-import 'ServiceHandler.dart';
+import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 class ImageWriter{
-  String path = "";
-  String cacheRootPath = "";
+  String? path = "";
+  String? cacheRootPath = "";
   ServiceHandler serviceHandler = new ServiceHandler();
   int SDKVer = 0;
   /**
@@ -20,12 +17,16 @@ class ImageWriter{
    * return Error - something went wrong
    */
   Future write(BooruItem item, SettingsHandler settingsHandler, String booruName) async{
-    int queryLastIndex = item.fileURL.lastIndexOf("?");
-    int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
-    String fileName = booruName + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
+    int queryLastIndex = item.fileURL!.lastIndexOf("?");
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL!.length;
+    String fileName = booruName + '_' + item.fileURL!.substring(item.fileURL!.lastIndexOf("/") + 1, lastIndex);
     // print(fileName);
 
-    await setPaths();
+    if (cacheRootPath == ""){
+      cacheRootPath = await serviceHandler.getCacheDir();
+    } else if (path == ""){
+      path = await serviceHandler.getExtDir();
+    }
 
     if(SDKVer == 0){
       if (Platform.isAndroid){
@@ -37,17 +38,18 @@ class ImageWriter{
     }
 
     // Don't do anything if file already exists
-    File image = new File(path+fileName);
+    File image = new File(path!+fileName);
     bool fileExists = await image.exists();
     if(fileExists || item.isSnatched) return null;
     try {
-      var response = await http.get(item.fileURL);
+      Uri fileURI = Uri.parse(item.fileURL!);
+      var response = await http.get(fileURI);
       if(SDKVer < 30){
-        await Directory(path).create(recursive:true);
+        await Directory(path!).create(recursive:true);
         await image.writeAsBytes(response.bodyBytes);
-        print("Image written: " + path+fileName);
+        print("Image written: " + path!+fileName);
         if (settingsHandler.jsonWrite){
-          File json = new File(path+fileName.split(".")[0]+".json");
+          File json = new File(path!+fileName.split(".")[0]+".json");
           await json.writeAsString(jsonEncode(item.toJSON()));
         }
         item.isSnatched = true;
@@ -61,7 +63,7 @@ class ImageWriter{
           return e;
         }
       } else {
-        print("files ext is " + item.fileExt);
+        print("files ext is " + item.fileExt!);
         //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
           var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt);
           if (writeResp != null){
@@ -73,7 +75,7 @@ class ImageWriter{
             return (fileName);
           }
         //} else {
-         // Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+         // Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
          // return 0;
         //}
 
@@ -88,24 +90,24 @@ class ImageWriter{
 
   Stream<int> writeMultiple (List<BooruItem> snatched, SettingsHandler settingsHandler, String booruName, int cooldown) async*{
     int snatchedCounter = 1;
-    List<String> existsList = new List();
-    List<String> failedList = new List();
+    List<String> existsList = [];
+    List<String> failedList = [];
     for (int i = 0; i < snatched.length ; i++){
       await Future.delayed(Duration(milliseconds: cooldown), () async{
         var snatchResult = await write(snatched.elementAt(i), settingsHandler, booruName);
         if (snatchResult == null){
-        existsList.add(snatched[i].fileURL);
+        existsList.add(snatched[i].fileURL!);
         } else if (snatchResult is !String) {
-        failedList.add(snatched[i].fileURL);
+        failedList.add(snatched[i].fileURL!);
         }
       });
       yield snatchedCounter++;
     }
     String toastString = "Snatching Complete ¡¡¡( •̀ ᴗ •́ )و!!! \n";
-    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2),colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 2),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
     if (existsList.length > 0){
       toastString += "Some files were already snatched! \n File Count: ${existsList.length} \n";
-      //Get.snackbar("Some files were already snatched!", "File Count: ${existsList.length}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor);
+      //Get.snackbar("Some files were already snatched!", "File Count: ${existsList.length}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
     }
     if (failedList.length > 0){
       toastString += "Snatching failed for some files!  \n File Count: ${failedList.length} \n";
@@ -115,40 +117,38 @@ class ImageWriter{
   }
 
   Future writeCache(String fileURL, String typeFolder) async{
-    String cachePath;
+    String? cachePath;
+    Uri fileURI = Uri.parse(fileURL);
     try {
-      var response = await http.get(fileURL);
-      await setPaths();
-      cachePath = cacheRootPath + typeFolder + "/";
+      var response = await http.get(fileURI);
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
+      cachePath = cacheRootPath! + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-        String unthumbedURL = fileURL.replaceAll('/thumb', '');
-        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
-      }
+      String fileName = parseThumbUrlToName(fileURL);
       File image = new File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes);
     } catch (e){
       print("Image Writer Exception:: cache write");
       print(e);
     }
-    return (cachePath+fileURL.substring(fileURL.lastIndexOf("/") + 1));
+    return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
 
   Future writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder) async{
     File image;
     String cachePath;
     try {
-      await setPaths();
-      cachePath = cacheRootPath + typeFolder + "/";
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
+      cachePath = cacheRootPath! + typeFolder + "/";
+      print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-        String unthumbedURL = fileURL.replaceAll('/thumb', '');
-        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
-      }
+      String fileName = parseThumbUrlToName(fileURL);
       image = new File(cachePath+fileName);
       await image.writeAsBytes(bytes);
     } catch (e){
@@ -159,18 +159,44 @@ class ImageWriter{
     return image;
   }
 
+  // Deletes file from given cache folder
+  // returns true if successful, false if there was an exception and null if file didn't exist
+  Future deleteFromCache(String fileURL, String typeFolder) async{
+    File file;
+    String cachePath;
+    try {
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
+      cachePath = cacheRootPath! + typeFolder + "/";
+      print(cachePath);
+
+      String fileName = parseThumbUrlToName(fileURL);
+      bool fileExists = await File(cachePath+fileName).exists();
+      if (fileExists){
+        file = new File(cachePath+fileName);
+        file.delete();
+        return true;
+      } else {
+        return null;
+      }
+    } catch (e){
+      print("Image Writer Exception");
+      print(e);
+      return false;
+    }
+  }
+
   Future getCachePath(String fileURL, String typeFolder) async{
     String cachePath;
     try {
-      await setPaths();
-      cachePath = cacheRootPath + typeFolder + "/";
+      if (cacheRootPath == ""){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      }
+      cachePath = await cacheRootPath! + typeFolder + "/";
       print(cachePath);
 
-      String fileName = fileURL.substring(fileURL.lastIndexOf("/") + 1);
-      if(fileName.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-        String unthumbedURL = fileURL.replaceAll('/thumb', '');
-        fileName = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
-      }
+      String fileName = parseThumbUrlToName(fileURL);
       bool fileExists = await File(cachePath+fileName).exists();
       if (fileExists){
         return cachePath+fileName;
@@ -184,24 +210,14 @@ class ImageWriter{
     }
   }
 
-
-  void setPaths() async {
-    if(path == ""){
-      if (Platform.isAndroid){
-        path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
-      } else if (Platform.isLinux){
-        path = Platform.environment['HOME'] + "/Pictures/LoliSnatcher/";
-      }
+  String parseThumbUrlToName(thumbURL) {
+    int queryLastIndex = thumbURL.lastIndexOf("?"); // Sankaku fix
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
+    String result = thumbURL.substring(thumbURL.lastIndexOf("/") + 1, lastIndex);
+    if(result.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+      String unthumbedURL = thumbURL.replaceAll('/thumb', '');
+      result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
     }
-
-    if(cacheRootPath == ""){
-      if (Platform.isAndroid){
-        cacheRootPath = await serviceHandler.getCacheDir();
-      } else if (Platform.isLinux){
-        cacheRootPath = Platform.environment['HOME'] + "/.loliSnatcher/cache/";
-      }
-    }
-
-    return;
+    return result;
   }
 }
