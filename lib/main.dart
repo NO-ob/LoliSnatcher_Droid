@@ -180,6 +180,7 @@ class _HomeState extends State<Home> {
       });
     }*/
      return Scaffold(
+       resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: activeTitle,
             actions: <Widget>[
@@ -212,7 +213,7 @@ class _HomeState extends State<Home> {
             child: Column(
               children:<Widget>[
                 Container(
-                  padding: new EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5, 0),
+                  padding: new EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5,0),
                   width: double.infinity,
                   child: Row(
                     mainAxisSize: MainAxisSize.max,

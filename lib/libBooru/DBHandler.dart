@@ -81,15 +81,17 @@ class DBHandler{
       result = await db!.rawQuery(
           "SELECT booruItemID as id FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
               "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
-              "HAVING COUNT(*) = ${tags.length} LIMIT $limit OFFSET $offset",tags);
+              "HAVING COUNT(*) = ${tags.length} ORDER BY id DESC LIMIT $limit OFFSET $offset",tags);
     } else {
       result = await db!.rawQuery(
-          "SELECT id FROM BooruItem LIMIT $limit OFFSET $offset");
+          "SELECT id FROM BooruItem ORDER BY id DESC LIMIT $limit OFFSET $offset");
     }
     if (result.isNotEmpty){
       for(int i=0; i < result.length; i++){
         BooruItem? temp = await getBooruItem(result[i]["id"]);
-        fetched.add(temp!);
+        if (temp != null){
+          fetched.add(temp);
+        }
       }
     }
     return fetched;

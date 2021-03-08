@@ -1,4 +1,5 @@
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
+import 'package:flutter/material.dart';
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
@@ -6,7 +7,9 @@ import 'BooruItem.dart';
 class FavouritesHandler extends BooruHandler{
   List<BooruItem>? fetched = [];
   DBHandler? dbHandler;
-  FavouritesHandler(Booru booru,int limit): super(booru,limit);
+  FavouritesHandler(Booru booru,int limit): super(booru,limit){
+    print("new favourites handler");
+  }
 
 
   Future Search(String tags, int pageNum) async{
@@ -20,8 +23,17 @@ class FavouritesHandler extends BooruHandler{
       fetched = [];
     }
     fetched!.addAll(await dbHandler!.searchDB(tags,fetched!.length.toString(),limit.toString()));
+    print("dbhandler fetched length is $length");
     prevTags = tags;
-    if (fetched!.length == length){locked = true;}
+    if (fetched!.isEmpty){
+      print("dbhandler dbLocked");
+      locked = true;
+    } else {
+      if (fetched!.length == length){
+        print("dbhandler dbLocked");
+        locked = true;
+      }
+    }
     isActive = false;
     return fetched;
   }

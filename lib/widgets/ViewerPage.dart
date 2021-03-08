@@ -61,6 +61,7 @@ class _ViewerPageState extends State<ViewerPage> {
       print("searchglobals index: ${widget.searchGlobals.viewedIndex!.value}");
       widget.searchGlobals.viewedIndex!.value = widget.index;
     });
+    kbFocusNode.requestFocus();
   }
 
   @override
@@ -108,6 +109,13 @@ class _ViewerPageState extends State<ViewerPage> {
           controller?.jumpToPage(widget.searchGlobals.viewedIndex!.value + 1);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
           widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
+        } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)){
+          if (widget.settingsHandler.dbEnabled){
+            setState(() {
+              widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite;
+              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value]);
+            });
+          }
         }
       },
       child: PreloadPageView.PageView.builder( // PreloadPageView.builder(
@@ -154,6 +162,7 @@ class _ViewerPageState extends State<ViewerPage> {
         onPageChanged: (int index) {
           setState(() {
             widget.searchGlobals.viewedIndex!.value = index;
+            kbFocusNode.requestFocus();
           });
           // print('Page changed ' + index.toString());
         },

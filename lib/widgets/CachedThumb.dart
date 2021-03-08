@@ -48,12 +48,15 @@ class _CachedThumbState extends State<CachedThumb> {
       });
     }
 
+    //a few boorus doesn't work without a browser useragent
+    Map<String,String> headers = {"user-agent": "Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"};
+
     // Otherwise start loading and subscribe to progress
     _client = Dio();
     _dioCancelToken = CancelToken();
     _client!.get<List<int>>(
       widget.thumbURL,
-      options: Options(responseType: ResponseType.bytes),
+      options: Options(responseType: ResponseType.bytes, headers: headers),
       cancelToken: _dioCancelToken,
       onReceiveProgress: (received, total) {
         _total = total;

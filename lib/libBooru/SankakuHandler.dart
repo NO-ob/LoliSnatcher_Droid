@@ -38,13 +38,13 @@ class SankakuHandler extends BooruHandler{
       ? {
         "Content-Type":"application/json",
         "Accept": "application/json",
-        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"
+        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
       }
       : {
         "Content-Type":"application/json",
         "Accept": "application/json",
         "Authorization": authToken,
-        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"
+        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
       };
       Uri uri = Uri.parse(url);
       final response = await http.get(uri, headers: headers);
