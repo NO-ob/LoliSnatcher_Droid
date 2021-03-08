@@ -188,6 +188,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             widget._focusNode.unfocus();
           },
           onTap: (){
+
           },
           decoration: InputDecoration(
             hintText: "Enter Tags",

@@ -2,12 +2,10 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
-
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
-
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 

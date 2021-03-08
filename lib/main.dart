@@ -211,36 +211,44 @@ class _HomeState extends State<Home> {
           drawer: Drawer(
             child: Column(
               children:<Widget>[
+                Container(
+                  padding: new EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5, 0),
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      //Tags/Search field
+                      //NewTagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus,widget.settingsHandler, searchAction),
+                      TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
+                      IconButton(
+                        padding: const EdgeInsets.all(5),
+                        icon: Icon(Icons.search),
+                        onPressed: () {
+                          searchTagsController.clearComposing();
+                          searchBoxFocus.unfocus();
+                          searchAction(searchTagsController.text);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
                 Expanded(
-                    child: ListView(
+                    child:
+                    Listener(
+                        onPointerDown: (event){
+                          print("pointer down");
+                          if(searchBoxFocus.hasFocus){
+                            searchBoxFocus.unfocus();
+                          }
+                        },
+                    child:
+                    ListView(
                       children: [
-                        Container(
-                          padding: new EdgeInsets.fromLTRB(10, 10, 5, 10),
-                          width: double.infinity,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              //Tags/Search field
-                              //NewTagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus,widget.settingsHandler, searchAction),
-                              TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
-                              IconButton(
-                                padding: const EdgeInsets.all(5),
-                                icon: Icon(Icons.search),
-                                onPressed: () {
-                                  searchTagsController.clearComposing();
-                                  searchBoxFocus.unfocus();
-                                  searchAction(searchTagsController.text);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
                         Container(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
-                              const SizedBox(width: 5),
                               const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
                               Expanded(
                                 child: DropdownButton<SearchGlobals>(
@@ -379,7 +387,7 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                       ],
-                    )
+                    ),)
                 ),
                 Container(
                   child: Align(
