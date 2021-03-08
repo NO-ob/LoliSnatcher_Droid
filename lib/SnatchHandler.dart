@@ -84,7 +84,7 @@ class SnatchHandler {
     } else {
       limit = 100;
     }
-    List temp = new BooruHandlerFactory().getBooruHandler(booru, limit, null);
+    List temp = new BooruHandlerFactory().getBooruHandler(booru, limit, settingsHandler!.dbHandler);
     booruHandler = temp[0];
     page = temp[1];
     ServiceHandler.displayToast("Snatching Images \n Do not close the app!");

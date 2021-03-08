@@ -18,8 +18,7 @@ class StaggeredView extends StatefulWidget {
   final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final SnatchHandler snatchHandler;
-  final FocusNode searchBoxFocus;
-  StaggeredView(this.settingsHandler, this.searchGlobals, this.snatchHandler,this.searchBoxFocus);
+  StaggeredView(this.settingsHandler, this.searchGlobals, this.snatchHandler);
   @override
   _StaggeredState createState() => _StaggeredState();
 }

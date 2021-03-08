@@ -20,37 +20,66 @@ class TagSearchBox extends StatefulWidget {
 
 class _TagSearchBoxState extends State<TagSearchBox> {
   OverlayEntry? _overlayEntry;
-
+  String input = "";
+  String lastTag = "";
+  List splitInput = [];
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
         .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
     widget.searchGlobals.booruHandler = temp[0];
     widget.searchGlobals.pageNum = temp[1];
+    if (widget.searchGlobals.booruHandler!.booru.type == "Szurubooru" &&
+        widget.searchGlobals.booruHandler!.booru.apiKey != "" &&
+        widget.searchGlobals.booruHandler!.booru.userID != "") {
+      widget.searchGlobals.booruHandler!.tagSearchEnabled = false;
+    } else if (widget.searchGlobals.booruHandler!.booru.type == "Shimmie" &&
+        widget.searchGlobals.booruHandler!.booru.baseURL!
+            .contains("rule34.paheal.net")) {
+      widget.searchGlobals.booruHandler!.tagSearchEnabled = false;
+    }
   }
   @override
   void initState() {
     super.initState();
-    widget._focusNode.addListener(_updateOverLay);
+    widget._focusNode.addListener(onFocusChange);
+    input = widget.searchTagsController.text;
+    splitInput = input.split(" ");
+    lastTag = input;
   }
-
-  void updateOverlay() {
-    setState(() {
-      if (this._overlayEntry != null) {
+  void onFocusChange(){
+    if (widget._focusNode.hasFocus){
+      createOverlay();
+    } else {
+      removeOverlay();
+    }
+  }
+  void createOverlay() {
+    if (widget._focusNode.hasFocus){
+      if (this._overlayEntry == null){
+        tagStuff();
+        this._overlayEntry = _createOverlayEntry();
+      }
+      this._updateOverlay();
+    }
+  }
+  void removeOverlay(){
+    if (this._overlayEntry != null){
+      if (this._overlayEntry!.mounted) {
         this._overlayEntry!.remove();
       }
-      this._updateOverLay();
-    });
+    }
   }
-
-  void _updateOverLay() {
+  void _updateOverlay() {
     if (widget._focusNode.hasFocus) {
       print("textbox is focused");
-      this._overlayEntry = this._createOverlayEntry();
-      if (this._overlayEntry != null) {
+      if (!this._overlayEntry!.mounted) {
         Overlay.of(context)!.insert(this._overlayEntry!);
+      } else {
+        tagStuff();
+        this._overlayEntry!.markNeedsBuild();
       }
     } else {
-      if (this._overlayEntry != null) {
+      if (this._overlayEntry!.mounted) {
         this._overlayEntry!.remove();
       }
     }
@@ -58,34 +87,31 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   @override
   void dispose() {
+    removeOverlay();
     widget._focusNode.unfocus();
     super.dispose();
   }
-
+  void tagStuff(){
+    if (widget.searchGlobals.booruHandler!.tagSearchEnabled) {
+      input = widget.searchTagsController.text;
+      splitInput = input.split(" ");
+      lastTag = input;
+      if (splitInput.length > 1) {
+        // Get last tag in the input and remove minus (exclude symbol)
+        // TODO /bug?: use the tag behind the current cursor position, not the last tag
+        setState(() {
+          lastTag = splitInput[splitInput.length - 1].replaceAll(
+              new RegExp(r'^-'), '');
+        });
+      }
+    }
+  }
   OverlayEntry? _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
     setBooruHandler();
     widget.searchGlobals.booruHandler!.limit = 20;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
-    if (widget.searchGlobals.booruHandler!.booru.type == "Szurubooru" &&
-        widget.searchGlobals.booruHandler!.booru.apiKey != "" &&
-        widget.searchGlobals.booruHandler!.booru.userID != "") {
-      widget.searchGlobals.booruHandler!.tagSearchEnabled = true;
-    } else if (widget.searchGlobals.booruHandler!.booru.type == "Shimmie" &&
-        widget.searchGlobals.booruHandler!.booru.baseURL!
-            .contains("rule34.paheal.net")) {
-      widget.searchGlobals.booruHandler!.tagSearchEnabled = true;
-    }
-    if (widget.searchGlobals.booruHandler!.tagSearchEnabled) {
-      String input = widget.searchTagsController.text;
-      List<String> splitInput = input.split(" ");
-      String lastTag = input;
-      if (splitInput.length > 1) {
-        // Get last tag in the input and remove minus (exclude symbol)
-        // TODO /bug?: use the tag behind the current cursor position, not the last tag
-        lastTag = splitInput[splitInput.length - 1].replaceAll(new RegExp(r'^-'), '');
-      }
       return OverlayEntry(
         builder: (context) => Positioned(
           left: offset.dx,
@@ -105,19 +131,25 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           shrinkWrap: true,
                           itemCount: snapshot.data.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                                title: Text(snapshot.data[index]),
-                                onTap: (() {
-                                  // widget._focusNode.unfocus();
-                                  // Keep minus if its in the beggining of current (last) tag
-                                  bool isExclude = new RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
-                                  String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + snapshot.data[index] + " ";
-                                  widget.searchTagsController.text = newInput;
+                            if (snapshot.data[index].isNotEmpty){
+                              return ListTile(
+                                  title: Text(snapshot.data[index]),
+                                  onTap: (() {
+                                    // widget._focusNode.unfocus();
+                                    // Keep minus if its in the beggining of current (last) tag
+                                    bool isExclude = new RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
+                                    String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + snapshot.data[index] + " ";
+                                    setState(() {
+                                      widget.searchTagsController.text = newInput;
 
-                                  // Set the cursor to the end of the search and reset the overlay data
-                                  widget.searchTagsController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
-                                  updateOverlay();
-                                }));
+                                      // Set the cursor to the end of the search and reset the overlay data
+                                      widget.searchTagsController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
+                                    });
+                                    this._overlayEntry!.markNeedsBuild();
+                                  }));
+                            } else {
+                              return Container(width: 0,height: 0,);
+                            }
                           });
                     } else {
                       return Center(child: CircularProgressIndicator());
@@ -130,23 +162,32 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         ),
       );
     }
-  }
 
   @override
   Widget build(BuildContext context) {
+    input = widget.searchTagsController.text;
+    splitInput = input.split(" ");
+    lastTag = input;
+    if (splitInput.length > 1) {
+      // Get last tag in the input and remove minus (exclude symbol)
+      // TODO /bug?: use the tag behind the current cursor position, not the last tag
+      lastTag = splitInput[splitInput.length - 1].replaceAll(new RegExp(r'^-'), '');
+    }
     return Expanded(
         child: TextField(
           controller: widget.searchTagsController,
           focusNode: widget._focusNode,
           onChanged: (text) {
-            updateOverlay();
+            createOverlay();
           },
           onSubmitted: (String text) {
-            widget.searchAction(text);
             widget._focusNode.unfocus();
+            widget.searchAction(text);
           },
           onEditingComplete: (){
             widget._focusNode.unfocus();
+          },
+          onTap: (){
           },
           decoration: InputDecoration(
             hintText: "Enter Tags",

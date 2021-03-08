@@ -22,11 +22,7 @@ class ImageWriter{
     String fileName = booruName + '_' + item.fileURL!.substring(item.fileURL!.lastIndexOf("/") + 1, lastIndex);
     // print(fileName);
 
-    if (cacheRootPath == ""){
-      cacheRootPath = await serviceHandler.getCacheDir();
-    } else if (path == ""){
-      path = await serviceHandler.getExtDir();
-    }
+    await setPaths();
 
     if(SDKVer == 0){
       if (Platform.isAndroid){
@@ -121,9 +117,7 @@ class ImageWriter{
     Uri fileURI = Uri.parse(fileURL);
     try {
       var response = await http.get(fileURI);
-      if (cacheRootPath == ""){
-        cacheRootPath = await serviceHandler.getCacheDir();
-      }
+      await setPaths();
       cachePath = cacheRootPath! + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
 
@@ -141,9 +135,7 @@ class ImageWriter{
     File image;
     String cachePath;
     try {
-      if (cacheRootPath == ""){
-        cacheRootPath = await serviceHandler.getCacheDir();
-      }
+      await setPaths();
       cachePath = cacheRootPath! + typeFolder + "/";
       print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
@@ -165,9 +157,7 @@ class ImageWriter{
     File file;
     String cachePath;
     try {
-      if (cacheRootPath == ""){
-        cacheRootPath = await serviceHandler.getCacheDir();
-      }
+      await setPaths();
       cachePath = cacheRootPath! + typeFolder + "/";
       print(cachePath);
 
@@ -190,9 +180,7 @@ class ImageWriter{
   Future getCachePath(String fileURL, String typeFolder) async{
     String cachePath;
     try {
-      if (cacheRootPath == ""){
-        cacheRootPath = await serviceHandler.getCacheDir();
-      }
+      await setPaths();
       cachePath = await cacheRootPath! + typeFolder + "/";
       print(cachePath);
 
@@ -219,5 +207,14 @@ class ImageWriter{
       result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
     }
     return result;
+  }
+  Future<bool> setPaths() async{
+    if (cacheRootPath == ""){
+      cacheRootPath = await serviceHandler.getCacheDir();
+    }
+    if (path == ""){
+      path = await serviceHandler.getExtDir();
+    }
+    return true;
   }
 }

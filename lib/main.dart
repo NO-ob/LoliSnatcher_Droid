@@ -179,14 +179,7 @@ class _HomeState extends State<Home> {
         }
       });
     }*/
-    return Listener(
-        onPointerDown: (event){
-          if(searchBoxFocus.hasFocus){
-            print("destroyed overlay");
-            searchBoxFocus.unfocus();
-          }
-        },
-        child: Scaffold(
+     return Scaffold(
           appBar: AppBar(
             title: activeTitle,
             actions: <Widget>[
@@ -228,11 +221,14 @@ class _HomeState extends State<Home> {
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               //Tags/Search field
+                              //NewTagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus,widget.settingsHandler, searchAction),
                               TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
                               IconButton(
                                 padding: const EdgeInsets.all(5),
                                 icon: Icon(Icons.search),
                                 onPressed: () {
+                                  searchTagsController.clearComposing();
+                                  searchBoxFocus.unfocus();
                                   searchAction(searchTagsController.text);
                                 },
                               ),
@@ -412,7 +408,7 @@ class _HomeState extends State<Home> {
               ],
             ),
           ),
-        )
+       // )
     );
   }
   /** If first run is true the default tags are loaded using the settings controller then parsed to the images widget
@@ -462,7 +458,7 @@ class _HomeState extends State<Home> {
                       if (widget.settingsHandler.previewDisplay == "Waterfall"){
                         return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
                       } else {
-                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
+                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
                       }
 
                     } else {
@@ -474,7 +470,7 @@ class _HomeState extends State<Home> {
               if (widget.settingsHandler.previewDisplay == "Waterfall"){
                 return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
               } else {
-                return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler,searchBoxFocus);
+                return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
               }
             }
           } else {
