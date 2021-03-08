@@ -3,11 +3,10 @@ import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:http/http.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:http/io_client.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
@@ -43,11 +42,9 @@ class _VideoAppState extends State<VideoApp> {
   Timer? _checkInterval, _debounceBytes;
   bool isFromCache = false, isStopped = false;
 
-  IOClient? _client;
-  StreamedResponse? _response;
-  StreamSubscription? _subscription;
-
-  List<int> _bytes = [];
+  Dio? _client;
+  CancelToken? _dioCancelToken;
+  // Uint8List _totalBytes = Uint8List(0);
   File? _video;
 
   /// Author: [Nani-Sore] ///
@@ -102,59 +99,60 @@ class _VideoAppState extends State<VideoApp> {
     }
 
     // Otherwise start loading and subscribe to progress
-    _client = IOClient();
-    _response = await _client!.send(Request('GET', Uri.parse(widget.booruItem.fileURL!)));
-    _total = _response!.contentLength!;
-
-    _subscription = _response!.stream.listen(
-      _onBytesAdded,
-      onError: (e) {
-        killLoading();
-        print(e);
+    _client = Dio();
+    _dioCancelToken = CancelToken();
+    _client!.get<List<int>>(
+      widget.booruItem.fileURL!,
+      options: Options(responseType: ResponseType.bytes),
+      cancelToken: _dioCancelToken,
+      onReceiveProgress: (received, total) {
+        _total = total;
+        _onBytesAdded(received);
       },
-      cancelOnError: true,
-      onDone: () async {
-        // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-        if (_received > (_total * 0.95)) {
-          final File? cacheFile = await imageWriter.writeCacheFromBytes(
-              widget.booruItem.fileURL!, _bytes, 'media');
-          if (cacheFile != null) {
-            //Restate only when just Caching
-            if (cacheMode == 'Cache') {
-              setState(() {
-                _video = cacheFile;
-                // Start video after caching
-                initPlayer();
-              });
-            } else {
+    ).then((value) async {
+      // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
+      if (value.data != null && _received > (_total * 0.95)) {
+        final File? cacheFile = await imageWriter.writeCacheFromBytes(
+            widget.booruItem.fileURL!, value.data!, 'media');
+        if (cacheFile != null) {
+          //Restate only when just Caching
+          if (cacheMode == 'Cache') {
+            setState(() {
               _video = cacheFile;
-            }
+              // Start video after caching
+              initPlayer();
+            });
+          } else {
+            _video = cacheFile;
           }
-
-          // clear bytes array
-          // _bytes = []
-        } else {
-          //TODO: show error message
-          killLoading();
-          print('Image load incomplete'); // Throw an error, allow to retry?
         }
+      } else {
+        //TODO: show error message
+        killLoading();
+        print('Video load incomplete'); // Throw an error, allow to retry?
       }
-    );
+      return value;
+    }).catchError((e) {
+      if (CancelToken.isCancel(e)) {
+        // print('Canceled by user: ${widget.booruItem.fileURL} | $e');
+      } else {
+        killLoading();
+        print('Dio request cancelled: $e');
+      }
+    });
   }
 
   /// Author: [Nani-Sore] ///
-  void _onBytesAdded(List<int> addedBytes) {
+  void _onBytesAdded(int received) {
     // always save incoming bytes, but restate only after [debounceDelay]MS
     const int debounceDelay = 50;
     bool isActive = _debounceBytes?.isActive ?? false;
     bool isAllowedToRestate = cacheMode == 'Cache' || !(_videoController.value.isInitialized);
     if (isActive || !isAllowedToRestate) {
-      _bytes.addAll(addedBytes);
-      _received += addedBytes.length;
+      _received = received;
     } else {
       setState(() {
-        _bytes.addAll(addedBytes);
-        _received += addedBytes.length;
+        _received = received;
       });
       _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
     }
@@ -176,8 +174,8 @@ class _VideoAppState extends State<VideoApp> {
   void killLoading() {
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
-    _subscription?.cancel();
-    _client?.close();
+    _dioCancelToken?.cancel();
+    // _client?.close(force: true);
 
     setState(() {
       _total = 0;
@@ -192,7 +190,6 @@ class _VideoAppState extends State<VideoApp> {
       isStopped = true;
 
       _video = null;
-      _bytes = [];
     });
   }
 
@@ -205,8 +202,8 @@ class _VideoAppState extends State<VideoApp> {
     _videoController.dispose();
     _chewieController?.dispose();
 
-    _subscription?.cancel();
-    _client?.close();
+    _dioCancelToken?.cancel();
+    // _client?.close(force: true);
     super.dispose();
   }
 
@@ -500,10 +497,7 @@ class _VideoAppState extends State<VideoApp> {
   @override
   Widget build(BuildContext context) {
     bool isViewed = widget.viewedIndex == widget.index;
-    bool initialized = _chewieController != null &&
-        _chewieController!.videoPlayerController.value.isInitialized;
-    // String vWidth = '';
-    // String vHeight = '';
+    bool initialized = _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
 
     if (!isViewed) {
       // reset zoom if not viewed
@@ -513,8 +507,6 @@ class _VideoAppState extends State<VideoApp> {
     }
 
     if (initialized) {
-      // vWidth = _chewieController.videoPlayerController.value.size.width.toStringAsFixed(0);
-      // vHeight = _chewieController.videoPlayerController.value.size.height.toStringAsFixed(0);
       if (isViewed) {
         // Reset video time if in view
         _videoController.seekTo(Duration());
@@ -526,11 +518,6 @@ class _VideoAppState extends State<VideoApp> {
         _videoController.pause();
       }
     }
-
-    // Show video dimensions on the top
-    // Container(
-    //   child: MediaQuery.of(context).orientation == Orientation.portrait ? Text(vWidth+'x'+vHeight) : null
-    // ),
 
     return initialized
       ? PhotoView.customChild(
