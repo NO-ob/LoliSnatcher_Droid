@@ -4,10 +4,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
-import 'package:http/http.dart';
-import 'package:http/io_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -25,10 +24,9 @@ class _CachedThumbState extends State<CachedThumb> {
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
   bool? isFromCache;
-  IOClient? _client;
-  StreamedResponse? _response;
-  StreamSubscription? _subscription;
-  List<int> _bytes = [];
+  Timer? _debounceBytes;
+  Dio? _client;
+  CancelToken? _dioCancelToken;
   Uint8List _totalBytes = Uint8List(0);
 
   /// Author: [Nani-Sore] ///
@@ -42,47 +40,63 @@ class _CachedThumbState extends State<CachedThumb> {
         // multiple restates in the same function is usually bad practice, but we need this to notify user how the file is loaded while we await for bytes
         isFromCache = true;
       });
-      Uint8List tempBytes = await file.readAsBytes();
-      setState(() {
-        _totalBytes = tempBytes;
-      });
+      // load bytes first, then trigger an empty restate
+      _totalBytes = await file.readAsBytes();
+      setState(() {});
       return;
+    } else {
+      setState(() {
+        isFromCache = false;
+      });
     }
 
     // Otherwise start loading and subscribe to progress
-    _client = IOClient();
-    _response = await _client!.send(Request('GET', Uri.parse(widget.thumbURL)));
-    _total = _response!.contentLength!;
-
-    setState(() {
-      isFromCache = false;
-    });
-
-    _subscription = _response!.stream.listen(
-          (value) {
-          setState(() {
-            _bytes.addAll(value);
-            _received += value.length;
-          });
-        },
-        onError: (e) {
-          print(e);
-        },
-        cancelOnError: true,
-        onDone: () async {
-          if (_received > (_total * 0.95)) {
-            // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-            setState((){
-              _totalBytes = Uint8List.fromList(_bytes);
-            });
-            if (widget.settingsHandler.imageCache) {
-              await imageWriter.writeCacheFromBytes(widget.thumbURL, _bytes, 'thumbnails');
-            }
-          } else {
-            print('Thumbnail load incomplete');
-          }
+    _client = Dio();
+    _dioCancelToken = CancelToken();
+    _client!.get<List<int>>(
+      widget.thumbURL,
+      options: Options(responseType: ResponseType.bytes),
+      cancelToken: _dioCancelToken,
+      onReceiveProgress: (received, total) {
+        _total = total;
+        _onBytesAdded(received);
+      },
+    ).then((value) {
+      // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
+      if (value.data != null && _received > (_total * 0.95)) {
+        // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
+        setState((){
+          _totalBytes = Uint8List.fromList(value.data!);
+        });
+        if (widget.settingsHandler.imageCache) {
+          imageWriter.writeCacheFromBytes(widget.thumbURL, value.data!, 'thumbnails');
         }
-    );
+      } else {
+        print('Thumbnail load incomplete');
+      }
+      return value;
+    }).catchError((e) {
+      if (CancelToken.isCancel(e)) {
+        // print('Canceled by user: $e');
+      } else {
+        print('Dio request cancelled: $e');
+      }
+    });
+  }
+
+  /// Author: [Nani-Sore] ///
+  void _onBytesAdded(int addedBytes) {
+    // always save incoming bytes, but restate only after [debounceDelay]MS
+    const int debounceDelay = 50;
+    bool isActive = _debounceBytes?.isActive ?? false;
+    if (isActive) {
+      _received = addedBytes;
+    } else {
+      setState(() {
+        _received = addedBytes;
+      });
+      _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
+    }
   }
 
   @override
@@ -95,8 +109,9 @@ class _CachedThumbState extends State<CachedThumb> {
   @override
   void dispose() {
     super.dispose();
-    _subscription?.cancel();
-    _client?.close();
+    _debounceBytes?.cancel();
+    _dioCancelToken?.cancel();
+    // _client?.close(force: true);
   }
 
   Widget loadingElementBuilder(BuildContext ctx, Widget child, ImageChunkEvent? loadingProgress) {

@@ -23,6 +23,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   http: ^0.13.0
+  dio: ^4.0.0-beta6
   xml: ^5.0.2
   flutter_launcher_icons: ^0.9.0
   get: ^4.0.0-nullsafety.2

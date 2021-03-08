@@ -3,11 +3,10 @@ import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:http/http.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/io_client.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/Tools.dart';
@@ -36,11 +35,8 @@ class _MediaViewerState extends State<MediaViewer> {
   bool isFromCache = false, isStopped = false;
 
   String? imageURL;
-  IOClient? _client;
-  StreamedResponse? _response;
-  StreamSubscription? _subscription;
-
-  List<int> _bytes = [];
+  Dio? _client;
+  CancelToken? _dioCancelToken;
   Uint8List _totalBytes = Uint8List(0);
 
   /// Author: [Nani-Sore] ///
@@ -56,61 +52,62 @@ class _MediaViewerState extends State<MediaViewer> {
         // multiple restates in the same function is usually bad practice, but we need this to notify user how the file is loaded while we await for bytes
         isFromCache = true;
       });
-      Uint8List tempBytes = await file.readAsBytes();
-      setState(() {
-        _totalBytes = tempBytes;
-      });
+      // load bytes first, then trigger an empty restate
+      _totalBytes = await file.readAsBytes();
+      setState(() {});
       return;
     }
 
     // Otherwise start loading and subscribe to progress
-    _client = IOClient();
-    _response = await _client!.send(Request('GET', Uri.parse(imageURL!)));
-    _total = _response!.contentLength!;
-
-    _subscription = _response!.stream.listen(
-      _onBytesAdded,
-      onError: (e) {
-        killLoading();
-        print(e);
+    _client = Dio();
+    _dioCancelToken = CancelToken();
+    _client!.get<List<int>>(
+      imageURL!,
+      options: Options(responseType: ResponseType.bytes),
+      cancelToken: _dioCancelToken,
+      onReceiveProgress: (received, total) {
+        _total = total;
+        _onBytesAdded(received);
       },
-      cancelOnError: true,
-      onDone: () async {
-        // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-        if (_received > (_total * 0.95)) {
-          setState((){
-            _totalBytes = Uint8List.fromList(_bytes);
-          });
+    ).then((value) {
+      // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
+      if (_received > (_total * 0.95)) {
+        setState((){
+          _totalBytes = Uint8List.fromList(value.data!);
+        });
 
-          _checkInterval?.cancel();
+        _checkInterval?.cancel();
 
-          if(widget.settingsHandler.mediaCache) {
-            // final File cacheFile = await
-            imageWriter.writeCacheFromBytes(imageURL!, _bytes, 'media');
-          }
-          // clear bytes array, because everything is saved in _totalBytes now
-          _bytes = [];
-        } else {
-          //TODO: show error message
-          killLoading();
-          print('Image load incomplete'); // Throw an error, allow to retry?
+        if(widget.settingsHandler.mediaCache) {
+          // final File cacheFile = await
+          imageWriter.writeCacheFromBytes(imageURL!, value.data!, 'media');
         }
+      } else {
+        //TODO: show error message
+        killLoading();
+        print('Image load incomplete'); // Throw an error, allow to retry?
       }
-    );
+      return value;
+    }).catchError((e) {
+      if (CancelToken.isCancel(e)) {
+        // print('Canceled by user: $imageURL | $e');
+      } else {
+        killLoading();
+        print('Dio request cancelled: $e');
+      }
+    });
   }
 
   /// Author: [Nani-Sore] ///
-  void _onBytesAdded(List<int> addedBytes) {
+  void _onBytesAdded(int received) {
     // always save incoming bytes, but restate only after [debounceDelay]MS
     const int debounceDelay = 50;
     bool isActive = _debounceBytes?.isActive ?? false;
     if (isActive) {
-      _bytes.addAll(addedBytes);
-      _received += addedBytes.length;
+      _received = received;
     } else {
       setState(() {
-        _bytes.addAll(addedBytes);
-        _received += addedBytes.length;
+        _received = received;
       });
       _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
     }
@@ -150,8 +147,8 @@ class _MediaViewerState extends State<MediaViewer> {
   void killLoading() {
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
-    _subscription?.cancel();
-    _client?.close();
+    _dioCancelToken?.cancel();
+    // _client?.close(force: true);
 
     setState(() {
       _total = 0;
@@ -165,7 +162,6 @@ class _MediaViewerState extends State<MediaViewer> {
       isFromCache = false;
       isStopped = true;
 
-      _bytes = [];
       _totalBytes = Uint8List(0);
     });
   }
@@ -175,15 +171,14 @@ class _MediaViewerState extends State<MediaViewer> {
     super.dispose();
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
-    _subscription?.cancel();
-    _client?.close();
+    _dioCancelToken?.cancel();
+    // _client?.close(force: true);
   }
 
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
     print(scaleState);
   }
-
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     print(viewState);
   }
@@ -413,23 +408,21 @@ class _MediaViewerState extends State<MediaViewer> {
     //   ),
     // )
 
-    return _totalBytes.length == 0
-        ? Center(
-          child: loadingElementBuilder(context, null),
-        )
-        : PhotoView(
-          //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-          imageProvider: ResizeImage(MemoryImage(_totalBytes), width: 4096), //MemoryImage(_totalBytes),
-          minScale: PhotoViewComputedScale.contained,
-          maxScale: PhotoViewComputedScale.covered * 8,
-          initialScale: PhotoViewComputedScale.contained,
-          enableRotation: false,
-          basePosition: Alignment.center,
-          controller: viewController,
-          // tightMode: true,
-          heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
-          scaleStateController: scaleController,
-          loadingBuilder: loadingElementBuilder,
-        );
+    return (_totalBytes.length == 0)
+      ? Center(child: loadingElementBuilder(context, null))
+      : PhotoView(
+        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+        imageProvider: ResizeImage(MemoryImage(_totalBytes), width: 4096), //MemoryImage(_totalBytes),
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.covered * 8,
+        initialScale: PhotoViewComputedScale.contained,
+        enableRotation: false,
+        basePosition: Alignment.center,
+        controller: viewController,
+        // tightMode: true,
+        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
+        scaleStateController: scaleController,
+        loadingBuilder: loadingElementBuilder,
+      );
   }
 }

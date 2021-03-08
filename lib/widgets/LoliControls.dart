@@ -339,13 +339,8 @@ class _LoliControlsState extends State<LoliControls>
           color: Colors.transparent,
           child: Center(
             child: Stack(
+              alignment: Alignment.center,
               children: [
-                if (_latestValue.isBuffering)
-                  Container(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
                 AnimatedOpacity(
                   opacity:
                       (!_latestValue.isPlaying && !_dragging)
@@ -375,7 +370,15 @@ class _LoliControlsState extends State<LoliControls>
                       )
                     ),
                   ),
-                )
+                ),
+                if (_latestValue.isBuffering)
+                  Container(
+                    child: Center(
+                      widthFactor: 3,
+                      heightFactor: 3,
+                      child: CircularProgressIndicator(strokeWidth: 5),
+                    ),
+                  ),
               ]
             ),
           ),
