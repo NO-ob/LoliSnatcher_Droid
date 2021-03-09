@@ -209,11 +209,20 @@ class ImageWriter{
     return result;
   }
   Future<bool> setPaths() async{
-    if (cacheRootPath == ""){
-      cacheRootPath = await serviceHandler.getCacheDir();
+    if(path == ""){
+      if (Platform.isAndroid){
+        path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
+      } else if (Platform.isLinux){
+        path = "${Platform.environment['HOME']}/Pictures/LoliSnatcher/";
+      }
     }
-    if (path == ""){
-      path = await serviceHandler.getExtDir();
+
+    if(cacheRootPath == ""){
+      if (Platform.isAndroid){
+        cacheRootPath = await serviceHandler.getCacheDir();
+      } else if (Platform.isLinux){
+        cacheRootPath =  "${Platform.environment['HOME']}/.loliSnatcher/cache/";
+      }
     }
     return true;
   }
