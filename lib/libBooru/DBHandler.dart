@@ -58,7 +58,6 @@ class DBHandler{
     } else {
       result = await db!.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)",[fileURL]);
     }
-    print("getItemID id is: $result");
     if (result.isNotEmpty){
       return result.first["id"].toString();
     } else {
@@ -86,6 +85,8 @@ class DBHandler{
       result = await db!.rawQuery(
           "SELECT id FROM BooruItem ORDER BY id DESC LIMIT $limit OFFSET $offset");
     }
+    print("got results from db");
+    print(result);
     if (result.isNotEmpty){
       for(int i=0; i < result.length; i++){
         BooruItem? temp = await getBooruItem(result[i]["id"]);
@@ -136,7 +137,6 @@ class DBHandler{
   //Gets a tag id from the database
   Future<String> getTagID(String tagName) async{
     var result = await db!.rawQuery("SELECT id FROM Tag WHERE name IN (?)",[tagName]);
-    print("getTagID id is: $result");
     if (result.isNotEmpty){
       return result.first["id"].toString();
     } else {

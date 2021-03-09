@@ -1,4 +1,5 @@
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:flutter/material.dart';
 import 'libBooru/BooruOnRailsHandler.dart';
@@ -1215,62 +1216,23 @@ class _booruEditState extends State<booruEdit> {
   Future<String> booruTest(Booru booru, String userBooruType, List<String> booruTypes) async{
     String booruType = "";
     BooruHandler test;
-    List<BooruItem>? testFetched = [];
-    switch(userBooruType){
-      case("Moebooru"):
-        test = new MoebooruHandler(booru, 5);
-        testFetched = await test.Search(" ", 1);
-        break;
-      case("Gelbooru"):
-        test = new GelbooruHandler(booru, 5);
-        testFetched = await test.Search(" ", 1);
-        break;
-      case("Danbooru"):
-        test = new DanbooruHandler(booru, 5);
-        testFetched = await test.Search(" ", 1);
-        break;
-      case("e621"):
-        test = new e621Handler(booru, 5);
-        testFetched = await test.Search(" ", 1);
-        break;
-      case("Shimmie"):
-        test = new ShimmieHandler(booru, 5);
-        testFetched = await test.Search(" ", 1);
-        break;
-      case("Philomena"):
-        test = new PhilomenaHandler(booru, 5);
-        testFetched = await test.Search("solo", 1);
-        break;
-      case("Szurubooru"):
-        test = new SzurubooruHandler(booru, 5);
-        testFetched = await test.Search("*", 1);
-        break;
-      case("Sankaku"):
-        test = new SankakuHandler(booru, 5);
-        testFetched = await test.Search("", 1);
-      break;
-      case("Hydrus"):
-        test = new HydrusHandler(booru, 5);
-        testFetched = await test.Search("", 1);
-        break;
-      case("GelbooruV1"):
-        test = new GelbooruV1Handler(booru, 5);
-        testFetched = await test.Search("", 1);
-        break;
-      case("BooruOnRails"):
-        test = new BooruOnRailsHandler(booru, 5);
-        testFetched = await test.Search("*", 1);
-        break;
-      case("Not Sure"):
-        for(int i = 1; i < booruTypes.length; i++){
-          if (booruType == ""){
-            booruType = await booruTest(booru, booruTypes.elementAt(i), booruTypes);
-          }
+    List<BooruItem>? testFetched = List.empty();
+    Booru tempBooru = booru;
+    booru.type = userBooruType;
+    if (userBooruType == "Not Sure"){
+      for(int i = 1; i < booruTypes.length; i++){
+        if (booruType == ""){
+          booruType = await booruTest(booru, booruTypes.elementAt(i), booruTypes);
         }
+      }
+    } else {
+      List temp = BooruHandlerFactory().getBooruHandler(booru, 5, widget.settingsHandler.dbHandler);
+      test = temp[0];
+      testFetched = await test.Search(" ", 1);
     }
     if (booruType == "") {
-      if (testFetched != null) {
-        if (testFetched.length > 0) {
+      if (testFetched != null){
+        if (testFetched.isNotEmpty) {
           booruType = userBooruType;
           print("Found Results as $userBooruType");
           return booruType;

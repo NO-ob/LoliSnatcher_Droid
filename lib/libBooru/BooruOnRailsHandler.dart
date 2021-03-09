@@ -42,9 +42,13 @@ class BooruOnRailsHandler extends BooruHandler {
               currentTags[x] = currentTags[x].replaceAll(" ", "+");
             }
           }
-          fetched!.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
-          if(dbHandler!.db != null){
-            setTrackedValues(fetched!.length - 1);
+          if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['thumb_small'] != null) {
+            fetched!.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+            if(dbHandler!.db != null){
+              setTrackedValues(fetched!.length - 1);
+            }
+          } else {
+            print("post $i skipped");
           }
         }
         prevTags = tags;

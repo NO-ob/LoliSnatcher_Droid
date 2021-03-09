@@ -23,6 +23,9 @@ class SzurubooruHandler extends BooruHandler{
     if(this.pageNum == pageNum){
       return fetched;
     }
+    if (tags == "" || tags == " "){
+      tags = "*";
+    }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
