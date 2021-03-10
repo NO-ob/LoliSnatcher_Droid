@@ -24,6 +24,7 @@ class HydrusHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   Future Search(String tags,int pageNum) async{
+    List tagList = [];
     isActive = true;
     if (limit > 20){this.limit = 20;}
     if(this.pageNum == pageNum){
@@ -37,7 +38,6 @@ class HydrusHandler extends BooruHandler{
     }
     String url = makeURL(tags);
     print(url);
-
     if (_fileIDs == null) {
       try {
         Uri uri = Uri.parse(url);
@@ -147,8 +147,8 @@ class HydrusHandler extends BooruHandler{
       print(tags);
       if (tags.isEmpty){
         tag = "[]";
-      } else if (tags.contains(" ")){
-        tag = jsonEncode(tags.split(" "));
+      } else if (tags.contains(",")){
+        tag = jsonEncode(tags.split(","));
       } else {
         tag = "[${jsonEncode(tags)}]";
       }

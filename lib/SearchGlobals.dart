@@ -17,6 +17,7 @@ class SearchGlobals{
   ValueNotifier? newTab = ValueNotifier("noListener");
   ValueNotifier? displayAppbar = ValueNotifier(true);
   ValueNotifier? viewedIndex = ValueNotifier(0);
+  ValueNotifier<BooruItem> currentItem = ValueNotifier(new BooruItem("", "", "", [], "", ""));
   List? selected = [];
   SearchGlobals(this.selectedBooru,this.tags);
   @override

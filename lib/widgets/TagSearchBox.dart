@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
+import 'package:get/get.dart';
 
 
 class TagSearchBox extends StatefulWidget {
@@ -191,6 +192,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
           },
           decoration: InputDecoration(
+            fillColor: Get.context!.theme.canvasColor,
+            filled: true,
             hintText: "Enter Tags",
             suffixIcon: widget.searchTagsController.text.length > 0
                 ? IconButton(

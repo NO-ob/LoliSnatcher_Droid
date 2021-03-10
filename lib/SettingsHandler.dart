@@ -16,7 +16,7 @@ import 'libBooru/DBHandler.dart';
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   DBHandler dbHandler = new DBHandler();
-  String? defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask";
+  String? defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
   String verStr = "1.7.8";
@@ -58,6 +58,9 @@ class SettingsHandler {
     }
     if (cachePath == ""){
       cachePath = await serviceHandler.getCacheDir();
+    }
+    if(Platform.isLinux){
+      appMode = "Desktop";
     }
     File settingsFile = new File(path+"settings.conf");
     if (settingsFile.existsSync()){
@@ -206,7 +209,11 @@ class SettingsHandler {
               print("Found dbEnabled " + settings[i].split(" = ")[1] );
             }
             break;
-
+          case ("App Mode"):
+            if (settings[i].split(" = ").length > 1){
+              appMode = settings[i].split(" = ")[1];
+              print("App mode found " + settings[i].split(" = ")[1] );
+            }
         }
       }
     }
@@ -218,7 +225,7 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay, String galleryMode, bool dbEnabled, String shareAction) async{
+  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay, String galleryMode, bool dbEnabled, String shareAction,String appMode) async{
     if (path == ""){
      path = await getExtDir();
     }
@@ -280,6 +287,8 @@ class SettingsHandler {
     this.galleryMode = galleryMode;
     writer.write("Enable Database = $dbEnabled\n");
     this.dbEnabled = dbEnabled;
+    writer.write("App Mode = $appMode\n");
+    this.appMode = appMode;
     writer.close();
     await this.loadSettings();
     await getBooru();

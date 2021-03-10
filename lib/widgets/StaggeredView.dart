@@ -86,9 +86,11 @@ class _StaggeredState extends State<StaggeredView> {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
           } else {
-            /**The short if statement with the media query is used to decide whether to display 2 or 4
-              * thumbnails in a row of the grid depending on screen orientation
-              */
+            if(widget.settingsHandler.appMode == "Desktop"){
+              if(widget.searchGlobals.currentItem.value.fileURL == ""){
+                widget.searchGlobals.currentItem.value = snapshot.data[0];
+              }
+            }
             // A notification listener is used to get the scroll position
             return RawKeyboardListener(
                 autofocus: false,
@@ -129,15 +131,18 @@ class _StaggeredState extends State<StaggeredView> {
                               onTap: () {
                                 // Load the image viewer
                                 kbFocusNode.unfocus();
-                                Get.dialog(
-                                  ViewerPage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
-                                  transitionDuration:
-                                  Duration(milliseconds: 200),
-                                  // barrierColor: Colors.transparent
-                                ).whenComplete(() {
-                                  //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-                                  kbFocusNode.requestFocus();
-                                });
+                                if (widget.settingsHandler.appMode == "Mobile"){
+                                  Get.dialog(
+                                    ViewerPage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler),
+                                    transitionDuration: Duration(milliseconds: 200),
+                                    // barrierColor: Colors.transparent
+                                  ).whenComplete(() {
+                                    //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+                                    kbFocusNode.requestFocus();
+                                  });
+                                } else {
+                                  widget.searchGlobals.currentItem.value = snapshot.data[index];
+                                }
 
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                               },

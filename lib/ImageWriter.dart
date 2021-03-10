@@ -159,7 +159,6 @@ class ImageWriter{
     try {
       await setPaths();
       cachePath = cacheRootPath! + typeFolder + "/";
-      print(cachePath);
 
       String fileName = parseThumbUrlToName(fileURL);
       bool fileExists = await File(cachePath+fileName).exists();
@@ -182,7 +181,6 @@ class ImageWriter{
     try {
       await setPaths();
       cachePath = await cacheRootPath! + typeFolder + "/";
-      print(cachePath);
 
       String fileName = parseThumbUrlToName(fileURL);
       bool fileExists = await File(cachePath+fileName).exists();

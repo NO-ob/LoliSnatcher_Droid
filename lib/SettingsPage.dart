@@ -41,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final settingsSnatchCooldownController = TextEditingController();
   bool jsonWrite = false, autoPlay = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true;
   Booru? selectedBooru;
-  String? previewMode, videoCacheMode, previewDisplay, galleryMode, shareAction;
+  String? previewMode, videoCacheMode, previewDisplay, galleryMode, shareAction, appMode;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -59,6 +59,7 @@ class _SettingsPageState extends State<SettingsPage> {
     videoCacheMode = widget.settingsHandler.videoCacheMode;
     galleryMode = widget.settingsHandler.galleryMode;
     shareAction = widget.settingsHandler.shareAction;
+    appMode = widget.settingsHandler.appMode;
     getPerms();
     setState(() {
       jsonWrite = widget.settingsHandler.jsonWrite;
@@ -224,6 +225,50 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              // This dropdown is used to change the display mode of the preview grid
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Text("App UI Mode :     "),
+                  DropdownButton<String>(
+                    value: appMode,
+                    icon: Icon(Icons.arrow_downward),
+                    onChanged: (String? newValue){
+                      setState((){
+                        appMode = newValue;
+                      });
+                    },
+                    items: <String>["Mobile","Desktop"].map<DropdownMenuItem<String>>((String value){
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
+                    onPressed: () {
+                      Get.dialog(
+                          InfoDialog("App UI Mode",
+                            [
+                              Text("- Mobile - Normal Mobile UI"),
+                              Text("- Desktop - Ahoviewer Style UI"),
+                              const SizedBox(height: 10),
+                              Text("[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs."),
+                              Text("If you are on android versions smaller than 11 you can remove the App Mode line from /LoliSnatcher/config/settings.conf"),
+                              Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
+                            ],
+                            CrossAxisAlignment.start,
+                          )
+                      );
+                    },
                   ),
                 ],
               ),
@@ -756,7 +801,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 onPressed: (){
                   if (selectedBooru == null && widget.settingsHandler.booruList!.isNotEmpty){selectedBooru = widget.settingsHandler.booruList!.elementAt(0);}
-                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode!,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru!.name!, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode!, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay!, galleryMode!, dbEnabled, shareAction!);
+                  widget.settingsHandler.saveSettings(settingsTagsController.text,settingsLimitController.text, previewMode!,settingsColumnsPortraitController.text,settingsColumnsLandscapeController.text,settingsPreloadController.text,jsonWrite,selectedBooru!.name!, autoPlay, loadingGif, imageCache, mediaCache, videoCacheMode!, autoHideImageBar,settingsSnatchCooldownController.text,previewDisplay!, galleryMode!, dbEnabled, shareAction!,appMode!);
                 },
                 child: Text("Save settings", style: TextStyle(color: Colors.white)),
               ),
@@ -1217,8 +1262,8 @@ class _booruEditState extends State<booruEdit> {
     String booruType = "";
     BooruHandler test;
     List<BooruItem>? testFetched = List.empty();
-    Booru tempBooru = booru;
     booru.type = userBooruType;
+    
     if (userBooruType == "Not Sure"){
       for(int i = 1; i < booruTypes.length; i++){
         if (booruType == ""){

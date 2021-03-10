@@ -33,7 +33,6 @@ class _MediaViewerState extends State<MediaViewer> {
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
   bool isFromCache = false, isStopped = false;
-
   String? imageURL;
   Dio? _client;
   CancelToken? _dioCancelToken;

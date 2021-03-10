@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,6 +21,7 @@ import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 import 'package:LoliSnatcher/widgets/WaterfallView.dart';
 import 'package:LoliSnatcher/widgets/StaggeredView.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
+import 'DesktopHome.dart';
 import 'ServiceHandler.dart';
 import 'libBooru/BooruHandler.dart';
 
@@ -60,7 +62,11 @@ class _PreloaderState extends State<Preloader> {
         future: widget.settingsHandler.initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot){
           if (snapshot.connectionState == ConnectionState.done){
-            return Home(widget.settingsHandler);
+            if(widget.settingsHandler.appMode == "Mobile"){
+              return Home(widget.settingsHandler);
+            } else {
+              return DesktopHome(widget.settingsHandler);
+            }
           } else {
             return Center(child: CircularProgressIndicator());
           }
@@ -251,76 +257,7 @@ class _HomeState extends State<Home> {
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              Expanded(
-                                child: DropdownButton<SearchGlobals>(
-                                  isExpanded: true,
-                                  value: searchGlobals[globalsIndex],
-                                  icon: Icon(Icons.arrow_downward),
-                                  onChanged: (SearchGlobals? newValue){
-                                    setState(() {
-                                      globalsIndex = searchGlobals.indexOf(newValue!);
-                                      searchTagsController.text = newValue.tags!;
-                                    });
-                                  },
-                                  onTap: (){
-                                    // setState(() { });
-                                  },
-                                  items: searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
-                                    bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru!.faviconURL != null;
-                                    print(value.tags);
-                                    String tagText = "${value.tags == "" ? "[No Tags]" : value.tags}";
-                                    return DropdownMenuItem<SearchGlobals>(
-                                      value: value,
-                                      child: Row(
-                                          children: [
-                                            isNotEmptyBooru
-                                                ? (value.selectedBooru!.type == "Favourites"
-                                                ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                                                : Image.network(
-                                                value.selectedBooru!.faviconURL!,
-                                                width: 16,
-                                                errorBuilder: (_, __, ___) {
-                                                  return Icon(Icons.broken_image, size: 18);
-                                                }
-                                            )
-                                            )
-                                                : Icon(CupertinoIcons.question, size: 18),
-                                            const SizedBox(width: 3),
-                                            Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
-                                          ]
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-
-
-                              IconButton(
-                                icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor),
-                                onPressed: () {
-                                  // add a new search global to the list
-                                  setState((){
-                                    searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
-                                    // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
-                                  });
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.remove_circle_outline, color: Get.context!.theme.accentColor),
-                                onPressed: () {
-                                  // Remove selected searchglobal from list and apply nearest to search bar
-                                  setState((){
-                                    if(globalsIndex == searchGlobals.length - 1 && searchGlobals.length > 1){
-                                      globalsIndex --;
-                                      searchTagsController.text = searchGlobals[globalsIndex].tags!;
-                                      searchGlobals.removeAt(globalsIndex + 1);
-                                    } else if (searchGlobals.length > 1){
-                                      searchTagsController.text = searchGlobals[globalsIndex + 1].tags!;
-                                      searchGlobals.removeAt(globalsIndex);
-                                    }
-                                  });
-                                },
-                              ),
+                              TagBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
                             ],
                           ),
                         ),
@@ -514,9 +451,20 @@ class _HomeState extends State<Home> {
       searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
     }
     return Container(
+      constraints: BoxConstraints(maxHeight: 30,minHeight: 20),
+      padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
+      decoration: BoxDecoration(
+        color: Get.context!.theme.canvasColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Get.context!.theme.accentColor,
+          width: 1,
+        ),
+      ),
       child: DropdownButton<Booru>(
         value: searchGlobals[globalsIndex].selectedBooru,
         icon: Icon(Icons.arrow_downward),
+        underline: Container(height: 0,),
         onChanged: (Booru? newValue){
           setState((){
             if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
@@ -532,7 +480,8 @@ class _HomeState extends State<Home> {
           // Return a dropdown item
           return DropdownMenuItem<Booru>(
             value: value,
-            child: Row(
+            child:
+            Row(
               children: <Widget>[
                 //Booru Icon
                 value.type == "Favourites" ?

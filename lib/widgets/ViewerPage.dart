@@ -24,6 +24,9 @@ import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 
+import '../DesktopHome.dart';
+import 'TagView.dart';
+
 /**
  * The image page is what is dispalyed when an iamge is clicked it shows a full resolution
  * version of an image and allows scrolling left and right through the currently loaded booruItems
@@ -344,57 +347,7 @@ class _ViewerPageState extends State<ViewerPage> {
               builder: (BuildContext context) {
                 return Dialog(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                  child: Container(
-                    margin: EdgeInsets.all(5),
-                    child: ListView.builder(
-                        itemCount: widget.fetched[widget.searchGlobals.viewedIndex!.value].tagsList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          String currentTag = widget.fetched[widget.searchGlobals.viewedIndex!.value].tagsList[index];
-                          if (currentTag != '') {
-                            return Column(children: <Widget>[
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(currentTag),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(
-                                      Icons.add,
-                                      color: Get.context!.theme.accentColor,
-                                    ),
-                                    onPressed: () {
-                                      setState(() {
-                                        widget.searchGlobals.addTag!.value = " " + currentTag;
-                                      });
-                                      ServiceHandler.displayToast("Added to search \n Tag: "+ currentTag);
-                                      //Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.fiber_new,
-                                        color: Get.context!.theme.accentColor),
-                                    onPressed: () {
-                                      setState(() {
-                                        widget.searchGlobals.newTab!.value =
-                                            currentTag;
-                                      });
-                                      ServiceHandler.displayToast("Added new tab \n Tag: " + currentTag);
-                                      //Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Divider(
-                                color: Colors.white,
-                                height: 2,
-                              ),
-                            ]);
-                          } else {
-                            // Render nothing if currentTag is an empty string
-                            return Container();
-                          }
-                        }),
-                  ),
+                  child: TagView(widget.fetched[widget.searchGlobals.viewedIndex!.value], widget.searchGlobals),
                 );
               });
         },
