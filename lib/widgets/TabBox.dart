@@ -6,17 +6,17 @@ import 'package:get/get.dart';
 
 import 'ScrollingText.dart';
 
-class TagBox extends StatefulWidget {
+class TabBox extends StatefulWidget {
   List<SearchGlobals> searchGlobals;
   int globalsIndex;
   TextEditingController searchTagsController;
   SettingsHandler settingsHandler;
-  TagBox(this.searchGlobals,this.globalsIndex,this.searchTagsController,this.settingsHandler);
+  TabBox(this.searchGlobals,this.globalsIndex,this.searchTagsController,this.settingsHandler);
   @override
-  _TagBoxState createState() => _TagBoxState();
+  _TabBoxState createState() => _TabBoxState();
 }
 
-class _TagBoxState extends State<TagBox> {
+class _TabBoxState extends State<TabBox> {
   @override
   Widget build(BuildContext context) {
     return Expanded(

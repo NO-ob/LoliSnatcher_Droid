@@ -257,7 +257,7 @@ class _HomeState extends State<Home> {
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              TagBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
+                              TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
                             ],
                           ),
                         ),

@@ -121,7 +121,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                 ),
                 Container(
                     constraints: BoxConstraints(minWidth: 10, maxWidth: 300),
-                    child: TagBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
+                    child: TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
                 ),
                 Spacer(),
                 Container(
