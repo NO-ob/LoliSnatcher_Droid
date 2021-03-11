@@ -23,7 +23,7 @@ abstract class BooruHandler {
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future setTrackedValues(int fetchedIndex) async{
     if (dbHandler!.db != null){
-      List<bool> values = await dbHandler!.getTrackedValues(fetched![fetchedIndex].fileURL!);
+      List<bool> values = await dbHandler!.getTrackedValues(fetched![fetchedIndex].fileURL);
       fetched![fetchedIndex].isSnatched = values[0];
       fetched![fetchedIndex].isFavourite = values[1];
     }

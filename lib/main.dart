@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:io';
 
 import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:flutter/cupertino.dart';
@@ -252,6 +253,7 @@ class _HomeState extends State<Home> {
                     ListView(
                       children: [
                         Container(
+                          margin: EdgeInsets.fromLTRB(5,0, 0, 0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
@@ -262,10 +264,12 @@ class _HomeState extends State<Home> {
                           ),
                         ),
                         Container(
+                          margin: EdgeInsets.fromLTRB(5, 5, 0, 10),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
+                              const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
                               FutureBuilder(
                                 future: BooruSelector(),
                                 builder: (context, AsyncSnapshot snapshot) {
@@ -455,9 +459,9 @@ class _HomeState extends State<Home> {
       padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
       decoration: BoxDecoration(
         color: Get.context!.theme.canvasColor,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(5),
         border: Border.all(
-          color: Get.context!.theme.accentColor,
+          color: Get.context!.theme.backgroundColor,
           width: 1,
         ),
       ),

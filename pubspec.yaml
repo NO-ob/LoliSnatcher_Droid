@@ -39,6 +39,7 @@ dependencies:
   video_player: ^2.0.0
   chewie: ^1.0.0
   sqflite: ^2.0.0+2
+  sqflite_common_ffi: ^2.0.0-nullsafety.7
   # preload_page_view: ^0.1.5
 
 flutter_icons:

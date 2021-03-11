@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
+import 'package:LoliSnatcher/widgets/DesktopImageListener.dart';
 import 'package:LoliSnatcher/widgets/MediaViewer.dart';
 import 'package:LoliSnatcher/widgets/StaggeredView.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
@@ -10,6 +11,7 @@ import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/WaterfallView.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
@@ -20,6 +22,7 @@ import 'SettingsHandler.dart';
 import 'SettingsPage.dart';
 import 'SnatchHandler.dart';
 import 'Snatcher.dart';
+import 'getPerms.dart';
 import 'libBooru/BooruItem.dart';
 
 class DesktopHome extends StatefulWidget {
@@ -42,6 +45,12 @@ class _DesktopHomeState extends State<DesktopHome> {
   @override
   void initState() {
     super.initState();
+    if (Platform.isAndroid){
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.landscapeLeft,
+      ]);
+    }
     Booru? defaultBooru;
     // Set the default booru and tags at the start
     if(((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru == widget.settingsHandler.booruList!.elementAt(0).name))) {
@@ -87,9 +96,9 @@ class _DesktopHomeState extends State<DesktopHome> {
       searchGlobals[globalsIndex].newTab!.value = "";
     }
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 35,
-        title: Text("LoliSnatcher"),
         actions: <Widget>[
           Expanded(
             child: Row(
@@ -97,18 +106,23 @@ class _DesktopHomeState extends State<DesktopHome> {
               children: <Widget>[
                 Container(
                   height: 30,
+                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
                   child: TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
                 ),
-                FutureBuilder(
-                  future: BooruSelector(),
-                  builder: (context, AsyncSnapshot snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                      return snapshot.data;
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  },
+                Container(
+                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
+                  constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
+                  child: FutureBuilder(
+                    future: BooruSelector(),
+                    builder: (context, AsyncSnapshot snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+                        return snapshot.data;
+                      } else {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                    },
+                  ),
                 ),
                 IconButton(
                   padding: const EdgeInsets.all(5),
@@ -120,11 +134,13 @@ class _DesktopHomeState extends State<DesktopHome> {
                   },
                 ),
                 Container(
-                    constraints: BoxConstraints(minWidth: 10, maxWidth: 300),
+                    margin: EdgeInsets.fromLTRB(10, 0,0,0),
+                    constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
                     child: TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
                 ),
                 Spacer(),
                 Container(
+                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   alignment: Alignment.center,
                   child: TextButton(
                     style: TextButton.styleFrom(
@@ -141,6 +157,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                   ),
                 ),
                 Container(
+                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   alignment: Alignment.center,
                   child: TextButton(
                     style: TextButton.styleFrom(
@@ -156,22 +173,6 @@ class _DesktopHomeState extends State<DesktopHome> {
                     child: Text("Settings", style: TextStyle(color: Colors.white)),
                   ),
                 ),
-                Container(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context!.theme.accentColor),
-                      ),
-                      backgroundColor: Get.context!.theme.canvasColor,
-                    ),
-                    onPressed: (){
-                      Get.to(AboutPage());
-                    },
-                    child: Text("About", style: TextStyle(color: Colors.white)),
-                  ),
-                ),
               ],
             ),
           ),
@@ -179,7 +180,17 @@ class _DesktopHomeState extends State<DesktopHome> {
           IconButton(
             icon: Icon(Icons.save),
             onPressed: (){
-
+              getPerms();
+              // call a function to save the currently viewed image when the save button is pressed
+              if (searchGlobals[globalsIndex].selected!.length > 0){
+                widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
+                setState(() {
+                  searchGlobals[globalsIndex].selected = [];
+                });
+              } else {
+                ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
+                //Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+              }
             },
           ),
         ],
@@ -207,7 +218,7 @@ class _DesktopHomeState extends State<DesktopHome> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Expanded(child: DesktopImageListener(searchGlobals[globalsIndex].currentItem,widget.settingsHandler)),
+                  Expanded(child: DesktopImageListener(searchGlobals,globalsIndex,widget.settingsHandler,widget.snatchHandler)),
                 ],
               ),
             ),
@@ -314,9 +325,9 @@ class _DesktopHomeState extends State<DesktopHome> {
       padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
       decoration: BoxDecoration(
           color: Get.context!.theme.canvasColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(5),
           border: Border.all(
-            color: Get.context!.theme.canvasColor,
+            color: Get.context!.theme.accentColor,
             width: 1,
           ),
       ),
@@ -363,63 +374,6 @@ class _DesktopHomeState extends State<DesktopHome> {
   }
 }
 
-
-class DesktopImageListener extends StatefulWidget {
-  ValueNotifier<BooruItem> valueNotifier;
-  SettingsHandler settingsHandler;
-  DesktopImageListener(this.valueNotifier, this.settingsHandler);
-  @override
-  _DesktopImageListenerState createState() => _DesktopImageListenerState();
-}
-
-class _DesktopImageListenerState extends State<DesktopImageListener> {
-  MediaViewer? view;
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: widget.valueNotifier,
-        builder: (BuildContext context, BooruItem value, Widget? child){
-          if (value.fileURL == ""){
-            return Container();
-          } else {
-           if (!value.isVideo() ){
-             return PhotoView(imageProvider: NetworkImage(value.fileURL!));
-           } else {
-             if (Platform.isAndroid){
-               return VideoApp(value, 0, 0, widget.settingsHandler);
-             } else {
-               return Center(
-                 child: Column(
-                   children: [
-                     Expanded(
-                         child:Image.network(value!.thumbnailURL!,fit: BoxFit.fill,),
-                     ),
-                     Container(
-                       alignment: Alignment.center,
-                       child: TextButton(
-                         style: TextButton.styleFrom(
-                           shape: RoundedRectangleBorder(
-                             borderRadius: new BorderRadius.circular(20),
-                             side: BorderSide(color: Get.context!.theme.accentColor),
-                           ),
-                         ),
-                         onPressed: (){
-                           Process.run('mpv', ["--loop", "${value.fileURL}"]);
-                         },
-                         child: Text(" Open in Video Player ", style: TextStyle(color: Colors.white)),
-                       ),
-                     ),
-                   ],
-                 ),
-               );
-             }
-           }
-          }
-        }
-    );
-  }
-
-}
 
 class DesktopTagListener extends StatefulWidget {
   ValueNotifier<BooruItem> valueNotifier;

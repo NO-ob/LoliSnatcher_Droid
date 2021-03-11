@@ -63,9 +63,11 @@ class SzurubooruHandler extends BooruHandler{
               tags.add(currentTags);
             }
           }
-          fetched!.add(new BooruItem("${booru.baseURL}/"+current['contentUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],tags,makePostURL(current['id'].toString()),getFileExt(current['contentUrl'])));
-          if(dbHandler!.db != null){
-            setTrackedValues(fetched!.length - 1);
+          if(current['contentUrl'] != null){
+            fetched!.add(new BooruItem("${booru.baseURL}/"+current['contentUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],tags,makePostURL(current['id'].toString()),getFileExt(current['contentUrl'])));
+            if(dbHandler!.db != null){
+              setTrackedValues(fetched!.length - 1);
+            }
           }
         }
         prevTags = tags;

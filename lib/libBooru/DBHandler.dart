@@ -1,6 +1,8 @@
+import 'dart:io';
+
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:sqflite/sqflite.dart';
-
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../Tools.dart';
 
 class DBHandler{
@@ -9,36 +11,60 @@ class DBHandler{
 
   //Connects to the database file and create the database if the tables dont exist
   void dbConnect(String path)async{
-    db = await openDatabase(path+"store.db", version: 1,
-        onCreate: (Database db, int version) async{
-          await db.execute("CREATE TABLE BooruItem"
-              "(id INTEGER PRIMARY KEY,"
-              "thumbnailURL TEXT,"
-              "sampleURL TEXT,"
-              "fileURL TEXT,"
-              "postURL TEXT,"
-              "mediaType TEXT,"
-              "isSnatched INTEGER,"
-              "isFavourite INTEGER"
-              ")");
-          await db.execute("CREATE TABLE Tag ("
-              "id INTEGER PRIMARY KEY,"
-              "name TEXT"
-              ")");
-          await db.execute("CREATE TABLE ImageTag ("
-              "tagID INTEGER,"
-              "booruItemID INTEGER"
-              ")");
-        }
-    );
+    if(Platform.isAndroid){
+      db = await openDatabase(path+"store.db", version: 1,
+          onCreate: (Database db, int version) async{
+            await db.execute("CREATE TABLE BooruItem"
+                "(id INTEGER PRIMARY KEY,"
+                "thumbnailURL TEXT,"
+                "sampleURL TEXT,"
+                "fileURL TEXT,"
+                "postURL TEXT,"
+                "mediaType TEXT,"
+                "isSnatched INTEGER,"
+                "isFavourite INTEGER"
+                ")");
+            await db.execute("CREATE TABLE Tag ("
+                "id INTEGER PRIMARY KEY,"
+                "name TEXT"
+                ")");
+            await db.execute("CREATE TABLE ImageTag ("
+                "tagID INTEGER,"
+                "booruItemID INTEGER"
+                ")");
+          }
+      );
+    } else {
+      sqfliteFfiInit();
+      var databaseFactory = databaseFactoryFfi;
+      db = await databaseFactory.openDatabase(path+"store.db");
+      await db!.execute("CREATE TABLE IF NOT EXISTS BooruItem"
+          "(id INTEGER PRIMARY KEY,"
+          "thumbnailURL TEXT,"
+          "sampleURL TEXT,"
+          "fileURL TEXT,"
+          "postURL TEXT,"
+          "mediaType TEXT,"
+          "isSnatched INTEGER,"
+          "isFavourite INTEGER"
+          ")");
+      await db!.execute("CREATE TABLE IF NOT EXISTS Tag ("
+          "id INTEGER PRIMARY KEY,"
+          "name TEXT"
+          ")");
+      await db!.execute("CREATE TABLE IF NOT EXISTS ImageTag ("
+          "tagID INTEGER,"
+          "booruItemID INTEGER"
+          ")");
+    }
     await deleteUntracked();
   }
 
 
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   void updateBooruItem(BooruItem item) async{
-    print("updateBooruItem called fileURL is:" + item.fileURL!);
-    String itemID = await getItemID(item.fileURL!);
+    print("updateBooruItem called fileURL is:" + item.fileURL);
+    String itemID = await getItemID(item.fileURL);
     if (itemID.isEmpty){
       var result = await db!.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
           [item.thumbnailURL,item.sampleURL,item.fileURL,item.postURL,item.mediaType,Tools.boolToInt(item.isSnatched),Tools.boolToInt(item.isFavourite)]);

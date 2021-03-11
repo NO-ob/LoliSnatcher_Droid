@@ -1,14 +1,14 @@
 class BooruItem{
-  String? fileURL,sampleURL,thumbnailURL,postURL,fileExt;
+  String fileURL,sampleURL,thumbnailURL,postURL,fileExt;
   List? tagsList;
   String? mediaType;
   bool isSnatched = false, isFavourite = false;
   String idOnHost = "";
-  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL, String fileExt){
-    if (this.sampleURL!.isEmpty){
+  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt){
+    if (this.sampleURL.isEmpty || this.sampleURL == "null"){
       this.sampleURL = this.thumbnailURL;
     }
-    this.fileExt = fileExt.toLowerCase();
+    this.fileExt = this.fileExt.toLowerCase();
     if (this.fileExt == "webm" || this.fileExt == "mp4"){
       this.mediaType = "video";
     } else {

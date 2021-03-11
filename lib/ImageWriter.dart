@@ -17,9 +17,9 @@ class ImageWriter{
    * return Error - something went wrong
    */
   Future write(BooruItem item, SettingsHandler settingsHandler, String booruName) async{
-    int queryLastIndex = item.fileURL!.lastIndexOf("?");
-    int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL!.length;
-    String fileName = booruName + '_' + item.fileURL!.substring(item.fileURL!.lastIndexOf("/") + 1, lastIndex);
+    int queryLastIndex = item.fileURL.lastIndexOf("?");
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
+    String fileName = booruName + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
     // print(fileName);
 
     await setPaths();
@@ -38,7 +38,7 @@ class ImageWriter{
     bool fileExists = await image.exists();
     if(fileExists || item.isSnatched) return null;
     try {
-      Uri fileURI = Uri.parse(item.fileURL!);
+      Uri fileURI = Uri.parse(item.fileURL);
       var response = await http.get(fileURI);
       if(SDKVer < 30){
         await Directory(path!).create(recursive:true);
@@ -53,13 +53,15 @@ class ImageWriter{
           settingsHandler.dbHandler.updateBooruItem(item);
         }
         try {
-          serviceHandler.callMediaScanner(image.path);
+          if(Platform.isAndroid){
+            serviceHandler.callMediaScanner(image.path);
+          }
         } catch (e){
           print("Image not found");
           return e;
         }
       } else {
-        print("files ext is " + item.fileExt!);
+        print("files ext is " + item.fileExt);
         //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
           var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt);
           if (writeResp != null){
@@ -92,9 +94,9 @@ class ImageWriter{
       await Future.delayed(Duration(milliseconds: cooldown), () async{
         var snatchResult = await write(snatched.elementAt(i), settingsHandler, booruName);
         if (snatchResult == null){
-        existsList.add(snatched[i].fileURL!);
+        existsList.add(snatched[i].fileURL);
         } else if (snatchResult is !String) {
-        failedList.add(snatched[i].fileURL!);
+        failedList.add(snatched[i].fileURL);
         }
       });
       yield snatchedCounter++;

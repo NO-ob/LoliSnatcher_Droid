@@ -58,14 +58,17 @@ class SankakuHandler extends BooruHandler{
           for (int x=0; x < current['tags'].length; x++) {
             tags.add(current['tags'][x]['name'].toString());
           }
-
-          String fileExt = current['file_type'].split('/')[1]; // image/jpeg
-
-          fetched!.add(new BooruItem(current['file_url'],current['sample_url'],current['preview_url'],tags,makePostURL(current['id'].toString()), fileExt));
-          if(dbHandler!.db != null){
-            setTrackedValues(fetched!.length - 1);
+          if (current['file_url'] != null) {
+            String fileExt = current['file_type'].split('/')[1]; // image/jpeg
+            fetched!.add(new BooruItem(
+                current['file_url'], current['sample_url'],
+                current['preview_url'], tags,
+                makePostURL(current['id'].toString()), fileExt));
+            if (dbHandler!.db != null) {
+              setTrackedValues(fetched!.length - 1);
+            }
+            print(fetched![fetched!.length - 1].toString());
           }
-          print(fetched![fetched!.length - 1].toString());
         }
         prevTags = tags;
         if (fetched!.length == length){locked = true;}

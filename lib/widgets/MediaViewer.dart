@@ -120,10 +120,10 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   void initViewer() {
-    if (widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL!.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL){
-      imageURL = widget.booruItem.sampleURL!;
+    if (widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL){
+      imageURL = widget.booruItem.sampleURL;
     } else {
-      imageURL = widget.booruItem.fileURL!;
+      imageURL = widget.booruItem.fileURL;
     }
 
     // debug output
@@ -222,7 +222,7 @@ class _MediaViewerState extends State<MediaViewer> {
 
     String thumbnailFileURL = (widget.settingsHandler.previewMode == "Sample"
         ? widget.booruItem.sampleURL
-        : widget.booruItem.thumbnailURL)!;
+        : widget.booruItem.thumbnailURL);
     File preview = File(
         "${widget.settingsHandler.cachePath}thumbnails/${thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1)}");
     // start opacity from 20%

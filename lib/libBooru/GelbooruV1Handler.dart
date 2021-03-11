@@ -39,21 +39,21 @@ class GelbooruV1Handler extends BooruHandler{
       if (response.statusCode == 200) {
         var document = parse(response.body);
         var spans = document.getElementsByClassName("thumb");
-        if (spans != null){
           for (int i = 0; i < spans.length; i++){
-            String id = spans.elementAt(i).children[0].attributes["id"]!.substring(1);
-            String thumbURL = spans.elementAt(i).children[0].firstChild!.attributes["src"]!;
-            String fileURL = thumbURL.replaceFirst("thumbs", "img").replaceFirst("thumbnails", "images").replaceFirst("thumbnail_", "");
-            List<String> tags = spans.elementAt(i).children[0].firstChild!.attributes["title"]!.split(" ");
-            /**
-             * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
-             */
-            fetched!.add(new BooruItem(fileURL,fileURL,thumbURL,tags,makePostURL(id),getFileExt(fileURL)));
-            if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+            if (spans.elementAt(i).children[0].firstChild!.attributes["src"] != null){
+              String id = spans.elementAt(i).children[0].attributes["id"]!.substring(1);
+              String thumbURL = spans.elementAt(i).children[0].firstChild!.attributes["src"]!;
+              String fileURL = thumbURL.replaceFirst("thumbs", "img").replaceFirst("thumbnails", "images").replaceFirst("thumbnail_", "");
+              List<String> tags = spans.elementAt(i).children[0].firstChild!.attributes["title"]!.split(" ");
+              /**
+               * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
+               */
+              fetched!.add(new BooruItem(fileURL,fileURL,thumbURL,tags,makePostURL(id),getFileExt(fileURL)));
+              if(dbHandler!.db != null){
+                setTrackedValues(fetched!.length - 1);
+              }
             }
           }
-        }
         // Create a BooruItem for each post in the list
         prevTags = tags;
         if (fetched!.length == length){locked = true;}

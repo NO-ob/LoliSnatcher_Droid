@@ -30,7 +30,7 @@ class _TabBoxState extends State<TabBox> {
               padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
               decoration: BoxDecoration(
                 color: Get.context!.theme.canvasColor,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(5),
                 border: Border.all(
                   color: Get.context!.theme.accentColor,
                   width: 1,

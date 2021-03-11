@@ -27,12 +27,12 @@ class ViewUtils {
   *
   */
   static Widget sampleorThumb(BooruItem item, int columnCount, SettingsHandler settingsHandler) {
-    List<dynamic>? itemType = getFileTypeAndIcon(item.fileExt!);
+    List<dynamic>? itemType = getFileTypeAndIcon(item.fileExt);
     bool isThumb = settingsHandler.previewMode == "Thumbnail" ||
         (itemType[0] == 'gif' || itemType[0] == 'video');
     String? thumbURL = isThumb ? item.thumbnailURL : item.sampleURL;
     return Stack(alignment: settingsHandler.previewDisplay == "Waterfall" ? Alignment.center : Alignment.bottomCenter, children: [
-      CachedThumb(thumbURL!, settingsHandler, columnCount),
+      CachedThumb(thumbURL, settingsHandler, columnCount),
       Container(
         alignment: Alignment.bottomRight,
         child: Container(
