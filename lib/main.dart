@@ -107,6 +107,7 @@ class _HomeState extends State<Home> {
       defaultBooru = widget.settingsHandler.booruList.elementAt(0);
     }
     searchGlobals = new List.from([new SearchGlobals(defaultBooru, widget.settingsHandler.defTags)]);
+    searchTagsController.text = widget.settingsHandler.defTags;
     activeTitle = ActiveTitle(widget.snatchHandler);
     widget.snatchHandler.settingsHandler = widget.settingsHandler;
   }

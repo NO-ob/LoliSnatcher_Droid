@@ -53,54 +53,63 @@ class _booruEditState extends State<booruEdit> {
       appBar: AppBar(
           title: Text("Booru Editor"),
         actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(20),
-                side: BorderSide(color: Get.context!.theme.accentColor),
-              ),
-            ),
-            onPressed: () async{
-              //Call the booru test
-              if(booruURLController.text.contains("chan.sankakucomplex.com")){
-                booruURLController.text = "https://capi-v2.sankakucomplex.com";
-                booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
-              }
-              if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
-                booruURLController.text = "https://" + booruURLController.text;
-              }
-              Booru testBooru;
-              if(booruAPIKeyController.text == ""){
-                testBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
-              } else {
-                testBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
-              }
-              String booruType = await booruTest(testBooru, selectedBooruType, booruTypes);
-              if(booruFaviconController.text == ""){
-                booruFaviconController.text = booruURLController.text + "/favicon.ico";
-              }
-              // If a booru type is returned set the widget state
-              if(booruType != ""){
-                setState((){
-                  widget.booruType = booruType;
-                  selectedBooruType = booruType;
-                });
-                // Alert user about the results of the test
-                ServiceHandler.displayToast("Booru Type is $booruType \nClick the save button to save this config");
-                //Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-              } else {
-                ServiceHandler.displayToast("No Data Returned \n Booru Information may be incorrect or the booru doesn't allow api access ");
-                //Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-              }
-            },
-            child: Text("Test", style: TextStyle(color: Colors.white)),
-          ),
-          saveButton(),
         ],
       ),
       body:Center(
         child: ListView(
           children: <Widget>[
+            Container(
+              margin: EdgeInsets.fromLTRB(10,10,10,10),
+              width: double.infinity,
+              child: Row(
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
+                      ),
+                      backgroundColor: Get.context!.theme.canvasColor,
+                    ),
+                    onPressed: () async{
+                      //Call the booru test
+                      if(booruURLController.text.contains("chan.sankakucomplex.com")){
+                        booruURLController.text = "https://capi-v2.sankakucomplex.com";
+                        booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+                      }
+                      if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
+                        booruURLController.text = "https://" + booruURLController.text;
+                      }
+                      Booru testBooru;
+                      if(booruAPIKeyController.text == ""){
+                        testBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
+                      } else {
+                        testBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
+                      }
+                      String booruType = await booruTest(testBooru, selectedBooruType, booruTypes);
+                      if(booruFaviconController.text == ""){
+                        booruFaviconController.text = booruURLController.text + "/favicon.ico";
+                      }
+                      // If a booru type is returned set the widget state
+                      if(booruType != ""){
+                        setState((){
+                          widget.booruType = booruType;
+                          selectedBooruType = booruType;
+                        });
+                        // Alert user about the results of the test
+                        ServiceHandler.displayToast("Booru Type is $booruType \nClick the save button to save this config");
+                        //Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+                      } else {
+                        ServiceHandler.displayToast("No Data Returned \n Booru Information may be incorrect or the booru doesn't allow api access ");
+                        //Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+                      }
+                    },
+                    child: Text("Test", style: TextStyle(color: Colors.white)),
+                  ),
+                  saveButton(),
+                ],
+              ),
+            ),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
