@@ -11,7 +11,8 @@ class TabBox extends StatefulWidget {
   int globalsIndex;
   TextEditingController searchTagsController;
   SettingsHandler settingsHandler;
-  TabBox(this.searchGlobals,this.globalsIndex,this.searchTagsController,this.settingsHandler);
+  final Function setParentGlobalsIndex;
+  TabBox(this.searchGlobals,this.globalsIndex,this.searchTagsController,this.settingsHandler,this.setParentGlobalsIndex);
   @override
   _TabBoxState createState() => _TabBoxState();
 }
@@ -43,8 +44,9 @@ class _TabBoxState extends State<TabBox> {
                 icon: Icon(Icons.arrow_downward),
                 onChanged: (SearchGlobals? newValue){
                   setState(() {
-                    widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
-                    widget.searchTagsController.text = newValue.tags!;
+                    //widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
+                    widget.searchTagsController.text = newValue!.tags!;
+                    widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue!));
                   });
                 },
                 onTap: (){

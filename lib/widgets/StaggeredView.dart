@@ -60,7 +60,7 @@ class _StaggeredState extends State<StaggeredView> {
     // super.build(context);
     if (FocusScope.of(context).focusedChild == null){
       print("kb focus node requesting focus");
-      kbFocusNode.requestFocus();
+      //kbFocusNode.requestFocus();
     }
     if (widget.searchGlobals.booruHandler == null) {
       initState();

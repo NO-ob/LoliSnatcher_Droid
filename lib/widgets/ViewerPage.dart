@@ -305,7 +305,7 @@ class _ViewerPageState extends State<ViewerPage> {
       ),
       IconButton(icon: Icon(Icons.share),
           onPressed: () {
-            String shareSetting = widget.settingsHandler.shareAction!;
+            String shareSetting = widget.settingsHandler.shareAction;
             switch(shareSetting) {
               case 'Post URL':
                 shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);

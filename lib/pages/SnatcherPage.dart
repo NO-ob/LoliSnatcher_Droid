@@ -185,7 +185,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   Future BooruSelector() async{
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (widget.booru == null){
-      widget.booru = widget.settingsHandler.booruList![0];
+      widget.booru = widget.settingsHandler.booruList[0];
     }
     return Container(
       child: DropdownButton<Booru>(
@@ -197,7 +197,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
             widget.booru = newValue;
           });
         },
-        items: widget.settingsHandler.booruList!.map<DropdownMenuItem<Booru>>((Booru value){
+        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
           // Return a dropdown item
           return DropdownMenuItem<Booru>(
             value: value,

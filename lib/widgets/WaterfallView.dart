@@ -54,7 +54,7 @@ class _WaterfallState extends State<WaterfallView> {
 
     if (FocusScope.of(context).focusedChild == null){
       print("kb focus node requesting focus");
-      kbFocusNode.requestFocus();
+      //kbFocusNode.requestFocus();
     }
     if (widget.searchGlobals.booruHandler == null) {
       setBooruHandler();

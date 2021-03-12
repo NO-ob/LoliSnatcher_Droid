@@ -12,5 +12,10 @@
         android:icon="@mipmap/launcher_icon"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".MainActivity"
+            android:windowSoftInputMode="stateVisible">
+        </activity>
     </application>
+
 </manifest>

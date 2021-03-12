@@ -16,11 +16,11 @@ import 'libBooru/DBHandler.dart';
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   DBHandler dbHandler = new DBHandler();
-  String? defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile";
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
-  String verStr = "1.7.8";
-  List<Booru>? booruList = [];
+  String verStr = "1.7.9";
+  List<Booru> booruList = [];
   /*static List<ThemeItem> themes = [
     new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),
     new ThemeItem("Purple", Colors.deepPurple[600], Colors.deepPurple[800]),
@@ -30,7 +30,7 @@ class SettingsHandler {
     new ThemeItem("Green", Colors.green, Colors.green[700]),
   ];*/
   String themeMode = "dark";
-  var path = "";
+  String path = "";
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true;
   Future writeDefaults() async{
     if (path == ""){
@@ -48,7 +48,7 @@ class SettingsHandler {
     return true;
   }
 
-  Future loadSettings() async{
+  Future<bool> loadSettings() async{
     if (path == ""){
       path = await getExtDir();
       print("found path $path");
@@ -168,6 +168,9 @@ class SettingsHandler {
           case("Pref Booru"):
             if (settings[i].split(" = ").length > 1){
               prefBooru = settings[i].split(" = ")[1];
+              if(prefBooru.isNotEmpty){
+                prefBooru = "";
+              }
               print("Found Pref Booru " + settings[i].split(" = ")[1] );
             }
             break;
@@ -225,78 +228,52 @@ class SettingsHandler {
     return true;
   }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
-  void saveSettings(String defTags, String limit, String previewMode, String portraitColumns, String landscapeColumns, String preloadCount,bool jsonWrite, String prefBooru, bool autoPlay, bool loadingGif, bool imageCache, bool mediaCache, String videoCacheMode, bool autoHideImageBar, String snatchCooldown, String previewDisplay, String galleryMode, bool dbEnabled, String shareAction,String appMode) async{
+  Future<bool> saveSettings() async{
+    await getPerms();
     if (path == ""){
      path = await getExtDir();
     }
+    print("writing settings------------------------------------------------------------------------------------");
     await Directory(path).create(recursive:true);
     File settingsFile = new File(path+"settings.conf");
     var writer = settingsFile.openWrite();
     writer.write("Default Tags = $defTags\n");
     this.defTags = defTags;
-    if (limit != ""){
       // Write limit if it between 0-100
-      if (int.parse(limit) <= 100 && int.parse(limit) > 0){
-        writer.write("Limit = ${int.parse(limit)}\n");
-        this.limit = int.parse(limit);
-      } else {
+    if (limit <= 100 && limit >= 5){
+      writer.write("Limit = $limit\n");
+    } else {
         // Close writer and alert user
-        writer.close();
-        ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit");
-        //Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-        return;
-      }
+      writer.close();
+      ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit");
+      //Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+      return false;
     }
     writer.write("Landscape Columns = $landscapeColumns\n");
-    this.landscapeColumns = int.parse(landscapeColumns);
     writer.write("Portrait Columns = $portraitColumns\n");
-    this.portraitColumns = int.parse(portraitColumns);
     writer.write("Preview Mode = $previewMode\n");
-    if (this.previewMode != previewMode) {
-      serviceHandler.emptyCache();
-    }
-    this.previewMode = previewMode;
     writer.write("Preload Count = $preloadCount\n");
-    this.preloadCount = int.parse(preloadCount);
     writer.write("Write Json = $jsonWrite\n");
-    this.jsonWrite = jsonWrite;
     writer.write("Pref Booru = $prefBooru\n");
-    this.prefBooru = prefBooru;
-    writer.write("Auto Play = $autoPlay\n");
-    this.autoPlayEnabled = autoPlay;
+    writer.write("Auto Play = $autoPlayEnabled\n");
     writer.write("Loading Gif = $loadingGif\n");
-    this.loadingGif = loadingGif;
     writer.write("Image Cache = $imageCache\n");
-    this.imageCache = imageCache;
     writer.write("Media Cache = $mediaCache\n");
-    this.mediaCache = mediaCache;
-    if (this.mediaCache != mediaCache) {
-      serviceHandler.emptyCache();
-    }
     writer.write("Video Cache Mode = $videoCacheMode\n");
-    this.videoCacheMode = videoCacheMode;
     writer.write("Share Action = $shareAction\n");
-    this.shareAction = shareAction;
     writer.write("Autohide Bar = $autoHideImageBar\n");
-    this.autoHideImageBar = autoHideImageBar;
     writer.write("Snatch Cooldown  = $snatchCooldown\n");
-    this.snatchCooldown = int.parse(snatchCooldown);
     writer.write("Preview Display = $previewDisplay\n");
-    this.previewDisplay = previewDisplay;
     writer.write("Gallery Mode = $galleryMode\n");
-    this.galleryMode = galleryMode;
     writer.write("Enable Database = $dbEnabled\n");
-    this.dbEnabled = dbEnabled;
     writer.write("App Mode = $appMode\n");
-    this.appMode = appMode;
     writer.close();
-    await this.loadSettings();
-    await getBooru();
     ServiceHandler.displayToast("Settings Saved! \n Some changes may not take effect until the app is restarted");
     //Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+    return true;
   }
 
-  Future getBooru() async{
+  Future<bool> getBooru() async{
     booruList = [];
     print("in getBooru");
     int prefIndex = 0;
@@ -306,27 +283,27 @@ class SettingsHandler {
       }
       var directory = new Directory(path);
       List files = directory.listSync();
-      if (files != null) {
+      if (files.length > 0) {
         for (int i = 0; i < files.length; i++) {
           if (files[i].path.contains(".booru")) {
             print(files[i].toString());
-            booruList!.add(Booru.fromFile(files[i]));
+            booruList.add(Booru.fromFile(files[i]));
           }
         }
       }
-      if (dbEnabled && booruList!.isNotEmpty){
-        booruList!.add(new Booru("Favourites", "Favourites", "", "", ""));
+      if (dbEnabled && booruList.isNotEmpty){
+        booruList.add(new Booru("Favourites", "Favourites", "", "", ""));
       }
-      if (prefBooru != "" && booruList!.isNotEmpty){
-        int prefIndex = booruList!.indexWhere((booru)=>booru.name == prefBooru);
+      if (prefBooru != "" && booruList.isNotEmpty){
+        int prefIndex = booruList.indexWhere((booru)=>booru.name == prefBooru);
         if (prefIndex != 0){
           print("Booru pref found in booruList");
-          Booru tmp = booruList!.elementAt(0);
-          Booru tmp2 = booruList!.elementAt(prefIndex);
-          booruList!.remove(tmp);
-          booruList!.remove(tmp2);
-          booruList!.insert(0, tmp2);
-          booruList!.insert(prefIndex, tmp);
+          Booru tmp = booruList.elementAt(0);
+          Booru tmp2 = booruList.elementAt(prefIndex);
+          booruList.remove(tmp);
+          booruList.remove(tmp2);
+          booruList.insert(0, tmp2);
+          booruList.insert(prefIndex, tmp);
           print("booruList is");
           print(booruList);
         }
@@ -352,22 +329,28 @@ class SettingsHandler {
     writer.write("User ID = ${booru.userID}\n");
     writer.write("Default Tags = ${booru.defTags}\n");
     writer.close();
-    booruList!.add(booru);
+    booruList.add(booru);
     return true;
   }
   bool deleteBooru(Booru booru){
     File booruFile = File(path+"${booru.name}.booru");
     booruFile.deleteSync();
-    booruList!.remove(booru);
+    if (prefBooru == booru.name){
+      prefBooru = "";
+      saveSettings();
+    }
+    booruList.remove(booru);
     return true;
   }
 
-  Future getExtDir() async{
+  Future<String> getExtDir() async{
+    String path = "";
     if (Platform.isAndroid){
-      return await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
+      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
-      return Platform.environment['HOME']! + "/.loliSnatcher/config/";
+      path = Platform.environment['HOME']! + "/.loliSnatcher/config/";
     }
+    return path;
   }
   Future getSDKVer() async{
     if (Platform.isAndroid){
@@ -383,11 +366,12 @@ class SettingsHandler {
       return Platform.environment['HOME']! + "/.loliSnatcher/config/";
     }
   }
-  Future initialize() async{
+  Future<bool> initialize() async{
     await getPerms();
     await loadSettings();
-    if (booruList!.isEmpty){
+    if (booruList.isEmpty){
       await getBooru();
     }
+    return true;
   }
 }

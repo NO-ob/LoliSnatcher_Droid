@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:core';
 import 'package:get/get.dart';
 
-import 'ServiceHandler.dart';
+import '../ServiceHandler.dart';
 
 class AboutPage extends StatelessWidget {
   @override

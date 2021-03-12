@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
+import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/DesktopImageListener.dart';
 import 'package:LoliSnatcher/widgets/MediaViewer.dart';
 import 'package:LoliSnatcher/widgets/StaggeredView.dart';
@@ -15,13 +16,13 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
-import 'AboutPage.dart';
+import 'pages/AboutPage.dart';
 import 'SearchGlobals.dart';
 import 'ServiceHandler.dart';
 import 'SettingsHandler.dart';
-import 'SettingsPage.dart';
+import 'pages/SettingsPage.dart';
 import 'SnatchHandler.dart';
-import 'Snatcher.dart';
+import 'pages/SnatcherPage.dart';
 import 'getPerms.dart';
 import 'libBooru/BooruItem.dart';
 
@@ -53,18 +54,26 @@ class _DesktopHomeState extends State<DesktopHome> {
     }
     Booru? defaultBooru;
     // Set the default booru and tags at the start
-    if(((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru == widget.settingsHandler.booruList!.elementAt(0).name))) {
-      defaultBooru = widget.settingsHandler.booruList!.elementAt(0);
+    if(((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru == widget.settingsHandler.booruList.elementAt(0).name))) {
+      defaultBooru = widget.settingsHandler.booruList.elementAt(0);
     }
     searchGlobals = new List.from([new SearchGlobals(defaultBooru, widget.settingsHandler.defTags)]);
     activeTitle = ActiveTitle(widget.snatchHandler);
     widget.snatchHandler.settingsHandler = widget.settingsHandler;
   }
+  void setSearchGlobalsIndex(int index){
+    globalsIndex = index;
+    searchAction(searchGlobals[globalsIndex].tags!);
+  }
+  void setSearchGlobal(SearchGlobals searchGlobal){
+    searchGlobals[globalsIndex] = searchGlobal;
+    searchAction(searchGlobals[globalsIndex].tags!);
+  }
   void searchAction(String text) {
     // Remove extra spaces
     text = text.trim();
-    if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList!.isNotEmpty){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList!.elementAt(0);
+    if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
     setState((){
       if(text.toLowerCase().contains("loli")){
@@ -113,16 +122,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                 Container(
                   margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
-                  child: FutureBuilder(
-                    future: BooruSelector(),
-                    builder: (context, AsyncSnapshot snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                        return snapshot.data;
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
+                  child: BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal),
                 ),
                 IconButton(
                   padding: const EdgeInsets.all(5),
@@ -136,7 +136,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                 Container(
                     margin: EdgeInsets.fromLTRB(10, 0,0,0),
                     constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
-                    child: TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
+                    child: TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
                 ),
                 Spacer(),
                 Container(
@@ -234,7 +234,7 @@ class _DesktopHomeState extends State<DesktopHome> {
         future: widget.settingsHandler.initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           if (snapshot.connectionState == ConnectionState.done){
-            if (widget.settingsHandler.booruList!.isEmpty){
+            if (widget.settingsHandler.booruList.isEmpty){
               return Center(
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -266,9 +266,9 @@ class _DesktopHomeState extends State<DesktopHome> {
                     if (snapshot.connectionState == ConnectionState.done){
                       firstRun = false;
                       searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-                      searchTagsController.text = widget.settingsHandler.defTags!;
+                      searchTagsController.text = widget.settingsHandler.defTags;
                       if (searchGlobals[globalsIndex].selectedBooru == null){
-                        searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
+                        searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
                       }
                       if (widget.settingsHandler.previewDisplay == "Waterfall"){
                         return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
@@ -292,84 +292,6 @@ class _DesktopHomeState extends State<DesktopHome> {
             return Center(child: CircularProgressIndicator());
           }
         }
-    );
-  }
-
-  /** This Future function will call getBooru on the settingsHandler to load the booru configs
-   * After these are loaded it returns a drop down list which is used to select which booru to search
-   * **/
-  Future BooruSelector() async {
-    if (widget.settingsHandler.prefBooru == ""){
-      await widget.settingsHandler.loadSettings();
-    }
-    if(widget.settingsHandler.booruList!.isEmpty){
-      print("getbooru because null");
-      await widget.settingsHandler.getBooru();
-    }
-    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList!.elementAt(0).name)){
-      await widget.settingsHandler.getBooru();
-    }
-    print(searchGlobals[globalsIndex].toString());
-    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
-    if (searchGlobals[globalsIndex].selectedBooru == null){
-      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList![0].toString());
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
-    }
-    if (!widget.settingsHandler.booruList!.contains(searchGlobals[globalsIndex].selectedBooru)){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
-    }
-    return Container(
-      constraints: BoxConstraints(maxHeight: 30,minHeight: 20),
-      padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
-      decoration: BoxDecoration(
-          color: Get.context!.theme.canvasColor,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: Get.context!.theme.accentColor,
-            width: 1,
-          ),
-      ),
-      child: DropdownButton<Booru>(
-        value: searchGlobals[globalsIndex].selectedBooru,
-        icon: Icon(Icons.arrow_downward),
-        underline: Container(height: 0,),
-        onChanged: (Booru? newValue){
-          setState((){
-            if((searchTagsController.text == "" || searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
-              searchTagsController.text = newValue.defTags!;
-            }
-            // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
-            searchGlobals[globalsIndex] = new SearchGlobals(newValue, searchTagsController.text);
-            print("booru set to ${searchGlobals[globalsIndex].selectedBooru!.name}");
-            // Set new booru and search with current tags
-          });
-        },
-        items: widget.settingsHandler.booruList!.map<DropdownMenuItem<Booru>>((Booru value){
-          // Return a dropdown item
-          return DropdownMenuItem<Booru>(
-            value: value,
-            child:
-            Row(
-              children: <Widget>[
-                //Booru Icon
-                value.type == "Favourites" ?
-                Icon(Icons.favorite,color: Colors.red, size: 18) :
-                Image.network(
-                  value.faviconURL!,
-                  width: 16,
-                  errorBuilder: (_, __, ___) {
-                    return Icon(Icons.broken_image, size: 18);
-                  },
-                ),
-                //Booru name
-                Text(" ${value.name}"),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
     );
   }
 }

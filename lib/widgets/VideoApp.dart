@@ -167,7 +167,7 @@ class _VideoAppState extends State<VideoApp> {
   void initVideo() {
     // viewController..outputStateStream.listen(onViewStateChanged);
     // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
-    cacheMode = widget.settingsHandler.videoCacheMode!;
+    cacheMode = widget.settingsHandler.videoCacheMode;
     _downloadVideo();
   }
 

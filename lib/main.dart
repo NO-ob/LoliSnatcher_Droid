@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
+import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -9,11 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/AboutPage.dart';
+import 'package:LoliSnatcher/pages/AboutPage.dart';
 import 'package:LoliSnatcher/getPerms.dart';
-import 'package:LoliSnatcher/Snatcher.dart';
+import 'package:LoliSnatcher/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/SettingsPage.dart';
+import 'package:LoliSnatcher/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
@@ -50,23 +53,19 @@ void main() {
 }
 
 // Added a preloader to load booruconfigs and settings other wise the booruselector misbehaves
-class Preloader extends StatefulWidget {
+class Preloader extends StatelessWidget {
   SettingsHandler settingsHandler = new SettingsHandler();
-  @override
-  _PreloaderState createState() => _PreloaderState();
-}
 
-class _PreloaderState extends State<Preloader> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: widget.settingsHandler.initialize(),
+        future: settingsHandler.initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot){
           if (snapshot.connectionState == ConnectionState.done){
-            if(widget.settingsHandler.appMode == "Mobile"){
-              return Home(widget.settingsHandler);
+            if(settingsHandler.appMode == "Mobile"){
+              return Home(settingsHandler);
             } else {
-              return DesktopHome(widget.settingsHandler);
+              return DesktopHome(settingsHandler);
             }
           } else {
             return Center(child: CircularProgressIndicator());
@@ -75,6 +74,7 @@ class _PreloaderState extends State<Preloader> {
     );
   }
 }
+
 /** The home widget is the main widget of the app and contains the Image Previews and the settings drawer.
  *
  * **/
@@ -101,8 +101,10 @@ class _HomeState extends State<Home> {
     super.initState();
     Booru? defaultBooru;
     // Set the default booru and tags at the start
-    if(((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru == widget.settingsHandler.booruList!.elementAt(0).name))) {
-      defaultBooru = widget.settingsHandler.booruList!.elementAt(0);
+    widget.settingsHandler.getBooru();
+    // Set the default booru and tags at the start
+    if (widget.settingsHandler.booruList.isNotEmpty){
+      defaultBooru = widget.settingsHandler.booruList.elementAt(0);
     }
     searchGlobals = new List.from([new SearchGlobals(defaultBooru, widget.settingsHandler.defTags)]);
     activeTitle = ActiveTitle(widget.snatchHandler);
@@ -136,13 +138,20 @@ class _HomeState extends State<Home> {
 
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
-
+  void setSearchGlobalsIndex(int index){
+      globalsIndex = index;
+      searchAction(searchGlobals[globalsIndex].tags!);
+  }
+  void setSearchGlobal(SearchGlobals searchGlobal){
+      searchGlobals[globalsIndex] = searchGlobal;
+      searchAction(searchGlobals[globalsIndex].tags!);
+  }
   void searchAction(String text) {
     // Remove extra spaces
     text = text.trim();
 
-    if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList!.isNotEmpty){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList!.elementAt(0);
+    if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
     setState((){
       if(text.toLowerCase().contains("loli")){
@@ -156,6 +165,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
     //searchTagsController.text = searchGlobals[globalsIndex].tags;
     if (searchGlobals[globalsIndex].newTab!.value == "noListener"){
       searchGlobals[globalsIndex].newTab!.addListener((){
@@ -213,7 +223,7 @@ class _HomeState extends State<Home> {
           new WillPopScope(
             onWillPop: _onBackPressed,
             child: Center(
-              child: ImagesFuture(),
+              child: ImagePreviews(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler),
             ),
           ),
           drawer: Drawer(
@@ -259,7 +269,7 @@ class _HomeState extends State<Home> {
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler),
+                              TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
                             ],
                           ),
                         ),
@@ -270,16 +280,7 @@ class _HomeState extends State<Home> {
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              FutureBuilder(
-                                future: BooruSelector(),
-                                builder: (context, AsyncSnapshot snapshot) {
-                                  if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                                    return snapshot.data;
-                                  } else {
-                                    return Center(child: CircularProgressIndicator());
-                                  }
-                                },
-                              ),
+                              BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal),
                             ],
                           ),
                         ),
@@ -293,7 +294,7 @@ class _HomeState extends State<Home> {
                               ),
                             ),
                             onPressed: (){
-                              Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
+                              Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
                             },
                             child: Text("Snatcher", style: TextStyle(color: Colors.white)),
                           ),
@@ -307,25 +308,12 @@ class _HomeState extends State<Home> {
                                 side: BorderSide(color: Get.context!.theme.accentColor),
                               ),
                             ),
-                            onPressed: (){
-                              Get.to(SettingsPage(widget.settingsHandler));
+                            onPressed: () async{
+                              await widget.settingsHandler.loadSettings();
+                              await widget.settingsHandler.getBooru();
+                              Get.to(() => SettingsPage(widget.settingsHandler));
                             },
                             child: Text("Settings", style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(20),
-                                side: BorderSide(color: Get.context!.theme.accentColor),
-                              ),
-                            ),
-                            onPressed: (){
-                              Get.to(AboutPage());
-                            },
-                            child: Text("About", style: TextStyle(color: Colors.white)),
                           ),
                         ),
                       ],
@@ -364,71 +352,8 @@ class _HomeState extends State<Home> {
   /** If first run is true the default tags are loaded using the settings controller then parsed to the images widget
    * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
    * **/
-  Widget ImagesFuture(){
-    return FutureBuilder(
-        future: widget.settingsHandler.initialize(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.connectionState == ConnectionState.done){
-            if (widget.settingsHandler.booruList!.isEmpty){
-              return Center(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Text("No Booru Configs Found"),
-                        Container(
-                          alignment: Alignment.center,
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(20),
-                                side: BorderSide(color: Get.context!.theme.accentColor),
-                              ),
-                            ),
-                            onPressed: (){
-                              Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
-                            },
-                            child: Text("Open Settings", style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ]
-                  )
-              );
-            } else if (firstRun){
-              return FutureBuilder(
-                  future: widget.settingsHandler.initialize(),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done){
-                      firstRun = false;
-                      searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-                      searchTagsController.text = widget.settingsHandler.defTags!;
-                      if (searchGlobals[globalsIndex].selectedBooru == null){
-                        searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
-                      }
-                      if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-                      } else {
-                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-                      }
 
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  }
-              );
-            } else {
-              if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-              } else {
-                return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-              }
-            }
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        }
-    );
-  }
+  /*
   /** This Future function will call getBooru on the settingsHandler to load the booru configs
    * After these are loaded it returns a drop down list which is used to select which booru to search
    * **/
@@ -436,23 +361,23 @@ class _HomeState extends State<Home> {
     if (widget.settingsHandler.prefBooru == ""){
       await widget.settingsHandler.loadSettings();
     }
-    if(widget.settingsHandler.booruList!.isEmpty){
+    if(widget.settingsHandler.booruList.isEmpty){
       print("getbooru because null");
       await widget.settingsHandler.getBooru();
     }
-    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList!.elementAt(0).name)){
+    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name)){
       await widget.settingsHandler.getBooru();
     }
     print(searchGlobals[globalsIndex].toString());
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (searchGlobals[globalsIndex].selectedBooru == null){
-      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList![0].toString());
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
+      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
     }
-    if (!widget.settingsHandler.booruList!.contains(searchGlobals[globalsIndex].selectedBooru)){
-      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList![0];
-      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList![0].type;
+    if (!widget.settingsHandler.booruList.contains(searchGlobals[globalsIndex].selectedBooru)){
+      searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
+      searchGlobals[globalsIndex].handlerType = widget.settingsHandler.booruList[0].type;
     }
     return Container(
       constraints: BoxConstraints(maxHeight: 30,minHeight: 20),
@@ -480,7 +405,7 @@ class _HomeState extends State<Home> {
             // Set new booru and search with current tags
           });
         },
-        items: widget.settingsHandler.booruList!.map<DropdownMenuItem<Booru>>((Booru value){
+        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
           // Return a dropdown item
           return DropdownMenuItem<Booru>(
             value: value,
@@ -505,5 +430,6 @@ class _HomeState extends State<Home> {
         }).toList(),
       ),
     );
-  }
+  }*/
 }
+
