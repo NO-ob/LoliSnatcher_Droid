@@ -23,9 +23,8 @@ import 'package:LoliSnatcher/widgets/PreloadPageView.dart' as PreloadPageView;
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+import 'package:LoliSnatcher/widgets/TagView.dart';
 
-import '../DesktopHome.dart';
-import 'TagView.dart';
 
 /**
  * The image page is what is dispalyed when an iamge is clicked it shows a full resolution

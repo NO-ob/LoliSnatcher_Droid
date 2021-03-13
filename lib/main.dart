@@ -1,10 +1,9 @@
 import 'dart:ui';
-import 'dart:io';
 
-import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
+import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,22 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/pages/AboutPage.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/DesktopHome.dart';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
-import 'package:LoliSnatcher/widgets/ScrollingText.dart';
-import 'package:LoliSnatcher/widgets/WaterfallView.dart';
-import 'package:LoliSnatcher/widgets/StaggeredView.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
-import 'DesktopHome.dart';
-import 'ServiceHandler.dart';
-import 'libBooru/BooruHandler.dart';
+
 
 void main() {
   runApp(GetMaterialApp(
@@ -140,8 +135,10 @@ class _HomeState extends State<Home> {
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
   void setSearchGlobalsIndex(int index){
-      globalsIndex = index;
-      searchAction(searchGlobals[globalsIndex].tags!);
+      setState(() {
+        globalsIndex = index;
+      });
+      // searchAction(searchGlobals[globalsIndex].tags!);
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
       searchGlobals[globalsIndex] = searchGlobal;
@@ -161,6 +158,9 @@ class _HomeState extends State<Home> {
       }
       searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, text);
     });
+    if(text != "" && widget.settingsHandler.searchHistoryEnabled) {
+      widget.settingsHandler.dbHandler.updateSearchHistory(text, searchGlobals[globalsIndex].selectedBooru!.type!, searchGlobals[globalsIndex].selectedBooru!.name!);
+    }
     // Setstate and update the tags variable so the widget rebuilds with the new tags
   }
 
@@ -170,7 +170,7 @@ class _HomeState extends State<Home> {
     //searchTagsController.text = searchGlobals[globalsIndex].tags;
     if (searchGlobals[globalsIndex].newTab!.value == "noListener"){
       searchGlobals[globalsIndex].newTab!.addListener((){
-        if (searchGlobals[globalsIndex].newTab!.value != ""){
+        if (searchGlobals[globalsIndex].newTab!.value != null){
           setState(() {
             // Add after the current tab
             // searchGlobals.insert(globalsIndex + 1, new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
@@ -178,14 +178,40 @@ class _HomeState extends State<Home> {
             // Add to the end
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
           });
+          if(widget.settingsHandler.searchHistoryEnabled) {
+            widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab!.value, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
+          }
+          searchGlobals[globalsIndex].newTab!.value = null;
         }
       });
       searchGlobals[globalsIndex].addTag!.addListener((){
         if (searchGlobals[globalsIndex].addTag!.value != ""){
           searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
+          searchGlobals[globalsIndex].addTag!.value = "";
         }
       });
-      searchGlobals[globalsIndex].newTab!.value = "";
+      searchGlobals[globalsIndex].removeTab!.addListener((){
+        if(searchGlobals[globalsIndex].removeTab!.value != "") {
+          setState(() {
+            if(searchGlobals.length > 1) {
+              if(globalsIndex == searchGlobals.length - 1){
+                globalsIndex --;
+                searchTagsController.text = searchGlobals[globalsIndex].tags!;
+                searchGlobals.removeAt(globalsIndex + 1);
+              } else {
+                searchTagsController.text = searchGlobals[globalsIndex + 1].tags!;
+                searchGlobals.removeAt(globalsIndex);
+              }
+            } else {
+              ServiceHandler.displayToast('Removed last tab! \nResetting to default tags');
+              searchTagsController.text = widget.settingsHandler.defTags;
+              searchGlobals[0] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags);
+            }
+          });
+          searchGlobals[globalsIndex].removeTab!.value = "";
+        }
+      });
+      searchGlobals[globalsIndex].newTab!.value = null;
     }
     /*if (widget.booruSelector.selectedBooruNotifier.value == "noListener"){
       print("Listener added to booruselector");
@@ -260,52 +286,67 @@ class _HomeState extends State<Home> {
                             searchBoxFocus.unfocus();
                           }
                         },
-                    child:
-                    ListView(
+                    child: ListView(
                       children: [
                         Container(
-                          margin: EdgeInsets.fromLTRB(5,0, 0, 0),
+                          margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
+                              TabBox(searchGlobals, globalsIndex, searchTagsController, widget.settingsHandler,setSearchGlobalsIndex),
                             ],
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.fromLTRB(5, 5, 0, 10),
+                          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              TabBoxButtons(searchGlobals, globalsIndex, searchTagsController, widget.settingsHandler, setSearchGlobalsIndex),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             mainAxisSize: MainAxisSize.max,
                             children: <Widget>[
                               const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal),
+                              BooruSelectorMain(searchGlobals[globalsIndex], widget.settingsHandler, searchTagsController, setSearchGlobal),
                             ],
                           ),
                         ),
                         Container(
                           alignment: Alignment.center,
-                          child: TextButton(
+                          child: TextButton.icon(
                             style: TextButton.styleFrom(
+                              primary: Get.context!.theme.accentColor,
+                              padding: EdgeInsets.all(10),
                               shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(20),
+                                borderRadius: new BorderRadius.circular(5),
                                 side: BorderSide(color: Get.context!.theme.accentColor),
                               ),
                             ),
                             onPressed: (){
                               Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
                             },
-                            child: Text("Snatcher", style: TextStyle(color: Colors.white)),
+                            icon: Icon(Icons.download_sharp),
+                            label: Text("Snatcher", style: TextStyle(color: Colors.white))
                           ),
                         ),
+                        const SizedBox(height: 10),
                         Container(
                           alignment: Alignment.center,
-                          child: TextButton(
+                          child: TextButton.icon(
                             style: TextButton.styleFrom(
+                              primary: Get.context!.theme.accentColor,
+                              padding: EdgeInsets.all(10),
                               shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(20),
+                                borderRadius: new BorderRadius.circular(5),
                                 side: BorderSide(color: Get.context!.theme.accentColor),
                               ),
                             ),
@@ -314,7 +355,8 @@ class _HomeState extends State<Home> {
                               await widget.settingsHandler.getBooru();
                               Get.to(() => SettingsPage(widget.settingsHandler));
                             },
-                            child: Text("Settings", style: TextStyle(color: Colors.white)),
+                            icon: Icon(Icons.settings),
+                            label: Text("Settings", style: TextStyle(color: Colors.white)),
                           ),
                         ),
                       ],

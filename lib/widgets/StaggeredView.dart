@@ -106,7 +106,6 @@ class _StaggeredState extends State<StaggeredView> {
                 },
               child:NotificationListener<ScrollUpdateNotification>(
                 child: Scrollbar(
-                  // TODO: Make it draggable
                   controller: gridController,
                   isAlwaysShown: true,
                   child: StaggeredGridView.countBuilder(

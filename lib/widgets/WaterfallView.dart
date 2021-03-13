@@ -102,7 +102,6 @@ class _WaterfallState extends State<WaterfallView> {
               },
               child: NotificationListener<ScrollUpdateNotification>(
                 child: Scrollbar(
-                  // TODO: Make it draggable
                   controller: gridController,
                   isAlwaysShown: true,
                   child: GridView.builder(

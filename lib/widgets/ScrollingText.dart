@@ -13,7 +13,7 @@ class ScrollingText extends StatefulWidget {
 
 class _ScrollingTextState extends State<ScrollingText> {
   String? displayText;
-  int counter = 0, pauseCounter = 0, pauseThreshold = 8;
+  int counter = 0, pauseCounter = 0, pauseThreshold = 8, maxAllowedSize = 0;
   String bufferText = "";
   bool forward = true, disposed = false;
   static const int stepDelay = 200;
@@ -21,6 +21,7 @@ class _ScrollingTextState extends State<ScrollingText> {
   void initState(){
     counter = 0;
     pauseCounter = 0;
+    maxAllowedSize = widget.size;
     bufferText = "";
     forward = true;
     super.initState();
@@ -33,13 +34,19 @@ class _ScrollingTextState extends State<ScrollingText> {
 
   @override
   Widget build(BuildContext context) {
-    if ((counter + widget.size) > widget.text.length){
+    if ((counter + maxAllowedSize) > widget.text.length){
       if(counter != 0) {
         setState(() {
           initState();
         });
       } else {
-        return Text(widget.text, textAlign: TextAlign.left, style: TextStyle(color: widget.textColor));
+        return Text(
+          widget.text, 
+          textAlign: TextAlign.left, 
+          style: TextStyle(
+            color: widget.textColor,
+          )
+        );
       }
     } else {
       switch(widget.mode){
@@ -57,12 +64,18 @@ class _ScrollingTextState extends State<ScrollingText> {
           break;
       }
     }
-    return Text(displayText!, textAlign: TextAlign.left, style: TextStyle(color: widget.textColor));
+    return Text(
+      displayText!, 
+      textAlign: TextAlign.left, 
+      style: TextStyle(
+        color: widget.textColor,
+      )
+    );
   }
   void bounce(){
     Future.delayed(const Duration(milliseconds: stepDelay), () {
       if (!disposed){
-        if ((counter+(widget.size) >= widget.text.length)) {
+        if ((counter + maxAllowedSize) >= widget.text.length) {
           setState(() {
             forward = false;
           });
@@ -82,12 +95,12 @@ class _ScrollingTextState extends State<ScrollingText> {
         }
       }
     });
-    displayText = " " + widget.text.substring(counter, counter +widget.size);
+    displayText = widget.text.substring(counter, counter + maxAllowedSize);
   }
   void scroll() {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
       if (!disposed){
-        if ((counter + (widget.size) < widget.text.length)) {
+        if ((counter + maxAllowedSize) < widget.text.length) {
           setState(() {
             counter++;
           });
@@ -96,13 +109,13 @@ class _ScrollingTextState extends State<ScrollingText> {
         }
       }
     });
-    displayText = " " + widget.text.substring(counter, counter + widget.size);
+    displayText = widget.text.substring(counter, counter + maxAllowedSize);
   }
   void infinite() {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
       if (!disposed){
         if (bufferText.length < 1){
-          if ((counter + (widget.size) < widget.text.length)) {
+          if ((counter + maxAllowedSize) < widget.text.length) {
             setState(() {
               counter++;
             });
@@ -126,9 +139,9 @@ class _ScrollingTextState extends State<ScrollingText> {
       }
     });
     if (bufferText.length < 1){
-      displayText = " " + widget.text.substring(counter, counter + widget.size);
+      displayText = widget.text.substring(counter, counter + maxAllowedSize);
     } else {
-      displayText = bufferText + " " + widget.text.substring(0, widget.size - (bufferText.length - 1));
+      displayText = bufferText + " " + widget.text.substring(0, maxAllowedSize - (bufferText.length - 1));
     }
   }
   void infiniteWithPause() async {
@@ -139,7 +152,7 @@ class _ScrollingTextState extends State<ScrollingText> {
             pauseCounter++;
           });
         } else if (bufferText.length < 1){
-          if ((counter + (widget.size) < widget.text.length)) {
+          if ((counter + maxAllowedSize) < widget.text.length) {
             setState(() {
               counter++;
             });
@@ -165,9 +178,9 @@ class _ScrollingTextState extends State<ScrollingText> {
     });
 
     if (bufferText.length < 1){
-      displayText = widget.text.substring(counter, counter + widget.size);
+      displayText = widget.text.substring(counter, counter + maxAllowedSize);
     } else {
-      displayText = bufferText + " " + widget.text.substring(0, widget.size - (bufferText.length - 1));
+      displayText = bufferText + " " + widget.text.substring(0, maxAllowedSize - (bufferText.length - 1));
     }
 
     if(counter == 0 && pauseCounter <= pauseThreshold) {

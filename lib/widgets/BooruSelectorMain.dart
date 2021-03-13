@@ -10,7 +10,7 @@ class BooruSelectorMain extends StatefulWidget {
   SettingsHandler settingsHandler;
   TextEditingController searchTagsController;
   final Function setParentGlobals;
-  BooruSelectorMain(this.searchGlobals,this.settingsHandler,this.searchTagsController,this.setParentGlobals);
+  BooruSelectorMain(this.searchGlobals, this.settingsHandler, this.searchTagsController, this.setParentGlobals);
   @override
   _BooruSelectorMainState createState() => _BooruSelectorMainState();
 }
@@ -41,8 +41,8 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
       widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList[0];
       widget.searchGlobals.handlerType = widget.settingsHandler.booruList[0].type;
     }
-    return Container(
-        constraints: BoxConstraints(maxHeight: 30,minHeight: 20),
+    return Expanded(child: Container(
+        constraints: BoxConstraints(maxHeight: 40, minHeight: 20),
         padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
         decoration: BoxDecoration(
           color: Get.context!.theme.canvasColor,
@@ -53,6 +53,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           ),
         ),
         child: DropdownButton<Booru>(
+          isExpanded: true,
           value: widget.searchGlobals.selectedBooru,
           icon: Icon(Icons.arrow_downward),
           underline: Container(height: 0,),
@@ -63,6 +64,9 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               }
               // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
               widget.setParentGlobals(new SearchGlobals(newValue, widget.searchTagsController.text));
+              if(widget.searchTagsController.text != "" && widget.settingsHandler.searchHistoryEnabled) {
+                widget.settingsHandler.dbHandler.updateSearchHistory(widget.searchTagsController.text, newValue?.type, newValue?.name);
+              }
               // Set new booru and search with current tags
             });
           },
@@ -70,8 +74,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             // Return a dropdown item
             return DropdownMenuItem<Booru>(
               value: value,
-              child:
-              Row(
+              child: Row(
                 children: <Widget>[
                   //Booru Icon
                   value.type == "Favourites" ?
@@ -90,7 +93,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             );
           }).toList(),
         ),
-      );
+      ));
   }
   @override
   Widget build(BuildContext context) {

@@ -204,7 +204,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 : Container(width: 0.0),
             contentPadding: EdgeInsets.fromLTRB(15, 0, 0, 0), // left,top,right,bottom
             border: new OutlineInputBorder(
-              borderRadius: new BorderRadius.circular(50),
+              borderRadius: new BorderRadius.circular(5),
               gapPadding: 0,
             ),
           ),

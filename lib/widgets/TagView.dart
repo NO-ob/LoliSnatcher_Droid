@@ -48,8 +48,7 @@ class _TagViewState extends State<TagView> {
                           color: Get.context!.theme.accentColor),
                       onPressed: () {
                         setState(() {
-                          widget.searchGlobals.newTab!.value =
-                              currentTag;
+                          widget.searchGlobals.newTab!.value = currentTag;
                         });
                         ServiceHandler.displayToast("Added new tab \n Tag: " + currentTag);
                         //Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
