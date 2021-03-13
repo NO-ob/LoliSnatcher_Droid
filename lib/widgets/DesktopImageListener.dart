@@ -73,13 +73,13 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           if (value.fileURL == ""){
             return Container();
           } else {
-            return Stack(
-              children: [
-                getImageWidget(value),
-                Container(
-                  alignment: Alignment.topRight,
-                  child: Expanded(
-                    child: Column(
+            return Container(
+              child: Stack(
+                children: [
+                  getImageWidget(value),
+                  Container(
+                    alignment: Alignment.topRight,
+                    child:Column(
                       children: [
                         Container(
                           width: 35,
@@ -148,9 +148,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                         )
                       ],
                     ),
-                  ),
-                ),
-              ],
+                  )
+                ],
+              ),
             );
           }
         }

@@ -27,7 +27,7 @@ class _TabBoxState extends State<TabBox> {
         children: <Widget>[
           Expanded(
             child: Container(
-              constraints: BoxConstraints(maxHeight: 30,minHeight: 20),
+              constraints: BoxConstraints(maxHeight: 30,minHeight: 20, minWidth: 100),
               padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
               decoration: BoxDecoration(
                 color: Get.context!.theme.canvasColor,
@@ -45,8 +45,10 @@ class _TabBoxState extends State<TabBox> {
                 onChanged: (SearchGlobals? newValue){
                   setState(() {
                     //widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
-                    widget.searchTagsController.text = newValue!.tags!;
-                    widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue!));
+                    if (newValue != null){
+                      widget.searchTagsController.text = newValue.tags!;
+                      widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue));
+                    }
                   });
                 },
                 onTap: (){

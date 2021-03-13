@@ -5,6 +5,7 @@ import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/DesktopImageListener.dart';
+import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
 import 'package:LoliSnatcher/widgets/MediaViewer.dart';
 import 'package:LoliSnatcher/widgets/StaggeredView.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
@@ -113,12 +114,7 @@ class _DesktopHomeState extends State<DesktopHome> {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                Container(
-                  height: 30,
-                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
-                  constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
-                  child: TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
-                ),
+                TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
                 Container(
                   margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
@@ -133,12 +129,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                     searchAction(searchTagsController.text);
                   },
                 ),
-                Container(
-                    margin: EdgeInsets.fromLTRB(10, 0,0,0),
-                    constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
-                    child: TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
-                ),
-                Spacer(),
+                TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
                 Container(
                   margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   alignment: Alignment.center,
@@ -202,7 +193,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                 children: [
                   Container(
                     height: MediaQuery.of(context).size.height * 0.65,
-                    child: ImagesFuture(),
+                    child: ImagePreviews(widget.settingsHandler, searchGlobals[globalsIndex], widget.snatchHandler),
                     padding: EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       border: Border.all(color: Get.context!.theme.backgroundColor,width: 2),
@@ -224,74 +215,6 @@ class _DesktopHomeState extends State<DesktopHome> {
             ),
           ],)
       ),
-    );
-  }
-  /** If first run is true the default tags are loaded using the settings controller then parsed to the images widget
-   * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
-   * **/
-  Widget ImagesFuture(){
-    return FutureBuilder(
-        future: widget.settingsHandler.initialize(),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if (snapshot.connectionState == ConnectionState.done){
-            if (widget.settingsHandler.booruList.isEmpty){
-              return Center(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        Text("No Booru Configs Found"),
-                        Container(
-                          alignment: Alignment.center,
-                          child: TextButton(
-                            style: TextButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(20),
-                                side: BorderSide(color: Get.context!.theme.accentColor),
-                              ),
-                            ),
-                            onPressed: (){
-                              //Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
-                            },
-                            child: Text("Open Settings", style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ]
-                  )
-              );
-            } else if (firstRun){
-              return FutureBuilder(
-                  future: widget.settingsHandler.initialize(),
-                  builder: (BuildContext context, AsyncSnapshot snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done){
-                      firstRun = false;
-                      searchGlobals[globalsIndex].tags = widget.settingsHandler.defTags;
-                      searchTagsController.text = widget.settingsHandler.defTags;
-                      if (searchGlobals[globalsIndex].selectedBooru == null){
-                        searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList[0];
-                      }
-                      if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                        return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-                      } else {
-                        return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-                      }
-
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  }
-              );
-            } else {
-              if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                return WaterfallView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-              } else {
-                return StaggeredView(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler);
-              }
-            }
-          } else {
-            return Center(child: CircularProgressIndicator());
-          }
-        }
     );
   }
 }
