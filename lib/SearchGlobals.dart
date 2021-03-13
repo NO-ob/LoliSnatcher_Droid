@@ -14,6 +14,7 @@ class SearchGlobals{
   BooruHandler? booruHandler;
   String? handlerType;
   ValueNotifier? addTag = ValueNotifier("");
+  ValueNotifier? removeTab = ValueNotifier("");
   ValueNotifier? newTab = ValueNotifier("noListener");
   ValueNotifier? displayAppbar = ValueNotifier(true);
   ValueNotifier? viewedIndex = ValueNotifier(0);

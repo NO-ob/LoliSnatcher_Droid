@@ -20,9 +20,10 @@ class CachedThumb extends StatefulWidget {
 
 class _CachedThumbState extends State<CachedThumb> {
   final ImageWriter imageWriter = ImageWriter();
-  int _total = 0, _received = 0;
+  int _total = 0, _received = 0, _restartedCount = 0;
   bool? isFromCache;
-  Timer? _debounceBytes;
+  bool isFailed = false;
+  Timer? _debounceBytes, _restartDelay;
   Dio? _client;
   CancelToken? _dioCancelToken;
   Uint8List _totalBytes = Uint8List(0);
@@ -80,6 +81,19 @@ class _CachedThumbState extends State<CachedThumb> {
       if (CancelToken.isCancel(e)) {
         // print('Canceled by user: $e');
       } else {
+        if(_restartedCount < 5) {
+          // attempt to reload 5 times with a second delay
+          _restartDelay?.cancel();
+          _restartDelay = Timer(const Duration(seconds: 1), () {
+            restartLoading();
+          });
+          _restartedCount++;
+        } else {
+          //show error
+          setState(() {
+            isFailed = true;
+          });
+        }
         print('Dio request cancelled: $e');
       }
     });
@@ -107,11 +121,34 @@ class _CachedThumbState extends State<CachedThumb> {
     _downloadImage();
   }
 
+  void restartLoading() {
+    _restartDelay?.cancel();
+    _debounceBytes?.cancel();
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
+      _dioCancelToken?.cancel();
+    }
+    // _client?.close(force: true);
+
+    setState(() {
+      _total = 0;
+      _received = 0;
+
+      isFromCache = false;
+
+      _totalBytes = Uint8List(0);
+    });
+
+    _downloadImage();
+  }
+
   @override
   void dispose() {
     super.dispose();
+    _restartDelay?.cancel();
     _debounceBytes?.cancel();
-    _dioCancelToken?.cancel();
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
+      _dioCancelToken?.cancel();
+    }
     // _client?.close(force: true);
   }
 
@@ -120,6 +157,11 @@ class _CachedThumbState extends State<CachedThumb> {
     //   // Resulting image for network loaded thumbnail
     //   return child;
     // }
+
+    if(isFailed) {
+      return child;
+    }
+
     bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (_total > 0);
     bool isProgressFromCaching = hasProgressData && _total > 0;
     int? expectedBytes = (hasProgressData ? (isProgressFromCaching ? _received : loadingProgress!.cumulativeBytesLoaded) : null);

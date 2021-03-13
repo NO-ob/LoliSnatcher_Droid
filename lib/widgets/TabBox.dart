@@ -1,10 +1,10 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'ScrollingText.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 
 class TabBox extends StatefulWidget {
   List<SearchGlobals> searchGlobals;
@@ -27,7 +27,7 @@ class _TabBoxState extends State<TabBox> {
         children: <Widget>[
           Expanded(
             child: Container(
-              constraints: BoxConstraints(maxHeight: 30,minHeight: 20, minWidth: 100),
+              constraints: BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100),
               padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
               decoration: BoxDecoration(
                 color: Get.context!.theme.canvasColor,
@@ -75,7 +75,7 @@ class _TabBoxState extends State<TabBox> {
                           )
                               : Icon(CupertinoIcons.question, size: 18),
                           const SizedBox(width: 3),
-                          Expanded(child: ScrollingText(tagText, 15, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
+                          Expanded(child: ScrollingText(tagText, 22, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
                         ]
                     ),
                   );
@@ -83,36 +83,8 @@ class _TabBoxState extends State<TabBox> {
               ),
             ),
           ),
-
-
-          IconButton(
-            icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor,),
-            onPressed: () {
-              // add a new search global to the list
-              setState((){
-                widget.searchGlobals.add(new SearchGlobals(widget.searchGlobals[widget.globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
-                // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
-              });
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.remove_circle_outline, color: Get.context!.theme.accentColor),
-            onPressed: () {
-              // Remove selected searchglobal from list and apply nearest to search bar
-              setState((){
-                if(widget.globalsIndex == widget.searchGlobals.length - 1 && widget.searchGlobals.length > 1){
-                  widget.globalsIndex --;
-                  widget.searchTagsController.text = widget.searchGlobals[widget.globalsIndex].tags!;
-                  widget.searchGlobals.removeAt(widget.globalsIndex + 1);
-                } else if (widget.searchGlobals.length > 1){
-                  widget.searchTagsController.text = widget.searchGlobals[widget.globalsIndex + 1].tags!;
-                  widget.searchGlobals.removeAt(widget.globalsIndex);
-                }
-              });
-            },
-          ),
         ],
-      ),
+      )
     );
   }
 }

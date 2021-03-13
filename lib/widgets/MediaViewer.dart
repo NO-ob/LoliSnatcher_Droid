@@ -33,6 +33,8 @@ class _MediaViewerState extends State<MediaViewer> {
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
   bool isFromCache = false, isStopped = false;
+
+  ImageProvider? thumbProvider;
   String? imageURL;
   Dio? _client;
   CancelToken? _dioCancelToken;
@@ -126,12 +128,29 @@ class _MediaViewerState extends State<MediaViewer> {
       imageURL = widget.booruItem.fileURL;
     }
 
+    // load thumbnail preview
+    () async {
+      String thumbnailFileURL = (widget.settingsHandler.previewMode == "Sample"
+          ? widget.booruItem.sampleURL
+          : widget.booruItem.thumbnailURL);
+      String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails');
+      File? preview = previewPath != null ? File(previewPath) : null;
+
+      setState(() {
+        if (preview != null){
+          thumbProvider = FileImage(preview);
+        } else {
+          thumbProvider = NetworkImage(thumbnailFileURL);
+        }
+      });
+    }();
+
     // debug output
     // viewController..outputStateStream.listen(onViewStateChanged);
     // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(new Duration(seconds: 1), (timer) {
+    _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
       // force restate every second to refresh all timers/indicators, even when loading has stopped
       setState(() {});
     });
@@ -147,7 +166,9 @@ class _MediaViewerState extends State<MediaViewer> {
   void killLoading() {
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
-    _dioCancelToken?.cancel();
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
+      _dioCancelToken?.cancel();
+    }
     // _client?.close(force: true);
 
     setState(() {
@@ -169,9 +190,10 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void dispose() {
     super.dispose();
+    thumbProvider?.evict();
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
-    if (!_dioCancelToken!.isCancelled){
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
     // _client?.close(force: true);
@@ -220,33 +242,22 @@ class _MediaViewerState extends State<MediaViewer> {
         : 'Loading${isFromCache ? ' from cache' : ''}...';
     String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    String thumbnailFileURL = (widget.settingsHandler.previewMode == "Sample"
-        ? widget.booruItem.sampleURL
-        : widget.booruItem.thumbnailURL);
-    File preview = File(
-        "${widget.settingsHandler.cachePath}thumbnails/${thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1)}");
     // start opacity from 20%
     double opacityValue = 0.2 + 0.8 * lerpDouble(0.0, 1.0, percentDone ?? 0.66)!;
 
-    // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
-    // print(opacityValue);
-    ImageProvider? provider;
-    if (preview.existsSync()){
-      provider = FileImage(preview);
-    } else {
-      provider = NetworkImage(thumbnailFileURL);
-    }
     return Container(
-        decoration: new BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.black,
-          image: new DecorationImage(
-              image: provider,
+          image: thumbProvider != null 
+          ? DecorationImage(
+              image: thumbProvider!,
               fit: BoxFit.contain,
-              colorFilter: new ColorFilter.mode(
-                  Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),
+              colorFilter: ColorFilter.mode(Colors.black.withOpacity(opacityValue), BlendMode.dstATop)
+          )
+          : null,
         ),
-        child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+        child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

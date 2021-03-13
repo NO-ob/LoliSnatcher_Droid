@@ -31,7 +31,7 @@ class SettingsHandler {
   ];*/
   String themeMode = "dark";
   String path = "";
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true, searchHistoryEnabled = true;
   Future writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -212,6 +212,16 @@ class SettingsHandler {
               print("Found dbEnabled " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Search History"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                searchHistoryEnabled = true;
+              } else {
+                searchHistoryEnabled = false;
+              }
+              print("Found searchHistoryEnabled " + settings[i].split(" = ")[1] );
+            }
+            break;
           case ("App Mode"):
             if (settings[i].split(" = ").length > 1){
               appMode = settings[i].split(" = ")[1];
@@ -266,6 +276,7 @@ class SettingsHandler {
     writer.write("Preview Display = $previewDisplay\n");
     writer.write("Gallery Mode = $galleryMode\n");
     writer.write("Enable Database = $dbEnabled\n");
+    writer.write("Search History = $searchHistoryEnabled\n");
     writer.write("App Mode = $appMode\n");
     writer.close();
     ServiceHandler.displayToast("Settings Saved! \n Some changes may not take effect until the app is restarted");

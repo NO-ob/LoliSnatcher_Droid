@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +33,7 @@ class _VideoAppState extends State<VideoApp> {
   ChewieController? _chewieController;
 
   // VideoPlayerValue _latestValue;
-
+  ImageProvider? thumbProvider;
   String? cacheMode;
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
@@ -50,7 +49,7 @@ class _VideoAppState extends State<VideoApp> {
   /// Author: [Nani-Sore] ///
   Future<void> _downloadVideo() async {
     _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(new Duration(seconds: 1), (timer) {
+    _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
       // force restate every second to refresh all timers/indicators, even when loading has stopped
       setState(() {});
     });
@@ -168,13 +167,34 @@ class _VideoAppState extends State<VideoApp> {
     // viewController..outputStateStream.listen(onViewStateChanged);
     // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
     cacheMode = widget.settingsHandler.videoCacheMode;
+
+    // load thumbnail preview
+    () async {
+      String thumbnailFileURL = widget.booruItem.thumbnailURL; // sample can be a video
+      // widget.settingsHandler.previewMode == "Sample"
+      //     ? widget.booruItem.sampleURL
+      //     : widget.booruItem.thumbnailURL;
+      String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails');
+      File? preview = previewPath != null ? File(previewPath) : null;
+
+      setState(() {
+        if (preview != null){
+          thumbProvider = FileImage(preview);
+        } else {
+          thumbProvider = NetworkImage(thumbnailFileURL);
+        }
+      });
+    }();
+
     _downloadVideo();
   }
 
   void killLoading() {
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
-    _dioCancelToken?.cancel();
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
+      _dioCancelToken?.cancel();
+    }
     // _client?.close(force: true);
 
     setState(() {
@@ -195,14 +215,18 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   void dispose() {
+    thumbProvider?.evict();
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
 
+    _videoController.setVolume(0);
     _videoController.pause();
     _videoController.dispose();
     _chewieController?.dispose();
 
-    _dioCancelToken?.cancel();
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
+      _dioCancelToken?.cancel();
+    }
     // _client?.close(force: true);
     super.dispose();
   }
@@ -317,37 +341,24 @@ class _VideoAppState extends State<VideoApp> {
         : 'Loading${isFromCache ? ' from cache' : ''}...';
     String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    String thumbnailFileURL = widget.booruItem.thumbnailURL; // sample can be a video
-    // widget.settingsHandler.previewMode == "Sample"
-    //     ? widget.booruItem.sampleURL
-    //     : widget.booruItem.thumbnailURL;
-    File preview = File(
-        "${widget.settingsHandler.cachePath}thumbnails/${thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1)}");
     // start opacity from 20%
     double opacityValue = hasProgressData
         ? 0.2 + 0.8 * lerpDouble(0.0, 1.0, percentDone ?? 0.66)!
         : 0.66;
-    // print(widget.settingsHandler.cachePath + "thumbnails/" + thumbnailFileURL.substring(thumbnailFileURL.lastIndexOf("/") + 1));
-    // print(opacityValue);
 
-
-    late ImageProvider provider;
-    if (preview.existsSync()){
-      provider = FileImage(preview);
-    } else {
-      provider = NetworkImage(thumbnailFileURL);
-    }
     return Container(
-        decoration: new BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.black,
-          image: new DecorationImage(
-              image: provider,
+          image: thumbProvider != null
+            ? DecorationImage(
+              image: thumbProvider!,
               fit: BoxFit.contain,
-              colorFilter: new ColorFilter.mode(
-                  Colors.black.withOpacity(opacityValue), BlendMode.dstATop)),
+              colorFilter: ColorFilter.mode(Colors.black.withOpacity(opacityValue), BlendMode.dstATop)
+            )
+            : null,
         ),
-        child: new BackdropFilter(
-            filter: new ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+        child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

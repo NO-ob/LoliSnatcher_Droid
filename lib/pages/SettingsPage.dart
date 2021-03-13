@@ -1,6 +1,3 @@
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/pages/settings/BehaviourPage.dart';
 import 'package:LoliSnatcher/pages/settings/BooruPage.dart';
 import 'package:LoliSnatcher/pages/settings/DatabasePage.dart';
@@ -8,25 +5,8 @@ import 'package:LoliSnatcher/pages/settings/GalleryPage.dart';
 import 'package:LoliSnatcher/pages/settings/UserInterfacePage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import '../libBooru/BooruOnRailsHandler.dart';
-import '../libBooru/GelbooruHandler.dart';
-import '../libBooru/GelbooruV1Handler.dart';
-import '../libBooru/MoebooruHandler.dart';
-import '../libBooru/PhilomenaHandler.dart';
-import '../libBooru/DanbooruHandler.dart';
-import '../libBooru/ShimmieHandler.dart';
-import '../libBooru/HydrusHandler.dart';
-import '../libBooru/SankakuHandler.dart';
-import '../libBooru/BooruHandler.dart';
-import '../libBooru/BooruItem.dart';
-import '../libBooru/e621Handler.dart';
-import '../libBooru/SzurubooruHandler.dart';
-import '../libBooru/Booru.dart';
-import '../widgets/InfoDialog.dart';
-import '../getPerms.dart';
 import '../SettingsHandler.dart';
 import 'package:get/get.dart';
-import 'package:flutter/services.dart';
 
 import 'AboutPage.dart';
 /**

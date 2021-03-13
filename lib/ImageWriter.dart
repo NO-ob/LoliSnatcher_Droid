@@ -1,11 +1,16 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+
+void writeBytesIsolate(Map<String, dynamic> map) {
+  map['file'].writeAsBytes(map['bytes']);
+}
 class ImageWriter{
   String? path = "";
   String? cacheRootPath = "";
@@ -144,7 +149,9 @@ class ImageWriter{
 
       String fileName = parseThumbUrlToName(fileURL);
       image = new File(cachePath+fileName);
-      await image.writeAsBytes(bytes);
+      // move to separate to thread, so the app won't hang while it saves
+      compute(writeBytesIsolate, {"file": image, "bytes": bytes});
+      // await image.writeAsBytes(bytes);
     } catch (e){
       print("Image Writer Exception:: cache write");
       print(e);
@@ -178,16 +185,24 @@ class ImageWriter{
     }
   }
 
-  Future getCachePath(String fileURL, String typeFolder) async{
+  Future<String?> getCachePath(String fileURL, String typeFolder) async{
     String cachePath;
     try {
       await setPaths();
-      cachePath = await cacheRootPath! + typeFolder + "/";
+      cachePath = cacheRootPath! + typeFolder + "/";
 
       String fileName = parseThumbUrlToName(fileURL);
-      bool fileExists = await File(cachePath+fileName).exists();
+      File cacheFile = File(cachePath+fileName);
+      bool fileExists = await cacheFile.exists();
+      bool fileIsNotEmpty = (await cacheFile.stat()).size > 0;
       if (fileExists){
-        return cachePath+fileName;
+        if(fileIsNotEmpty) {
+          return cachePath+fileName;
+        } else {
+          // somehow some files can save with zero bytes - we remove them
+          cacheFile.delete();
+          return null;
+        }
       } else {
         return null;
       }

@@ -1,23 +1,17 @@
 import 'dart:io';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/DesktopImageListener.dart';
 import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
-import 'package:LoliSnatcher/widgets/MediaViewer.dart';
-import 'package:LoliSnatcher/widgets/StaggeredView.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
-import 'package:LoliSnatcher/widgets/VideoApp.dart';
-import 'package:LoliSnatcher/widgets/WaterfallView.dart';
+import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
-import 'pages/AboutPage.dart';
 import 'SearchGlobals.dart';
 import 'ServiceHandler.dart';
 import 'SettingsHandler.dart';
@@ -63,8 +57,10 @@ class _DesktopHomeState extends State<DesktopHome> {
     widget.snatchHandler.settingsHandler = widget.settingsHandler;
   }
   void setSearchGlobalsIndex(int index){
-    globalsIndex = index;
-    searchAction(searchGlobals[globalsIndex].tags!);
+    setState(() {
+      globalsIndex = index;
+    });
+    // searchAction(searchGlobals[globalsIndex].tags!);
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
     searchGlobals[globalsIndex] = searchGlobal;
@@ -83,27 +79,56 @@ class _DesktopHomeState extends State<DesktopHome> {
       }
       searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, text);
     });
+    if(text != "" && widget.settingsHandler.searchHistoryEnabled) {
+      widget.settingsHandler.dbHandler.updateSearchHistory(text, searchGlobals[globalsIndex].selectedBooru!.type!, searchGlobals[globalsIndex].selectedBooru!.name!);
+    }
     // Setstate and update the tags variable so the widget rebuilds with the new tags
   }
   @override
   Widget build(BuildContext context) {
     if (searchGlobals[globalsIndex].newTab!.value == "noListener"){
       searchGlobals[globalsIndex].newTab!.addListener((){
-        if (searchGlobals[globalsIndex].newTab!.value != ""){
+        if (searchGlobals[globalsIndex].newTab!.value != null){
           setState(() {
             // Add after the current tab
             // searchGlobals.insert(globalsIndex + 1, new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
             // Add to the end
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
           });
+          if(widget.settingsHandler.searchHistoryEnabled) {
+            widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab!.value, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
+          }
+          searchGlobals[globalsIndex].newTab!.value = null;
         }
       });
       searchGlobals[globalsIndex].addTag!.addListener((){
         if (searchGlobals[globalsIndex].addTag!.value != ""){
           searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
+          searchGlobals[globalsIndex].addTag!.value = "";
         }
       });
-      searchGlobals[globalsIndex].newTab!.value = "";
+      searchGlobals[globalsIndex].removeTab!.addListener((){
+        if(searchGlobals[globalsIndex].removeTab!.value != "") {
+          setState(() {
+            if(searchGlobals.length > 1) {
+              if(globalsIndex == searchGlobals.length - 1){
+                globalsIndex --;
+                searchTagsController.text = searchGlobals[globalsIndex].tags!;
+                searchGlobals.removeAt(globalsIndex + 1);
+              } else {
+                searchTagsController.text = searchGlobals[globalsIndex + 1].tags!;
+                searchGlobals.removeAt(globalsIndex);
+              }
+            } else {
+              ServiceHandler.displayToast('Removed last tab! \nResetting to default tags');
+              searchTagsController.text = widget.settingsHandler.defTags;
+              searchGlobals[0] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags);
+            }
+          });
+          searchGlobals[globalsIndex].removeTab!.value = "";
+        }
+      });
+      searchGlobals[globalsIndex].newTab!.value = null;
     }
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -130,6 +155,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                   },
                 ),
                 TabBox(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
+                TabBoxButtons(searchGlobals,globalsIndex,searchTagsController,widget.settingsHandler,setSearchGlobalsIndex),
                 Container(
                   margin: EdgeInsets.fromLTRB(10, 0,0,0),
                   alignment: Alignment.center,
