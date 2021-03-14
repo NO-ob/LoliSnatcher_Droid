@@ -29,7 +29,7 @@ class VideoApp extends StatefulWidget {
 class _VideoAppState extends State<VideoApp> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  late VideoPlayerController _videoController;
+  VideoPlayerController? _videoController;
   ChewieController? _chewieController;
 
   // VideoPlayerValue _latestValue;
@@ -111,8 +111,7 @@ class _VideoAppState extends State<VideoApp> {
     ).then((value) async {
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
       if (value.data != null && _received > (_total * 0.95)) {
-        final File? cacheFile = await imageWriter.writeCacheFromBytes(
-            widget.booruItem.fileURL, value.data!, 'media');
+        final File? cacheFile = await imageWriter.writeCacheFromBytes(widget.booruItem.fileURL, value.data!, 'media');
         if (cacheFile != null) {
           //Restate only when just Caching
           if (cacheMode == 'Cache') {
@@ -146,7 +145,7 @@ class _VideoAppState extends State<VideoApp> {
     // always save incoming bytes, but restate only after [debounceDelay]MS
     const int debounceDelay = 50;
     bool isActive = _debounceBytes?.isActive ?? false;
-    bool isAllowedToRestate = cacheMode == 'Cache' || !(_videoController.value.isInitialized);
+    bool isAllowedToRestate = cacheMode == 'Cache' || !(_videoController != null && _videoController!.value.isInitialized);
     if (isActive || !isAllowedToRestate) {
       _received = received;
     } else {
@@ -190,12 +189,7 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void killLoading() {
-    _debounceBytes?.cancel();
-    _checkInterval?.cancel();
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
-      _dioCancelToken?.cancel();
-    }
-    // _client?.close(force: true);
+    disposables();
 
     setState(() {
       _total = 0;
@@ -215,20 +209,24 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   void dispose() {
+    disposables();
+    super.dispose();
+  }
+
+  void disposables() {
     thumbProvider?.evict();
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
 
-    _videoController.setVolume(0);
-    _videoController.pause();
-    _videoController.dispose();
+    _videoController?.setVolume(0);
+    _videoController?.pause();
+    _videoController?.dispose();
     _chewieController?.dispose();
 
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
     // _client?.close(force: true);
-    super.dispose();
   }
 
 
@@ -242,9 +240,9 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   // void _updateState() {
-  //   print(_videoController.value);
+  //   print(_videoController?.value);
   //   setState(() {
-  //     _latestValue = _videoController.value;
+  //     _latestValue = _videoController?.value;
   //   });
   // }
 
@@ -258,7 +256,7 @@ class _VideoAppState extends State<VideoApp> {
       // Otherwise load from network
       _videoController = VideoPlayerController.network(widget.booruItem.fileURL, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
     }
-    await Future.wait([_videoController.initialize()]);
+    await Future.wait([_videoController!.initialize()]);
     // _videoController.addListener(_updateState);
 
     // Stop force restating loading indicators when video is initialized
@@ -266,7 +264,7 @@ class _VideoAppState extends State<VideoApp> {
 
     // Player wrapper to allow controls, looping...
     _chewieController = ChewieController(
-      videoPlayerController: _videoController,
+      videoPlayerController: _videoController!,
       // autoplay is disabled here, because videos started playing randomly, but videos will still autoplay when in view (see isViewed check later)
       autoPlay: false,
       allowedScreenSleep: false,
@@ -520,13 +518,13 @@ class _VideoAppState extends State<VideoApp> {
     if (initialized) {
       if (isViewed) {
         // Reset video time if in view
-        _videoController.seekTo(Duration());
+        _videoController!.seekTo(Duration());
         if (widget.settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-          _videoController.play();
+          _videoController!.play();
         }
       } else {
-        _videoController.pause();
+        _videoController!.pause();
       }
     }
 

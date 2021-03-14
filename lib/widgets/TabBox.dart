@@ -38,7 +38,7 @@ class _TabBoxState extends State<TabBox> {
                 ),
               ),
               child: DropdownButton<SearchGlobals>(
-                underline: Container(height: 0,),
+                underline: Container(height: 0),
                 isExpanded: true,
                 value: widget.searchGlobals[widget.globalsIndex],
                 icon: Icon(Icons.arrow_downward),
@@ -47,7 +47,7 @@ class _TabBoxState extends State<TabBox> {
                     //widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
                     if (newValue != null){
                       widget.searchTagsController.text = newValue.tags!;
-                      widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue));
+                      widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue), null);
                     }
                   });
                 },

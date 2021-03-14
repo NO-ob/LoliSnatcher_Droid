@@ -26,7 +26,7 @@ class _CachedThumbState extends State<CachedThumb> {
   Timer? _debounceBytes, _restartDelay;
   Dio? _client;
   CancelToken? _dioCancelToken;
-  Uint8List _totalBytes = Uint8List(0);
+  ImageProvider? thumbProvider;
 
   /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
@@ -40,7 +40,7 @@ class _CachedThumbState extends State<CachedThumb> {
         isFromCache = true;
       });
       // load bytes first, then trigger an empty restate
-      _totalBytes = await file.readAsBytes();
+      thumbProvider = ResizeImage(MemoryImage(await file.readAsBytes()), width: 500); // allowUpscaling: true
       setState(() {});
       return;
     } else {
@@ -67,9 +67,8 @@ class _CachedThumbState extends State<CachedThumb> {
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
       if (value.data != null && _received > (_total * 0.95)) {
         // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-        setState((){
-          _totalBytes = Uint8List.fromList(value.data!);
-        });
+        thumbProvider = ResizeImage(MemoryImage(Uint8List.fromList(value.data!)), width: 500); // allowUpscaling: true
+        setState((){ });
         if (widget.settingsHandler.imageCache) {
           imageWriter.writeCacheFromBytes(widget.thumbURL, value.data!, 'thumbnails');
         }
@@ -122,20 +121,13 @@ class _CachedThumbState extends State<CachedThumb> {
   }
 
   void restartLoading() {
-    _restartDelay?.cancel();
-    _debounceBytes?.cancel();
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
-      _dioCancelToken?.cancel();
-    }
-    // _client?.close(force: true);
+    disposables();
 
     setState(() {
       _total = 0;
       _received = 0;
 
       isFromCache = false;
-
-      _totalBytes = Uint8List(0);
     });
 
     _downloadImage();
@@ -143,7 +135,12 @@ class _CachedThumbState extends State<CachedThumb> {
 
   @override
   void dispose() {
+    disposables();
     super.dispose();
+  }
+
+  void disposables() {
+    thumbProvider?.evict();
     _restartDelay?.cancel();
     _debounceBytes?.cancel();
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
@@ -196,42 +193,11 @@ class _CachedThumbState extends State<CachedThumb> {
 
   @override
   Widget build(BuildContext context) {
-    // Show progress until image bytes are fetched (either from network or cache)
-    /*_client = IOClient();
-    return FutureBuilder(
-        future: _client!.send(Request('GET', Uri.parse(widget.thumbURL))),
-        builder: (BuildContext context, AsyncSnapshot snapshot){
-          if (snapshot.connectionState == ConnectionState.done){
-            int contentlen = snapshot.data.contentLength;
-            num recieved = 0;
-            return StreamBuilder(
-                stream: snapshot.data.stream,
-                builder: (BuildContext context, AsyncSnapshot snapshot){
-                    if(snapshot.hasData){
-                      _bytes += snapshot.data;
-                      if(snapshot.connectionState == ConnectionState.done){
-                        return Image.memory(
-                            Uint8List.fromList(_bytes),
-                          fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
-                          width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
-                          height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
-                        );
-                      } else {
-                        return Text("Snapshot is active ${_bytes.length} / $contentlen / ${snapshot.data.length}");
-                      }
-                    } else {
-                      return Text("No Data");
-                    }
-
-            });
-          }
-          return Container();
-        });*/
-    if (_totalBytes.length == 0) {
+    if (thumbProvider == null) { // (_totalBytes.length == 0) {
       return loadingElementBuilder(context, Center(child: Text("Error")), null);
     } else {
-      return Image.memory(
-        _totalBytes,
+      return Image(
+        image: thumbProvider!, //ResizeImage(MemoryImage(_totalBytes), width: 500, allowUpscaling: true),
         fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
         width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
         height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,

@@ -134,11 +134,13 @@ class _HomeState extends State<Home> {
 
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
-  void setSearchGlobalsIndex(int index){
+  void setSearchGlobalsIndex(int index, String? newSearch){
       setState(() {
         globalsIndex = index;
       });
-      // searchAction(searchGlobals[globalsIndex].tags!);
+      if(newSearch != null) {
+        searchAction(searchGlobals[globalsIndex].tags!);
+      }
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
       searchGlobals[globalsIndex] = searchGlobal;
@@ -178,7 +180,7 @@ class _HomeState extends State<Home> {
             // Add to the end
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
           });
-          if(widget.settingsHandler.searchHistoryEnabled) {
+          if(searchGlobals[globalsIndex].newTab!.value != "" && widget.settingsHandler.searchHistoryEnabled) {
             widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab!.value, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
           }
           searchGlobals[globalsIndex].newTab!.value = null;

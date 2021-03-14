@@ -8,9 +8,12 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
-void writeBytesIsolate(Map<String, dynamic> map) {
-  map['file'].writeAsBytes(map['bytes']);
-}
+// move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
+// Future<void> writeBytesIsolate(Map<String, dynamic> map) async {
+//   await map['file'].writeAsBytes(map['bytes']);
+//   return;
+// }
+
 class ImageWriter{
   String? path = "";
   String? cacheRootPath = "";
@@ -138,8 +141,8 @@ class ImageWriter{
     return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
 
-  Future writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder) async{
-    File image;
+  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder) async{
+    File? image;
     String cachePath;
     try {
       await setPaths();
@@ -149,9 +152,10 @@ class ImageWriter{
 
       String fileName = parseThumbUrlToName(fileURL);
       image = new File(cachePath+fileName);
-      // move to separate to thread, so the app won't hang while it saves
-      compute(writeBytesIsolate, {"file": image, "bytes": bytes});
-      // await image.writeAsBytes(bytes);
+      await image.writeAsBytes(bytes);
+
+      // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
+      // await compute(writeBytesIsolate, {"file": image, "bytes": bytes});
     } catch (e){
       print("Image Writer Exception:: cache write");
       print(e);

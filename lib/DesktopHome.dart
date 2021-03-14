@@ -95,7 +95,7 @@ class _DesktopHomeState extends State<DesktopHome> {
             // Add to the end
             searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
           });
-          if(widget.settingsHandler.searchHistoryEnabled) {
+          if(searchGlobals[globalsIndex].newTab!.value != "" && widget.settingsHandler.searchHistoryEnabled) {
             widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab!.value, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
           }
           searchGlobals[globalsIndex].newTab!.value = null;
