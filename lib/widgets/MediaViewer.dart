@@ -35,10 +35,10 @@ class _MediaViewerState extends State<MediaViewer> {
   bool isFromCache = false, isStopped = false;
 
   ImageProvider? thumbProvider;
+  ImageProvider? mainProvider;
   String? imageURL;
   Dio? _client;
   CancelToken? _dioCancelToken;
-  Uint8List _totalBytes = Uint8List(0);
 
   /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
@@ -54,7 +54,7 @@ class _MediaViewerState extends State<MediaViewer> {
         isFromCache = true;
       });
       // load bytes first, then trigger an empty restate
-      _totalBytes = await file.readAsBytes();
+      mainProvider = ResizeImage(MemoryImage(await file.readAsBytes()), width: 4096);
       setState(() {});
       return;
     }
@@ -74,9 +74,8 @@ class _MediaViewerState extends State<MediaViewer> {
     ).then((value) {
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
       if (_received > (_total * 0.95)) {
-        setState((){
-          _totalBytes = Uint8List.fromList(value.data!);
-        });
+        mainProvider = ResizeImage(MemoryImage(Uint8List.fromList(value.data!)), width: 4096);
+        setState((){ });
 
         _checkInterval?.cancel();
 
@@ -164,12 +163,7 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   void killLoading() {
-    _debounceBytes?.cancel();
-    _checkInterval?.cancel();
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
-      _dioCancelToken?.cancel();
-    }
-    // _client?.close(force: true);
+    disposables();
 
     setState(() {
       _total = 0;
@@ -182,15 +176,26 @@ class _MediaViewerState extends State<MediaViewer> {
 
       isFromCache = false;
       isStopped = true;
-
-      _totalBytes = Uint8List(0);
     });
   }
 
   @override
   void dispose() {
+    disposables();
     super.dispose();
+  }
+
+  void disposables() {
     thumbProvider?.evict();
+    mainProvider?.evict().then((bool success) {
+      // if(success) {
+      //   ServiceHandler.displayToast('main image evicted');
+      //   print('main image evicted');
+      // } else {
+      //   ServiceHandler.displayToast('main image eviction failed');
+      //   print('main image eviction failed');
+      // }
+    });
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
@@ -421,11 +426,11 @@ class _MediaViewerState extends State<MediaViewer> {
     //   ),
     // )
 
-    return (_totalBytes.length == 0)
+    return mainProvider == null //(_totalBytes.length == 0)
       ? Center(child: loadingElementBuilder(context, null))
       : PhotoView(
         //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-        imageProvider: ResizeImage(MemoryImage(_totalBytes), width: 4096), //MemoryImage(_totalBytes),
+        imageProvider: mainProvider, //ResizeImage(mainProvider!, width: 4096), //MemoryImage(_totalBytes),
         minScale: PhotoViewComputedScale.contained,
         maxScale: PhotoViewComputedScale.covered * 8,
         initialScale: PhotoViewComputedScale.contained,

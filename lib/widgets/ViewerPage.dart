@@ -232,9 +232,13 @@ class _ViewerPageState extends State<ViewerPage> {
       var request = await HttpClient().getUrl(Uri.parse(item.fileURL));
       var response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-      final File cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media');
-      path = cacheFile.path;
-      await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt);
+      final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media');
+      if(cacheFile != null) {
+        path = cacheFile.path;
+        await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt);
+      } else {
+        ServiceHandler.displayToast("Error!\nSomething went wrong when saving file to share");
+      }
 
       // TODO: find a way to detect when share menu was closed, orherwise this is triggered immediately and file is deleted before sending to another app
       // writer.deleteFromCache(path, 'media');

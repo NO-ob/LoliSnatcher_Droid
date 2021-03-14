@@ -91,7 +91,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
                               });
                             }
                             Navigator.of(context).pop(true);
-                            widget.setParentGlobalsIndex(widget.globalsIndex);
+                            widget.setParentGlobalsIndex(widget.globalsIndex, currentEntry[1]);
                           },
                           icon: booru != null
                               ? (booru.type == "Favourites"
