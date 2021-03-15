@@ -45,8 +45,15 @@ class DBHandler{
         "booruType TEXT,"
         "booruName TEXT,"
         "searchText TEXT,"
+        "isFavourite INTEGER,"
         "timestamp TEXT DEFAULT CURRENT_TIMESTAMP"
         ")");
+    try{
+      // add new column, try-catch to ignore the "already added" error
+      await db?.execute("ALTER TABLE SearchHistory ADD COLUMN isFavourite INTEGER;");
+    } catch(e) {
+      // print(e);
+    }
     return true;
   }
 
@@ -173,25 +180,51 @@ class DBHandler{
 
   // Remove duplicates and add every new search to history table
   void updateSearchHistory(String searchText, String? booruType, String? booruName) async{
-    await db?.rawDelete("DELETE FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=?", [searchText, booruType, booruName]);
-    await db?.rawInsert("INSERT INTO SearchHistory(searchText, booruType, booruName) VALUES(?,?,?)", [searchText, booruType, booruName]);
+    // trim extra spaces
+    searchText = searchText.trim();
+
+    await db?.rawDelete("DELETE FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite != '1'", [searchText, booruType, booruName]); // remove non-favourite duplicates of new entry
+
+    var favouriteDuplicates = await db?.rawQuery("SELECT * FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite == '1'", [searchText, booruType, booruName]); // insert new entry only if it wasn't favourited before
+    if(favouriteDuplicates == null || favouriteDuplicates.isEmpty) {
+      await db?.rawInsert("INSERT INTO SearchHistory(searchText, booruType, booruName) VALUES(?,?,?)", [searchText, booruType, booruName]);
+    } else { // otherwise update the last seartch time
+      await db?.rawUpdate("UPDATE SearchHistory SET timestamp = CURRENT_TIMESTAMP WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite == '1'", [searchText, booruType, booruName]);
+    }
+
+    await db?.rawDelete("DELETE FROM SearchHistory WHERE isFavourite != '1' AND id NOT IN (SELECT id FROM SearchHistory WHERE isFavourite != '1' ORDER BY id DESC LIMIT 200)"); // remove everything except last 200 entries (ignores favourited)
   }
 
+  // Get search history entries
   Future<List<List<String>>> getSearchHistory() async{
-    var metaData = await db?.rawQuery("SELECT id, searchText, booruType, booruName FROM SearchHistory GROUP BY searchText, booruName ORDER BY id DESC LIMIT 100");
+    var metaData = await db?.rawQuery("SELECT * FROM SearchHistory GROUP BY searchText, booruName ORDER BY id DESC");
     List<List<String>> result = [];
     metaData?.forEach((s) {
-      result.add([s['id'].toString(), s['searchText'].toString(), s['booruType'].toString(), s['booruName'].toString()]);
+      result.add([
+        s['id'].toString(),
+        s['searchText'].toString(),
+        s['booruType'].toString(),
+        s['booruName'].toString(),
+        s['isFavourite'].toString(),
+        s['timestamp'].toString(),
+      ]);
     });
     return result;
   }
 
+  // Delete entry from search history (if no id given - clears everything)
   Future<void> deleteFromSearchHistory(String? id) async{
     if(id != null) {
       await db?.rawDelete("DELETE FROM SearchHistory WHERE id IN (?)", [id]);
     } else {
       await db?.rawDelete("DELETE FROM SearchHistory WHERE id IS NOT NULL");
     }
+    return;
+  }
+
+  // Set/unset search history entry as favourite
+  Future<void> setFavouriteSearchHistory(String id, bool isFavourite) async{
+    await db?.rawUpdate("UPDATE SearchHistory SET isFavourite = ? WHERE id = ?", [Tools.boolToInt(isFavourite), id]);
     return;
   }
 
