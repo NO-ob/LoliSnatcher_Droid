@@ -4,9 +4,8 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
-import 'package:LoliSnatcher/widgets/ScrollingText.dart';
+import 'package:LoliSnatcher/widgets/HistoryList.dart';
 
 class TabBoxButtons extends StatefulWidget {
   List<SearchGlobals> searchGlobals;
@@ -22,7 +21,6 @@ class TabBoxButtons extends StatefulWidget {
 class _TabBoxButtonsState extends State<TabBoxButtons> {
 
   void showHistory() async {
-    List<List<String>> history = (widget.settingsHandler.dbEnabled && widget.settingsHandler.searchHistoryEnabled) ? await widget.settingsHandler.dbHandler.getSearchHistory() : [];
     showDialog(context: context, builder: (context) {
       return StatefulBuilder(builder: (context, setDialogState) {
         return InfoDialog(
@@ -30,89 +28,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
           [
             widget.settingsHandler.searchHistoryEnabled ? const SizedBox() : Text('Search History is disabled.'),
             widget.settingsHandler.dbEnabled ? const SizedBox() : Text('Search History requires enabling Database in settings.'),
-            history.length > 0 ? const SizedBox() : Text('Search History is empty.'),
-            // TextButton.icon(
-            //   style: TextButton.styleFrom(
-            //     shape: RoundedRectangleBorder(
-            //       borderRadius: new BorderRadius.circular(5),
-            //       side: BorderSide(color: Get.context!.theme.accentColor),
-            //     ),
-            //   ),
-            //   onPressed: () async {
-            //     await widget.settingsHandler.dbHandler.deleteFromSearchHistory(null);
-            //     setDialogState(() {
-            //       history = [];
-            //     });
-            //   },
-            //   icon: Icon(Icons.delete_forever, color: Colors.red),
-            //   label: Text('Delete all', style: TextStyle(color: Colors.white)),
-            // ),
-            const SizedBox(height: 10),
-            ClipRRect(
-              borderRadius: new BorderRadius.circular(20),
-              child: Container(
-                height: (MediaQuery.of(context).size.height / 2) + 20,
-                child: Material(
-                  child: ListView.builder(
-                    padding: EdgeInsets.fromLTRB(0, 5, 10, 5),
-                    shrinkWrap: true,
-                    itemCount: history.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) {
-                      List<String> currentEntry = history[index];
-                      Booru? booru;
-                      if(widget.settingsHandler.booruList.isNotEmpty) {
-                        booru = widget.settingsHandler.booruList.firstWhere((b) => b.type == currentEntry[2] && b.name == currentEntry[3]);
-                      }
-                      return Row(children: <Widget>[
-                        IconButton(
-                          icon: Icon(Icons.delete_forever),
-                          onPressed: () async {
-                            await widget.settingsHandler.dbHandler.deleteFromSearchHistory(currentEntry[0]);
-                            setDialogState(() {
-                              history = history.where((el) => el[0] != currentEntry[0]).toList();
-                            });
-                          }
-                        ),
-                        Expanded(
-                          child: TextButton.icon(
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(5),
-                              side: BorderSide(color: Get.context!.theme.accentColor),
-                            ),
-                          ),
-                          onPressed: () {
-                            widget.searchTagsController.text = currentEntry[1];
-                            if(booru != null) {
-                              setState(() {
-                                widget.searchGlobals[widget.globalsIndex].tags = currentEntry[1];
-                                widget.searchGlobals[widget.globalsIndex].selectedBooru = booru;
-                              });
-                            }
-                            Navigator.of(context).pop(true);
-                            widget.setParentGlobalsIndex(widget.globalsIndex, currentEntry[1]);
-                          },
-                          icon: booru != null
-                              ? (booru.type == "Favourites"
-                                ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                                : Image.network(
-                                booru.faviconURL!,
-                                width: 16,
-                                errorBuilder: (_, __, ___) {
-                                  return Icon(Icons.broken_image, size: 18);
-                                }
-                              )
-                            )
-                              : Icon(CupertinoIcons.question, size: 18),
-                          label: Expanded(child: ScrollingText(currentEntry[1], 25, "infiniteWithPause", Colors.white)),
-                        ))
-                      ]);
-                    }
-                  )
-                )
-              )
-            )
+            HistoryList(widget.searchGlobals,widget.globalsIndex,widget.searchTagsController,widget.settingsHandler,widget.setParentGlobalsIndex),
           ],
           CrossAxisAlignment.start
         );

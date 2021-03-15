@@ -89,9 +89,13 @@ class _DatabasePageState extends State<DatabasePage> {
                       icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                       onPressed: () {
                         Get.dialog(
-                            InfoDialog("Search History",
+                            InfoDialog(
+                              "Search History",
                               [
-                                Text("Database is required"),
+                                Text("Requires enabled Database."),
+                                Text("Records last 200 search queries."),
+                                Text("Long press any history entry for additional actions (Delete, Set as Favourite...)"),
+                                Text("Favourited entries are pinned to the top of the list and will not be included in 200 limit."),
                               ],
                               CrossAxisAlignment.start,
                             )
