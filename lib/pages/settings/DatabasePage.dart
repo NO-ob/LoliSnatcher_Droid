@@ -89,7 +89,8 @@ class _DatabasePageState extends State<DatabasePage> {
                       icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
                       onPressed: () {
                         Get.dialog(
-                            InfoDialog("Search History",
+                            InfoDialog(
+                              "Search History",
                               [
                                 Text("Requires enabled Database."),
                                 Text("Records last 200 search queries."),
