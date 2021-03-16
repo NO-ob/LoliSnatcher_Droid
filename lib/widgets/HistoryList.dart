@@ -39,25 +39,31 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   int compareFavourites(a, b) {
-    if(a[4] == '1' && b[4] != '1') {
-      return -1;
-    } else if(a[4] != '1' && b[4] == '1') {
-      return 1;
-    } else {
-      return 0;
+    // first sort favourited ones
+    if(a[4] == '1' && b[4] != '1') return -1;
+    else if(a[4] != '1' && b[4] == '1') return 1;
+    else {
+      // then sort by date
+      int dateA = DateTime.parse(a[5]).millisecondsSinceEpoch;
+      int dateB = DateTime.parse(b[5]).millisecondsSinceEpoch;
+      if(dateA < dateB) return 1;
+      else if(dateA > dateB) return -1;
+      else return 0;
     }
   }
   
 
   void showHistoryEntryActions(Widget row, List<String> data) {
+    Duration timeZone = new DateTime.now().timeZoneOffset;
+    DateTime searchDate = DateTime.parse(data[5]).add(timeZone);
+    String searchDateStr = "${searchDate.day.toString().padLeft(2,'0')}.${searchDate.month.toString().padLeft(2,'0')}.${searchDate.year.toString().substring(2)} ${searchDate.hour.toString().padLeft(2,'0')}:${searchDate.minute.toString().padLeft(2,'0')}:${searchDate.second.toString().padLeft(2,'0')}";
     showDialog(context: context, builder: (context) {
       return StatefulBuilder(builder: (context, setDialogState) {
         return InfoDialog(
           null,
           [
             AbsorbPointer(absorbing: true, child: row),
-            // TODO: convert time to local device's format and correct timezone
-            Text("Last searched on: ${data[5]}"),
+            Text("Last searched on: ${searchDateStr}"),
             const SizedBox(height: 20),
             TextButton.icon(
               style: TextButton.styleFrom(
