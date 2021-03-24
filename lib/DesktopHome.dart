@@ -140,11 +140,7 @@ class _DesktopHomeState extends State<DesktopHome> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
-                  constraints: BoxConstraints(minWidth: 10, maxWidth: MediaQuery.of(context).size.width * 0.2),
-                  child: BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal),
-                ),
+                BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal),
                 IconButton(
                   padding: const EdgeInsets.all(5),
                   icon: Icon(Icons.search),
