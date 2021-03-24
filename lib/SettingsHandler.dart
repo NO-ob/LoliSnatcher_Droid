@@ -32,7 +32,7 @@ class SettingsHandler {
   String themeMode = "dark";
   String path = "";
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true, searchHistoryEnabled = true;
-  Future writeDefaults() async{
+  Future<bool> writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
     }
@@ -168,7 +168,7 @@ class SettingsHandler {
           case("Pref Booru"):
             if (settings[i].split(" = ").length > 1){
               prefBooru = settings[i].split(" = ")[1];
-              if(prefBooru.isNotEmpty){
+              if(prefBooru.isEmpty){
                 prefBooru = "";
               }
               print("Found Pref Booru " + settings[i].split(" = ")[1] );
@@ -306,25 +306,39 @@ class SettingsHandler {
         booruList.add(new Booru("Favourites", "Favourites", "", "", ""));
       }
       if (prefBooru != "" && booruList.isNotEmpty){
-        int prefIndex = booruList.indexWhere((booru)=>booru.name == prefBooru);
-        if (prefIndex != 0){
-          print("Booru pref found in booruList");
-          Booru tmp = booruList.elementAt(0);
-          Booru tmp2 = booruList.elementAt(prefIndex);
-          booruList.remove(tmp);
-          booruList.remove(tmp2);
-          booruList.insert(0, tmp2);
-          booruList.insert(prefIndex, tmp);
-          print("booruList is");
-          print(booruList);
-        }
+        booruList = await sortList();
+      } else{
+        print("NOT SORTING ===============");
+        print(prefBooru);
+        print(booruList.isNotEmpty);
       }
     } catch (e){
       print(e);
     }
     return true;
   }
-
+  Future<List<Booru>> sortList() async{
+    List<Booru> sorted = booruList;
+    int prefIndex = 0;
+    for (int i = 0; i < sorted.length; i++){
+      if (sorted[i].name == prefBooru){
+        prefIndex = i;
+        print("prefIndex is" + prefIndex.toString());
+      }
+    }
+    if (prefIndex != 0){
+      print("Booru pref found in booruList");
+      Booru tmp = sorted.elementAt(0);
+      Booru tmp2 = sorted.elementAt(prefIndex);
+      sorted.remove(tmp);
+      sorted.remove(tmp2);
+      sorted.insert(0, tmp2);
+      sorted.insert(prefIndex, tmp);
+      print("booruList is");
+      print(sorted);
+    }
+    return sorted;
+  }
   Future saveBooru(Booru booru) async{
     if (path == ""){
       path = await getExtDir();

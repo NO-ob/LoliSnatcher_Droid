@@ -24,12 +24,8 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
     if (widget.settingsHandler.prefBooru == ""){
       await widget.settingsHandler.loadSettings();
     }
-    if(widget.settingsHandler.booruList.isEmpty){
-      print("getbooru because null");
-      await widget.settingsHandler.getBooru();
-    }
     if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name)){
-      await widget.settingsHandler.getBooru();
+      widget.settingsHandler.booruList = await widget.settingsHandler.sortList();
     }
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (widget.searchGlobals.selectedBooru == null){
