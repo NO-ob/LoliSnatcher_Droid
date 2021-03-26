@@ -64,6 +64,7 @@ class _ViewerPageState extends State<ViewerPage> {
       widget.searchGlobals.viewedIndex!.value = widget.index;
     });
     kbFocusNode.requestFocus();
+    ServiceHandler.disableSleep();
   }
 
   @override
@@ -99,6 +100,7 @@ class _ViewerPageState extends State<ViewerPage> {
   void dispose(){
     kbFocusNode.dispose();
     super.dispose();
+    ServiceHandler.enableSleep();
   }
   Widget androidPageBuilder() {
     return new RawKeyboardListener(

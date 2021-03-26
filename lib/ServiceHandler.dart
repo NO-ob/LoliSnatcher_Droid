@@ -91,6 +91,16 @@ class ServiceHandler{
       platform.invokeMethod("toast",{"toastStr" : str});
     }
   }
+  static void disableSleep (){
+    if (Platform.isAndroid){
+      platform.invokeMethod("disableSleep");
+    }
+  }
+  static void enableSleep (){
+    if (Platform.isAndroid){
+      platform.invokeMethod("enableSleep");
+    }
+  }
   void emptyCache() async{
     try{
       if (Platform.isAndroid){

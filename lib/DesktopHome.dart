@@ -46,6 +46,7 @@ class _DesktopHomeState extends State<DesktopHome> {
         DeviceOrientation.landscapeRight,
         DeviceOrientation.landscapeLeft,
       ]);
+      ServiceHandler.disableSleep();
     }
     Booru? defaultBooru;
     // Set the default booru and tags at the start

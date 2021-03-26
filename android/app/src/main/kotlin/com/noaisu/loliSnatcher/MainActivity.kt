@@ -136,6 +136,10 @@ class MainActivity: FlutterActivity() {
                     urlLauncher.action = ACTION_VIEW;
                     startActivity(urlLauncher);
                 }
+            } else if (call.method == "disableSleep"){
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            } else if (call.method == "enableSleep"){
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
 
 
