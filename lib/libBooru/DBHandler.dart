@@ -10,7 +10,7 @@ class DBHandler{
   DBHandler();
 
   //Connects to the database file and create the database if the tables dont exist
-  void dbConnect(String path)async{
+  Future<bool> dbConnect(String path)async{
     if(Platform.isAndroid){
       db = await openDatabase(path+"store.db", version: 1);
     } else {
@@ -20,6 +20,7 @@ class DBHandler{
     }
     await updateTable();
     await deleteUntracked();
+    return true;
   }
   Future<bool> updateTable() async{
     await db?.execute("CREATE TABLE IF NOT EXISTS BooruItem"

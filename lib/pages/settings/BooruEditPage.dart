@@ -49,7 +49,7 @@ class _booruEditState extends State<booruEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      //resizeToAvoidBottomInset: false,
       appBar: AppBar(
           title: Text("Booru Editor"),
         actions: [

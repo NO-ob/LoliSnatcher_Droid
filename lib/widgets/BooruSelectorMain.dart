@@ -1,6 +1,7 @@
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,8 +35,12 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
       widget.searchGlobals.handlerType = widget.settingsHandler.booruList[0].type;
     }
     if (!widget.settingsHandler.booruList.contains(widget.searchGlobals.selectedBooru)){
-      widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList[0];
-      widget.searchGlobals.handlerType = widget.settingsHandler.booruList[0].type;
+      widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList.firstWhere((element) =>
+          element.name == widget.searchGlobals.selectedBooru!.name, orElse: () =>
+          widget.settingsHandler.booruList[0]
+      );
+      print("booru changing because its not in the list");
+      widget.searchGlobals.handlerType = widget.searchGlobals.selectedBooru!.type;
     }
     return Expanded(child: Container(
         constraints: BoxConstraints(maxHeight: 40, minHeight: 20),

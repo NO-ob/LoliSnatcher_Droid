@@ -231,7 +231,7 @@ class SettingsHandler {
       }
     }
     if(dbEnabled){
-      dbHandler.dbConnect(path);
+      await dbHandler.dbConnect(path);
     } else {
       dbHandler = new DBHandler();
     }
