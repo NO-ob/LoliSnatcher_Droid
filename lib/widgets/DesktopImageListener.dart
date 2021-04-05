@@ -29,14 +29,27 @@ class DesktopImageListener extends StatefulWidget {
 }
 
 class _DesktopImageListenerState extends State<DesktopImageListener> {
-
+  Future<bool> nothing() async{
+    return true;
+  }
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value){
       if (!value.isVideo() ){
         return PhotoView(imageProvider: NetworkImage(value.fileURL));
       } else {
         if (Platform.isAndroid){
-          return VideoApp(value, 0, 0, widget.settingsHandler);
+          //This is probably bad but it makes the videoapp get recreated which doesn't happen normally
+          return Center(
+            child: FutureBuilder(
+              future: nothing(),
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.connectionState == ConnectionState.done){
+                  return VideoApp(value, 1, 1, widget.settingsHandler,false);
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              }
+          ),);
         } else {
           return Center(
             child: Column(

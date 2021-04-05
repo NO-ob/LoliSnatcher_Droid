@@ -155,8 +155,8 @@ class _LoliControlsState extends State<LoliControls>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
+                Expanded(
+                  flex : 6,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -171,8 +171,8 @@ class _LoliControlsState extends State<LoliControls>
                     ]
                   )
                 ),
-                 Container(
-                  width: MediaQuery.of(context).size.width * 0.4,
+                 Expanded(
+                     flex :4,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[

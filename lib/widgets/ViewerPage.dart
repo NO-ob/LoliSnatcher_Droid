@@ -150,7 +150,7 @@ class _ViewerPageState extends State<ViewerPage> {
                         widget.fetched[index],
                         index,
                         widget.searchGlobals.viewedIndex!.value,
-                        widget.settingsHandler)
+                        widget.settingsHandler,true)
                         : MediaViewer(
                         widget.fetched[index],
                         index,

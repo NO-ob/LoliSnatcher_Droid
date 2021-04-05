@@ -21,7 +21,8 @@ class VideoApp extends StatefulWidget {
   final int index;
   final int viewedIndex;
   final SettingsHandler settingsHandler;
-  VideoApp(this.booruItem, this.index, this.viewedIndex, this.settingsHandler);
+  final bool enableFullscreen;
+  VideoApp(this.booruItem, this.index, this.viewedIndex, this.settingsHandler,this.enableFullscreen);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
@@ -206,7 +207,6 @@ class _VideoAppState extends State<VideoApp> {
       _video = null;
     });
   }
-
   @override
   void dispose() {
     disposables();
@@ -269,6 +269,7 @@ class _VideoAppState extends State<VideoApp> {
       autoPlay: false,
       allowedScreenSleep: false,
       looping: true,
+      allowFullScreen: widget.enableFullscreen,
       showControls: true,
       customControls:
         LoliControls(),
@@ -375,9 +376,17 @@ class _VideoAppState extends State<VideoApp> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: widget.settingsHandler.loadingGif
                           ? [
-                              Container(
-                                  width: MediaQuery.of(context).size.width - 30,
-                                  child: Image(image: AssetImage('assets/images/loading.gif')))
+                              Expanded(
+                                child: Container(
+                                  alignment: Alignment.centerRight,
+                                  constraints: BoxConstraints(minWidth: 10,maxWidth: 300),
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage('assets/images/loading.gif'),
+                                        fit: BoxFit.contain),
+                                  ),
+                                ),
+                                ),
                             ]
                           : (isStopped
                             ? [TextButton.icon(
