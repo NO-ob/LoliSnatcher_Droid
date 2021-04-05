@@ -196,7 +196,8 @@ class _CachedThumbState extends State<CachedThumb> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.thumbType == "video" && !widget.thumbURL.endsWith(".gif")){
+    if (widget.thumbType == "video" &&
+        (widget.thumbURL.endsWith(".webm") || !widget.thumbURL.endsWith(".mp4"))){
       ServiceHandler serviceHandler = ServiceHandler();
       return FutureBuilder(
           future: serviceHandler.makeVidThumb(widget.thumbURL), // a previously-obtained Future<String> or null
