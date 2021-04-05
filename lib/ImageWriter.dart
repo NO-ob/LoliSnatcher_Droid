@@ -38,6 +38,8 @@ class ImageWriter{
         print(SDKVer);
       } else if (Platform.isLinux){
         SDKVer = 1;
+      } else if (Platform.isWindows){
+        SDKVer = 2;
       }
     }
 
@@ -50,11 +52,11 @@ class ImageWriter{
       var response = await http.get(fileURI);
       if(SDKVer < 30){
         await Directory(path!).create(recursive:true);
-        await image.writeAsBytes(response.bodyBytes);
+        await image.writeAsBytes(response.bodyBytes, flush: true);
         print("Image written: " + path!+fileName);
         if (settingsHandler.jsonWrite){
           File json = new File(path!+fileName.split(".")[0]+".json");
-          await json.writeAsString(jsonEncode(item.toJSON()));
+          await json.writeAsString(jsonEncode(item.toJSON()), flush: true);
         }
         item.isSnatched = true;
         if (settingsHandler.dbEnabled){
@@ -102,9 +104,9 @@ class ImageWriter{
       await Future.delayed(Duration(milliseconds: cooldown), () async{
         var snatchResult = await write(snatched.elementAt(i), settingsHandler, booruName);
         if (snatchResult == null){
-        existsList.add(snatched[i].fileURL);
+          existsList.add(snatched[i].fileURL);
         } else if (snatchResult is !String) {
-        failedList.add(snatched[i].fileURL);
+          failedList.add(snatched[i].fileURL);
         }
       });
       yield snatchedCounter++;
@@ -133,7 +135,7 @@ class ImageWriter{
 
       String fileName = parseThumbUrlToName(fileURL);
       File image = new File(cachePath+fileName);
-      await image.writeAsBytes(response.bodyBytes);
+      await image.writeAsBytes(response.bodyBytes, flush: true);
     } catch (e){
       print("Image Writer Exception:: cache write");
       print(e);
@@ -147,12 +149,12 @@ class ImageWriter{
     try {
       await setPaths();
       cachePath = cacheRootPath! + typeFolder + "/";
-      print("write cahce from bytes:: cache path is $cachePath");
+      // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
 
       String fileName = parseThumbUrlToName(fileURL);
       image = new File(cachePath+fileName);
-      await image.writeAsBytes(bytes);
+      await image.writeAsBytes(bytes, flush: true);
 
       // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
       // await compute(writeBytesIsolate, {"file": image, "bytes": bytes});
@@ -217,6 +219,35 @@ class ImageWriter{
     }
   }
 
+  // calculates cache (total or by type) size and file count
+  Future<Map<String,int>> getCacheStat(String? typeFolder) async {
+    String cacheDirPath;
+    int fileNum = 0;
+    int totalSize = 0;
+    if(typeFolder == null) typeFolder = '';
+    try {
+      await setPaths();
+      cacheDirPath = cacheRootPath! + typeFolder + "/";
+
+      Directory cacheDir = Directory(cacheDirPath);
+      bool dirExists = await cacheDir.exists();
+      if (dirExists) {
+        cacheDir.listSync(recursive: true, followLinks: false)
+          .forEach((FileSystemEntity entity) {
+            if (entity is File) {
+              fileNum++;
+              totalSize += entity.lengthSync();
+            }
+          });
+      }
+    } catch (e){
+      print("Image Writer Exception");
+      print(e);
+    }
+
+    return {'fileNum': fileNum, 'totalSize': totalSize};
+  }
+
   String parseThumbUrlToName(thumbURL) {
     int queryLastIndex = thumbURL.lastIndexOf("?"); // Sankaku fix
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
@@ -227,12 +258,15 @@ class ImageWriter{
     }
     return result;
   }
+
   Future<bool> setPaths() async{
     if(path == ""){
       if (Platform.isAndroid){
         path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
       } else if (Platform.isLinux){
         path = "${Platform.environment['HOME']}/Pictures/LoliSnatcher/";
+      } else if (Platform.isWindows){
+        path = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/Pictures/";
       }
     }
 
@@ -241,6 +275,8 @@ class ImageWriter{
         cacheRootPath = await serviceHandler.getCacheDir();
       } else if (Platform.isLinux){
         cacheRootPath =  "${Platform.environment['HOME']}/.loliSnatcher/cache/";
+      } else if (Platform.isWindows){
+        path = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/cache/";
       }
     }
     return true;

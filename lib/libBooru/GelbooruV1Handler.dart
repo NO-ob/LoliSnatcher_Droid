@@ -4,12 +4,12 @@ import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
+import 'package:LoliSnatcher/Tools.dart';
 
 /**
  * Booru Handler for the gelbooru engine
  */
 class GelbooruV1Handler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   // Dart constructors are weird so it has to call super with the args
   GelbooruV1Handler(Booru booru,int limit): super(booru,limit);
   bool tagSearchEnabled = false;
@@ -32,9 +32,9 @@ class GelbooruV1Handler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      int length = fetched!.length;
+      int length = fetched.length;
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"});
+      final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var document = parse(response.body);
@@ -48,15 +48,15 @@ class GelbooruV1Handler extends BooruHandler{
               /**
                * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
                */
-              fetched!.add(new BooruItem(fileURL,fileURL,thumbURL,tags,makePostURL(id),getFileExt(fileURL)));
+              fetched.add(BooruItem(fileURL, fileURL, thumbURL, tags, makePostURL(id), Tools.getFileExt(fileURL)));
               if(dbHandler!.db != null){
-                setTrackedValues(fetched!.length - 1);
+                setTrackedValues(fetched.length - 1);
               }
             }
           }
         // Create a BooruItem for each post in the list
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       }
@@ -73,6 +73,6 @@ class GelbooruV1Handler extends BooruHandler{
     }
     // This will create a url for the http request
     String makeURL(String tags){
-      return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum! * 20).toString()}";
+      return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum * 20).toString()}";
     }
 }

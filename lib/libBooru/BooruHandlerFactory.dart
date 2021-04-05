@@ -17,37 +17,37 @@ import 'SzurubooruHandler.dart';
 import 'e621Handler.dart';
 class BooruHandlerFactory{
   BooruHandler? booruHandler;
-  int pageNum = 0;
+  int pageNum = -1;
   List getBooruHandler(Booru booru, int limit, DBHandler? dbHandler){
     switch (booru.type) {
       case("Moebooru"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new MoebooruHandler(booru, limit);
         break;
       case("Gelbooru"):
         booruHandler = new GelbooruHandler(booru, limit);
         break;
       case("Danbooru"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new DanbooruHandler(booru, limit);
         break;
       case("e621"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new e621Handler(booru, limit);
         break;
       case("Shimmie"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new ShimmieHandler(booru, limit);
         break;
       case("Philomena"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new PhilomenaHandler(booru, limit);
         break;
       case("Szurubooru"):
         booruHandler = new SzurubooruHandler(booru, limit);
         break;
       case("Sankaku"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new SankakuHandler(booru, limit);
         break;
       case("Hydrus"):
@@ -57,7 +57,7 @@ class BooruHandlerFactory{
         booruHandler = new GelbooruV1Handler(booru, limit);
         break;
       case("BooruOnRails"):
-        pageNum = 1;
+        pageNum = 0;
         booruHandler = new BooruOnRailsHandler(booru, limit);
         break;
       case("Favourites"):
@@ -65,6 +65,6 @@ class BooruHandlerFactory{
         break;
     }
     booruHandler!.dbHandler = dbHandler;
-    return [booruHandler,pageNum];
+    return [booruHandler, pageNum];
   }
 }

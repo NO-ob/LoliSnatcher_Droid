@@ -65,7 +65,7 @@ class _DesktopHomeState extends State<DesktopHome> {
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
     searchGlobals[globalsIndex] = searchGlobal;
-    searchAction(searchGlobals[globalsIndex].tags!);
+    searchAction(searchGlobals[globalsIndex].tags);
   }
   void searchAction(String text) {
     // Remove extra spaces
@@ -114,10 +114,10 @@ class _DesktopHomeState extends State<DesktopHome> {
             if(searchGlobals.length > 1) {
               if(globalsIndex == searchGlobals.length - 1){
                 globalsIndex --;
-                searchTagsController.text = searchGlobals[globalsIndex].tags!;
+                searchTagsController.text = searchGlobals[globalsIndex].tags;
                 searchGlobals.removeAt(globalsIndex + 1);
               } else {
-                searchTagsController.text = searchGlobals[globalsIndex + 1].tags!;
+                searchTagsController.text = searchGlobals[globalsIndex + 1].tags;
                 searchGlobals.removeAt(globalsIndex);
               }
             } else {
@@ -196,7 +196,7 @@ class _DesktopHomeState extends State<DesktopHome> {
             onPressed: (){
               getPerms();
               // call a function to save the currently viewed image when the save button is pressed
-              if (searchGlobals[globalsIndex].selected!.length > 0){
+              if (searchGlobals[globalsIndex].selected.length > 0){
                 widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
                 setState(() {
                   searchGlobals[globalsIndex].selected = [];
@@ -216,7 +216,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                 children: [
                   Container(
                     height: MediaQuery.of(context).size.height * 0.65,
-                    child: ImagePreviews(widget.settingsHandler, searchGlobals[globalsIndex], widget.snatchHandler),
+                    child: ImagePreviews(widget.settingsHandler, searchGlobals[globalsIndex], widget.snatchHandler, searchAction),
                     padding: EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       border: Border.all(color: Get.context!.theme.backgroundColor,width: 2),
@@ -258,7 +258,7 @@ class _DesktopTagListenerState extends State<DesktopTagListener> {
     return ValueListenableBuilder(valueListenable: widget.valueNotifier,
         builder: (BuildContext context, BooruItem value, Widget? child){
           return Container(
-              child: TagView(value, widget.searchGlobals),
+              child: TagView(value, widget.searchGlobals, widget.settingsHandler),
               padding: EdgeInsets.all(5),
               decoration: BoxDecoration(
                   border: Border.all(color: Get.context!.theme.accentColor,width: 2),

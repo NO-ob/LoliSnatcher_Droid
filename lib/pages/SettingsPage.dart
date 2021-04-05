@@ -3,6 +3,7 @@ import 'package:LoliSnatcher/pages/settings/BooruPage.dart';
 import 'package:LoliSnatcher/pages/settings/DatabasePage.dart';
 import 'package:LoliSnatcher/pages/settings/GalleryPage.dart';
 import 'package:LoliSnatcher/pages/settings/UserInterfacePage.dart';
+import 'package:LoliSnatcher/pages/settings/FilterTagsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import '../SettingsHandler.dart';
@@ -114,6 +115,21 @@ class _SettingsPageState extends State<SettingsPage> {
                     Get.to(() => BehaviourPage(widget.settingsHandler));
                   },
                   child: Text("Behaviour", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
+                  ),
+                  onPressed: (){
+                    Get.to(() => FiltersEdit(widget.settingsHandler));
+                  },
+                  child: Text("Tag Filters", style: TextStyle(color: Colors.white)),
                 ),
               ),
               Container(

@@ -33,10 +33,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         widget.searchGlobals.booruHandler!.booru.apiKey != "" &&
         widget.searchGlobals.booruHandler!.booru.userID != "") {
       widget.searchGlobals.booruHandler!.tagSearchEnabled = false;
-    } else if (widget.searchGlobals.booruHandler!.booru.type == "Shimmie" &&
-        widget.searchGlobals.booruHandler!.booru.baseURL!
-            .contains("rule34.paheal.net")) {
-      widget.searchGlobals.booruHandler!.tagSearchEnabled = false;
     }
   }
   @override
@@ -101,8 +97,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         // Get last tag in the input and remove minus (exclude symbol)
         // TODO /bug?: use the tag behind the current cursor position, not the last tag
         setState(() {
-          lastTag = splitInput[splitInput.length - 1].replaceAll(
-              new RegExp(r'^-'), '');
+          lastTag = splitInput[splitInput.length - 1].replaceAll(new RegExp(r'^-'), '');
         });
       }
     }
@@ -195,14 +190,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             fillColor: Get.context!.theme.canvasColor,
             filled: true,
             hintText: "Enter Tags",
-            suffixIcon: widget.searchTagsController.text.length > 0
-                ? IconButton(
-              padding: const EdgeInsets.all(5),
-              onPressed: () => widget.searchTagsController.clear(),
-              icon: Icon(Icons.clear),
-            )
-                : Container(width: 0.0),
-            contentPadding: EdgeInsets.fromLTRB(15, 0, 0, 0), // left,top,right,bottom
+            prefixIcon: widget.searchTagsController.text.length > 0
+              ? IconButton(
+                  padding: const EdgeInsets.all(5),
+                  onPressed: () => setState(() {widget.searchTagsController.clear();}),
+                  icon: Icon(Icons.clear),
+                )
+              : null,
+            contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
             border: new OutlineInputBorder(
               borderRadius: new BorderRadius.circular(30),
               gapPadding: 0,

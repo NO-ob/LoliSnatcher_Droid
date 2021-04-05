@@ -1,20 +1,20 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../SearchGlobals.dart';
-import 'StaggeredView.dart';
-import 'WaterfallView.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/SnatchHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/widgets/WaterfallView.dart';
 
 class ImagePreviews extends StatefulWidget {
   SettingsHandler settingsHandler;
   SearchGlobals searchGlobals;
   SnatchHandler snatchHandler;
-  ImagePreviews(this.settingsHandler,this.searchGlobals,this.snatchHandler);
+  Function searchAction;
+  ImagePreviews(this.settingsHandler, this.searchGlobals, this.snatchHandler, this.searchAction);
   @override
   _ImagePreviewsState createState() => _ImagePreviewsState();
 }
@@ -58,11 +58,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.connectionState == ConnectionState.done){
                 if (widget.searchGlobals.selectedBooru != null){
-                  if (widget.settingsHandler.previewDisplay == "Waterfall"){
-                    return WaterfallView(widget.settingsHandler,widget.searchGlobals,widget.snatchHandler);
-                  } else {
-                    return StaggeredView(widget.settingsHandler,widget.searchGlobals,widget.snatchHandler);
-                  }
+                  return WaterfallView(widget.settingsHandler, widget.searchGlobals, widget.snatchHandler, widget.searchAction);
                 } else {
                   return Center(child: CircularProgressIndicator());
                 }

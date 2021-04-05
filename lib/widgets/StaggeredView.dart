@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +27,11 @@ class StaggeredView extends StatefulWidget {
 
 class _StaggeredState extends State<StaggeredView> {
   ScrollController gridController = ScrollController();
-  bool isLastPage = false;
+  bool isLastPage = false, isLoading = true;
   FocusNode kbFocusNode = FocusNode();
 
   void setBooruHandler() {
-    List temp = new BooruHandlerFactory()
+    List temp = BooruHandlerFactory()
         .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
     widget.searchGlobals.booruHandler = temp[0];
     widget.searchGlobals.pageNum = temp[1];
@@ -55,6 +57,15 @@ class _StaggeredState extends State<StaggeredView> {
     super.dispose();
   }
 
+  Future filteredSearch() async {
+    var fetched = await widget.searchGlobals.booruHandler!.Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum);
+    if(widget.settingsHandler.filterHated) {
+      fetched = fetched.where((item) => widget.settingsHandler.parseTagsList(item.tagsList)[0].length == 0).toList();
+    }
+    isLoading = false;
+    return fetched;
+  }
+
   @override
   Widget build(BuildContext context) {
     // super.build(context);
@@ -69,7 +80,7 @@ class _StaggeredState extends State<StaggeredView> {
       gridController.jumpTo(widget.searchGlobals.scrollPosition);
     } else if (widget.searchGlobals.scrollPosition != 0) {
       setState(() {
-        gridController = new ScrollController(
+        gridController = ScrollController(
             initialScrollOffset: widget.searchGlobals.scrollPosition);
       });
     }
@@ -78,10 +89,11 @@ class _StaggeredState extends State<StaggeredView> {
         (MediaQuery.of(context).orientation == Orientation.portrait)
             ? widget.settingsHandler.portraitColumns
             : widget.settingsHandler.landscapeColumns;
+    double itemMaxWidth = MediaQuery.of(context).size.width / columnsCount;
+    double itemMaxHeight = MediaQuery.of(context).size.height * 0.75;
 
     return FutureBuilder(
-        future: widget.searchGlobals.booruHandler!
-            .Search(widget.searchGlobals.tags!, widget.searchGlobals.pageNum),
+        future: filteredSearch(),
         builder: (context, AsyncSnapshot snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -110,18 +122,34 @@ class _StaggeredState extends State<StaggeredView> {
                   isAlwaysShown: true,
                   child: StaggeredGridView.countBuilder(
                     controller: gridController,
+                    physics: BouncingScrollPhysics(),
+                    addAutomaticKeepAlives: true,
                     itemCount: snapshot.data.length,
                     crossAxisCount: columnsCount * 2,
                     itemBuilder: (BuildContext context, int index) {
-                      bool isSelected = widget.searchGlobals.selected!.contains(index);
+                      bool isSelected = widget.searchGlobals.selected.contains(index);
+
+                      double? widthData = snapshot.data[index].fileWidth ?? null;
+                      double? heightData = snapshot.data[index].fileHeight ?? null;
+                      
+                      double possibleWidth = itemMaxWidth;
+                      double possibleHeight = itemMaxWidth;
+                      if(heightData != null && widthData != null) {
+                        double aspectRatio = widthData / heightData;
+                        possibleHeight = possibleWidth / aspectRatio;
+                      }
+                      // force to use minimum 150 px and max 75% of screen height
+                      possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
+                      
                       return Container(
+                        height: possibleHeight,
+                        width: possibleWidth,
                         // Inkresponse is used so the tile can have an onclick function
                         child: Material(
                           borderOnForeground: true,
                           child: Ink(
-                            decoration: isSelected ?
-                            BoxDecoration(border: Border.all(color: Get.context!.theme.accentColor, width: 4.0),) : null,
-                            child: new InkResponse(
+                            decoration: isSelected ? BoxDecoration(border: Border.all(color: Get.context!.theme.accentColor, width: 4.0),) : null,
+                            child: InkResponse(
                               enableFeedback: true,
                               highlightShape: BoxShape.rectangle,
                               containedInkWell: true,
@@ -146,14 +174,13 @@ class _StaggeredState extends State<StaggeredView> {
                                 // Get.to(ImagePage(snapshot.data, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler));
                               },
                               onLongPress: () {
-                                if (widget.searchGlobals.selected!
-                                    .contains(index)) {
+                                if (widget.searchGlobals.selected.contains(index)) {
                                   setState(() {
-                                    widget.searchGlobals.selected!.remove(index);
+                                    widget.searchGlobals.selected.remove(index);
                                   });
                                 } else {
                                   setState(() {
-                                    widget.searchGlobals.selected!.add(index);
+                                    widget.searchGlobals.selected.add(index);
                                   });
                                 }
                               },
@@ -162,8 +189,7 @@ class _StaggeredState extends State<StaggeredView> {
                         ),
                       );
                     },
-                    staggeredTileBuilder: (int index) =>
-                    new StaggeredTile.fit(2),
+                    staggeredTileBuilder: (int index) => StaggeredTile.fit(2),
                     mainAxisSpacing: 4.0,
                     crossAxisSpacing: 4.0,
                   ),
@@ -173,12 +199,13 @@ class _StaggeredState extends State<StaggeredView> {
                   // If at bottom edge update state with incremented pageNum
                   // If at bottom edge update state with incremented pageNum
                   bool isNotAtStart = notif.metrics.pixels > 0;
-                  //bool isNearEdge = notif.metrics.pixels > notif.metrics.maxScrollExtent - 25;
-                  bool isAtEdge = notif.metrics.atEdge;
+                  // bool isNearEdge = notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2)); // trigger new page when scroll is < 2 viewports
+                  bool isAtEdge = notif.metrics.atEdge || notif.metrics.pixels >= notif.metrics.maxScrollExtent;
                   bool isScreenFilled = notif.metrics.extentBefore > 0 || notif.metrics.extentAfter > 0; // for cases when first page doesn't fill the screen (example: too many thumbnails per row)
-                  if ((isNotAtStart || !isScreenFilled) && isAtEdge) {
+                  if ((isNotAtStart || !isScreenFilled) && isAtEdge && !isLoading) {
                     if (!widget.searchGlobals.booruHandler!.locked) {
                       setState(() {
+                        isLoading = true;
                         widget.searchGlobals.pageNum++;
                       });
                       ServiceHandler.displayToast("Loading next page...\n Page #" + widget.searchGlobals.pageNum.toString());

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
@@ -91,6 +92,9 @@ class _HomeState extends State<Home> {
   ActiveTitle? activeTitle;
   String snatchStatus = "";
   final searchTagsController = TextEditingController();
+
+  Timer? cacheClearTimer;
+
   @override
   void initState() {
     super.initState();
@@ -105,6 +109,11 @@ class _HomeState extends State<Home> {
     searchTagsController.text = widget.settingsHandler.defTags;
     activeTitle = ActiveTitle(widget.snatchHandler);
     widget.snatchHandler.settingsHandler = widget.settingsHandler;
+
+    // force cache clear every minute
+    cacheClearTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+      forceClearMemoryCache();
+    });
   }
 
   Future<bool> _onBackPressed() async {
@@ -134,17 +143,28 @@ class _HomeState extends State<Home> {
 
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
+
+  void forceClearMemoryCache({bool withLive = false}) {
+    // clears memory image cache on timer or when changing tabs
+    // ServiceHandler.displayToast('Clearing cache\n${imageCache?.liveImageCount}/${imageCache?.currentSize}');
+    imageCache?.clear();
+    if(withLive) imageCache?.clearLiveImages();
+  }
+
   void setSearchGlobalsIndex(int index, String? newSearch){
       setState(() {
         globalsIndex = index;
       });
+      forceClearMemoryCache(withLive: true);
       if(newSearch != null) {
-        searchAction(searchGlobals[globalsIndex].tags!);
+        searchAction(searchGlobals[globalsIndex].tags);
+      } else {
+        forceClearMemoryCache(withLive: true);
       }
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
       searchGlobals[globalsIndex] = searchGlobal;
-      searchAction(searchGlobals[globalsIndex].tags!);
+      searchAction(searchGlobals[globalsIndex].tags);
   }
   void searchAction(String text) {
     // Remove extra spaces
@@ -153,6 +173,7 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
+    forceClearMemoryCache();
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
@@ -198,10 +219,10 @@ class _HomeState extends State<Home> {
             if(searchGlobals.length > 1) {
               if(globalsIndex == searchGlobals.length - 1){
                 globalsIndex --;
-                searchTagsController.text = searchGlobals[globalsIndex].tags!;
+                searchTagsController.text = searchGlobals[globalsIndex].tags;
                 searchGlobals.removeAt(globalsIndex + 1);
               } else {
-                searchTagsController.text = searchGlobals[globalsIndex + 1].tags!;
+                searchTagsController.text = searchGlobals[globalsIndex + 1].tags;
                 searchGlobals.removeAt(globalsIndex);
               }
             } else {
@@ -235,7 +256,7 @@ class _HomeState extends State<Home> {
                 onPressed: (){
                   getPerms();
                   // call a function to save the currently viewed image when the save button is pressed
-                  if (searchGlobals[globalsIndex].selected!.length > 0){
+                  if (searchGlobals[globalsIndex].selected.length > 0){
                     widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
                     setState(() {
                       searchGlobals[globalsIndex].selected = [];
@@ -252,7 +273,7 @@ class _HomeState extends State<Home> {
           new WillPopScope(
             onWillPop: _onBackPressed,
             child: Center(
-              child: ImagePreviews(widget.settingsHandler,searchGlobals[globalsIndex],widget.snatchHandler),
+              child: ImagePreviews(widget.settingsHandler, searchGlobals[globalsIndex], widget.snatchHandler, searchAction),
             ),
           ),
           drawer: Drawer(

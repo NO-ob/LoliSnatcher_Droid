@@ -46,7 +46,7 @@ class _TabBoxState extends State<TabBox> {
                   setState(() {
                     //widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
                     if (newValue != null){
-                      widget.searchTagsController.text = newValue.tags!;
+                      widget.searchTagsController.text = newValue.tags;
                       widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue), null);
                     }
                   });
@@ -63,17 +63,17 @@ class _TabBoxState extends State<TabBox> {
                     child: Row(
                         children: [
                           isNotEmptyBooru
-                              ? (value.selectedBooru!.type == "Favourites"
+                            ? (value.selectedBooru!.type == "Favourites"
                               ? Icon(Icons.favorite, color: Colors.red, size: 18)
                               : Image.network(
-                              value.selectedBooru!.faviconURL!,
-                              width: 16,
-                              errorBuilder: (_, __, ___) {
-                                return Icon(Icons.broken_image, size: 18);
-                              }
-                          )
-                          )
-                              : Icon(CupertinoIcons.question, size: 18),
+                                value.selectedBooru!.faviconURL!,
+                                width: 16,
+                                errorBuilder: (_, __, ___) {
+                                  return Icon(Icons.broken_image, size: 18);
+                                }
+                              )
+                            )
+                            : Icon(CupertinoIcons.question, size: 18),
                           const SizedBox(width: 3),
                           Expanded(child: ScrollingText(tagText, 22, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
                         ]

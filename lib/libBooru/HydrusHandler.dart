@@ -13,7 +13,6 @@ import 'Booru.dart';
  * Booru Handler for the gelbooru engine
  */
 class HydrusHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   bool tagSearchEnabled = false;
   var _fileIDs;
   // Dart constructors are weird so it has to call super with the args
@@ -102,9 +101,16 @@ class HydrusHandler extends BooruHandler{
                   }
                 }
                 if (parsedResponse['metadata'][i]['file_id'] != null){
-                  fetched!.add(new BooruItem("${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}", tagList, "postURL", parsedResponse['metadata'][i]['ext'].toString().substring(1)));
+                  fetched.add(BooruItem(
+                    "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                    "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                    "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                    tagList,
+                    "postURL",
+                    parsedResponse['metadata'][i]['ext'].toString().substring(1)
+                  ));
                   if(dbHandler!.db != null){
-                    setTrackedValues(fetched!.length - 1);
+                    setTrackedValues(fetched.length - 1);
                   }
                 }
             }

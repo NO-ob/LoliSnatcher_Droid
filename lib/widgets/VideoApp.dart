@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/HideableControlsPadding.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,18 +13,20 @@ import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/LoliControls.dart';
+import 'package:LoliSnatcher/widgets/BorderedText.dart';
 
 class VideoApp extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
-  final int viewedIndex;
+  final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
   final bool enableFullscreen;
-  VideoApp(this.booruItem, this.index, this.viewedIndex, this.settingsHandler,this.enableFullscreen);
+  VideoApp(this.booruItem, this.index, this.searchGlobals, this.settingsHandler, this.enableFullscreen);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
@@ -32,15 +36,18 @@ class _VideoAppState extends State<VideoApp> {
   PhotoViewController viewController = PhotoViewController();
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
+  ValueNotifier<bool> isFullscreen = ValueNotifier(false);
 
   // VideoPlayerValue _latestValue;
   ImageProvider? thumbProvider;
+  double thumbnailBlur = 1;
   String? cacheMode;
   final ImageWriter imageWriter = ImageWriter();
-  int _total = 0, _received = 0;
+  int _total = 0, _received = 0, _lastViewedIndex = -1;
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false;
+  bool isFromCache = false, isStopped = false, isHated = false;
+  List<String> stopReason = [];
 
   Dio? _client;
   CancelToken? _dioCancelToken;
@@ -126,16 +133,15 @@ class _VideoAppState extends State<VideoApp> {
           }
         }
       } else {
-        //TODO: show error message
-        killLoading();
-        print('Video load incomplete'); // Throw an error, allow to retry?
+        killLoading(['Loading Incomplete Error']);
+        print('Video load incomplete');
       }
       return value;
     }).catchError((e) {
       if (CancelToken.isCancel(e)) {
         // print('Canceled by user: ${widget.booruItem.fileURL} | $e');
       } else {
-        killLoading();
+        killLoading(['Loading Error']);
         print('Dio request cancelled: $e');
       }
     });
@@ -160,10 +166,10 @@ class _VideoAppState extends State<VideoApp> {
   @override
   void initState() {
     super.initState();
-    initVideo();
+    initVideo(false);
   }
 
-  void initVideo() {
+  void initVideo(ignoreTagsCheck) {
     // viewController..outputStateStream.listen(onViewStateChanged);
     // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
     cacheMode = widget.settingsHandler.videoCacheMode;
@@ -186,10 +192,17 @@ class _VideoAppState extends State<VideoApp> {
       });
     }();
 
-    _downloadVideo();
+    List<List<String>> hatedAndLovedTags = widget.settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+    if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
+      isHated = true;
+      thumbnailBlur = 20;
+      killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
+    } else {
+      _downloadVideo();
+    }
   }
 
-  void killLoading() {
+  void killLoading(List<String> reason) {
     disposables();
 
     setState(() {
@@ -203,6 +216,7 @@ class _VideoAppState extends State<VideoApp> {
 
       isFromCache = false;
       isStopped = true;
+      stopReason = reason;
 
       _video = null;
     });
@@ -239,25 +253,37 @@ class _VideoAppState extends State<VideoApp> {
     print(viewState);
   }
 
-  // void _updateState() {
-  //   print(_videoController?.value);
-  //   setState(() {
-  //     _latestValue = _videoController?.value;
-  //   });
-  // }
+  void _updateState() {
+    // print(_videoController?.value);
+    // setState(() {
+    //   _latestValue = _videoController?.value;
+    // });
+    if(_chewieController == null) return;
+
+    isFullscreen.value = _chewieController!.isFullScreen;
+    if(_chewieController!.isFullScreen) {
+      ServiceHandler.setVolumeButtons(true);
+    } else {
+      if(widget.searchGlobals.displayAppbar!.value == false && widget.settingsHandler.useVolumeButtonsForScroll) {
+        ServiceHandler.setVolumeButtons(false);
+      } else {
+        ServiceHandler.setVolumeButtons(true);
+      }
+    }
+  }
 
 
   Future<void> initPlayer() async {
     // Start from cache if was already cached or only caching is allowed
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
     if (widget.settingsHandler.mediaCache && _video != null) {
-      _videoController = VideoPlayerController.file(_video!, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
+      _videoController = VideoPlayerController.file(_video!, videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null);
     } else {
       // Otherwise load from network
-      _videoController = VideoPlayerController.network(widget.booruItem.fileURL, videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true));
+      _videoController = VideoPlayerController.network(widget.booruItem.fileURL, videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null);
     }
     await Future.wait([_videoController!.initialize()]);
-    // _videoController.addListener(_updateState);
+    _videoController?.addListener(_updateState);
 
     // Stop force restating loading indicators when video is initialized
     _checkInterval?.cancel();
@@ -271,8 +297,11 @@ class _VideoAppState extends State<VideoApp> {
       looping: true,
       allowFullScreen: widget.enableFullscreen,
       showControls: true,
+      showControlsOnInitialize: widget.searchGlobals.displayAppbar!.value ?? true,
       customControls:
-        LoliControls(),
+        widget.settingsHandler.galleryBarPosition == 'Bottom'
+          ? HideableControlsPadding(widget.searchGlobals, isFullscreen, LoliControls())
+          : LoliControls(),
         // MaterialControls(),
         // CupertinoControls(
         //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
@@ -329,9 +358,9 @@ class _VideoAppState extends State<VideoApp> {
     String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
     int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
-    String expectedSpeedText = hasProgressData ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
+    String expectedSpeedText = (hasProgressData && percentDone! < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
     double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
+    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone! < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
     int sinceStart = Duration(milliseconds: nowMils - _startedAt).inSeconds;
     String sinceStartText = "Started " + sinceStart.toString() + " second${sinceStart == 1 ? '' : 's'} ago";
 
@@ -357,7 +386,7 @@ class _VideoAppState extends State<VideoApp> {
             : null,
         ),
         child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+            filter: ImageFilter.blur(sigmaX: thumbnailBlur, sigmaY: thumbnailBlur),
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -379,121 +408,106 @@ class _VideoAppState extends State<VideoApp> {
                               Expanded(
                                 child: Container(
                                   alignment: Alignment.centerRight,
-                                  constraints: BoxConstraints(minWidth: 10,maxWidth: 300),
+                                  constraints: BoxConstraints(minWidth: 10, maxWidth: 300),
                                   decoration: BoxDecoration(
                                     image: DecorationImage(
-                                        image: AssetImage('assets/images/loading.gif'),
-                                        fit: BoxFit.contain),
+                                      image: AssetImage('assets/images/loading.gif'),
+                                      fit: BoxFit.contain,
+                                    ),
                                   ),
                                 ),
-                                ),
+                              ),
                             ]
                           : (isStopped
-                            ? [TextButton.icon(
-                                icon: Icon(Icons.play_arrow),
-                                label: Text('Restart loading', style: TextStyle(color: Colors.white)),
-                                onPressed: () {
-                                  setState(() { initVideo(); });
-                                },
-                              )]
+                            ? [
+                                ...stopReason.map((reason){
+                                  return BorderedText(
+                                    child: Text(
+                                      reason,
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                      ),
+                                    )
+                                  );
+                                }),
+                                TextButton.icon(
+                                  icon: Icon(Icons.play_arrow, size: 44),
+                                  label: BorderedText(
+                                    child: Text(
+                                      isHated ? 'Load Anyway' : 'Restart Loading',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                    )
+                                  ),
+                                  onPressed: () {
+                                    setState(() { initVideo(true); });
+                                  },
+                                ),
+                              ]
                             : [
-                              Stack(children: [
-                                Text(
-                                  percentDoneText,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
+                              if(percentDoneText != '')
+                                BorderedText(
+                                  child: Text(
+                                    percentDoneText,
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                    ),
+                                  )
                                 ),
-                                Text(
-                                  percentDoneText,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                  ),
+                              if(filesizeText != '')
+                                BorderedText(
+                                  child: Text(
+                                    filesizeText,
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                    ),
+                                  )
                                 ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  filesizeText,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
+                              if(expectedSpeedText != '')
+                                BorderedText(
+                                  child: Text(
+                                    expectedSpeedText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )
                                 ),
-                                Text(
-                                  filesizeText,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                  ),
+                              if(expectedTimeText != '')
+                                BorderedText(
+                                  child: Text(
+                                    expectedTimeText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )
                                 ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  expectedSpeedText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
+                              if(sinceStartText != '')
+                                BorderedText(
+                                  child: Text(
+                                    sinceStartText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )
                                 ),
-                                Text(
-                                  expectedSpeedText,
-                                  style: TextStyle(
-                                    fontSize: 16,
+                              const SizedBox(height: 10),
+                              if(widget.settingsHandler.mediaCache && cacheMode != 'Stream')
+                                TextButton.icon(
+                                  icon: Icon(Icons.stop, size: 44, color: Colors.red),
+                                  label: BorderedText(
+                                    child: Text(
+                                      'Stop Loading',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.red,
+                                      ),
+                                    )
                                   ),
+                                  onPressed: () {
+                                    killLoading(['Stopped by User']);
+                                  },
                                 ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  expectedTimeText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
-                                ),
-                                Text(
-                                  expectedTimeText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  sinceStartText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
-                                ),
-                                Text(
-                                  sinceStartText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ]),
-                              (widget.settingsHandler.mediaCache && cacheMode != 'Stream')
-                                ? TextButton.icon(
-                                  icon: Icon(Icons.stop),
-                                  label: Text('Stop loading', style: TextStyle(color: Colors.white)),
-                                  onPressed: killLoading,
-                                )
-                                : Text('')
                             ]
                           )
                   ),
@@ -514,8 +528,12 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   Widget build(BuildContext context) {
-    bool isViewed = widget.viewedIndex == widget.index;
+    int viewedIndex = widget.searchGlobals.viewedIndex!.value ?? 0;
+    bool isViewed = viewedIndex == widget.index;
     bool initialized = _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
+
+    // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
+    bool needsRestart = _lastViewedIndex != viewedIndex;
 
     if (!isViewed) {
       // reset zoom if not viewed
@@ -526,8 +544,11 @@ class _VideoAppState extends State<VideoApp> {
 
     if (initialized) {
       if (isViewed) {
-        // Reset video time if in view
-        _videoController!.seekTo(Duration());
+        // Reset video time if came into view
+        if(needsRestart) {
+          _videoController!.seekTo(Duration());
+        }
+
         if (widget.settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
           _videoController!.play();
@@ -535,6 +556,10 @@ class _VideoAppState extends State<VideoApp> {
       } else {
         _videoController!.pause();
       }
+    }
+
+    if(needsRestart) {
+      _lastViewedIndex = viewedIndex;
     }
 
     return initialized

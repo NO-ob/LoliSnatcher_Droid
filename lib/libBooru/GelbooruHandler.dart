@@ -1,19 +1,17 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
+import 'package:LoliSnatcher/Tools.dart';
 
 /**
  * Booru Handler for the gelbooru engine
  */
 class GelbooruHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
-
   // Dart constructors are weird so it has to call super with the args
   GelbooruHandler(Booru booru,int limit): super(booru,limit);
 
@@ -23,6 +21,7 @@ class GelbooruHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
+    hasSizeData = true;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -33,7 +32,7 @@ class GelbooruHandler extends BooruHandler{
     String url = makeURL(tags);
     print(url);
     try {
-      int length = fetched!.length;
+      int length = fetched.length;
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
@@ -51,14 +50,23 @@ class GelbooruHandler extends BooruHandler{
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if(current.getAttribute("file_url") != null){
-            fetched!.add(new BooruItem(current.getAttribute("file_url").toString(),current.getAttribute("sample_url").toString(),current.getAttribute("preview_url").toString(),current.getAttribute("tags")!.split(" "),makePostURL(current.getAttribute("id")!),getFileExt(current.getAttribute("file_url"))));
+            fetched.add(new BooruItem(
+              current.getAttribute("file_url").toString(),
+              current.getAttribute("sample_url").toString(),
+              current.getAttribute("preview_url").toString(),
+              current.getAttribute("tags")!.split(" "),
+              makePostURL(current.getAttribute("id")!),
+              Tools.getFileExt(current.getAttribute("file_url")),
+              fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
+              fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
+            ));
             if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
           }
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       }

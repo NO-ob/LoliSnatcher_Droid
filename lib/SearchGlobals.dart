@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 
 
 class SearchGlobals{
-  String? tags = "";
+  String tags = "";
   Booru? selectedBooru;
   int pageNum = 0;
   double scrollPosition = 0;
@@ -19,7 +19,7 @@ class SearchGlobals{
   ValueNotifier? displayAppbar = ValueNotifier(true);
   ValueNotifier? viewedIndex = ValueNotifier(0);
   ValueNotifier<BooruItem> currentItem = ValueNotifier(new BooruItem("", "", "", [], "", ""));
-  List? selected = [];
+  List selected = [];
   SearchGlobals(this.selectedBooru,this.tags);
   @override
   String toString() {
@@ -27,8 +27,8 @@ class SearchGlobals{
   }
   List<BooruItem> getSelected(){
     List<BooruItem>? selectedItems = [];
-    for (int i=0; i < selected!.length; i++){
-      selectedItems.add(booruHandler!.fetched!.elementAt(selected![i]));
+    for (int i=0; i < selected.length; i++){
+      selectedItems.add(booruHandler!.fetched.elementAt(selected[i]));
     }
     return selectedItems;
   }

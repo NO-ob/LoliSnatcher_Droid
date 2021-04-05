@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 
 import 'Booru.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
+import 'package:LoliSnatcher/Tools.dart';
 
 class e621Handler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   e621Handler(Booru booru,int limit) : super(booru,limit);
 
   /**
@@ -17,7 +16,8 @@ class e621Handler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched!.length;
+    hasSizeData = true;
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -38,24 +38,34 @@ class e621Handler extends BooruHandler{
          * all the data needed about each image
          */
         var posts = parsedResponse['posts'];
-        print("e621Handler::search ${parsedResponse['posts'].length}");
+        print(parsedResponse);
+        print("e621Handler::search ${posts.length}");
 
         // Create a BooruItem for each post in the list
-        for (int i =0; i < parsedResponse['posts'].length; i++){
-          var current = parsedResponse['posts'][i];
+        for (int i = 0; i < posts.length; i++){
+          var current = posts[i];
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if (current['file']['url'] != null){
-            fetched!.add(new BooruItem(current['file']['url'],current['sample']['url'],current['preview']['url'],current['tags']['general'] + current['tags']['species'] + current['tags']['character'] + current['tags']['artist'] + current['tags']['meta'],makePostURL(current['id'].toString()),getFileExt(current['file']['url'])));
+            fetched.add(new BooruItem(
+              current['file']['url'],
+              current['sample']['url'],
+              current['preview']['url'],
+              [...current['tags']['general'], ...current['tags']['species'], ...current['tags']['character'], ...current['tags']['artist'], ...current['tags']['meta']],
+              makePostURL(current['id'].toString()),
+              Tools.getFileExt(current['file']['url']),
+              fileWidth: current['file']['width'].toDouble(),
+              fileHeight: current['file']['height'].toDouble(),
+            ));
             if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
           }
 
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       }

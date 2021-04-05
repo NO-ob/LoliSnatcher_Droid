@@ -7,7 +7,6 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class SankakuHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   SankakuHandler(Booru booru,int limit) : super(booru,limit);
   bool tagSearchEnabled = true;
   String authToken = '';
@@ -18,7 +17,8 @@ class SankakuHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched!.length;
+    hasSizeData = true;
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -60,18 +60,24 @@ class SankakuHandler extends BooruHandler{
           }
           if (current['file_url'] != null) {
             String fileExt = current['file_type'].split('/')[1]; // image/jpeg
-            fetched!.add(new BooruItem(
-                current['file_url'], current['sample_url'],
-                current['preview_url'], tags,
-                makePostURL(current['id'].toString()), fileExt));
+            fetched.add(BooruItem(
+              current['file_url'],
+              current['sample_url'],
+              current['preview_url'],
+              tags,
+              makePostURL(current['id'].toString()),
+              fileExt,
+              fileWidth: current['width'].toDouble(),
+              fileHeight: current['height'].toDouble(),
+            ));
             if (dbHandler!.db != null) {
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
-            print(fetched![fetched!.length - 1].toString());
+            print(fetched[fetched.length - 1].toString());
           }
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       } else {

@@ -5,12 +5,11 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
 import 'dart:convert';
+import 'package:LoliSnatcher/Tools.dart';
 /**
  * Booru Handler for the Danbooru engine
  */
 class DanbooruHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
-
   // Dart constructors are weird so it has to call super with the args
   DanbooruHandler(Booru booru,int limit) : super(booru,limit);
 
@@ -20,7 +19,8 @@ class DanbooruHandler extends BooruHandler{
    */
   Future Search(String tags, int pageNum) async{
     isActive = true;
-    int length = fetched!.length;
+    hasSizeData = true;
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -44,32 +44,23 @@ class DanbooruHandler extends BooruHandler{
            * to go with the rest of the data so cannot be displayed and are pointless for the app
            */
           if ((current.findElements("file-url").length > 0)) {
-            fetched!.add(new BooruItem(current
-                .findElements("file-url")
-                .elementAt(0)
-                .text, current
-                .findElements("large-file-url")
-                .elementAt(0)
-                .text, current
-                .findElements("preview-file-url")
-                .elementAt(0)
-                .text, current
-                .findElements("tag-string")
-                .elementAt(0).text.split(" ")
-                , makePostURL(current
-                .findElements("id")
-                .elementAt(0)
-                .text),getFileExt(current
-                    .findElements("file-url")
-                    .elementAt(0)
-                    .text)));
+            fetched.add(new BooruItem(
+              current.findElements("file-url").elementAt(0).text,
+              current.findElements("large-file-url").elementAt(0).text,
+              current.findElements("preview-file-url").elementAt(0).text,
+              current.findElements("tag-string").elementAt(0).text.split(" "),
+              makePostURL(current.findElements("id").elementAt(0).text),
+              Tools.getFileExt(current.findElements("file-url").elementAt(0).text),
+              fileHeight: double.tryParse(current.findElements("image-height").elementAt(0).text) ?? null,
+              fileWidth: double.tryParse(current.findElements("image-width").elementAt(0).text) ?? null,
+            ));
             if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
           }
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       }

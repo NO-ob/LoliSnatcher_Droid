@@ -1,16 +1,14 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
+import 'package:LoliSnatcher/Tools.dart';
 /**
  * Booru Handler for the Shimmie engine
  */
 class ShimmieHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   bool tagSearchEnabled = false;
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
@@ -20,7 +18,8 @@ class ShimmieHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched!.length;
+    hasSizeData = true;
+    int length = fetched.length;
     if(tags == " " || tags == ""){
       tags="*";
     }
@@ -55,19 +54,40 @@ class ShimmieHandler extends BooruHandler{
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if (current.getAttribute("file_url") != null){
-            if (!booru.baseURL!.contains("https://whyneko.com/booru")){
-              fetched!.add(new BooruItem(current.getAttribute("file_url").toString(),current.getAttribute("preview_url").toString(),current.getAttribute("preview_url").toString(),current.getAttribute("tags")!.split(" "),makePostURL(current.getAttribute("id")!),getFileExt(current.getAttribute("file_url"))));
-            } else {
+            if (booru.baseURL!.contains("https://whyneko.com/booru")){
+              // special case for whyneko
               String cutURL = booru.baseURL!.split("/booru")[0];
-              fetched!.add(new BooruItem(cutURL+current.getAttribute("file_url")!,cutURL+current.getAttribute("preview_url")!,cutURL+current.getAttribute("preview_url")!,current.getAttribute("tags")!.split(" "),makePostURL(current.getAttribute("id")!),getFileExt(current.getAttribute("file_url"))));
+              fetched.add(BooruItem(
+                cutURL+current.getAttribute("file_url")!,
+                cutURL+current.getAttribute("preview_url")!,
+                cutURL+current.getAttribute("preview_url")!,
+                current.getAttribute("tags")!.split(" "),
+                makePostURL(current.getAttribute("id")!),
+                Tools.getFileExt(current.getAttribute("file_url")),
+                fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
+                fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
+              ));
+            } else {
+              // other shimmie boorus
+              fetched.add(BooruItem(
+                current.getAttribute("file_url").toString(),
+                current.getAttribute("preview_url").toString(),
+                current.getAttribute("preview_url").toString(),
+                current.getAttribute("tags")!.split(" "),
+                makePostURL(current.getAttribute("id")!),
+                Tools.getFileExt(current.getAttribute("file_url")),
+                fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
+                fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
+              ));
             }
+              
             if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
           }
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       } else {
@@ -86,12 +106,13 @@ class ShimmieHandler extends BooruHandler{
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "${booru.baseURL}/api/danbooru/find_posts/index.xml?&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    return "${booru.baseURL}/api/danbooru/find_posts/index.xml?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
 
 
   String makeTagURL(String input){
     if (booru.baseURL!.contains("rule34.paheal.net")){
+      tagSearchEnabled = true;
       return "${booru.baseURL}/api/internal/autocomplete?s=$input"; // doesn't allow limit, but sorts by popularity
     } else {
       return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10";
@@ -102,7 +123,7 @@ class ShimmieHandler extends BooruHandler{
   Future tagSearch(String input) async {
     List<String> searchTags = [];
     String url = makeTagURL(input);
-    print("shimmie tag search");
+    print("shimmie tag search $input $url");
     try {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});

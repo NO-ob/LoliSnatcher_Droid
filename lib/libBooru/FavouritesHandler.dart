@@ -5,7 +5,6 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class FavouritesHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   DBHandler? dbHandler;
   FavouritesHandler(Booru booru,int limit): super(booru,limit){
     print("new favourites handler");
@@ -14,7 +13,7 @@ class FavouritesHandler extends BooruHandler{
 
   Future Search(String tags, int pageNum) async{
     isActive = true;
-    int length = fetched!.length;
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -22,14 +21,14 @@ class FavouritesHandler extends BooruHandler{
     if (prevTags != tags){
       fetched = [];
     }
-    fetched!.addAll(await dbHandler!.searchDB(tags,fetched!.length.toString(),limit.toString()));
+    fetched.addAll(await dbHandler!.searchDB(tags, fetched.length.toString(), limit.toString()));
     print("dbhandler fetched length is $length");
     prevTags = tags;
-    if (fetched!.isEmpty){
+    if (fetched.isEmpty){
       print("dbhandler dbLocked");
       locked = true;
     } else {
-      if (fetched!.length == length){
+      if (fetched.length == length){
         print("dbhandler dbLocked");
         locked = true;
       }
