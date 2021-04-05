@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,9 +13,10 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 
 class CachedThumb extends StatefulWidget {
   final String thumbURL;
+  final String thumbType;
   final int columnCount;
   final SettingsHandler settingsHandler;
-  CachedThumb(this.thumbURL, this.settingsHandler, this.columnCount);
+  CachedThumb(this.thumbURL,this.thumbType, this.settingsHandler, this.columnCount);
   @override
   _CachedThumbState createState() => _CachedThumbState();
 }
@@ -193,7 +196,24 @@ class _CachedThumbState extends State<CachedThumb> {
 
   @override
   Widget build(BuildContext context) {
-    if (thumbProvider == null) { // (_totalBytes.length == 0) {
+    if (widget.thumbType == "video"){
+      ServiceHandler serviceHandler = ServiceHandler();
+      return FutureBuilder(
+          future: serviceHandler.makeVidThumb(widget.thumbURL), // a previously-obtained Future<String> or null
+          builder: (BuildContext context, AsyncSnapshot<Uint8List?> snapshot) {
+            if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
+              return Image(
+                image: ResizeImage(MemoryImage(Uint8List.fromList(snapshot.data!)), width: 500), //ResizeImage(MemoryImage(_totalBytes), width: 500, allowUpscaling: true),
+                fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
+                width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
+                height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+              );
+            } else {
+              return CircularProgressIndicator();
+            }
+          }
+      );
+    } else if (thumbProvider == null) { // (_totalBytes.length == 0) {
       return loadingElementBuilder(context, Center(child: Text("Error")), null);
     } else {
       return Image(

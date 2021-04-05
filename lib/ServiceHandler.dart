@@ -1,4 +1,6 @@
+
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/services.dart';
@@ -136,7 +138,13 @@ class ServiceHandler{
       Process.run('xdg-open', [url]);
     }
   }
-
+  Future<Uint8List?> makeVidThumb(String videoURL) async {
+    Uint8List? thumbnail;
+    if (Platform.isAndroid){
+      thumbnail = await platform.invokeMethod("makeVidThumb",{"videoURL" : videoURL});
+    }
+    return thumbnail;
+  }
   Future<String?> writeImage(var imageData, fileName, mediaType, fileExt) async{
     String? result;
     try{

@@ -4,12 +4,11 @@ import android.content.ContentValues
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
 import android.content.Intent.CATEGORY_BROWSABLE
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.view.Gravity
@@ -21,8 +20,8 @@ import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
@@ -140,6 +139,16 @@ class MainActivity: FlutterActivity() {
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             } else if (call.method == "enableSleep"){
                 window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            } else if (call.method == "makeVidThumb"){
+                val videoURL = call.argument<String>("videoURL");
+                val retriever = MediaMetadataRetriever()
+                retriever.setDataSource(videoURL, HashMap())
+                val image = retriever.getFrameAtTime(2000000, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+                val stream = ByteArrayOutputStream()
+                image?.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                val byteArray = stream.toByteArray();
+                image?.recycle();
+                result.success(byteArray);
             }
 
 

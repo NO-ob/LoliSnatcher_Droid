@@ -8,7 +8,7 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 
 class BooruOnRailsHandler extends BooruHandler {
-  bool tagSearchEnabled = false;
+  bool tagSearchEnabled = true;
   List<BooruItem>? fetched = [];
   BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
   Future Search(String tags,int pageNum) async{
@@ -79,7 +79,7 @@ class BooruOnRailsHandler extends BooruHandler {
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/tags.json?q=$input";
+    return "${booru.baseURL}/tags.json?tq=*$input*";
   }
   @override
   Future tagSearch(String input) async {
@@ -92,6 +92,8 @@ class BooruOnRailsHandler extends BooruHandler {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
+      print(url);
+      print(response);
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
