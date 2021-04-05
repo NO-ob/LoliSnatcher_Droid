@@ -19,7 +19,7 @@ class SettingsHandler {
   String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile";
   int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
-  String verStr = "1.7.9";
+  String verStr = "1.8.0";
   List<Booru> booruList = [];
   /*static List<ThemeItem> themes = [
     new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),
