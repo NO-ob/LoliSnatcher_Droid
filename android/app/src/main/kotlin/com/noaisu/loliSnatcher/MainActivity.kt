@@ -1,5 +1,7 @@
 package com.noaisu.loliSnatcher
 
+import android.app.Activity
+import android.media.AudioManager
 import android.content.ContentValues
 import android.content.Intent
 import android.content.Intent.ACTION_VIEW
@@ -13,6 +15,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.view.Gravity
 import android.view.View
+import android.view.KeyEvent
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.NonNull
@@ -20,15 +23,22 @@ import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.EventChannel
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
+import android.R.attr.streamType
+import android.content.Context
 
 
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.noaisu.loliSnatcher/services"
+    private val VOLUME_CHANNEL = "com.noaisu.loliSnatcher/volume"
+    private var sink: EventChannel.EventSink? = null
+    private var isSinkingVolume: Boolean = false
+    private var audioManager: AudioManager? = null
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -108,9 +118,9 @@ class MainActivity: FlutterActivity() {
                 toast.setGravity(Gravity.TOP or Gravity.CENTER, 0, 30);
                 toast.show();
 
-            } else if (call.method == "systemUIMode"){
+            } else if (call.method == "systemUIMode") {
                 val modeString: String? = call.argument("mode");
-                if (modeString.equals("immersive")){
+                if (modeString.equals("immersive")) {
                     window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE
                             // Set the content to appear under the system bars so that the
                             // content doesn't resize when the system bars hide and show.
@@ -121,15 +131,30 @@ class MainActivity: FlutterActivity() {
                             or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                             or View.SYSTEM_UI_FLAG_FULLSCREEN)
 
-                } else if (modeString.equals("normal")){
+                } else if (modeString.equals("normal")) {
                     window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                             or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                             or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
                 }
-            } else if (call.method == "launchURL"){
+            } else if(call.method == "setBrightness") {
+                val brightness: Double? = call.argument("brightness")
+                val layoutParams: WindowManager.LayoutParams = (context as Activity).getWindow().getAttributes()
+                layoutParams.screenBrightness = brightness!!.toFloat();
+                (context as Activity).getWindow().setAttributes(layoutParams)
+                result.success(null)
+            } else if(call.method == "setVolume") {
+                val i: Int? = call.argument("newVol")
+                val showUiFlag: Int? = call.argument("showVolumeUiFlag")
+                if(audioManager == null) audioManager = applicationContext.getSystemService(AUDIO_SERVICE) as AudioManager
+                audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, i!!, AudioManager.FLAG_SHOW_UI)
+                result.success(null) //audioManager.getStreamVolume(3))
+            } else if(call.method == "setVolumeButtons") {
+                val state: Boolean? = call.argument("setActive")
+                isSinkingVolume = !state!!
+            } else if(call.method == "launchURL") {
                 val urlString: String? = call.argument("url");
-                if (!urlString.isNullOrBlank()){
+                if (!urlString.isNullOrBlank()) {
                     val uri = Uri.parse(urlString);
                     val urlLauncher = Intent(CATEGORY_BROWSABLE, uri);
                     urlLauncher.action = ACTION_VIEW;
@@ -151,10 +176,28 @@ class MainActivity: FlutterActivity() {
                 result.success(byteArray);
             }
 
-
-
         }
+
+        EventChannel(flutterEngine.dartExecutor, VOLUME_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, eventSink: EventChannel.EventSink?) {
+                sink = eventSink;
+            }
+
+            override fun onCancel(arguments: Any?) {
+            }
+        })
     }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) && isSinkingVolume)
+        {
+            sink?.success(if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) "down" else "up")
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event)
+    }
+
     private fun getExtDir(): String {
         if (android.os.Build.VERSION.SDK_INT <= android.os.Build.VERSION_CODES.Q) {
             return Environment.getExternalStorageDirectory().absolutePath;

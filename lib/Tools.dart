@@ -10,10 +10,25 @@ class Tools {
         ' ' +
         suffixes[i];
   }
+
   static int boolToInt(bool boolean){
     return boolean ? 1 : 0;
   }
   static bool intToBool(int boolean){
     return boolean != 0 ? true : false;
+  }
+
+  static String getFileExt(fileURL){
+    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
+    String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
+    return fileExt;
+  }
+
+  static String getFileName(fileURL){
+    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
+    String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
+    return fileExt;
   }
 }

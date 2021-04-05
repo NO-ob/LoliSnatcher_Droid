@@ -1,11 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-
-import '../ServiceHandler.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
@@ -51,16 +48,23 @@ class _HideableAppBarState extends State<HideableAppBar> {
     return AnimatedContainer(
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,
+      color: Colors.transparent,
       height:
           widget.searchGlobals.displayAppbar!.value ? widget.defaultHeight : 0.0,
       child: AppBar(
         // toolbarHeight: widget.defaultHeight,
+        // elevation: 0, // set to zero to disable a shadow behind
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
         leading: IconButton(
           // to ignore icon change
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: FittedBox(fit: BoxFit.fitWidth, child: Text(widget.title)),
+        title: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Text(widget.title, style: TextStyle(color: Colors.white)),
+        ),
         actions: widget.actions,
       ),
     );

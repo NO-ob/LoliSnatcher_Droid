@@ -1,18 +1,18 @@
 import 'dart:convert';
-import 'package:LoliSnatcher/libBooru/PhilomenaHandler.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
+import 'package:LoliSnatcher/Tools.dart';
 
 class BooruOnRailsHandler extends BooruHandler {
   bool tagSearchEnabled = true;
-  List<BooruItem>? fetched = [];
+  List<BooruItem> fetched = [];
+
   BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
   Future Search(String tags,int pageNum) async{
-    int length = fetched!.length;
+    int length = fetched.length;
     if (tags == "" || tags == " "){
       tags = "*";
     }
@@ -44,22 +44,30 @@ class BooruOnRailsHandler extends BooruHandler {
           }
           if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['thumb_small'] != null) {
             String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
-            if(current["mime_type"].toString().contains("video")){
-              String tmpURL = sampleURL.substring(0,sampleURL.lastIndexOf("/")+1) + "thumb.gif";
+            if(current["mime_type"].toString().contains("video")) {
+              String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
               sampleURL = tmpURL;
               thumbURL = tmpURL;
-              print("tmpurl is" + tmpURL);
+              print("tmpurl is " + tmpURL);
             }
-            fetched!.add(new BooruItem(current['representations']['full'],sampleURL,thumbURL,currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+            
+            fetched.add(BooruItem(
+              current['representations']['full'],
+              sampleURL,
+              thumbURL,
+              currentTags,
+              makePostURL(current['id'].toString()),
+              Tools.getFileExt(current['representations']['full'])
+            ));
             if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
           } else {
             print("post $i skipped");
           }
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         return fetched;
       }
     } catch(e) {

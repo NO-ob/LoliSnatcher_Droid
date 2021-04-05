@@ -16,8 +16,9 @@ import 'libBooru/DBHandler.dart';
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   DBHandler dbHandler = new DBHandler();
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile";
-  int limit = 20, portraitColumns = 2,landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top';
+  List<String> hatedTags = [], lovedTags = [];
+  int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
   String verStr = "1.8.0";
   List<Booru> booruList = [];
@@ -31,7 +32,10 @@ class SettingsHandler {
   ];*/
   String themeMode = "dark";
   String path = "";
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false, imageCache = false, mediaCache = false, autoHideImageBar = false, dbEnabled = true, searchHistoryEnabled = true;
+  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
+        imageCache = false, mediaCache = false, autoHideImageBar = false,
+          dbEnabled = true, searchHistoryEnabled = true, filterHated = false,
+            useVolumeButtonsForScroll = false;
   Future<bool> writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -51,7 +55,7 @@ class SettingsHandler {
   Future<bool> loadSettings() async{
     if (path == ""){
       path = await getExtDir();
-      print("found path $path");
+      // print("found path $path");
     }
     if (SDKVer == 0){
       SDKVer = await getSDKVer();
@@ -70,37 +74,37 @@ class SettingsHandler {
           case("Default Tags"):
             if (settings[i].split(" = ").length > 1){
               defTags = settings[i].split(" = ")[1];
-              print("Found Default Tags " + settings[i].split(" = ")[1]);
+              // print("Found Default Tags " + settings[i].split(" = ")[1]);
             }
             break;
           case("Limit"):
             if (settings[i].split(" = ").length > 1){
               limit = int.parse(settings[i].split(" = ")[1]);
-              print("Found Limit " + settings[i].split(" = ")[1] );
+              // print("Found Limit " + settings[i].split(" = ")[1] );
             }
             break;
           case("Preview Mode"):
             if (settings[i].split(" = ").length > 1){
               previewMode = settings[i].split(" = ")[1];
-              print("Found Preview Mode " + settings[i].split(" = ")[1] );
+              // print("Found Preview Mode " + settings[i].split(" = ")[1] );
             }
             break;
           case("Portrait Columns"):
             if (settings[i].split(" = ").length > 1){
               portraitColumns = int.parse(settings[i].split(" = ")[1]);
-              print("Found Portrait Columns " + settings[i].split(" = ")[1] );
+              // print("Found Portrait Columns " + settings[i].split(" = ")[1] );
             }
             break;
           case("Landscape Columns"):
             if (settings[i].split(" = ").length > 1){
               landscapeColumns = int.parse(settings[i].split(" = ")[1]);
-              print("Found Landscape Columns " + settings[i].split(" = ")[1] );
+              // print("Found Landscape Columns " + settings[i].split(" = ")[1] );
             }
             break;
           case("Preload Count"):
             if (settings[i].split(" = ").length > 1){
               preloadCount = int.parse(settings[i].split(" = ")[1]);
-              print("Found Preload Count " + settings[i].split(" = ")[1] );
+              // print("Found Preload Count " + settings[i].split(" = ")[1] );
             }
             break;
           case("Write Json"):
@@ -110,7 +114,7 @@ class SettingsHandler {
               } else {
                 jsonWrite = false;
               }
-              print("Found jsonWrite " + settings[i].split(" = ")[1] );
+              // print("Found jsonWrite " + settings[i].split(" = ")[1] );
             }
             break;
           case("Auto Play"):
@@ -120,7 +124,7 @@ class SettingsHandler {
               } else {
                 autoPlayEnabled = false;
               }
-              print("Found Auto Play " + settings[i].split(" = ")[1] );
+              // print("Found Auto Play " + settings[i].split(" = ")[1] );
             }
             break;
           case("Loading Gif"):
@@ -130,7 +134,7 @@ class SettingsHandler {
               } else {
                 loadingGif = false;
               }
-              print("Found Loading gif " + settings[i].split(" = ")[1] );
+              // print("Found Loading gif " + settings[i].split(" = ")[1] );
             }
             break;
           case("Image Cache"):
@@ -140,7 +144,7 @@ class SettingsHandler {
               } else {
                 imageCache = false;
               }
-              print("Found Image Cache " + settings[i].split(" = ")[1] );
+              // print("Found Image Cache " + settings[i].split(" = ")[1] );
             }
             break;
           case("Media Cache"):
@@ -150,19 +154,19 @@ class SettingsHandler {
               } else {
                 mediaCache = false;
               }
-              print("Found Image Cache " + settings[i].split(" = ")[1] );
+              // print("Found Image Cache " + settings[i].split(" = ")[1] );
             }
             break;
           case("Video Cache Mode"):
             if (settings[i].split(" = ").length > 1){
               videoCacheMode = settings[i].split(" = ")[1];
-              print("Found Video Cache Mode " + settings[i].split(" = ")[1] );
+              // print("Found Video Cache Mode " + settings[i].split(" = ")[1] );
             }
             break;
           case("Share Action"):
             if (settings[i].split(" = ").length > 1){
               shareAction = settings[i].split(" = ")[1];
-              print("Found Share Action " + settings[i].split(" = ")[1] );
+              // print("Found Share Action " + settings[i].split(" = ")[1] );
             }
             break;
           case("Pref Booru"):
@@ -171,7 +175,7 @@ class SettingsHandler {
               if(prefBooru.isEmpty){
                 prefBooru = "";
               }
-              print("Found Pref Booru " + settings[i].split(" = ")[1] );
+              // print("Found Pref Booru " + settings[i].split(" = ")[1] );
             }
             break;
           case ("Autohide Bar"):
@@ -181,25 +185,31 @@ class SettingsHandler {
               } else {
                 autoHideImageBar = false;
               }
-              print("Auto hide image bar " + settings[i].split(" = ")[1] );
+              // print("Auto hide image bar " + settings[i].split(" = ")[1] );
             }
             break;
           case("Snatch Cooldown"):
             if (settings[i].split(" = ").length > 1){
               snatchCooldown = int.parse(settings[i].split(" = ")[1]);
-              print("Found Snatch cooldown " + settings[i].split(" = ")[1] );
+              // print("Found Snatch cooldown " + settings[i].split(" = ")[1] );
             }
             break;
           case ("Preview Display"):
             if (settings[i].split(" = ").length > 1){
               previewDisplay = settings[i].split(" = ")[1];
-              print("Found Preview Display Mode " + settings[i].split(" = ")[1] );
+              // print("Found Preview Display Mode " + settings[i].split(" = ")[1] );
             }
             break;
           case ("Gallery Mode"):
             if (settings[i].split(" = ").length > 1){
               galleryMode = settings[i].split(" = ")[1];
-              print("Found Gallery Mode " + settings[i].split(" = ")[1] );
+              // print("Found Gallery Mode " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case ("Gallery Bar Position"):
+            if (settings[i].split(" = ").length > 1){
+              galleryBarPosition = settings[i].split(" = ")[1];
+              // print("Found Gallery Bar Position " + settings[i].split(" = ")[1] );
             }
             break;
           case ("Enable Database"):
@@ -209,7 +219,7 @@ class SettingsHandler {
               } else {
                 dbEnabled = false;
               }
-              print("Found dbEnabled " + settings[i].split(" = ")[1] );
+              // print("Found dbEnabled " + settings[i].split(" = ")[1] );
             }
             break;
           case ("Search History"):
@@ -219,14 +229,47 @@ class SettingsHandler {
               } else {
                 searchHistoryEnabled = false;
               }
-              print("Found searchHistoryEnabled " + settings[i].split(" = ")[1] );
+              // print("Found searchHistoryEnabled " + settings[i].split(" = ")[1] );
             }
             break;
           case ("App Mode"):
             if (settings[i].split(" = ").length > 1){
               appMode = settings[i].split(" = ")[1];
-              print("App mode found " + settings[i].split(" = ")[1] );
+              // print("App mode found " + settings[i].split(" = ")[1] );
             }
+            break;
+          case("Hated Tags"):
+            if (settings[i].split(" = ").length > 1){
+              hatedTags = cleanTagsList(settings[i].split(" = ")[1].split(','));
+              // print("Found Hated Tags " + settings[i].split(" = ")[1]);
+            }
+            break;
+          case ("Filter Hated"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                filterHated = true;
+              } else {
+                filterHated = false;
+              }
+              // print("Found filterHated " + settings[i].split(" = ")[1] );
+            }
+            break;
+          case("Loved Tags"):
+            if (settings[i].split(" = ").length > 1){
+              lovedTags = cleanTagsList(settings[i].split(" = ")[1].split(','));
+              // print("Found Loved Tags " + settings[i].split(" = ")[1]);
+            }
+            break;
+          case ("Volume Buttons Scroll"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                useVolumeButtonsForScroll = true;
+              } else {
+                useVolumeButtonsForScroll = false;
+              }
+              // print("Found useVolumeButtonsForScroll " + settings[i].split(" = ")[1] );
+            }
+            break;
         }
       }
     }
@@ -249,6 +292,14 @@ class SettingsHandler {
     var writer = settingsFile.openWrite();
     writer.write("Default Tags = $defTags\n");
     this.defTags = defTags;
+    writer.write("Hated Tags = ${cleanTagsList(hatedTags).join(',')}\n");
+    this.hatedTags = hatedTags;
+    writer.write("Filter Hated = $filterHated\n");
+    writer.write("Loved Tags = ${cleanTagsList(lovedTags).join(',')}\n");
+    this.lovedTags = lovedTags;
+
+    writer.write("Volume Buttons Scroll = $useVolumeButtonsForScroll\n");
+
       // Write limit if it between 0-100
     if (limit <= 100 && limit >= 5){
       writer.write("Limit = $limit\n");
@@ -275,12 +326,13 @@ class SettingsHandler {
     writer.write("Snatch Cooldown  = $snatchCooldown\n");
     writer.write("Preview Display = $previewDisplay\n");
     writer.write("Gallery Mode = $galleryMode\n");
+    writer.write("Gallery Bar Position = $galleryBarPosition\n");
     writer.write("Enable Database = $dbEnabled\n");
     writer.write("Search History = $searchHistoryEnabled\n");
     writer.write("App Mode = $appMode\n");
     writer.close();
-    ServiceHandler.displayToast("Settings Saved! \n Some changes may not take effect until the app is restarted");
-    //Get.snackbar("Settings Saved!","Some changes may not take effect until the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+    ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
+    //Get.snackbar("Settings Saved!","Some changes may not take effect until the search is refreshed or the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
     return true;
   }
 
@@ -368,12 +420,33 @@ class SettingsHandler {
     return true;
   }
 
+  List<List<String>> parseTagsList(List<String> itemTags, {bool isCapped = true}) {
+    List<String> cleanItemTags = cleanTagsList(itemTags);
+    List<String> hatedInItem = this.hatedTags.where((tag) => cleanItemTags.contains(tag)).toList();
+    List<String> lovedInItem = this.lovedTags.where((tag) => cleanItemTags.contains(tag)).toList();
+
+    if(isCapped && hatedInItem.length > 5) {
+      hatedInItem = [...hatedInItem.take(5), '...'];
+    }
+    if(isCapped && lovedInItem.length > 5) {
+      lovedInItem = [...lovedInItem.take(5), '...'];
+    }
+
+    return [hatedInItem, lovedInItem];
+  }
+
+  List<String> cleanTagsList(List<String> tags) {
+    return tags.where((tag) => tag != "").map((tag) => tag.trim().toLowerCase()).toList();
+  }
+
   Future<String> getExtDir() async{
     String path = "";
     if (Platform.isAndroid){
       path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       path = Platform.environment['HOME']! + "/.loliSnatcher/config/";
+    } else if (Platform.isWindows) {
+      path = Platform.environment['LOCALAPPDATA']! + "/LoliSnatcher/config/";
     }
     return path;
   }
@@ -382,6 +455,10 @@ class SettingsHandler {
       return await serviceHandler.getSDKVersion();
     } else if (Platform.isLinux){
       return 1;
+    } else if (Platform.isWindows) {
+      return 2;
+    } else {
+      return -1;
     }
   }
   Future getDocumentsDir() async{
@@ -389,6 +466,8 @@ class SettingsHandler {
       return await serviceHandler.getDocumentsDir() + "/LoliSnatcher/config/";
     } else if (Platform.isLinux){
       return Platform.environment['HOME']! + "/.loliSnatcher/config/";
+    } else if (Platform.isWindows) {
+      path = Platform.environment['LOCALAPPDATA']! + "/LoliSnatcher/config/";
     }
   }
   Future<bool> initialize() async{

@@ -67,10 +67,10 @@ class SnatchHandler {
         booruNameList!.add(booruName);
         queuedItems!.value ++;
         if (booruItems.length > 1){
-          ServiceHandler.displayToast("Items added to snatch queue\n Amount: ${booruItems.length}\n Queue Position: ${queuedItems!.value}");
+          ServiceHandler.displayToast("Items added to snatch queue\nAmount: ${booruItems.length}\nQueue Position: ${queuedItems!.value}");
           //Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
         } else {
-          ServiceHandler.displayToast("Item added to snatch queue\n ${booruItems[0].fileURL} \n Queue Position: ${queuedItems!.value}");
+          ServiceHandler.displayToast("Item added to snatch queue\nQueue Position: ${queuedItems!.value}");
           //Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
         }
       }
@@ -87,7 +87,7 @@ class SnatchHandler {
     List temp = new BooruHandlerFactory().getBooruHandler(booru, limit, settingsHandler!.dbHandler);
     booruHandler = temp[0];
     page = temp[1];
-    ServiceHandler.displayToast("Snatching Images \n Do not close the app!");
+    ServiceHandler.displayToast("Snatching Images\nDo not close the app!");
     //Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
     while (count < int.parse(amount) && !booruHandler.locked){
       booruItems = await booruHandler.Search(tags,page);

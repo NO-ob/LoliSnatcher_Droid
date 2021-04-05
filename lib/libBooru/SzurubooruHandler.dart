@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
+import 'package:LoliSnatcher/Tools.dart';
 
 class SzurubooruHandler extends BooruHandler{
-  List<BooruItem>? fetched = [];
   SzurubooruHandler(Booru booru,int limit) : super(booru,limit);
   bool tagSearchEnabled = false;
 
@@ -19,7 +17,7 @@ class SzurubooruHandler extends BooruHandler{
    */
   Future Search(String tags,int pageNum) async{
     isActive = true;
-    int length = fetched!.length;
+    int length = fetched.length;
     if(this.pageNum == pageNum){
       return fetched;
     }
@@ -53,25 +51,33 @@ class SzurubooruHandler extends BooruHandler{
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse['results'].length; i++){
           var current = parsedResponse['results'][i];
-          List tags = [];
+          List<String> tags = [];
           for (int x=0; x < current['tags'].length; x++) {
             String currentTags = current['tags'][x]['names'].toString().replaceAll(r":", r"\:");
             currentTags = currentTags.substring(1,currentTags.length - 1);
             if (currentTags.contains(",")){
-              tags += currentTags.split(", ");
+              tags.addAll(currentTags.split(", "));
             } else {
               tags.add(currentTags);
             }
           }
           if(current['contentUrl'] != null){
-            fetched!.add(new BooruItem("${booru.baseURL}/"+current['contentUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],"${booru.baseURL}/"+current['thumbnailUrl'],tags,makePostURL(current['id'].toString()),getFileExt(current['contentUrl'])));
+            fetched.add(new BooruItem(
+              "${booru.baseURL}/"+current['contentUrl'],
+              "${booru.baseURL}/"+current['thumbnailUrl'],
+              "${booru.baseURL}/"+current['thumbnailUrl'],
+              tags,
+              makePostURL(current['id'].toString()),
+              Tools.getFileExt(current['contentUrl'])
+            ));
+
             if(dbHandler!.db != null){
-              setTrackedValues(fetched!.length - 1);
+              setTrackedValues(fetched.length - 1);
             }
           }
         }
         prevTags = tags;
-        if (fetched!.length == length){locked = true;}
+        if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
       }
@@ -88,7 +94,7 @@ class SzurubooruHandler extends BooruHandler{
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "${booru.baseURL}/api/posts/?offset=${pageNum!*limit}&limit=${limit.toString()}&query=$tags";
+    return "${booru.baseURL}/api/posts/?offset=${pageNum*limit}&limit=${limit.toString()}&query=$tags";
     }
 
   String makeTagURL(String input){

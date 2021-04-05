@@ -23,7 +23,7 @@ class DesktopImageListener extends StatefulWidget {
   int globalsIndex;
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler;
-  DesktopImageListener(this.searchGlobals,this.globalsIndex, this.settingsHandler,this.snatchHandler);
+  DesktopImageListener(this.searchGlobals, this.globalsIndex, this.settingsHandler, this.snatchHandler);
   @override
   _DesktopImageListenerState createState() => _DesktopImageListenerState();
 }
@@ -34,7 +34,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   }
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value){
-      if (!value.isVideo() ){
+      if (!value.isVideo()){
         return PhotoView(imageProvider: NetworkImage(value.fileURL));
       } else {
         if (Platform.isAndroid){
@@ -44,12 +44,13 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
               future: nothing(),
               builder: (BuildContext context, AsyncSnapshot snapshot) {
                 if (snapshot.connectionState == ConnectionState.done){
-                  return VideoApp(value, 1, 1, widget.settingsHandler,false);
+                  return VideoApp(value, 1, widget.searchGlobals[widget.globalsIndex], widget.settingsHandler, false);
                 } else {
                   return Center(child: CircularProgressIndicator());
                 }
               }
-          ),);
+            ),
+          );
         } else {
           return Center(
             child: Column(

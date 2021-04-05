@@ -23,6 +23,7 @@ class HistoryList extends StatefulWidget {
 
 class _HistoryListState extends State<HistoryList> {
   List<List<String>> history = [];
+  ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
@@ -93,7 +94,6 @@ class _HistoryListState extends State<HistoryList> {
               onPressed: () {
                 int indexWhere = history.indexWhere((el) => el[0] == data[0]);
                 bool newFavourite = data[4] == '1' ? false : true;
-                print(data);
                 data[4] = data[4] == '1' ? '0' : '1';
                 setState(() {
                   history[indexWhere] = data;
@@ -135,70 +135,81 @@ class _HistoryListState extends State<HistoryList> {
     return Column(children: [
       history.length > 0 ? const SizedBox() : Text('Search History is empty.'),
       const SizedBox(height: 10),
-      ClipRRect(
-        borderRadius: new BorderRadius.circular(10),
-        child: Container(
-          height: (MediaQuery.of(context).size.height / 2) + 20,
-          child: Material(
-            child: ListView.builder(
-              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-              shrinkWrap: true,
-              itemCount: history.length,
-              scrollDirection: Axis.vertical,
-              itemBuilder: (BuildContext context, int index) {
-                List<String> currentEntry = history[index]; //0-id, 1-text, 2-booru type, 3-booru name, 4-isFavourite, 5-timestamp
-                Booru? booru;
-                if (widget.settingsHandler.booruList.isNotEmpty) {
-                  booru = widget.settingsHandler.booruList.firstWhere((b) => b.type == currentEntry[2] && b.name == currentEntry[3]);
-                }
+      Scrollbar(
+        controller: scrollController,
+        isAlwaysShown: true,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            height: (MediaQuery.of(context).size.height / 2) + 20,
+            child: Material(
+              child: ListView.builder(
+                controller: scrollController,
+                padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+                shrinkWrap: true,
+                itemCount: history.length,
+                scrollDirection: Axis.vertical,
+                itemBuilder: (BuildContext context, int index) {
+                  List<String> currentEntry = history[index]; //0-id, 1-text, 2-booru type, 3-booru name, 4-isFavourite, 5-timestamp
+                  Booru booru = Booru(null, null, null, null, null);
+                  if (widget.settingsHandler.booruList.isNotEmpty) {
+                    booru = widget.settingsHandler.booruList.firstWhere(
+                      (b) => b.type == currentEntry[2] && b.name == currentEntry[3],
+                      orElse: () { return Booru(null, null, null, null, null); }
+                    );
+                  }
 
-                Widget entryRow = TextButton.icon(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(5),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
+                  Widget entryRow = TextButton.icon(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(5),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
+                      ),
                     ),
-                  ),
-                  onPressed: () {
-                    widget.searchTagsController.text = currentEntry[1];
-                    if (booru != null) {
-                      setState(() {
-                        widget.searchGlobals[widget.globalsIndex].tags = currentEntry[1];
-                        widget.searchGlobals[widget.globalsIndex].selectedBooru = booru;
-                      });
-                    }
-                    Navigator.of(context).pop(true);
-                    widget.setParentGlobalsIndex(widget.globalsIndex, currentEntry[1]);
-                  },
-                  icon: booru != null
+                    onPressed: () {
+                      if (booru.type != null) {
+                        widget.searchTagsController.text = currentEntry[1];
+                        setState(() {
+                          widget.searchGlobals[widget.globalsIndex].tags = currentEntry[1];
+                          widget.searchGlobals[widget.globalsIndex].selectedBooru = booru;
+                        });
+                        Navigator.of(context).pop(true);
+                        widget.setParentGlobalsIndex(widget.globalsIndex, currentEntry[1]);
+                      } else {
+                        ServiceHandler.displayToast('Unknown booru type');
+                      }
+                    },
+                    icon: booru.faviconURL != null
                       ? (booru.type == "Favourites"
-                          ? Icon(Icons.favorite,
-                              color: Colors.red, size: 18)
-                          : Image.network(booru.faviconURL!,
-                              width: 16, errorBuilder: (_, __, ___) {
-                              return Icon(Icons.broken_image,
-                                  size: 18);
-                            }))
+                        ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                        : Image.network(booru.faviconURL!,
+                            width: 16,
+                            errorBuilder: (_, __, ___) {
+                              return Icon(Icons.broken_image, size: 18);
+                            }
+                          )
+                        )
                       : Icon(CupertinoIcons.question, size: 18),
-                  label: Expanded(child: ScrollingText(currentEntry[1], 25, "infiniteWithPause", Colors.white)),
-                );
+                    label: Expanded(child: ScrollingText(currentEntry[1], 25, "infiniteWithPause", Colors.white)),
+                  );
 
 
-                return Row(children: <Widget>[
-                  Expanded(
-                    child: GestureDetector(
-                      onLongPress: () {showHistoryEntryActions(entryRow, currentEntry);},
-                      child: entryRow
-                    )
-                  ),
-                  if(currentEntry[4] == '1') 
-                    Padding(padding: EdgeInsets.fromLTRB(5, 0, 0, 0), child: Icon(Icons.favorite, color: Colors.red)),
-                ]);
-              }
+                  return Row(children: <Widget>[
+                    Expanded(
+                      child: GestureDetector(
+                        onLongPress: () {showHistoryEntryActions(entryRow, currentEntry);},
+                        child: entryRow
+                      )
+                    ),
+                    if(currentEntry[4] == '1') 
+                      Padding(padding: EdgeInsets.fromLTRB(5, 0, 0, 0), child: Icon(Icons.favorite, color: Colors.red)),
+                  ]);
+                }
+              )
             )
           )
         )
-      )
+      ),
     ]);
   }
 }

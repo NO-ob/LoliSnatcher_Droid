@@ -63,7 +63,9 @@ class ServiceHandler{
         result = await platform.invokeMethod("getCachePath") + "/";
       } else if (Platform.isLinux){
         result = Platform.environment['HOME']! + "/.loliSnatcher/cache/";
-      }
+      } else if (Platform.isWindows){
+        result = Platform.environment['LOCALAPPDATA']! + "/LoliSnatcher/cache/";
+      } 
     } catch(e){
       print(e);
     }
@@ -107,7 +109,7 @@ class ServiceHandler{
     try{
       if (Platform.isAndroid){
         await platform.invokeMethod("emptyCache");
-      } else if (Platform.isLinux){
+      } else if (Platform.isLinux || Platform.isWindows){
         String cacheD = await getCacheDir();
         File cacheDir = new File(cacheD);
         cacheDir.delete(recursive: true);
@@ -125,10 +127,31 @@ class ServiceHandler{
     }
   }
   static void makeImmersive(){
-    platform.invokeMethod("systemUIMode",{"mode":"immersive"});
+    if (Platform.isAndroid){
+      platform.invokeMethod("systemUIMode",{"mode":"immersive"});
+    }
   }
   static void makeNormal(){
-    platform.invokeMethod("systemUIMode",{"mode":"normal"});
+    if (Platform.isAndroid){
+      platform.invokeMethod("systemUIMode",{"mode":"normal"});
+    }
+  }
+  static void setBrightness(double brightness) {
+    // TODO WIP
+    if (Platform.isAndroid){
+      platform.invokeMethod("setBrightness",{"brightness": brightness});
+    }
+  }
+  static void setVolume(int volume, int showSystemUI) {
+    // TODO WIP
+    if (Platform.isAndroid){
+      platform.invokeMethod("setVolume",{"volume": volume, "showUI": showSystemUI});
+    }
+  }
+  static void setVolumeButtons(bool setActive) {
+    if (Platform.isAndroid){
+      platform.invokeMethod("setVolumeButtons",{"setActive": setActive});
+    }
   }
 
   static void launchURL(String url){
@@ -136,6 +159,8 @@ class ServiceHandler{
       platform.invokeMethod("launchURL", {"url":"$url"});
     } else if (Platform.isLinux) {
       Process.run('xdg-open', [url]);
+    } else if (Platform.isWindows) {
+      /////////////////////
     }
   }
   Future<Uint8List?> makeVidThumb(String videoURL) async {

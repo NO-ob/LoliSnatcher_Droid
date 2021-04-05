@@ -1,11 +1,15 @@
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../SettingsHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+import 'package:LoliSnatcher/ImageWriter.dart';
+import 'package:LoliSnatcher/Tools.dart';
 
 class BehaviourPage extends StatefulWidget {
   SettingsHandler settingsHandler;
@@ -19,8 +23,13 @@ class _BehaviourPageState extends State<BehaviourPage> {
   TextEditingController snatchCooldownController = new TextEditingController();
   ServiceHandler serviceHandler = new ServiceHandler();
   bool jsonWrite = false,imageCache = false, mediaCache = false;
+
+  ImageWriter imageWriter = ImageWriter();
+  List<List<String?>> cacheTypes = [[null, 'Total'], ['thumbnails', 'Thumbnails'], ['samples', 'Samples'], ['media', 'Media']]; // [cache folder, displayed name]
+  List<Map<String,int>> cacheStats = [];
+
   @override
-  void initState(){
+  void initState() {
     super.initState();
     shareAction = widget.settingsHandler.shareAction;
     snatchCooldownController.text = widget.settingsHandler.snatchCooldown.toString();
@@ -28,6 +37,17 @@ class _BehaviourPageState extends State<BehaviourPage> {
     mediaCache = widget.settingsHandler.mediaCache;
     videoCacheMode = widget.settingsHandler.videoCacheMode;
     jsonWrite = widget.settingsHandler.jsonWrite;
+
+    getCacheStats();
+  }
+
+  void getCacheStats() async {
+    cacheStats = [];
+    for(List<String?> type in cacheTypes) {
+      cacheStats.add(await imageWriter.getCacheStat(type[0]));
+    }
+    setState(() { });
+    return;
   }
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
@@ -230,10 +250,20 @@ class _BehaviourPageState extends State<BehaviourPage> {
                     serviceHandler.emptyCache();
                     ServiceHandler.displayToast("Cache cleared! \n Restart may be required!");
                     //Get.snackbar("Cache cleared!","Restart may be required!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+                    Timer(Duration(seconds: 2), () {getCacheStats();});
                   },
                   child: Text("Clear cache", style: TextStyle(color: Colors.white)),
                 ),
               ),
+              ...cacheStats.map((stat) {
+                int index = cacheStats.indexOf(stat);
+                String name = cacheTypes[index][1]!;
+                String size = Tools.formatBytes(stat['totalSize']!, 2);
+                int count = stat['fileNum'] ?? 0;
+                bool isEmpty = stat['fileNum'] == 0;
+                String text = isEmpty ? 'Empty' : '$size in ${count.toString()} file${count == 1 ? '' : 's'}';
+                return Text('$name: $text', style: TextStyle(color: Colors.white));
+              })
             ],
           ),
         ),

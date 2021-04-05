@@ -12,6 +12,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/widgets/BorderedText.dart';
 
 class MediaViewer extends StatefulWidget {
   final BooruItem booruItem;
@@ -32,24 +33,29 @@ class _MediaViewerState extends State<MediaViewer> {
   int _total = 0, _received = 0;
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false;
+  bool isFromCache = false, isStopped = false, isHated = false;
+  List<String> stopReason = [];
 
   ImageProvider? thumbProvider;
   ImageProvider? mainProvider;
   String? imageURL;
+  String? imageType;
+  String? thumbnailFileURL;
+  String? thumbnailFolder;
+  double thumbnailBlur = 1;
   Dio? _client;
   CancelToken? _dioCancelToken;
 
   /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
-    final String? filePath = await imageWriter.getCachePath(imageURL!, 'media');
+    final String? filePath = await imageWriter.getCachePath(imageURL!, imageType!);
 
     // If file is in cache - load
     // print(filePath);
     if (filePath != null) {
       final File file = File(filePath);
       setState(() {
-        print("setSt MediaViewer::_downloadsImage");
+        // print("setSt MediaViewer::_downloadsImage");
         // multiple restates in the same function is usually bad practice, but we need this to notify user how the file is loaded while we await for bytes
         isFromCache = true;
       });
@@ -81,19 +87,18 @@ class _MediaViewerState extends State<MediaViewer> {
 
         if(widget.settingsHandler.mediaCache) {
           // final File cacheFile = await
-          imageWriter.writeCacheFromBytes(imageURL!, value.data!, 'media');
+          imageWriter.writeCacheFromBytes(imageURL!, value.data!, imageType!);
         }
       } else {
-        //TODO: show error message
-        killLoading();
-        print('Image load incomplete'); // Throw an error, allow to retry?
+        killLoading(['Loading Incomplete Error']);
+        print('Image load incomplete');
       }
       return value;
     }).catchError((e) {
       if (CancelToken.isCancel(e)) {
         // print('Canceled by user: $imageURL | $e');
       } else {
-        killLoading();
+        killLoading(['Loading Error']);
         print('Dio request cancelled: $e');
       }
     });
@@ -102,7 +107,7 @@ class _MediaViewerState extends State<MediaViewer> {
   /// Author: [Nani-Sore] ///
   void _onBytesAdded(int received) {
     // always save incoming bytes, but restate only after [debounceDelay]MS
-    const int debounceDelay = 50;
+    const int debounceDelay = 100;
     bool isActive = _debounceBytes?.isActive ?? false;
     if (isActive) {
       _received = received;
@@ -117,32 +122,45 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void initState() {
     super.initState();
-    initViewer();
+    initViewer(false);
   }
 
-  void initViewer() {
-    if (widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL){
+  void initViewer(bool ignoreTagsCheck) {
+    if ((widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) || widget.booruItem.sampleURL == widget.booruItem.fileURL){
+      // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
       imageURL = widget.booruItem.sampleURL;
+      imageType = 'samples';
     } else {
       imageURL = widget.booruItem.fileURL;
+      imageType = 'media';
     }
 
     // load thumbnail preview
+    bool isThumbSample = widget.settingsHandler.previewMode == "Sample" && widget.booruItem.mediaType != "animation" && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL;
+    thumbnailFileURL = isThumbSample ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
+    thumbnailFolder = isThumbSample ? 'samples' : 'thumbnails';
     () async {
-      String thumbnailFileURL = (widget.settingsHandler.previewMode == "Sample"
-          ? widget.booruItem.sampleURL
-          : widget.booruItem.thumbnailURL);
-      String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails');
+      String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!);
       File? preview = previewPath != null ? File(previewPath) : null;
 
       setState(() {
         if (preview != null){
           thumbProvider = FileImage(preview);
         } else {
-          thumbProvider = NetworkImage(thumbnailFileURL);
+          thumbProvider = NetworkImage(thumbnailFileURL!);
         }
       });
     }();
+
+    List<List<String>> hatedAndLovedTags = widget.settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+    if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
+      isHated = true;
+      thumbnailBlur = 20;
+      killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
+      return;
+    } else if (thumbnailFolder == 'samples') {
+      thumbnailBlur = 0;
+    }
 
     // debug output
     // viewController..outputStateStream.listen(onViewStateChanged);
@@ -162,7 +180,7 @@ class _MediaViewerState extends State<MediaViewer> {
     // }
   }
 
-  void killLoading() {
+  void killLoading(List<String> reason) {
     disposables();
 
     setState(() {
@@ -176,6 +194,7 @@ class _MediaViewerState extends State<MediaViewer> {
 
       isFromCache = false;
       isStopped = true;
+      stopReason = reason;
     });
   }
 
@@ -236,9 +255,9 @@ class _MediaViewerState extends State<MediaViewer> {
     String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
     int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
-    String expectedSpeedText = hasProgressData ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
+    String expectedSpeedText = (hasProgressData && percentDone! < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
     double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime != 0 && expectedTime > 0) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
+    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone! < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
     int sinceStart = Duration(milliseconds: nowMils - _startedAt).inSeconds;
     String sinceStartText = "Started " + sinceStart.toString() + " second${sinceStart == 1 ? '' : 's'} ago";
 
@@ -247,8 +266,10 @@ class _MediaViewerState extends State<MediaViewer> {
         : 'Loading${isFromCache ? ' from cache' : ''}...';
     String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    // start opacity from 20%
-    double opacityValue = 0.2 + 0.8 * lerpDouble(0.0, 1.0, percentDone ?? 0.66)!;
+    // start opacity from (0% if hated) OR (50% if of sample qulaity) OR (33% if no progress data) OR 20%
+    bool isMovedBelow = thumbnailFolder == 'samples' && !isHated;
+    double startOpacity = isHated ? 0.0 : (isMovedBelow ? 0.5 : 0.2);
+    double opacityValue = startOpacity + (1 - startOpacity) * lerpDouble(0.0, 1.0, percentDone ?? 0.33)!;
 
     return Container(
         decoration: BoxDecoration(
@@ -262,7 +283,7 @@ class _MediaViewerState extends State<MediaViewer> {
           : null,
         ),
         child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 1.0, sigmaY: 1.0),
+            filter: ImageFilter.blur(sigmaX: thumbnailBlur, sigmaY: thumbnailBlur),
             child: Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -278,117 +299,107 @@ class _MediaViewerState extends State<MediaViewer> {
                     ),
                   ),
                   Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      // move loading info lower if preview is of sample quality (except when item is hated)
+                      mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
                       children: widget.settingsHandler.loadingGif
                           ? [
                               Container(
-                                  width: MediaQuery.of(context).size.width - 30,
-                                  child: Image(image: AssetImage('assets/images/loading.gif')))
+                                width: MediaQuery.of(context).size.width - 30,
+                                child: Image(image: AssetImage('assets/images/loading.gif'))
+                              ),
+                              const SizedBox(height: 30),
                             ]
                           : (isStopped
-                            ? [TextButton.icon(
-                                icon: Icon(Icons.play_arrow),
-                                label: Text('Restart loading', style: TextStyle(color: Colors.white)),
-                                onPressed: () {
-                                  setState(() { initViewer(); });
-                                },
-                              )]
+                            ? [
+                                ...stopReason.map((reason){
+                                  return BorderedText(
+                                    child: Text(
+                                      reason,
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                      ),
+                                    )
+                                  );
+                                }),
+                                TextButton.icon(
+                                  icon: Icon(Icons.play_arrow, size: 44),
+                                  label: BorderedText(
+                                    child: Text(
+                                      isHated ? 'Load Anyway' : 'Restart Loading',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                      ),
+                                    )
+                                  ),
+                                  onPressed: () {
+                                    setState(() { initViewer(true); });
+                                  },
+                                ),
+                                if(isMovedBelow) const SizedBox(height: 60),
+                              ]
                             : [
-                              Stack(children: [
-                                Text(
-                                  percentDoneText,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
+                              if(percentDoneText != '')
+                                BorderedText(
+                                  child: Text(
+                                    percentDoneText,
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                    ),
+                                  )
                                 ),
-                                Text(
-                                  percentDoneText,
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                  ),
+                              if(filesizeText != '')
+                                BorderedText(
+                                  child: Text(
+                                    filesizeText,
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                    ),
+                                  )
                                 ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  filesizeText,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
+                              if(expectedSpeedText != '')
+                                BorderedText(
+                                  child: Text(
+                                    expectedSpeedText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )
                                 ),
-                                Text(
-                                  filesizeText,
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                  ),
+                              if(expectedTimeText != '')
+                                BorderedText(
+                                  child: Text(
+                                    expectedTimeText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )
                                 ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  expectedSpeedText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
+                              if(sinceStartText != '')
+                                BorderedText(
+                                  child: Text(
+                                    sinceStartText,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  )
                                 ),
-                                Text(
-                                  expectedSpeedText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  expectedTimeText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
-                                ),
-                                Text(
-                                  expectedTimeText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ]),
-                              Stack(children: [
-                                Text(
-                                  sinceStartText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    foreground: Paint()
-                                      ..style = PaintingStyle.stroke
-                                      ..strokeWidth = 4
-                                      ..color = Colors.black,
-                                  ),
-                                ),
-                                Text(
-                                  sinceStartText,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ]),
+                              const SizedBox(height: 10),
                               TextButton.icon(
-                                icon: Icon(Icons.stop),
-                                label: Text('Stop loading', style: TextStyle(color: Colors.white)),
-                                onPressed: killLoading,
+                                icon: Icon(Icons.stop, size: 44, color: Colors.red),
+                                label: BorderedText(
+                                  child: Text(
+                                    'Stop Loading',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.red,
+                                    ),
+                                  )
+                                ),
+                                onPressed: () {
+                                  killLoading(['Stopped by User']);
+                                },
                               ),
+                              if(isMovedBelow) const SizedBox(height: 60),
                             ]
                           )
                   ),

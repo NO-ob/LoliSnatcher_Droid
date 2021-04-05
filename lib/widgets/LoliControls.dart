@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/material_progress_bar.dart';
@@ -21,12 +22,22 @@ class _LoliControlsState extends State<LoliControls>
     with SingleTickerProviderStateMixin {
   late VideoPlayerValue _latestValue;
   double? _latestVolume;
+  double? _latestLight;
+  final int len = 200;
+  double? heightToSwipe;
+  int intVolume = -1;
+  int intLight = -1;
   bool _hideStuff = true;
   Timer? _hideTimer;
   Timer? _initTimer;
   Timer? _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
+
+  bool? _vertDragType; // false - brightness, true - volume, null - middle
+  bool _adjust = false;
+  double _initialHeightOffset = 0;
+  double _endHeightOffset = 0;
 
   final barHeight = 48.0;
   final marginSize = 5.0;
@@ -49,6 +60,18 @@ class _LoliControlsState extends State<LoliControls>
   int _lastDoubleTapSide = 0;
   String _doubleTapExtraMessage = '';
 
+
+  @override
+  void initState() {
+    setUp();
+    super.initState();
+  }
+
+  setUp() {
+    _latestLight = .5;
+    _latestVolume = 1;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_latestValue.hasError) {
@@ -65,6 +88,7 @@ class _LoliControlsState extends State<LoliControls>
           );
     }
 
+    heightToSwipe = MediaQuery.of(context).size.height / 5;
 
     return MouseRegion(
       onHover: (_) {
@@ -73,12 +97,44 @@ class _LoliControlsState extends State<LoliControls>
       child: GestureDetector(
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
+        // TODO WIP
+        onVerticalDragStart: null, // _onVerticalDragStart,
+        onVerticalDragUpdate: null, // _onVerticalDragUpdate,
+        onVerticalDragEnd: null, // _onVerticalDragEnd,
         onTap: () => _cancelAndRestartTimer(),
         child: AbsorbPointer(
           absorbing: _hideStuff,
           child: Column(
             children: <Widget>[
               _buildDoubleTapMessage(),
+              Center(
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 3 * 2,
+                  child: (_vertDragType == null && (_initialHeightOffset - _endHeightOffset).abs() < heightToSwipe!) ? const SizedBox() : Offstage(
+                    offstage: !_adjust,
+                    child: Align(
+                      child: Row(
+                        children: [
+                          Icon(
+                            _vertDragType == true ? (intVolume > 0 ? Icons.volume_up : Icons.volume_off) : (_vertDragType == false ? (intLight > 0 ? Icons.lightbulb : Icons.lightbulb_outline) : Icons.cancel),
+                            size: _vertDragType == null ? 66 : 32,
+                            color: Colors.white,
+                          ),
+                          if(_vertDragType != null)
+                            Expanded(
+                              child: Slider(
+                                value: getIntSlider(),
+                                max: len.toDouble(),
+                                min: 0,
+                                activeColor: Colors.white,
+                                inactiveColor: Colors.white38,
+                                onChanged: (v) {},
+                              ),
+                            ),
+                        ],
+                      ),
+                      alignment: Alignment.topCenter))),
+              ),
               _buildHitArea(),
               Stack(
                 alignment: AlignmentDirectional.bottomStart,
@@ -134,7 +190,7 @@ class _LoliControlsState extends State<LoliControls>
         children: <Widget>[
           Container(
             height: barHeight / 1.5,
-            color: Theme.of(context).dialogBackgroundColor.withOpacity(0.5),
+            color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
             child: Row(
               children: <Widget>[
                 if (chewieController.isLive)
@@ -150,7 +206,7 @@ class _LoliControlsState extends State<LoliControls>
           ),
           Container(
             height: barHeight,
-            color: Theme.of(context).dialogBackgroundColor.withOpacity(0.5),
+            color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
             // Split into two parts: play + position | other buttons in 3:2 split
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -242,7 +298,8 @@ class _LoliControlsState extends State<LoliControls>
       child: Container(
           height: barHeight,
           margin: EdgeInsets.only(
-            top: 10,
+            // when not in fullscreen - move lower to avoid conflict with appbar
+            top: chewieController.isFullScreen ? 10 : 60,
             right: 10,
             left: 10,
           ),
@@ -250,37 +307,37 @@ class _LoliControlsState extends State<LoliControls>
             children: <Widget>[
               if (_lastDoubleTapSide < 0)
                 ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
-                    child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                          top: 8,
-                          right: 8,
-                          left: 8,
-                          bottom: 8,
-                        ),
-                        color: Theme.of(context)
-                            .dialogBackgroundColor
-                            .withOpacity(0.5),
-                        child: Text(msgText, style: TextStyle(fontSize: 20))))
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      top: 8,
+                      right: 8,
+                      left: 8,
+                      bottom: 8,
+                    ),
+                    color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
+                    child: Text(msgText, style: TextStyle(fontSize: 20))
+                  )
+                )
               else
                 Container(),
               const Spacer(),
               if (_lastDoubleTapSide > 0)
                 ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
-                    child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.only(
-                          top: 8,
-                          right: 8,
-                          left: 8,
-                          bottom: 8,
-                        ),
-                        color: Theme.of(context)
-                            .dialogBackgroundColor
-                            .withOpacity(0.5),
-                        child: Text(msgText, style: TextStyle(fontSize: 20))))
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.only(
+                      top: 8,
+                      right: 8,
+                      left: 8,
+                      bottom: 8,
+                    ),
+                    color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
+                    child: Text(msgText, style: TextStyle(fontSize: 20))
+                  )
+                )
               else
                 Container(),
             ],
@@ -350,7 +407,7 @@ class _LoliControlsState extends State<LoliControls>
                   child: GestureDetector(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
+                        color: Colors.black87, //Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
                         borderRadius: BorderRadius.circular(48.0),
                       ),
                       child: Padding(
@@ -696,6 +753,128 @@ class _LoliControlsState extends State<LoliControls>
     }
   }
 
+  double getIntSlider() {
+    if (_vertDragType == true) {
+      if (intVolume == -1) {
+        intVolume = (_latestVolume! * len).toInt();
+      }
+      if (intVolume > len) {
+        return len.toDouble();
+      } else if (intVolume < 0) {
+        return .0;
+      } else {
+        return intVolume.toDouble();
+      }
+    } else if (_vertDragType == false) {
+      if (intLight == -1) {
+        intLight = (_latestLight! * len).toInt();
+      }
+      if (intLight > len) {
+        return len.toDouble();
+      } else if (intLight < 0) {
+        return .0;
+      } else {
+        return intLight.toDouble();
+      }
+    } else {
+      return 0;
+    }
+  }
+
+  void _onVerticalDragStart(DragStartDetails dragStartDetails) {
+    setState(() {
+      if (intVolume == -1) {
+        intVolume = len * _latestVolume!.toInt();
+      }
+      _initialHeightOffset = dragStartDetails.globalPosition.dy;
+      _adjust = true;
+    });
+  }
+
+  void _onVerticalDragUpdate(DragUpdateDetails dragUpdateDetails) {
+    double wSpace = MediaQuery.of(context).size.width / 3;
+    double dx = dragUpdateDetails.globalPosition.dx;
+    bool up = dragUpdateDetails.primaryDelta! < 0;
+    if (dx < wSpace) {
+      _vertDragType = false;
+      if (up) {
+        intLight += 1;
+      } else {
+        intLight -= 1;
+      }
+      setState(() {
+        if (intLight > len) {
+          intLight = len;
+          _latestLight = 1.0;
+        } else if (intLight < 0) {
+          intLight = 0;
+          _latestLight = 0;
+        }
+        var d = intLight / len;
+        ServiceHandler.setBrightness(d);
+      });
+    } else if (dx > (wSpace * 2)) {
+      _vertDragType = true;
+      if (up) {
+        intVolume += 1;
+      } else {
+        intVolume -= 1;
+      }
+      setState(() {
+        if (intVolume > len) {
+          intVolume = len;
+          _latestVolume = 1.0;
+        } else if (intVolume < 0) {
+          intVolume = 0;
+          _latestVolume = 0;
+        }
+        var d = intVolume / len;
+        controller.setVolume(d);
+        // ServiceHandler.setVolume(d.toInt(), 1);
+      });
+    } else {
+      _vertDragType = null;
+      _endHeightOffset = dragUpdateDetails.globalPosition.dy;
+    }
+  }
+
+  void _onVerticalDragEnd(DragEndDetails dragEndDetails) {
+    setState(() {
+      _adjust = false;
+      if (_vertDragType == true) {
+        if (intVolume > len) {
+          intVolume = len;
+          _latestVolume = 1.0;
+        } else if (intVolume < 0) {
+          intVolume = 0;
+          _latestVolume = 0;
+        }
+        var d = intVolume / len;
+        controller.setVolume(d);
+        // ServiceHandler.setVolume(d.toInt(), 1);
+      } else if (_vertDragType == false) {
+        if (intLight > len) {
+          intLight = len;
+          _latestLight = 1.0;
+        } else if (intLight < 0) {
+          intLight = 0;
+          _latestLight = 0;
+        }
+        var d = intLight / len;
+        ServiceHandler.setBrightness(d);
+      } else {
+        if((_initialHeightOffset - _endHeightOffset).abs() > heightToSwipe! && _vertDragType == null) {
+          Navigator.of(context).pop(true);
+        } else {
+          setState(() {
+            _initialHeightOffset = 0;
+            _endHeightOffset = 0;
+          });
+        }
+      }
+    });
+  }
+
   Widget _buildProgressBar() {
     return Expanded(
       child: MaterialVideoProgressBar(
@@ -716,10 +895,11 @@ class _LoliControlsState extends State<LoliControls>
         },
         colors: chewieController.materialProgressColors ??
             ChewieProgressColors(
-                playedColor: Theme.of(context).accentColor,
-                handleColor: Theme.of(context).accentColor,
-                bufferedColor: Theme.of(context).backgroundColor,
-                backgroundColor: Theme.of(context).disabledColor),
+              playedColor: Theme.of(context).accentColor,
+              handleColor: Theme.of(context).accentColor,
+              bufferedColor: Theme.of(context).backgroundColor,
+              backgroundColor: Theme.of(context).disabledColor,
+            ),
       )
     );
   }
