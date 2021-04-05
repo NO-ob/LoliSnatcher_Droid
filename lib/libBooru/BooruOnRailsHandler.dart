@@ -43,7 +43,14 @@ class BooruOnRailsHandler extends BooruHandler {
             }
           }
           if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['thumb_small'] != null) {
-            fetched!.add(new BooruItem(current['representations']['full'],current['representations']['medium'],current['representations']['thumb_small'],currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
+            String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
+            if(current["mime_type"].toString().contains("video")){
+              String tmpURL = sampleURL.substring(0,sampleURL.lastIndexOf("/")+1) + "thumb.gif";
+              sampleURL = tmpURL;
+              thumbURL = tmpURL;
+              print("tmpurl is" + tmpURL);
+            }
+            fetched!.add(new BooruItem(current['representations']['full'],sampleURL,thumbURL,currentTags,makePostURL(current['id'].toString()),getFileExt(current['representations']['full'])));
             if(dbHandler!.db != null){
               setTrackedValues(fetched!.length - 1);
             }
