@@ -279,7 +279,7 @@ class _CachedThumbState extends State<CachedThumb> {
           child: thumbProvider != null
             ? Image(
               image: thumbProvider!, //ResizeImage(MemoryImage(_totalBytes), width: 500, allowUpscaling: true),
-              fit: BoxFit.contain, //widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
+              fit: BoxFit.cover, //widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
               width: double.infinity, //widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
               height: double.infinity, //widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
             )

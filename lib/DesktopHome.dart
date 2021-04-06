@@ -15,6 +15,7 @@ import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
 import 'SearchGlobals.dart';
 import 'ServiceHandler.dart';
 import 'SettingsHandler.dart';
+import 'Tools.dart';
 import 'pages/SettingsPage.dart';
 import 'SnatchHandler.dart';
 import 'pages/SnatcherPage.dart';
@@ -57,11 +58,16 @@ class _DesktopHomeState extends State<DesktopHome> {
     activeTitle = ActiveTitle(widget.snatchHandler);
     widget.snatchHandler.settingsHandler = widget.settingsHandler;
   }
-  void setSearchGlobalsIndex(int index){
+  void setSearchGlobalsIndex(int index, String? newSearch){
     setState(() {
       globalsIndex = index;
     });
-    // searchAction(searchGlobals[globalsIndex].tags!);
+    Tools.forceClearMemoryCache(withLive: true);
+    if(newSearch != null) {
+      searchAction(searchGlobals[globalsIndex].tags);
+    } else {
+      Tools.forceClearMemoryCache(withLive: true);
+    }
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
     searchGlobals[globalsIndex] = searchGlobal;
@@ -73,6 +79,7 @@ class _DesktopHomeState extends State<DesktopHome> {
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
+    Tools.forceClearMemoryCache();
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");

@@ -117,7 +117,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                           child:FloatingActionButton(
                             onPressed: () {
                               setState(() {
-                                value.isFavourite = true;
+                                value.isFavourite = !value.isFavourite;
                                 widget.settingsHandler.dbHandler.updateBooruItem(value);
                               });
                             },

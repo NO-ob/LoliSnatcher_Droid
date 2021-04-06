@@ -78,8 +78,11 @@ class DBHandler{
   Future<String?> getItemID(String fileURL) async{
     var result;
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
-    
+    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx")){
+      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
+    } else {
+      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
+    }
     if (result != null && result.isNotEmpty){
       return result.first["id"].toString();
     } else {
@@ -236,8 +239,11 @@ class DBHandler{
     List<bool> values = [false,false];
     var result;
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
-
+    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx")){
+      result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
+    } else {
+      result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
+    }
     if (result != null && result.isNotEmpty){
       print("file url is: $fileURL");
       print(result.toString());

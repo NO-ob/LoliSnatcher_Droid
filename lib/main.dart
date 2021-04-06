@@ -24,6 +24,8 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
 
+import 'Tools.dart';
+
 
 void main() {
   runApp(GetMaterialApp(
@@ -112,7 +114,7 @@ class _HomeState extends State<Home> {
 
     // force cache clear every minute
     cacheClearTimer = Timer.periodic(Duration(minutes: 1), (timer) {
-      forceClearMemoryCache();
+      Tools.forceClearMemoryCache();
     });
   }
 
@@ -144,22 +146,16 @@ class _HomeState extends State<Home> {
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
 
-  void forceClearMemoryCache({bool withLive = false}) {
-    // clears memory image cache on timer or when changing tabs
-    // ServiceHandler.displayToast('Clearing cache\n${imageCache?.liveImageCount}/${imageCache?.currentSize}');
-    imageCache?.clear();
-    if(withLive) imageCache?.clearLiveImages();
-  }
 
   void setSearchGlobalsIndex(int index, String? newSearch){
       setState(() {
         globalsIndex = index;
       });
-      forceClearMemoryCache(withLive: true);
+      Tools.forceClearMemoryCache(withLive: true);
       if(newSearch != null) {
         searchAction(searchGlobals[globalsIndex].tags);
       } else {
-        forceClearMemoryCache(withLive: true);
+        Tools.forceClearMemoryCache(withLive: true);
       }
   }
   void setSearchGlobal(SearchGlobals searchGlobal){
@@ -173,7 +169,7 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
-    forceClearMemoryCache();
+    Tools.forceClearMemoryCache();
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
