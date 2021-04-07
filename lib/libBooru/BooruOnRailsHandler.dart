@@ -50,14 +50,16 @@ class BooruOnRailsHandler extends BooruHandler {
               thumbURL = tmpURL;
               print("tmpurl is " + tmpURL);
             }
-            
+            print(thumbURL);
+            print(sampleURL);
             fetched.add(BooruItem(
               current['representations']['full'],
               sampleURL,
               thumbURL,
               currentTags,
               makePostURL(current['id'].toString()),
-              Tools.getFileExt(current['representations']['full'])
+              Tools.getFileExt(current['representations']['full']),
+              idOnHost: current['id'].toString()
             ));
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);

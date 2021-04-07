@@ -104,7 +104,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                               widget.snatchHandler.queue([value],
                                   widget.settingsHandler.jsonWrite,
                                   widget.searchGlobals[widget.globalsIndex]
-                                      .selectedBooru!.name!, 0);
+                                      .selectedBooru, 0);
                             },
                             child: Icon(Icons.save),
                             backgroundColor: Get.context!.theme.primaryColor,

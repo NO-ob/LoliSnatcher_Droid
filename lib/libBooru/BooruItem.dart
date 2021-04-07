@@ -3,9 +3,9 @@ class BooruItem{
   List<String> tagsList;
   String? mediaType;
   bool isSnatched = false, isFavourite = false;
-  String idOnHost = "";
+  String? idOnHost = "";
   double? fileWidth, fileHeight;
-  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt, {this.fileWidth, this.fileHeight}){
+  BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt, {this.fileWidth, this.fileHeight,this.idOnHost}){
     if (this.sampleURL.isEmpty || this.sampleURL == "null"){
       this.sampleURL = this.thumbnailURL;
     }

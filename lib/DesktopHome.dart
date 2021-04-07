@@ -204,7 +204,7 @@ class _DesktopHomeState extends State<DesktopHome> {
               getPerms();
               // call a function to save the currently viewed image when the save button is pressed
               if (searchGlobals[globalsIndex].selected.length > 0){
-                widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
+                widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler.snatchCooldown);
                 setState(() {
                   searchGlobals[globalsIndex].selected = [];
                 });

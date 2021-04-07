@@ -46,14 +46,14 @@ class PhilomenaHandler extends BooruHandler{
               thumbURL = tmpURL;
               print("tmpurl is " + tmpURL);
             }
-
             fetched.add(BooruItem(
               current['representations']['full'],
               sampleURL,
               thumbURL,
               current['tags'],
               makePostURL(current['id'].toString()),
-              Tools.getFileExt(current['representations']['full'])
+              Tools.getFileExt(current['representations']['full']),
+                idOnHost: current['id'].toString()
             ));
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);

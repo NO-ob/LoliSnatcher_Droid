@@ -147,7 +147,7 @@ class _ViewerPageState extends State<ViewerPage> {
         } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
           controller?.jumpToPage(widget.searchGlobals.viewedIndex!.value + 1);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru!.name!,widget.settingsHandler.snatchCooldown);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru,widget.settingsHandler.snatchCooldown);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)){
           if (widget.settingsHandler.dbEnabled){
             setState(() {
@@ -374,7 +374,7 @@ class _ViewerPageState extends State<ViewerPage> {
         onPressed: () async {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru!.name!, widget.settingsHandler.snatchCooldown);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru, widget.settingsHandler.snatchCooldown);
         },
       ),
       GestureDetector(

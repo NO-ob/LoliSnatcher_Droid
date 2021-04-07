@@ -8,6 +8,8 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
+import 'libBooru/Booru.dart';
+
 // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
 // Future<void> writeBytesIsolate(Map<String, dynamic> map) async {
 //   await map['file'].writeAsBytes(map['bytes']);
@@ -24,12 +26,16 @@ class ImageWriter{
    * return String - file saved
    * return Error - something went wrong
    */
-  Future write(BooruItem item, SettingsHandler settingsHandler, String booruName) async{
+  Future write(BooruItem item, SettingsHandler settingsHandler, Booru booru) async{
     int queryLastIndex = item.fileURL.lastIndexOf("?");
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
-    String fileName = booruName + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
+    String fileName = "";
+    if (booru.type == ("BooruOnRails") || booru.type == "Philomena"){
+      fileName = booru.name! + '_' + item.idOnHost! + "." + item.fileExt;
+    } else {
+      fileName = booru.name! + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
+    }
     // print(fileName);
-
     await setPaths();
 
     if(SDKVer == 0){
@@ -96,13 +102,13 @@ class ImageWriter{
     return (fileName);
   }
 
-  Stream<int> writeMultiple (List<BooruItem> snatched, SettingsHandler settingsHandler, String booruName, int cooldown) async*{
+  Stream<int> writeMultiple (List<BooruItem> snatched, SettingsHandler settingsHandler, Booru booru, int cooldown) async*{
     int snatchedCounter = 1;
     List<String> existsList = [];
     List<String> failedList = [];
     for (int i = 0; i < snatched.length ; i++){
       await Future.delayed(Duration(milliseconds: cooldown), () async{
-        var snatchResult = await write(snatched.elementAt(i), settingsHandler, booruName);
+        var snatchResult = await write(snatched.elementAt(i), settingsHandler, booru);
         if (snatchResult == null){
           existsList.add(snatched[i].fileURL);
         } else if (snatchResult is !String) {
