@@ -50,8 +50,6 @@ class BooruOnRailsHandler extends BooruHandler {
               thumbURL = tmpURL;
               print("tmpurl is " + tmpURL);
             }
-            print(thumbURL);
-            print(sampleURL);
             fetched.add(BooruItem(
               current['representations']['full'],
               sampleURL,
