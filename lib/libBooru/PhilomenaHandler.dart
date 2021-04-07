@@ -97,10 +97,14 @@ class PhilomenaHandler extends BooruHandler{
   // This will create a url for the http request
   String makeURL(String tags){
     //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
+    String filter = "56027";
+    if (booru.baseURL!.contains("booru.bronyhub.com")){
+      filter = "2";
+    }
     if (booru.apiKey == ""){
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=56027&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=56027&key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
     }
 
   }
@@ -133,7 +137,7 @@ class PhilomenaHandler extends BooruHandler{
         ];
         if (parsedResponse.length > 0){
           for (int i=0; i < tags.length; i++){
-            String tag = parsedResponse[i]['slug'].toString();
+            String tag = tags[i]['slug'].toString();
             for (int x = 0; x < tagStringReplacements.length; x++){
               tag = tag.replaceAll(tagStringReplacements[x][0],tagStringReplacements[x][1]);
             }
