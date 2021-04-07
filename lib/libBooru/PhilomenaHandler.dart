@@ -33,6 +33,7 @@ class PhilomenaHandler extends BooruHandler{
       final response = await http.get(uri,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
+        print(response.body);
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         print("PhilomenaHandler::search ${parsedResponse['images'].length}");
         // Create a BooruItem for each post in the list
@@ -46,6 +47,17 @@ class PhilomenaHandler extends BooruHandler{
               thumbURL = tmpURL;
               print("tmpurl is " + tmpURL);
             }
+
+            String fileURL = current['representations']['full'];
+            if (!fileURL.contains("http")){
+              sampleURL = booru.baseURL! + sampleURL;
+              thumbURL = booru.baseURL! + thumbURL;
+              print("fileurl is $fileURL");
+              fileURL = booru.baseURL! + fileURL;
+              print("newurl is $fileURL");
+            }
+
+            print("sample url is $sampleURL");
             List<String> currentTags = current['tags'].toString().substring(1,current['tags'].toString().length -1).split(", ");
             for (int x = 0; x< currentTags.length; x++){
               if (currentTags[x].contains(" ")){
@@ -53,7 +65,7 @@ class PhilomenaHandler extends BooruHandler{
               }
             }
             fetched.add(BooruItem(
-              current['representations']['full'],
+              fileURL,
               sampleURL,
               thumbURL,
               currentTags,

@@ -50,8 +50,14 @@ class BooruOnRailsHandler extends BooruHandler {
               thumbURL = tmpURL;
               print("tmpurl is " + tmpURL);
             }
+            String fileURL = current['representations']['full'];
+            if (!fileURL.contains("http")){
+              sampleURL = booru.baseURL! + sampleURL;
+              thumbURL = booru.baseURL! + thumbURL;
+              fileURL = booru.baseURL! + fileURL;
+            }
             fetched.add(BooruItem(
-              current['representations']['full'],
+              fileURL,
               sampleURL,
               thumbURL,
               currentTags,
