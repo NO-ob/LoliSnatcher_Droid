@@ -94,7 +94,7 @@ class PhilomenaHandler extends BooruHandler{
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/api/v1/json/search/tags?q=$input&per_page=10";
+    return "${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10";
   }
   @override
   Future tagSearch(String input) async {
@@ -108,11 +108,12 @@ class PhilomenaHandler extends BooruHandler{
       final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
+        print(response.body);
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         var tags = parsedResponse['tags'];
         if (parsedResponse.length > 0){
           for (int i=0; i < tags.length; i++){
-            searchTags.add(tags[i]['slug'].toString());
+            searchTags.add(tags[i]['slug'].toString().replaceAll("-colon-", ":").replaceAll("-dash-", "-"));
           }
         }
       }

@@ -113,7 +113,7 @@ class BooruOnRailsHandler extends BooruHandler {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
           for (int i=0; i < 10; i++) {
-            searchTags.add(parsedResponse[i]['slug'].toString());
+            searchTags.add(parsedResponse[i]['slug'].toString().replaceAll("-colon-", ":").replaceAll("-dash-", "-"));
           }
         }
       }
