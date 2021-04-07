@@ -111,9 +111,21 @@ class BooruOnRailsHandler extends BooruHandler {
       print(response);
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
+        List tagStringReplacements = [
+          ["-colon-",":"],
+          ["-dash-","-"],
+          ["-fwslash-","/"],
+          ["-bwslash-","\\"],
+          ["-dot-","."],
+          ["-plus-","+"]
+        ];
         if (parsedResponse.length > 0){
           for (int i=0; i < 10; i++) {
-            searchTags.add(parsedResponse[i]['slug'].toString().replaceAll("-colon-", ":").replaceAll("-dash-", "-"));
+            String tag = parsedResponse[i]['slug'].toString();
+            for (int x = 0; x < tagStringReplacements.length; x++){
+              tag = tag.replaceAll(tagStringReplacements[x][0],tagStringReplacements[x][1]);
+            }
+            searchTags.add(tag);
           }
         }
       }

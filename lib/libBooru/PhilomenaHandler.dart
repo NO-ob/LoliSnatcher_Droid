@@ -111,9 +111,21 @@ class PhilomenaHandler extends BooruHandler{
         print(response.body);
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         var tags = parsedResponse['tags'];
+        List tagStringReplacements = [
+          ["-colon-",":"],
+          ["-dash-","-"],
+          ["-fwslash-","/"],
+          ["-bwslash-","\\"],
+          ["-dot-","."],
+          ["-plus-","+"]
+        ];
         if (parsedResponse.length > 0){
           for (int i=0; i < tags.length; i++){
-            searchTags.add(tags[i]['slug'].toString().replaceAll("-colon-", ":").replaceAll("-dash-", "-"));
+            String tag = parsedResponse[i]['slug'].toString();
+            for (int x = 0; x < tagStringReplacements.length; x++){
+              tag = tag.replaceAll(tagStringReplacements[x][0],tagStringReplacements[x][1]);
+            }
+            searchTags.add(tag);
           }
         }
       }
