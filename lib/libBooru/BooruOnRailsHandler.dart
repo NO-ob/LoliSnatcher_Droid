@@ -113,8 +113,6 @@ class BooruOnRailsHandler extends BooruHandler {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
-      print(url);
-      print(response);
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         List tagStringReplacements = [
@@ -138,7 +136,6 @@ class BooruOnRailsHandler extends BooruHandler {
     } catch(e) {
       print(e);
     }
-    print(searchTags.length);
     return searchTags;
   }
 }

@@ -97,9 +97,9 @@ class PhilomenaHandler extends BooruHandler{
   // This will create a url for the http request
   String makeURL(String tags){
     //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
-    String filter = "56027";
-    if (booru.baseURL!.contains("booru.bronyhub.com")){
-      filter = "2";
+    String filter = "2";
+    if (booru.baseURL!.contains("derpibooru")){
+      filter = "56027";
     }
     if (booru.apiKey == ""){
       return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
@@ -124,7 +124,6 @@ class PhilomenaHandler extends BooruHandler{
       final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        print(response.body);
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         var tags = parsedResponse['tags'];
         List tagStringReplacements = [
@@ -148,7 +147,6 @@ class PhilomenaHandler extends BooruHandler{
     } catch(e) {
       print(e);
     }
-    print(searchTags.length);
     return searchTags;
   }
 }
