@@ -30,7 +30,7 @@ class _booruEditState extends State<booruEdit> {
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
-  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","GelbooruV1","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus","BooruOnRails"];
+  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","GelbooruV1","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus","BooruOnRails","Rainbooru"];
   String selectedBooruType = "Not Sure";
   @override
   void initState() {

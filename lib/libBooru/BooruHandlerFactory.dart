@@ -1,5 +1,6 @@
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
+import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
 
 import 'Booru.dart';
 import 'BooruItem.dart';
@@ -62,6 +63,10 @@ class BooruHandlerFactory{
         break;
       case("Favourites"):
         booruHandler = new FavouritesHandler(booru, limit);
+        break;
+      case("Rainbooru"):
+        pageNum = 0;
+        booruHandler = new RainbooruHandler(booru, limit);
         break;
     }
     booruHandler!.dbHandler = dbHandler;
