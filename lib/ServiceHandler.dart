@@ -142,6 +142,14 @@ class ServiceHandler{
       platform.invokeMethod("setBrightness",{"brightness": brightness});
     }
   }
+  static Future<String> getIP() async{
+    // TODO WIP
+    if (Platform.isAndroid){
+      return await platform.invokeMethod("getIP");
+    } else {
+      return "";
+    }
+  }
   static void setVolume(int volume, int showSystemUI) {
     // TODO WIP
     if (Platform.isAndroid){

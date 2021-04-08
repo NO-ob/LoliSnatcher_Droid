@@ -35,6 +35,7 @@ class ImageWriter{
     } else {
       fileName = booru.name! + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
     }
+    print("out file is $fileName");
     // print(fileName);
     await setPaths();
 
@@ -66,7 +67,7 @@ class ImageWriter{
         }
         item.isSnatched = true;
         if (settingsHandler.dbEnabled){
-          settingsHandler.dbHandler.updateBooruItem(item);
+          settingsHandler.dbHandler.updateBooruItem(item,"local");
         }
         try {
           if(Platform.isAndroid){
@@ -84,7 +85,7 @@ class ImageWriter{
             print("write response: $writeResp");
             item.isSnatched = true;
             if (settingsHandler.dbEnabled){
-              settingsHandler.dbHandler.updateBooruItem(item);
+              settingsHandler.dbHandler.updateBooruItem(item,"local");
             }
             return (fileName);
           }

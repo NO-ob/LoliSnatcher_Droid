@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class BooruItem{
   String fileURL, sampleURL, thumbnailURL, postURL, fileExt;
   List<String> tagsList;
@@ -24,7 +26,21 @@ class BooruItem{
     return (this.mediaType == "video");
   }
   toJSON() {
-    return {'postURL': "$postURL",'fileURL': "$fileURL", 'sampleURL': "$sampleURL", 'thumbnailURL': "$thumbnailURL", 'tags': tagsList, 'fileExt': fileExt};
+    return {"postURL": "$postURL","fileURL": "$fileURL", "sampleURL": "$sampleURL", "thumbnailURL": "$thumbnailURL", "tags": tagsList, "fileExt": fileExt, "isFavourite": "$isFavourite","isSnatched" : "$isSnatched"};
+  }
+  static BooruItem fromJSON(String jsonString){
+    Map<String, dynamic> json = jsonDecode(jsonString);
+    List<String> tags = [];
+    List tagz = json["tags"];
+    for (int i = 0; i < tagz.length; i++){
+      tags.add(tagz[i].toString());
+    }
+    //BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt
+    BooruItem item = new BooruItem(json["fileURL"].toString(), json["sampleURL"].toString(), json["thumbnailURL"].toString(), tags, json["postURL"].toString(), json["fileExt"].toString());
+    print(item.toJSON());
+    item.isFavourite = json["isFavourite"].toString() == "true" ? true : false;
+    item.isSnatched = json["isSnatched"].toString() == "true" ? true : false;
+    return item;
   }
 }
 

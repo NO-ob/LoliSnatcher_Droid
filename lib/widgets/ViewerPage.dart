@@ -152,7 +152,7 @@ class _ViewerPageState extends State<ViewerPage> {
           if (widget.settingsHandler.dbEnabled){
             setState(() {
               widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite;
-              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value]);
+              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value],"local");
             });
           }
         }
@@ -413,7 +413,7 @@ class _ViewerPageState extends State<ViewerPage> {
         onPressed: () {
           setState(() {
             widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite;
-            widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value]);
+            widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value],"local");
           });
         },
       ) : Container(),

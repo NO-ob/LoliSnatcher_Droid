@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
@@ -355,6 +356,29 @@ class _HomeState extends State<Home> {
                             },
                             icon: Icon(Icons.download_sharp),
                             label: Text("Snatcher", style: TextStyle(color: Colors.white))
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          alignment: Alignment.center,
+                          child: TextButton.icon(
+                              style: TextButton.styleFrom(
+                                primary: Get.context!.theme.accentColor,
+                                padding: EdgeInsets.all(10),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: new BorderRadius.circular(5),
+                                  side: BorderSide(color: Get.context!.theme.accentColor),
+                                ),
+                              ),
+                              onPressed: (){
+                                if (widget.settingsHandler.dbEnabled){
+                                  Get.to(() => LoliSyncPage(widget.settingsHandler));
+                                } else {
+                                  ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
+                                }
+                              },
+                              icon: Icon(Icons.sync),
+                              label: Text("Loli Sync", style: TextStyle(color: Colors.white))
                           ),
                         ),
                         const SizedBox(height: 10),

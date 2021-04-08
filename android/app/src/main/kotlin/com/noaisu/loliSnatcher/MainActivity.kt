@@ -31,6 +31,8 @@ import java.io.OutputStream
 import java.util.*
 import android.R.attr.streamType
 import android.content.Context
+import java.net.Inet4Address
+import java.net.NetworkInterface
 
 
 class MainActivity: FlutterActivity() {
@@ -174,8 +176,9 @@ class MainActivity: FlutterActivity() {
                 val byteArray = stream.toByteArray();
                 image?.recycle();
                 result.success(byteArray);
+            } else if(call.method == "getIP"){
+               result.success(getIpv4HostAddress());
             }
-
         }
 
         EventChannel(flutterEngine.dartExecutor, VOLUME_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
@@ -196,6 +199,14 @@ class MainActivity: FlutterActivity() {
         }
 
         return super.onKeyDown(keyCode, event)
+    }
+    private fun getIpv4HostAddress(): String {
+        NetworkInterface.getNetworkInterfaces()?.toList()?.map { networkInterface ->
+            networkInterface.inetAddresses?.toList()?.find {
+                !it.isLoopbackAddress && it is Inet4Address
+            }?.let { return it.hostAddress }
+        }
+        return ""
     }
 
     private fun getExtDir(): String {

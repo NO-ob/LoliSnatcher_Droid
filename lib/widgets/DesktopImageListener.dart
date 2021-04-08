@@ -118,7 +118,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                             onPressed: () {
                               setState(() {
                                 value.isFavourite = !value.isFavourite;
-                                widget.settingsHandler.dbHandler.updateBooruItem(value);
+                                widget.settingsHandler.dbHandler.updateBooruItem(value,"local");
                               });
                             },
                             child: Icon(value.isFavourite ? Icons.favorite : Icons.favorite_border),

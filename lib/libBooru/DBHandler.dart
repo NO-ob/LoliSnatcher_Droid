@@ -59,18 +59,22 @@ class DBHandler{
   }
 
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
-  void updateBooruItem(BooruItem item) async{
+  Future<String?> updateBooruItem(BooruItem item, String mode) async{
     print("updateBooruItem called fileURL is:" + item.fileURL);
     String? itemID = await getItemID(item.fileURL);
+    String resultStr = "";
     if (itemID == null || itemID.isEmpty) {
       var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
           [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched), Tools.boolToInt(item.isFavourite)]);
       itemID = result?.toString();
       updateTags(item.tagsList, itemID);
-    } else {
+      resultStr = "Inserted $itemID";
+    } else if (mode != "local") {
       await db?.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?", [Tools.boolToInt(item.isSnatched), Tools.boolToInt(item.isFavourite), itemID]);
+      resultStr = "Updated $itemID";
     }
     await deleteUntracked();
+    return resultStr;
   }
 
 
