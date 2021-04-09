@@ -7,6 +7,7 @@ import 'dart:core';
 import 'package:get/get.dart';
 
 import '../ServiceHandler.dart';
+import 'LoliSyncSendPage.dart';
 import 'LoliSyncServerPage.dart';
 
 class LoliSyncPage extends StatefulWidget {
@@ -20,9 +21,6 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   final ipController = TextEditingController();
   final portController = TextEditingController();
   LoliSync loliSync = new LoliSync();
-  String ip = "";
-  String port = "";
-  bool serverStarted = false;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -49,25 +47,6 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         body:Center(
           child: ListView(
             children: <Widget>[
-              serverStarted ?
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    setState(() {
-                      loliSync = new LoliSync();
-                      serverStarted = false;
-                    });
-                  },
-                  child: Text("Stop Server", style: TextStyle(color: Colors.white)),
-                ),
-              ):
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
                 child: TextButton(
@@ -83,8 +62,6 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   child: Text("Start Server", style: TextStyle(color: Colors.white)),
                 ),
               ),
-              Text("IP: $ip", style: TextStyle(color: Colors.white)),
-              Text("Port: $port", style: TextStyle(color: Colors.white)),
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
                 width: double.infinity,
@@ -156,11 +133,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     ),
                   ),
                   onPressed: () async{
-                    List<BooruItem> uwu = [];
-                    uwu = await widget.settingsHandler.dbHandler.searchDB("", "0", "5");
-                    uwu.forEach((element) {
-                      LoliSync.send(element, ipController.text, portController.text);
-                    });
+                    print("ip ${ipController.text} ${portController.text}");
+                    Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text));
                   },
                   child: Text("Start Sync", style: TextStyle(color: Colors.white)),
                 ),

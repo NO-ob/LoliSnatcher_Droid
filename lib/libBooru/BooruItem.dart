@@ -40,6 +40,8 @@ class BooruItem{
     print(item.toJSON());
     item.isFavourite = json["isFavourite"].toString() == "true" ? true : false;
     item.isSnatched = json["isSnatched"].toString() == "true" ? true : false;
+    print(item.isFavourite);
+    print(item.isSnatched);
     return item;
   }
 }

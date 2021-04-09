@@ -68,10 +68,12 @@ class DBHandler{
           [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched), Tools.boolToInt(item.isFavourite)]);
       itemID = result?.toString();
       updateTags(item.tagsList, itemID);
-      resultStr = "Inserted $itemID";
-    } else if (mode != "local") {
+      resultStr = "Inserted";
+    } else if (mode == "local") {
       await db?.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?", [Tools.boolToInt(item.isSnatched), Tools.boolToInt(item.isFavourite), itemID]);
-      resultStr = "Updated $itemID";
+      resultStr = "Updated";
+    } else {
+      resultStr = "Already Exists";
     }
     await deleteUntracked();
     return resultStr;
@@ -95,7 +97,7 @@ class DBHandler{
   }
 
   //Gets a list of BooruItem from the database
-  Future<List<BooruItem>> searchDB(String tagString, String offset, String limit) async {
+  Future<List<BooruItem>> searchDB(String tagString, String offset, String limit, String order) async {
     List<String> tags;
     var result;
     List<BooruItem> fetched = [];
@@ -109,10 +111,10 @@ class DBHandler{
       result = await db?.rawQuery(
           "SELECT booruItemID as id FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
               "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
-              "HAVING COUNT(*) = ${tags.length} ORDER BY id DESC LIMIT $limit OFFSET $offset", tags);
+              "HAVING COUNT(*) = ${tags.length} ORDER BY id $order LIMIT $limit OFFSET $offset", tags);
     } else {
       result = await db?.rawQuery(
-          "SELECT id FROM BooruItem ORDER BY id DESC LIMIT $limit OFFSET $offset");
+          "SELECT id FROM BooruItem ORDER BY id $order LIMIT $limit OFFSET $offset");
     }
     print("got results from db");
     print(result);
@@ -125,6 +127,17 @@ class DBHandler{
       }
     }
     return fetched;
+  }
+  //Gets the favourites count from db
+  Future<int> getFavouritesCount() async {
+    var result;
+    result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
+    print("got results from db");
+    print(result);
+    if (result != null){
+      return result.first["count"];
+    }
+    return 0;
   }
 
   //Creates a BooruItem from a BooruItem id

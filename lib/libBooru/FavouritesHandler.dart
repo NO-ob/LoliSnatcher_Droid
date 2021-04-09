@@ -21,7 +21,7 @@ class FavouritesHandler extends BooruHandler{
     if (prevTags != tags){
       fetched = [];
     }
-    fetched.addAll(await dbHandler!.searchDB(tags, fetched.length.toString(), limit.toString()));
+    fetched.addAll(await dbHandler!.searchDB(tags, fetched.length.toString(), limit.toString(),"DESC"));
     print("dbhandler fetched length is $length");
     prevTags = tags;
     if (fetched.isEmpty){

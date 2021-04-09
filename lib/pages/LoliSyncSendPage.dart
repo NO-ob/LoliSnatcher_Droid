@@ -3,20 +3,24 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/LoliSync.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'dart:core';
 import 'package:get/get.dart';
 
 import '../ServiceHandler.dart';
 
-class LoliSyncServerPage extends StatefulWidget {
+class LoliSyncSendPage extends StatefulWidget {
   SettingsHandler settingsHandler;
-  LoliSyncServerPage(this.settingsHandler);
+  String ip = "";
+  String port = "";
+  LoliSyncSendPage(this.settingsHandler, this.ip, this.port);
   @override
-  _LoliSyncServerPageState createState() => _LoliSyncServerPageState();
+  _LoliSyncSendPageState createState() => _LoliSyncSendPageState();
 }
 
-class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
+class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
   LoliSync loliSync = new LoliSync();
+  bool serverStarted = false;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -42,7 +46,7 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startServer(widget.settingsHandler),
+              stream: loliSync.startSync(widget.settingsHandler, widget.ip, widget.port, "Favourites"),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {
@@ -62,7 +66,7 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
                 return Center(
                   child: Column(
                     children: [
-                      Icon(Icons.electrical_services, size: 400),
+                      Icon(Icons.sync, size: 400),
                       Text(status),
                     ],
                   ),
