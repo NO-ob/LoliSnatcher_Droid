@@ -126,7 +126,17 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   ),
                   onPressed: () async{
                     if (ipController.text != "" && portController.text != ""){
-                      Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text));
+                      if(widget.settingsHandler.appMode == "Desktop"){
+                        Get.dialog(Dialog(
+                          child: Container(
+                            width: 500,
+                            child: LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text),
+                          ),
+                        ));
+                      } else {
+                        Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text));
+                      }
+
                     } else {
                       ServiceHandler.displayToast("The port and ip fields must be filled");
                     }
@@ -148,7 +158,16 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     ),
                   ),
                   onPressed: (){
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child: LoliSyncServerPage(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
                       Get.to(() => LoliSyncServerPage(widget.settingsHandler));
+                    }
                   },
                   child: Text("Start Server", style: TextStyle(color: Colors.white)),
                 ),

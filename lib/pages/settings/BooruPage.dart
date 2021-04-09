@@ -178,8 +178,17 @@ class _BooruPageState extends State<BooruPage> {
                             ),
                           ),
                           onPressed: (){
-                            // Open the booru edtor page but with default values
-                            Get.to(() => booruEdit(new Booru("New","","","",""),widget.settingsHandler));
+                            //Open the booru editor on a new page with default values
+                            if(widget.settingsHandler.appMode == "Desktop"){
+                              Get.dialog(Dialog(
+                                child: Container(
+                                  width: 500,
+                                  child: booruEdit(new Booru("New","","","",""),widget.settingsHandler),
+                                ),
+                              ));
+                            } else {
+                              Get.to(() => booruEdit(new Booru("New","","","",""),widget.settingsHandler));
+                            }
                           },
                           child: Text("Add new", style: TextStyle(color: Colors.white)),
                         ),

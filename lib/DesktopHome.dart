@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/DesktopImageListener.dart';
@@ -172,7 +173,12 @@ class _DesktopHomeState extends State<DesktopHome> {
                         backgroundColor: Get.context!.theme.canvasColor,
                     ),
                     onPressed: (){
-                      Get.to(SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler),
+                        ),
+                      ));
                     },
                     child: Text(" Snatcher ", style: TextStyle(color: Colors.white)),
                   ),
@@ -189,9 +195,41 @@ class _DesktopHomeState extends State<DesktopHome> {
                       backgroundColor: Get.context!.theme.canvasColor,
                     ),
                     onPressed: (){
-                      Get.to(SettingsPage(widget.settingsHandler));
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:SettingsPage(widget.settingsHandler),
+                        ),
+                      ));
                     },
                     child: Text("Settings", style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
+                  alignment: Alignment.center,
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(20),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
+                      ),
+                      backgroundColor: Get.context!.theme.canvasColor,
+                    ),
+                    onPressed: (){
+
+                      if (widget.settingsHandler.dbEnabled){
+                        Get.dialog(Dialog(
+                          child: Container(
+                            width: 500,
+                            child:LoliSyncPage(widget.settingsHandler),
+                          ),
+                        ));
+                      } else {
+                        ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
+                      }
+                    },
+                    child: Text("Loli Sync", style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],

@@ -143,12 +143,17 @@ class ServiceHandler{
     }
   }
   static Future<String> getIP() async{
+    String ip = "";
     // TODO WIP
     if (Platform.isAndroid){
-      return await platform.invokeMethod("getIP");
+      ip = await platform.invokeMethod("getIP");
     } else {
-      return "";
+      var interface = await NetworkInterface.list();
+      if (interface.isNotEmpty){
+        ip = interface[0].addresses[0].address;
+      }
     }
+    return ip;
   }
   static void setVolume(int volume, int showSystemUI) {
     // TODO WIP

@@ -42,7 +42,16 @@ class _ImagePreviewsState extends State<ImagePreviews> {
                         ),
                       ),
                       onPressed: (){
-                        Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
+                        if(widget.settingsHandler.appMode == "Desktop"){
+                          Get.dialog(Dialog(
+                            child: Container(
+                              width: 500,
+                              child: booruEdit(new Booru("New","","","",""),widget.settingsHandler),
+                            ),
+                          ));
+                        } else {
+                          Get.to(booruEdit(new Booru("New","","","",""),widget.settingsHandler));
+                        }
                       },
                       child: Text("Open Settings", style: TextStyle(color: Colors.white)),
                     ),

@@ -67,7 +67,17 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => BooruPage(widget.settingsHandler));
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child: BooruPage(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => BooruPage(widget.settingsHandler));
+                    }
+
                   },
                   child: Text("Booru/Search", style: TextStyle(color: Colors.white)),
                 ),
@@ -82,7 +92,17 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => UserInterfacePage(widget.settingsHandler));
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child: UserInterfacePage(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => UserInterfacePage(widget.settingsHandler));
+                    }
+
                   },
                   child: Text("User Interface", style: TextStyle(color: Colors.white)),
                 ),
@@ -97,7 +117,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => GalleryPage(widget.settingsHandler));
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child: GalleryPage(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => GalleryPage(widget.settingsHandler));
+                    }
                   },
                   child: Text("Gallery/Viewer", style: TextStyle(color: Colors.white)),
                 ),
@@ -112,7 +141,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => BehaviourPage(widget.settingsHandler));
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:BehaviourPage(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => BehaviourPage(widget.settingsHandler));
+                    }
                   },
                   child: Text("Behaviour", style: TextStyle(color: Colors.white)),
                 ),
@@ -127,7 +165,17 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => FiltersEdit(widget.settingsHandler));
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:FiltersEdit(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => FiltersEdit(widget.settingsHandler));
+                    }
+
                   },
                   child: Text("Tag Filters", style: TextStyle(color: Colors.white)),
                 ),
@@ -142,7 +190,17 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => DatabasePage(widget.settingsHandler));
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:DatabasePage(widget.settingsHandler),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => DatabasePage(widget.settingsHandler));
+                    }
+
                   },
                   child: Text("Database", style: TextStyle(color: Colors.white)),
                 ),
@@ -157,7 +215,16 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    Get.to(() => AboutPage());
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:AboutPage(),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => AboutPage());
+                    }
                   },
                   child: Text("About", style: TextStyle(color: Colors.white)),
                 ),
