@@ -27,7 +27,31 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     super.initState();
   }
   Future<bool> _onWillPop() async {
-    return true;
+    final shouldPop = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Are you sure?'),
+          content: Text('Do you want to stop syncing?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                loliSync.killSync();
+                Navigator.of(context).pop(true);
+              },
+            ),
+            TextButton(
+              child: Text('No', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return shouldPop;
   }
   @override
   Widget build(BuildContext context) {
@@ -40,7 +64,9 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
           leading: new IconButton(
               icon: new Icon(Icons.arrow_back),
               onPressed: () async{
-                Get.back();
+                if (await _onWillPop()){
+                  Get.back();
+                }
               }
           ),
         ),
@@ -66,8 +92,10 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
                 return Center(
                   child: Column(
                     children: [
-                      Icon(Icons.sync, size: 400),
-                      Text(status),
+                      const SizedBox(height: 10),
+                      Icon(Icons.sync, size: 250),
+                      const SizedBox(height: 10),
+                      Text(status,style: TextStyle(fontSize: 18)),
                     ],
                   ),
                 );

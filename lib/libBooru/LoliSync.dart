@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 import 'BooruItem.dart';
@@ -13,9 +14,11 @@ class LoliSync{
   String port = "1234";
   int amount = -1;
   int current = -1;
+  var server;
+  bool syncKilled = false;
   Stream<String> startServer(SettingsHandler settingsHandler) async* {
     ip = await ServiceHandler.getIP();
-    var server = await HttpServer.bind(ip, 1234);
+    server = await HttpServer.bind(ip, 1234);
     yield "Server active at $ip:$port";
     await for (var req in server) {
       print(req.uri.path.toString());
@@ -52,7 +55,13 @@ class LoliSync{
       await req.response.close();
     }
   }
-
+  void killServer() async{
+    await server.close();
+    ServiceHandler.displayToast("LoliSync server killed");
+  }
+  void killSync(){
+    syncKilled = true;
+  }
   Future<String> send(BooruItem item, String ip, String port, int favouritesCount, int current) async{
     print("Sending item $current / $favouritesCount");
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/booruitem?amount=$favouritesCount&current=$current")
@@ -70,17 +79,19 @@ class LoliSync{
         if (favouritesCount > 0){
           int ceiling = (favouritesCount / 10).ceil();
           for(int i=0; i < ceiling; i++){
-            int tens = i*10;
-            List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("",tens.toString(),"10","ASC","loliSyncFav");
-            print("fetched is ${fetched.length} i is $i");
-            for (int x = 0; x < fetched.length; x++){
-              int count = tens + x;
-              print("count is $count");
-              if (count < favouritesCount){
-                String resp = await send(fetched.elementAt(x), ip, port, favouritesCount, count);
-                yield "$count / $favouritesCount - $resp";
-              } else {
-                print("skipping");
+            if (!syncKilled){
+              int tens = i*10;
+              List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("",tens.toString(),"10","ASC","loliSyncFav");
+              print("fetched is ${fetched.length} i is $i");
+              for (int x = 0; x < fetched.length; x++){
+                int count = tens + x;
+                print("count is $count");
+                if (count < favouritesCount){
+                  String resp = await send(fetched.elementAt(x), ip, port, favouritesCount, count);
+                  yield "$count / $favouritesCount - $resp";
+                } else {
+                  print("skipping");
+                }
               }
             }
           }

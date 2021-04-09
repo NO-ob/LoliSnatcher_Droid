@@ -23,7 +23,31 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
     super.initState();
   }
   Future<bool> _onWillPop() async {
-    return true;
+    final shouldPop = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Are you sure?'),
+          content: Text('Do you want to stop the server?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Yes', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                loliSync.killServer();
+                Navigator.of(context).pop(true);
+              },
+            ),
+            TextButton(
+              child: Text('No', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return shouldPop;
   }
   @override
   Widget build(BuildContext context) {
@@ -36,7 +60,9 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
           leading: new IconButton(
               icon: new Icon(Icons.arrow_back),
               onPressed: () async{
-                Get.back();
+                if (await _onWillPop()){
+                  Get.back();
+                }
               }
           ),
         ),
@@ -62,8 +88,10 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
                 return Center(
                   child: Column(
                     children: [
-                      Icon(Icons.electrical_services, size: 400),
-                      Text(status),
+                      const SizedBox(height: 10),
+                      Icon(Icons.electrical_services, size: 250),
+                      const SizedBox(height: 10),
+                      Text(status,style: TextStyle(fontSize: 18)),
                     ],
                   ),
                 );

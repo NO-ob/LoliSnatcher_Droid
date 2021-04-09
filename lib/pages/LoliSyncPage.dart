@@ -49,18 +49,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             children: <Widget>[
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    Get.to(() => LoliSyncServerPage(widget.settingsHandler));
-                  },
-                  child: Text("Start Server", style: TextStyle(color: Colors.white)),
-                ),
+                child: Text("Start the server on another device it will show an ip and port, once filled in you can start syncing"),
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
@@ -77,6 +66,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                           controller: ipController,
                           //The keyboard type and input formatter are used to make sure the user can only input a numerical value
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp('[0-9.]'))
+                          ],
                           decoration: InputDecoration(
                             hintText: "Host IP Address",
                             contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
@@ -133,10 +125,32 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     ),
                   ),
                   onPressed: () async{
-                    print("ip ${ipController.text} ${portController.text}");
-                    Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text));
+                    if (ipController.text != "" && portController.text != ""){
+                      Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text));
+                    } else {
+                      ServiceHandler.displayToast("The port and ip fields must be filled");
+                    }
                   },
                   child: Text("Start Sync", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Text("Start the server if you want your device to recieve favourites, do not use this on public wifi as you might get pozzed"),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
+                  ),
+                  onPressed: (){
+                      Get.to(() => LoliSyncServerPage(widget.settingsHandler));
+                  },
+                  child: Text("Start Server", style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],
