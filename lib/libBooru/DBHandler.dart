@@ -97,7 +97,7 @@ class DBHandler{
   }
 
   //Gets a list of BooruItem from the database
-  Future<List<BooruItem>> searchDB(String tagString, String offset, String limit, String order) async {
+  Future<List<BooruItem>> searchDB(String tagString, String offset, String limit, String order, String mode) async {
     List<String> tags;
     var result;
     List<BooruItem> fetched = [];
@@ -120,9 +120,12 @@ class DBHandler{
     print(result);
     if (result != null && result.isNotEmpty){
       for(int i=0; i < result.length; i++){
-        BooruItem? temp = await getBooruItem(result[i]["id"]);
+        BooruItem? temp = await getBooruItem(result[i]["id"], mode);
         if (temp != null){
           fetched.add(temp);
+          print("added ${result[i]["id"]} to fetched");
+        } else {
+          print("skipped ${result[i]["id"]}");
         }
       }
     }
@@ -141,7 +144,7 @@ class DBHandler{
   }
 
   //Creates a BooruItem from a BooruItem id
-  Future<BooruItem?> getBooruItem(int itemID) async{
+  Future<BooruItem?> getBooruItem(int itemID, String mode) async{
     var metaData = await db?.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?) AND isFavourite = 1",[itemID]);
     BooruItem item;
     List<String> tagsList = [];
@@ -149,7 +152,11 @@ class DBHandler{
       item = new BooruItem(metaData.first["fileURL"].toString(), metaData.first["fileURL"].toString(), metaData.first["thumbnailURL"].toString(), [], metaData.first["postURL"].toString(), Tools.getFileExt(metaData.first["fileURL"].toString()));
       var tags = await db?.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)", [itemID]);
       tags?.forEach((tag) {tagsList.add(tag["name"].toString());});
-      item.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+      if (mode == "loliSyncFav"){
+        item.isSnatched = false;
+      } else {
+        item.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+      }
       item.isFavourite = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
       item.tagsList = tagsList;
       return item;
@@ -159,9 +166,11 @@ class DBHandler{
   }
   void clearSnatched() async{
     await db?.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
+    deleteUntracked();
   }
   void clearFavourites() async{
     await db?.rawUpdate("UPDATE BooruItem SET isFavourite = 0");
+    deleteUntracked();
   }
   //Adds tags for a BooruItem to the database
   void updateTags(List tags, String? itemID) async{

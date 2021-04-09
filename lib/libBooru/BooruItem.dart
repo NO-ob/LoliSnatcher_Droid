@@ -25,8 +25,8 @@ class BooruItem{
   bool isVideo() {
     return (this.mediaType == "video");
   }
-  toJSON() {
-    return {"postURL": "$postURL","fileURL": "$fileURL", "sampleURL": "$sampleURL", "thumbnailURL": "$thumbnailURL", "tags": tagsList, "fileExt": fileExt, "isFavourite": "$isFavourite","isSnatched" : "$isSnatched"};
+  Map toJSON() {
+    return {"postURL": "$postURL","fileURL": "$fileURL", "sampleURL": "$sampleURL", "thumbnailURL": "$thumbnailURL", "tags": tagsList, "fileExt": fileExt, "isFavourite": "${isFavourite.toString()}","isSnatched" : "${isSnatched.toString()}"};
   }
   static BooruItem fromJSON(String jsonString){
     Map<String, dynamic> json = jsonDecode(jsonString);
@@ -37,11 +37,9 @@ class BooruItem{
     }
     //BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt
     BooruItem item = new BooruItem(json["fileURL"].toString(), json["sampleURL"].toString(), json["thumbnailURL"].toString(), tags, json["postURL"].toString(), json["fileExt"].toString());
-    print(item.toJSON());
     item.isFavourite = json["isFavourite"].toString() == "true" ? true : false;
-    item.isSnatched = json["isSnatched"].toString() == "true" ? true : false;
-    print(item.isFavourite);
-    print(item.isSnatched);
+    item.isSnatched = json["isSnatched"].toString() == "true"? true : false;
+    print(item.toJSON());
     return item;
   }
 }

@@ -47,6 +47,7 @@ class LoliSync{
             req.response.statusCode = 404;
             req.response.write("Invalid Query");
           }
+          break;
       }
       await req.response.close();
     }
@@ -70,12 +71,13 @@ class LoliSync{
           int ceiling = (favouritesCount / 10).ceil();
           for(int i=0; i < ceiling; i++){
             int tens = i*10;
-            List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("",tens.toString(),"10","ASC");
+            List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("",tens.toString(),"10","ASC","loliSyncFav");
+            print("fetched is ${fetched.length} i is $i");
             for (int x = 0; x < fetched.length; x++){
               int count = tens + x;
               print("count is $count");
               if (count < favouritesCount){
-                String? resp = await send(fetched.elementAt(x), ip, port, favouritesCount, count);
+                String resp = await send(fetched.elementAt(x), ip, port, favouritesCount, count);
                 yield "$count / $favouritesCount - $resp";
               } else {
                 print("skipping");
