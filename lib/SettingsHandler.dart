@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'ServiceHandler.dart';
 import 'package:get/get.dart';
 import 'ThemeItem.dart';
+import 'Tools.dart';
 import 'libBooru/Booru.dart';
 import 'dart:io' show Platform;
 
@@ -280,6 +282,76 @@ class SettingsHandler {
     }
     return true;
   }
+  Map toJSON() {
+    //Dont add prefbooru or appmode since,appmode will mess up syncing between desktop and mobile
+    // prefbooru will mess up if the booru configs aren't synced
+    return {"defTags": "$defTags",
+      "previewMode": "$previewMode",
+      "videoCacheMode": "$videoCacheMode",
+      "previewDisplay": "$previewDisplay",
+      "galleryMode": "$galleryMode",
+      "shareAction" : "$shareAction",
+      "limit" : "$limit",
+      "portraitColumns" : "$portraitColumns",
+      "landscapeColumns" : "$landscapeColumns",
+      "preloadCount" : "$preloadCount",
+      "snatchCooldown" : "$snatchCooldown",
+      "galleryBarPosition" : "$galleryBarPosition",
+      "hatedTags": cleanTagsList(hatedTags),
+      "lovedTags": cleanTagsList(lovedTags),
+      "jsonWrite" : "${jsonWrite.toString()}",
+      "autoPlayEnabled" : "${autoPlayEnabled.toString()}",
+      "loadingGif" : "${loadingGif.toString()}",
+      "imageCache" : "${imageCache.toString()}",
+      "mediaCache": "${mediaCache.toString()}",
+      "autoHideImageBar" : "${autoHideImageBar.toString()}",
+      "dbEnabled" : "${dbEnabled.toString()}",
+      "searchHistoryEnabled" : "${searchHistoryEnabled.toString()}",
+      "filterHated" : "${filterHated.toString()}",
+      "useVolumeButtonsForScroll" : "${useVolumeButtonsForScroll.toString()}",
+    };
+  }
+  Future<bool> loadFromJSON(String jsonString) async{
+    print("load from json + $jsonString");
+    Map<String, dynamic> json = jsonDecode(jsonString);
+    List hateTags = json["hatedTags"];
+    List loveTags = json["lovedTags"];
+    for (int i = 0; i < hateTags.length; i++){
+        if (!hatedTags.contains(hateTags.elementAt(i))){
+          hatedTags.add(hateTags.elementAt(i));
+        }
+    }
+    for (int i = 0; i < loveTags.length; i++){
+      if (!lovedTags.contains(loveTags.elementAt(i))){
+        lovedTags.add(loveTags.elementAt(i));
+      }
+    }
+    defTags = json["defTags"];
+    previewMode = json["previewMode"];
+    videoCacheMode = json["videoCacheMode"];
+    previewDisplay = json["previewDisplay"];
+    galleryMode = json["galleryMode"];
+    shareAction = json["shareAction"];
+    galleryBarPosition = json["galleryBarPosition"];
+    limit = int.parse(json["limit"]);
+    portraitColumns = int.parse(json["portraitColumns"]);
+    landscapeColumns = int.parse(json["landscapeColumns"]);
+    preloadCount = int.parse(json["preloadCount"]);
+    snatchCooldown = int.parse(json["snatchCooldown"]);
+    jsonWrite = Tools.stringToBool(json["jsonWrite"]);
+    autoPlayEnabled = Tools.stringToBool(json["autoPlayEnabled"]);
+    loadingGif = Tools.stringToBool(json["loadingGif"]);
+    imageCache = Tools.stringToBool(json["imageCache"]);
+    mediaCache = Tools.stringToBool(json["mediaCache"]);
+    autoHideImageBar = Tools.stringToBool(json["autoHideImageBar"]);
+    dbEnabled = Tools.stringToBool(json["dbEnabled"]);
+    searchHistoryEnabled = Tools.stringToBool(json["searchHistoryEnabled"]);
+    filterHated = Tools.stringToBool(json["filterHated"]);
+    useVolumeButtonsForScroll = Tools.stringToBool(json["useVolumeButtonsForScroll"]);
+    print(toJSON());
+    await saveSettings();
+    return true;
+  }
   //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
   Future<bool> saveSettings() async{
     await getPerms();
@@ -300,7 +372,7 @@ class SettingsHandler {
 
     writer.write("Volume Buttons Scroll = $useVolumeButtonsForScroll\n");
 
-      // Write limit if it between 0-100
+      // Write limit if its between 0-100
     if (limit <= 100 && limit >= 5){
       writer.write("Limit = $limit\n");
     } else {

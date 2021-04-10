@@ -20,6 +20,7 @@ class LoliSyncPage extends StatefulWidget {
 class _LoliSyncPageState extends State<LoliSyncPage> {
   final ipController = TextEditingController();
   final portController = TextEditingController();
+  bool favourites = false, settings = false, booru = false;
   LoliSync loliSync = new LoliSync();
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
@@ -116,6 +117,57 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 ),
               ),
               Container(
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child:
+                Row(children: [
+                    Text("Send Favourites: "),
+                    Checkbox(
+                    value: favourites,
+                    onChanged: (newValue) {
+                      setState(() {
+                        favourites = newValue!;
+                      });
+                    },
+                   activeColor: Get.context!.theme.primaryColor,
+                  ),
+                  ]
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child:
+                Row(children: [
+                  Text("Send settings: "),
+                  Checkbox(
+                    value: settings,
+                    onChanged: (newValue) {
+                      setState(() {
+                        settings = newValue!;
+                      });
+                    },
+                    activeColor: Get.context!.theme.primaryColor,
+                  ),
+                ]
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child:
+                Row(children: [
+                  Text("Send Booru Configs: "),
+                  Checkbox(
+                    value: booru,
+                    onChanged: (newValue) {
+                      setState(() {
+                        booru = newValue!;
+                      });
+                    },
+                    activeColor: Get.context!.theme.primaryColor,
+                  ),
+                ]
+                ),
+              ),
+              Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
                 child: TextButton(
                   style: TextButton.styleFrom(
@@ -125,20 +177,21 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     ),
                   ),
                   onPressed: () async{
-                    if (ipController.text != "" && portController.text != ""){
+                    if (ipController.text == "" && portController.text == ""){
+                      ServiceHandler.displayToast("The port and ip fields must be filled");
+                    } else if(!favourites && !settings && !booru){
+                      ServiceHandler.displayToast("You haven't selected anything to sync");
+                    } else {
                       if(widget.settingsHandler.appMode == "Desktop"){
                         Get.dialog(Dialog(
                           child: Container(
                             width: 500,
-                            child: LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text),
+                            child: LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text, settings, favourites, booru),
                           ),
                         ));
                       } else {
-                        Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text));
+                        Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text, settings, favourites, booru));
                       }
-
-                    } else {
-                      ServiceHandler.displayToast("The port and ip fields must be filled");
                     }
                   },
                   child: Text("Start Sync", style: TextStyle(color: Colors.white)),

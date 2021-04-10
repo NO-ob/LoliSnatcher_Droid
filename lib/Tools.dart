@@ -19,6 +19,9 @@ class Tools {
   static bool intToBool(int boolean){
     return boolean != 0 ? true : false;
   }
+  static bool stringToBool(String boolean){
+    return boolean == "true" ? true : false;
+  }
 
   static String getFileExt(fileURL){
     int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters

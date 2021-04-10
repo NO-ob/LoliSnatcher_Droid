@@ -13,17 +13,28 @@ class LoliSyncSendPage extends StatefulWidget {
   SettingsHandler settingsHandler;
   String ip = "";
   String port = "";
-  LoliSyncSendPage(this.settingsHandler, this.ip, this.port);
+  bool favourites = false, settings = false, booru = false;
+  LoliSyncSendPage(this.settingsHandler, this.ip, this.port, this.settings, this.favourites,this.booru);
   @override
   _LoliSyncSendPageState createState() => _LoliSyncSendPageState();
 }
 
 class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
   LoliSync loliSync = new LoliSync();
+  List<String> toSync = [];
   bool serverStarted = false;
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
+    if(widget.favourites){
+      toSync.add("Favourites");
+    }
+    if(widget.settings){
+      toSync.add("Settings");
+    }
+    if(widget.booru){
+      toSync.add("Booru");
+    }
     super.initState();
   }
   Future<bool> _onWillPop() async {
@@ -72,7 +83,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startSync(widget.settingsHandler, widget.ip, widget.port, "Favourites"),
+              stream: loliSync.startSync(widget.settingsHandler, widget.ip, widget.port, toSync),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {

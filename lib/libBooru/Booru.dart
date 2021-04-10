@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 
 class Booru {
-  String? name,faviconURL,type,baseURL,apiKey = "",userID = "",defTags;
+  String? name = "",faviconURL = "",type = "",baseURL = "",apiKey = "",userID = "",defTags = "";
   Booru(this.name,this.type,this.faviconURL,this.baseURL,this.defTags);
   Booru.withKey(this.name,this.type,this.faviconURL,this.baseURL,this.defTags,this.apiKey,this.userID);
 
@@ -40,6 +41,27 @@ class Booru {
         }
       }
     }
+  Map toJSON() {
+    return {
+      "name": "$name",
+      "type": "$type",
+      "faviconURL": "$faviconURL",
+      "baseURL": "$baseURL",
+      "defTags": "$defTags",
+      "apiKey": "$apiKey",
+      "userID" : "$userID"};
+  }
+  Booru.fromJSON(String jsonString){
+    Map<String, dynamic> json = jsonDecode(jsonString);
+    this.name = json["name"].toString();
+    this.type = json["type"].toString();
+    this.faviconURL = json["faviconURL"].toString();
+    this.baseURL = json["baseURL"].toString();
+    this.defTags = json["defTags"].toString();
+    this.apiKey = json["apiKey"].toString();
+    this.userID = json["userID"].toString();
+    print(toJSON());
+  }
     @override
     String toString() {
       return ("Name: $name Type: $type BaseURL: $baseURL FaviconURL: $faviconURL APIKey: $apiKey UserID: $userID");
