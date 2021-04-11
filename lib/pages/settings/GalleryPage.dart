@@ -14,7 +14,7 @@ class GalleryPage extends StatefulWidget {
 }
 
 class _GalleryPageState extends State<GalleryPage> {
-  bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false;
+  bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
   String? galleryMode, galleryBarPosition;
   TextEditingController preloadController = new TextEditingController();
   @override
@@ -25,6 +25,8 @@ class _GalleryPageState extends State<GalleryPage> {
     autoPlay = widget.settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = widget.settingsHandler.useVolumeButtonsForScroll;
     preloadController.text = widget.settingsHandler.preloadCount.toString();
+    shitDevice = widget.settingsHandler.shitDevice;
+    disableVideo = widget.settingsHandler.disableVideo;
     loadingGif = widget.settingsHandler.loadingGif;
     super.initState();
   }
@@ -35,6 +37,8 @@ class _GalleryPageState extends State<GalleryPage> {
     widget.settingsHandler.galleryBarPosition = galleryBarPosition!;
     widget.settingsHandler.autoPlayEnabled = autoPlay;
     widget.settingsHandler.loadingGif = loadingGif;
+    widget.settingsHandler.shitDevice = shitDevice;
+    widget.settingsHandler.disableVideo = disableVideo;
     widget.settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     if (int.parse(preloadController.text) < 0){
       preloadController.text = 0.toString();
@@ -172,6 +176,35 @@ class _GalleryPageState extends State<GalleryPage> {
               Container(
                   margin: EdgeInsets.fromLTRB(10,10,10,10),
                   child: Row(children: [
+                    Text("Disable Video: "),
+                    Checkbox(
+                      value: disableVideo,
+                      onChanged: (newValue) {
+                        setState(() {
+                          disableVideo = newValue!;
+                        });
+                      },
+                      activeColor: Get.context!.theme.primaryColor,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
+                      onPressed: () {
+                        Get.dialog(
+                            InfoDialog("Disable Video",
+                              [
+                                Text("Useful on low end devices that crash when trying to load videos."),
+                                Text("Replaces video with some text that says Video disabled"),
+                              ],
+                              CrossAxisAlignment.start,
+                            )
+                        );
+                      },
+                    ),
+                  ],)
+              ),
+              Container(
+                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  child: Row(children: [
                     Text("Video Auto Play: "),
                     Checkbox(
                       value: autoPlay,
@@ -197,6 +230,43 @@ class _GalleryPageState extends State<GalleryPage> {
                       },
                       activeColor: Get.context!.theme.primaryColor,
                     )
+                  ],)
+              ),
+              Container(
+                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  child: Row(children: [
+                    Text("My device is shit: "),
+                    Checkbox(
+                      value: shitDevice,
+                      onChanged: (newValue) {
+                        setState(() {
+                          shitDevice = newValue!;
+                          if (shitDevice){
+                            preloadController.text = "0";
+                            galleryMode = "Sample";
+                            autoPlay = false;
+                          }
+                        });
+                      },
+                      activeColor: Get.context!.theme.primaryColor,
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
+                      onPressed: () {
+                        Get.dialog(
+                            InfoDialog("My device is shit",
+                              [
+                                Text(" - Disables loading progress information"),
+                                Text(" - Sets optimal settings for:"),
+                                Text("    - Gallery Quality"),
+                                Text("    - Gallery Preload"),
+                                Text("    - Video Auto Play"),
+                              ],
+                              CrossAxisAlignment.start,
+                            )
+                        );
+                      },
+                    ),
                   ],)
               ),
               Container(

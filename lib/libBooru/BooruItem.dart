@@ -39,7 +39,6 @@ class BooruItem{
     BooruItem item = new BooruItem(json["fileURL"].toString(), json["sampleURL"].toString(), json["thumbnailURL"].toString(), tags, json["postURL"].toString(), json["fileExt"].toString());
     item.isFavourite = json["isFavourite"].toString() == "true" ? true : false;
     item.isSnatched = json["isSnatched"].toString() == "true"? true : false;
-    print(item.toJSON());
     return item;
   }
 }

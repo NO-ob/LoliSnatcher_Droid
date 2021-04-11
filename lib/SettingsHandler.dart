@@ -22,7 +22,7 @@ class SettingsHandler {
   List<String> hatedTags = [], lovedTags = [];
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
   int SDKVer = 0;
-  String verStr = "1.8.0";
+  String verStr = "1.8.1";
   List<Booru> booruList = [];
   /*static List<ThemeItem> themes = [
     new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),
@@ -37,7 +37,7 @@ class SettingsHandler {
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
         imageCache = false, mediaCache = false, autoHideImageBar = false,
           dbEnabled = true, searchHistoryEnabled = true, filterHated = false,
-            useVolumeButtonsForScroll = false;
+            useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
   Future<bool> writeDefaults() async{
     if (path == ""){
       path = await getExtDir();
@@ -272,6 +272,24 @@ class SettingsHandler {
               // print("Found useVolumeButtonsForScroll " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Shit Device"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                shitDevice = true;
+              } else {
+                shitDevice = false;
+              }
+            }
+            break;
+          case ("Disable Video"):
+            if (settings[i].split(" = ").length > 1){
+              if (settings[i].split(" = ")[1] == "true"){
+                disableVideo = true;
+              } else {
+                disableVideo = false;
+              }
+            }
+            break;
         }
       }
     }
@@ -309,10 +327,11 @@ class SettingsHandler {
       "searchHistoryEnabled" : "${searchHistoryEnabled.toString()}",
       "filterHated" : "${filterHated.toString()}",
       "useVolumeButtonsForScroll" : "${useVolumeButtonsForScroll.toString()}",
+      "disableVideo" : "${disableVideo.toString()}",
+      "shitDevice" : "${shitDevice.toString()}",
     };
   }
   Future<bool> loadFromJSON(String jsonString) async{
-    print("load from json + $jsonString");
     Map<String, dynamic> json = jsonDecode(jsonString);
     List hateTags = json["hatedTags"];
     List loveTags = json["lovedTags"];
@@ -348,11 +367,13 @@ class SettingsHandler {
     searchHistoryEnabled = Tools.stringToBool(json["searchHistoryEnabled"]);
     filterHated = Tools.stringToBool(json["filterHated"]);
     useVolumeButtonsForScroll = Tools.stringToBool(json["useVolumeButtonsForScroll"]);
+    disableVideo = Tools.stringToBool(json["disableVideo"]);
+    shitDevice = Tools.stringToBool(json["shitDevice"]);
     print(toJSON());
     await saveSettings();
     return true;
   }
-  //to-do: Change to scoped storage to be compliant with googles new rules https://www.androidcentral.com/what-scoped-storage
+
   Future<bool> saveSettings() async{
     await getPerms();
     if (path == ""){
@@ -402,6 +423,8 @@ class SettingsHandler {
     writer.write("Enable Database = $dbEnabled\n");
     writer.write("Search History = $searchHistoryEnabled\n");
     writer.write("App Mode = $appMode\n");
+    writer.write("Shit Device = $shitDevice\n");
+    writer.write("Disable Video = $disableVideo\n");
     writer.close();
     ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
     //Get.snackbar("Settings Saved!","Some changes may not take effect until the search is refreshed or the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);

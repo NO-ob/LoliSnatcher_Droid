@@ -340,46 +340,52 @@ class _HomeState extends State<Home> {
                             ],
                           ),
                         ),
-                        Container(
-                          alignment: Alignment.center,
-                          child: TextButton.icon(
-                            style: TextButton.styleFrom(
-                              primary: Get.context!.theme.accentColor,
-                              padding: EdgeInsets.all(10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(5),
-                                side: BorderSide(color: Get.context!.theme.accentColor),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              child: TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    primary: Get.context!.theme.accentColor,
+                                    padding: EdgeInsets.all(10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: new BorderRadius.circular(5),
+                                      side: BorderSide(color: Get.context!.theme.accentColor),
+                                    ),
+                                  ),
+                                  onPressed: (){
+                                    Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
+                                  },
+                                  icon: Icon(Icons.download_sharp),
+                                  label: Text("Snatcher", style: TextStyle(color: Colors.white))
                               ),
                             ),
-                            onPressed: (){
-                              Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
-                            },
-                            icon: Icon(Icons.download_sharp),
-                            label: Text("Snatcher", style: TextStyle(color: Colors.white))
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          alignment: Alignment.center,
-                          child: TextButton.icon(
-                              style: TextButton.styleFrom(
-                                primary: Get.context!.theme.accentColor,
-                                padding: EdgeInsets.all(10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(5),
-                                  side: BorderSide(color: Get.context!.theme.accentColor),
-                                ),
+                            const SizedBox(width: 10),
+                            Container(
+                              alignment: Alignment.center,
+                              child: TextButton.icon(
+                                  style: TextButton.styleFrom(
+                                    primary: Get.context!.theme.accentColor,
+                                    padding: EdgeInsets.all(10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: new BorderRadius.circular(5),
+                                      side: BorderSide(color: Get.context!.theme.accentColor),
+                                    ),
+                                  ),
+                                  onPressed: (){
+                                    if (widget.settingsHandler.dbEnabled){
+                                      Get.to(() => LoliSyncPage(widget.settingsHandler));
+                                    } else {
+                                      ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
+                                    }
+                                  },
+                                  icon: Icon(Icons.sync),
+                                  label: Text("Loli Sync", style: TextStyle(color: Colors.white))
                               ),
-                              onPressed: (){
-                                if (widget.settingsHandler.dbEnabled){
-                                  Get.to(() => LoliSyncPage(widget.settingsHandler));
-                                } else {
-                                  ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
-                                }
-                              },
-                              icon: Icon(Icons.sync),
-                              label: Text("Loli Sync", style: TextStyle(color: Colors.white))
-                          ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         Container(
@@ -411,18 +417,21 @@ class _HomeState extends State<Home> {
                     child: Container(
                       child: Column(
                         children: [
-                          (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 600)
+                          (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 550)
                               ? Container()
                               : Column(children: [
                             Text("Version: ${widget.settingsHandler.verStr}" ),
-                            DrawerHeader(
-                              margin: EdgeInsets.zero,
-                              decoration: new BoxDecoration(
-                                color: Get.context!.theme.primaryColor,
-                                image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                            SizedBox(
+                              height: (MediaQuery.of(context).size.height * 0.25),
+                              child: DrawerHeader(
+                                margin: EdgeInsets.zero,
+                                decoration: new BoxDecoration(
+                                  color: Get.context!.theme.primaryColor,
+                                  image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                                ),
+                                child: Container(),
+                              ), //add further code here
                               ),
-                              child: Container(),
-                            ),
                           ],)
                         ],
                       ),

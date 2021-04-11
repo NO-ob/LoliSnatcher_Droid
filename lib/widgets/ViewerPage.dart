@@ -204,13 +204,15 @@ class _ViewerPageState extends State<ViewerPage> {
                   ServiceHandler.setVolumeButtons(isVolumeAllowed);
                 },
                 child: isVideo
-                  ? VideoApp(
+                  ? (!widget.settingsHandler.disableVideo ? VideoApp(
                     widget.fetched[index],
                     index,
                     widget.searchGlobals,
                     widget.settingsHandler,
                     true
-                  )
+                ): Center(
+                  child: Text("Video Disabled", style: TextStyle(fontSize: 20),),
+                ))
                   : MediaViewer(
                     widget.fetched[index],
                     index,

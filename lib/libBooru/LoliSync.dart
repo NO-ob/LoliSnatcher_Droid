@@ -59,7 +59,6 @@ class LoliSync{
   Future<String> storeBooruItem(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
-        print(req.uri.queryParametersAll.toString());
         amount = int.parse(req.uri.queryParameters["amount"]!);
         current = int.parse(req.uri.queryParameters["current"]!);
         print("request to update booru item recieved");
@@ -90,7 +89,6 @@ class LoliSync{
   Future<String> storeBooru(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
-        print(req.uri.queryParametersAll.toString());
         print("request to add item recieved");
         amount = int.parse(req.uri.queryParameters["amount"]!);
         current = int.parse(req.uri.queryParameters["current"]!);
@@ -174,7 +172,6 @@ class LoliSync{
                 print("fetched is ${fetched.length} i is $i");
                 for (int x = 0; x < fetched.length; x++){
                   int count = tens + x;
-                  print("count is $count");
                   if (count < favouritesCount){
                     String resp = await sendBooruItem(fetched.elementAt(x), ip, port, favouritesCount, count);
                     yield "$count / $favouritesCount - $resp";

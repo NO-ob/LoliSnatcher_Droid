@@ -123,7 +123,6 @@ class DBHandler{
         BooruItem? temp = await getBooruItem(result[i]["id"], mode);
         if (temp != null){
           fetched.add(temp);
-          print("added ${result[i]["id"]} to fetched");
         } else {
           print("skipped ${result[i]["id"]}");
         }

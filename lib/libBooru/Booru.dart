@@ -60,7 +60,6 @@ class Booru {
     this.defTags = json["defTags"].toString();
     this.apiKey = json["apiKey"].toString();
     this.userID = json["userID"].toString();
-    print(toJSON());
   }
     @override
     String toString() {

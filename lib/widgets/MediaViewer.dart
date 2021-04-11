@@ -437,9 +437,10 @@ class _MediaViewerState extends State<MediaViewer> {
     //   ),
     // )
 
-    return mainProvider == null //(_totalBytes.length == 0)
-      ? Center(child: loadingElementBuilder(context, null))
-      : PhotoView(
+    if (!widget.settingsHandler.shitDevice){
+      return mainProvider == null //(_totalBytes.length == 0)
+          ? Center(child: loadingElementBuilder(context, null))
+          : PhotoView(
         //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
         imageProvider: mainProvider, //ResizeImage(mainProvider!, width: 4096), //MemoryImage(_totalBytes),
         minScale: PhotoViewComputedScale.contained,
@@ -453,5 +454,29 @@ class _MediaViewerState extends State<MediaViewer> {
         scaleStateController: scaleController,
         loadingBuilder: loadingElementBuilder,
       );
+    } else {
+      return PhotoView(
+        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+        imageProvider: NetworkImage(widget.settingsHandler.galleryMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.fileURL), //ResizeImage(mainProvider!, width: 4096), //MemoryImage(_totalBytes),
+        minScale: PhotoViewComputedScale.contained,
+        maxScale: PhotoViewComputedScale.covered * 8,
+        initialScale: PhotoViewComputedScale.contained,
+        enableRotation: false,
+        basePosition: Alignment.center,
+        controller: viewController,
+        // tightMode: true,
+        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
+        scaleStateController: scaleController,
+        loadingBuilder: (context, event) => !widget.settingsHandler.loadingGif ? Center(
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+          child: CircularProgressIndicator(),
+        )) : Container(
+            width: MediaQuery.of(context).size.width - 30,
+            child: Image(image: AssetImage('assets/images/loading.gif'))
+        ),
+      );
+    }
   }
 }

@@ -50,7 +50,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             children: <Widget>[
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: Text("Start the server on another device it will show an ip and port, once filled in you can start syncing"),
+                child: Text("Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
@@ -199,7 +199,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: Text("Start the server if you want your device to recieve favourites, do not use this on public wifi as you might get pozzed"),
+                child: Text("Start the server if you want your device to recieve data from another, do not use this on public wifi as you might get pozzed"),
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(10,10,10,10),
