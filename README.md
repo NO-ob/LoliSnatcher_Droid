@@ -7,6 +7,19 @@ A booru client with support for batch downloading, written in Dart/Flutter for A
 
 Thanks to Showers-U for letting me use their art for an icon check them out on pixiv : https://www.pixiv.net/en/users/28366691
 
+Supported Booru engines:
+- Danbooru
+- Gelbooru
+- GelbooruV1 (Booru.org)
+- Moebooru
+- Philomena
+- Shimmie
+- e621
+- Szurubooru
+- Hydrus Network
+- Sankaku
+- Booru On Rails (Twibooru)
+
 ![github-small](https://loli.rehab/images/posts/loliSnatcherDroid/preview.png)
 
 ![github-small](https://s1.desu-usergeneratedcontent.xyz/g/image/1616/61/1616619170446.png)
