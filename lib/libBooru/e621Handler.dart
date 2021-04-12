@@ -47,14 +47,31 @@ class e621Handler extends BooruHandler{
           /**
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
-          if (current['file']['url'] != null){
+          if (current['file']['md5'] != null){
+            String fileURL = "";
+            String sampleURL = "";
+            String thumbURL = "";
+            if (current['file']['url'] == null){
+              String md5FirstSplit = current['file']['md5'].toString().substring(0,2);
+              String md5SecondSplit = current['file']['md5'].toString().substring(2,4);
+              fileURL = "https://static1.e621.net/data/$md5FirstSplit/$md5SecondSplit/${current['file']['md5']}.${current['file']['ext']}";
+              sampleURL = fileURL.replaceFirst("data","data/sample").replaceFirst(current['file']['ext'], "jpg");
+              thumbURL = sampleURL.replaceFirst("data/sample", "data/preview");
+              if (current['file']['size'] <= 2694254){
+                sampleURL = fileURL;
+              }
+            } else {
+              fileURL = current['file']['url'];
+              sampleURL = current['sample']['url'];
+              thumbURL = current['preview']['url'];
+            }
             fetched.add(new BooruItem(
-              current['file']['url'],
-              current['sample']['url'],
-              current['preview']['url'],
+              fileURL,
+              sampleURL,
+              thumbURL,
               [...current['tags']['general'], ...current['tags']['species'], ...current['tags']['character'], ...current['tags']['artist'], ...current['tags']['meta']],
               makePostURL(current['id'].toString()),
-              Tools.getFileExt(current['file']['url']),
+              current['file']['ext'],
               fileWidth: current['file']['width'].toDouble(),
               fileHeight: current['file']['height'].toDouble(),
             ));
