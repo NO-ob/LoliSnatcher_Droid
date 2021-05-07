@@ -1,5 +1,5 @@
 # LoliSnatcher Droid   [![Github All Releases](https://img.shields.io/github/downloads/NO-ob/LoliSnatcher_Droid/total.svg)](https://github.com/NO-ob/LoliSnatcher_Droid/releases)
-[![github-small](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0)
+[![github-small](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)](https://www.gnu.org/licenses/agpl-3.0.html)
 [![github-small](https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Google_Play_Store_badge_EN.svg/200px-Google_Play_Store_badge_EN.svg.png)](https://play.google.com/store/apps/details?id=com.noaisu.loliSnatcher)
 
 
