@@ -24,7 +24,7 @@ Supported Booru engines:
 
 ![github-small](https://s1.desu-usergeneratedcontent.xyz/g/image/1616/61/1616619170446.png)
 
-
+![github-small](https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/sancucku.png)
 ## To Do
 - [ ] Search remembering
     - [ ] Add setting for remembering tabs
