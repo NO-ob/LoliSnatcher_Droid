@@ -14,9 +14,9 @@ class FavouritesHandler extends BooruHandler{
   Future Search(String tags, int pageNum) async{
     isActive = true;
     int length = fetched.length;
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -37,9 +37,13 @@ class FavouritesHandler extends BooruHandler{
     return fetched;
   }
 
-  tagSearch(String input) async{
+  Future<List<String>> tagSearch(String input) async {
     List<String> tags = [];
     tags = await dbHandler!.getTags(input, limit);
     return tags;
+  }
+
+  void searchCount(String input) async {
+    this.totalCount = await dbHandler!.searchDBCount(input);
   }
 }

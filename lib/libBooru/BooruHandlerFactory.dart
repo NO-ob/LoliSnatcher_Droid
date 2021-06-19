@@ -16,6 +16,10 @@ import 'SankakuHandler.dart';
 import 'ShimmieHandler.dart';
 import 'SzurubooruHandler.dart';
 import 'e621Handler.dart';
+import 'WorldHandler.dart';
+import 'R34HentaiHandler.dart';
+import 'IdolSankakuHandler.dart';
+
 class BooruHandlerFactory{
   BooruHandler? booruHandler;
   int pageNum = -1;
@@ -67,6 +71,17 @@ class BooruHandlerFactory{
       case("Rainbooru"):
         pageNum = 0;
         booruHandler = new RainbooruHandler(booru, limit);
+        break;
+      case("R34Hentai"):
+        pageNum = 0;
+        booruHandler = new R34HentaiHandler(booru, limit);
+        break;
+      case("World"):
+        booruHandler = new WorldHandler(booru, limit);
+        break;
+      case("IdolSankaku"):
+        pageNum = 0;
+        booruHandler = new IdolSankakuHandler(booru, limit);
         break;
     }
     booruHandler!.dbHandler = dbHandler;

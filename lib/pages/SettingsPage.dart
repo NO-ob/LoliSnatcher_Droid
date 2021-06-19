@@ -229,6 +229,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: Text("About", style: TextStyle(color: Colors.white)),
                 ),
               ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: Text("Version: ${widget.settingsHandler.verStr}" ),
+              )
             ],
           ),
         ),

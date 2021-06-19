@@ -85,7 +85,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         valueListenable: widget.searchGlobals[widget.globalsIndex].currentItem,
         builder: (BuildContext context, BooruItem value, Widget? child){
           if (value.fileURL == ""){
-            return Container();
+            return const SizedBox();
           } else {
             return Container(
               child: Stack(
@@ -125,41 +125,42 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                             backgroundColor: Get.context!.theme.primaryColor,
                           ),
                         ),
-                        value.isVideo() ? Container():
-                        Container(
-                          width: 30,
-                          height: 30,
-                          child:FloatingActionButton(
-                            onPressed: () {
-                              Get.dialog(
-                                Stack(
-                                  children: [
-                                    getImageWidget(value),
-                                    Container(
-                                        padding: EdgeInsets.all(10),
-                                        alignment: Alignment.topRight,
-                                        child: Container(
-                                          width: 30,
-                                          height: 30,
-                                          child: FloatingActionButton(
-                                            onPressed: (){
-                                              Get.back();
-                                            },
-                                            child: Icon(Icons.close),
-                                            backgroundColor: Get.context!.theme.primaryColor,
-                                          ),
-                                        )
-                                    )
-                                  ],
-                                ),
-                                transitionDuration: Duration(milliseconds: 200),
-                                barrierColor: Colors.black,
-                              );
-                            },
-                            child: Icon(Icons.fullscreen),
-                            backgroundColor: Get.context!.theme.primaryColor,
-                          ),
-                        )
+                        value.isVideo()
+                          ? const SizedBox()
+                          : Container(
+                            width: 30,
+                            height: 30,
+                            child:FloatingActionButton(
+                              onPressed: () {
+                                Get.dialog(
+                                  Stack(
+                                    children: [
+                                      getImageWidget(value),
+                                      Container(
+                                          padding: EdgeInsets.all(10),
+                                          alignment: Alignment.topRight,
+                                          child: Container(
+                                            width: 30,
+                                            height: 30,
+                                            child: FloatingActionButton(
+                                              onPressed: (){
+                                                Get.back();
+                                              },
+                                              child: Icon(Icons.close),
+                                              backgroundColor: Get.context!.theme.primaryColor,
+                                            ),
+                                          )
+                                      )
+                                    ],
+                                  ),
+                                  transitionDuration: Duration(milliseconds: 200),
+                                  barrierColor: Colors.black,
+                                );
+                              },
+                              child: Icon(Icons.fullscreen),
+                              backgroundColor: Get.context!.theme.primaryColor,
+                            ),
+                          )
                       ],
                     ),
                   )

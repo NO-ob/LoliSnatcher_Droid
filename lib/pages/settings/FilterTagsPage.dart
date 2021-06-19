@@ -6,6 +6,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/ScrollingText.dart';
+import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class FiltersEdit extends StatefulWidget {
   SettingsHandler settingsHandler;
@@ -111,7 +112,12 @@ class _FiltersEditState extends State<FiltersEdit> {
                   ),
                   onPressed: null,
                   icon: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
-                  label: Expanded(child: ScrollingText(currentEntry, 25, "infiniteWithPause", Colors.white)),
+                  // label: Expanded(child: ScrollingText(currentEntry, 25, "infiniteWithPause", Colors.white)),
+                  label: MarqueeText(
+                    text: currentEntry,
+                    fontSize: 16,
+                    startPadding: 0,
+                  ),
                 );
 
                 return Row(children: <Widget>[

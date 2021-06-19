@@ -93,9 +93,9 @@ class _DatabasePageState extends State<DatabasePage> {
                               "Search History",
                               [
                                 Text("Requires enabled Database."),
-                                Text("Records last 500 search queries."),
+                                Text("Records last 5000 search queries."),
                                 Text("Long press any history entry for additional actions (Delete, Set as Favourite...)"),
-                                Text("Favourited entries are pinned to the top of the list and will not be included in 500 limit."),
+                                Text("Favourited entries are pinned to the top of the list and will not be included in 5000 limit."),
                               ],
                               CrossAxisAlignment.start,
                             )

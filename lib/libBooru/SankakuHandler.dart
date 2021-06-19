@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
@@ -19,9 +19,9 @@ class SankakuHandler extends BooruHandler{
     isActive = true;
     hasSizeData = true;
     int length = fetched.length;
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -52,7 +52,7 @@ class SankakuHandler extends BooruHandler{
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
         // Create a BooruItem for each post in the list
-        for (int i =0; i < parsedResponse.length; i++){
+        for (int i = 0; i < parsedResponse.length; i++){
           var current = parsedResponse[i];
           List<String> tags = [];
           for (int x=0; x < current['tags'].length; x++) {
@@ -61,19 +61,30 @@ class SankakuHandler extends BooruHandler{
           if (current['file_url'] != null) {
             String fileExt = current['file_type'].split('/')[1]; // image/jpeg
             fetched.add(BooruItem(
-              current['file_url'],
-              current['sample_url'],
-              current['preview_url'],
-              tags,
-              makePostURL(current['id'].toString()),
-              fileExt,
+              fileURL: current['file_url'],
+              sampleURL: current['sample_url'],
+              thumbnailURL: current['preview_url'],
+              tagsList: tags,
+              postURL: makePostURL(current['id'].toString()),
+              fileSize: current['file_size'],
               fileWidth: current['width'].toDouble(),
               fileHeight: current['height'].toDouble(),
+              sampleWidth: current['sample_width'].toDouble(),
+              sampleHeight: current['sample_height'].toDouble(),
+              previewWidth: current['preview_width'].toDouble(),
+              previewHeight: current['preview_height'].toDouble(),
+              hasNotes: current['has_notes'],
+              serverId: current['id'].toString(),
+              rating: current['rating'],
+              score: current['total_score'].toString(),
+              sources: [current['source']],
+              md5String: current['md5'],
+              postDate: DateTime.fromMillisecondsSinceEpoch(int.parse(current['created_at']['s'].toString() + '000')).toString(), // unix time without in seconds (need to x1000?)
+              postDateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
             ));
             if (dbHandler!.db != null) {
               setTrackedValues(fetched.length - 1);
             }
-            print(fetched[fetched.length - 1].toString());
           }
         }
         prevTags = tags;

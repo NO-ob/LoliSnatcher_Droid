@@ -18,33 +18,33 @@ class HideableControlsPadding extends StatefulWidget {
 }
 
 class _HideableControlsPaddingState extends State<HideableControlsPadding> {
-  bool isVisible = false;
+  bool isEnabled = false;
 
   @override
   void initState() {
     super.initState();
-    isVisible = widget.searchGlobals.displayAppbar!.value;
-    widget.searchGlobals.displayAppbar?.addListener(setSt);
+    isEnabled = widget.searchGlobals.displayAppbar.value && !widget.isFullscreen.value;
+    widget.searchGlobals.displayAppbar.addListener(setSt);
     widget.isFullscreen.addListener(setStOnFullScreen);
   }
 
   void setSt() {
-    isVisible = widget.searchGlobals.displayAppbar!.value;
+    isEnabled = widget.searchGlobals.displayAppbar.value;
     setState(() {});
   }
 
   void setStOnFullScreen() {
     if(widget.isFullscreen.value) {
-      isVisible = false;
+      isEnabled = false;
     } else {
-      isVisible = widget.searchGlobals.displayAppbar!.value;
+      isEnabled = widget.searchGlobals.displayAppbar.value;
     }
     setState(() {});
   }
 
   @override
   void dispose() {
-    widget.searchGlobals.displayAppbar?.removeListener(setSt);
+    widget.searchGlobals.displayAppbar.removeListener(setSt);
     widget.isFullscreen.removeListener(setStOnFullScreen);
     super.dispose();
   }
@@ -54,7 +54,7 @@ class _HideableControlsPaddingState extends State<HideableControlsPadding> {
     return AnimatedPadding(
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,
-      padding: EdgeInsets.only(bottom: isVisible ? widget.defaultHeight : 0.0),
+      padding: EdgeInsets.only(bottom: isEnabled ? widget.defaultHeight : 0.0),
       child: widget.controls,
     );
   }

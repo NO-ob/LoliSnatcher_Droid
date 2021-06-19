@@ -170,7 +170,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                           previewDisplay = newValue;
                         });
                       },
-                      items: <String>["Waterfall","Staggered"].map<DropdownMenuItem<String>>((String value){
+                      items: <String>["Waterfall", "Rectangle", "Staggered"].map<DropdownMenuItem<String>>((String value){
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),

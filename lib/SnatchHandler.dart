@@ -12,9 +12,9 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 
 class SnatchHandler {
-  ValueNotifier? snatchActive = ValueNotifier(false);
-  ValueNotifier? snatchStatus = ValueNotifier("");
-  ValueNotifier? queuedItems = ValueNotifier(0);
+  ValueNotifier<bool> snatchActive = ValueNotifier(false);
+  ValueNotifier<String> snatchStatus = ValueNotifier("");
+  ValueNotifier<int> queuedItems = ValueNotifier(0);
   List? queuedList = [];
   List<int>? cooldownList = [];
   List<Booru>? booruList = [];
@@ -25,10 +25,10 @@ class SnatchHandler {
     addQueueHandler();
   }
   void addQueueHandler(){
-    if (!queuedItems!.hasListeners) {
+    if (!queuedItems.hasListeners) {
       print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
       print("queuedItems listener added");
-      queuedItems!.addListener(() {
+      queuedItems.addListener(() {
         print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
         print("queuedItems updated");
         trySnatch();
@@ -38,24 +38,24 @@ class SnatchHandler {
   Future snatch(List<BooruItem> booruItems, SettingsHandler settingsHandler, Booru booru,int cooldown) async{
     print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
     print("snatching");
-    if (!snatchActive!.value){
-      snatchActive!.value = true;
+    if (!snatchActive.value){
+      snatchActive.value = true;
       ImageWriter writer = new ImageWriter();
       writer.writeMultiple(booruItems, settingsHandler, booru, cooldown).listen(
             (data) {
-          snatchStatus!.value = "$data / ${booruItems.length}";
+          snatchStatus.value = "$data / ${booruItems.length}";
         },
         onDone: (){
-          snatchActive!.value = false;
-          snatchStatus!.value = "";
+          snatchActive.value = false;
+          snatchStatus.value = "";
           trySnatch();
         },
       );
     }
   }
   void trySnatch(){
-    if (!snatchActive!.value && queuedItems!.value > 0){
-      queuedItems!.value --;
+    if (!snatchActive.value && queuedItems.value > 0){
+      queuedItems.value --;
       snatch(queuedList!.removeLast(),settingsHandler!,booruList!.removeLast(),cooldownList!.removeLast());
     }
   }
@@ -65,12 +65,12 @@ class SnatchHandler {
         queuedList!.add(booruItems);
         cooldownList!.add(cooldown);
         booruList!.add(booru);
-        queuedItems!.value ++;
+        queuedItems.value ++;
         if (booruItems.length > 1){
-          ServiceHandler.displayToast("Items added to snatch queue\nAmount: ${booruItems.length}\nQueue Position: ${queuedItems!.value}");
+          ServiceHandler.displayToast("Items added to snatch queue\nAmount: ${booruItems.length}\nQueue Position: ${queuedItems.value}");
           //Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
         } else {
-          ServiceHandler.displayToast("Item added to snatch queue\nQueue Position: ${queuedItems!.value}");
+          ServiceHandler.displayToast("Item added to snatch queue\nQueue Position: ${queuedItems.value}");
           //Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
         }
       }

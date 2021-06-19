@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/ScrollingText.dart';
+import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class TabBox extends StatefulWidget {
   List<SearchGlobals> searchGlobals;
@@ -33,34 +34,49 @@ class _TabBoxState extends State<TabBox> {
                 color: Get.context!.theme.canvasColor,
                 borderRadius: BorderRadius.circular(5),
                 border: Border.all(
-                  color: Get.context!.theme.accentColor,
+                  color: Get.context!.theme.backgroundColor,
                   width: 1,
                 ),
               ),
               child: DropdownButton<SearchGlobals>(
-                underline: Container(height: 0),
                 isExpanded: true,
                 value: widget.searchGlobals[widget.globalsIndex],
                 icon: Icon(Icons.arrow_downward),
+                underline: const SizedBox(),
+                dropdownColor: Get.context!.theme.colorScheme.surface,
                 onChanged: (SearchGlobals? newValue){
-                  setState(() {
-                    //widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
-                    if (newValue != null){
-                      widget.searchTagsController.text = newValue.tags;
+                  widget.searchTagsController.text = newValue?.tags ?? ''; // set search box text anyway
+                  if (newValue != null && widget.searchGlobals.indexOf(newValue) != widget.globalsIndex){
+                    // ...but change tab only if it exists(?) and if it's not a current one
+                    setState(() {
+                      //widget.globalsIndex = widget.searchGlobals.indexOf(newValue!);
                       widget.setParentGlobalsIndex(widget.searchGlobals.indexOf(newValue), null);
-                    }
-                  });
+                    });
+                  }
                 },
                 onTap: (){
                   // setState(() { });
                 },
                 items: widget.searchGlobals.map<DropdownMenuItem<SearchGlobals>>((SearchGlobals value){
+                  bool isCurrent = widget.searchGlobals.indexOf(value) == widget.globalsIndex;
                   bool isNotEmptyBooru = value.selectedBooru != null && value.selectedBooru!.faviconURL != null;
-                  print(value.tags);
-                  String tagText = "${value.tags == "" ? "[No Tags]" : value.tags}";
+
+                  // print(value.tags);
+                  int? totalCount = value.booruHandler?.totalCount;
+                  String totalCountText = (totalCount != null && totalCount > 0) ? " (${totalCount})" : "";
+                  String tagText = "${value.tags == "" ? "[No Tags]" : value.tags}${totalCountText}";
+
                   return DropdownMenuItem<SearchGlobals>(
                     value: value,
-                    child: Row(
+                    child: Container(
+                      padding: EdgeInsets.all(5),
+                      decoration: isCurrent
+                      ? BoxDecoration(
+                        border: Border.all(color: Get.context!.theme.accentColor, width: 1),
+                        borderRadius: BorderRadius.circular(5),
+                      )
+                      : null,
+                      child: Row(
                         children: [
                           isNotEmptyBooru
                             ? (value.selectedBooru!.type == "Favourites"
@@ -75,8 +91,15 @@ class _TabBoxState extends State<TabBox> {
                             )
                             : Icon(CupertinoIcons.question, size: 18),
                           const SizedBox(width: 3),
-                          Expanded(child: ScrollingText(tagText, 22, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
+                          // Expanded(child: ScrollingText(tagText, 22, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
+                          MarqueeText(
+                            text: tagText,
+                            fontSize: 16,
+                            color: value.tags == "" ? Colors.grey : Colors.white,
+                            startPadding: 5,
+                          ),
                         ]
+                      )
                     ),
                   );
                 }).toList(),

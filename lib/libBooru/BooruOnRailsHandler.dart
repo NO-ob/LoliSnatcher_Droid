@@ -16,9 +16,9 @@ class BooruOnRailsHandler extends BooruHandler {
     if (tags == "" || tags == " "){
       tags = "*";
     }
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -57,13 +57,12 @@ class BooruOnRailsHandler extends BooruHandler {
               fileURL = booru.baseURL! + fileURL;
             }
             fetched.add(BooruItem(
-              fileURL,
-              sampleURL,
-              thumbURL,
-              currentTags,
-              makePostURL(current['id'].toString()),
-              Tools.getFileExt(current['representations']['full']),
-              idOnHost: current['id'].toString()
+              fileURL: fileURL,
+              sampleURL: sampleURL,
+              thumbnailURL: thumbURL,
+              tagsList: currentTags,
+              postURL: makePostURL(current['id'].toString()),
+              serverId: current['id'].toString()
             ));
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);

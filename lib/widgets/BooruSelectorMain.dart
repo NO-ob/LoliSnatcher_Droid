@@ -57,39 +57,52 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           isExpanded: true,
           value: widget.searchGlobals.selectedBooru,
           icon: Icon(Icons.arrow_downward),
-          underline: Container(height: 0,),
+          underline: const SizedBox(),
+          dropdownColor: Get.context!.theme.colorScheme.surface,
           onChanged: (Booru? newValue){
-            setState((){
-              if((widget.searchTagsController.text == "" || widget.searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
-                widget.searchTagsController.text = newValue.defTags!;
-              }
-              // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
-              widget.setParentGlobals(new SearchGlobals(newValue, widget.searchTagsController.text));
-              if(widget.searchTagsController.text != "" && widget.settingsHandler.searchHistoryEnabled) {
-                widget.settingsHandler.dbHandler.updateSearchHistory(widget.searchTagsController.text, newValue?.type, newValue?.name);
-              }
-              // Set new booru and search with current tags
-            });
+            if(widget.searchGlobals.selectedBooru != newValue) { // if not already selected
+              setState((){
+                if((widget.searchTagsController.text == "" || widget.searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
+                  widget.searchTagsController.text = newValue.defTags!;
+                }
+                // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
+                widget.setParentGlobals(new SearchGlobals(newValue, widget.searchTagsController.text));
+                if(widget.searchTagsController.text != "" && widget.settingsHandler.searchHistoryEnabled) {
+                  widget.settingsHandler.dbHandler.updateSearchHistory(widget.searchTagsController.text, newValue?.type, newValue?.name);
+                }
+                // Set new booru and search with current tags
+              });
+            }
           },
           items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+            bool isCurrent = widget.searchGlobals.selectedBooru == value;
             // Return a dropdown item
             return DropdownMenuItem<Booru>(
               value: value,
-              child: Row(
-                children: <Widget>[
-                  //Booru Icon
-                  value.type == "Favourites" ?
-                  Icon(Icons.favorite,color: Colors.red, size: 18) :
-                  Image.network(
-                    value.faviconURL!,
-                    width: 16,
-                    errorBuilder: (_, __, ___) {
-                      return Icon(Icons.broken_image, size: 18);
-                    },
-                  ),
-                  //Booru name
-                  Text(" ${value.name}"),
-                ],
+              child: Container(
+                padding: EdgeInsets.all(5),
+                decoration: isCurrent
+                ? BoxDecoration(
+                  border: Border.all(color: Get.context!.theme.accentColor, width: 1),
+                  borderRadius: BorderRadius.circular(5),
+                )
+                : null,
+                child: Row(
+                  children: <Widget>[
+                    //Booru Icon
+                    value.type == "Favourites"
+                    ? Icon(Icons.favorite,color: Colors.red, size: 18)
+                    : Image.network(
+                      value.faviconURL!,
+                      width: 16,
+                      errorBuilder: (_, __, ___) {
+                        return Icon(Icons.broken_image, size: 18);
+                      },
+                    ),
+                    //Booru name
+                    Text(" ${value.name}"),
+                  ],
+                )
               ),
             );
           }).toList(),

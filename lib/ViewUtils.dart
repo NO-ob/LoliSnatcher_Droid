@@ -1,5 +1,6 @@
 
 import 'dart:math';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -10,15 +11,42 @@ import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 
 class ViewUtils {
 
+  // unified http headers list generator for dio in thumb/media/video loaders
+  static Map<String, String> getFileCustomHeaders(SearchGlobals searchGlobals, {bool checkForReferer = false}) {
+    // a few boorus doesn't work without a browser useragent
+    Map<String,String> headers = {"user-agent": "Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"};
+    // some boorus require referer header
+    if(checkForReferer) {
+      Booru? curBooru = searchGlobals.selectedBooru;
+      switch (curBooru?.type) {
+        case 'World':
+          if(curBooru?.baseURL!.contains('rule34.xyz') ?? false) {
+            headers["referer"] = "https://rule34xyz.b-cdn.net";
+          } else if(curBooru?.baseURL!.contains('rule34.world') ?? false) {
+            headers["referer"] = "https://rule34storage.b-cdn.net";
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return headers;
+  }
+
   static IconData getFileIcon(String? mediaType) {
-    if (mediaType == 'image') {
-      return Icons.photo;
-    } else if (mediaType == 'video') {
-      return CupertinoIcons.videocam_fill;
-    } else if (mediaType == 'animation') {
-      return CupertinoIcons.play_fill;
-    } else {
-      return CupertinoIcons.question;
+    switch (mediaType) {
+      case 'image':
+        return Icons.photo;
+      case 'video':
+        return CupertinoIcons.videocam_fill;
+      case 'animation':
+        return CupertinoIcons.play_fill;
+      case 'not_supported_animation':
+        return Icons.play_disabled;
+      default:
+        return CupertinoIcons.question;
     }
   }
 
@@ -26,32 +54,33 @@ class ViewUtils {
   * or the thumbnail url depending on the users settings (sampleURL is much higher quality)
   *
   */
-  static Widget sampleorThumb(BooruItem item, int columnCount, SettingsHandler settingsHandler) {
+  static Widget sampleorThumb(BooruItem item, int index, int columnCount, SettingsHandler settingsHandler, SearchGlobals searchGlobals) {
     IconData itemIcon = getFileIcon(item.mediaType);
-    bool isThumb = settingsHandler.previewMode == "Thumbnail" || (item.mediaType == 'animation' || item.mediaType == 'video'); // item.mediaType == 'animation'; 
-    String? thumbURL = isThumb ? item.thumbnailURL : item.sampleURL;
 
     List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
     bool isHated = parsedTags[0].length > 0;
     bool isLoved = parsedTags[1].length > 0;
+    bool isSound = parsedTags[2].length > 0;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(3),
       child: Stack(
         alignment: settingsHandler.previewDisplay == "Waterfall" ? Alignment.center : Alignment.bottomCenter,
         children: [
-          CachedThumb(thumbURL, item.mediaType!, settingsHandler, columnCount, isHated),
+          CachedThumb(item, index, settingsHandler, searchGlobals, columnCount, isHated),
           Container(
             alignment: Alignment.bottomRight,
             child: Container(
               padding: EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: Colors.black,
-                // borderRadius: BorderRadius.circular(100)
+                color: Colors.black.withOpacity(0.66),
+                borderRadius: BorderRadius.only(topLeft: Radius.circular(5))
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Text('  ${(index + 1).toString()}  ', style: TextStyle(fontSize: 10)),
+
                   if(item.isFavourite || isLoved)
                     Icon(
                       item.isFavourite ? Icons.favorite : Icons.star,
@@ -62,6 +91,13 @@ class ViewUtils {
                   if(item.isSnatched)
                     Icon(
                       Icons.save_alt,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+
+                  if(isSound)
+                    Icon(
+                      Icons.volume_up_rounded,
                       color: Colors.white,
                       size: 14,
                     ),

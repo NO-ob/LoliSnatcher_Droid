@@ -31,7 +31,7 @@ class ImageWriter{
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
     String fileName = "";
     if (booru.type == ("BooruOnRails") || booru.type == "Philomena"){
-      fileName = booru.name! + '_' + item.idOnHost! + "." + item.fileExt;
+      fileName = booru.name! + '_' + item.serverId! + "." + item.fileExt!;
     } else {
       fileName = booru.name! + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
     }
@@ -78,7 +78,7 @@ class ImageWriter{
           return e;
         }
       } else {
-        print("files ext is " + item.fileExt);
+        print("files ext is " + item.fileExt!);
         //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
           var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt);
           if (writeResp != null){

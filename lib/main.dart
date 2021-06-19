@@ -28,6 +28,33 @@ import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
 import 'Tools.dart';
 
 
+final ColorScheme alternateColorScheme = ColorScheme(
+  primary: Colors.pink[200]!,
+  onPrimary: Colors.white,
+  primaryVariant: Colors.pink[200]!,
+
+  secondary: Colors.pink[600]!,
+  onSecondary: Colors.white,
+  secondaryVariant: Colors.pink[600]!,
+
+  surface: Colors.grey[900]!,
+  onSurface: Colors.white,
+  background: Colors.black,
+  onBackground: Colors.white,
+  error: Colors.redAccent,
+  onError: Colors.white,
+
+  brightness: Brightness.dark
+);
+
+final TextTheme mainTextTheme = TextTheme(
+  headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
+  headline6: GoogleFonts.quicksand(fontSize: 36.0),
+  bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
+  bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
+);
+
+
 void main() {
   runApp(GetMaterialApp(
     title: 'LoliSnatcher',
@@ -35,16 +62,18 @@ void main() {
     theme: //ThemeData(brightness: Brightness.light,primaryColor: SettingsHandler.themes[3].primary, accentColor: SettingsHandler.themes[3].accent,textTheme: SettingsHandler.themes[3].text),
     ThemeData(
       // Define the default brightness and colors.
-      brightness: Brightness.dark,
-      primaryColor: Colors.pink[200],
-      accentColor: Colors.pink[300],
+      scaffoldBackgroundColor: Colors.black,
+      backgroundColor: Colors.black,
+      canvasColor: Colors.black,
 
-      textTheme: TextTheme(
-        headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
-        headline6: GoogleFonts.quicksand(fontSize: 36.0),
-        bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
-        bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
-      ),
+      brightness: Brightness.dark,
+      primarySwatch: Colors.pink,
+      primaryColor: Colors.pink[200],
+      accentColor: Colors.pink[600],
+
+      colorScheme: alternateColorScheme,
+
+      textTheme: mainTextTheme,
     ),
     navigatorKey: Get.key,
     home: Preloader(),
@@ -108,14 +137,17 @@ class _HomeState extends State<Home> {
     if (widget.settingsHandler.booruList.isNotEmpty){
       defaultBooru = widget.settingsHandler.booruList.elementAt(0);
     }
-    searchGlobals = new List.from([new SearchGlobals(defaultBooru, widget.settingsHandler.defTags)]);
+    searchGlobals = List.from([SearchGlobals(defaultBooru, widget.settingsHandler.defTags)]);
     searchTagsController.text = widget.settingsHandler.defTags;
+    restoreTabs();
+
     activeTitle = ActiveTitle(widget.snatchHandler);
     widget.snatchHandler.settingsHandler = widget.settingsHandler;
 
-    // force cache clear every minute
-    cacheClearTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+    // force cache clear every minute + perform tabs backup
+    cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       Tools.forceClearMemoryCache();
+      backupTabs();
     });
   }
 
@@ -147,12 +179,85 @@ class _HomeState extends State<Home> {
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
 
+  // special strings used to separate parts of tab backup string
+  // tab - separates info parts about tab itself, list - separates tabs list entries
+  final String tabDivider = '|||', listDivider = '~~~';
+
+  // Restores tabs from a string saved in DB
+  void restoreTabs() async {
+    List<String> result = await widget.settingsHandler.dbHandler.getTabRestore();
+    List<SearchGlobals> restoredGlobals = [];
+
+    bool foundBrokenItem = false;
+    int newIndex = 0;
+    if(result.length == 2) {
+      // split list into tabs
+      List<String> splitInput = result[1].split(listDivider);
+      splitInput.asMap().forEach((int index, String str){
+        // split tab into booru name and tags
+        List<String> booruAndTags = str.split(tabDivider);
+        // check for parsing errors
+        bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
+        if(isEntryValid) {
+          // find booru by name and create searchglobal with given tags
+          Booru findBooru = widget.settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
+          if(findBooru.name != null) {
+            restoredGlobals.add(SearchGlobals(findBooru, booruAndTags[1]));
+          } else {
+            foundBrokenItem = true;
+            restoredGlobals.add(SearchGlobals(widget.settingsHandler.booruList[0], booruAndTags[1]));
+          }
+
+          // check if tab was marked as selected and set current selected index accordingly 
+          if(booruAndTags.length == 3 && booruAndTags[2] == 'selected') { // if split has third item (selected) - set as current tab
+            newIndex = index;
+          }
+        } else {
+          foundBrokenItem = true;
+        }
+      });
+
+      // notify user if there was unknown booru or invalid entry in the list
+      if(foundBrokenItem) {
+        ServiceHandler.displayToast('Some restored tabs had unknown boorus or broken characters\nThey were set to default or ignored');
+      }
+    }
+
+    // set parsed tabs
+    if(restoredGlobals.length > 0) {
+      ServiceHandler.displayToast('Restored ${restoredGlobals.length} tabs from previous session!');
+      searchGlobals = restoredGlobals;
+      globalsIndex = newIndex;
+      searchTagsController.text = restoredGlobals[newIndex].tags;
+      setState(() { });
+    }
+  }
+
+  // Saves current tabs list to DB
+  void backupTabs() {
+    // if there are only one tab - check that its not with default booru and tags
+    // if there are more than 1 tab or check return false - start backup
+    bool onlyDefaultTab = searchGlobals.length == 1 && searchGlobals[0].booruHandler?.booru.name == widget.settingsHandler.prefBooru && searchGlobals[0].tags == widget.settingsHandler.defTags;
+    if(!onlyDefaultTab) {
+      final List<String> dump = searchGlobals.map((tab) {
+        String booruName = tab.selectedBooru?.name ?? 'unknown';
+        String tabTags = tab.tags;
+        String selected = tab == searchGlobals[globalsIndex] ? '${tabDivider}selected' : '';
+        return '$booruName$tabDivider$tabTags$selected'; // booruName|searchTags|selected (last only if its the current tab)
+      }).toList();
+      // TODO small indicator somewhere when tabs are saved?
+      final String restoreString = dump.join(listDivider);
+      widget.settingsHandler.dbHandler.addTabRestore(restoreString);
+      // ServiceHandler.displayToast('Dumped tabs');
+    } else {
+      widget.settingsHandler.dbHandler.clearTabRestore();
+    }
+  }
 
   void setSearchGlobalsIndex(int index, String? newSearch){
       setState(() {
         globalsIndex = index;
       });
-      Tools.forceClearMemoryCache(withLive: true);
       if(newSearch != null) {
         searchAction(searchGlobals[globalsIndex].tags);
       } else {
@@ -163,6 +268,11 @@ class _HomeState extends State<Home> {
       searchGlobals[globalsIndex] = searchGlobal;
       searchAction(searchGlobals[globalsIndex].tags);
   }
+  void rewriteGlobals(List<SearchGlobals> newGlobals) {
+    setState(() {
+      searchGlobals = newGlobals;
+    });
+  }
   void searchAction(String text) {
     // Remove extra spaces
     text = text.trim();
@@ -170,7 +280,7 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
-    Tools.forceClearMemoryCache();
+    Tools.forceClearMemoryCache(withLive: true);
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
@@ -184,34 +294,210 @@ class _HomeState extends State<Home> {
     // Setstate and update the tags variable so the widget rebuilds with the new tags
   }
 
+  Widget buildDrawer() {
+    return Drawer(
+      child: Column(
+        children:<Widget>[
+          Container(
+            padding: new EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5,0),
+            width: double.infinity,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                //Tags/Search field
+                //NewTagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus,widget.settingsHandler, searchAction),
+                TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
+                GestureDetector(
+                  onLongPress: (){
+                    searchTagsController.clearComposing();
+                    searchBoxFocus.unfocus();
+
+                    searchGlobals[globalsIndex].newTab.value = searchTagsController.text;
+                    setSearchGlobalsIndex(searchGlobals.length - 1, searchTagsController.text); // create new tab and set it
+                  },
+                  child: IconButton(
+                    padding: const EdgeInsets.all(5),
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      searchTagsController.clearComposing();
+                      searchBoxFocus.unfocus();
+                      searchAction(searchTagsController.text);
+                    },
+                  )
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Listener(
+              onPointerDown: (event) {
+                print("pointer down");
+                if(searchBoxFocus.hasFocus){
+                  searchBoxFocus.unfocus();
+                }
+              },
+              child: ListView(
+                children: [
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        TabBox(searchGlobals, globalsIndex, searchTagsController, widget.settingsHandler,setSearchGlobalsIndex),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        TabBoxButtons(searchGlobals, globalsIndex, searchTagsController, widget.settingsHandler, setSearchGlobalsIndex),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        BooruSelectorMain(searchGlobals[globalsIndex], widget.settingsHandler, searchTagsController, setSearchGlobal),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(
+                        alignment: Alignment.center,
+                        child: TextButton.icon(
+                            style: TextButton.styleFrom(
+                              primary: Get.context!.theme.accentColor,
+                              padding: EdgeInsets.all(10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(5),
+                                side: BorderSide(color: Get.context!.theme.accentColor),
+                              ),
+                            ),
+                            onPressed: (){
+                              Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
+                            },
+                            icon: Icon(Icons.download_sharp),
+                            label: Text("Snatcher", style: TextStyle(color: Colors.white))
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        alignment: Alignment.center,
+                        child: TextButton.icon(
+                            style: TextButton.styleFrom(
+                              primary: Get.context!.theme.accentColor,
+                              padding: EdgeInsets.all(10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: new BorderRadius.circular(5),
+                                side: BorderSide(color: Get.context!.theme.accentColor),
+                              ),
+                            ),
+                            onPressed: (){
+                              if (widget.settingsHandler.dbEnabled){
+                                Get.to(() => LoliSyncPage(widget.settingsHandler));
+                              } else {
+                                ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
+                              }
+                            },
+                            icon: Icon(Icons.sync),
+                            label: Text("Loli Sync", style: TextStyle(color: Colors.white))
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    alignment: Alignment.center,
+                    child: TextButton.icon(
+                      style: TextButton.styleFrom(
+                        primary: Get.context!.theme.accentColor,
+                        padding: EdgeInsets.all(10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(5),
+                          side: BorderSide(color: Get.context!.theme.accentColor),
+                        ),
+                      ),
+                      onPressed: () async{
+                        await widget.settingsHandler.loadSettings();
+                        await widget.settingsHandler.getBooru();
+                        Get.to(() => SettingsPage(widget.settingsHandler));
+                      },
+                      icon: Icon(Icons.settings),
+                      label: Text("Settings", style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ),
+          Container(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: Container(
+                child: Column(
+                  children: [
+                    (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 550)
+                        ? const SizedBox()
+                        : SizedBox(
+                            height: (MediaQuery.of(context).size.height * 0.25),
+                            child: DrawerHeader(
+                              margin: EdgeInsets.zero,
+                              decoration: new BoxDecoration(
+                                color: Get.context!.theme.primaryColor,
+                                image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
+                              ),
+                              child: null,
+                            ),
+                          ),
+                  ]
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
     //searchTagsController.text = searchGlobals[globalsIndex].tags;
-    if (searchGlobals[globalsIndex].newTab!.value == "noListener"){
-      searchGlobals[globalsIndex].newTab!.addListener((){
-        if (searchGlobals[globalsIndex].newTab!.value != null){
-          setState(() {
-            // Add after the current tab
-            // searchGlobals.insert(globalsIndex + 1, new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
+    if (searchGlobals[globalsIndex].newTab.value == "noListener"){
+      searchGlobals[globalsIndex].newTab.addListener((){
+        if (searchGlobals[globalsIndex].newTab.value != null){
+          // Add after the current tab
+          // searchGlobals.insert(globalsIndex + 1, new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
 
-            // Add to the end
-            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
-          });
-          if(searchGlobals[globalsIndex].newTab!.value != "" && widget.settingsHandler.searchHistoryEnabled) {
-            widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab!.value, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
+          // Add to the end
+          searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value!));
+
+          if(searchGlobals[globalsIndex].newTab.value != "" && widget.settingsHandler.searchHistoryEnabled) {
+            widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab.value!, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
           }
-          searchGlobals[globalsIndex].newTab!.value = null;
+          searchGlobals[globalsIndex].newTab.value = null;
         }
       });
-      searchGlobals[globalsIndex].addTag!.addListener((){
-        if (searchGlobals[globalsIndex].addTag!.value != ""){
-          searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
-          searchGlobals[globalsIndex].addTag!.value = "";
+      searchGlobals[globalsIndex].addTag.addListener((){
+        if (searchGlobals[globalsIndex].addTag.value != ""){
+          searchTagsController.text += searchGlobals[globalsIndex].addTag.value!;
+          searchGlobals[globalsIndex].addTag.value = "";
         }
       });
-      searchGlobals[globalsIndex].removeTab!.addListener((){
-        if(searchGlobals[globalsIndex].removeTab!.value != "") {
+      searchGlobals[globalsIndex].removeTab.addListener((){
+        if(searchGlobals[globalsIndex].removeTab.value != "") {
           setState(() {
             if(searchGlobals.length > 1) {
               if(globalsIndex == searchGlobals.length - 1){
@@ -228,10 +514,10 @@ class _HomeState extends State<Home> {
               searchGlobals[0] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags);
             }
           });
-          searchGlobals[globalsIndex].removeTab!.value = "";
+          searchGlobals[globalsIndex].removeTab.value = "";
         }
       });
-      searchGlobals[globalsIndex].newTab!.value = null;
+      searchGlobals[globalsIndex].newTab.value = null;
     }
     /*if (widget.booruSelector.selectedBooruNotifier.value == "noListener"){
       print("Listener added to booruselector");
@@ -243,207 +529,39 @@ class _HomeState extends State<Home> {
         }
       });
     }*/
-     return Scaffold(
-       resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            title: activeTitle,
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.save),
-                onPressed: (){
-                  getPerms();
-                  // call a function to save the currently viewed image when the save button is pressed
-                  if (searchGlobals[globalsIndex].selected.length > 0){
-                    widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler.snatchCooldown);
-                    setState(() {
-                      searchGlobals[globalsIndex].selected = [];
-                    });
-                  } else {
-                    ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
-                    //Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-                  }
-                },
-              )
-            ],
-          ),
-          body:
-          new WillPopScope(
-            onWillPop: _onBackPressed,
-            child: Center(
-              child: ImagePreviews(widget.settingsHandler, searchGlobals[globalsIndex], widget.snatchHandler, searchAction),
-            ),
-          ),
-          drawer: Drawer(
-            child: Column(
-              children:<Widget>[
-                Container(
-                  padding: new EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5,0),
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      //Tags/Search field
-                      //NewTagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus,widget.settingsHandler, searchAction),
-                      TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
-                      IconButton(
-                        padding: const EdgeInsets.all(5),
-                        icon: Icon(Icons.search),
-                        onPressed: () {
-                          searchTagsController.clearComposing();
-                          searchBoxFocus.unfocus();
-                          searchAction(searchTagsController.text);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                    child:
-                    Listener(
-                        onPointerDown: (event){
-                          print("pointer down");
-                          if(searchBoxFocus.hasFocus){
-                            searchBoxFocus.unfocus();
-                          }
-                        },
-                    child: ListView(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              TabBox(searchGlobals, globalsIndex, searchTagsController, widget.settingsHandler,setSearchGlobalsIndex),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              TabBoxButtons(searchGlobals, globalsIndex, searchTagsController, widget.settingsHandler, setSearchGlobalsIndex),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.max,
-                            children: <Widget>[
-                              const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                              BooruSelectorMain(searchGlobals[globalsIndex], widget.settingsHandler, searchTagsController, setSearchGlobal),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              child: TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    primary: Get.context!.theme.accentColor,
-                                    padding: EdgeInsets.all(10),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: new BorderRadius.circular(5),
-                                      side: BorderSide(color: Get.context!.theme.accentColor),
-                                    ),
-                                  ),
-                                  onPressed: (){
-                                    Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
-                                  },
-                                  icon: Icon(Icons.download_sharp),
-                                  label: Text("Snatcher", style: TextStyle(color: Colors.white))
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Container(
-                              alignment: Alignment.center,
-                              child: TextButton.icon(
-                                  style: TextButton.styleFrom(
-                                    primary: Get.context!.theme.accentColor,
-                                    padding: EdgeInsets.all(10),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: new BorderRadius.circular(5),
-                                      side: BorderSide(color: Get.context!.theme.accentColor),
-                                    ),
-                                  ),
-                                  onPressed: (){
-                                    if (widget.settingsHandler.dbEnabled){
-                                      Get.to(() => LoliSyncPage(widget.settingsHandler));
-                                    } else {
-                                      ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
-                                    }
-                                  },
-                                  icon: Icon(Icons.sync),
-                                  label: Text("Loli Sync", style: TextStyle(color: Colors.white))
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          alignment: Alignment.center,
-                          child: TextButton.icon(
-                            style: TextButton.styleFrom(
-                              primary: Get.context!.theme.accentColor,
-                              padding: EdgeInsets.all(10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: new BorderRadius.circular(5),
-                                side: BorderSide(color: Get.context!.theme.accentColor),
-                              ),
-                            ),
-                            onPressed: () async{
-                              await widget.settingsHandler.loadSettings();
-                              await widget.settingsHandler.getBooru();
-                              Get.to(() => SettingsPage(widget.settingsHandler));
-                            },
-                            icon: Icon(Icons.settings),
-                            label: Text("Settings", style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ],
-                    ),)
-                ),
-                Container(
-                  child: Align(
-                    alignment: FractionalOffset.bottomCenter,
-                    child: Container(
-                      child: Column(
-                        children: [
-                          (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 550)
-                              ? Container()
-                              : Column(children: [
-                            Text("Version: ${widget.settingsHandler.verStr}" ),
-                            SizedBox(
-                              height: (MediaQuery.of(context).size.height * 0.25),
-                              child: DrawerHeader(
-                                margin: EdgeInsets.zero,
-                                decoration: new BoxDecoration(
-                                  color: Get.context!.theme.primaryColor,
-                                  image: new DecorationImage(fit: BoxFit.cover, image: new AssetImage('assets/images/drawer_icon.png'),),
-                                ),
-                                child: Container(),
-                              ), //add further code here
-                              ),
-                          ],)
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-       // )
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: activeTitle,
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: (){
+              getPerms();
+              // call a function to save the currently viewed image when the save button is pressed
+              if (searchGlobals[globalsIndex].selected.length > 0){
+                widget.snatchHandler.queue(searchGlobals[globalsIndex].getSelected(), widget.settingsHandler.jsonWrite,searchGlobals[globalsIndex].selectedBooru,widget.settingsHandler.snatchCooldown);
+                setState(() {
+                  searchGlobals[globalsIndex].selected = [];
+                });
+              } else {
+                ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
+                //Get.snackbar("No items selected","(」°ロ°)」",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+              }
+            },
+          )
+        ],
+      ),
+      body: WillPopScope(
+        onWillPop: _onBackPressed,
+        child: Center(
+          child: ImagePreviews(widget.settingsHandler, searchGlobals[globalsIndex], widget.snatchHandler, searchAction),
+        ),
+      ),
+      drawer: buildDrawer(),
     );
   }
+
   /** If first run is true the default tags are loaded using the settings controller then parsed to the images widget
    * This is done with a future builder as we must wait for the permissions popup and also for the settings to load
    * **/
