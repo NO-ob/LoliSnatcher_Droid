@@ -13,12 +13,18 @@ class SearchGlobals{
   double scrollPosition = 0;
   BooruHandler? booruHandler;
   String? handlerType;
-  ValueNotifier? addTag = ValueNotifier("");
-  ValueNotifier? removeTab = ValueNotifier("");
-  ValueNotifier? newTab = ValueNotifier("noListener");
-  ValueNotifier? displayAppbar = ValueNotifier(true);
-  ValueNotifier? viewedIndex = ValueNotifier(0);
-  ValueNotifier<BooruItem> currentItem = ValueNotifier(new BooruItem("", "", "", [], "", ""));
+  ValueNotifier<String?> addTag = ValueNotifier("");
+  ValueNotifier<String?> removeTab = ValueNotifier("");
+  ValueNotifier<String?> newTab = ValueNotifier("noListener");
+  ValueNotifier<bool> displayAppbar = ValueNotifier(true);
+  ValueNotifier<int> viewedIndex = ValueNotifier(0);
+  ValueNotifier<BooruItem> currentItem = ValueNotifier(new BooruItem(
+    fileURL: "",
+    sampleURL: "",
+    thumbnailURL: "",
+    tagsList: [],
+    postURL: ""
+  ));
   List selected = [];
   SearchGlobals(this.selectedBooru,this.tags);
   @override

@@ -15,15 +15,19 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
-  String? galleryMode, galleryBarPosition;
+  String? galleryMode, galleryBarPosition, galleryScrollDirection;
   TextEditingController preloadController = new TextEditingController();
+  TextEditingController scrollSpeedController = TextEditingController();
   @override
   void initState(){
     autoHideImageBar = widget.settingsHandler.autoHideImageBar;
     galleryMode = widget.settingsHandler.galleryMode;
     galleryBarPosition = widget.settingsHandler.galleryBarPosition;
+    galleryScrollDirection = widget.settingsHandler.galleryScrollDirection;
     autoPlay = widget.settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = widget.settingsHandler.useVolumeButtonsForScroll;
+    scrollSpeedController.text = widget.settingsHandler.volumeButtonsScrollSpeed.toString();
+    
     preloadController.text = widget.settingsHandler.preloadCount.toString();
     shitDevice = widget.settingsHandler.shitDevice;
     disableVideo = widget.settingsHandler.disableVideo;
@@ -35,11 +39,17 @@ class _GalleryPageState extends State<GalleryPage> {
     widget.settingsHandler.autoHideImageBar = autoHideImageBar;
     widget.settingsHandler.galleryMode = galleryMode!;
     widget.settingsHandler.galleryBarPosition = galleryBarPosition!;
+    widget.settingsHandler.galleryScrollDirection = galleryScrollDirection!;
     widget.settingsHandler.autoPlayEnabled = autoPlay;
     widget.settingsHandler.loadingGif = loadingGif;
     widget.settingsHandler.shitDevice = shitDevice;
     widget.settingsHandler.disableVideo = disableVideo;
     widget.settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
+    if (int.parse(scrollSpeedController.text) < 100){
+      scrollSpeedController.text = 100.toString();
+    }
+    widget.settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
+
     if (int.parse(preloadController.text) < 0){
       preloadController.text = 0.toString();
     }
@@ -139,6 +149,31 @@ class _GalleryPageState extends State<GalleryPage> {
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
+                    Text("Gallery Scroll Direction :     "),
+                    DropdownButton<String>(
+                      value: galleryScrollDirection,
+                      icon: Icon(Icons.arrow_downward),
+                      onChanged: (String? newValue){
+                        setState((){
+                          galleryScrollDirection = newValue;
+                        });
+                      },
+                      items: <String>["Horizontal", "Vertical"].map<DropdownMenuItem<String>>((String value){
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                width: double.infinity,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
                     Text("Gallery Bar Position :     "),
                     DropdownButton<String>(
                       value: galleryBarPosition,
@@ -148,7 +183,7 @@ class _GalleryPageState extends State<GalleryPage> {
                           galleryBarPosition = newValue;
                         });
                       },
-                      items: <String>["Top","Bottom"].map<DropdownMenuItem<String>>((String value){
+                      items: <String>["Top", "Bottom"].map<DropdownMenuItem<String>>((String value){
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -304,6 +339,37 @@ class _GalleryPageState extends State<GalleryPage> {
                       ),
                     ],
                   )
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                width: double.infinity,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text("Buttons Scroll Speed :            "),
+                    new Expanded(
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(10,0,0,0),
+                        child: TextField(
+                          controller: scrollSpeedController,
+                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            hintText: "Scroll Speed",
+                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                            border: new OutlineInputBorder(
+                              borderRadius: new BorderRadius.circular(50),
+                              gapPadding: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

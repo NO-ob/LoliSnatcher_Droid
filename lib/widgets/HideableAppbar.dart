@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
+// import 'package:LoliSnatcher/ServiceHandler.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   String title;
@@ -22,21 +23,22 @@ class _HideableAppBarState extends State<HideableAppBar> {
   @override
   void initState() {
     super.initState();
-    widget.searchGlobals.displayAppbar!.value = !widget.autoHide;
-    widget.searchGlobals.displayAppbar!.addListener(setSt);
+    widget.searchGlobals.displayAppbar.value = !widget.autoHide;
+    widget.searchGlobals.displayAppbar.addListener(setSt);
 
     // Hide system ui on first render
-    //SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
-    //ServiceHandler.makeImmersive();
+    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    // ServiceHandler.makeImmersive();
   }
   void setSt(){
     setState(() {});
   }
   @override
   void dispose() {
-    widget.searchGlobals.displayAppbar!.removeListener(setSt);
+    widget.searchGlobals.displayAppbar.removeListener(setSt);
 
     // Return system ui after closing viewer
+    // ServiceHandler.makeNormal();
     super.dispose();
   }
 
@@ -49,8 +51,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       duration: Duration(milliseconds: 200),
       curve: Curves.linear,
       color: Colors.transparent,
-      height:
-          widget.searchGlobals.displayAppbar!.value ? widget.defaultHeight : 0.0,
+      height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
       child: AppBar(
         // toolbarHeight: widget.defaultHeight,
         // elevation: 0, // set to zero to disable a shadow behind

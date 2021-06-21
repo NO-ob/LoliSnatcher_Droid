@@ -3,11 +3,11 @@ import 'dart:ui';
 import 'dart:async';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/widgets/HideableControlsPadding.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
@@ -46,7 +46,7 @@ class _VideoAppState extends State<VideoApp> {
   int _total = 0, _received = 0, _lastViewedIndex = -1;
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false, isHated = false;
+  bool isFromCache = false, isStopped = false, isHated = false, isZoomed = false, isZoomButtonVisible = true;
   List<String> stopReason = [];
 
   Dio? _client;
@@ -108,18 +108,23 @@ class _VideoAppState extends State<VideoApp> {
     // Otherwise start loading and subscribe to progress
     _client = Dio();
     _dioCancelToken = CancelToken();
-    _client!.get<List<int>>(
-      widget.booruItem.fileURL,
-      options: Options(responseType: ResponseType.bytes),
-      cancelToken: _dioCancelToken,
-      onReceiveProgress: (received, total) {
-        _total = total;
-        _onBytesAdded(received);
-      },
-    ).then((value) async {
+
+    try {
+      //// GET request
+      Response<dynamic> response = await _client!.get(
+        widget.booruItem.fileURL,
+        options: Options(responseType: ResponseType.bytes, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobals, checkForReferer: true)),
+        cancelToken: _dioCancelToken,
+        onReceiveProgress: (received, total) {
+          _total = total;
+          _onBytesAdded(received);
+        },
+      );
+
+      //// Parse response
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-      if (value.data != null && _received > (_total * 0.95)) {
-        final File? cacheFile = await imageWriter.writeCacheFromBytes(widget.booruItem.fileURL, value.data!, 'media');
+      if (response.data != null && _received > (_total * 0.95)) {
+        final File? cacheFile = await imageWriter.writeCacheFromBytes(widget.booruItem.fileURL, response.data!, 'media');
         if (cacheFile != null) {
           //Restate only when just Caching
           if (cacheMode == 'Cache') {
@@ -133,18 +138,18 @@ class _VideoAppState extends State<VideoApp> {
           }
         }
       } else {
-        killLoading(['Loading Incomplete Error']);
         print('Video load incomplete');
+        throw('Load Incomplete');
       }
-      return value;
-    }).catchError((e) {
+    } on DioError catch(e) {
+      //// Error handling
       if (CancelToken.isCancel(e)) {
         // print('Canceled by user: ${widget.booruItem.fileURL} | $e');
       } else {
-        killLoading(['Loading Error']);
+        killLoading(['Loading Error: ${e.message}']);
         print('Dio request cancelled: $e');
       }
-    });
+    }
   }
 
   /// Author: [Nani-Sore] ///
@@ -166,31 +171,17 @@ class _VideoAppState extends State<VideoApp> {
   @override
   void initState() {
     super.initState();
+    widget.searchGlobals.displayAppbar.addListener(setZoomVisibility);
     initVideo(false);
   }
 
   void initVideo(ignoreTagsCheck) {
     // viewController..outputStateStream.listen(onViewStateChanged);
-    // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
     cacheMode = widget.settingsHandler.videoCacheMode;
 
     // load thumbnail preview
-    () async {
-      String thumbnailFileURL = widget.booruItem.thumbnailURL; // sample can be a video
-      // widget.settingsHandler.previewMode == "Sample"
-      //     ? widget.booruItem.sampleURL
-      //     : widget.booruItem.thumbnailURL;
-      String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails');
-      File? preview = previewPath != null ? File(previewPath) : null;
-
-      setState(() {
-        if (preview != null){
-          thumbProvider = FileImage(preview);
-        } else {
-          thumbProvider = NetworkImage(thumbnailFileURL);
-        }
-      });
-    }();
+    getThumbnail();
 
     List<List<String>> hatedAndLovedTags = widget.settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
     if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
@@ -200,6 +191,22 @@ class _VideoAppState extends State<VideoApp> {
     } else {
       _downloadVideo();
     }
+  }
+
+  void getThumbnail() async {
+    String thumbnailFileURL = widget.booruItem.thumbnailURL; // sample can be a video
+    // widget.settingsHandler.previewMode == "Sample"
+    //     ? widget.booruItem.sampleURL
+    //     : widget.booruItem.thumbnailURL;
+    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails');
+    File? preview = previewPath != null ? File(previewPath) : null;
+
+    if (preview != null){
+      thumbProvider = ResizeImage(MemoryImage(await preview.readAsBytes()), width: 4096); // FileImage(preview);
+    } else {
+      thumbProvider = NetworkImage(thumbnailFileURL);
+    }
+    setState(() { });
   }
 
   void killLoading(List<String> reason) {
@@ -237,6 +244,8 @@ class _VideoAppState extends State<VideoApp> {
     _videoController?.dispose();
     _chewieController?.dispose();
 
+    widget.searchGlobals.displayAppbar.removeListener(setZoomVisibility);
+
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
@@ -247,10 +256,50 @@ class _VideoAppState extends State<VideoApp> {
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
     print(scaleState);
+
+    isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
+    setState(() { });
   }
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     print(viewState);
+  }
+
+  void resetZoom() {
+    scaleController.scaleState = PhotoViewScaleState.initial;
+    setState(() { });
+  }
+
+  void doubleTapZoom() {
+    viewController.scale = 2;
+    // scaleController.scaleState = PhotoViewScaleState.originalSize;
+    setState(() { });
+  }
+
+  void setZoomVisibility() {
+    isZoomButtonVisible = widget.searchGlobals.displayAppbar.value;
+    setState(() { });
+  }
+
+  Widget zoomButtonBuild() {
+    if(isZoomButtonVisible && (_videoController != null && _videoController!.value.isInitialized)) {
+      return Positioned(
+        bottom: 150,
+        right: -15,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            primary: Theme.of(context).colorScheme.secondary.withOpacity(0.33),
+            minimumSize: Size(28, 28),
+            padding: EdgeInsets.all(3),
+          ),
+          icon: Icon(isZoomed ? Icons.zoom_out : Icons.zoom_in, size: 28),
+          label: Text(''),
+          onPressed: isZoomed ? resetZoom : doubleTapZoom,
+        )
+      );
+    } else {
+      return const SizedBox();
+    }
   }
 
   void _updateState() {
@@ -261,13 +310,11 @@ class _VideoAppState extends State<VideoApp> {
     if(_chewieController == null) return;
 
     isFullscreen.value = _chewieController!.isFullScreen;
-    if(_chewieController!.isFullScreen) {
-      ServiceHandler.setVolumeButtons(true);
-    } else {
-      if(widget.searchGlobals.displayAppbar!.value == false && widget.settingsHandler.useVolumeButtonsForScroll) {
-        ServiceHandler.setVolumeButtons(false);
+    if(widget.searchGlobals.viewedIndex.value == widget.index) {
+      if(_chewieController!.isFullScreen || !widget.settingsHandler.useVolumeButtonsForScroll) {
+        ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
       } else {
-        ServiceHandler.setVolumeButtons(true);
+        ServiceHandler.setVolumeButtons(widget.searchGlobals.displayAppbar.value); // same as app bar value
       }
     }
   }
@@ -276,11 +323,18 @@ class _VideoAppState extends State<VideoApp> {
   Future<void> initPlayer() async {
     // Start from cache if was already cached or only caching is allowed
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
-    if (widget.settingsHandler.mediaCache && _video != null) {
-      _videoController = VideoPlayerController.file(_video!, videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null);
+    if(_video != null) { // if (widget.settingsHandler.mediaCache || _video != null) {
+      _videoController = VideoPlayerController.file(
+        _video!,
+        videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
+      );
     } else {
       // Otherwise load from network
-      _videoController = VideoPlayerController.network(widget.booruItem.fileURL, videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null);
+      _videoController = VideoPlayerController.network(
+        widget.booruItem.fileURL,
+        videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
+        httpHeaders: ViewUtils.getFileCustomHeaders(widget.searchGlobals, checkForReferer: true),
+      );
     }
     await Future.wait([_videoController!.initialize()]);
     _videoController?.addListener(_updateState);
@@ -297,7 +351,7 @@ class _VideoAppState extends State<VideoApp> {
       looping: true,
       allowFullScreen: widget.enableFullscreen,
       showControls: true,
-      showControlsOnInitialize: widget.searchGlobals.displayAppbar!.value ?? true,
+      showControlsOnInitialize: widget.searchGlobals.displayAppbar.value,
       customControls:
         widget.settingsHandler.galleryBarPosition == 'Bottom'
           ? HideableControlsPadding(widget.searchGlobals, isFullscreen, LoliControls())
@@ -308,8 +362,8 @@ class _VideoAppState extends State<VideoApp> {
         //   iconColor: Color.fromARGB(255, 200, 200, 200)
         // ),
       materialProgressColors: ChewieProgressColors(
-        playedColor: Get.context!.theme.primaryColor,
-        handleColor: Get.context!.theme.primaryColor,
+        playedColor: Theme.of(context).colorScheme.primary,
+        handleColor: Theme.of(context).colorScheme.primary,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white,
       ),
@@ -528,7 +582,7 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   Widget build(BuildContext context) {
-    int viewedIndex = widget.searchGlobals.viewedIndex!.value ?? 0;
+    int viewedIndex = widget.searchGlobals.viewedIndex.value;
     bool isViewed = viewedIndex == widget.index;
     bool initialized = _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
 
@@ -537,9 +591,7 @@ class _VideoAppState extends State<VideoApp> {
 
     if (!isViewed) {
       // reset zoom if not viewed
-      setState(() {
-        scaleController.scaleState = PhotoViewScaleState.initial;
-      });
+      resetZoom();
     }
 
     if (initialized) {
@@ -562,19 +614,30 @@ class _VideoAppState extends State<VideoApp> {
       _lastViewedIndex = viewedIndex;
     }
 
-    return initialized
-      ? PhotoView.customChild(
-          child: Chewie(controller: _chewieController!),
-          minScale: PhotoViewComputedScale.contained,
-          maxScale: PhotoViewComputedScale.covered * 8,
-          initialScale: PhotoViewComputedScale.contained,
-          enableRotation: false,
-          basePosition: Alignment.center,
-          controller: viewController,
-          // tightMode: true,
-          heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
-          scaleStateController: scaleController,
+    // TODO move controls outside of chewie, to exclude them from zoom
+
+    return Hero(
+      tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
+      child: Material(
+        child: Stack(
+          children: [
+            PhotoView.customChild(
+              child: initialized ? Chewie(controller: _chewieController!) : loadingElementBuilder(),
+              minScale: PhotoViewComputedScale.contained,
+              maxScale: PhotoViewComputedScale.covered * 8,
+              initialScale: PhotoViewComputedScale.contained,
+              enableRotation: false,
+              basePosition: Alignment.center,
+              controller: viewController,
+              // tightMode: true,
+              // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.searchGlobals.viewedIndex.value == widget.index ? '' : 'ignore') + widget.index.toString()),
+              scaleStateController: scaleController,
+            ),
+
+            zoomButtonBuild(),
+          ]
         )
-      : loadingElementBuilder();
+      )
+    );
   }
 }

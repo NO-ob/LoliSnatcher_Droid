@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'GelbooruHandler.dart';
 import 'Booru.dart';
 /**
@@ -13,10 +15,11 @@ class MoebooruHandler extends GelbooruHandler{
   @override
   // This will create a url for the http request
   String makeURL(String tags){
+    int cappedPage = max(1, pageNum);
     if (booru.apiKey == ""){
-      return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=$pageNum";
+      return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
     } else {
-      return "${booru.baseURL}/post.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/post.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
     }
   }
   @override

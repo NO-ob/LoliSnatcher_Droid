@@ -21,27 +21,31 @@ dependencies:
     sdk: flutter
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
-  http: ^0.13.0
-  dio: ^4.0.0-beta6
-  xml: ^5.0.2
+  cupertino_icons: ^1.0.3
+  http: ^0.13.3
+  dio: ^4.0.0
+  xml: ^5.1.2
+  intl: ^0.17.0
   flutter_launcher_icons: ^0.9.0
+  # flash: ^1.5.0
+  marquee: ^2.1.0
+  auto_size_text: ^3.0.0-nullsafety.0
   vibration: ^1.7.4-nullsafety.0
-  get: ^4.0.0-nullsafety.2
+  get: ^4.1.4
   permission_handler: ^6.0.0
-  image: ^3.0.1
-  google_fonts: ^2.0.0
-  photo_view: # ^0.10.3
+  image: ^3.0.2
+  google_fonts: ^2.1.0
+  photo_view: # ^0.11.1
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
   html: ^0.15.0
-  # flutter_staggered_grid_view: ^0.3.4
-  flutter_staggered_grid_view: ^0.4.0-nullsafety.3
-  video_player: ^2.0.0
-  chewie: ^1.0.0
-  sqflite: ^2.0.0+2
-  sqflite_common_ffi: ^2.0.0-nullsafety.7
-  # preload_page_view: ^0.1.5
+  flutter_staggered_grid_view: ^0.4.0 # ^0.3.4 - pre-null-safety version
+  scroll_to_index: ^2.0.0
+  video_player: ^2.1.6
+  chewie: ^1.2.2
+  sqflite: ^2.0.0+3
+  sqflite_common_ffi: ^2.0.0+1
+  preload_page_view: ^0.1.6
 
 flutter_icons:
   android: "launcher_icon"

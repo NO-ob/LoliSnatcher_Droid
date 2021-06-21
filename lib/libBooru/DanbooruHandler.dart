@@ -21,9 +21,9 @@ class DanbooruHandler extends BooruHandler{
     isActive = true;
     hasSizeData = true;
     int length = fetched.length;
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -45,14 +45,22 @@ class DanbooruHandler extends BooruHandler{
            */
           if ((current.findElements("file-url").length > 0)) {
             fetched.add(new BooruItem(
-              current.findElements("file-url").elementAt(0).text,
-              current.findElements("large-file-url").elementAt(0).text,
-              current.findElements("preview-file-url").elementAt(0).text,
-              current.findElements("tag-string").elementAt(0).text.split(" "),
-              makePostURL(current.findElements("id").elementAt(0).text),
-              Tools.getFileExt(current.findElements("file-url").elementAt(0).text),
+              fileURL: current.findElements("file-url").elementAt(0).text,
+              sampleURL: current.findElements("large-file-url").elementAt(0).text,
+              thumbnailURL: current.findElements("preview-file-url").elementAt(0).text,
+              tagsList: current.findElements("tag-string").elementAt(0).text.split(" "),
+              postURL: makePostURL(current.findElements("id").elementAt(0).text),
+              fileExt: current.findElements("file-ext").elementAt(0).text,
+              fileSize: int.tryParse(current.findElements("file-size").elementAt(0).text) ?? null,
               fileHeight: double.tryParse(current.findElements("image-height").elementAt(0).text) ?? null,
               fileWidth: double.tryParse(current.findElements("image-width").elementAt(0).text) ?? null,
+              serverId: current.findElements("id").elementAt(0).text,
+              rating: current.findElements("rating").elementAt(0).text,
+              score: current.findElements("score").elementAt(0).text,
+              sources: [current.findElements("source").elementAt(0).text],
+              md5String: current.findElements("md5").elementAt(0).text,
+              postDate: current.findElements("created-at").elementAt(0).text, // 2021-06-17T16:27:45-04:00
+              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ssZ",
             ));
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);

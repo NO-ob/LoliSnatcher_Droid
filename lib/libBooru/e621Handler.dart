@@ -18,9 +18,9 @@ class e621Handler extends BooruHandler{
     isActive = true;
     hasSizeData = true;
     int length = fetched.length;
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -66,15 +66,35 @@ class e621Handler extends BooruHandler{
               thumbURL = current['preview']['url'];
             }
             fetched.add(new BooruItem(
-              fileURL,
-              sampleURL,
-              thumbURL,
-              [...current['tags']['general'], ...current['tags']['species'], ...current['tags']['character'], ...current['tags']['artist'], ...current['tags']['meta']],
-              makePostURL(current['id'].toString()),
-              current['file']['ext'],
+              fileURL: fileURL,
+              sampleURL: sampleURL,
+              thumbnailURL: thumbURL,
+              tagsList: [
+                ...current['tags']['character'],
+                ...current['tags']['copyright'],
+                ...current['tags']['artist'],
+                ...current['tags']['meta'],
+                ...current['tags']['general'],
+                ...current['tags']['species']
+              ],
+              postURL: makePostURL(current['id'].toString()),
+              fileExt: current['file']['ext'],
+              fileSize: current['file']['size'],
               fileWidth: current['file']['width'].toDouble(),
               fileHeight: current['file']['height'].toDouble(),
-            ));
+              sampleWidth: current['sample']['width'],
+              sampleHeight: current['sample']['height'],
+              previewWidth: current['preview']['width'],
+              previewHeight: current['preview']['height'],
+              hasNotes: current['has_notes'],
+              serverId: current['id'],
+              rating: current['rating'],
+              score: current['score']['total'],
+              sources: List<String>.from(current['sources'] ?? []),
+              md5String: current['file']['md5'],
+              postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
+              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+            )); 
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);
             }

@@ -49,6 +49,10 @@ class DBHandler{
         "isFavourite INTEGER,"
         "timestamp TEXT DEFAULT CURRENT_TIMESTAMP"
         ")");
+    await db?.execute("CREATE TABLE IF NOT EXISTS TabRestore ("
+        "id INTEGER PRIMARY KEY,"
+        "restore TEXT"
+        ")");
     try{
       // add new column, try-catch to ignore the "already added" error
       await db?.execute("ALTER TABLE SearchHistory ADD COLUMN isFavourite INTEGER;");
@@ -84,7 +88,7 @@ class DBHandler{
   Future<String?> getItemID(String fileURL) async{
     var result;
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx")){
+    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx") || fileURL.contains("paheal.net")){
       result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
     } else {
       result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
@@ -130,6 +134,35 @@ class DBHandler{
     }
     return fetched;
   }
+  //Gets amount of BooruItems from the database
+  Future<int> searchDBCount(String tagString) async {
+    List<String> tags;
+    var result;
+    int count = 0;
+    String questionMarks = "?";
+    if (tagString.isNotEmpty){
+      tags = tagString.split(" ");
+      for (int i = 1; i < tags.length; i++){
+        questionMarks += ",?";
+      }
+      result = await db?.rawQuery(
+          "SELECT COUNT(*) as count FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
+              "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
+              "HAVING COUNT(*) = ${tags.length}", tags);
+    } else {
+      result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem");
+    }
+    print("got count results from db");
+    print(result);
+    if (result != null && result.isNotEmpty){
+      if(result.length > 1) {
+        count = result.length;
+      } else if(result.length == 1) {
+        count = result[0]["count"];
+      }
+    }
+    return count;
+  }
   //Gets the favourites count from db
   Future<int> getFavouritesCount() async {
     var result;
@@ -148,7 +181,13 @@ class DBHandler{
     BooruItem item;
     List<String> tagsList = [];
     if (metaData != null && metaData.isNotEmpty){
-      item = new BooruItem(metaData.first["fileURL"].toString(), metaData.first["fileURL"].toString(), metaData.first["thumbnailURL"].toString(), [], metaData.first["postURL"].toString(), Tools.getFileExt(metaData.first["fileURL"].toString()));
+      item = new BooruItem(
+        fileURL: metaData.first["fileURL"].toString(),
+        sampleURL: metaData.first["fileURL"].toString(),
+        thumbnailURL: metaData.first["thumbnailURL"].toString(),
+        tagsList: [],
+        postURL: metaData.first["postURL"].toString(),
+      );
       var tags = await db?.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)", [itemID]);
       tags?.forEach((tag) {tagsList.add(tag["name"].toString());});
       if (mode == "loliSyncFav"){
@@ -197,7 +236,7 @@ class DBHandler{
   //Get a list of tags from the database based on an input
   Future<List<String>> getTags(String queryStr, int limit) async{
     List<String> tags = [];
-    var result = await db?.rawQuery("SELECT name FROM Tag WHERE name LIKE (?) LIMIT $limit",["$queryStr%"]);
+    var result = await db?.rawQuery("SELECT DISTINCT name FROM Tag WHERE lower(name) LIKE (?) LIMIT $limit",["${queryStr.toLowerCase()}%"]);
     if (result != null && result.isNotEmpty){
       for (int i = 0; i < result.length; i++){
         tags.add(result[i]["name"].toString());
@@ -205,6 +244,31 @@ class DBHandler{
     }
     return tags;
   }
+
+  // functions related to tab backup logic:
+  Future<void> addTabRestore(String restore) async {
+    await clearTabRestore();
+    await db?.rawInsert("INSERT INTO TabRestore(restore) VALUES(?)", [restore]);
+    return;
+  }
+  Future<void> clearTabRestore() async {
+    await db?.rawDelete("DELETE FROM TabRestore WHERE id IN (SELECT id FROM TabRestore);"); // remove previous items
+    return;
+  }
+  Future<List<String>> getTabRestore() async {
+    var result = await db?.rawQuery("SELECT id, restore FROM TabRestore ORDER BY id DESC LIMIT 1");
+    List<String> restoreItem = []; // id, restoreString
+    if (result != null && result.isNotEmpty){
+      restoreItem.add(result[0]["id"].toString());
+      restoreItem.add(result[0]["restore"].toString());
+    }
+    return restoreItem;
+  }
+  Future<void> removeTabRestore(String id) async {
+    await db?.rawDelete("DELETE FROM TabRestore WHERE id=?;", [id]);
+    return;
+  }
+  ///////
 
   // Remove duplicates and add every new search to history table
   void updateSearchHistory(String searchText, String? booruType, String? booruName) async{
@@ -222,8 +286,8 @@ class DBHandler{
       await db?.rawUpdate("UPDATE SearchHistory SET timestamp = CURRENT_TIMESTAMP WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite == '1';", [searchText, booruType, booruName]);
     }
 
-    // remove everything except last 500 entries (ignores favourited)
-    await db?.rawDelete("DELETE FROM SearchHistory WHERE $notFavouriteQuery AND id NOT IN (SELECT id FROM SearchHistory WHERE $notFavouriteQuery ORDER BY id DESC LIMIT 500);");
+    // remove everything except last X entries (ignores favourited)
+    await db?.rawDelete("DELETE FROM SearchHistory WHERE $notFavouriteQuery AND id NOT IN (SELECT id FROM SearchHistory WHERE $notFavouriteQuery ORDER BY id DESC LIMIT 5000);");
   }
 
   // Get search history entries
@@ -241,6 +305,17 @@ class DBHandler{
       ]);
     });
     return result;
+  }
+
+  Future<List<String>> getSearchHistoryByInput(String queryStr, int limit) async{
+    List<String> tags = [];
+    var result = await db?.rawQuery("SELECT DISTINCT searchText FROM SearchHistory WHERE lower(searchText) LIKE (?) LIMIT $limit",["${queryStr.toLowerCase()}%"]);
+    if (result != null && result.isNotEmpty){
+      for (int i = 0; i < result.length; i++){
+        tags.add(result[i]["searchText"].toString());
+      }
+    }
+    return tags;
   }
 
   // Delete entry from search history (if no id given - clears everything)
@@ -264,7 +339,7 @@ class DBHandler{
     List<bool> values = [false,false];
     var result;
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx")){
+    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx") || fileURL.contains("paheal.net")){
       result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
     } else {
       result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)", [fileURL]);

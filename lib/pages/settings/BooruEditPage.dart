@@ -30,10 +30,16 @@ class _booruEditState extends State<booruEdit> {
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
-  List<String> booruTypes = ["Not Sure","Danbooru","e621","Gelbooru","GelbooruV1","Moebooru","Philomena","Sankaku","Shimmie","Szurubooru","Hydrus","BooruOnRails"];
-  String selectedBooruType = "Not Sure";
+  List<String> booruTypes = [
+    "Danbooru", "e621", "Gelbooru", "GelbooruV1", "Moebooru", "Philomena", "Sankaku", "Shimmie", "Szurubooru", "Hydrus", "BooruOnRails", "Rainbooru",
+    "R34Hentai", "World", "IdolSankaku"
+  ];
+  String selectedBooruType = "AutoDetect";
   @override
   void initState() {
+    booruTypes.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    booruTypes.insert(0, 'AutoDetect');
+
     //Load settings from the Booru instance parsed to the widget and populate the text fields
     if (widget.booru.name != "New"){
       booruNameController.text = widget.booru.name!;
@@ -42,7 +48,7 @@ class _booruEditState extends State<booruEdit> {
       booruAPIKeyController.text = widget.booru.apiKey!;
       booruUserIDController.text = widget.booru.userID!;
       booruDefTagsController.text = widget.booru.defTags!;
-      selectedBooruType = widget.booru.type!;
+      selectedBooruType = booruTypes.contains(widget.booru.type ?? '') ? widget.booru.type! : selectedBooruType;
     }
     super.initState();
   }
@@ -72,24 +78,57 @@ class _booruEditState extends State<booruEdit> {
                       backgroundColor: Get.context!.theme.canvasColor,
                     ),
                     onPressed: () async{
-                      //Call the booru test
+                      // name and url are required
+                      if(booruNameController.text == "") {
+                        ServiceHandler.displayToast("Booru Name required!");
+                        return;
+                      }
+                      if(booruURLController.text == "") {
+                        ServiceHandler.displayToast("Booru URL required!");
+                        return;
+                      } else {
+                        // add https if not specified
+                        if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
+                          booruURLController.text = "https://" + booruURLController.text;
+                        }
+                        // autofill favicon if not specified
+                        if(booruFaviconController.text == ""){
+                          booruFaviconController.text = booruURLController.text + "/favicon.ico";
+                        }
+                      }
+
+                      // Sankaku api override
                       if(booruURLController.text.contains("chan.sankakucomplex.com")){
                         booruURLController.text = "https://capi-v2.sankakucomplex.com";
-                        booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+                        // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+                      } else if(booruURLController.text.contains("idol.sankakucomplex.com")){
+                        booruURLController.text = "https://iapi.sankakucomplex.com";
+                        // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
                       }
-                      if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
-                        booruURLController.text = "https://" + booruURLController.text;
-                      }
+
+                      //Call the booru test
                       Booru testBooru;
                       if(booruAPIKeyController.text == ""){
-                        testBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
+                        testBooru = new Booru(
+                          booruNameController.text,
+                          widget.booruType,
+                          booruFaviconController.text,
+                          booruURLController.text,
+                          booruDefTagsController.text
+                        );
                       } else {
-                        testBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
+                        testBooru = new Booru.withKey(
+                          booruNameController.text,
+                          widget.booruType,
+                          booruFaviconController.text,
+                          booruURLController.text,
+                          booruDefTagsController.text,
+                          booruAPIKeyController.text,
+                          booruUserIDController.text
+                        );
                       }
-                      String booruType = await booruTest(testBooru, selectedBooruType, booruTypes);
-                      if(booruFaviconController.text == ""){
-                        booruFaviconController.text = booruURLController.text + "/favicon.ico";
-                      }
+                      String booruType = await booruTest(testBooru, selectedBooruType);
+
                       // If a booru type is returned set the widget state
                       if(booruType != ""){
                         setState((){
@@ -97,11 +136,9 @@ class _booruEditState extends State<booruEdit> {
                           selectedBooruType = booruType;
                         });
                         // Alert user about the results of the test
-                        ServiceHandler.displayToast("Booru Type is $booruType \nClick the save button to save this config");
-                        //Get.snackbar("Booru Type is $booruType","Click the save button to save this config",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+                        ServiceHandler.displayToast("Booru Type is $booruType\nClick the save button to save this config");
                       } else {
-                        ServiceHandler.displayToast("No Data Returned \n Booru Information may be incorrect or the booru doesn't allow api access ");
-                        //Get.snackbar("No Data Returned","Booru Information may be incorrect or the booru doesn't allow api access ",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+                        ServiceHandler.displayToast("No Data Returned\nBooru Information may be incorrect or the booru doesn't allow api access");
                       }
                     },
                     child: Text("Test", style: TextStyle(color: Colors.white)),
@@ -181,9 +218,19 @@ class _booruEditState extends State<booruEdit> {
                         });
                       },
                       items: booruTypes.map<DropdownMenuItem<String>>((String value){
+                        bool isCurrent = selectedBooruType == value;
                         return DropdownMenuItem<String>(
                           value: value,
-                          child: Text(value),
+                          child: Container(
+                            padding: EdgeInsets.all(6),
+                            decoration: isCurrent
+                              ? BoxDecoration(
+                                border: Border.all(color: Colors.grey, width: 1),
+                                borderRadius: BorderRadius.circular(5),
+                              )
+                              : null,
+                            child: Row(children: [Text(value)]),
+                          ),
                         );
                       }).toList(),
                     ),
@@ -248,6 +295,11 @@ class _booruEditState extends State<booruEdit> {
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
               child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              width: double.infinity,
+              child: SelectableText(selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler(Booru('', selectedBooruType, '', '', ''), 1, null)[0].getDescription() : ""),
             ),
             Container(
                 child: Column(
@@ -355,7 +407,7 @@ class _booruEditState extends State<booruEdit> {
    */
   Widget saveButton(){
     if (widget.booruType == ""){
-      return Container();
+      return const SizedBox();
     } else {
       return TextButton(
         style: TextButton.styleFrom(
@@ -402,16 +454,16 @@ class _booruEditState extends State<booruEdit> {
    * if the searches return null each time it tries the search it uses a different
    * type of BooruHandler
    */
-  Future<String> booruTest(Booru booru, String userBooruType, List<String> booruTypes) async{
+  Future<String> booruTest(Booru booru, String userBooruType) async{
     String booruType = "";
     BooruHandler test;
     List<BooruItem>? testFetched = List.empty();
     booru.type = userBooruType;
 
-    if (userBooruType == "Not Sure"){
+    if (userBooruType == "AutoDetect"){
       for(int i = 1; i < booruTypes.length; i++){
         if (booruType == ""){
-          booruType = await booruTest(booru, booruTypes.elementAt(i), booruTypes);
+          booruType = await booruTest(booru, booruTypes.elementAt(i));
         }
       }
     } else {

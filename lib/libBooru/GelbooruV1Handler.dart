@@ -22,9 +22,9 @@ class GelbooruV1Handler extends BooruHandler{
     if(tags == " " || tags == ""){
       tags="all";
     }
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -48,7 +48,13 @@ class GelbooruV1Handler extends BooruHandler{
               /**
                * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
                */
-              fetched.add(BooruItem(fileURL, fileURL, thumbURL, tags, makePostURL(id), Tools.getFileExt(fileURL)));
+              fetched.add(BooruItem(
+                fileURL: fileURL,
+                sampleURL: fileURL,
+                thumbnailURL: thumbURL,
+                tagsList: tags,
+                postURL: makePostURL(id),
+              ));
               if(dbHandler!.db != null){
                 setTrackedValues(fetched.length - 1);
               }

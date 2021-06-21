@@ -3,40 +3,42 @@ import 'package:flutter/cupertino.dart';
 import '../SnatchHandler.dart';
 
 class ActiveTitle extends StatefulWidget {
-  SnatchHandler snatchHandler;
-  bool isSnatching = false;
-  String snatchStatus = "";
+  final SnatchHandler snatchHandler;
   @override
   _ActiveTitleState createState() => _ActiveTitleState();
   ActiveTitle(this.snatchHandler);
 }
 
 class _ActiveTitleState extends State<ActiveTitle> {
+  bool isSnatching = false;
+  String snatchStatus = "";
 
   @override
   void initState(){
-    //widget.snatchHandler.snatchActive.value = false;
-    widget.snatchHandler.snatchActive!.addListener(snatchActive);
-    widget.snatchHandler.snatchStatus!.addListener(snatchStatus);
+    super.initState();
+    widget.snatchHandler.snatchActive.addListener(setSnatchActive);
+    widget.snatchHandler.snatchStatus.addListener(setSnatchStatus);
   }
-  void snatchActive() {
-    setState(() {
-      widget.isSnatching = widget.snatchHandler.snatchActive!.value;
-    });
+
+  void setSnatchActive() {
+    isSnatching = widget.snatchHandler.snatchActive.value;
+    setState(() { });
   }
-  void snatchStatus(){
-    setState(() {
-      widget.snatchStatus = widget.snatchHandler.snatchStatus!.value;
-    });
+
+  void setSnatchStatus(){
+    snatchStatus = widget.snatchHandler.snatchStatus.value;
+    setState(() { });
   }
+
   @override
   void dispose(){
-    widget.snatchHandler.snatchStatus!.removeListener(snatchActive);
-    widget.snatchHandler.snatchStatus!.removeListener(snatchStatus);
+    widget.snatchHandler.snatchActive.removeListener(setSnatchActive);
+    widget.snatchHandler.snatchStatus.removeListener(setSnatchStatus);
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    return widget.isSnatching ? Text("Snatching: ${widget.snatchStatus}") : Text("Loli Snatcher");
+    return isSnatching ? Text("Snatching: ${snatchStatus}") : Text("Loli Snatcher");
   }
 }

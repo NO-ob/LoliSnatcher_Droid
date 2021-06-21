@@ -26,9 +26,9 @@ class HydrusHandler extends BooruHandler{
     List tagList = [];
     isActive = true;
     if (limit > 20){this.limit = 20;}
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       print("making new fetched list");
@@ -102,12 +102,12 @@ class HydrusHandler extends BooruHandler{
                 }
                 if (parsedResponse['metadata'][i]['file_id'] != null){
                   fetched.add(BooruItem(
-                    "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
-                    "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
-                    "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
-                    tagList,
-                    "postURL",
-                    parsedResponse['metadata'][i]['ext'].toString().substring(1)
+                    fileURL: "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                    sampleURL: "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                    thumbnailURL: "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
+                    tagsList: tagList,
+                    postURL: '',
+                    fileExt: parsedResponse['metadata'][i]['ext'].toString().substring(1)
                   ));
                   if(dbHandler!.db != null){
                     setTrackedValues(fetched.length - 1);

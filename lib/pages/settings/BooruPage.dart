@@ -161,8 +161,9 @@ class _BooruPageState extends State<BooruPage> {
                             ),
                           ),
                           onPressed: (){
-                            if(selectedBooru != null){
-                              Get.to(() => booruEdit(selectedBooru!,widget.settingsHandler));
+                            // do nothing if no selected or selected "Favourites"
+                            if(selectedBooru != null && selectedBooru?.type != 'Favourites'){
+                              Get.to(() => booruEdit(selectedBooru!, widget.settingsHandler));
                             }
                           },
                           child: Text("Edit", style: TextStyle(color: Colors.white)),
@@ -203,6 +204,9 @@ class _BooruPageState extends State<BooruPage> {
                             ),
                           ),
                           onPressed: (){
+                            // do nothing if no selected or selected "Favourites"
+                            if(selectedBooru == null || selectedBooru?.type == 'Favourites') return;
+
                             // Open the booru edtor page but with default values
                             if (widget.settingsHandler.deleteBooru(selectedBooru!)){
                               setState(() {

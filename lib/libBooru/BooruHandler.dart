@@ -17,11 +17,22 @@ abstract class BooruHandler {
   DBHandler? dbHandler;
   BooruHandler(this.booru,this.limit);
   Future? Search(String tags, int pageNum){}
+  String? makePostURL(String id){}
   String? makeURL(String tags){}
+  String? makeTagURL(String input){}
   tagSearch(String input) {}
+
+  int totalCount = 0;
+  void searchCount(String input) {
+    this.totalCount = 0;
+  }
 
   String getDescription() {
     return '';
+  }
+
+  List<String> searchModifiers() {
+    return [];
   }
 
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched

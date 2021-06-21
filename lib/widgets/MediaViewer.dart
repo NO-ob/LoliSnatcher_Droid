@@ -3,12 +3,14 @@ import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
@@ -17,9 +19,9 @@ import 'package:LoliSnatcher/widgets/BorderedText.dart';
 class MediaViewer extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
-  final int viewedIndex;
+  final SearchGlobals searchGlobals;
   final SettingsHandler settingsHandler;
-  MediaViewer(this.booruItem, this.index, this.viewedIndex, this.settingsHandler);
+  MediaViewer(this.booruItem, this.index, this.searchGlobals, this.settingsHandler);
 
   @override
   _MediaViewerState createState() => _MediaViewerState();
@@ -33,7 +35,7 @@ class _MediaViewerState extends State<MediaViewer> {
   int _total = 0, _received = 0;
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false, isHated = false;
+  bool isFromCache = false, isStopped = false, isHated = false, isZoomed = false, isZoomButtonVisible = true;
   List<String> stopReason = [];
 
   ImageProvider? thumbProvider;
@@ -59,49 +61,54 @@ class _MediaViewerState extends State<MediaViewer> {
         // multiple restates in the same function is usually bad practice, but we need this to notify user how the file is loaded while we await for bytes
         isFromCache = true;
       });
+      // add a small delay to let preview load
+      await Future.delayed(Duration(milliseconds: 500), () => true);
       // load bytes first, then trigger an empty restate
-      mainProvider = ResizeImage(MemoryImage(await file.readAsBytes()), width: 4096);
-      setState(() {});
+      mainProvider = getImageProvider(await file.readAsBytes());
+      if(this.mounted) setState(() {});
       return;
     }
-    //a few boorus doesn't work without a browser useragent
-    Map<String,String> headers = {"user-agent": "Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"};
+
     // Otherwise start loading and subscribe to progress
     _client = Dio();
     _dioCancelToken = CancelToken();
-    _client!.get<List<int>>(
-      imageURL!,
-      options: Options(responseType: ResponseType.bytes,headers: headers),
-      cancelToken: _dioCancelToken,
-      onReceiveProgress: (received, total) {
-        _total = total;
-        _onBytesAdded(received);
-      },
-    ).then((value) {
+
+    try {
+      //// GET request
+      Response<dynamic> response = await _client!.get(
+        imageURL!,
+        options: Options(responseType: ResponseType.bytes, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobals, checkForReferer: true)),
+        cancelToken: _dioCancelToken,
+        onReceiveProgress: (received, total) {
+          _total = total;
+          _onBytesAdded(received);
+        },
+      );
+
+      //// Parse response
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
-      if (_received > (_total * 0.95)) {
-        mainProvider = ResizeImage(MemoryImage(Uint8List.fromList(value.data!)), width: 4096);
-        setState((){ });
+      if (response.data != null && _received > (_total * 0.95)) {
+        mainProvider = getImageProvider(Uint8List.fromList(response.data!));
+        if(this.mounted) setState((){ });
 
         _checkInterval?.cancel();
 
         if(widget.settingsHandler.mediaCache) {
-          // final File cacheFile = await
-          imageWriter.writeCacheFromBytes(imageURL!, value.data!, imageType!);
+          imageWriter.writeCacheFromBytes(imageURL!, response.data!, imageType!);
         }
       } else {
-        killLoading(['Loading Incomplete Error']);
         print('Image load incomplete');
+        throw('Load Incomplete');
       }
-      return value;
-    }).catchError((e) {
+    } on DioError catch(e) {
+      //// Error handling
       if (CancelToken.isCancel(e)) {
         // print('Canceled by user: $imageURL | $e');
       } else {
-        killLoading(['Loading Error']);
+        killLoading(['Loading Error: ${e.message}']);
         print('Dio request cancelled: $e');
       }
-    });
+    }
   }
 
   /// Author: [Nani-Sore] ///
@@ -112,7 +119,7 @@ class _MediaViewerState extends State<MediaViewer> {
     if (isActive) {
       _received = received;
     } else {
-      setState(() {
+      if(this.mounted) setState(() {
         _received = received;
       });
       _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
@@ -122,6 +129,7 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void initState() {
     super.initState();
+    widget.searchGlobals.displayAppbar.addListener(setZoomVisibility);
     initViewer(false);
   }
 
@@ -139,18 +147,8 @@ class _MediaViewerState extends State<MediaViewer> {
     bool isThumbSample = widget.settingsHandler.previewMode == "Sample" && widget.booruItem.mediaType != "animation" && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL;
     thumbnailFileURL = isThumbSample ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
     thumbnailFolder = isThumbSample ? 'samples' : 'thumbnails';
-    () async {
-      String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!);
-      File? preview = previewPath != null ? File(previewPath) : null;
-
-      setState(() {
-        if (preview != null){
-          thumbProvider = FileImage(preview);
-        } else {
-          thumbProvider = NetworkImage(thumbnailFileURL!);
-        }
-      });
-    }();
+    bool isPreviewEqualToFull = thumbnailFileURL == widget.booruItem.fileURL;
+    if(!isPreviewEqualToFull) getThumbnail();
 
     List<List<String>> hatedAndLovedTags = widget.settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
     if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
@@ -164,20 +162,34 @@ class _MediaViewerState extends State<MediaViewer> {
 
     // debug output
     // viewController..outputStateStream.listen(onViewStateChanged);
-    // scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     _checkInterval?.cancel();
     _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
       // force restate every second to refresh all timers/indicators, even when loading has stopped
-      setState(() {});
+      if(this.mounted) setState(() {});
     });
 
     isStopped = false;
     _startedAt = DateTime.now().millisecondsSinceEpoch;
 
-    // if (widget.settingsHandler.mediaCache) {
     _downloadImage();
-    // }
+  }
+
+  void getThumbnail() async {
+    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!);
+    File? preview = previewPath != null ? File(previewPath) : null;
+
+    if (preview != null){
+      thumbProvider = ResizeImage(MemoryImage(await preview.readAsBytes()), width: 4096); // FileImage(preview);
+    } else {
+      thumbProvider = NetworkImage(thumbnailFileURL!);
+    }
+    if(this.mounted) setState(() { });
+  }
+
+  ImageProvider getImageProvider(Uint8List bytes) {
+    return ResizeImage(MemoryImage(bytes), width: 4096);
   }
 
   void killLoading(List<String> reason) {
@@ -215,8 +227,12 @@ class _MediaViewerState extends State<MediaViewer> {
       //   print('main image eviction failed');
       // }
     });
+
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
+
+    widget.searchGlobals.displayAppbar.removeListener(setZoomVisibility);
+
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
@@ -226,13 +242,63 @@ class _MediaViewerState extends State<MediaViewer> {
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
     print(scaleState);
+
+    // manual zoom || double tap || double tap AFTER double tap
+    isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
+    setState(() { });
   }
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     print(viewState);
   }
 
+  void resetZoom() {
+    scaleController.scaleState = PhotoViewScaleState.initial;
+    setState(() { });
+  }
+
+  void doubleTapZoom() {
+    scaleController.scaleState = PhotoViewScaleState.covering;
+    setState(() { });
+  }
+
+  void setZoomVisibility() {
+    isZoomButtonVisible = widget.searchGlobals.displayAppbar.value;
+    setState(() { });
+  }
+
+  Widget zoomButtonBuild() {
+    if(isZoomButtonVisible && mainProvider != null) {
+      return Positioned(
+        bottom: 150,
+        right: -15,
+        child: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            primary: Theme.of(context).colorScheme.secondary.withOpacity(0.33),
+            minimumSize: Size(28, 28),
+            padding: EdgeInsets.all(3),
+          ),
+          icon: Icon(isZoomed ? Icons.zoom_out : Icons.zoom_in, size: 28),
+          label: Text(''),
+          onPressed: isZoomed ? resetZoom : doubleTapZoom,
+        )
+      );
+    } else {
+      return const SizedBox();
+    }
+  }
+
   /// Author: [Nani-Sore] ///
   Widget loadingElementBuilder(BuildContext ctx, ImageChunkEvent? loadingProgress) {
+    if(widget.settingsHandler.loadingGif) {
+      return Container(
+        width: MediaQuery.of(context).size.width - 30,
+        child: Image(image: AssetImage('assets/images/loading.gif'))
+      );
+    } else if(widget.settingsHandler.shitDevice) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+
     bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (_total > 0);
     int expectedBytes = hasProgressData
         ? _received
@@ -419,64 +485,40 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   Widget build(BuildContext context) {
-    if (widget.viewedIndex != widget.index) {
+    final bool isViewed = widget.searchGlobals.viewedIndex.value == widget.index;
+    if (!isViewed) {
       // reset zoom if not viewed
-      setState(() {
-        scaleController.scaleState = PhotoViewScaleState.initial;
-      });
+      resetZoom();
     }
 
-    // Scaffold(
-    //   floatingActionButton: FloatingActionButton.extended(
-    //     label: Text("${_received ~/ 1024}/${_total ~/ 1024} KB"),
-    //     icon: Icon(Icons.file_download),
-    //     // onPressed: _downloadImage,
-    //   ),
-    //   body: Center(
-    //     child: loadingElementBuilder(context, null),
-    //   ),
-    // )
+    return Hero(
+      tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
+      child: Material( // without this every text element will have broken styles on first frames
+        child: Stack(
+          children: [
+            if(mainProvider == null)
+              loadingElementBuilder(context, null)
+            else
+              PhotoView(
+                //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+                imageProvider: mainProvider,
+                filterQuality: FilterQuality.high,
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 8,
+                initialScale: PhotoViewComputedScale.contained,
+                enableRotation: false,
+                basePosition: Alignment.center,
+                controller: viewController,
+                // tightMode: true,
+                // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.viewedIndex == widget.index ? '' : 'ignore') + widget.index.toString()),
+                scaleStateController: scaleController,
+                loadingBuilder: loadingElementBuilder,
+              ),
 
-    if (!widget.settingsHandler.shitDevice){
-      return mainProvider == null //(_totalBytes.length == 0)
-          ? Center(child: loadingElementBuilder(context, null))
-          : PhotoView(
-        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-        imageProvider: mainProvider, //ResizeImage(mainProvider!, width: 4096), //MemoryImage(_totalBytes),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 8,
-        initialScale: PhotoViewComputedScale.contained,
-        enableRotation: false,
-        basePosition: Alignment.center,
-        controller: viewController,
-        // tightMode: true,
-        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
-        scaleStateController: scaleController,
-        loadingBuilder: loadingElementBuilder,
-      );
-    } else {
-      return PhotoView(
-        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-        imageProvider: NetworkImage(widget.settingsHandler.galleryMode == "Sample" ? widget.booruItem.sampleURL : widget.booruItem.fileURL), //ResizeImage(mainProvider!, width: 4096), //MemoryImage(_totalBytes),
-        minScale: PhotoViewComputedScale.contained,
-        maxScale: PhotoViewComputedScale.covered * 8,
-        initialScale: PhotoViewComputedScale.contained,
-        enableRotation: false,
-        basePosition: Alignment.center,
-        controller: viewController,
-        // tightMode: true,
-        heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + widget.index.toString()),
-        scaleStateController: scaleController,
-        loadingBuilder: (context, event) => !widget.settingsHandler.loadingGif ? Center(
-        child: Container(
-          width: 100.0,
-          height: 100.0,
-          child: CircularProgressIndicator(),
-        )) : Container(
-            width: MediaQuery.of(context).size.width - 30,
-            child: Image(image: AssetImage('assets/images/loading.gif'))
-        ),
-      );
-    }
+            zoomButtonBuild(),
+          ]
+        )
+      )
+    );
   }
 }

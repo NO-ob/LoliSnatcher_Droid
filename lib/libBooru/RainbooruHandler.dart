@@ -21,9 +21,9 @@ class RainbooruHandler extends BooruHandler {
     if (tags == "" || tags == " "){
       tags = "*";
     }
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -48,28 +48,27 @@ class RainbooruHandler extends BooruHandler {
             if (responseInner.statusCode == 200){
               document = parse(responseInner.body);
               var post = document.getElementById("immainpage");
-               if (post != null){
-                 var postsURLs = post.querySelector("div#immainpage > a");
-                 String fileURL = "" + postsURLs!.attributes["href"]!;
-                 String sampleURL = "" + postsURLs!.firstChild!.attributes["src"]!;
-                 var tags = document.querySelectorAll("a.tag");
-                 print("fileurl is " +fileURL);
-                 List<String> currentTags = [];
-                 for (int x = 0; x < tags.length; x++) {
-                   currentTags.add(tags[x].innerHtml.replaceAll(" ", "+"));
-                 }
-                 fetched.add(BooruItem(
-                     fileURL,
-                     sampleURL,
-                     thumbURL,
-                     currentTags,
-                     url,
-                     Tools.getFileExt(fileURL),
-                 ));
-                 if(dbHandler!.db != null){
-                   setTrackedValues(fetched.length - 1);
-                 }
-               }
+              if (post != null){
+                var postsURLs = post.querySelector("div#immainpage > a");
+                String fileURL = "" + postsURLs!.attributes["href"]!;
+                String sampleURL = "" + postsURLs.firstChild!.attributes["src"]!;
+                var tags = document.querySelectorAll("a.tag");
+                print("fileurl is " +fileURL);
+                List<String> currentTags = [];
+                for (int x = 0; x < tags.length; x++) {
+                  currentTags.add(tags[x].innerHtml.replaceAll(" ", "+"));
+                }
+                fetched.add(BooruItem(
+                  fileURL: fileURL,
+                  sampleURL: sampleURL,
+                  thumbnailURL: thumbURL,
+                  tagsList: currentTags,
+                  postURL: url,
+                ));
+                if(dbHandler!.db != null){
+                  setTrackedValues(fetched.length - 1);
+                }
+              }
             } else {
               print("post $i skipped");
             }

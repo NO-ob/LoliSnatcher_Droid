@@ -23,9 +23,9 @@ class ShimmieHandler extends BooruHandler{
     if(tags == " " || tags == ""){
       tags="*";
     }
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
@@ -54,36 +54,34 @@ class ShimmieHandler extends BooruHandler{
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if (current.getAttribute("file_url") != null){
+            String preURL = '';
             if (booru.baseURL!.contains("https://whyneko.com/booru")){
               // special case for whyneko
-              String cutURL = booru.baseURL!.split("/booru")[0];
-              fetched.add(BooruItem(
-                cutURL+current.getAttribute("file_url")!,
-                cutURL+current.getAttribute("preview_url")!,
-                cutURL+current.getAttribute("preview_url")!,
-                current.getAttribute("tags")!.split(" "),
-                makePostURL(current.getAttribute("id")!),
-                Tools.getFileExt(current.getAttribute("file_url")),
-                fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
-                fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
-              ));
-            } else {
-              // other shimmie boorus
-              fetched.add(BooruItem(
-                current.getAttribute("file_url").toString(),
-                current.getAttribute("preview_url").toString(),
-                current.getAttribute("preview_url").toString(),
-                current.getAttribute("tags")!.split(" "),
-                makePostURL(current.getAttribute("id")!),
-                Tools.getFileExt(current.getAttribute("file_url")),
-                fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
-                fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
-              ));
+              preURL = booru.baseURL!.split("/booru")[0];
             }
+
+            String dateString = current.getAttribute("date").toString();
+            fetched.add(BooruItem(
+              fileURL: preURL + current.getAttribute("file_url")!,
+              sampleURL: preURL + current.getAttribute("file_url")!,
+              thumbnailURL: preURL + current.getAttribute("preview_url")!,
+              tagsList: current.getAttribute("tags")!.split(" "),
+              postURL: makePostURL(current.getAttribute("id")!),
+              fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
+              fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
+              previewWidth: double.tryParse(current.getAttribute('preview_width') ?? '') ?? null,
+              previewHeight: double.tryParse(current.getAttribute('preview_height') ?? '') ?? null,
+              serverId: current.getAttribute("id"),
+              score: current.getAttribute("score"),
+              sources: [current.getAttribute("source") ?? ''],
+              md5String: current.getAttribute("md5"),
+              postDate: dateString.substring(0, dateString.length-3), // 2021-06-18 04:37:31.471007 // microseconds?
+              postDateFormat: 'yyyy-MM-dd HH:mm:ss.SSSSSS'
+            ));
+          }
               
-            if(dbHandler!.db != null){
-              setTrackedValues(fetched.length - 1);
-            }
+          if(dbHandler!.db != null){
+            setTrackedValues(fetched.length - 1);
           }
         }
         prevTags = tags;
@@ -118,7 +116,7 @@ class ShimmieHandler extends BooruHandler{
       return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10";
     }
   }
-  //No api documentation on finding tags
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];
@@ -137,5 +135,27 @@ class ShimmieHandler extends BooruHandler{
     }
     print(searchTags.length);
     return searchTags;
+  }
+
+  void searchCount(String input) async {
+    int result = 0;
+    if (booru.baseURL!.contains("rule34.paheal.net") && input != ''){ // paheal limits any search to 500 pages => empty input returns wrong count
+      String url = makeURL(input);
+      try {
+        Uri uri = Uri.parse(url);
+        final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
+        // 200 is the success http response code
+        if (response.statusCode == 200) {
+          var parsedResponse = xml.parse(response.body);
+          var root = parsedResponse.findAllElements('posts').toList();
+          if(root.length == 1) {
+            result = int.parse(root[0].getAttribute('count') ?? '0');
+          }
+        }
+      } catch(e) {
+        print(e);
+      }
+    }
+    this.totalCount = result;
   }
 }

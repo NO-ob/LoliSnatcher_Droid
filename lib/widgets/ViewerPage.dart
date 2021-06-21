@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
-// import 'package:preload_page_view/preload_page_view.dart';
+import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:vibration/vibration.dart';
 
@@ -21,7 +21,7 @@ import 'package:LoliSnatcher/getPerms.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MediaViewer.dart';
-import 'package:LoliSnatcher/widgets/PreloadPageView.dart' as PreloadPageView;
+// import 'package:LoliSnatcher/widgets/PreloadPageView.dart' as PreloadPageView;
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
@@ -40,23 +40,27 @@ class ViewerPage extends StatefulWidget {
   SearchGlobals searchGlobals;
   SettingsHandler settingsHandler;
   SnatchHandler snatchHandler;
+  Function callback;
 
-  ViewerPage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.snatchHandler);
+  ViewerPage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.snatchHandler, this.callback);
   @override
   _ViewerPageState createState() => _ViewerPageState();
 }
 
 class _ViewerPageState extends State<ViewerPage> {
-  PreloadPageView.PageController? controller;
+  // PreloadPageView.PageController? controller;
+  PreloadPageController? controller;
   PageController? controllerLinux;
   ImageWriter writer = new ImageWriter();
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
+  final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
-    controller = PreloadPageView.PageController(
+    // controller = PreloadPageView.PageController(
+    controller = PreloadPageController(
       initialPage: widget.index,
     );
     controllerLinux = PageController(
@@ -64,23 +68,25 @@ class _ViewerPageState extends State<ViewerPage> {
     );
     setState(() {
       // print("widget index: ${widget.index}");
-      // print("searchglobals index: ${widget.searchGlobals.viewedIndex!.value}");
-      widget.searchGlobals.viewedIndex!.value = widget.index;
+      // print("searchglobals index: ${widget.searchGlobals.viewedIndex.value}");
+      widget.searchGlobals.viewedIndex.value = widget.index;
     });
     kbFocusNode.requestFocus();
     ServiceHandler.disableSleep();
 
     // enable volume buttons if opened page is a video AND appbar is visible
     bool isVideo = widget.fetched[widget.index].isVideo();
-    bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar!.value);
+    bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
+    setVolumeListener();
   }
 
   @override
   Widget build(BuildContext context) {
-    String appBarTitle = "${(widget.searchGlobals.viewedIndex!.value + 1).toString()}/${widget.fetched.length.toString()}";
+    String appBarTitle = "${(widget.searchGlobals.viewedIndex.value + 1).toString()}/${widget.fetched.length.toString()}";
     //kbFocusNode.requestFocus();
     return Scaffold(
+      key: viewerScaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
       appBar: widget.settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(appBarTitle, appBarActions(), widget.searchGlobals, widget.settingsHandler.autoHideImageBar) : null,
@@ -90,11 +96,11 @@ class _ViewerPageState extends State<ViewerPage> {
         // vertical to prevent swipe-to-dismiss when zoomed
         axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix for this
         child: Dismissible(
-          direction: DismissDirection.vertical,
+          direction: widget.settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
           // background: Container(color: Colors.black.withOpacity(0.3)),
           key: const Key('imagePageDismissibleKey'),
           resizeDuration: null, // Duration(milliseconds: 100),
-          dismissThresholds: {DismissDirection.up: 0.2, DismissDirection.down: 0.2}, // Amount of swiped away which triggers dismiss
+          dismissThresholds: {DismissDirection.up: 0.2, DismissDirection.down: 0.2, DismissDirection.startToEnd: 0.3, DismissDirection.endToStart: 0.3}, // Amount of swiped away which triggers dismiss
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
             // child: PhotoViewGestureDetectorScope(
@@ -105,15 +111,21 @@ class _ViewerPageState extends State<ViewerPage> {
             // ),
           )
         )
+      ),
+      endDrawerEnableOpenDragGesture: false,
+      endDrawer: Theme(
+        data: Theme.of(context).copyWith(
+          canvasColor: Theme.of(context).colorScheme.background.withOpacity(0.66) // copy existing main app theme, but make background semitransparent
+        ),
+        child: renderDrawer(),
       )
     );
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void setVolumeListener() {
     volumeListener?.cancel();
     volumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
+      // print('in viewer $event');
       int dir = 0;
       if (event == 'up') {
         dir = -1;
@@ -122,7 +134,7 @@ class _ViewerPageState extends State<ViewerPage> {
       }
 
       // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, widget.fetched.length), 0);
-      int toPage = widget.searchGlobals.viewedIndex!.value + dir; // lastScrolledTo; 
+      int toPage = widget.searchGlobals.viewedIndex.value + dir; // lastScrolledTo; 
       controller?.animateToPage(toPage, duration: Duration(milliseconds: 30), curve: Curves.easeInOut);
       // controller?.jumpToPage(toPage);
     });
@@ -131,10 +143,11 @@ class _ViewerPageState extends State<ViewerPage> {
   @override
   void dispose(){
     volumeListener?.cancel();
-    ServiceHandler.setVolumeButtons(true);
+    ServiceHandler.setVolumeButtons(!widget.settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
-    super.dispose();
+    widget.callback();
     ServiceHandler.enableSleep();
+    super.dispose();
   }
 
   Widget androidPageBuilder() {
@@ -143,31 +156,31 @@ class _ViewerPageState extends State<ViewerPage> {
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event){
         if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
-          controller?.jumpToPage(widget.searchGlobals.viewedIndex!.value - 1);
+          controller?.jumpToPage(widget.searchGlobals.viewedIndex.value - 1);
         } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
-          controller?.jumpToPage(widget.searchGlobals.viewedIndex!.value + 1);
+          controller?.jumpToPage(widget.searchGlobals.viewedIndex.value + 1);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru,widget.settingsHandler.snatchCooldown);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru,widget.settingsHandler.snatchCooldown);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)){
           if (widget.settingsHandler.dbEnabled){
             setState(() {
-              widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite;
-              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value],"local");
+              widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
+              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value],"local");
             });
           }
         }
       },
-      child: PreloadPageView.PageView.builder( // PreloadPageView.builder(
+      child: PreloadPageView.builder( // PreloadPageView.PageView.builder(
         preloadPagesCount: widget.settingsHandler.preloadCount,
-        allowImplicitScrolling: true,
-        scrollDirection: Axis.horizontal,
+        // allowImplicitScrolling: true,
+        scrollDirection: widget.settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
         physics: const AlwaysScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           String fileURL = widget.fetched[index].fileURL;
           bool isVideo = widget.fetched[index].isVideo();
           int preloadCount = widget.settingsHandler.preloadCount;
-          bool isViewed = widget.searchGlobals.viewedIndex!.value == index;
-          bool isNear = (widget.searchGlobals.viewedIndex!.value - index).abs() <= preloadCount;
+          bool isViewed = widget.searchGlobals.viewedIndex.value == index;
+          bool isNear = (widget.searchGlobals.viewedIndex.value - index).abs() <= preloadCount;
           // print(fileURL);
           // print('isVideo: '+isVideo.toString());
           // Render only if viewed or in preloadCount range
@@ -184,39 +197,40 @@ class _ViewerPageState extends State<ViewerPage> {
                 //   double sideThreshold = screenWidth / 5;
 
                 //   if(tapPosX > (screenWidth - sideThreshold)) {
-                //     controller?.animateToPage(widget.searchGlobals.viewedIndex!.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
                 //   } else if(tapPosX < sideThreshold) {
-                //     controller?.animateToPage(widget.searchGlobals.viewedIndex!.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
                 //   }
                 // },
                 onLongPress: () async {
                   print('longpress');
-                  bool newAppbarVisibility = !widget.searchGlobals.displayAppbar!.value;
-                  widget.searchGlobals.displayAppbar!.value = newAppbarVisibility;
+                  bool newAppbarVisibility = !widget.searchGlobals.displayAppbar.value;
+                  widget.searchGlobals.displayAppbar.value = newAppbarVisibility;
 
                   if(await Vibration.hasVibrator() ?? false) {
                     Vibration.vibrate(duration: 10);
                   }
 
                   // enable volume buttons if current page is a video AND appbar is set to visible
-                  bool isVideo = widget.fetched[widget.searchGlobals.viewedIndex!.value].isVideo();
+                  bool isVideo = widget.fetched[widget.searchGlobals.viewedIndex.value].isVideo();
                   bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
                   ServiceHandler.setVolumeButtons(isVolumeAllowed);
                 },
                 child: isVideo
-                  ? (!widget.settingsHandler.disableVideo ? VideoApp(
-                    widget.fetched[index],
-                    index,
-                    widget.searchGlobals,
-                    widget.settingsHandler,
-                    true
-                ): Center(
-                  child: Text("Video Disabled", style: TextStyle(fontSize: 20),),
-                ))
+                  ? (!widget.settingsHandler.disableVideo
+                    ? VideoApp(
+                      widget.fetched[index],
+                      index,
+                      widget.searchGlobals,
+                      widget.settingsHandler,
+                      true
+                    )
+                    : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
+                  )
                   : MediaViewer(
                     widget.fetched[index],
                     index,
-                    widget.searchGlobals.viewedIndex!.value,
+                    widget.searchGlobals,
                     widget.settingsHandler
                   )
               )
@@ -230,13 +244,13 @@ class _ViewerPageState extends State<ViewerPage> {
         controller: controller,
         onPageChanged: (int index) {
           setState(() {
-            widget.searchGlobals.viewedIndex!.value = index;
+            widget.searchGlobals.viewedIndex.value = index;
             kbFocusNode.requestFocus();
           });
 
           // enable volume buttons if new page is a video AND appbar is visible
           bool isVideo = widget.fetched[index].isVideo();
-          bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar!.value);
+          bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar.value);
           ServiceHandler.setVolumeButtons(isVolumeAllowed);
           // print('Page changed ' + index.toString());
         },
@@ -281,6 +295,20 @@ class _ViewerPageState extends State<ViewerPage> {
         });
   }
 
+  Widget renderDrawer() {
+    final MediaQueryData mQuery = MediaQuery.of(context);
+    final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.75) : (mQuery.size.height * 0.75);
+
+    return SizedBox(
+      width: maxWidth,
+      child: Drawer(
+        child: SafeArea(
+          child: TagView(widget.fetched[widget.searchGlobals.viewedIndex.value], widget.searchGlobals, widget.settingsHandler)
+        ),
+      )
+    );
+  }
+
 
   /// Author: [Nani-Sore] ///
   void shareTextAction(String text) {
@@ -290,14 +318,14 @@ class _ViewerPageState extends State<ViewerPage> {
 
   /// Author: [Nani-Sore] ///
   void shareFileAction() async {
-    BooruItem item = widget.fetched[widget.searchGlobals.viewedIndex!.value];
+    BooruItem item = widget.fetched[widget.searchGlobals.viewedIndex.value];
     String? path = await ImageWriter().getCachePath(item.fileURL, 'media');
     ServiceHandler serviceHandler = new ServiceHandler();
     ImageWriter writer = new ImageWriter();
 
     if(path != null) {
       // File is already in cache - share from there
-      await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt);
+      await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       ServiceHandler.displayToast("Loading file from network...\nPlease wait");
@@ -307,7 +335,7 @@ class _ViewerPageState extends State<ViewerPage> {
       final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media');
       if(cacheFile != null) {
         path = cacheFile.path;
-        await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt);
+        await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
       } else {
         ServiceHandler.displayToast("Error!\nSomething went wrong when saving file to share");
       }
@@ -319,48 +347,81 @@ class _ViewerPageState extends State<ViewerPage> {
 
   /// Author: [Nani-Sore] ///
   void showShareDialog({bool showTip = true}) {
+    // TODO change layout so the buttons set their width automatically, without padding stuff
     Get.dialog(
       InfoDialog('What to share',
         [
-          TextButton(
-            style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
-                )
-            ),
-            onPressed: (){
-              Navigator.of(context).pop();
-              shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);
-            },
-            child: Text('Post URL', style: TextStyle(color: Colors.white))
+          const SizedBox(height: 15),
+          Column(
+            children: [
+              if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '')
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(10),
+                            side: BorderSide(color: Get.context!.theme.accentColor),
+                          ),
+                          padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
+                      ),
+                      onPressed: (){
+                        Navigator.of(context).pop();
+                        shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+                      },
+                      icon: Icon(CupertinoIcons.link),
+                      label: Text('Post URL', style: TextStyle(color: Colors.white))
+                    )
+                  ]
+                ),
+
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(10),
+                          side: BorderSide(color: Get.context!.theme.accentColor),
+                        ),
+                        padding: EdgeInsets.fromLTRB(18, 15, 18, 15),
+                    ),
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                      shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+                    },
+                    icon: Icon(CupertinoIcons.link),
+                    label: Text('File URL', style: TextStyle(color: Colors.white))
+                  )
+                ]
+              ),
+
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: new BorderRadius.circular(10),
+                        side: BorderSide(color: Get.context!.theme.accentColor),
+                      ),
+                      padding: EdgeInsets.fromLTRB(32, 15, 32, 15),
+                    ),
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                      shareFileAction();
+                    },
+                    icon: Icon(Icons.file_present),
+                    label: Text('File', style: TextStyle(color: Colors.white))                  
+                  )
+                ]
+              ),
+            ]
           ),
-          TextButton(
-            style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
-                )
-            ),
-            onPressed: (){
-              Navigator.of(context).pop();
-              shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].fileURL);
-            },
-            child: Text('File URL', style: TextStyle(color: Colors.white))
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: new BorderRadius.circular(20),
-                side: BorderSide(color: Get.context!.theme.accentColor),
-              )
-            ),
-            onPressed: (){
-              Navigator.of(context).pop();
-              shareFileAction();
-            },
-            child: Text('File', style: TextStyle(color: Colors.white))
-          ),
+          const SizedBox(height: 15),
           Text(showTip ? '[Tip]: You can set default action in settings' : '')
         ],
         CrossAxisAlignment.center,
@@ -376,11 +437,14 @@ class _ViewerPageState extends State<ViewerPage> {
         onPressed: () async {
           getPerms();
           // call a function to save the currently viewed image when the save button is pressed
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex!.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru, widget.settingsHandler.snatchCooldown);
+          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru, widget.settingsHandler.snatchCooldown);
         },
       ),
       GestureDetector(
-        onLongPress: () {
+        onLongPress: () async {
+          if(await Vibration.hasVibrator() ?? false) {
+            Vibration.vibrate(duration: 10);
+          }
           // Ignore share setting on long press
           showShareDialog(showTip: false);
         },
@@ -391,10 +455,14 @@ class _ViewerPageState extends State<ViewerPage> {
             String shareSetting = widget.settingsHandler.shareAction;
             switch(shareSetting) {
               case 'Post URL':
-                shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);
+                if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '') {
+                  shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+                } else {
+                  ServiceHandler.displayToast("No Post URL!");
+                }
                 break;
               case 'File URL':
-                shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex!.value].fileURL);
+                shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
                 break;
               case 'File':
                 shareFileAction();
@@ -408,36 +476,34 @@ class _ViewerPageState extends State<ViewerPage> {
           },
         ),
       ),
-      widget.settingsHandler.dbEnabled ?
-      IconButton(
-        icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite ? Icons.favorite : Icons.favorite_border),
-        color: Colors.white,
-        onPressed: () {
-          setState(() {
-            widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex!.value].isFavourite;
-            widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex!.value],"local");
-          });
-        },
-      ) : Container(),
-      IconButton(
-        icon: Icon(Icons.public),
-        color: Colors.white,
-        onPressed: () {
-            ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex!.value].postURL);
-        },
-      ),
+      widget.settingsHandler.dbEnabled
+        ? IconButton(
+          icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
+          color: Colors.white,
+          onPressed: () {
+            setState(() {
+              widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
+              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value],"local");
+            });
+          },
+        )
+        : const SizedBox(),
+
+      if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '')
+        IconButton(
+          icon: Icon(Icons.public),
+          color: Colors.white,
+          onPressed: () {
+              ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+          },
+        ),
+
       IconButton(
         icon: Icon(Icons.info),
         color: Colors.white,
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return Dialog(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-                  child: TagView(widget.fetched[widget.searchGlobals.viewedIndex!.value], widget.searchGlobals, widget.settingsHandler),
-                );
-              });
+          // Scaffold.of(context).openEndDrawer(); // doesn't work?
+          viewerScaffoldKey.currentState?.openEndDrawer();
         },
       ),
     ];

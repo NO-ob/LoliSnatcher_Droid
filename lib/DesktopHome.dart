@@ -63,7 +63,6 @@ class _DesktopHomeState extends State<DesktopHome> {
     setState(() {
       globalsIndex = index;
     });
-    Tools.forceClearMemoryCache(withLive: true);
     if(newSearch != null) {
       searchAction(searchGlobals[globalsIndex].tags);
     } else {
@@ -80,7 +79,7 @@ class _DesktopHomeState extends State<DesktopHome> {
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
-    Tools.forceClearMemoryCache();
+    Tools.forceClearMemoryCache(withLive: true);
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
@@ -95,29 +94,29 @@ class _DesktopHomeState extends State<DesktopHome> {
   }
   @override
   Widget build(BuildContext context) {
-    if (searchGlobals[globalsIndex].newTab!.value == "noListener"){
-      searchGlobals[globalsIndex].newTab!.addListener((){
-        if (searchGlobals[globalsIndex].newTab!.value != null){
+    if (searchGlobals[globalsIndex].newTab.value == "noListener"){
+      searchGlobals[globalsIndex].newTab.addListener((){
+        if (searchGlobals[globalsIndex].newTab.value != null){
           setState(() {
             // Add after the current tab
-            // searchGlobals.insert(globalsIndex + 1, new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
+            // searchGlobals.insert(globalsIndex + 1, new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value));
             // Add to the end
-            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab!.value));
+            searchGlobals.add(new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchGlobals[globalsIndex].newTab.value!));
           });
-          if(searchGlobals[globalsIndex].newTab!.value != "" && widget.settingsHandler.searchHistoryEnabled) {
-            widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab!.value, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
+          if(searchGlobals[globalsIndex].newTab.value != "" && widget.settingsHandler.searchHistoryEnabled) {
+            widget.settingsHandler.dbHandler.updateSearchHistory(searchGlobals[globalsIndex].newTab.value!, searchGlobals[globalsIndex].selectedBooru?.type, searchGlobals[globalsIndex].selectedBooru?.name);
           }
-          searchGlobals[globalsIndex].newTab!.value = null;
+          searchGlobals[globalsIndex].newTab.value = null;
         }
       });
-      searchGlobals[globalsIndex].addTag!.addListener((){
-        if (searchGlobals[globalsIndex].addTag!.value != ""){
-          searchTagsController.text += searchGlobals[globalsIndex].addTag!.value;
-          searchGlobals[globalsIndex].addTag!.value = "";
+      searchGlobals[globalsIndex].addTag.addListener((){
+        if (searchGlobals[globalsIndex].addTag.value != ""){
+          searchTagsController.text += searchGlobals[globalsIndex].addTag.value!;
+          searchGlobals[globalsIndex].addTag.value = "";
         }
       });
-      searchGlobals[globalsIndex].removeTab!.addListener((){
-        if(searchGlobals[globalsIndex].removeTab!.value != "") {
+      searchGlobals[globalsIndex].removeTab.addListener((){
+        if(searchGlobals[globalsIndex].removeTab.value != "") {
           setState(() {
             if(searchGlobals.length > 1) {
               if(globalsIndex == searchGlobals.length - 1){
@@ -134,10 +133,10 @@ class _DesktopHomeState extends State<DesktopHome> {
               searchGlobals[0] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, widget.settingsHandler.defTags);
             }
           });
-          searchGlobals[globalsIndex].removeTab!.value = "";
+          searchGlobals[globalsIndex].removeTab.value = "";
         }
       });
-      searchGlobals[globalsIndex].newTab!.value = null;
+      searchGlobals[globalsIndex].newTab.value = null;
     }
     return Scaffold(
       resizeToAvoidBottomInset: false,

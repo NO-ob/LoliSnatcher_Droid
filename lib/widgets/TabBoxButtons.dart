@@ -24,11 +24,9 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
     showDialog(context: context, builder: (context) {
       return StatefulBuilder(builder: (context, setDialogState) {
         return InfoDialog(
-          'Search History',
+          null,
           [
-            widget.settingsHandler.searchHistoryEnabled ? const SizedBox() : Text('Search History is disabled.'),
-            widget.settingsHandler.dbEnabled ? const SizedBox() : Text('Search History requires enabling Database in settings.'),
-            HistoryList(widget.searchGlobals,widget.globalsIndex,widget.searchTagsController,widget.settingsHandler,widget.setParentGlobalsIndex),
+            HistoryList(widget.searchGlobals, widget.globalsIndex, widget.searchTagsController, widget.settingsHandler, widget.setParentGlobalsIndex)
           ],
           CrossAxisAlignment.start
         );
@@ -54,7 +52,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
                   onPressed: () {
                     // Remove selected searchglobal from list and apply nearest to search bar
                     setState((){
-                      widget.searchGlobals[widget.globalsIndex].removeTab!.value = "remove";
+                      widget.searchGlobals[widget.globalsIndex].removeTab.value = "remove";
                     });
                   },
                 ),
@@ -64,16 +62,24 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
                     showHistory();
                   },
                 ),
-                IconButton(
-                  icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor),
-                  onPressed: () {
-                    // add a new search global to the list
-                    setState((){
-                      widget.searchGlobals[widget.globalsIndex].newTab!.value = widget.settingsHandler.defTags;
-                      // widget.searchGlobals.add(new SearchGlobals(widget.searchGlobals[widget.globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
-                      // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
-                    });
+                GestureDetector(
+                  onLongPress: () {
+                    widget.searchTagsController.text = widget.settingsHandler.defTags;
+                    widget.searchGlobals[widget.globalsIndex].newTab.value = widget.settingsHandler.defTags;
+                    widget.setParentGlobalsIndex(widget.searchGlobals.length - 1, null); // set last tab
                   },
+                  child: IconButton(
+                    icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor),
+                    onPressed: () {
+                      // add a new search global to the list
+                      widget.searchGlobals[widget.globalsIndex].newTab.value = widget.settingsHandler.defTags;
+                      widget.setParentGlobalsIndex(widget.globalsIndex, null);
+                      // setState((){
+                        // widget.searchGlobals.add(new SearchGlobals(widget.searchGlobals[widget.globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
+                        // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
+                      // });
+                    },
+                  ),
                 ),
                 const SizedBox(width: 30),
               ]

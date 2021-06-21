@@ -4,13 +4,15 @@ import 'dart:math';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
-import 'package:chewie/src/material_progress_bar.dart';
-import 'package:chewie/src/utils.dart';
+import 'package:chewie/src/progress_bar.dart';
+import 'package:chewie/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class LoliControls extends StatefulWidget {
-  const LoliControls({Key? key}) : super(key: key);
+  const LoliControls({
+    Key? key
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -21,23 +23,12 @@ class LoliControls extends StatefulWidget {
 class _LoliControlsState extends State<LoliControls>
     with SingleTickerProviderStateMixin {
   late VideoPlayerValue _latestValue;
-  double? _latestVolume;
-  double? _latestLight;
-  final int len = 200;
-  double? heightToSwipe;
-  int intVolume = -1;
-  int intLight = -1;
   bool _hideStuff = true;
   Timer? _hideTimer;
   Timer? _initTimer;
   Timer? _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
-
-  bool? _vertDragType; // false - brightness, true - volume, null - middle
-  bool _adjust = false;
-  double _initialHeightOffset = 0;
-  double _endHeightOffset = 0;
 
   final barHeight = 48.0;
   final marginSize = 5.0;
@@ -62,17 +53,6 @@ class _LoliControlsState extends State<LoliControls>
 
 
   @override
-  void initState() {
-    setUp();
-    super.initState();
-  }
-
-  setUp() {
-    _latestLight = .5;
-    _latestVolume = 1;
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (_latestValue.hasError) {
       return chewieController.errorBuilder?.call(
@@ -88,8 +68,6 @@ class _LoliControlsState extends State<LoliControls>
           );
     }
 
-    heightToSwipe = MediaQuery.of(context).size.height / 5;
-
     return MouseRegion(
       onHover: (_) {
         _cancelAndRestartTimer();
@@ -97,44 +75,12 @@ class _LoliControlsState extends State<LoliControls>
       child: GestureDetector(
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
-        // TODO WIP
-        onVerticalDragStart: null, // _onVerticalDragStart,
-        onVerticalDragUpdate: null, // _onVerticalDragUpdate,
-        onVerticalDragEnd: null, // _onVerticalDragEnd,
         onTap: () => _cancelAndRestartTimer(),
         child: AbsorbPointer(
           absorbing: _hideStuff,
           child: Column(
             children: <Widget>[
               _buildDoubleTapMessage(),
-              Center(
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3 * 2,
-                  child: (_vertDragType == null && (_initialHeightOffset - _endHeightOffset).abs() < heightToSwipe!) ? const SizedBox() : Offstage(
-                    offstage: !_adjust,
-                    child: Align(
-                      child: Row(
-                        children: [
-                          Icon(
-                            _vertDragType == true ? (intVolume > 0 ? Icons.volume_up : Icons.volume_off) : (_vertDragType == false ? (intLight > 0 ? Icons.lightbulb : Icons.lightbulb_outline) : Icons.cancel),
-                            size: _vertDragType == null ? 66 : 32,
-                            color: Colors.white,
-                          ),
-                          if(_vertDragType != null)
-                            Expanded(
-                              child: Slider(
-                                value: getIntSlider(),
-                                max: len.toDouble(),
-                                min: 0,
-                                activeColor: Colors.white,
-                                inactiveColor: Colors.white38,
-                                onChanged: (v) {},
-                              ),
-                            ),
-                        ],
-                      ),
-                      alignment: Alignment.topCenter))),
-              ),
               _buildHitArea(),
               Stack(
                 alignment: AlignmentDirectional.bottomStart,
@@ -197,9 +143,9 @@ class _LoliControlsState extends State<LoliControls>
                   const SizedBox()
                 else
                   ...[
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 10),
                     _buildProgressBar(),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 10),
                   ]
               ],
             ),
@@ -260,9 +206,6 @@ class _LoliControlsState extends State<LoliControls>
         absorbing: false,
         child: Container(
           height: 5,
-          // child: Transform( //TODO ScaleX to make it wider, probably need to copy and modify default MaterialVideoProgressBar
-          //   transform: Matrix4.diagonal3Values(1.0, 2.0, 1.0),
-          //   origin: Offset(0, 30),
           child: Row(
             children: [
               if (chewieController.isLive)
@@ -271,7 +214,6 @@ class _LoliControlsState extends State<LoliControls>
                 _buildProgressBar(),
             ],
           )
-          // )
         )
       )
     );
@@ -321,7 +263,8 @@ class _LoliControlsState extends State<LoliControls>
                   )
                 )
               else
-                Container(),
+                const SizedBox(),
+
               const Spacer(),
               if (_lastDoubleTapSide > 0)
                 ClipRRect(
@@ -339,7 +282,7 @@ class _LoliControlsState extends State<LoliControls>
                   )
                 )
               else
-                Container(),
+                const SizedBox(),
             ],
           )),
     );
@@ -483,7 +426,7 @@ class _LoliControlsState extends State<LoliControls>
             child: Icon(Icons.speed,
                 color: _latestValue.playbackSpeed == 1.0
                     ? Colors.white
-                    : Theme.of(context).accentColor),
+                    : Theme.of(context).colorScheme.primary),
           ),
         ),
       ),
@@ -498,10 +441,9 @@ class _LoliControlsState extends State<LoliControls>
         _cancelAndRestartTimer();
 
         if (_latestValue.volume == 0) {
-          controller.setVolume(_latestVolume ?? 0.5);
+          controller.setVolume(1);
         } else {
-          _latestVolume = controller.value.volume;
-          controller.setVolume(0.0);
+          controller.setVolume(0);
         }
       },
       child: AnimatedOpacity(
@@ -753,131 +695,9 @@ class _LoliControlsState extends State<LoliControls>
     }
   }
 
-  double getIntSlider() {
-    if (_vertDragType == true) {
-      if (intVolume == -1) {
-        intVolume = (_latestVolume! * len).toInt();
-      }
-      if (intVolume > len) {
-        return len.toDouble();
-      } else if (intVolume < 0) {
-        return .0;
-      } else {
-        return intVolume.toDouble();
-      }
-    } else if (_vertDragType == false) {
-      if (intLight == -1) {
-        intLight = (_latestLight! * len).toInt();
-      }
-      if (intLight > len) {
-        return len.toDouble();
-      } else if (intLight < 0) {
-        return .0;
-      } else {
-        return intLight.toDouble();
-      }
-    } else {
-      return 0;
-    }
-  }
-
-  void _onVerticalDragStart(DragStartDetails dragStartDetails) {
-    setState(() {
-      if (intVolume == -1) {
-        intVolume = len * _latestVolume!.toInt();
-      }
-      _initialHeightOffset = dragStartDetails.globalPosition.dy;
-      _adjust = true;
-    });
-  }
-
-  void _onVerticalDragUpdate(DragUpdateDetails dragUpdateDetails) {
-    double wSpace = MediaQuery.of(context).size.width / 3;
-    double dx = dragUpdateDetails.globalPosition.dx;
-    bool up = dragUpdateDetails.primaryDelta! < 0;
-    if (dx < wSpace) {
-      _vertDragType = false;
-      if (up) {
-        intLight += 1;
-      } else {
-        intLight -= 1;
-      }
-      setState(() {
-        if (intLight > len) {
-          intLight = len;
-          _latestLight = 1.0;
-        } else if (intLight < 0) {
-          intLight = 0;
-          _latestLight = 0;
-        }
-        var d = intLight / len;
-        ServiceHandler.setBrightness(d);
-      });
-    } else if (dx > (wSpace * 2)) {
-      _vertDragType = true;
-      if (up) {
-        intVolume += 1;
-      } else {
-        intVolume -= 1;
-      }
-      setState(() {
-        if (intVolume > len) {
-          intVolume = len;
-          _latestVolume = 1.0;
-        } else if (intVolume < 0) {
-          intVolume = 0;
-          _latestVolume = 0;
-        }
-        var d = intVolume / len;
-        controller.setVolume(d);
-        // ServiceHandler.setVolume(d.toInt(), 1);
-      });
-    } else {
-      _vertDragType = null;
-      _endHeightOffset = dragUpdateDetails.globalPosition.dy;
-    }
-  }
-
-  void _onVerticalDragEnd(DragEndDetails dragEndDetails) {
-    setState(() {
-      _adjust = false;
-      if (_vertDragType == true) {
-        if (intVolume > len) {
-          intVolume = len;
-          _latestVolume = 1.0;
-        } else if (intVolume < 0) {
-          intVolume = 0;
-          _latestVolume = 0;
-        }
-        var d = intVolume / len;
-        controller.setVolume(d);
-        // ServiceHandler.setVolume(d.toInt(), 1);
-      } else if (_vertDragType == false) {
-        if (intLight > len) {
-          intLight = len;
-          _latestLight = 1.0;
-        } else if (intLight < 0) {
-          intLight = 0;
-          _latestLight = 0;
-        }
-        var d = intLight / len;
-        ServiceHandler.setBrightness(d);
-      } else {
-        if((_initialHeightOffset - _endHeightOffset).abs() > heightToSwipe! && _vertDragType == null) {
-          Navigator.of(context).pop(true);
-        } else {
-          setState(() {
-            _initialHeightOffset = 0;
-            _endHeightOffset = 0;
-          });
-        }
-      }
-    });
-  }
-
   Widget _buildProgressBar() {
     return Expanded(
-      child: MaterialVideoProgressBar(
+      child: VideoProgressBar(
         controller,
         onDragStart: () {
           setState(() {
@@ -893,6 +713,9 @@ class _LoliControlsState extends State<LoliControls>
 
           _startHideTimer();
         },
+        barHeight: _hideStuff ? 2 : 5,
+        handleHeight: _hideStuff ? 0 : 6,
+        drawShadow: true,
         colors: chewieController.materialProgressColors ??
             ChewieProgressColors(
               playedColor: Theme.of(context).accentColor,
@@ -919,7 +742,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).primaryColor;
+    final Color selectedColor = Theme.of(context).colorScheme.primary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

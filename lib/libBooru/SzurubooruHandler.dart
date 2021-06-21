@@ -18,9 +18,9 @@ class SzurubooruHandler extends BooruHandler{
   Future Search(String tags,int pageNum) async{
     isActive = true;
     int length = fetched.length;
-    if(this.pageNum == pageNum){
-      return fetched;
-    }
+    // if(this.pageNum == pageNum){
+    //   return fetched;
+    // }
     if (tags == "" || tags == " "){
       tags = "*";
     }
@@ -63,12 +63,11 @@ class SzurubooruHandler extends BooruHandler{
           }
           if(current['contentUrl'] != null){
             fetched.add(new BooruItem(
-              "${booru.baseURL}/"+current['contentUrl'],
-              "${booru.baseURL}/"+current['thumbnailUrl'],
-              "${booru.baseURL}/"+current['thumbnailUrl'],
-              tags,
-              makePostURL(current['id'].toString()),
-              Tools.getFileExt(current['contentUrl'])
+              fileURL: "${booru.baseURL}/"+current['contentUrl'],
+              sampleURL: "${booru.baseURL}/"+current['contentUrl'],
+              thumbnailURL: "${booru.baseURL}/"+current['thumbnailUrl'],
+              tagsList: tags,
+              postURL: makePostURL(current['id'].toString()),
             ));
 
             if(dbHandler!.db != null){

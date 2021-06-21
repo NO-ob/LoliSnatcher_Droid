@@ -1,26 +1,22 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:LoliSnatcher/getPerms.dart';
-import 'package:flutter/material.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 
-import 'ServiceHandler.dart';
-import 'package:get/get.dart';
-import 'ThemeItem.dart';
-import 'Tools.dart';
-import 'libBooru/Booru.dart';
-import 'dart:io' show Platform;
-
-import 'libBooru/DBHandler.dart';
 /**
  * This class is used loading from and writing settings to files
  */
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   DBHandler dbHandler = new DBHandler();
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top';
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal';
   List<String> hatedTags = [], lovedTags = [];
-  int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250;
+  int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0;
   String verStr = "1.8.1";
   List<Booru> booruList = [];
@@ -49,7 +45,7 @@ class SettingsHandler {
       writer.write("Default Tags = rating:safe\n");
       writer.write("Limit = 20\n");
       writer.write("Preview Mode = Sample\n");
-      writer.close;
+      writer.close();
     }
     return true;
   }
@@ -57,7 +53,7 @@ class SettingsHandler {
   Future<bool> loadSettings() async{
     if (path == ""){
       path = await getExtDir();
-      // print("found path $path");
+      print("found path $path");
     }
     if (SDKVer == 0){
       SDKVer = await getSDKVer();
@@ -214,6 +210,12 @@ class SettingsHandler {
               // print("Found Gallery Bar Position " + settings[i].split(" = ")[1] );
             }
             break;
+          case ("Gallery Scroll Direction"):
+            if (settings[i].split(" = ").length > 1){
+              galleryScrollDirection = settings[i].split(" = ")[1];
+              // print("Found Gallery Scroll Direction " + settings[i].split(" = ")[1] );
+            }
+            break;
           case ("Enable Database"):
             if (settings[i].split(" = ").length > 1){
               if (settings[i].split(" = ")[1] == "true"){
@@ -272,6 +274,12 @@ class SettingsHandler {
               // print("Found useVolumeButtonsForScroll " + settings[i].split(" = ")[1] );
             }
             break;
+          case("Volume Buttons Scroll Speed"):
+            if (settings[i].split(" = ").length > 1){
+              volumeButtonsScrollSpeed = int.parse(settings[i].split(" = ")[1]);
+              // print("Volume Buttons Scroll Speed " + settings[i].split(" = ")[1] );
+            }
+            break;
           case ("Shit Device"):
             if (settings[i].split(" = ").length > 1){
               if (settings[i].split(" = ")[1] == "true"){
@@ -303,7 +311,8 @@ class SettingsHandler {
   Map toJSON() {
     //Dont add prefbooru or appmode since,appmode will mess up syncing between desktop and mobile
     // prefbooru will mess up if the booru configs aren't synced
-    return {"defTags": "$defTags",
+    return {
+      "defTags": "$defTags",
       "previewMode": "$previewMode",
       "videoCacheMode": "$videoCacheMode",
       "previewDisplay": "$previewDisplay",
@@ -315,6 +324,7 @@ class SettingsHandler {
       "preloadCount" : "$preloadCount",
       "snatchCooldown" : "$snatchCooldown",
       "galleryBarPosition" : "$galleryBarPosition",
+      "galleryScrollDirection" : "$galleryScrollDirection",
       "hatedTags": cleanTagsList(hatedTags),
       "lovedTags": cleanTagsList(lovedTags),
       "jsonWrite" : "${jsonWrite.toString()}",
@@ -327,6 +337,7 @@ class SettingsHandler {
       "searchHistoryEnabled" : "${searchHistoryEnabled.toString()}",
       "filterHated" : "${filterHated.toString()}",
       "useVolumeButtonsForScroll" : "${useVolumeButtonsForScroll.toString()}",
+      "volumeButtonsScrollSpeed" : "${volumeButtonsScrollSpeed.toString()}",
       "disableVideo" : "${disableVideo.toString()}",
       "shitDevice" : "${shitDevice.toString()}",
     };
@@ -352,6 +363,7 @@ class SettingsHandler {
     galleryMode = json["galleryMode"];
     shareAction = json["shareAction"];
     galleryBarPosition = json["galleryBarPosition"];
+    galleryScrollDirection = json["galleryScrollDirection"];
     limit = int.parse(json["limit"]);
     portraitColumns = int.parse(json["portraitColumns"]);
     landscapeColumns = int.parse(json["landscapeColumns"]);
@@ -367,6 +379,7 @@ class SettingsHandler {
     searchHistoryEnabled = Tools.stringToBool(json["searchHistoryEnabled"]);
     filterHated = Tools.stringToBool(json["filterHated"]);
     useVolumeButtonsForScroll = Tools.stringToBool(json["useVolumeButtonsForScroll"]);
+    volumeButtonsScrollSpeed = int.parse(json["volumeButtonsScrollSpeed"]);
     disableVideo = Tools.stringToBool(json["disableVideo"]);
     shitDevice = Tools.stringToBool(json["shitDevice"]);
     print(toJSON());
@@ -392,6 +405,7 @@ class SettingsHandler {
     this.lovedTags = lovedTags;
 
     writer.write("Volume Buttons Scroll = $useVolumeButtonsForScroll\n");
+    writer.write("Volume Buttons Scroll Speed = $volumeButtonsScrollSpeed\n");
 
       // Write limit if its between 0-100
     if (limit <= 100 && limit >= 5){
@@ -416,10 +430,11 @@ class SettingsHandler {
     writer.write("Video Cache Mode = $videoCacheMode\n");
     writer.write("Share Action = $shareAction\n");
     writer.write("Autohide Bar = $autoHideImageBar\n");
-    writer.write("Snatch Cooldown  = $snatchCooldown\n");
+    writer.write("Snatch Cooldown = $snatchCooldown\n");
     writer.write("Preview Display = $previewDisplay\n");
     writer.write("Gallery Mode = $galleryMode\n");
     writer.write("Gallery Bar Position = $galleryBarPosition\n");
+    writer.write("Gallery Scroll Direction = $galleryScrollDirection\n");
     writer.write("Enable Database = $dbEnabled\n");
     writer.write("Search History = $searchHistoryEnabled\n");
     writer.write("App Mode = $appMode\n");
@@ -466,6 +481,11 @@ class SettingsHandler {
   }
   Future<List<Booru>> sortList() async{
     List<Booru> sorted = booruList;
+    booruList.sort((a, b) {
+      // sort alphabetically
+      return a.name!.toLowerCase().compareTo(b.name!.toLowerCase());
+    });
+
     int prefIndex = 0;
     for (int i = 0; i < sorted.length; i++){
       if (sorted[i].name == prefBooru){
@@ -474,15 +494,21 @@ class SettingsHandler {
       }
     }
     if (prefIndex != 0){
-      print("Booru pref found in booruList");
-      Booru tmp = sorted.elementAt(0);
-      Booru tmp2 = sorted.elementAt(prefIndex);
+      // move default booru to top
+      // print("Booru pref found in booruList");
+      Booru tmp = sorted.elementAt(prefIndex);
       sorted.remove(tmp);
-      sorted.remove(tmp2);
-      sorted.insert(0, tmp2);
-      sorted.insert(prefIndex, tmp);
-      print("booruList is");
-      print(sorted);
+      sorted.insert(0, tmp);
+      // print("booruList is");
+      // print(sorted);
+    }
+
+    int favsIndex = sorted.indexWhere((el) => el.type == 'Favourites');
+    if(favsIndex != -1) {
+      // move favourites to the end
+      Booru tmp = sorted.elementAt(favsIndex);
+      sorted.remove(tmp);
+      sorted.add(tmp);
     }
     return sorted;
   }
@@ -519,15 +545,19 @@ class SettingsHandler {
     List<String> cleanItemTags = cleanTagsList(itemTags);
     List<String> hatedInItem = this.hatedTags.where((tag) => cleanItemTags.contains(tag)).toList();
     List<String> lovedInItem = this.lovedTags.where((tag) => cleanItemTags.contains(tag)).toList();
+    List<String> soundInItem = ['sound', 'sound_edit', 'has_audio', 'voice_acted'].where((tag) => cleanItemTags.contains(tag)).toList();
+    // TODO add more sound tags?
 
-    if(isCapped && hatedInItem.length > 5) {
-      hatedInItem = [...hatedInItem.take(5), '...'];
-    }
-    if(isCapped && lovedInItem.length > 5) {
-      lovedInItem = [...lovedInItem.take(5), '...'];
+    if(isCapped) {
+      if(hatedInItem.length > 5) {
+        hatedInItem = [...hatedInItem.take(5), '...'];
+      }
+      if(lovedInItem.length > 5) {
+        lovedInItem = [...lovedInItem.take(5), '...'];
+      }
     }
 
-    return [hatedInItem, lovedInItem];
+    return [hatedInItem, lovedInItem, soundInItem];
   }
 
   List<String> cleanTagsList(List<String> tags) {
