@@ -178,6 +178,10 @@ class MainActivity: FlutterActivity() {
                 result.success(byteArray);
             } else if(call.method == "getIP"){
                result.success(getIpv4HostAddress());
+            } else if (call.method == "setExtPath"){
+                //val uwu = askPermission();
+                //print(uwu);
+                result.success("")
             }
         }
 
@@ -190,7 +194,23 @@ class MainActivity: FlutterActivity() {
             }
         })
     }
+    //Doesn't work and idk why, it should get a uri after selecting a directory but doesn't
+    //https://developer.android.com/training/data-storage/shared/documents-files#perform-operations
+    /*private fun askPermission(): String {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        startActivityForResult(intent, 1);
+        return intent.data.toString()
 
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == RESULT_OK && requestCode == 1) {
+            data?.data?.also { uri ->
+                print("uri is $uri")
+            }
+
+        }
+    }*/
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) && isSinkingVolume)
         {

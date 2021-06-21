@@ -42,12 +42,10 @@ class BooruItem{
     }
     this.fileExt = this.fileExt != null ? this.fileExt : Tools.getFileExt(this.fileURL);
     this.fileExt = this.fileExt!.toLowerCase();
-    if (["jpg", "jpeg", "png", "webp"].any((val) => this.fileExt == val)) {
+    if (["jpg", "jpeg", "png", "webp","gif"].any((val) => this.fileExt == val)) {
       this.mediaType = "image";
     } else if (["webm", "mp4"].any((val) => this.fileExt == val)) {
       this.mediaType = "video";
-    } else if (["gif"].any((val) => this.fileExt == val)) {
-      this.mediaType = "animation";
     } else if (["apng"].any((val) => this.fileExt == val)) {
       this.mediaType = "not_supported_animation";
     } else {

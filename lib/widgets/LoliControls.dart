@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/progress_bar.dart';
@@ -10,9 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 class LoliControls extends StatefulWidget {
-  const LoliControls({
-    Key? key
-  }) : super(key: key);
+  SettingsHandler settingsHandler;
+  LoliControls({Key? key, required this.settingsHandler}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -439,11 +439,18 @@ class _LoliControlsState extends State<LoliControls>
     return GestureDetector(
       onTap: () {
         _cancelAndRestartTimer();
-
         if (_latestValue.volume == 0) {
           controller.setVolume(1);
         } else {
           controller.setVolume(0);
+        }
+      },
+      onLongPress: (){
+        widget.settingsHandler.videoAutoMute = !widget.settingsHandler.videoAutoMute;
+        if (widget.settingsHandler.videoAutoMute && _latestValue.volume != 0) {
+          controller.setVolume(0);
+        } else if (!widget.settingsHandler.videoAutoMute && _latestValue.volume == 0){
+          controller.setVolume(1);
         }
       },
       child: AnimatedOpacity(
@@ -464,7 +471,6 @@ class _LoliControlsState extends State<LoliControls>
       ),
     );
   }
-
   GestureDetector _buildPlayPause(VideoPlayerController controller) {
     return GestureDetector(
       onTap: _playPause,

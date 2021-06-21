@@ -51,10 +51,22 @@ class GelbooruHandler extends BooruHandler{
            * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
            */
           if(current.getAttribute("file_url") != null){
+            // Fix for bleachbooru
+            String fileURL = "", sampleURL = "", previewURL = "";
+            fileURL += current.getAttribute("file_url")!.toString();
+            sampleURL += current.getAttribute("sample_url")!.toString();
+            previewURL += current.getAttribute("preview_url")!.toString();
+            if (!fileURL.contains("http")){
+              fileURL = booru.baseURL! + fileURL;
+              sampleURL = booru.baseURL! + sampleURL;
+              previewURL = booru.baseURL! + previewURL;
+            }
+            print(fileURL);
+
             fetched.add(new BooruItem(
-              fileURL: current.getAttribute("file_url").toString(),
-              sampleURL: current.getAttribute("sample_url").toString(),
-              thumbnailURL: current.getAttribute("preview_url").toString(),
+              fileURL: fileURL,
+              sampleURL: sampleURL,
+              thumbnailURL: previewURL,
               tagsList: current.getAttribute("tags")!.split(" "),
               postURL: makePostURL(current.getAttribute("id")!),
               fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,

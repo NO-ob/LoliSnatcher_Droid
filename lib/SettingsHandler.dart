@@ -33,7 +33,7 @@ class SettingsHandler {
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
         imageCache = false, mediaCache = false, autoHideImageBar = false,
           dbEnabled = true, searchHistoryEnabled = true, filterHated = false,
-            useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
+            useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false, videoAutoMute = false;
   Future<bool> writeDefaults() async{
     if (path == ""){
       path = await getExtDir();

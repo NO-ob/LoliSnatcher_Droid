@@ -354,8 +354,8 @@ class _VideoAppState extends State<VideoApp> {
       showControlsOnInitialize: widget.searchGlobals.displayAppbar.value,
       customControls:
         widget.settingsHandler.galleryBarPosition == 'Bottom'
-          ? HideableControlsPadding(widget.searchGlobals, isFullscreen, LoliControls())
-          : LoliControls(),
+          ? HideableControlsPadding(widget.searchGlobals, isFullscreen, LoliControls(settingsHandler:widget.settingsHandler))
+          : LoliControls(settingsHandler:widget.settingsHandler),
         // MaterialControls(),
         // CupertinoControls(
         //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
@@ -600,10 +600,12 @@ class _VideoAppState extends State<VideoApp> {
         if(needsRestart) {
           _videoController!.seekTo(Duration());
         }
-
         if (widget.settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
           _videoController!.play();
+        }
+        if (widget.settingsHandler.videoAutoMute){
+          _videoController!.setVolume(0);
         }
       } else {
         _videoController!.pause();

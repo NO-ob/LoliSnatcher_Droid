@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
+
+import 'DirPicker.dart';
 
 class BehaviourPage extends StatefulWidget {
   SettingsHandler settingsHandler;
@@ -263,7 +266,44 @@ class _BehaviourPageState extends State<BehaviourPage> {
                 bool isEmpty = stat['fileNum'] == 0;
                 String text = isEmpty ? 'Empty' : '$size in ${count.toString()} file${count == 1 ? '' : 's'}';
                 return Text('$name: $text', style: TextStyle(color: Colors.white));
-              })
+              }),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: EdgeInsets.fromLTRB(20,10,20,10),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
+                  ),
+                  onPressed: () async{
+                    //String url = await ServiceHandler.setExtDir();
+                    int SDKVer = 0;
+                    String path = await serviceHandler.getExtDir();
+                    if (Platform.isAndroid){
+                      SDKVer = await serviceHandler.getSDKVersion();
+                      print(SDKVer);
+                    }
+                    if (SDKVer < 30){
+                      if(widget.settingsHandler.appMode == "Desktop"){
+                        Get.dialog(Dialog(
+                          child: Container(
+                            width: 500,
+                            child:DirPicker(widget.settingsHandler,path),
+                          ),
+                        )).then((value) => {print(path)});
+                      } else {
+                        Get.to(() => DirPicker(widget.settingsHandler,path))!.then((value) => {print(path)});
+                      }
+                    } else {
+                      ServiceHandler.displayToast("Not available on android 11+");
+                    }
+
+                  },
+                  child: Text("Set Storage Directory", style: TextStyle(color: Colors.white)),
+                ),
+              ),
             ],
           ),
         ),

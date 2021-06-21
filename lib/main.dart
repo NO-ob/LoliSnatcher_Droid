@@ -24,7 +24,7 @@ import 'package:LoliSnatcher/DesktopHome.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
-
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'Tools.dart';
 
 
@@ -90,6 +90,7 @@ class Preloader extends StatelessWidget {
         future: settingsHandler.initialize(),
         builder: (BuildContext context, AsyncSnapshot snapshot){
           if (snapshot.connectionState == ConnectionState.done){
+            FlutterDisplayMode.setHighRefreshRate();
             if(settingsHandler.appMode == "Mobile"){
               return Home(settingsHandler);
             } else {

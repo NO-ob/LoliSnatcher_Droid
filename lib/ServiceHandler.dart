@@ -29,6 +29,17 @@ class ServiceHandler{
     }
     return result;
   }
+
+  static Future<String> setExtDir() async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("setExtPath");
+      print(result);
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
   Future<int> getSDKVersion() async{
     int result = 0;
     try{
@@ -173,7 +184,7 @@ class ServiceHandler{
     } else if (Platform.isLinux) {
       Process.run('xdg-open', [url]);
     } else if (Platform.isWindows) {
-      /////////////////////
+      Process.run('open', [url]);
     }
   }
   Future<Uint8List?> makeVidThumb(String videoURL) async {

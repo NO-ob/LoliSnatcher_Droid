@@ -103,7 +103,7 @@ class PhilomenaHandler extends BooruHandler{
     if (booru.apiKey == ""){
       return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
     }
 
   }

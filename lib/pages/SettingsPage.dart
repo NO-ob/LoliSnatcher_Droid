@@ -10,6 +10,7 @@ import '../SettingsHandler.dart';
 import 'package:get/get.dart';
 
 import 'AboutPage.dart';
+import 'help/BooruHelpPage.dart';
 /**
  * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
  */
@@ -227,6 +228,30 @@ class _SettingsPageState extends State<SettingsPage> {
                     }
                   },
                   child: Text("About", style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20),
+                      side: BorderSide(color: Get.context!.theme.accentColor),
+                    ),
+                  ),
+                  onPressed: (){
+                    if(widget.settingsHandler.appMode == "Desktop"){
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child:BooruHelpPage(),
+                        ),
+                      ));
+                    } else {
+                      Get.to(() => BooruHelpPage());
+                    }
+                  },
+                  child: Text("Help", style: TextStyle(color: Colors.white)),
                 ),
               ),
               Container(
