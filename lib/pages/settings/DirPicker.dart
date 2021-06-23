@@ -27,6 +27,7 @@ class _DirPickerState extends State<DirPicker> {
   }
   Future<bool> _onWillPop() async {
     if (path == widget.path){
+      //not what its suppsoed to do this is fopr testing
       if (path == "./"){
         return true;
       } else {
@@ -119,15 +120,6 @@ class _DirPickerState extends State<DirPicker> {
                 widget.settingsHandler.extPathOverride = path + "/";
                 Get.back();
               },
-              child: path.contains("/sdcard") ? Icon(Icons.storage) : Icon(Icons.sd_card),
-              backgroundColor: Get.context!.theme.accentColor,
-            ),
-            FloatingActionButton(
-              heroTag: null,
-              onPressed: () {
-                widget.settingsHandler.extPathOverride = path + "/";
-                Get.back();
-              },
               child: const Icon(Icons.check),
               backgroundColor: Get.context!.theme.accentColor,
             ),
@@ -175,6 +167,17 @@ class _DirPickerState extends State<DirPicker> {
                 // Add your onPressed code here!
               },
               child: const Icon(Icons.add),
+              backgroundColor: Get.context!.theme.accentColor,
+            ),
+            Container(width: 5,),
+            //This button is for testing currently not sure it works right
+            FloatingActionButton(
+              heroTag: null,
+              onPressed: () {
+                widget.settingsHandler.extPathOverride = path + "/";
+                Get.back();
+              },
+              child: path.contains("/sdcard") ? Icon(Icons.storage) : Icon(Icons.sd_card),
               backgroundColor: Get.context!.theme.accentColor,
             ),
           ],
