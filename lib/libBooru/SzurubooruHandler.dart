@@ -50,6 +50,9 @@ class SzurubooruHandler extends BooruHandler{
          */
         // Create a BooruItem for each post in the list
         for (int i =0; i < parsedResponse['results'].length; i++){
+          if (i == 0){
+            print(parsedResponse['results'][0].toString());
+          }
           var current = parsedResponse['results'][i];
           List<String> tags = [];
           for (int x=0; x < current['tags'].length; x++) {
@@ -64,10 +67,17 @@ class SzurubooruHandler extends BooruHandler{
           if(current['contentUrl'] != null){
             fetched.add(new BooruItem(
               fileURL: "${booru.baseURL}/"+current['contentUrl'],
+              fileWidth: current['canvasWidth'].toDouble(),
+              fileHeight: current['canvasHeight'].toDouble(),
               sampleURL: "${booru.baseURL}/"+current['contentUrl'],
               thumbnailURL: "${booru.baseURL}/"+current['thumbnailUrl'],
               tagsList: tags,
+              serverId: current['id'].toString(),
+              score: current['score'].toString(),
               postURL: makePostURL(current['id'].toString()),
+              rating: current['safety'],
+              postDate: current['creationTime'].substring(0,22),
+              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS",
             ));
 
             if(dbHandler!.db != null){

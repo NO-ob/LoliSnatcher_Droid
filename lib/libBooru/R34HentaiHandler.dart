@@ -11,7 +11,7 @@ import 'package:LoliSnatcher/Tools.dart';
 class R34HentaiHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   R34HentaiHandler(Booru booru,int limit) : super(booru,limit);
-
+  bool tagSearchEnabled = false;
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems

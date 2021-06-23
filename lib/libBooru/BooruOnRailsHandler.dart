@@ -58,11 +58,18 @@ class BooruOnRailsHandler extends BooruHandler {
             }
             fetched.add(BooruItem(
               fileURL: fileURL,
+              fileWidth: current['width'].toDouble(),
+              fileHeight: current['height'].toDouble(),
               sampleURL: sampleURL,
               thumbnailURL: thumbURL,
               tagsList: currentTags,
               postURL: makePostURL(current['id'].toString()),
-              serverId: current['id'].toString()
+              serverId: current['id'].toString(),
+              score: current['score'].toString(),
+              sources: [current['source_url'].toString()],
+              rating: currentTags[0][0],
+              postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
+              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
             ));
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);

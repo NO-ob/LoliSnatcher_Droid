@@ -37,7 +37,7 @@ class ImageWriter{
     }
     print("out file is $fileName");
     // print(fileName);
-    await setPaths();
+    await setPaths(settingsHandler);
 
     if(SDKVer == 0){
       if (Platform.isAndroid){
@@ -131,12 +131,12 @@ class ImageWriter{
     ServiceHandler.displayToast(toastString);
   }
 
-  Future writeCache(String fileURL, String typeFolder) async{
+  Future writeCache(String fileURL, String typeFolder,SettingsHandler settingsHandler) async{
     String? cachePath;
     Uri fileURI = Uri.parse(fileURL);
     try {
       var response = await http.get(fileURI);
-      await setPaths();
+      await setPaths(settingsHandler);
       cachePath = cacheRootPath! + typeFolder + "/";
       await Directory(cachePath).create(recursive:true);
 
@@ -150,11 +150,11 @@ class ImageWriter{
     return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
 
-  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder) async{
+  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, SettingsHandler settingsHandler) async{
     File? image;
     String cachePath;
     try {
-      await setPaths();
+      await setPaths(settingsHandler);
       cachePath = cacheRootPath! + typeFolder + "/";
       // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
@@ -175,11 +175,11 @@ class ImageWriter{
 
   // Deletes file from given cache folder
   // returns true if successful, false if there was an exception and null if file didn't exist
-  Future deleteFromCache(String fileURL, String typeFolder) async{
+  Future deleteFromCache(String fileURL, String typeFolder, SettingsHandler settingsHandler) async{
     File file;
     String cachePath;
     try {
-      await setPaths();
+      await setPaths(settingsHandler);
       cachePath = cacheRootPath! + typeFolder + "/";
 
       String fileName = parseThumbUrlToName(fileURL);
@@ -198,10 +198,10 @@ class ImageWriter{
     }
   }
 
-  Future<String?> getCachePath(String fileURL, String typeFolder) async{
+  Future<String?> getCachePath(String fileURL, String typeFolder, SettingsHandler settingsHandler) async{
     String cachePath;
     try {
-      await setPaths();
+      await setPaths(settingsHandler);
       cachePath = cacheRootPath! + typeFolder + "/";
 
       String fileName = parseThumbUrlToName(fileURL);
@@ -227,13 +227,13 @@ class ImageWriter{
   }
 
   // calculates cache (total or by type) size and file count
-  Future<Map<String,int>> getCacheStat(String? typeFolder) async {
+  Future<Map<String,int>> getCacheStat(String? typeFolder, SettingsHandler settingsHandler) async {
     String cacheDirPath;
     int fileNum = 0;
     int totalSize = 0;
     if(typeFolder == null) typeFolder = '';
     try {
-      await setPaths();
+      await setPaths(settingsHandler);
       cacheDirPath = cacheRootPath! + typeFolder + "/";
 
       Directory cacheDir = Directory(cacheDirPath);
@@ -266,15 +266,21 @@ class ImageWriter{
     return result;
   }
 
-  Future<bool> setPaths() async{
+  Future<bool> setPaths(SettingsHandler settingsHandler) async{
     if(path == ""){
-      if (Platform.isAndroid){
-        path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
-      } else if (Platform.isLinux){
-        path = "${Platform.environment['HOME']}/Pictures/LoliSnatcher/";
-      } else if (Platform.isWindows){
-        path = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/Pictures/";
+      if (settingsHandler.extPathOverride.isEmpty){
+        if (Platform.isAndroid){
+          path = await serviceHandler.getExtDir() + "/Pictures/LoliSnatcher/";
+        } else if (Platform.isLinux){
+          path = "${Platform.environment['HOME']}/Pictures/LoliSnatcher/";
+        } else if (Platform.isWindows){
+          path = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/Pictures/";
+        }
+      } else {
+        path = settingsHandler.extPathOverride;
       }
+
+
     }
 
     if(cacheRootPath == ""){

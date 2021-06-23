@@ -244,14 +244,18 @@ class MainActivity: FlutterActivity() {
         val resolver = contentResolver
         val contentValues = ContentValues()
         val imageUri: Uri?
+        var thisMediaType: String = mediaType;
+        if (thisMediaType == "animation"){
+            thisMediaType = "image";
+        }
         if(mediaType == "image"){
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
-            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$mediaType/$fileExt")
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
             contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
             imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
         } else {
             contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "$name.$fileExt")
-            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$mediaType/$fileExt")
+            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$thisMediaType/$fileExt")
             contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
             imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
         }

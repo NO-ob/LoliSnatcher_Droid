@@ -66,11 +66,17 @@ class PhilomenaHandler extends BooruHandler{
             }
             fetched.add(BooruItem(
               fileURL: fileURL,
+              fileWidth: current['width'].toDouble(),
+              fileHeight: current['height'].toDouble(),
               sampleURL: sampleURL,
               thumbnailURL: thumbURL,
               tagsList: currentTags,
               postURL: makePostURL(current['id'].toString()),
               serverId: current['id'].toString(),
+              score: current['score'].toString(),
+              sources: [current['source_url'].toString()],
+              postDate: current['created_at'],
+              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
             ));
             if(dbHandler!.db != null){
               setTrackedValues(fetched.length - 1);

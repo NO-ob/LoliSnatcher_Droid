@@ -64,7 +64,7 @@ class _VideoAppState extends State<VideoApp> {
     isStopped = false;
     _startedAt = DateTime.now().millisecondsSinceEpoch;
 
-    final String? filePath = await imageWriter.getCachePath(widget.booruItem.fileURL, 'media');
+    final String? filePath = await imageWriter.getCachePath(widget.booruItem.fileURL, 'media',widget.settingsHandler);
     // If file is in cache - load
     // print(filePath);
     if (filePath != null) {
@@ -124,7 +124,7 @@ class _VideoAppState extends State<VideoApp> {
       //// Parse response
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
       if (response.data != null && _received > (_total * 0.95)) {
-        final File? cacheFile = await imageWriter.writeCacheFromBytes(widget.booruItem.fileURL, response.data!, 'media');
+        final File? cacheFile = await imageWriter.writeCacheFromBytes(widget.booruItem.fileURL, response.data!, 'media',widget.settingsHandler);
         if (cacheFile != null) {
           //Restate only when just Caching
           if (cacheMode == 'Cache') {
@@ -198,7 +198,7 @@ class _VideoAppState extends State<VideoApp> {
     // widget.settingsHandler.previewMode == "Sample"
     //     ? widget.booruItem.sampleURL
     //     : widget.booruItem.thumbnailURL;
-    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails');
+    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL, 'thumbnails',widget.settingsHandler);
     File? preview = previewPath != null ? File(previewPath) : null;
 
     if (preview != null){

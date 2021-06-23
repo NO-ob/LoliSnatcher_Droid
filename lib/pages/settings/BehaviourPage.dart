@@ -47,7 +47,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
   void getCacheStats() async {
     cacheStats = [];
     for(List<String?> type in cacheTypes) {
-      cacheStats.add(await imageWriter.getCacheStat(type[0]));
+      cacheStats.add(await imageWriter.getCacheStat(type[0],widget.settingsHandler));
     }
     setState(() { });
     return;

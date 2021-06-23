@@ -319,7 +319,7 @@ class _ViewerPageState extends State<ViewerPage> {
   /// Author: [Nani-Sore] ///
   void shareFileAction() async {
     BooruItem item = widget.fetched[widget.searchGlobals.viewedIndex.value];
-    String? path = await ImageWriter().getCachePath(item.fileURL, 'media');
+    String? path = await ImageWriter().getCachePath(item.fileURL, 'media',widget.settingsHandler);
     ServiceHandler serviceHandler = new ServiceHandler();
     ImageWriter writer = new ImageWriter();
 
@@ -332,7 +332,7 @@ class _ViewerPageState extends State<ViewerPage> {
       var request = await HttpClient().getUrl(Uri.parse(item.fileURL));
       var response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-      final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media');
+      final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media',widget.settingsHandler);
       if(cacheFile != null) {
         path = cacheFile.path;
         await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);

@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/pages/settings/BehaviourPage.dart';
 import 'package:LoliSnatcher/pages/settings/BooruPage.dart';
 import 'package:LoliSnatcher/pages/settings/DatabasePage.dart';
@@ -240,18 +241,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                   onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child:BooruHelpPage(),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => BooruHelpPage());
-                    }
+                    ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
                   },
-                  child: Text("Help", style: TextStyle(color: Colors.white)),
+                  child: Text("Help/Wiki", style: TextStyle(color: Colors.white)),
                 ),
               ),
               Container(

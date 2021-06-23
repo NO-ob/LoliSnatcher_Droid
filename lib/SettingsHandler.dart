@@ -14,7 +14,7 @@ import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 class SettingsHandler {
   ServiceHandler serviceHandler = new ServiceHandler();
   DBHandler dbHandler = new DBHandler();
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal';
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal',extPathOverride = "";
   List<String> hatedTags = [], lovedTags = [];
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0;
@@ -298,6 +298,11 @@ class SettingsHandler {
               }
             }
             break;
+          case ("Ext Path"):
+            if (settings[i].split(" = ").length > 1){
+              extPathOverride = settings[i].split(" = ")[1];
+            }
+            break;
         }
       }
     }
@@ -440,6 +445,7 @@ class SettingsHandler {
     writer.write("App Mode = $appMode\n");
     writer.write("Shit Device = $shitDevice\n");
     writer.write("Disable Video = $disableVideo\n");
+    writer.write("Ext Path = $extPathOverride\n");
     writer.close();
     ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
     //Get.snackbar("Settings Saved!","Some changes may not take effect until the search is refreshed or the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);

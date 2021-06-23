@@ -50,7 +50,7 @@ class _MediaViewerState extends State<MediaViewer> {
 
   /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
-    final String? filePath = await imageWriter.getCachePath(imageURL!, imageType!);
+    final String? filePath = await imageWriter.getCachePath(imageURL!, imageType!,widget.settingsHandler);
 
     // If file is in cache - load
     // print(filePath);
@@ -94,7 +94,7 @@ class _MediaViewerState extends State<MediaViewer> {
         _checkInterval?.cancel();
 
         if(widget.settingsHandler.mediaCache) {
-          imageWriter.writeCacheFromBytes(imageURL!, response.data!, imageType!);
+          imageWriter.writeCacheFromBytes(imageURL!, response.data!, imageType!,widget.settingsHandler);
         }
       } else {
         print('Image load incomplete');
@@ -177,7 +177,7 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   void getThumbnail() async {
-    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!);
+    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!,widget.settingsHandler);
     File? preview = previewPath != null ? File(previewPath) : null;
 
     if (preview != null){

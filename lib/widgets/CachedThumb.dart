@@ -43,7 +43,7 @@ class _CachedThumbState extends State<CachedThumb> {
 
   /// Author: [Nani-Sore] ///
   Future<void> downloadThumb() async {
-    final String? filePath = await imageWriter.getCachePath(thumbURL, widget.settingsHandler.previewMode == 'Sample' ? 'samples' : 'thumbnails');
+    final String? filePath = await imageWriter.getCachePath(thumbURL, widget.settingsHandler.previewMode == 'Sample' ? 'samples' : 'thumbnails',widget.settingsHandler);
 
     // If file is in cache - load
     if (filePath != null) {
@@ -90,7 +90,7 @@ class _CachedThumbState extends State<CachedThumb> {
         isVisible = true;
         if(this.mounted) setState(() { });
         if (widget.settingsHandler.imageCache) {
-          imageWriter.writeCacheFromBytes(thumbURL, response.data!, widget.settingsHandler.previewMode == 'Sample' ? 'samples' : 'thumbnails');
+          imageWriter.writeCacheFromBytes(thumbURL, response.data!, widget.settingsHandler.previewMode == 'Sample' ? 'samples' : 'thumbnails',widget.settingsHandler);
         }
       } else {
         print('Thumbnail load incomplete');
