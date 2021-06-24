@@ -87,6 +87,7 @@ class SnatchHandler {
     List temp = new BooruHandlerFactory().getBooruHandler(booru, limit, settingsHandler!.dbHandler);
     booruHandler = temp[0];
     page = temp[1];
+    page ++;
     ServiceHandler.displayToast("Snatching Images\nDo not close the app!");
     //Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
     while (count < int.parse(amount) && !booruHandler.locked){

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,10 +27,31 @@ class _DirPickerState extends State<DirPicker> {
     path = widget.path;
   }
   Future<bool> _onWillPop() async {
-    if (path == widget.path){
-      //not what its suppsoed to do this is fopr testing
-      if (path == "./"){
-        return true;
+    if (path == "/storage"){
+      final shouldPop = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Are you sure?'),
+            content: Text('Do you want to close the picker without choosing a directory?'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Yes', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Get.back(result: true);
+                },
+              ),
+              TextButton(
+                child: Text('No', style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  Get.back(result: false);
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return shouldPop;
       } else {
         setState(() {
           path = path.substring(0,path.lastIndexOf("/"));
@@ -37,23 +59,35 @@ class _DirPickerState extends State<DirPicker> {
         });
         return false;
       }
-    } else {
-      setState(() {
-        path = path.substring(0,path.lastIndexOf("/"));
-      });
-      return false;
-    }
-
   }
+
   void mkdir(){
     var dir = Directory(path+"/"+newDirNameController.text);
     if (!dir.existsSync()){
       dir.createSync(recursive: true);
     }
-    setState(() {
-      path += "/"+ newDirNameController.text;
+    if (dir.existsSync()){
+      setState(() {
+        path += "/"+ newDirNameController.text;
+        newDirNameController.text = "";
+      });
+    } else {
       newDirNameController.text = "";
-    });
+      ServiceHandler.displayToast("Failed to create directory");
+    }
+
+  }
+  bool isWritable(){
+    File file = File(path+"/"+"test.txt");
+    try {
+      file.createSync();
+      file.writeAsStringSync('', mode: FileMode.write, flush: true);
+      file.deleteSync();
+      return true;
+    } on FileSystemException catch(e) {
+      ServiceHandler.displayToast("Directory is not writable");
+      return false;
+    }
   }
   Future<List<String>> getDirs() async{
     List<String> dirs = [];
@@ -83,26 +117,48 @@ class _DirPickerState extends State<DirPicker> {
               future: getDirs(),
               builder: (BuildContext context, AsyncSnapshot snapshot){
                 if (snapshot.connectionState == ConnectionState.done){
-                  return ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: snapshot.data.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return GestureDetector(
-                          onTap: (){
-                            setState(() {
-                              if (!path.endsWith(snapshot.data[index])){
-                                path += snapshot.data[index];
-                                print(path);
-                              }
-                            });
-                          },
-                          child: Container(
-                          height: 50,
-                          child: Center(child: Text(snapshot.data[index])),
-                         ),
-                        );
-                      }
-                  );
+                  if (snapshot.data.length > 0){
+                    return ListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: snapshot.data.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return GestureDetector(
+                            onTap: (){
+                              setState(() {
+                                if (!path.endsWith(snapshot.data[index])){
+                                  path += snapshot.data[index];
+                                  print(path);
+                                }                widget.settingsHandler.extPathOverride = path + "/";
+                              });
+                            },
+                            child: Container(
+                              height: 50,
+                              child: Center(child: Text(snapshot.data[index])),
+                            ),
+                          );
+                        }
+                    );
+                  } else if (title == "emulated"){
+                    return ListView(children: [
+                        GestureDetector(
+                        onTap: (){
+                          setState(() {
+                            if (!path.endsWith("0")){
+                              path += "/0";
+                              print(path);
+                            }
+                            widget.settingsHandler.extPathOverride = path + "/";
+                          });
+                        },
+                        child: Container(
+                        height: 50,
+                        child: Center(child: Text("/0")),
+                          ),
+                        ),
+                      ],);
+                  } else {
+                    return Container();
+                  }
                 } else {
                   return Center(child: CircularProgressIndicator());
                 }
@@ -117,8 +173,9 @@ class _DirPickerState extends State<DirPicker> {
             FloatingActionButton(
               heroTag: null,
               onPressed: () {
-                widget.settingsHandler.extPathOverride = path + "/";
-                Get.back();
+                if (isWritable()){
+                  Get.back(result: path + "/");
+                }
               },
               child: const Icon(Icons.check),
               backgroundColor: Get.context!.theme.accentColor,
@@ -167,17 +224,6 @@ class _DirPickerState extends State<DirPicker> {
                 // Add your onPressed code here!
               },
               child: const Icon(Icons.add),
-              backgroundColor: Get.context!.theme.accentColor,
-            ),
-            Container(width: 5,),
-            //This button is for testing currently not sure it works right
-            FloatingActionButton(
-              heroTag: null,
-              onPressed: () {
-                widget.settingsHandler.extPathOverride = path + "/";
-                Get.back();
-              },
-              child: path.contains("/sdcard") ? Icon(Icons.storage) : Icon(Icons.sd_card),
               backgroundColor: Get.context!.theme.accentColor,
             ),
           ],

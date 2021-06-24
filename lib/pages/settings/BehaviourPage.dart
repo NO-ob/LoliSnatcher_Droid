@@ -63,7 +63,13 @@ class _BehaviourPageState extends State<BehaviourPage> {
     bool result = await widget.settingsHandler.saveSettings();
     return result;
   }
-
+  void setPath(String path){
+    print("path is $path");
+    if (path.isNotEmpty){
+      print(path);
+      widget.settingsHandler.extPathOverride = path;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -292,14 +298,13 @@ class _BehaviourPageState extends State<BehaviourPage> {
                             width: 500,
                             child:DirPicker(widget.settingsHandler,path),
                           ),
-                        )).then((value) => {print(path)});
+                        )).then((value) => {setPath(value == null ? "" : value)});
                       } else {
-                        Get.to(() => DirPicker(widget.settingsHandler,path))!.then((value) => {print(path)});
+                        Get.to(() => DirPicker(widget.settingsHandler,path))!.then((value) => {setPath(value == null ? "" : value)});
                       }
                     } else {
                       ServiceHandler.displayToast("Not available on android 11+");
                     }
-
                   },
                   child: Text("Set Storage Directory", style: TextStyle(color: Colors.white)),
                 ),
@@ -311,3 +316,4 @@ class _BehaviourPageState extends State<BehaviourPage> {
     );
   }
 }
+
