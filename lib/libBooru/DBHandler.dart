@@ -112,19 +112,27 @@ class DBHandler{
       for (int i = 1; i < tags.length; i++){
         questionMarks += ",?";
       }
+      /*
+      var metaData = await db?.rawQuery("SELECT BooruItem.id as dbid, thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
+        "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
+        "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
+        "WHERE dbid IN (?) AND isFavourite = 1 GROUP BY dbid",[itemID]);
+       */
       result = await db?.rawQuery(
-          "SELECT booruItemID as id FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
-              "HAVING COUNT(*) = ${tags.length} ORDER BY id $order LIMIT $limit OFFSET $offset", tags);
+          "SELECT BooruItem.id as dbid, isFavourite FROM BooruItem "
+              "LEFT JOIN ImageTag on dbid = ImageTag.booruItemID "
+              "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
+              "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY dbid "
+              "HAVING COUNT(*) = ${tags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", tags);
     } else {
       result = await db?.rawQuery(
-          "SELECT id FROM BooruItem ORDER BY id $order LIMIT $limit OFFSET $offset");
+          "SELECT id as dbid, isFavourite FROM BooruItem WHERE isFavourite = 1 ORDER BY id $order LIMIT $limit OFFSET $offset");
     }
     print("got results from db");
     print(result);
     if (result != null && result.isNotEmpty){
       for(int i=0; i < result.length; i++){
-        BooruItem? temp = await getBooruItem(result[i]["id"], mode);
+        BooruItem? temp = await getBooruItem(result[i]["dbid"], mode);
         if (temp != null){
           fetched.add(temp);
         } else {
@@ -145,6 +153,7 @@ class DBHandler{
       for (int i = 1; i < tags.length; i++){
         questionMarks += ",?";
       }
+
       result = await db?.rawQuery(
           "SELECT COUNT(*) as count FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
               "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
@@ -177,26 +186,28 @@ class DBHandler{
 
   //Creates a BooruItem from a BooruItem id
   Future<BooruItem?> getBooruItem(int itemID, String mode) async{
-    var metaData = await db?.rawQuery("SELECT * FROM BooruItem WHERE ID IN (?) AND isFavourite = 1",[itemID]);
+    var metaData = await db?.rawQuery("SELECT BooruItem.id as dbid, thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
+        "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
+        "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
+        "WHERE dbid IN (?) AND isFavourite = 1 GROUP BY dbid",[itemID]);
     BooruItem item;
-    List<String> tagsList = [];
     if (metaData != null && metaData.isNotEmpty){
       item = new BooruItem(
         fileURL: metaData.first["fileURL"].toString(),
         sampleURL: metaData.first["fileURL"].toString(),
         thumbnailURL: metaData.first["thumbnailURL"].toString(),
-        tagsList: [],
+        tagsList: metaData.first["tags"].toString().split(","),
         postURL: metaData.first["postURL"].toString(),
       );
-      var tags = await db?.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)", [itemID]);
-      tags?.forEach((tag) {tagsList.add(tag["name"].toString());});
+      //var tags = await db?.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)", [itemID]);
+      //tags?.forEach((tag) {tagsList.add(tag["name"].toString());});
       if (mode == "loliSyncFav"){
         item.isSnatched = false;
       } else {
         item.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
       }
       item.isFavourite = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
-      item.tagsList = tagsList;
+      //item.tagsList = tagsList;
       return item;
     } else {
       return null;
