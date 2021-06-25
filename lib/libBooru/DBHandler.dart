@@ -119,14 +119,14 @@ class DBHandler{
         "WHERE dbid IN (?) AND isFavourite = 1 GROUP BY dbid",[itemID]);
        */
       result = await db?.rawQuery(
-          "SELECT BooruItem.id as dbid, isFavourite FROM BooruItem "
+          "SELECT BooruItem.id as dbid FROM BooruItem "
               "LEFT JOIN ImageTag on dbid = ImageTag.booruItemID "
               "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
               "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY dbid "
               "HAVING COUNT(*) = ${tags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", tags);
     } else {
       result = await db?.rawQuery(
-          "SELECT id as dbid, isFavourite FROM BooruItem WHERE isFavourite = 1 ORDER BY id $order LIMIT $limit OFFSET $offset");
+          "SELECT id as dbid FROM BooruItem WHERE isFavourite = 1 ORDER BY id $order LIMIT $limit OFFSET $offset");
     }
     print("got results from db");
     print(result);
@@ -154,12 +154,22 @@ class DBHandler{
         questionMarks += ",?";
       }
 
+
+      /*
+      * "SELECT BooruItem.id as dbid, isFavourite FROM BooruItem "
+              "LEFT JOIN ImageTag on dbid = ImageTag.booruItemID "
+              "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
+              "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY dbid "
+              "HAVING COUNT(*) = ${tags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", tags);
+      * */
       result = await db?.rawQuery(
-          "SELECT COUNT(*) as count FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN ($questionMarks) GROUP BY booruItemID "
+          "SELECT COUNT(*) as count FROM BooruItem "
+              "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
+              "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
+              "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY BooruItem.id "
               "HAVING COUNT(*) = ${tags.length}", tags);
     } else {
-      result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem");
+      result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
     }
     print("got count results from db");
     print(result);
