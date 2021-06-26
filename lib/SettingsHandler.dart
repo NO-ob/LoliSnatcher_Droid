@@ -17,7 +17,7 @@ class SettingsHandler {
   String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal',extPathOverride = "";
   List<String> hatedTags = [], lovedTags = [];
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
-  int SDKVer = 0;
+  int SDKVer = 0, galleryAutoScrollTime = 4000;
   String verStr = "1.8.1";
   List<Booru> booruList = [];
   /*static List<ThemeItem> themes = [
@@ -303,6 +303,11 @@ class SettingsHandler {
               extPathOverride = settings[i].split(" = ")[1];
             }
             break;
+          case ("Gallery Auto Scroll"):
+            if (settings[i].split(" = ").length > 1){
+              galleryAutoScrollTime = int.parse(settings[i].split(" = ")[1]);
+            }
+            break;
         }
       }
     }
@@ -345,6 +350,7 @@ class SettingsHandler {
       "volumeButtonsScrollSpeed" : "${volumeButtonsScrollSpeed.toString()}",
       "disableVideo" : "${disableVideo.toString()}",
       "shitDevice" : "${shitDevice.toString()}",
+      "galleryAutoScrollTime" : "${galleryAutoScrollTime.toString()}",
     };
   }
   Future<bool> loadFromJSON(String jsonString) async{
@@ -387,6 +393,7 @@ class SettingsHandler {
     volumeButtonsScrollSpeed = int.parse(json["volumeButtonsScrollSpeed"]);
     disableVideo = Tools.stringToBool(json["disableVideo"]);
     shitDevice = Tools.stringToBool(json["shitDevice"]);
+    galleryAutoScrollTime = int.parse(json["galleryAutoScrollTime"]);
     print(toJSON());
     await saveSettings();
     return true;
@@ -446,6 +453,7 @@ class SettingsHandler {
     writer.write("Shit Device = $shitDevice\n");
     writer.write("Disable Video = $disableVideo\n");
     writer.write("Ext Path = $extPathOverride\n");
+    writer.write("Gallery Auto Scroll = $galleryAutoScrollTime\n");
     writer.close();
     ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
     //Get.snackbar("Settings Saved!","Some changes may not take effect until the search is refreshed or the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);

@@ -49,6 +49,7 @@ class ViewerPage extends StatefulWidget {
 
 class _ViewerPageState extends State<ViewerPage> {
   // PreloadPageView.PageController? controller;
+  bool autoScroll = false;
   PreloadPageController? controller;
   PageController? controllerLinux;
   ImageWriter writer = new ImageWriter();
@@ -107,7 +108,7 @@ class _ViewerPageState extends State<ViewerPage> {
             //   // horizontal to prevent triggering page change early when panning
             //   axis: Axis.horizontal,
               // The pageView builder will created a page for each image in the booruList(fetched)
-              child: (Platform.isAndroid || Platform.isWindows) ? androidPageBuilder() : linuxPageBuilder(),
+              child: androidPageBuilder(),
             // ),
           )
         )
@@ -218,13 +219,13 @@ class _ViewerPageState extends State<ViewerPage> {
                 },
                 child: isVideo
                   ? (!widget.settingsHandler.disableVideo
-                    ? VideoApp(
+                    ? (Platform.isAndroid ? VideoApp(
                       widget.fetched[index],
                       index,
                       widget.searchGlobals,
                       widget.settingsHandler,
                       true
-                    )
+                    ) : desktopVideoPlaceHolder(widget.fetched[index]))
                     : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
                   )
                   : MediaViewer(
@@ -246,6 +247,9 @@ class _ViewerPageState extends State<ViewerPage> {
           setState(() {
             widget.searchGlobals.viewedIndex.value = index;
             kbFocusNode.requestFocus();
+            if (autoScroll){
+              scrollToNextPage(index);
+            }
           });
 
           // enable volume buttons if new page is a video AND appbar is visible
@@ -258,7 +262,44 @@ class _ViewerPageState extends State<ViewerPage> {
       ),
     );
   }
-
+  void scrollToNextPage(int pageNum){
+    // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
+    Future.delayed(Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime),(){
+      if (pageNum == controller!.page!.toInt() && pageNum < widget.fetched.length && widget.fetched[pageNum].mediaType == "image" && autoScroll){
+        print("autoscrolling");
+        controller!.animateToPage(controller!.page!.toInt() + 1,
+            duration: Duration(milliseconds: 400),
+            curve: Curves.linear
+        );
+      }
+    });
+  }
+  Widget desktopVideoPlaceHolder(BooruItem item){
+    return Center(
+      child: Column(
+        children: [
+          Container(height: 150),
+          Image.network(item.thumbnailURL,),
+          Container(
+            margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+            child: TextButton(
+              style: TextButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: new BorderRadius.circular(20),
+                  side: BorderSide(color: Get.context!.theme.accentColor),
+                ),
+              ),
+              onPressed: () {
+                Process.run('mpv', ["--loop", item.fileURL]);
+              },
+              child: Text("Open in MPV", style: TextStyle(color: Colors.white)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  // Might not be needed anymore prelaodpageview is nw working on flutter linux, might not work with go-flutter though
   Widget linuxPageBuilder() {
     return PageView.builder(
         controller: controllerLinux,
@@ -431,6 +472,18 @@ class _ViewerPageState extends State<ViewerPage> {
 
   List<Widget> appBarActions() {
     return [
+      IconButton(
+        icon: autoScroll ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+        color: Colors.white,
+        onPressed: () {
+          setState(() {
+            autoScroll = !autoScroll;
+          });
+          if (autoScroll){
+            scrollToNextPage(controller!.page!.toInt());
+          }
+        },
+      ),
       IconButton(
         icon: Icon(Icons.save),
         color: Colors.white,

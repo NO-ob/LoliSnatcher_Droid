@@ -131,14 +131,19 @@ class DBHandler{
     print("got results from db");
     print(result);
     if (result != null && result.isNotEmpty){
-      for(int i=0; i < result.length; i++){
-        BooruItem? temp = await getBooruItem(result[i]["dbid"], mode);
-        if (temp != null){
-          fetched.add(temp);
-        } else {
-          print("skipped ${result[i]["id"]}");
-        }
-      }
+      List<BooruItem> booruItems = await getBooruItems(List<int>.from(result.map((r) {
+        return r["dbid"];
+      })), mode);
+      fetched.addAll(booruItems);
+
+      // for(int i=0; i < result.length; i++){
+      //   BooruItem? temp = await getBooruItem(result[i]["dbid"], mode);
+      //   if (temp != null){
+      //     fetched.add(temp);
+      //   } else {
+      //     print("skipped ${result[i]["id"]}");
+      //   }
+      // }
     }
     return fetched;
   }
@@ -223,6 +228,37 @@ class DBHandler{
       return null;
     }
   }
+  Future<List<BooruItem>> getBooruItems(List<int> itemIDs, String mode) async{
+    var metaData = await db?.rawQuery("SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
+        "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
+        "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
+        "WHERE ItemID IN (${itemIDs.join(',')}) AND isFavourite = 1 GROUP BY ItemID ORDER BY ItemID DESC");
+
+    List<BooruItem> items = [];
+    if (metaData != null && metaData.isNotEmpty){
+      for(int i=0; i < metaData.length; i++){
+        var currentItem = metaData[i];
+        if(currentItem != null && currentItem.isNotEmpty) {
+          BooruItem bItem = new BooruItem(
+            fileURL: currentItem["fileURL"].toString(),
+            sampleURL: currentItem["sampleURL"].toString(),
+            thumbnailURL: currentItem["thumbnailURL"].toString(),
+            tagsList: currentItem["tags"].toString().split(","),
+            postURL: currentItem["postURL"].toString(),
+          );
+          if (mode == "loliSyncFav"){
+            bItem.isSnatched = false;
+          } else {
+            bItem.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+          }
+          bItem.isFavourite = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
+          items.add(bItem);
+        }
+      }
+    }
+    return items;
+  }
+
   void clearSnatched() async{
     await db?.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
     deleteUntracked();
@@ -300,7 +336,7 @@ class DBHandler{
     const String notFavouriteQuery = "(isFavourite != '1' OR isFavourite is null)";
     await db?.rawDelete("DELETE FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND $notFavouriteQuery;", [searchText, booruType, booruName]);
 
-    var favouriteDuplicates = await db?.rawQuery("SELECT * FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite == '1';", [searchText, booruType, booruName]); 
+    var favouriteDuplicates = await db?.rawQuery("SELECT * FROM SearchHistory WHERE searchText=? AND booruType=? AND booruName=? AND isFavourite == '1';", [searchText, booruType, booruName]);
     if(favouriteDuplicates == null || favouriteDuplicates.isEmpty) { // insert new entry only if it wasn't favourited before
       await db?.rawInsert("INSERT INTO SearchHistory(searchText, booruType, booruName) VALUES(?,?,?)", [searchText, booruType, booruName]);
     } else { // otherwise update the last seartch time

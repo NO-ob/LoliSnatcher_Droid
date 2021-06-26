@@ -18,6 +18,7 @@ class _GalleryPageState extends State<GalleryPage> {
   String? galleryMode, galleryBarPosition, galleryScrollDirection;
   TextEditingController preloadController = new TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
+  TextEditingController galleryAutoScrollController = new TextEditingController();
   @override
   void initState(){
     autoHideImageBar = widget.settingsHandler.autoHideImageBar;
@@ -27,7 +28,7 @@ class _GalleryPageState extends State<GalleryPage> {
     autoPlay = widget.settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = widget.settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = widget.settingsHandler.volumeButtonsScrollSpeed.toString();
-    
+    galleryAutoScrollController.text = widget.settingsHandler.galleryAutoScrollTime.toString();
     preloadController.text = widget.settingsHandler.preloadCount.toString();
     shitDevice = widget.settingsHandler.shitDevice;
     disableVideo = widget.settingsHandler.disableVideo;
@@ -46,10 +47,13 @@ class _GalleryPageState extends State<GalleryPage> {
     widget.settingsHandler.disableVideo = disableVideo;
     widget.settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     if (int.parse(scrollSpeedController.text) < 100){
-      scrollSpeedController.text = 100.toString();
+      scrollSpeedController.text = "100";
+    }
+    if (int.parse(galleryAutoScrollController.text) < 800){
+      galleryAutoScrollController.text = "800";
     }
     widget.settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
-
+    widget.settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
     if (int.parse(preloadController.text) < 0){
       preloadController.text = 0.toString();
     }
@@ -359,6 +363,37 @@ class _GalleryPageState extends State<GalleryPage> {
                           ],
                           decoration: InputDecoration(
                             hintText: "Scroll Speed",
+                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                            border: new OutlineInputBorder(
+                              borderRadius: new BorderRadius.circular(50),
+                              gapPadding: 0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                width: double.infinity,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Text("Auto Scroll Timeout (MS) :            "),
+                    new Expanded(
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(10,0,0,0),
+                        child: TextField(
+                          controller: galleryAutoScrollController,
+                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                            hintText: "Auto Scroll Timeout",
                             contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
                             border: new OutlineInputBorder(
                               borderRadius: new BorderRadius.circular(50),
