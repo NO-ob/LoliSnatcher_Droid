@@ -19,13 +19,21 @@ class SettingsHandler {
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0, galleryAutoScrollTime = 4000;
   String verStr = "1.8.1";
+  List<List<String>> buttonList = [
+    ["autoscroll", "AutoScroll"],
+    ["snatch", "Save"],
+    ["favourite", "Favourite"],
+    ["info", "Display Info"],
+    ["share", "Share"],
+    ["open", "Open in Browser"]
+  ];
   List<List<String>> buttonOrder = [
-    ["autoscroll","Auto Scroll"],
-    ["snatch","Snatch Image"],
-    ["favourite","Add to Favourites"],
-    ["info","Display Info"],
-    ["share","Share Image"],
-    ["open","Open in Browser"]
+    ["autoscroll", "AutoScroll"],
+    ["snatch", "Save"],
+    ["favourite", "Favourite"],
+    ["info", "Display Info"],
+    ["share", "Share"],
+    ["open", "Open in Browser"]
   ];
   List<Booru> booruList = [];
   /*static List<ThemeItem> themes = [
@@ -250,6 +258,15 @@ class SettingsHandler {
               // print("App mode found " + settings[i].split(" = ")[1] );
             }
             break;
+          case("Buttons Order"):
+            if (settings[i].split(" = ").length > 1){
+              buttonOrder = settings[i].split(" = ")[1].split(',').map((bstr) {
+                List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+                return button;
+              }).where((el) => el[0] != 'null').toList(); // split button names string, get their [name, label] list, filter all wrong values
+              // print("Found Gallery Buttons Order " + settings[i].split(" = ")[1]);
+            }
+            break;
           case("Hated Tags"):
             if (settings[i].split(" = ").length > 1){
               hatedTags = cleanTagsList(settings[i].split(" = ")[1].split(','));
@@ -343,6 +360,7 @@ class SettingsHandler {
       "snatchCooldown" : "$snatchCooldown",
       "galleryBarPosition" : "$galleryBarPosition",
       "galleryScrollDirection" : "$galleryScrollDirection",
+      "buttonOrder": "${buttonOrder.map((e) => e[0]).join(',')}",
       "hatedTags": cleanTagsList(hatedTags),
       "lovedTags": cleanTagsList(lovedTags),
       "jsonWrite" : "${jsonWrite.toString()}",
@@ -363,6 +381,12 @@ class SettingsHandler {
   }
   Future<bool> loadFromJSON(String jsonString) async{
     Map<String, dynamic> json = jsonDecode(jsonString);
+    List<List<String>> btnOrder = json["buttonorder"].map((bstr) {
+      List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+      return button;
+    }).where((el) => el[0] != 'null').toList();
+    buttonOrder = btnOrder;
+
     List hateTags = json["hatedTags"];
     List loveTags = json["lovedTags"];
     for (int i = 0; i < hateTags.length; i++){
@@ -407,7 +431,7 @@ class SettingsHandler {
     return true;
   }
 
-  Future<bool> saveSettings() async{
+  Future<bool> saveSettings() async {
     await getPerms();
     if (path == ""){
      path = await getExtDir();
@@ -416,26 +440,32 @@ class SettingsHandler {
     await Directory(path).create(recursive:true);
     File settingsFile = new File(path+"settings.conf");
     var writer = settingsFile.openWrite();
+
     writer.write("Default Tags = $defTags\n");
     this.defTags = defTags;
+
+    writer.write("Buttons Order = ${buttonOrder.map((e) => e[0]).join(',')}\n");
+    this.buttonOrder = buttonOrder;
+
     writer.write("Hated Tags = ${cleanTagsList(hatedTags).join(',')}\n");
     this.hatedTags = hatedTags;
+
     writer.write("Filter Hated = $filterHated\n");
+
     writer.write("Loved Tags = ${cleanTagsList(lovedTags).join(',')}\n");
     this.lovedTags = lovedTags;
 
     writer.write("Volume Buttons Scroll = $useVolumeButtonsForScroll\n");
     writer.write("Volume Buttons Scroll Speed = $volumeButtonsScrollSpeed\n");
 
-      // Write limit if its between 0-100
+    // Write limit if its between 0-100
     if (limit <= 100 && limit >= 5){
       writer.write("Limit = $limit\n");
     } else {
-        // Close writer and alert user
-      writer.close();
-      ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit");
+      // Close writer and alert user
+      writer.write("Limit = 20\n");
+      ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit amount, Defaulting to 20");
       //Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-      return false;
     }
     writer.write("Landscape Columns = $landscapeColumns\n");
     writer.write("Portrait Columns = $portraitColumns\n");

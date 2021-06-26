@@ -28,7 +28,7 @@ dependencies:
   intl: ^0.17.0
   flutter_launcher_icons: ^0.9.0
   # flash: ^1.5.0
-  marquee: ^2.1.0
+  marquee: ^2.2.0
   auto_size_text: ^3.0.0-nullsafety.0
   vibration: ^1.7.4-nullsafety.0
   get: ^4.1.4

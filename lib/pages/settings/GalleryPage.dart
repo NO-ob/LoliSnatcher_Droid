@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class GalleryPage extends StatefulWidget {
 class _GalleryPageState extends State<GalleryPage> {
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
   String? galleryMode, galleryBarPosition, galleryScrollDirection;
+  List<List<String>>? buttonOrder;
   TextEditingController preloadController = new TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
   TextEditingController galleryAutoScrollController = new TextEditingController();
@@ -24,6 +26,7 @@ class _GalleryPageState extends State<GalleryPage> {
     autoHideImageBar = widget.settingsHandler.autoHideImageBar;
     galleryMode = widget.settingsHandler.galleryMode;
     galleryBarPosition = widget.settingsHandler.galleryBarPosition;
+    buttonOrder = widget.settingsHandler.buttonOrder;
     galleryScrollDirection = widget.settingsHandler.galleryScrollDirection;
     autoPlay = widget.settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = widget.settingsHandler.useVolumeButtonsForScroll;
@@ -40,6 +43,7 @@ class _GalleryPageState extends State<GalleryPage> {
     widget.settingsHandler.autoHideImageBar = autoHideImageBar;
     widget.settingsHandler.galleryMode = galleryMode!;
     widget.settingsHandler.galleryBarPosition = galleryBarPosition!;
+    widget.settingsHandler.buttonOrder = buttonOrder!;
     widget.settingsHandler.galleryScrollDirection = galleryScrollDirection!;
     widget.settingsHandler.autoPlayEnabled = autoPlay;
     widget.settingsHandler.loadingGif = loadingGif;
@@ -65,6 +69,10 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
+    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child:Scaffold(
@@ -211,6 +219,59 @@ class _GalleryPageState extends State<GalleryPage> {
                       activeColor: Get.context!.theme.primaryColor,
                     )
                   ],)
+              ),
+              Container(
+                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  decoration: BoxDecoration(
+                    border: Border.symmetric(vertical: BorderSide.none, horizontal: BorderSide(color: Get.context!.theme.focusColor, width: 3)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(children: [
+                        Text('Toolbar Buttons Order'),
+                        IconButton(
+                          icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
+                          onPressed: () {
+                            Get.dialog(
+                                InfoDialog("Buttons Order",
+                                  [
+                                    Text("Long press to change item order."),
+                                    Text("First 4 buttons from this list will be always visible on Toolbar."),
+                                    Text("Other buttons will be in overflow (three dots) menu."),
+                                  ],
+                                  CrossAxisAlignment.start,
+                                )
+                            );
+                          },
+                        ),
+                      ]),
+                      ReorderableListView(
+                        padding: EdgeInsets.fromLTRB(5, 5, 150, 5),
+                        shrinkWrap: true,
+                        children: [
+                          for (int index = 0; index < buttonOrder!.length; index++)
+                            ListTile(
+                              onTap: () {
+                                ServiceHandler.displayToast('Long Press to move items');
+                              },
+                              key: Key('$index'),
+                              tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                              title: Text('${buttonOrder![index][1]}'),
+                              trailing: Icon(Icons.menu),
+                            ),
+                        ],
+                        onReorder: (int oldIndex, int newIndex) {
+                          setState(() {
+                            if (oldIndex < newIndex) {
+                              newIndex -= 1;
+                            }
+                            final List<String> item = buttonOrder!.removeAt(oldIndex);
+                            buttonOrder!.insert(newIndex, item);
+                          });
+                        },
+                      )
+                    ]
+                  )
               ),
               Container(
                   margin: EdgeInsets.fromLTRB(10,10,10,10),
@@ -382,6 +443,19 @@ class _GalleryPageState extends State<GalleryPage> {
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     Text("Auto Scroll Timeout (MS) :            "),
+                    IconButton(
+                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
+                      onPressed: () {
+                        Get.dialog(
+                            InfoDialog("AutoScroll / Slideshow",
+                              [
+                                Text("[WIP] Videos and gifs must be scrolled manually for now"),
+                              ],
+                              CrossAxisAlignment.start,
+                            )
+                        );
+                      },
+                    ),
                     new Expanded(
                       child: Container(
                         margin: EdgeInsets.fromLTRB(10,0,0,0),

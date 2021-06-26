@@ -174,16 +174,19 @@ class _LoliControlsState extends State<LoliControls>
                   )
                 ),
                  Expanded(
-                     flex :4,
+                  flex: 4,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       if (chewieController.allowPlaybackSpeedChanging)
                         _buildSpeedButton(controller),
+                        // Container(child: _buildSpeedButton(controller), decoration: BoxDecoration(color: Colors.red)),
                       if (chewieController.allowMuting)
                         _buildMuteButton(controller),
+                        // Container(child: _buildMuteButton(controller), decoration: BoxDecoration(color: Colors.yellow)),
                       if (chewieController.allowFullScreen)
                         _buildExpandButton(),
+                        // Container(child: _buildExpandButton(), decoration: BoxDecoration(color: Colors.green)),
                     ]
                   )
                 ),
@@ -291,24 +294,27 @@ class _LoliControlsState extends State<LoliControls>
   GestureDetector _buildExpandButton() {
     return GestureDetector(
       onTap: _onExpandCollapse,
-      child: AnimatedOpacity(
-        opacity: _hideStuff ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: Container(
-          height: barHeight,
-          margin: const EdgeInsets.only(right: 12.0),
-          padding: const EdgeInsets.only(
-            left: 8.0,
-            right: 8.0,
-          ),
-          child: Center(
-            child: Icon(
-              chewieController.isFullScreen
-                  ? Icons.fullscreen_exit
-                  : Icons.fullscreen,
+      child: Container( // extra container with decoration to force more clickable width, otherwise there is ~40px of empty space on the right
+        decoration: BoxDecoration(color: Colors.transparent),
+        child: AnimatedOpacity(
+          opacity: _hideStuff ? 0.0 : 1.0,
+          duration: const Duration(milliseconds: 300),
+          child: Container(
+            height: barHeight,
+            margin: const EdgeInsets.only(right: 12.0),
+            padding: const EdgeInsets.only(
+              left: 8.0,
+              right: 8.0,
+            ),
+            child: Center(
+              child: Icon(
+                chewieController.isFullScreen
+                    ? Icons.fullscreen_exit
+                    : Icons.fullscreen,
+              ),
             ),
           ),
-        ),
+        )
       ),
     );
   }
@@ -433,9 +439,9 @@ class _LoliControlsState extends State<LoliControls>
     );
   }
 
-  GestureDetector _buildMuteButton(
-    VideoPlayerController controller,
-  ) {
+  GestureDetector _buildMuteButton(VideoPlayerController controller) {
+    bool isGlobalMute = widget.settingsHandler.videoAutoMute;
+
     return GestureDetector(
       onTap: () {
         _cancelAndRestartTimer();
@@ -464,7 +470,7 @@ class _LoliControlsState extends State<LoliControls>
               right: 8.0,
             ),
             child: Icon(
-              _latestValue.volume > 0 ? Icons.volume_up : Icons.volume_off,
+              _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
             ),
           ),
         ),
