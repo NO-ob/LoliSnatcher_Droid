@@ -47,27 +47,30 @@ class _HideableAppBarState extends State<HideableAppBar> {
     //Hide status bar and bottom navbar
     // Bug: triggers restate => forces video restart, animation lags
     // !widget.searchGlobals.displayAppbar.value ? SystemChrome.setEnabledSystemUIOverlays([]) : SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
-      curve: Curves.linear,
-      color: Colors.transparent,
-      height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
-      child: AppBar(
-        // toolbarHeight: widget.defaultHeight,
-        // elevation: 0, // set to zero to disable a shadow behind
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          // to ignore icon change
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+
+    return SafeArea( // to fix height bug when bar on top
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.linear,
+        color: Colors.transparent,
+        height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
+        child: AppBar(
+          // toolbarHeight: widget.defaultHeight,
+          // elevation: 0, // set to zero to disable a shadow behind
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            // to ignore icon change
+            icon: Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: FittedBox(
+            fit: BoxFit.fitWidth,
+            child: Text(widget.title, style: TextStyle(color: Colors.white)),
+          ),
+          actions: widget.actions,
         ),
-        title: FittedBox(
-          fit: BoxFit.fitWidth,
-          child: Text(widget.title, style: TextStyle(color: Colors.white)),
-        ),
-        actions: widget.actions,
-      ),
+      )
     );
   }
 }

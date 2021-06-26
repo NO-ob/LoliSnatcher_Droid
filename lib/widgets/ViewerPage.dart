@@ -18,6 +18,8 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/TimedProgressController.dart';
+import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MediaViewer.dart';
@@ -50,6 +52,9 @@ class ViewerPage extends StatefulWidget {
 class _ViewerPageState extends State<ViewerPage> {
   // PreloadPageView.PageController? controller;
   bool autoScroll = false;
+  Timer? autoScrollTimer;
+  TimedProgressController? autoScrollProgressController;
+
   PreloadPageController? controller;
   PageController? controllerLinux;
   ImageWriter writer = new ImageWriter();
@@ -75,6 +80,10 @@ class _ViewerPageState extends State<ViewerPage> {
     });
     kbFocusNode.requestFocus();
     ServiceHandler.disableSleep();
+
+    autoScrollProgressController = TimedProgressController(
+      duration: Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime),
+    );
 
     // enable volume buttons if opened page is a video AND appbar is visible
     bool isVideo = widget.fetched[widget.index].isVideo();
@@ -144,6 +153,8 @@ class _ViewerPageState extends State<ViewerPage> {
 
   @override
   void dispose(){
+    autoScrollProgressController?.dispose();
+    autoScrollTimer?.cancel();
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(!widget.settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
@@ -248,9 +259,6 @@ class _ViewerPageState extends State<ViewerPage> {
           setState(() {
             widget.searchGlobals.viewedIndex.value = index;
             kbFocusNode.requestFocus();
-            if (autoScroll){
-              scrollToNextPage(index);
-            }
           });
 
           // enable volume buttons if new page is a video AND appbar is visible
@@ -263,18 +271,52 @@ class _ViewerPageState extends State<ViewerPage> {
       ),
     );
   }
-  void scrollToNextPage(int pageNum){
+
+  void scrollToNextPage() {
     // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
-    Future.delayed(Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime),(){
-      if (pageNum == controller!.page!.toInt() && pageNum < widget.fetched.length && widget.fetched[pageNum].mediaType == "image" && autoScroll){
+    final int viewedIndex = widget.searchGlobals.viewedIndex.value;
+    final bool isImage = widget.fetched[viewedIndex].mediaType == "image";
+    if((viewedIndex + 1) < widget.fetched.length) {
+      if (viewedIndex == controller!.page!.toInt() && isImage && autoScroll){
         print("autoscrolling");
         controller!.animateToPage(controller!.page!.toInt() + 1,
             duration: Duration(milliseconds: 400),
             curve: Curves.linear
         );
       }
+    } else {
+      autoScrollState(false);
+    }
+  }
+  void setScrollTimer() {
+    autoScrollProgressController?.start();
+    autoScrollTimer = Timer.periodic(Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime), (timer) {
+      scrollToNextPage();
+      autoScrollProgressController?.restart();
     });
   }
+  void unsetScrollTimer() {
+    autoScrollTimer?.cancel();
+    autoScrollProgressController?.stop();
+  }
+  void autoScrollState(bool newState) {
+    bool isNotLastPage = (widget.searchGlobals.viewedIndex.value + 1) < widget.fetched.length;
+    if(autoScroll != newState) {
+      if(isNotLastPage) {
+        setState(() {
+          autoScroll = newState;
+        });
+        newState ? setScrollTimer() : unsetScrollTimer();
+      } else {
+        if(newState == true) ServiceHandler.displayToast("Can't start slideshow\nReached the last loaded item");
+        setState(() {
+          autoScroll = false;
+        });
+        unsetScrollTimer();
+      }
+    }
+  }
+
   Widget desktopVideoPlaceHolder(BooruItem item){
     return Center(
       child: Column(
@@ -472,105 +514,140 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   List<Widget> appBarActions() {
-    List<List<String>> buttonList = widget.settingsHandler.buttonOrder.sublist(0,4);
-    List<List<String>> overFlowList = widget.settingsHandler.buttonOrder.sublist(4);
     List<Widget> actions = [];
 
-    buttonList.forEach((element) {
-      switch(element[0]){
-        case("autoscroll"):
-          actions.add(autoScrollButton());
-          break;
-        case("snatch"):
-          actions.add(snatchButton());
-          break;
-        case("share"):
-          actions.add(shareButton());
-          break;
-        case("favourite"):
-          actions.add(favouriteButton());
-          break;
-        case("open"):
-          actions.add(openButton());
-          break;
-        case("info"):
-          actions.add(infoButton());
-          break;
-      }
+    // first 4 buttons will show on toolbar
+    List<List<String>> buttonList = widget.settingsHandler.buttonOrder.sublist(0,4);
+    buttonList.forEach((value) {
+      actions.add(buildIconButton(value[0]));
     });
+
+    // all buttons after that will be in overflow menu
+    List<List<String>> overFlowList = widget.settingsHandler.buttonOrder.sublist(4);
     actions.add(PopupMenuButton(
         icon: Icon(
           Icons.more_vert,
           color: Colors.white,
         ),
-        onSelected: (value){
-          buttonClick(value.toString());
-        },
         itemBuilder: (BuildContext itemBuilder) =>
-            overFlowList.map((value) =>
-                PopupMenuItem(
-                  child: Text(value[1]),
-                  value: value[0],)
-            ).toList()
+          overFlowList.map((value) =>
+            PopupMenuItem(
+              padding: EdgeInsets.all(0), // remove empty space around the button
+              child: SizedBox(
+                width: double.infinity, // force button to take full width
+                child: TextButton.icon(
+                  onLongPress: () {
+                    buttonHold(value[0]);
+                  },
+                  onPressed: () {
+                    Navigator.of(context).pop(); // remove overflow menu
+                    buttonClick(value[0]);
+                  },
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
+                    alignment: Alignment.centerLeft,
+                    padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
+                  ),
+                  icon: buttonIcon(value[0]),
+                  label: Text(buttonText(value))
+                )
+              ),
+              value: value[0]
+            )
+          ).toList()
     ));
     return actions;
   }
 
-  Widget infoButton(){
-    return IconButton(
-      icon: Icon(Icons.info),
-      color: Colors.white,
-      onPressed: () {
-        buttonClick("info");
-      },
-    );
-  }
-  Widget openButton(){
-    if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != ''){
-      return IconButton(
-        icon: Icon(Icons.public),
-        color: Colors.white,
-        onPressed: () {
-          buttonClick("open");
+  // generate widget for toolbar button
+  Widget buildIconButton(String action) {
+    if(action == 'autoscroll') {
+      // custom build to add progress indicator to slideshow button
+      return GestureDetector(
+        onLongPress: () {
+          buttonHold(action);
         },
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if(autoScroll)
+              RestartableProgressIndicator(
+                controller: autoScrollProgressController!,
+              ),
+
+            IconButton(
+              icon: buttonIcon(action),
+              color: Colors.white,
+              onPressed: () {
+                buttonClick(action);
+              },
+            ),
+          ]
+        )
       );
     } else {
-      return SizedBox();
-    }
-  }
-  Widget autoScrollButton(){
-    return IconButton(
-      icon: autoScroll ? Icon(Icons.pause) : Icon(Icons.play_arrow),
-      color: Colors.white,
-      onPressed: () {
-        buttonClick("autoscroll");
-      },
-    );
-  }
-  Widget snatchButton(){
-    return IconButton(
-      icon: Icon(Icons.save),
-      color: Colors.white,
-      onPressed: () async {
-        buttonClick("snatch");
-      },
-    );
-  }
-  Widget favouriteButton(){
-    if (widget.settingsHandler.dbEnabled){
-      return IconButton(
-        icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
-        color: Colors.white,
-        onPressed: () {
-          buttonClick("favourite");
+      return GestureDetector(
+        onLongPress: () {
+          buttonHold(action);
         },
+        child: IconButton(
+          icon: buttonIcon(action),
+          color: Colors.white,
+          onPressed: () {
+            buttonClick(action);
+          },
+        ),
       );
-    } else {
-      return SizedBox();
     }
   }
-  void buttonClick(String action){
-    switch(action){
+
+  // get button icon
+  Widget buttonIcon(String action) {
+    late IconData icon;
+    switch(action) {
+      case("info"):
+        icon = Icons.info;
+        break;
+      case("open"):
+        icon = Icons.public;
+        break;
+      case("autoscroll"):
+        icon = autoScroll ? Icons.pause : Icons.play_arrow;
+        break;
+      case("snatch"):
+        icon = Icons.save;
+        break;
+      case("favourite"):
+        icon = widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border;
+        break;
+      case("share"):
+        icon = Icons.share;
+    }
+    return Icon(icon);
+  }
+
+  // get button text for overflow menu
+  String buttonText(List<String> actionAndLabel) {
+    String action = actionAndLabel[0], defaultLabel = actionAndLabel[1];
+    late String label;
+    switch(action) {
+      case("autoscroll"):
+        label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
+        break;
+      case("favourite"):
+        label = widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? 'Unfavourite' : defaultLabel;
+        break;
+      default:
+        // use default text
+        label = defaultLabel;
+        break;
+    }
+    return label;
+  }
+
+  // execute button action
+  void buttonClick(String action) {
+    switch(action) {
       case("info"):
         viewerScaffoldKey.currentState?.openEndDrawer();
         break;
@@ -578,12 +655,7 @@ class _ViewerPageState extends State<ViewerPage> {
         ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
         break;
       case("autoscroll"):
-        setState(() {
-          autoScroll = !autoScroll;
-        });
-        if (autoScroll){
-          scrollToNextPage(controller!.page!.toInt());
-        }
+        autoScrollState(!autoScroll);
         break;
       case("snatch"):
         getPerms();
@@ -601,24 +673,16 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
     }
   }
-  Widget shareButton(){
-    return GestureDetector(
-      onLongPress: () async {
-        if(await Vibration.hasVibrator() ?? false) {
-          Vibration.vibrate(duration: 10);
-        }
-        // Ignore share setting on long press
-        showShareDialog(showTip: false);
-      },
-      child: IconButton(
-        icon: Icon(Icons.share),
-        color: Colors.white,
-        onPressed: () {
-          buttonClick("share");
-        },
-      ),
-    );
+
+  // long tap action
+  void buttonHold(String action) {
+    switch(action) {
+      case("share"):
+        onShareHold();
+        break;
+    }
   }
+
   void onShareClick(){
     String shareSetting = widget.settingsHandler.shareAction;
     switch(shareSetting) {
@@ -641,4 +705,12 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
     }
   }
+  void onShareHold() async {
+    if(await Vibration.hasVibrator() ?? false) {
+      Vibration.vibrate(duration: 10);
+    }
+    // Ignore share setting on long press
+    showShareDialog(showTip: false);
+  }
+
 }

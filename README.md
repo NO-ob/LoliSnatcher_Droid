@@ -17,7 +17,9 @@ Supported Booru engines:
 - e621
 - Szurubooru
 - Hydrus Network
-- Sankaku
+- Sankaku (Default and Idol)
+- rule34.xyz / rule34.world
+- rule34hentai
 - Booru On Rails (Twibooru)
 
 ![github-small](https://loli.rehab/images/posts/loliSnatcherDroid/preview.png)

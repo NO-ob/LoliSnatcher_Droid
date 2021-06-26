@@ -30,7 +30,7 @@ class GelbooruHandler extends BooruHandler{
     if (prevTags != tags){
       fetched = [];
     }
-    String url = makeURL(tags);
+    String url = makeURL(tags).replaceAll(" ", "+");
     print(url);
     try {
       int length = fetched.length;
