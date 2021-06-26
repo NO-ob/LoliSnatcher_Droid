@@ -261,6 +261,15 @@ class _ViewerPageState extends State<ViewerPage> {
             kbFocusNode.requestFocus();
           });
 
+          if(autoScroll) {
+            if((autoScrollTimer?.isActive == true)) {
+              // reset slideshow timer if user scrolled earlier
+              // TODO bug: progress animation lags for a few frames when scroll is automatic
+              unsetScrollTimer();
+              setScrollTimer();
+            }
+          }
+
           // enable volume buttons if new page is a video AND appbar is visible
           bool isVideo = widget.fetched[index].isVideo();
           bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar.value);
@@ -289,7 +298,7 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
   void setScrollTimer() {
-    autoScrollProgressController?.start();
+    autoScrollProgressController?.restart();
     autoScrollTimer = Timer.periodic(Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime), (timer) {
       scrollToNextPage();
       autoScrollProgressController?.restart();
