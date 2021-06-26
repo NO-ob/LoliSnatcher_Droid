@@ -19,6 +19,14 @@ class SettingsHandler {
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0, galleryAutoScrollTime = 4000;
   String verStr = "1.8.1";
+  List<List<String>> buttonOrder = [
+    ["autoscroll","Auto Scroll"],
+    ["snatch","Snatch Image"],
+    ["favourite","Add to Favourites"],
+    ["info","Display Info"],
+    ["share","Share Image"],
+    ["open","Open in Browser"]
+  ];
   List<Booru> booruList = [];
   /*static List<ThemeItem> themes = [
     new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),

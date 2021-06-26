@@ -57,6 +57,7 @@ class _ViewerPageState extends State<ViewerPage> {
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
+
   @override
   void initState() {
     super.initState();
@@ -471,94 +472,173 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   List<Widget> appBarActions() {
-    return [
-      IconButton(
-        icon: autoScroll ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+    List<List<String>> buttonList = widget.settingsHandler.buttonOrder.sublist(0,4);
+    List<List<String>> overFlowList = widget.settingsHandler.buttonOrder.sublist(4);
+    List<Widget> actions = [];
+
+    buttonList.forEach((element) {
+      switch(element[0]){
+        case("autoscroll"):
+          actions.add(autoScrollButton());
+          break;
+        case("snatch"):
+          actions.add(snatchButton());
+          break;
+        case("share"):
+          actions.add(shareButton());
+          break;
+        case("favourite"):
+          actions.add(favouriteButton());
+          break;
+        case("open"):
+          actions.add(openButton());
+          break;
+        case("info"):
+          actions.add(infoButton());
+          break;
+      }
+    });
+    actions.add(PopupMenuButton(
+        icon: Icon(
+          Icons.more_vert,
+          color: Colors.white,
+        ),
+        onSelected: (value){
+          buttonClick(value.toString());
+        },
+        itemBuilder: (BuildContext itemBuilder) =>
+            overFlowList.map((value) =>
+                PopupMenuItem(
+                  child: Text(value[1]),
+                  value: value[0],)
+            ).toList()
+    ));
+    return actions;
+  }
+
+  Widget infoButton(){
+    return IconButton(
+      icon: Icon(Icons.info),
+      color: Colors.white,
+      onPressed: () {
+        buttonClick("info");
+      },
+    );
+  }
+  Widget openButton(){
+    if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != ''){
+      return IconButton(
+        icon: Icon(Icons.public),
         color: Colors.white,
         onPressed: () {
-          setState(() {
-            autoScroll = !autoScroll;
-          });
-          if (autoScroll){
-            scrollToNextPage(controller!.page!.toInt());
-          }
+          buttonClick("open");
         },
-      ),
-      IconButton(
-        icon: Icon(Icons.save),
-        color: Colors.white,
-        onPressed: () async {
-          getPerms();
-          // call a function to save the currently viewed image when the save button is pressed
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru, widget.settingsHandler.snatchCooldown);
-        },
-      ),
-      GestureDetector(
-        onLongPress: () async {
-          if(await Vibration.hasVibrator() ?? false) {
-            Vibration.vibrate(duration: 10);
-          }
-          // Ignore share setting on long press
-          showShareDialog(showTip: false);
-        },
-        child: IconButton(
-          icon: Icon(Icons.share),
-          color: Colors.white,
-          onPressed: () {
-            String shareSetting = widget.settingsHandler.shareAction;
-            switch(shareSetting) {
-              case 'Post URL':
-                if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '') {
-                  shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
-                } else {
-                  ServiceHandler.displayToast("No Post URL!");
-                }
-                break;
-              case 'File URL':
-                shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
-                break;
-              case 'File':
-                shareFileAction();
-                break;
-
-              case 'Ask':
-              default:
-                showShareDialog();
-                break;
-            }
-          },
-        ),
-      ),
-      widget.settingsHandler.dbEnabled
-        ? IconButton(
-          icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
-          color: Colors.white,
-          onPressed: () {
-            setState(() {
-              widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
-              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value],"local");
-            });
-          },
-        )
-        : const SizedBox(),
-
-      if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '')
-        IconButton(
-          icon: Icon(Icons.public),
-          color: Colors.white,
-          onPressed: () {
-              ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
-          },
-        ),
-
-      IconButton(
-        icon: Icon(Icons.info),
+      );
+    } else {
+      return SizedBox();
+    }
+  }
+  Widget autoScrollButton(){
+    return IconButton(
+      icon: autoScroll ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+      color: Colors.white,
+      onPressed: () {
+        buttonClick("autoscroll");
+      },
+    );
+  }
+  Widget snatchButton(){
+    return IconButton(
+      icon: Icon(Icons.save),
+      color: Colors.white,
+      onPressed: () async {
+        buttonClick("snatch");
+      },
+    );
+  }
+  Widget favouriteButton(){
+    if (widget.settingsHandler.dbEnabled){
+      return IconButton(
+        icon: Icon(widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border),
         color: Colors.white,
         onPressed: () {
-          // Scaffold.of(context).openEndDrawer(); // doesn't work?
-          viewerScaffoldKey.currentState?.openEndDrawer();
+          buttonClick("favourite");
+        },
+      );
+    } else {
+      return SizedBox();
+    }
+  }
+  void buttonClick(String action){
+    switch(action){
+      case("info"):
+        viewerScaffoldKey.currentState?.openEndDrawer();
+        break;
+      case("open"):
+        ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+        break;
+      case("autoscroll"):
+        setState(() {
+          autoScroll = !autoScroll;
+        });
+        if (autoScroll){
+          scrollToNextPage(controller!.page!.toInt());
+        }
+        break;
+      case("snatch"):
+        getPerms();
+        // call a function to save the currently viewed image when the save button is pressed
+        widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru, widget.settingsHandler.snatchCooldown);
+        break;
+      case("favourite"):
+        setState(() {
+          widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
+          widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value],"local");
+        });
+        break;
+      case("share"):
+        onShareClick();
+        break;
+    }
+  }
+  Widget shareButton(){
+    return GestureDetector(
+      onLongPress: () async {
+        if(await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(duration: 10);
+        }
+        // Ignore share setting on long press
+        showShareDialog(showTip: false);
+      },
+      child: IconButton(
+        icon: Icon(Icons.share),
+        color: Colors.white,
+        onPressed: () {
+          buttonClick("share");
         },
       ),
-    ];
+    );
+  }
+  void onShareClick(){
+    String shareSetting = widget.settingsHandler.shareAction;
+    switch(shareSetting) {
+      case 'Post URL':
+        if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '') {
+          shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+        } else {
+          ServiceHandler.displayToast("No Post URL!");
+        }
+        break;
+      case 'File URL':
+        shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+        break;
+      case 'File':
+        shareFileAction();
+        break;
+      case 'Ask':
+      default:
+        showShareDialog();
+        break;
+    }
   }
 }
