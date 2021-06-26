@@ -204,7 +204,7 @@ class DBHandler{
     var metaData = await db?.rawQuery("SELECT BooruItem.id as dbid, thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
         "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
         "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-        "WHERE dbid IN (?) AND isFavourite = 1 GROUP BY dbid",[itemID]);
+        "WHERE dbid IN (?) GROUP BY dbid",[itemID]);
     BooruItem item;
     if (metaData != null && metaData.isNotEmpty){
       item = new BooruItem(
@@ -232,7 +232,7 @@ class DBHandler{
     var metaData = await db?.rawQuery("SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
         "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
         "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-        "WHERE ItemID IN (${itemIDs.join(',')}) AND isFavourite = 1 GROUP BY ItemID ORDER BY ItemID DESC");
+        "WHERE ItemID IN (${itemIDs.join(',')}) GROUP BY ItemID ORDER BY ItemID DESC");
 
     List<BooruItem> items = [];
     if (metaData != null && metaData.isNotEmpty){
