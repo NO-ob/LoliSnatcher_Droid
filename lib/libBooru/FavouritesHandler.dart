@@ -10,7 +10,7 @@ class FavouritesHandler extends BooruHandler{
     print("new favourites handler");
   }
 
-
+  @override
   Future Search(String tags, int pageNum) async{
     isActive = true;
     int length = fetched.length;

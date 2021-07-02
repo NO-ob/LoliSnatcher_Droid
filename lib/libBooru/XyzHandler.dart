@@ -16,6 +16,7 @@ class XyzHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
+  @override
   Future Search(String tags,int pageNum) async{
     int length = fetched.length;
     bool loadTags = false;
@@ -56,7 +57,7 @@ class XyzHandler extends BooruHandler{
       });
       // print(requestBody);
       Uri uri = Uri.parse(url);
-      final response = await http.post(uri, headers: {"Accept": "application/json", 'Content-Type': 'application/json', "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"}, body: requestBody, encoding: Encoding.getByName("utf-8"));
+      final response = await http.post(uri, headers: getWebHeaders(), body: requestBody, encoding: Encoding.getByName("utf-8"));
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -208,10 +209,7 @@ class XyzHandler extends BooruHandler{
       try {
         Map<String,String> requestBody = {"text": input};
         Uri uri = Uri.parse(url);
-        final response = await http.post(uri, headers: {
-          "Accept": "application/json",
-          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"
-        }, body: requestBody);
+        final response = await http.post(uri, headers: getWebHeaders(), body: requestBody);
         // 200 is the success http response code
         if (response.statusCode == 200) {
           List<dynamic> parsedResponse = jsonDecode(response.body);

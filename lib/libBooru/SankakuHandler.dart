@@ -15,6 +15,9 @@ class SankakuHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
+
+  //Tried stripping further but it breaks auth. Putting the auth stuff into the getHeaders function and overriding doesn't work
+  // Overriding search having just the auth stuff then calling super.search also doesn't work
   Future Search(String tags,int pageNum) async{
     isActive = true;
     hasSizeData = true;
@@ -34,60 +37,12 @@ class SankakuHandler extends BooruHandler{
         print("++++++++++++++++++++++++++++++++++++++++++++++++++");
         print(authToken);
       }
-      Map<String,String> headers = authToken == ''
-      ? {
-        "Content-Type":"application/json",
-        "Accept": "application/json",
-        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
-      }
-      : {
-        "Content-Type":"application/json",
-        "Accept": "application/json",
-        "Authorization": authToken,
-        "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
-      };
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: headers);
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        List<dynamic> parsedResponse = jsonDecode(response.body);
-        // Create a BooruItem for each post in the list
-        for (int i = 0; i < parsedResponse.length; i++){
-          var current = parsedResponse[i];
-          List<String> tags = [];
-          for (int x=0; x < current['tags'].length; x++) {
-            tags.add(current['tags'][x]['name'].toString());
-          }
-          if (current['file_url'] != null) {
-            String fileExt = current['file_type'].split('/')[1]; // image/jpeg
-            fetched.add(BooruItem(
-              fileURL: current['file_url'],
-              sampleURL: current['sample_url'],
-              thumbnailURL: current['preview_url'],
-              tagsList: tags,
-              postURL: makePostURL(current['id'].toString()),
-              fileSize: current['file_size'],
-              fileWidth: current['width'].toDouble(),
-              fileHeight: current['height'].toDouble(),
-              sampleWidth: current['sample_width'].toDouble(),
-              sampleHeight: current['sample_height'].toDouble(),
-              previewWidth: current['preview_width'].toDouble(),
-              previewHeight: current['preview_height'].toDouble(),
-              hasNotes: current['has_notes'],
-              serverId: current['id'].toString(),
-              rating: current['rating'],
-              score: current['total_score'].toString(),
-              sources: [current['source']],
-              md5String: current['md5'],
-              postDate: DateTime.fromMillisecondsSinceEpoch(int.parse(current['created_at']['s'].toString() + '000')).toString(), // unix time without in seconds (need to x1000?)
-              postDateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
-            ));
-            if (dbHandler!.db != null) {
-              setTrackedValues(fetched.length - 1);
-            }
-          }
-        }
         prevTags = tags;
+        parseResponse(response);
         if (fetched.length == length){locked = true;}
         isActive = false;
         return fetched;
@@ -102,6 +57,60 @@ class SankakuHandler extends BooruHandler{
       return fetched;
     }
 
+  }
+  @override
+  void parseResponse(response){
+    List<dynamic> parsedResponse = jsonDecode(response.body);
+    // Create a BooruItem for each post in the list
+    for (int i = 0; i < parsedResponse.length; i++){
+      var current = parsedResponse[i];
+      List<String> tags = [];
+      for (int x=0; x < current['tags'].length; x++) {
+        tags.add(current['tags'][x]['name'].toString());
+      }
+      if (current['file_url'] != null) {
+        String fileExt = current['file_type'].split('/')[1]; // image/jpeg
+        fetched.add(BooruItem(
+          fileURL: current['file_url'],
+          sampleURL: current['sample_url'],
+          thumbnailURL: current['preview_url'],
+          tagsList: tags,
+          postURL: makePostURL(current['id'].toString()),
+          fileSize: current['file_size'],
+          fileWidth: current['width'].toDouble(),
+          fileHeight: current['height'].toDouble(),
+          sampleWidth: current['sample_width'].toDouble(),
+          sampleHeight: current['sample_height'].toDouble(),
+          previewWidth: current['preview_width'].toDouble(),
+          previewHeight: current['preview_height'].toDouble(),
+          hasNotes: current['has_notes'],
+          serverId: current['id'].toString(),
+          rating: current['rating'],
+          score: current['total_score'].toString(),
+          sources: [current['source']],
+          md5String: current['md5'],
+          postDate: DateTime.fromMillisecondsSinceEpoch(int.parse(current['created_at']['s'].toString() + '000')).toString(), // unix time without in seconds (need to x1000?)
+          postDateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
+        ));
+        if (dbHandler!.db != null) {
+          setTrackedValues(fetched.length - 1);
+        }
+      }
+    }
+  }
+  @override
+  Map<String,String> getHeaders(){
+    return authToken == ''
+        ? {
+      "Content-Type":"application/json",
+      "Accept": "application/json",
+      "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
+    }: {
+      "Content-Type":"application/json",
+      "Accept": "application/json",
+      "Authorization": authToken,
+      "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
+    };
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){

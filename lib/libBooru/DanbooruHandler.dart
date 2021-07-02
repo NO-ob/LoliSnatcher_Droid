@@ -12,72 +12,46 @@ import 'package:LoliSnatcher/Tools.dart';
 class DanbooruHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   DanbooruHandler(Booru booru,int limit) : super(booru,limit);
+  @override
+  bool hasSizeData = true;
 
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
-  Future Search(String tags, int pageNum) async{
-    isActive = true;
-    hasSizeData = true;
-    int length = fetched.length;
-    // if(this.pageNum == pageNum){
-    //   return fetched;
-    // }
-    this.pageNum = pageNum;
-    if (prevTags != tags){
-      fetched = [];
-    }
-    String url = makeURL(tags);
-    print(url);
-    try {
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
-      if (response.statusCode == 200) {
-        var parsedResponse = xml.parse(response.body);
-        var posts = parsedResponse.findAllElements('post');
-        // Create a BooruItem for each post in the list
-        for (int i = 0; i < posts.length; i++) {
-          var current = posts.elementAt(i);
-          /**
-           * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
-           * to go with the rest of the data so cannot be displayed and are pointless for the app
-           */
-          if ((current.findElements("file-url").length > 0)) {
-            fetched.add(new BooruItem(
-              fileURL: current.findElements("file-url").elementAt(0).text,
-              sampleURL: current.findElements("large-file-url").elementAt(0).text,
-              thumbnailURL: current.findElements("preview-file-url").elementAt(0).text,
-              tagsList: current.findElements("tag-string").elementAt(0).text.split(" "),
-              postURL: makePostURL(current.findElements("id").elementAt(0).text),
-              fileExt: current.findElements("file-ext").elementAt(0).text,
-              fileSize: int.tryParse(current.findElements("file-size").elementAt(0).text) ?? null,
-              fileHeight: double.tryParse(current.findElements("image-height").elementAt(0).text) ?? null,
-              fileWidth: double.tryParse(current.findElements("image-width").elementAt(0).text) ?? null,
-              serverId: current.findElements("id").elementAt(0).text,
-              rating: current.findElements("rating").elementAt(0).text,
-              score: current.findElements("score").elementAt(0).text,
-              sources: [current.findElements("source").elementAt(0).text],
-              md5String: current.findElements("md5").elementAt(0).text,
-              postDate: current.findElements("created-at").elementAt(0).text, // 2021-06-17T16:27:45-04:00
-              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ssZ",
-            ));
-            if(dbHandler!.db != null){
-              setTrackedValues(fetched.length - 1);
-            }
-          }
+  @override
+  void parseResponse(response){
+    var parsedResponse = xml.parse(response.body);
+    var posts = parsedResponse.findAllElements('post');
+    // Create a BooruItem for each post in the list
+    for (int i = 0; i < posts.length; i++) {
+      var current = posts.elementAt(i);
+      /**
+       * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
+       * to go with the rest of the data so cannot be displayed and are pointless for the app
+       */
+      if ((current.findElements("file-url").length > 0)) {
+        fetched.add(new BooruItem(
+          fileURL: current.findElements("file-url").elementAt(0).text,
+          sampleURL: current.findElements("large-file-url").elementAt(0).text,
+          thumbnailURL: current.findElements("preview-file-url").elementAt(0).text,
+          tagsList: current.findElements("tag-string").elementAt(0).text.split(" "),
+          postURL: makePostURL(current.findElements("id").elementAt(0).text),
+          fileExt: current.findElements("file-ext").elementAt(0).text,
+          fileSize: int.tryParse(current.findElements("file-size").elementAt(0).text) ?? null,
+          fileHeight: double.tryParse(current.findElements("image-height").elementAt(0).text) ?? null,
+          fileWidth: double.tryParse(current.findElements("image-width").elementAt(0).text) ?? null,
+          serverId: current.findElements("id").elementAt(0).text,
+          rating: current.findElements("rating").elementAt(0).text,
+          score: current.findElements("score").elementAt(0).text,
+          sources: [current.findElements("source").elementAt(0).text],
+          md5String: current.findElements("md5").elementAt(0).text,
+          postDate: current.findElements("created-at").elementAt(0).text, // 2021-06-17T16:27:45-04:00
+          postDateFormat: "yyyy-MM-dd'T'HH:mm:ss", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ssZ",
+        ));
+        if(dbHandler!.db != null){
+          setTrackedValues(fetched.length - 1);
         }
-        prevTags = tags;
-        if (fetched.length == length){locked = true;}
-        isActive = false;
-        return fetched;
       }
-    } catch(e) {
-      print(e);
-      isActive = false;
-      return fetched;
     }
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/posts/$id";
@@ -99,7 +73,7 @@ class DanbooruHandler extends BooruHandler{
     String url = makeTagURL(input);
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      final response = await http.get(uri,headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);

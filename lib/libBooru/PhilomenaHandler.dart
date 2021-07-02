@@ -9,91 +9,66 @@ import 'package:LoliSnatcher/Tools.dart';
 class PhilomenaHandler extends BooruHandler{
   PhilomenaHandler(Booru booru,int limit) : super(booru,limit);
 
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
-  Future Search(String tags,int pageNum) async{
-    isActive = true;
-    int length = fetched.length;
+  @override
+  String validateTags(tags){
     if (tags == "" || tags == " "){
-      tags = "*";
+      return "*";
+    } else {
+      return tags;
     }
-    // if(this.pageNum == pageNum){
-    //   return fetched;
-    // }
-    this.pageNum = pageNum;
-    if (prevTags != tags){
-      fetched = [];
-    }
-    String url = makeURL(tags);
-    print(url);
-    try {
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
-      // 200 is the success http response code
-      if (response.statusCode == 200) {
-        print(response.body);
-        Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        print("PhilomenaHandler::search ${parsedResponse['images'].length}");
-        // Create a BooruItem for each post in the list
-        for (int i =0; i < parsedResponse['images'].length; i++){
-          var current = parsedResponse['images'][i];
-          if (current['representations']['full'] != null){
-            String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
-            if(current["mime_type"].toString().contains("video")) {
-              String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
-              sampleURL = tmpURL;
-              thumbURL = tmpURL;
-              print("tmpurl is " + tmpURL);
-            }
+  }
+  @override
+  void parseResponse(response){
+    print(response.body);
+    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    print("PhilomenaHandler::search ${parsedResponse['images'].length}");
+    // Create a BooruItem for each post in the list
+    for (int i =0; i < parsedResponse['images'].length; i++){
+      var current = parsedResponse['images'][i];
+      if (current['representations']['full'] != null){
+        String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
+        if(current["mime_type"].toString().contains("video")) {
+          String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
+          sampleURL = tmpURL;
+          thumbURL = tmpURL;
+          print("tmpurl is " + tmpURL);
+        }
 
-            String fileURL = current['representations']['full'];
-            if (!fileURL.contains("http")){
-              sampleURL = booru.baseURL! + sampleURL;
-              thumbURL = booru.baseURL! + thumbURL;
-              print("fileurl is $fileURL");
-              fileURL = booru.baseURL! + fileURL;
-              print("newurl is $fileURL");
-            }
+        String fileURL = current['representations']['full'];
+        if (!fileURL.contains("http")){
+          sampleURL = booru.baseURL! + sampleURL;
+          thumbURL = booru.baseURL! + thumbURL;
+          print("fileurl is $fileURL");
+          fileURL = booru.baseURL! + fileURL;
+          print("newurl is $fileURL");
+        }
 
-            print("sample url is $sampleURL");
-            List<String> currentTags = current['tags'].toString().substring(1,current['tags'].toString().length -1).split(", ");
-            for (int x = 0; x< currentTags.length; x++){
-              if (currentTags[x].contains(" ")){
-                currentTags[x] = currentTags[x].replaceAll(" ", "+");
-              }
-            }
-            fetched.add(BooruItem(
-              fileURL: fileURL,
-              fileWidth: current['width'].toDouble(),
-              fileHeight: current['height'].toDouble(),
-              sampleURL: sampleURL,
-              thumbnailURL: thumbURL,
-              tagsList: currentTags,
-              postURL: makePostURL(current['id'].toString()),
-              serverId: current['id'].toString(),
-              score: current['score'].toString(),
-              sources: [current['source_url'].toString()],
-              postDate: current['created_at'],
-              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            ));
-            if(dbHandler!.db != null){
-              setTrackedValues(fetched.length - 1);
-            }
+        print("sample url is $sampleURL");
+        List<String> currentTags = current['tags'].toString().substring(1,current['tags'].toString().length -1).split(", ");
+        for (int x = 0; x< currentTags.length; x++){
+          if (currentTags[x].contains(" ")){
+            currentTags[x] = currentTags[x].replaceAll(" ", "+");
           }
         }
-        prevTags = tags;
-        if (fetched.length == length){locked = true;}
-        isActive = false;
-        return fetched;
+        fetched.add(BooruItem(
+          fileURL: fileURL,
+          fileWidth: current['width'].toDouble(),
+          fileHeight: current['height'].toDouble(),
+          sampleURL: sampleURL,
+          thumbnailURL: thumbURL,
+          tagsList: currentTags,
+          postURL: makePostURL(current['id'].toString()),
+          serverId: current['id'].toString(),
+          score: current['score'].toString(),
+          sources: [current['source_url'].toString()],
+          postDate: current['created_at'],
+          postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        ));
+        if(dbHandler!.db != null){
+          setTrackedValues(fetched.length - 1);
+        }
       }
-    } catch(e) {
-      print(e);
-      isActive = false;
-      return fetched;
     }
-
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
@@ -126,7 +101,7 @@ class PhilomenaHandler extends BooruHandler{
     String url = makeTagURL(input);
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      final response = await http.get(uri,headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
