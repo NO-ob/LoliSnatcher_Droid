@@ -526,45 +526,49 @@ class _ViewerPageState extends State<ViewerPage> {
     List<Widget> actions = [];
 
     // first 4 buttons will show on toolbar
-    List<List<String>> buttonList = widget.settingsHandler.buttonOrder.sublist(0,4);
+    int listSplit = (MediaQuery.of(context).size.width / 100).floor();
+    print(MediaQuery.of(context).size.width);
+    List<List<String>> buttonList = widget.settingsHandler.buttonOrder.sublist(0,listSplit);
     buttonList.forEach((value) {
       actions.add(buildIconButton(value[0]));
     });
 
     // all buttons after that will be in overflow menu
-    List<List<String>> overFlowList = widget.settingsHandler.buttonOrder.sublist(4);
-    actions.add(PopupMenuButton(
-        icon: Icon(
-          Icons.more_vert,
-          color: Colors.white,
-        ),
-        itemBuilder: (BuildContext itemBuilder) =>
-          overFlowList.map((value) =>
-            PopupMenuItem(
-              padding: EdgeInsets.all(0), // remove empty space around the button
-              child: SizedBox(
-                width: double.infinity, // force button to take full width
-                child: TextButton.icon(
-                  onLongPress: () {
-                    buttonHold(value[0]);
-                  },
-                  onPressed: () {
-                    Navigator.of(context).pop(); // remove overflow menu
-                    buttonClick(value[0]);
-                  },
-                  style: ButtonStyle(
-                    foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
-                    alignment: Alignment.centerLeft,
-                    padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
-                  ),
-                  icon: buttonIcon(value[0]),
-                  label: Text(buttonText(value))
-                )
-              ),
-              value: value[0]
-            )
-          ).toList()
-    ));
+    List<List<String>> overFlowList = widget.settingsHandler.buttonOrder.sublist(listSplit);
+    if (overFlowList.isNotEmpty){
+      actions.add(PopupMenuButton(
+          icon: Icon(
+            Icons.more_vert,
+            color: Colors.white,
+          ),
+          itemBuilder: (BuildContext itemBuilder) =>
+              overFlowList.map((value) =>
+                  PopupMenuItem(
+                      padding: EdgeInsets.all(0), // remove empty space around the button
+                      child: SizedBox(
+                          width: double.infinity, // force button to take full width
+                          child: TextButton.icon(
+                              onLongPress: () {
+                                buttonHold(value[0]);
+                              },
+                              onPressed: () {
+                                Navigator.of(context).pop(); // remove overflow menu
+                                buttonClick(value[0]);
+                              },
+                              style: ButtonStyle(
+                                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
+                                  alignment: Alignment.centerLeft,
+                                  padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
+                              ),
+                              icon: buttonIcon(value[0]),
+                              label: Text(buttonText(value))
+                          )
+                      ),
+                      value: value[0]
+                  )
+              ).toList()
+      ));
+    }
     return actions;
   }
 
