@@ -19,7 +19,7 @@ class R34HentaiHandler extends BooruHandler{
     if(booru.apiKey == ""){
       booru.apiKey = null;
     }
-    super.Search(tags, pageNum);
+    return super.Search(tags, pageNum);
   }
 
   @override

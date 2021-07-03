@@ -524,17 +524,22 @@ class _ViewerPageState extends State<ViewerPage> {
 
   List<Widget> appBarActions() {
     List<Widget> actions = [];
-
+    List<List<String>> overFlowList = [];
+    List<List<String>> buttonList = [];
     // first 4 buttons will show on toolbar
     int listSplit = (MediaQuery.of(context).size.width / 100).floor();
     print(MediaQuery.of(context).size.width);
-    List<List<String>> buttonList = widget.settingsHandler.buttonOrder.sublist(0,listSplit);
+    if (listSplit < widget.settingsHandler.buttonOrder.length){
+      overFlowList = (widget.settingsHandler.buttonOrder.sublist(listSplit));
+      buttonList = widget.settingsHandler.buttonOrder.sublist(0,listSplit);
+    } else {
+      buttonList = widget.settingsHandler.buttonOrder;
+    }
     buttonList.forEach((value) {
       actions.add(buildIconButton(value[0]));
     });
-
     // all buttons after that will be in overflow menu
-    List<List<String>> overFlowList = widget.settingsHandler.buttonOrder.sublist(listSplit);
+
     if (overFlowList.isNotEmpty){
       actions.add(PopupMenuButton(
           icon: Icon(
