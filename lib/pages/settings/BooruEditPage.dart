@@ -469,7 +469,12 @@ class _booruEditState extends State<booruEdit> {
     } else {
       List temp = BooruHandlerFactory().getBooruHandler(booru, 5, widget.settingsHandler.dbHandler);
       test = temp[0];
-      testFetched = await test.Search(" ", 1);
+      if (booru.type == "Hydrus"){
+        testFetched = await test.Search(" ", 0);
+      } else {
+        testFetched = await test.Search(" ", 1);
+      }
+
     }
     if (booruType == "") {
       if (testFetched != null){

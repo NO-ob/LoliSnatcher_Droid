@@ -3,6 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -408,6 +412,13 @@ class _ViewerPageState extends State<ViewerPage> {
     ServiceHandler serviceHandler = new ServiceHandler();
     serviceHandler.loadShareTextIntent(text);
   }
+  void shareHydrusAction(BooruItem item) {
+    if (widget.settingsHandler.hasHydrus){
+      Booru hydrus = widget.settingsHandler.booruList.where((element) => element.type == "Hydrus").first;
+      HydrusHandler hydrusHandler = new HydrusHandler(hydrus, 10);
+      hydrusHandler.addURL(item);
+    }
+  }
 
   /// Author: [Nani-Sore] ///
   void shareFileAction() async {
@@ -512,6 +523,27 @@ class _ViewerPageState extends State<ViewerPage> {
                   )
                 ]
               ),
+              const SizedBox(height: 15),
+              widget.settingsHandler.hasHydrus && widget.searchGlobals.selectedBooru!.type != "Hydrus" ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton.icon(
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(10),
+                            side: BorderSide(color: Get.context!.theme.accentColor),
+                          ),
+                          padding: EdgeInsets.fromLTRB(32, 15, 32, 15),
+                        ),
+                        onPressed: (){
+                          Navigator.of(context).pop();
+                          shareHydrusAction(widget.fetched[widget.searchGlobals.viewedIndex.value]);
+                        },
+                        icon: Icon(Icons.file_present),
+                        label: Text('Hydrus', style: TextStyle(color: Colors.white))
+                    )
+                  ]
+              ) : Container()
             ]
           ),
           const SizedBox(height: 15),
@@ -713,6 +745,9 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
       case 'File URL':
         shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+        break;
+      case 'Hydrus':
+        shareHydrusAction(widget.fetched[widget.searchGlobals.viewedIndex.value]);
         break;
       case 'File':
         shareFileAction();

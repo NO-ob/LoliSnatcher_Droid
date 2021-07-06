@@ -173,7 +173,11 @@ class _TagViewState extends State<TagView> {
                   ),
                   onPressed: () {
                     setState(() {
-                      widget.searchGlobals.addTag.value = " " + currentTag;
+                      if (widget.searchGlobals.selectedBooru!.type == "Hydrus"){
+                        widget.searchGlobals.addTag.value = ", " + currentTag;
+                      } else {
+                        widget.searchGlobals.addTag.value = " " + currentTag;
+                      }
                     });
                     ServiceHandler.displayToast("Added to search:\n"+ currentTag);
                     //Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);

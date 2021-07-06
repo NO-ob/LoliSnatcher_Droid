@@ -32,7 +32,10 @@ class ImageWriter{
     String fileName = "";
     if (booru.type == ("BooruOnRails") || booru.type == "Philomena"){
       fileName = booru.name! + '_' + item.serverId! + "." + item.fileExt!;
-    } else {
+    } else if (booru.type == "Hydrus"){
+      fileName = "Hydrus_${item.md5String}.${item.fileExt}";
+    }
+    else{
       fileName = booru.name! + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
     }
     print("out file is $fileName");

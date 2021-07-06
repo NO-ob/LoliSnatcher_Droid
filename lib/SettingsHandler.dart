@@ -19,6 +19,7 @@ class SettingsHandler {
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0, galleryAutoScrollTime = 4000;
   String verStr = "1.8.1";
+  bool hasHydrus = false;
   List<List<String>> buttonList = [
     ["autoscroll", "AutoScroll"],
     ["snatch", "Save"],
@@ -513,6 +514,9 @@ class SettingsHandler {
           if (files[i].path.contains(".booru")) {
             print(files[i].toString());
             booruList.add(Booru.fromFile(files[i]));
+            if (booruList.last.type == "Hydrus"){
+              hasHydrus = true;
+            }
           }
         }
       }

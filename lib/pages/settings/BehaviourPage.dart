@@ -127,7 +127,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                           shareAction = newValue;
                         });
                       },
-                      items: <String>["Ask", "Post URL", "File URL", "File"].map<DropdownMenuItem<String>>((String value){
+                      items: <String>["Ask", "Post URL", "File URL", "File","Hydrus"].map<DropdownMenuItem<String>>((String value){
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -144,6 +144,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                                 Text("- Post URL"),
                                 Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
                                 Text("- File - shares viewed file itself"),
+                                Text("- Hydrus - sends the post url to Hydrus for import"),
                                 const SizedBox(height: 10),
                                 Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
                                 Text("[Tip]: You can open Share Actions Menu by long pressing Share button")
