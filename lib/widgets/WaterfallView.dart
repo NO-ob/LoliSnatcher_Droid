@@ -42,9 +42,16 @@ class _WaterfallState extends State<WaterfallView> {
   StreamSubscription? volumeListener;
 
   void setBooruHandler() {
-    List temp = BooruHandlerFactory().getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
-    widget.searchGlobals.booruHandler = temp[0];
-    widget.searchGlobals.pageNum = temp[1];
+    List temp = [];
+    if (widget.settingsHandler.mergeEnabled && widget.searchGlobals.secondaryBooru != null){
+      temp = BooruHandlerFactory().getBooruHandler([widget.searchGlobals.selectedBooru!,widget.searchGlobals.secondaryBooru!], widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+    } else {
+      temp = BooruHandlerFactory().getBooruHandler([widget.searchGlobals.selectedBooru!], widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+    }
+      widget.searchGlobals.booruHandler = temp[0];
+      widget.searchGlobals.pageNum = temp[1];
+
+
   }
 
   @override

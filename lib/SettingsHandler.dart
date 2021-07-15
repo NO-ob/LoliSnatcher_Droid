@@ -19,7 +19,7 @@ class SettingsHandler {
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0, galleryAutoScrollTime = 4000;
   String verStr = "1.8.1";
-  bool hasHydrus = false;
+  bool hasHydrus = false, mergeEnabled = false;
   List<List<String>> buttonList = [
     ["autoscroll", "AutoScroll"],
     ["snatch", "Save"],

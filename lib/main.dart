@@ -274,20 +274,37 @@ class _HomeState extends State<Home> {
       searchGlobals = newGlobals;
     });
   }
+  void mergeAction(){
+    if (widget.settingsHandler.mergeEnabled && searchGlobals[globalsIndex].secondaryBooru == null && widget.settingsHandler.booruList.length > 1){
+      SearchGlobals newSearchGlobals = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchTagsController.text);
+      newSearchGlobals.secondaryBooru = widget.settingsHandler.booruList.elementAt(1);
+      setState(() {
+        searchGlobals[globalsIndex] = newSearchGlobals;
+      });
+
+    }
+    if (!widget.settingsHandler.mergeEnabled){
+      SearchGlobals newSearchGlobals = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchTagsController.text);
+      newSearchGlobals.secondaryBooru = null;
+      setState(() {
+        searchGlobals[globalsIndex] = newSearchGlobals;
+      });
+    }
+
+  }
   void searchAction(String text) {
     // Remove extra spaces
     text = text.trim();
-
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
+
     Tools.forceClearMemoryCache(withLive: true);
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
         //Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
       }
-      searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, text);
     });
     if(text != "" && widget.settingsHandler.searchHistoryEnabled) {
       widget.settingsHandler.dbHandler.updateSearchHistory(text, searchGlobals[globalsIndex].selectedBooru!.type!, searchGlobals[globalsIndex].selectedBooru!.name!);
@@ -367,10 +384,39 @@ class _HomeState extends State<Home> {
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
                         const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                        BooruSelectorMain(searchGlobals[globalsIndex], widget.settingsHandler, searchTagsController, setSearchGlobal),
+                        BooruSelectorMain(searchGlobals[globalsIndex], widget.settingsHandler, searchTagsController, setSearchGlobal,true),
                       ],
                     ),
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text("Merge "),
+                      Checkbox(
+                        value: widget.settingsHandler.mergeEnabled,
+                        onChanged: (newValue) {
+                          setState(() {
+                            widget.settingsHandler.mergeEnabled = newValue!;
+                            mergeAction();
+                          });
+                        },
+                        activeColor: Get.context!.theme.primaryColor,
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  widget.settingsHandler.mergeEnabled ? Container(
+                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        BooruSelectorMain(searchGlobals[globalsIndex], widget.settingsHandler, searchTagsController, setSearchGlobal,false),
+                      ],
+                    ),
+                  ) : Container(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,

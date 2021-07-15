@@ -148,7 +148,7 @@ class _DesktopHomeState extends State<DesktopHome> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 TagSearchBox(searchGlobals[globalsIndex], searchTagsController, searchBoxFocus, widget.settingsHandler, searchAction),
-                BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal),
+                BooruSelectorMain(searchGlobals[globalsIndex],widget.settingsHandler,searchTagsController,setSearchGlobal,true),
                 IconButton(
                   padding: const EdgeInsets.all(5),
                   icon: Icon(Icons.search),

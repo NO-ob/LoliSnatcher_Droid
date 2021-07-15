@@ -299,7 +299,7 @@ class _booruEditState extends State<booruEdit> {
             Container(
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
-              child: SelectableText(selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler(Booru('', selectedBooruType, '', '', ''), 1, null)[0].getDescription() : ""),
+              child: SelectableText(selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler([Booru('', selectedBooruType, '', '', '')], 1, null)[0].getDescription() : ""),
             ),
             Container(
                 child: Column(
@@ -467,7 +467,7 @@ class _booruEditState extends State<booruEdit> {
         }
       }
     } else {
-      List temp = BooruHandlerFactory().getBooruHandler(booru, 5, widget.settingsHandler.dbHandler);
+      List temp = BooruHandlerFactory().getBooruHandler([booru], 5, widget.settingsHandler.dbHandler);
       test = temp[0];
       if (booru.type == "Hydrus"){
         testFetched = await test.Search(" ", 0);

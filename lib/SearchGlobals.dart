@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 class SearchGlobals{
   String tags = "";
   Booru? selectedBooru;
+  Booru? secondaryBooru;
   int pageNum = 0;
   double scrollPosition = 0;
   BooruHandler? booruHandler;

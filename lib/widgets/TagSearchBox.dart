@@ -29,7 +29,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void setBooruHandler() {
     List temp = new BooruHandlerFactory()
-        .getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
+        .getBooruHandler([widget.searchGlobals.selectedBooru!], widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
     widget.searchGlobals.booruHandler = temp[0];
     widget.searchGlobals.pageNum = temp[1];
     if (widget.searchGlobals.booruHandler!.booru.type == "Szurubooru" &&

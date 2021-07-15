@@ -11,7 +11,7 @@ abstract class BooruHandler {
   String prevTags = "";
   bool locked = false;
   Booru booru;
-  String verStr = "1.8.1";
+  String verStr = "1.8.2";
   List<BooruItem> fetched = [];
   bool tagSearchEnabled = true;
   bool hasSizeData = false;
@@ -76,7 +76,7 @@ abstract class BooruHandler {
   List<String> searchModifiers() {
     return [];
   }
-
+  void setupMerge(List<Booru> boorus){}
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future setTrackedValues(int fetchedIndex) async{
     if (dbHandler!.db != null){

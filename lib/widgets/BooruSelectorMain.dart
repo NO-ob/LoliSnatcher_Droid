@@ -11,36 +11,43 @@ class BooruSelectorMain extends StatefulWidget {
   SettingsHandler settingsHandler;
   TextEditingController searchTagsController;
   final Function setParentGlobals;
-  BooruSelectorMain(this.searchGlobals, this.settingsHandler, this.searchTagsController, this.setParentGlobals);
+  bool isPrimary = true;
+  BooruSelectorMain(this.searchGlobals, this.settingsHandler, this.searchTagsController, this.setParentGlobals, this.isPrimary);
   @override
   _BooruSelectorMainState createState() => _BooruSelectorMainState();
 }
 
 class _BooruSelectorMainState extends State<BooruSelectorMain> {
-
   Future BooruSelector() async{
-    if (widget.settingsHandler.booruList.isEmpty) {
-      await widget.settingsHandler.getBooru();
-    }
-    if (widget.settingsHandler.prefBooru == ""){
-      await widget.settingsHandler.loadSettings();
-    }
-    if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name)){
-      widget.settingsHandler.booruList = await widget.settingsHandler.sortList();
-    }
-    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
-    if (widget.searchGlobals.selectedBooru == null){
-      print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
-      widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList[0];
-      widget.searchGlobals.handlerType = widget.settingsHandler.booruList[0].type;
-    }
-    if (!widget.settingsHandler.booruList.contains(widget.searchGlobals.selectedBooru)){
-      widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList.firstWhere((element) =>
-          element.name == widget.searchGlobals.selectedBooru!.name, orElse: () =>
-          widget.settingsHandler.booruList[0]
-      );
-      print("booru changing because its not in the list");
-      widget.searchGlobals.handlerType = widget.searchGlobals.selectedBooru!.type;
+    if (widget.isPrimary){
+      if (widget.settingsHandler.booruList.isEmpty) {
+        await widget.settingsHandler.getBooru();
+      }
+      if (widget.settingsHandler.prefBooru == ""){
+        await widget.settingsHandler.loadSettings();
+      }
+      if ((widget.settingsHandler.prefBooru != "") && (widget.settingsHandler.prefBooru != widget.settingsHandler.booruList.elementAt(0).name)){
+        widget.settingsHandler.booruList = await widget.settingsHandler.sortList();
+      }
+      // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
+      if (widget.searchGlobals.selectedBooru == null){
+        print("selectedBooru is null setting to: " + widget.settingsHandler.booruList[0].toString());
+        widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList[0];
+        widget.searchGlobals.handlerType = widget.settingsHandler.booruList[0].type;
+      }
+      if (!widget.settingsHandler.booruList.contains(widget.searchGlobals.selectedBooru)){
+        widget.searchGlobals.selectedBooru = widget.settingsHandler.booruList.firstWhere((element) =>
+        element.name == widget.searchGlobals.selectedBooru!.name, orElse: () =>
+        widget.settingsHandler.booruList[0]
+        );
+        print("booru changing because its not in the list");
+        widget.searchGlobals.handlerType = widget.searchGlobals.selectedBooru!.type;
+      }
+    } else {
+      if (widget.searchGlobals.secondaryBooru == null){
+        print("secondary Booru is null setting to: " + widget.settingsHandler.booruList[1].toString());
+        widget.searchGlobals.secondaryBooru = widget.settingsHandler.booruList[1];
+      }
     }
     return Expanded(child: Container(
         constraints: BoxConstraints(maxHeight: 40, minHeight: 20),
@@ -55,23 +62,31 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         ),
         child: DropdownButton<Booru>(
           isExpanded: true,
-          value: widget.searchGlobals.selectedBooru,
+          value: widget.isPrimary ? widget.searchGlobals.selectedBooru : widget.searchGlobals.secondaryBooru,
           icon: Icon(Icons.arrow_downward),
           underline: const SizedBox(),
           dropdownColor: Get.context!.theme.colorScheme.surface,
           onChanged: (Booru? newValue){
-            if(widget.searchGlobals.selectedBooru != newValue) { // if not already selected
-              setState((){
-                if((widget.searchTagsController.text == "" || widget.searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
-                  widget.searchTagsController.text = newValue.defTags!;
-                }
-                // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
-                widget.setParentGlobals(new SearchGlobals(newValue, widget.searchTagsController.text));
-                if(widget.searchTagsController.text != "" && widget.settingsHandler.searchHistoryEnabled) {
-                  widget.settingsHandler.dbHandler.updateSearchHistory(widget.searchTagsController.text, newValue?.type, newValue?.name);
-                }
-                // Set new booru and search with current tags
-              });
+            if((widget.isPrimary ? widget.searchGlobals.selectedBooru : widget.searchGlobals.secondaryBooru) != newValue) { // if not already selected
+              if(widget.isPrimary){
+                setState((){
+                  if((widget.searchTagsController.text == "" || widget.searchTagsController.text == widget.settingsHandler.defTags) && newValue!.defTags != ""){
+                    widget.searchTagsController.text = newValue.defTags!;
+                  }
+                  // searchGlobals[globalsIndex].selectedBooru = newValue; // Just set new booru
+                  widget.setParentGlobals(new SearchGlobals(newValue, widget.searchTagsController.text));
+                  if(widget.searchTagsController.text != "" && widget.settingsHandler.searchHistoryEnabled) {
+                    widget.settingsHandler.dbHandler.updateSearchHistory(widget.searchTagsController.text, newValue?.type, newValue?.name);
+                  }
+                  // Set new booru and search with current tags
+                });
+              } else {
+                setState(() {
+                  SearchGlobals searchGlobals = new SearchGlobals(widget.searchGlobals.selectedBooru, widget.searchTagsController.text);
+                  searchGlobals.secondaryBooru = newValue;
+                  widget.setParentGlobals(searchGlobals);
+                });
+              }
             }
           },
           items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
