@@ -56,9 +56,9 @@ class MoebooruHandler extends GelbooruHandler{
           rating: current.getAttribute("rating"),
           score: current.getAttribute("score"),
           sources: [current.getAttribute("source") == null ? "" : current.getAttribute("source")!],
-          /*md5String: current.getAttribute("md5"),
+          md5String: current.getAttribute("md5"),
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
-          postDateFormat: "unix", */// when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
+          postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
         ));
         print(fetched.last);
         if(dbHandler!.db != null){
