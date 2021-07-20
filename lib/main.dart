@@ -305,6 +305,7 @@ class _HomeState extends State<Home> {
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
         //Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
       }
+      searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, text);
     });
     if(text != "" && widget.settingsHandler.searchHistoryEnabled) {
       widget.settingsHandler.dbHandler.updateSearchHistory(text, searchGlobals[globalsIndex].selectedBooru!.type!, searchGlobals[globalsIndex].selectedBooru!.name!);

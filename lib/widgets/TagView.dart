@@ -47,9 +47,14 @@ class _TagViewState extends State<TagView> {
       try {
         // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
         // remove timezones from strings until they fix it
-        postDate = postDate.replaceAll(new RegExp(r'(?:\+|\-)\d{4}'), '');
+        DateTime parsedDate;
+        if(postDateFormat == "unix"){
+          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
+        } else {
+          postDate = postDate.replaceAll(new RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
+        }
         // print(postDate);
-        DateTime parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
         formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
       } catch(e) {
         print('$postDate $postDateFormat');

@@ -24,7 +24,6 @@ abstract class BooruHandler {
    */
   Future Search(String tags, int pageNum) async{
     tags = validateTags(tags);
-
     this.pageNum = pageNum;
     if (prevTags != tags){
       fetched = [];
