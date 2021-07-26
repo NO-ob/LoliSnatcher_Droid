@@ -159,7 +159,7 @@ class ServiceHandler{
     if (Platform.isAndroid){
       ip = await platform.invokeMethod("getIP");
     } else {
-      var interface = await NetworkInterface.list();
+      var interface = await NetworkInterface.list(type: InternetAddressType.IPv4);
       if (interface.isNotEmpty){
         ip = interface[0].addresses[0].address;
       }
