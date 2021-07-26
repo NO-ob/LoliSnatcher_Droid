@@ -298,14 +298,18 @@ class _HomeState extends State<Home> {
     if (searchGlobals[globalsIndex].selectedBooru == null && widget.settingsHandler.booruList.isNotEmpty){
       searchGlobals[globalsIndex].selectedBooru = widget.settingsHandler.booruList.elementAt(0);
     }
-
     Tools.forceClearMemoryCache(withLive: true);
     setState((){
       if(text.toLowerCase().contains("loli")){
         ServiceHandler.displayToast("UOOOOOHHHHH \n 😭");
         //Get.snackbar("UOOOOOHHHHH", '😭', snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context.theme.primaryColor );
       }
-      searchGlobals[globalsIndex] = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, text);
+      SearchGlobals newSearchGlobals = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, text);
+
+      if (widget.settingsHandler.mergeEnabled){
+        newSearchGlobals.secondaryBooru = searchGlobals[globalsIndex].secondaryBooru;
+      }
+      searchGlobals[globalsIndex] = newSearchGlobals;
     });
     if(text != "" && widget.settingsHandler.searchHistoryEnabled) {
       widget.settingsHandler.dbHandler.updateSearchHistory(text, searchGlobals[globalsIndex].selectedBooru!.type!, searchGlobals[globalsIndex].selectedBooru!.name!);

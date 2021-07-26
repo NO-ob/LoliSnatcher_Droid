@@ -38,6 +38,7 @@ class GelbooruV1Handler extends BooruHandler{
             sampleURL: fileURL,
             thumbnailURL: thumbURL,
             tagsList: tags,
+            md5String: getHashFromURL(thumbURL),
             postURL: makePostURL(id),
           ));
           if(dbHandler!.db != null){
@@ -45,6 +46,10 @@ class GelbooruV1Handler extends BooruHandler{
           }
         }
       }
+    }
+    String getHashFromURL(String url){
+      String hash = url.substring(url.lastIndexOf("_") + 1,url.lastIndexOf("."));
+      return hash;
     }
     // This will create a url to goto the images page in the browser
     String makePostURL(String id){

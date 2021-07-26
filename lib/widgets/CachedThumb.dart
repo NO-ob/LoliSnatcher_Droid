@@ -353,11 +353,11 @@ class _CachedThumbState extends State<CachedThumb> {
             height: 50,
             child: Icon(CupertinoIcons.eye_slash, color: Colors.white)
           ),
-
-        Container(
-          color: Colors.black,
-          child: Text(thumbURL),
-        )
+        if (widget.settingsHandler.showURLInThumb)
+          Container(
+            color: Colors.black,
+            child: Text(thumbURL),
+          )
 
       ]
     );
