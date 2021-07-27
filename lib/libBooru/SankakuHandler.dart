@@ -87,7 +87,7 @@ class SankakuHandler extends BooruHandler{
           serverId: current['id'].toString(),
           rating: current['rating'],
           score: current['total_score'].toString(),
-          sources: [current['source']],
+          sources: [current['source'] == null ? "" : current['source']!],
           md5String: current['md5'],
           postDate: DateTime.fromMillisecondsSinceEpoch(int.parse(current['created_at']['s'].toString() + '000')).toString(), // unix time without in seconds (need to x1000?)
           postDateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
