@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'BooruHandler.dart';
@@ -38,7 +39,7 @@ class XyzHandler extends BooruHandler{
       fetched = [];
     }
     String url = makeURL(tags);
-    print(url);
+    Logger.Inst().log(url, "XyzHandler", "Search", LogTypes.booruHandlerSearchURL);
 
     try {
       final includeTags = await makeTagsArray(tags, false);
@@ -55,7 +56,6 @@ class XyzHandler extends BooruHandler{
         "tags": includeTags,
         "exceptTags": excludeTags
       });
-      // print(requestBody);
       Uri uri = Uri.parse(url);
       final response = await http.post(uri, headers: getWebHeaders(), body: requestBody, encoding: Encoding.getByName("utf-8"));
       // 200 is the success http response code
@@ -70,6 +70,7 @@ class XyzHandler extends BooruHandler{
            * Parse Data Object and Add a new BooruItem to the list
            */
             var current = posts.elementAt(i);
+            Logger.Inst().log(current.toString(), "XyzHandler", "Search", LogTypes.booruHandlerRawFetched);
             String imageUrl = current['imageUrl'];
 
             // create thumbnail link from image url
@@ -103,13 +104,13 @@ class XyzHandler extends BooruHandler{
           isActive = false;
           return fetched;
         } else {
-          print(parsedResponse);
+          Logger.Inst().log(parsedResponse.toString(), "XyzHandler", "Search", LogTypes.booruHandlerRawFetched);
         }
       } else {
-        print(response.statusCode);
+        Logger.Inst().log(response.statusCode.toString(), "XyzHandler", "Search", LogTypes.booruHandlerInfo);
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "XyzHandler", "Search", LogTypes.exception);
       isActive = false;
       return fetched;
     }
@@ -152,21 +153,19 @@ class XyzHandler extends BooruHandler{
           if (response.statusCode == 200) {
             List<dynamic> parsedResponse = jsonDecode(response.body);
               var relatedTags = parsedResponse;
-              // print(parsedResponse);
               var exactTag = relatedTags.firstWhere((tag) => tag['value'] == current.toLowerCase(), orElse: () => null);
               if(exactTag != null) {
                 fetchedTags.add(exactTag);
               }
           } else {
-            print('Tag match error:' + response.statusCode.toString());
+            Logger.Inst().log('Tag match error:' + response.statusCode.toString(), "XyzHandler", "makeTagsArray", LogTypes.booruHandlerInfo);
           }
         }
       } catch(e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "XyzHandler", "makeTagsArray", LogTypes.booruHandlerInfo);
         return [];
       }
     }
-    print(fetchedTags);
     return fetchedTags;
   }
 
@@ -184,10 +183,10 @@ class XyzHandler extends BooruHandler{
         var parsedResponse = jsonDecode(response.body);
         fetchedTags = parsedResponse['object']['post']['tags'].map((tag) => tag['value']).toList();
       } else {
-        print('Tag match error:' + response.statusCode.toString());
+        Logger.Inst().log('Tag match error:' + response.statusCode.toString(), "XyzHandler", "getPostInfo", LogTypes.booruHandlerInfo);
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "XyzHandler", "getPostInfo", LogTypes.exception);
       return [];
     }
     // print(fetchedTags);
@@ -220,10 +219,10 @@ class XyzHandler extends BooruHandler{
             }
           }
         } else {
-          print('Tag search error:' + response.statusCode.toString());
+          Logger.Inst().log('Tag search error:' + response.statusCode.toString(), "XyzHandler", "tagSearch", LogTypes.booruHandlerInfo);
         }
       } catch(e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "XyzHandler", "tagSearch", LogTypes.exception);
         return [];
       }
     }

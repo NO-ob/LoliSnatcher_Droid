@@ -1,3 +1,5 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
+
 import 'Booru.dart';
 import 'BooruItem.dart';
 import 'DBHandler.dart';
@@ -30,11 +32,10 @@ abstract class BooruHandler {
     }
 
     String? url = makeURL(tags);
-    print(url);
-
+    Logger.Inst().log(url!, "BooruHandler", "Search", LogTypes.booruHandlerSearchURL);
     try {
       int length = fetched.length;
-      Uri uri = Uri.parse(url!);
+      Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: getHeaders());
       if (response.statusCode == 200) {
         parseResponse(response);
@@ -42,11 +43,11 @@ abstract class BooruHandler {
         if (fetched.length == length){locked = true;}
         return fetched;
       } else {
-        print("BooruHandler status is: ${response.statusCode}");
-        print("BooruHandler url is: $url");
+        Logger.Inst().log("BooruHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("BooruHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "BooruHandler", "Search", LogTypes.exception);
       return fetched;
     }
   }

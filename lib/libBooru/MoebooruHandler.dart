@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:xml/xml.dart' as xml;
 import 'BooruItem.dart';
 import 'GelbooruHandler.dart';
@@ -25,6 +26,7 @@ class MoebooruHandler extends GelbooruHandler{
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++){
       var current = posts.elementAt(i);
+      Logger.Inst().log(current.toString(), "MoebooruHandler","parseResponse", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
@@ -39,7 +41,6 @@ class MoebooruHandler extends GelbooruHandler{
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
         }
-        print(fileURL);
         fetched.add(new BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
@@ -60,7 +61,6 @@ class MoebooruHandler extends GelbooruHandler{
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
           postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
         ));
-        print(fetched.last);
         if(dbHandler!.db != null){
           setTrackedValues(fetched.length - 1);
         }

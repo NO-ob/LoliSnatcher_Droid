@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,26 +36,19 @@ class HydrusHandler extends BooruHandler{
     // }
     this.pageNum = pageNum;
     if (prevTags != tags){
-      print("making new fetched list");
       fetched = [];
       prevTags = tags;
     }
     String url = makeURL(tags);
-    print(url);
+    Logger.Inst().log(url, "HydrusHandler", "Search", LogTypes.booruHandlerSearchURL);
     if (_fileIDs == null) {
       try {
         Uri uri = Uri.parse(url);
         final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
-        print("----------------Hydrus Search----------------------");
-        print("Search url: " + url);
-        print("Hydrus key: " + booru.apiKey!);
-        print("Status code: " + response.statusCode.toString());
-        print(response.body);
         if (response.statusCode == 200) {
           Map<String, dynamic> parsedResponse = jsonDecode(response.body);
           if (parsedResponse['file_ids'] != null) {
             _fileIDs = parsedResponse['file_ids'];
-            print("getting res page");
             return await getResultsPage(pageNum);
           }
           prevTags = tags;
@@ -62,7 +56,7 @@ class HydrusHandler extends BooruHandler{
           return fetched;
         }
       } catch(e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "HydrusHandler", "Search", LogTypes.exception);
         isActive = false;
         return fetched;
       }
@@ -74,8 +68,6 @@ class HydrusHandler extends BooruHandler{
     Future getResultsPage(pageNum) async{
       try {
         int pageMax = (_fileIDs.length > limit ? (_fileIDs.length / limit).ceil() : 1);
-        print("pagemax: $pageMax");
-        print("pagenum: $pageNum");
         if (pageNum >= pageMax){
           locked = true;
         } else {
@@ -87,21 +79,14 @@ class HydrusHandler extends BooruHandler{
             if(i != upperBound - 1) {fileIDString +=',';}
           }
           fileIDString += ']';
-          print(fileIDString);
           String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
           Uri uri = Uri.parse(url);
           final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
-          print("----------------Hydrus Search----------------------");
-          print("Metadata url: " + url);
-          print("Hydrus key: " + booru.apiKey!);
-          print("Status code: " + response.statusCode.toString());
-          print(response.body);
           if (response.statusCode == 200) {
             var parsedResponse = jsonDecode(response.body);
-            print(response.body);
+            Logger.Inst().log(response.body, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
             for (int i = 0; i < parsedResponse['metadata'].length; i++){
                 List<String> tagList = [];
-                print(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']);
                 var responseTags;
                 if (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags'] != null){
                   responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'];
@@ -139,12 +124,11 @@ class HydrusHandler extends BooruHandler{
             isActive = false;
             return fetched;
           } else {
-            print("Getting metadata failed");
+            Logger.Inst().log("Getting metadata failed", "HydrusHandler", "getResultsPage", LogTypes.booruHandlerInfo);
           }
         }
       }catch(e){
-        print("Except caught when fetching metadata");
-        print(e);
+        Logger.Inst().log(e.toString(), "HydrusHandler", "getResultsPage", LogTypes.exception);
       }
       isActive = false;
       return fetched;
@@ -153,19 +137,9 @@ class HydrusHandler extends BooruHandler{
     try {
       String url = "${booru.baseURL}/add_urls/add_url";
       Uri uri = Uri.parse(url);
-      print(url);
-      print(booru.apiKey!);
-      // Doesn't send the content type correctly and the post doesn't work
-      /*final response = await http.post(
-        uri,
-        headers: {
-          HttpHeaders.contentTypeHeader:"application/json",
-          "Hydrus-Client-API-Access-Key":booru.apiKey!
-        },
-        body: jsonEncode(<String, String>{
-          "url": postURL,
-        }),
-      );*/
+      Logger.Inst().log(url, "HydrusHandler", "addURL", LogTypes.booruHandlerInfo);
+      Logger.Inst().log(booru.apiKey!, "HydrusHandler", "addURL", LogTypes.booruHandlerInfo);
+      // Uses dio because darts http post doesn't send the content type header correctly and the post doesn't work
       var dio = Dio();
       List<String> tags = [];
       String tagString = '';
@@ -174,8 +148,6 @@ class HydrusHandler extends BooruHandler{
         tagString += '"$element",';
       });
       tagString = tagString.substring(0,tagString.length -1);
-      //tagString += "]";
-      print(tagString);
       Response dioResponse = await dio.post(url,
         options: Options(headers: {
           HttpHeaders.contentTypeHeader: "application/json",
@@ -185,32 +157,29 @@ class HydrusHandler extends BooruHandler{
           "filterable_tags":item.tagsList
         }),
       );
-      print("res body is ${dioResponse.data}");
     }catch(e){
       ServiceHandler.displayToast("Something went wrong importing to hydrus you might not have given the correct api permissions this can be edited in Review Services. Add tags to file and Add Urls");
-      print("Except caught when sending url to Hydrus");
-      print(e);
+      Logger.Inst().log(e.toString(), "HydrusHandler", "addURL", LogTypes.exception);
     }
     isActive = false;
     return fetched;
   }
     Future getAccessKey() async{
       String url = "${booru.baseURL}/request_new_permissions?name=LoliSnatcher&basic_permissions=[3,0,2]";
-      print("Requesting key: " + url);
+      Logger.Inst().log("Requesting key: " + url, "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
       try {
         Uri uri = Uri.parse(url);
         final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
         if (response.statusCode == 200) {
           var parsedResponse = jsonDecode(response.body);
-          print("Key Request Successful: " + parsedResponse['access_key'].toString());
+          Logger.Inst().log("Key Request Successful: " + parsedResponse['access_key'].toString(), "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
           return parsedResponse['access_key'].toString();
         } else {
-          print("Key Request Failed: " + response.statusCode.toString());
-          print(response.body);
+          Logger.Inst().log("Key Request Failed: " + response.statusCode.toString(), "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
+          Logger.Inst().log(response.body, "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
         }
       } catch (e){
-        print("HydrusHandler::getAccessKey::AccessKeyError");
-        print("e");
+        Logger.Inst().log(e.toString(), "HydrusHandler", "getAccessKey", LogTypes.exception);
       }
       return "";
     }
@@ -218,7 +187,6 @@ class HydrusHandler extends BooruHandler{
     // This will create a url for the http request
     String makeURL(String tags){
       String tag;
-      print(tags);
       if (tags.isEmpty){
         tag = "[]";
       } else if (tags.contains(",")){

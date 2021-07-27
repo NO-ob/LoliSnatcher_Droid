@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
@@ -29,7 +30,6 @@ class MergebooruHandler extends BooruHandler{
   }
   @override
   Future Search(String tags, int pageNum) async{
-    print("PAGE NUM = $pageNum");
     List<List<BooruItem>> tmpFetchedList = [];
     List<bool> isGelbooruV1List = [];
     int fetchedMax = 0;
@@ -57,13 +57,13 @@ class MergebooruHandler extends BooruHandler{
           if (!hashInFetched(fetched, tmpFetchedList[i][innerFetchedIndex].md5String,tmpFetchedList[i][innerFetchedIndex].fileURL)){
             fetched.add(tmpFetchedList[i][innerFetchedIndex]);
           } else {
-            print("Skipped because hash match: ${tmpFetchedList[i][innerFetchedIndex].fileURL}");
+            Logger.Inst().log("Skipped because hash match: ${tmpFetchedList[i][innerFetchedIndex].fileURL}", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
           }
 
         } else{
-          print("not adding item from ${booruHandlers[i].booru.name}, length: ${tmpFetchedList[i].length}, index: $innerFetchedIndex");
-          print("innerLimit $innerLimit, pageNum: $pageNum");
-          print("fetched: ${fetched.length}, fetchedMax: $fetchedMax");
+          Logger.Inst().log("not adding item from ${booruHandlers[i].booru.name}, length: ${tmpFetchedList[i].length}, index: $innerFetchedIndex", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
+          Logger.Inst().log("innerLimit $innerLimit, pageNum: $pageNum", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
+          Logger.Inst().log("fetched: ${fetched.length}, fetchedMax: $fetchedMax", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
         }
       }
       innerFetchedOffset ++;
@@ -90,13 +90,13 @@ class MergebooruHandler extends BooruHandler{
   String makeSha1Hash(String hash){
     List<int> bytes = utf8.encode(hash);
     Digest digest = sha1.convert(bytes);
-    print("converting hash to sha1");
+    Logger.Inst().log("converting hash to sha1", "MergeBooruHandler", "makeSha1Hash", LogTypes.booruHandlerInfo);
     return digest.toString();
   }
   bool hashInFetched(List<BooruItem> fetched, hash, fileURL){
     for (int i = 0; i < fetched.length; i++){
       if (fetched[i].md5String == hash){
-        print("hash match URL: $fileURL fetchedURL: ${fetched[i].fileURL}");
+        Logger.Inst().log("hash match URL: $fileURL fetchedURL: ${fetched[i].fileURL}", "MergeBooruHandler", "hashInFetched", LogTypes.booruHandlerInfo);
         return true;
       }
     }
@@ -110,7 +110,7 @@ class MergebooruHandler extends BooruHandler{
       List factoryResults = BooruHandlerFactory().getBooruHandler([element], innerLimit, this.dbHandler);
       booruHandlers.add(factoryResults[0]);
       booruHandlerPageNums.add(factoryResults[1] + 1);
-      print("SETUP MERGE ADDING: ${element.name}");
+      Logger.Inst().log("SETUP MERGE ADDING: ${element.name}", "MergeBooruHandler", "setupMerge", LogTypes.booruHandlerInfo);
       if (element.type == "GelbooruV1"){
         hasGelbooruV1 = true;
       }

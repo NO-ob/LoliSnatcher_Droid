@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
@@ -21,7 +22,7 @@ class LoliSync{
     server = await HttpServer.bind(ip, 1234);
     yield "Server active at $ip:$port";
     await for (var req in server) {
-      print(req.uri.path.toString());
+      Logger.Inst().log(req.uri.path.toString(), "LoliSync", "startServer", LogTypes.loliSyncInfo);
       switch (req.uri.path.toString()) {
         case("/lolisync/booruitem"):
           yield await storeBooruItem(req, settingsHandler);
@@ -39,14 +40,14 @@ class LoliSync{
   Future<String> storeSettings(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
-        print("request to update settings recieved");
+        Logger.Inst().log("request to update settings recieved", "LoliSync", "storeSettings", LogTypes.loliSyncInfo);
         String content = await utf8.decoder.bind(req).join(); /*2*/
         await settingsHandler.loadFromJSON(content);
         req.response.statusCode = 200;
         req.response.write("Settings Sent");
         return "Settings Saved";
       } catch (e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "LoliSync", "storeSettings", LogTypes.exception);
       }
     } else {
       req.response.statusCode = 404;
@@ -61,7 +62,7 @@ class LoliSync{
       try {
         amount = int.parse(req.uri.queryParameters["amount"]!);
         current = int.parse(req.uri.queryParameters["current"]!);
-        print("request to update booru item recieved");
+        Logger.Inst().log("request to update booru item recieved", "LoliSync", "storeBooruItem", LogTypes.loliSyncInfo);
         String content = await utf8.decoder.bind(req).join(); /*2*/
         BooruItem item = BooruItem.fromJSON(content);
         if (settingsHandler.dbEnabled) {
@@ -77,7 +78,7 @@ class LoliSync{
         }
 
       } catch (e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "LoliSync", "storeBooruItem", LogTypes.exception);
       }
     } else {
       req.response.statusCode = 404;
@@ -89,7 +90,7 @@ class LoliSync{
   Future<String> storeBooru(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
-        print("request to add item recieved");
+        Logger.Inst().log("request to add item recieved", "LoliSync", "storeBooru", LogTypes.loliSyncInfo);
         amount = int.parse(req.uri.queryParameters["amount"]!);
         current = int.parse(req.uri.queryParameters["current"]!);
         String content = await utf8.decoder.bind(req).join(); /*2*/
@@ -112,7 +113,7 @@ class LoliSync{
           return "$current / $amount - ${booru.name}";
         }
       } catch (e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "LoliSync", "storeBooru", LogTypes.exception);
       }
     } else {
       req.response.statusCode = 404;
@@ -131,7 +132,7 @@ class LoliSync{
     syncKilled = true;
   }
   Future<String> sendBooruItem(BooruItem item, String ip, String port, int favouritesCount, int current) async{
-    print("Sending item $current / $favouritesCount");
+    Logger.Inst().log("Sending item $current / $favouritesCount", "LoliSync", "sendBooruItem", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/booruitem?amount=$favouritesCount&current=$current")
       ..headers.contentType = ContentType.json
       ..write(jsonEncode(item.toJSON())); /*3*/
@@ -140,7 +141,7 @@ class LoliSync{
     return responseStr;
   }
   Future<String> sendSettings(Map settingsJSON, String ip, String port) async{
-    print("Sending settings $settingsJSON");
+    Logger.Inst().log("Sending settings $settingsJSON", "LoliSync", "sendSettings", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/settings")
       ..headers.contentType = ContentType.json
       ..write(jsonEncode(settingsJSON));
@@ -149,7 +150,7 @@ class LoliSync{
     return responseStr;
   }
   Future<String> sendBooru(Booru booru, String ip, String port, int booruCount, int current) async{
-    print("Sending item $current / $booruCount");
+    Logger.Inst().log("Sending item $current / $booruCount", "LoliSync", "sendBooru", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/booru?amount=$booruCount&current=$current")
       ..headers.contentType = ContentType.json
       ..write(jsonEncode(booru.toJSON()));
@@ -169,14 +170,14 @@ class LoliSync{
               if (!syncKilled){
                 int tens = i*10;
                 List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("",tens.toString(),"10","ASC","loliSyncFav");
-                print("fetched is ${fetched.length} i is $i");
+                Logger.Inst().log("fetched is ${fetched.length} i is $i", "LoliSync", "startSync", LogTypes.loliSyncInfo);
                 for (int x = 0; x < fetched.length; x++){
                   int count = tens + x;
                   if (count < favouritesCount){
                     String resp = await sendBooruItem(fetched.elementAt(x), ip, port, favouritesCount, count);
                     yield "$count / $favouritesCount - $resp";
                   } else {
-                    print("skipping");
+                    Logger.Inst().log("skipping", "LoliSync", "startSync", LogTypes.loliSyncInfo);
                   }
                 }
               }
@@ -201,7 +202,7 @@ class LoliSync{
                   String resp = await sendBooru(settingsHandler.booruList.elementAt(i), ip, port, booruCount, i);
                   yield "$i / $booruCount - $resp";
                 } else {
-                  print("skipping");
+                  Logger.Inst().log("skipping", "LoliSync", "startSync", LogTypes.loliSyncInfo);
                 }
               }
             }

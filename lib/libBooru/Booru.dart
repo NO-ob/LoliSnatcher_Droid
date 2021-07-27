@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:LoliSnatcher/utilities/Logger.dart';
+
 class Booru {
   String? name = "",faviconURL = "",type = "",baseURL = "",apiKey = "",userID = "",defTags = "";
   Booru(this.name,this.type,this.faviconURL,this.baseURL,this.defTags);
@@ -11,31 +13,31 @@ class Booru {
     for (int i=0;i < booruString.length; i++){
         switch(booruString[i].split(" = ")[0]){
           case("Booru Name"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.name = booruString[i].split(" = ")[1];
             break;
           case("Favicon URL"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.faviconURL = booruString[i].split(" = ")[1];
             break;
           case("Booru Type"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.type = booruString[i].split(" = ")[1];
             break;
           case("Base URL"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.baseURL = booruString[i].split(" = ")[1];
             break;
           case("API Key"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.apiKey = booruString[i].split(" = ")[1];
             break;
           case("User ID"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.userID = booruString[i].split(" = ")[1];
             break;
           case("Default Tags"):
-            print(booruString[i].split(" = ")[1]);
+            Logger.Inst().log(booruString[i].split(" = ")[1], "Booru", "fromFile", LogTypes.booruItemLoad);
             this.defTags = booruString[i].split(" = ")[1];
             break;
         }

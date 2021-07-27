@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
@@ -28,10 +29,10 @@ class BooruOnRailsHandler extends BooruHandler {
   void parseResponse(response){
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse['search'];
-    print("BooruOnRails::search ${posts.length}");
     // Create a BooruItem for each post in the list
     for (int i =0; i < posts.length; i++){
       var current = posts[i];
+      Logger.Inst().log(current.toString(), "BooruOnRailsHandler", "parsedResponse", LogTypes.booruHandlerRawFetched);
       List<String> currentTags = current['tags'].split(", ");
       for (int x = 0; x< currentTags.length; x++){
         if (currentTags[x].contains(" ")){
@@ -44,7 +45,6 @@ class BooruOnRailsHandler extends BooruHandler {
           String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
           sampleURL = tmpURL;
           thumbURL = tmpURL;
-          print("tmpurl is " + tmpURL);
         }
         String fileURL = current['representations']['full'];
         if (!fileURL.contains("http")){
@@ -71,7 +71,7 @@ class BooruOnRailsHandler extends BooruHandler {
           setTrackedValues(fetched.length - 1);
         }
       } else {
-        print("post $i skipped");
+        Logger.Inst().log("post $i skipped", "BooruOnRailsHandler", "parseResponse", LogTypes.booruHandlerInfo);
       }
     }
   }
@@ -122,7 +122,7 @@ class BooruOnRailsHandler extends BooruHandler {
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "BooruOnRailsHandler", "tagSearch", LogTypes.exception);
     }
     return searchTags;
   }

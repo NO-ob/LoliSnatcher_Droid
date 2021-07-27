@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/Tools.dart';
@@ -21,6 +22,7 @@ class IdolSankakuHandler extends SankakuHandler{
     // Create a BooruItem for each post in the list
     for (int i = 0; i < parsedResponse.length; i++){
       var current = parsedResponse[i];
+      Logger.Inst().log(current.toString(), "IdolSankakuHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       List<String> tags = [];
       for (int x=0; x < current['tags'].length; x++) {
         tags.add(current['tags'][x]['name'].toString());

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:LoliSnatcher/Tools.dart';
@@ -64,7 +65,7 @@ class DBHandler{
 
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   Future<String?> updateBooruItem(BooruItem item, String mode) async{
-    print("updateBooruItem called fileURL is:" + item.fileURL);
+    Logger.Inst().log("updateBooruItem called fileURL is:" + item.fileURL, "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
     String? itemID = await getItemID(item.fileURL);
     String resultStr = "";
     if (itemID == null || itemID.isEmpty) {
@@ -106,7 +107,7 @@ class DBHandler{
     var result;
     List<BooruItem> fetched = [];
     String questionMarks = "?";
-    print("Searching DB for tags ${tagString}");
+    Logger.Inst().log("Searching DB for tags ${tagString}", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
     if (tagString.isNotEmpty){
       tags = tagString.split(" ");
       for (int i = 1; i < tags.length; i++){
@@ -128,22 +129,14 @@ class DBHandler{
       result = await db?.rawQuery(
           "SELECT id as dbid FROM BooruItem WHERE isFavourite = 1 ORDER BY id $order LIMIT $limit OFFSET $offset");
     }
-    print("got results from db");
-    print(result);
+    Logger.Inst().log("got results from db", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
+    Logger.Inst().log(result, "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
     if (result != null && result.isNotEmpty){
       List<BooruItem> booruItems = await getBooruItems(List<int>.from(result.map((r) {
         return r["dbid"];
       })), mode);
       fetched.addAll(booruItems);
 
-      // for(int i=0; i < result.length; i++){
-      //   BooruItem? temp = await getBooruItem(result[i]["dbid"], mode);
-      //   if (temp != null){
-      //     fetched.add(temp);
-      //   } else {
-      //     print("skipped ${result[i]["id"]}");
-      //   }
-      // }
     }
     return fetched;
   }
@@ -176,8 +169,8 @@ class DBHandler{
     } else {
       result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
     }
-    print("got count results from db");
-    print(result);
+    Logger.Inst().log("got results from db", "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
+    Logger.Inst().log(result, "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
     if (result != null && result.isNotEmpty){
       if(result.length > 1) {
         count = result.length;
@@ -191,8 +184,8 @@ class DBHandler{
   Future<int> getFavouritesCount() async {
     var result;
     result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
-    print("got results from db");
-    print(result);
+    Logger.Inst().log("got results from db", "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
+    Logger.Inst().log(result, "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
     if (result != null){
       return result.first["count"];
     }
@@ -402,8 +395,8 @@ class DBHandler{
       result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
     }
     if (result != null && result.isNotEmpty){
-      print("file url is: $fileURL");
-      print(result.toString());
+      Logger.Inst().log("file url is: $fileURL", "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
+      Logger.Inst().log(result.toString(), "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
       values[0] = Tools.intToBool(result.first["isSnatched"]);
       values[1] = Tools.intToBool(result.first["isFavourite"]);
     }
@@ -420,7 +413,7 @@ class DBHandler{
 
   //Deletes a BooruItem and its tags from the database
   void deleteItem(List<String> itemIDs) async{
-    print("DBHandler deleting: $itemIDs");
+    Logger.Inst().log("DBHandler deleting: $itemIDs", "DBHandler", "deleteItem", LogTypes.booruHandlerInfo);
     String questionMarks = "?";
     for (int i = 1; i < itemIDs.length; i++){
       questionMarks += ",?";

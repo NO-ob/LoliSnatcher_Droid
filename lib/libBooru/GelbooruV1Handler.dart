@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart';
 import 'dart:async';
@@ -25,6 +26,7 @@ class GelbooruV1Handler extends BooruHandler{
       var document = parse(response.body);
       var spans = document.getElementsByClassName("thumb");
       for (int i = 0; i < spans.length; i++){
+        Logger.Inst().log(spans.elementAt(i).children[0].innerHtml, "GelbooruV1Handler", "parseResponse", LogTypes.booruHandlerRawFetched);
         if (spans.elementAt(i).children[0].firstChild!.attributes["src"] != null){
           String id = spans.elementAt(i).children[0].attributes["id"]!.substring(1);
           String thumbURL = spans.elementAt(i).children[0].firstChild!.attributes["src"]!;

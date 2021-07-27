@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'BooruHandler.dart';
@@ -25,15 +26,14 @@ class WorldHandler extends BooruHandler{
   void parseResponse(response){
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse['items'];
-    // print(posts.length); // Limit doesn't work with this api
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++){
       /**
        * Parse Data Object and Add a new BooruItem to the list
        */
       var current = posts.elementAt(i);
+      Logger.Inst().log(current.toString(), "WorldHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       List<dynamic> imageLinks = current['imageLinks'];
-
       bool isVideo = current['type'] == 1; //type 1 - video, type 0 - image
       String bestFile = imageLinks.where((f) => f["type"] == (isVideo ? 10 : 2)).toList()[0]["url"];
       String sampleImage = imageLinks.where((f) => f["type"] == 2).toList()[0]["url"]; // isVideo ? 2 : 5 ???
@@ -110,7 +110,6 @@ class WorldHandler extends BooruHandler{
         // 200 is the success http response code
         if (response.statusCode == 200) {
           List<dynamic> parsedResponse = jsonDecode(response.body)["items"];
-          // print(parsedResponse);
           if (parsedResponse.length > 0) {
             for (int i=0; i < parsedResponse.length; i++){
               Map<String,dynamic> current = parsedResponse.elementAt(i);
@@ -118,10 +117,10 @@ class WorldHandler extends BooruHandler{
             }
           }
         } else {
-          print('Tag search error:' + response.statusCode.toString());
+          Logger.Inst().log('Tag search error:' + response.statusCode.toString(), "WorldHandler", "tagSearch", LogTypes.booruHandlerInfo);
         }
       } catch(e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "WorldHandler", "tagSearch", LogTypes.exception);
         return [];
       }
     }
@@ -141,10 +140,10 @@ class WorldHandler extends BooruHandler{
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         result = parsedResponse['totalCount'];
       } else {
-        print(response.statusCode);
+        Logger.Inst().log(response.statusCode.toString(), "WorldHandler", "searchCount", LogTypes.booruHandlerInfo);
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "WorldHandler", "searchCount", LogTypes.exception);
     }
     this.totalCount = result;
   }

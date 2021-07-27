@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
@@ -25,7 +26,6 @@ class ShimmieHandler extends BooruHandler{
   }
   @override
   void parseResponse(response){
-    print(response.body);
     var parsedResponse = xml.parse(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
@@ -38,6 +38,7 @@ class ShimmieHandler extends BooruHandler{
     // Create a BooruItem for each post in the list
     for (int i =0; i < posts.length; i++){
       var current = posts.elementAt(i);
+      Logger.Inst().log(current.toXmlString(), "ShimmieHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
@@ -96,19 +97,17 @@ class ShimmieHandler extends BooruHandler{
   Future tagSearch(String input) async {
     List<String> searchTags = [];
     String url = makeTagURL(input);
-    print("shimmie tag search $input $url");
+    Logger.Inst().log("shimmie tag search $input $url", "ShimmieHandler", "tagSearch", LogTypes.booruHandlerInfo);
     try {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: getWebHeaders());
       // 200 is the success http response code
-      print(response.body);
       if (response.statusCode == 200) {
         searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(new RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "ShimmieHandler", "tagSearch", LogTypes.exception);
     }
-    print(searchTags.length);
     return searchTags;
   }
 
@@ -128,7 +127,7 @@ class ShimmieHandler extends BooruHandler{
           }
         }
       } catch(e) {
-        print(e);
+        Logger.Inst().log(e.toString(), "ShimmieHandler", "searchCount", LogTypes.booruHandlerInfo);
       }
     }
     this.totalCount = result;

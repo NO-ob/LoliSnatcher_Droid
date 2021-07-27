@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:LoliSnatcher/utilities/Logger.dart';
+
 import 'Booru.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -19,12 +21,10 @@ class e621Handler extends BooruHandler{
      * all the data needed about each image
      */
     var posts = parsedResponse['posts'];
-    print(parsedResponse);
-    print("e621Handler::search ${posts.length}");
-
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++){
       var current = posts[i];
+      Logger.Inst().log(current.toString(), "e621Handler", "parseResponse", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
@@ -115,7 +115,7 @@ class e621Handler extends BooruHandler{
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "e621Handler", "tagSearch", LogTypes.exception);
     }
     print(searchTags.length);
     return searchTags;

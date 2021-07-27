@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
@@ -22,6 +23,7 @@ class DanbooruHandler extends BooruHandler{
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
+      Logger.Inst().log(current.toXmlString(), "DanbooruHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       /**
        * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
        * to go with the rest of the data so cannot be displayed and are pointless for the app
@@ -84,7 +86,7 @@ class DanbooruHandler extends BooruHandler{
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "DanbooruHandler", "tagSearch", LogTypes.exception);
     }
     print(searchTags.length);
     return searchTags;

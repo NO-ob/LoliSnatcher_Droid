@@ -281,7 +281,6 @@ class _HomeState extends State<Home> {
       setState(() {
         searchGlobals[globalsIndex] = newSearchGlobals;
       });
-
     }
     if (!widget.settingsHandler.mergeEnabled){
       SearchGlobals newSearchGlobals = new SearchGlobals(searchGlobals[globalsIndex].selectedBooru, searchTagsController.text);

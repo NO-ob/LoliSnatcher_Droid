@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
@@ -27,10 +28,8 @@ class SzurubooruHandler extends BooruHandler{
      */
     // Create a BooruItem for each post in the list
     for (int i =0; i < parsedResponse['results'].length; i++){
-      if (i == 0){
-        print(parsedResponse['results'][0].toString());
-      }
       var current = parsedResponse['results'][i];
+      Logger.Inst().log(current.toString(), "SzurubooruHandler", "parseRespnose", LogTypes.booruHandlerRawFetched);
       List<String> tags = [];
       for (int x=0; x < current['tags'].length; x++) {
         String currentTags = current['tags'][x]['names'].toString().replaceAll(r":", r"\:");
@@ -91,7 +90,6 @@ class SzurubooruHandler extends BooruHandler{
     try {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: getHeaders());
-      print(response.body);
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -103,9 +101,8 @@ class SzurubooruHandler extends BooruHandler{
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "SzurubooruHandler", "tagSearch", LogTypes.exception);
     }
-    print(searchTags.length);
     return searchTags;
   }
   }

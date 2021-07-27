@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
 import 'dart:async';
@@ -28,6 +29,7 @@ class GelbooruHandler extends BooruHandler{
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++){
       var current = posts.elementAt(i);
+      Logger.Inst().log("dbhandler dbLocked", "GelbooruHandler", "search", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
@@ -42,8 +44,6 @@ class GelbooruHandler extends BooruHandler{
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
         }
-        print(fileURL);
-
         fetched.add(new BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
@@ -107,7 +107,6 @@ class GelbooruHandler extends BooruHandler{
         // 200 is the success http response code
         if (response.statusCode == 200) {
           var parsedResponse = jsonDecode(response.body);
-          print(parsedResponse);
           if (parsedResponse.length > 0){
             for (int i=0; i < parsedResponse.length; i++){
               searchTags.add(parsedResponse.elementAt(i)["value"]);
@@ -129,7 +128,7 @@ class GelbooruHandler extends BooruHandler{
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "GelbooruHandler", "tagSearch", LogTypes.exception);
     }
     return searchTags;
   }
@@ -149,7 +148,7 @@ class GelbooruHandler extends BooruHandler{
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "GelbooruHandler", "searchCount", LogTypes.exception);
     }
     this.totalCount = result;
   }

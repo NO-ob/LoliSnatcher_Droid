@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 import 'dart:async';
@@ -37,14 +38,14 @@ class R34HentaiHandler extends BooruHandler{
   @override
   void parseResponse(response){
     List<dynamic> parsedResponse = jsonDecode(response.body);
-    var posts = parsedResponse;
-    print(posts); // Limit doesn't work with this api
+    var posts = parsedResponse; // Limit doesn't work with this api
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++){
       /**
        * Parse Data Object and Add a new BooruItem to the list
        */
       var current = posts.elementAt(i);
+      Logger.Inst().log(current.toString(), "R34HentaiHandler","parseResponse", LogTypes.booruHandlerRawFetched);
       String imageUrl = current['file_url'];
       String sampleUrl = current['sample_url'];
       String thumbnailUrl = current['preview_url'];

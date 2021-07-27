@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
@@ -30,7 +31,6 @@ class RainbooruHandler extends BooruHandler {
       fetched = [];
     }
     String url = makeURL(tags);
-    print(url);
     try {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: getHeaders());
@@ -38,13 +38,13 @@ class RainbooruHandler extends BooruHandler {
       if (response.statusCode == 200) {
         await parseResponse(response);
         } else {
-        print("rainbooru status is" + response.statusCode.toString());
+        Logger.Inst().log("rainbooru status is" + response.statusCode.toString(), "RainbooruHandler","parseResponse", LogTypes.booruHandlerInfo);
       }
         prevTags = tags;
         if (fetched.length == length){locked = true;}
         return fetched;
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "RainbooruHandler","parseResponse", LogTypes.exception);
       return fetched;
     }
   }
@@ -68,7 +68,6 @@ class RainbooruHandler extends BooruHandler {
           String fileURL = "" + postsURLs!.attributes["href"]!;
           String sampleURL = "" + postsURLs.firstChild!.attributes["src"]!;
           var tags = document.querySelectorAll("a.tag");
-          print("fileurl is " +fileURL);
           List<String> currentTags = [];
           for (int x = 0; x < tags.length; x++) {
             currentTags.add(tags[x].innerHtml.replaceAll(" ", "+"));
@@ -85,7 +84,6 @@ class RainbooruHandler extends BooruHandler {
           }
         }
       } else {
-        print("post $i skipped");
       }
     }
   }
@@ -143,7 +141,7 @@ class RainbooruHandler extends BooruHandler {
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "RainbooruHandler","makeTagURL", LogTypes.exception);
     }
     return searchTags;
   }

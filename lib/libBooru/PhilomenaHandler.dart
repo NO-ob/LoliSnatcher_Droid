@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
@@ -19,31 +20,26 @@ class PhilomenaHandler extends BooruHandler{
   }
   @override
   void parseResponse(response){
-    print(response.body);
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    print("PhilomenaHandler::search ${parsedResponse['images'].length}");
     // Create a BooruItem for each post in the list
     for (int i =0; i < parsedResponse['images'].length; i++){
       var current = parsedResponse['images'][i];
+      Logger.Inst().log(current.toString(), "PhiloMenaHandler","parseResponse", LogTypes.booruHandlerRawFetched);
       if (current['representations']['full'] != null){
         String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
         if(current["mime_type"].toString().contains("video")) {
           String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
           sampleURL = tmpURL;
           thumbURL = tmpURL;
-          print("tmpurl is " + tmpURL);
         }
 
         String fileURL = current['representations']['full'];
         if (!fileURL.contains("http")){
           sampleURL = booru.baseURL! + sampleURL;
           thumbURL = booru.baseURL! + thumbURL;
-          print("fileurl is $fileURL");
           fileURL = booru.baseURL! + fileURL;
-          print("newurl is $fileURL");
         }
 
-        print("sample url is $sampleURL");
         List<String> currentTags = current['tags'].toString().substring(1,current['tags'].toString().length -1).split(", ");
         for (int x = 0; x< currentTags.length; x++){
           if (currentTags[x].contains(" ")){
@@ -125,7 +121,7 @@ class PhilomenaHandler extends BooruHandler{
         }
       }
     } catch(e) {
-      print(e);
+      Logger.Inst().log(e.toString(), "PhiloMenaHandler","tagSearch", LogTypes.exception);
     }
     return searchTags;
   }
