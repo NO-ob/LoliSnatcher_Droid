@@ -32,7 +32,7 @@ class _booruEditState extends State<booruEdit> {
   final booruDefTagsController = TextEditingController();
   List<String> booruTypes = [
     "Danbooru", "e621", "Gelbooru", "GelbooruV1", "Moebooru", "Philomena", "Sankaku", "Shimmie", "Szurubooru", "Hydrus", "BooruOnRails", "Rainbooru",
-    "R34Hentai", "World", "IdolSankaku"
+    "R34Hentai", "World", "IdolSankaku","InkBunny"
   ];
   String selectedBooruType = "AutoDetect";
   @override

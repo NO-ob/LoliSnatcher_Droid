@@ -289,7 +289,6 @@ class _HomeState extends State<Home> {
         searchGlobals[globalsIndex] = newSearchGlobals;
       });
     }
-
   }
   void searchAction(String text) {
     // Remove extra spaces
@@ -421,6 +420,22 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                   ) : Container(),
+                  //Add merge popup window
+                  /*TextButton.icon(
+                      style: TextButton.styleFrom(
+                        primary: Get.context!.theme.accentColor,
+                        padding: EdgeInsets.all(10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(5),
+                          side: BorderSide(color: Get.context!.theme.accentColor),
+                        ),
+                      ),
+                      onPressed: (){
+                        Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
+                      },
+                      icon: Icon(Icons.download_sharp),
+                      label: Text("Merge", style: TextStyle(color: Colors.white))
+                  ),*/
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.max,

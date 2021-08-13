@@ -1,5 +1,6 @@
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
+import 'package:LoliSnatcher/libBooru/InkBunnyHandler.dart';
 import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
 
@@ -84,6 +85,10 @@ class BooruHandlerFactory{
         case("IdolSankaku"):
           pageNum = 0;
           booruHandler = new IdolSankakuHandler(booru[0], limit);
+          break;
+        case("InkBunny"):
+          pageNum = 0;
+          booruHandler = new InkBunnyHandler(booru[0], limit);
           break;
       }
     } else {

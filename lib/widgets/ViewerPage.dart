@@ -204,52 +204,99 @@ class _ViewerPageState extends State<ViewerPage> {
           if (isViewed || isNear) {
             // Cut to the size of the container, prevents overlapping
             return ClipRect(
-              child: GestureDetector(
-                // onTapUp: (TapUpDetails tapInfo) {
-                //   if(isVideo) return;
-                //   // TODO WIP
-                //   // change page if tapped on 20% of any side of the screen AND not a video
-                //   double tapPosX = tapInfo.localPosition.dx;
-                //   double screenWidth = MediaQuery.of(context).size.width;
-                //   double sideThreshold = screenWidth / 5;
+              //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    // onTapUp: (TapUpDetails tapInfo) {
+                    //   if(isVideo) return;
+                    //   // TODO WIP
+                    //   // change page if tapped on 20% of any side of the screen AND not a video
+                    //   double tapPosX = tapInfo.localPosition.dx;
+                    //   double screenWidth = MediaQuery.of(context).size.width;
+                    //   double sideThreshold = screenWidth / 5;
 
-                //   if(tapPosX > (screenWidth - sideThreshold)) {
-                //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                //   } else if(tapPosX < sideThreshold) {
-                //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                //   }
-                // },
-                onLongPress: () async {
-                  print('longpress');
-                  bool newAppbarVisibility = !widget.searchGlobals.displayAppbar.value;
-                  widget.searchGlobals.displayAppbar.value = newAppbarVisibility;
+                    //   if(tapPosX > (screenWidth - sideThreshold)) {
+                    //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                    //   } else if(tapPosX < sideThreshold) {
+                    //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                    //   }
+                    // },
+                      onLongPress: () async {
+                        print('longpress');
+                        bool newAppbarVisibility = !widget.searchGlobals.displayAppbar.value;
+                        widget.searchGlobals.displayAppbar.value = newAppbarVisibility;
 
-                  if(await Vibration.hasVibrator() ?? false) {
-                    Vibration.vibrate(duration: 10);
-                  }
+                        if(await Vibration.hasVibrator() ?? false) {
+                          Vibration.vibrate(duration: 10);
+                        }
 
-                  // enable volume buttons if current page is a video AND appbar is set to visible
-                  bool isVideo = widget.fetched[widget.searchGlobals.viewedIndex.value].isVideo();
-                  bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-                  ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                },
-                child: isVideo
-                  ? (!widget.settingsHandler.disableVideo
-                    ? (Platform.isAndroid ? VideoApp(
-                      widget.fetched[index],
-                      index,
-                      widget.searchGlobals,
-                      widget.settingsHandler,
-                      true
-                    ) : desktopVideoPlaceHolder(widget.fetched[index]))
-                    : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
-                  )
-                  : MediaViewer(
-                    widget.fetched[index],
-                    index,
-                    widget.searchGlobals,
-                    widget.settingsHandler
-                  )
+                        // enable volume buttons if current page is a video AND appbar is set to visible
+                        bool isVideo = widget.fetched[widget.searchGlobals.viewedIndex.value].isVideo();
+                        bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+                        ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                      },
+                      child: isVideo
+                          ? (!widget.settingsHandler.disableVideo
+                          ? (Platform.isAndroid ? VideoApp(
+                          widget.fetched[index],
+                          index,
+                          widget.searchGlobals,
+                          widget.settingsHandler,
+                          true
+                      ) : desktopVideoPlaceHolder(widget.fetched[index]))
+                          : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
+                      )
+                          : MediaViewer(
+                          widget.fetched[index],
+                          index,
+                          widget.searchGlobals,
+                          widget.settingsHandler
+                      )
+                  ),
+                  !Platform.isAndroid ? Container(
+                      alignment: Alignment.bottomLeft,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 35,
+                            height: 35,
+                            margin: EdgeInsets.all(10),
+                            child:FloatingActionButton(
+                              onPressed: () {
+                                if((index - 1) >= 0) {
+                                  controller!.animateToPage(
+                                      controller!.page!.toInt() - 1,
+                                      duration: Duration(milliseconds: 400),
+                                      curve: Curves.linear
+                                  );
+                                }
+                              },
+                              child: Icon(Icons.arrow_left),
+                              backgroundColor: Get.context!.theme.primaryColor,
+                            ),
+                          ),
+                          Container(
+                            width: 35,
+                            height: 35,
+                            margin: EdgeInsets.all(10),
+                            child:FloatingActionButton(
+                              onPressed: () {
+                                if((index + 1) < widget.fetched.length) {
+                                  controller!.animateToPage(
+                                      controller!.page!.toInt() + 1,
+                                      duration: Duration(milliseconds: 400),
+                                      curve: Curves.linear
+                                  );
+                                }
+                              },
+                              child: Icon(Icons.arrow_right),
+                              backgroundColor: Get.context!.theme.primaryColor,
+                            ),
+                          ),
+                        ],
+                      )) : Container(),
+                ],
               )
             );
           } else {
