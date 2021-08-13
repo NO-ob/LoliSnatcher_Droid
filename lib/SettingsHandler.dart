@@ -18,7 +18,7 @@ class SettingsHandler {
   List<String> hatedTags = [], lovedTags = [];
   int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
   int SDKVer = 0, galleryAutoScrollTime = 4000;
-  String verStr = "1.8.1";
+  String verStr = "1.8.3";
   bool hasHydrus = false, mergeEnabled = false,showURLInThumb = false;
   List<List<String>> buttonList = [
     ["autoscroll", "AutoScroll"],

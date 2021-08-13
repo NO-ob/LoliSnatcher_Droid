@@ -15,7 +15,7 @@ abstract class BooruHandler {
   String prevTags = "";
   bool locked = false;
   Booru booru;
-  String verStr = "1.8.2";
+  String verStr = "1.8.3";
   List<BooruItem> fetched = [];
   bool tagSearchEnabled = true;
   bool hasSizeData = false;

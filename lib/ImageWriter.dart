@@ -55,6 +55,7 @@ class ImageWriter{
 
     // Don't do anything if file already exists
     File image = new File(path!+fileName);
+    print(path!+fileName);
     bool fileExists = await image.exists();
     if(fileExists || item.isSnatched) return null;
     try {
@@ -277,13 +278,12 @@ class ImageWriter{
         } else if (Platform.isLinux){
           path = "${Platform.environment['HOME']}/Pictures/LoliSnatcher/";
         } else if (Platform.isWindows){
-          path = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/Pictures/";
+          path = "${Platform.environment['USERPROFILE']}/Pictures/";
+          //print(Platform.environment.toString());
         }
       } else {
         path = settingsHandler.extPathOverride;
       }
-
-
     }
 
     if(cacheRootPath == ""){
@@ -292,7 +292,7 @@ class ImageWriter{
       } else if (Platform.isLinux){
         cacheRootPath =  "${Platform.environment['HOME']}/.loliSnatcher/cache/";
       } else if (Platform.isWindows){
-        path = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/cache/";
+        cacheRootPath = "${Platform.environment['LOCALAPPDATA']}/LoliSnatcher/cache/";
       }
     }
     return true;

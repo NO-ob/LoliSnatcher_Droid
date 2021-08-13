@@ -143,7 +143,8 @@ class InkBunnyHandler extends BooruHandler{
   void parseResponse(submissionResponse) async{
     if (submissionResponse != null){
       Map<String, dynamic> parsedResponse = jsonDecode(submissionResponse.body);
-      for (int i =0; i < parsedResponse["submissions"].length; i++){
+      // Loop backwards because the api order the results the wrong way
+      for (int i = parsedResponse["submissions"].length - 1; i >= 0; i--){
         var current = parsedResponse["submissions"][i];
         Logger.Inst().log(current.toString(), "InkBunnyHandler","parseResponse", LogTypes.booruHandlerRawFetched);
         List<String> currentTags = [];
@@ -186,6 +187,8 @@ class InkBunnyHandler extends BooruHandler{
             setTrackedValues(fetched.length - 1);
           }
         }
+
+
       }
     }
   }

@@ -255,8 +255,10 @@ class _ViewerPageState extends State<ViewerPage> {
                       )
                   ),
                   !Platform.isAndroid ? Container(
-                      alignment: Alignment.bottomLeft,
+                      alignment: Alignment.bottomRight,
+                      margin: EdgeInsets.all(20),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Container(
                             width: 35,
@@ -295,6 +297,7 @@ class _ViewerPageState extends State<ViewerPage> {
                             ),
                           ),
                         ],
+
                       )) : Container(),
                 ],
               )
