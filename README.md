@@ -21,6 +21,7 @@ Supported Booru engines:
 - rule34.xyz / rule34.world
 - rule34hentai
 - Booru On Rails (Twibooru)
+- InkBunny
 
 ![github-small](https://loli.rehab/images/posts/loliSnatcherDroid/preview.png)
 
