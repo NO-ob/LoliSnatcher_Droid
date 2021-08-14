@@ -14,21 +14,16 @@ import 'package:LoliSnatcher/Tools.dart';
 //Slow piece of shit
 class RainbooruHandler extends BooruHandler {
   bool tagSearchEnabled = true;
-  List<BooruItem> fetched = [];
 
   RainbooruHandler(Booru booru,int limit) : super(booru,limit);
   @override
-  Future Search(String tags,int pageNum) async{
+  Future Search(String tags, int? pageNumCustom) async{
     int length = fetched.length;
     if (tags == "" || tags == " "){
       tags = "*";
     }
-    // if(this.pageNum == pageNum){
-    //   return fetched;
-    // }
-    this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = [];
+      fetched.value = [];
     }
     String url = makeURL(tags);
     try {
@@ -41,7 +36,7 @@ class RainbooruHandler extends BooruHandler {
         Logger.Inst().log("rainbooru status is" + response.statusCode.toString(), "RainbooruHandler","parseResponse", LogTypes.booruHandlerInfo);
       }
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
+        if (fetched.length == length){locked.value = true;}
         return fetched;
     } catch(e) {
       Logger.Inst().log(e.toString(), "RainbooruHandler","parseResponse", LogTypes.exception);
@@ -49,6 +44,7 @@ class RainbooruHandler extends BooruHandler {
     }
   }
 
+  @override
   Future<void> parseResponse(response) async {
     var document = parse(response.body);
     var posts = document.getElementsByClassName("thumbnail");
@@ -79,9 +75,7 @@ class RainbooruHandler extends BooruHandler {
             tagsList: currentTags,
             postURL: url,
           ));
-          if(dbHandler!.db != null){
-            setTrackedValues(fetched.length - 1);
-          }
+          setTrackedValues(fetched.length - 1);
         }
       } else {
       }

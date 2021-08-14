@@ -4,10 +4,7 @@ import 'dart:io';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
@@ -27,20 +24,21 @@ class HydrusHandler extends BooruHandler{
    * it will then create a list of booruItems
    */
   @override
-  Future Search(String tags,int pageNum) async{
+  Future Search(String tags, int? pageNumCustom) async {
     List tagList = [];
-    isActive = true;
-    if (limit > 20){this.limit = 20;}
-    // if(this.pageNum == pageNum){
-    //   return fetched;
-    // }
-    this.pageNum = pageNum;
+  
+    if (limit > 20){
+      this.limit = 20;
+    }
+
     if (prevTags != tags){
-      fetched = [];
+      fetched.value = [];
       prevTags = tags;
     }
+
     String url = makeURL(tags);
     Logger.Inst().log(url, "HydrusHandler", "Search", LogTypes.booruHandlerSearchURL);
+
     if (_fileIDs == null) {
       try {
         Uri uri = Uri.parse(url);
@@ -52,12 +50,10 @@ class HydrusHandler extends BooruHandler{
             return await getResultsPage(pageNum);
           }
           prevTags = tags;
-          isActive = false;
           return fetched;
         }
       } catch(e) {
         Logger.Inst().log(e.toString(), "HydrusHandler", "Search", LogTypes.exception);
-        isActive = false;
         return fetched;
       }
     } else {
@@ -69,7 +65,7 @@ class HydrusHandler extends BooruHandler{
       try {
         int pageMax = (_fileIDs.length > limit ? (_fileIDs.length / limit).ceil() : 1);
         if (pageNum >= pageMax){
-          locked = true;
+          locked.value = true;
         } else {
           int lowerBound = ((pageNum < 1) ? 0 : pageNum * limit);
           int upperBound = (pageNum + 1< pageMax) ? (lowerBound + limit) : _fileIDs.length;
@@ -116,12 +112,9 @@ class HydrusHandler extends BooruHandler{
                     md5String: parsedResponse['metadata'][i]['hash'],
                     sources: knownUrls,
                   ));
-                  if(dbHandler!.db != null){
-                    setTrackedValues(fetched.length - 1);
-                  }
+                  setTrackedValues(fetched.length - 1);
                 }
             }
-            isActive = false;
             return fetched;
           } else {
             Logger.Inst().log("Getting metadata failed", "HydrusHandler", "getResultsPage", LogTypes.booruHandlerInfo);
@@ -130,7 +123,6 @@ class HydrusHandler extends BooruHandler{
       }catch(e){
         Logger.Inst().log(e.toString(), "HydrusHandler", "getResultsPage", LogTypes.exception);
       }
-      isActive = false;
       return fetched;
     }
   Future addURL(BooruItem item) async{
@@ -161,7 +153,6 @@ class HydrusHandler extends BooruHandler{
       ServiceHandler.displayToast("Something went wrong importing to hydrus you might not have given the correct api permissions this can be edited in Review Services. Add tags to file and Add Urls");
       Logger.Inst().log(e.toString(), "HydrusHandler", "addURL", LogTypes.exception);
     }
-    isActive = false;
     return fetched;
   }
     Future getAccessKey() async{

@@ -23,7 +23,7 @@ class WorldHandler extends BooruHandler{
   }
 
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse['items'];
     // Create a BooruItem for each post in the list
@@ -51,10 +51,10 @@ class WorldHandler extends BooruHandler{
 
       // Uses retarded tag scheme: "tag with multiple words|next tag", instead of "tag_with_multiple_words next_tag", convert their scheme to ours here
       List<String> originalTags = current['tags'] != null ? [...current['tags']] : [];
-      var fixedTags = originalTags.map((tag) => tag.replaceAll(new RegExp(r' '), '_')).toList();
+      var fixedTags = originalTags.map((tag) => tag.replaceAll(RegExp(r' '), '_')).toList();
 
       String dateString = current['posted'].split('.')[0]; //split off microseconds // use posted or created?
-      fetched.add(new BooruItem(
+      fetched.add(BooruItem(
           fileURL: bestFile,
           sampleURL: sampleImage,
           thumbnailURL: thumbImage,
@@ -66,9 +66,7 @@ class WorldHandler extends BooruHandler{
           postDate: dateString, // 2021-06-18T06:09:02.63366 // microseconds?
           postDateFormat: "yyyy-MM-dd'T'hh:mm:ss"
       ));
-      if(dbHandler!.db != null){
-        setTrackedValues(fetched.length - 1);
-      }
+      setTrackedValues(fetched.length - 1);
     }
   }
   // This will create a url to goto the images page in the browser
@@ -79,11 +77,11 @@ class WorldHandler extends BooruHandler{
   // This will create a url for the http request
   String makeURL(String tags){
     // convert "tag_name_1 tag_name_2" to "tag name 1|tag name 2" and filter excluded tags out
-    String includeTags = tags.split(' ').where((f) => !f.startsWith('-')).toList().map((tag) => tag.replaceAll(new RegExp(r'_'), '+')).toList().join('|');
-    String excludeTags = tags.split(' ').where((f) => f.startsWith('-')).toList().map((tag) => tag.replaceAll(new RegExp(r'_'), '+').replaceAll(new RegExp(r'^-'), '')).toList().join('|');
+    String includeTags = tags.split(' ').where((f) => !f.startsWith('-')).toList().map((tag) => tag.replaceAll(RegExp(r'_'), '+')).toList().join('|');
+    String excludeTags = tags.split(' ').where((f) => f.startsWith('-')).toList().map((tag) => tag.replaceAll(RegExp(r'_'), '+').replaceAll(RegExp(r'^-'), '')).toList().join('|');
     // ignores custom limits
     // 
-    int skip = (pageNum * limit) < 0 ? 0 : pageNum * limit;
+    int skip = (pageNum.value * limit) < 0 ? 0 : pageNum.value * limit;
     return "${booru.baseURL}/api/post/Search?IncludeLinks=true&Tag=$includeTags&ExcludeTag=$excludeTags&OrderBy=0&Skip=${skip.toString()}&Take=${limit.toString()}&DisableTotal=false";
   }
 
@@ -101,7 +99,7 @@ class WorldHandler extends BooruHandler{
     if(input.length > 1) {
       try {
         String requestBody = jsonEncode({
-          "searchText": input.replaceAll(new RegExp(r'^-'), ''),
+          "searchText": input.replaceAll(RegExp(r'^-'), ''),
           "skip": 0,
           "take": 10, //limit
         });
@@ -113,7 +111,7 @@ class WorldHandler extends BooruHandler{
           if (parsedResponse.length > 0) {
             for (int i=0; i < parsedResponse.length; i++){
               Map<String,dynamic> current = parsedResponse.elementAt(i);
-              searchTags.add(current['value'].replaceAll(new RegExp(r' '), '_'));
+              searchTags.add(current['value'].replaceAll(RegExp(r' '), '_'));
             }
           }
         } else {
@@ -127,7 +125,7 @@ class WorldHandler extends BooruHandler{
     return searchTags;
   }
 
-  void searchCount(String tags) async {
+  Future<void> searchCount(String tags) async {
     int result = 0;
     String url = makeURL(tags);
     url = url.replaceAll(RegExp(r''), '');
@@ -145,6 +143,7 @@ class WorldHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "WorldHandler", "searchCount", LogTypes.exception);
     }
-    this.totalCount = result;
+    totalCount.value = result;
+    return;
   }
 }

@@ -17,7 +17,7 @@ class IdolSankakuHandler extends SankakuHandler{
   bool hasSizeData = true;
 
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     List<dynamic> parsedResponse = jsonDecode(response.body);
     // Create a BooruItem for each post in the list
     for (int i = 0; i < parsedResponse.length; i++){
@@ -48,12 +48,10 @@ class IdolSankakuHandler extends SankakuHandler{
           score: current['total_score'].toString(),
           sources: [current['source']],
           md5String: current['md5'],
-          postDate: DateTime.fromMillisecondsSinceEpoch(int.parse(current['created_at']['s'].toString() + '000')).toString(), // unix time without in seconds (need to x1000?)
-          postDateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
+          postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
+          postDateFormat: "unix",
         ));
-        if (dbHandler!.db != null) {
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }

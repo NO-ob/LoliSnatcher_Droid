@@ -3,6 +3,7 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -14,27 +15,35 @@ import '../../getPerms.dart';
 /**
  * This is the booru editor page.
  */
-class booruEdit extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  booruEdit(this.booru,this.settingsHandler);
+class BooruEdit extends StatefulWidget {
   Booru booru;
   String booruType = "";
+  BooruEdit(this.booru);
+
   @override
-  _booruEditState createState() => _booruEditState();
+  _BooruEditState createState() => _BooruEditState();
 }
 
-class _booruEditState extends State<booruEdit> {
+class _BooruEditState extends State<BooruEdit> {
+  final SettingsHandler settingsHandler = Get.find();
   final booruNameController = TextEditingController();
   final booruURLController = TextEditingController();
   final booruFaviconController = TextEditingController();
   final booruAPIKeyController = TextEditingController();
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
-  List<String> booruTypes = [
-    "Danbooru", "e621", "Gelbooru", "GelbooruV1", "Moebooru", "Philomena", "Sankaku", "Shimmie", "Szurubooru", "Hydrus", "BooruOnRails", "Rainbooru",
-    "R34Hentai", "World", "IdolSankaku","InkBunny"
-  ];
+
   String selectedBooruType = "AutoDetect";
+  List<String> booruTypes = [
+    "Danbooru", "e621", "Gelbooru",
+    "GelbooruV1", "Moebooru", "Philomena",
+    "Sankaku", "Shimmie", "Szurubooru",
+    "Hydrus", "BooruOnRails", "Rainbooru",
+    "R34Hentai", "World", "IdolSankaku", "InkBunny"
+  ];
+
+  bool isTesting = false;
+
   @override
   void initState() {
     booruTypes.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
@@ -52,245 +61,56 @@ class _booruEditState extends State<booruEdit> {
     }
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      //resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-          title: Text("Booru Editor"),
-        actions: [
-        ],
+        title: Text("Booru Editor"),
+        actions: [],
       ),
-      body:Center(
+      body: Center(
         child: ListView(
           children: <Widget>[
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                children: [
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20),
-                        side: BorderSide(color: Get.context!.theme.accentColor),
-                      ),
-                      backgroundColor: Get.context!.theme.canvasColor,
-                    ),
-                    onPressed: () async{
-                      // name and url are required
-                      if(booruNameController.text == "") {
-                        ServiceHandler.displayToast("Booru Name required!");
-                        return;
-                      }
-                      if(booruURLController.text == "") {
-                        ServiceHandler.displayToast("Booru URL required!");
-                        return;
-                      } else {
-                        // add https if not specified
-                        if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
-                          booruURLController.text = "https://" + booruURLController.text;
-                        }
-                        // autofill favicon if not specified
-                        if(booruFaviconController.text == ""){
-                          booruFaviconController.text = booruURLController.text + "/favicon.ico";
-                        }
-                      }
-
-                      // Sankaku api override
-                      if(booruURLController.text.contains("chan.sankakucomplex.com")){
-                        booruURLController.text = "https://capi-v2.sankakucomplex.com";
-                        // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
-                      } else if(booruURLController.text.contains("idol.sankakucomplex.com")){
-                        booruURLController.text = "https://iapi.sankakucomplex.com";
-                        // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
-                      }
-
-                      //Call the booru test
-                      Booru testBooru;
-                      if(booruAPIKeyController.text == ""){
-                        testBooru = new Booru(
-                          booruNameController.text,
-                          widget.booruType,
-                          booruFaviconController.text,
-                          booruURLController.text,
-                          booruDefTagsController.text
-                        );
-                      } else {
-                        testBooru = new Booru.withKey(
-                          booruNameController.text,
-                          widget.booruType,
-                          booruFaviconController.text,
-                          booruURLController.text,
-                          booruDefTagsController.text,
-                          booruAPIKeyController.text,
-                          booruUserIDController.text
-                        );
-                      }
-                      String booruType = await booruTest(testBooru, selectedBooruType);
-
-                      // If a booru type is returned set the widget state
-                      if(booruType != ""){
-                        setState((){
-                          widget.booruType = booruType;
-                          selectedBooruType = booruType;
-                        });
-                        // Alert user about the results of the test
-                        ServiceHandler.displayToast("Booru Type is $booruType\nClick the save button to save this config");
-                      } else {
-                        ServiceHandler.displayToast("No Data Returned\nBooru Information may be incorrect or the booru doesn't allow api access");
-                      }
-                    },
-                    child: Text("Test", style: TextStyle(color: Colors.white)),
-                  ),
-                  saveButton(),
-                ],
-              ),
+            testButton(),
+            saveButton(),
+            SettingsButton(name: '', enabled: false),
+            SettingsTextInput(
+              controller: booruNameController,
+              title: 'Name',
+              hintText: "Enter Booru Name",
+              inputType: TextInputType.text,
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Name: "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruNameController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Booru Name",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SettingsTextInput(
+              controller: booruURLController,
+              title: 'URL',
+              hintText: "Enter Booru URL",
+              inputType: TextInputType.text,
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("URL : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruURLController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Booru URL",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SettingsDropdown(
+              selected: selectedBooruType,
+              values: booruTypes,
+              onChanged: (String? newValue){
+                setState((){
+                  selectedBooruType = newValue ?? booruTypes[0];
+                });
+              },
+              title: 'Booru Type',
+            ),
+            SettingsTextInput(
+              controller: booruFaviconController,
+              title: 'Favicon',
+              hintText: "(Autofills if blank)",
+              inputType: TextInputType.text,
+            ),
+            SettingsTextInput(
+              controller: booruDefTagsController,
+              title: 'Default Tags',
+              hintText: "Default search for booru",
+              inputType: TextInputType.text,
             ),
 
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Booru Type : "),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10,0,0,0),
-                    child: DropdownButton<String>(
-                      value: selectedBooruType,
-                      icon: Icon(Icons.arrow_downward),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedBooruType = newValue!;
-                        });
-                      },
-                      items: booruTypes.map<DropdownMenuItem<String>>((String value){
-                        bool isCurrent = selectedBooruType == value;
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Container(
-                            padding: EdgeInsets.all(6),
-                            decoration: isCurrent
-                              ? BoxDecoration(
-                                border: Border.all(color: Colors.grey, width: 1),
-                                borderRadius: BorderRadius.circular(5),
-                              )
-                              : null,
-                            child: Row(children: [Text(value)]),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Favicon : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruFaviconController,
-                        decoration: InputDecoration(
-                          hintText:"(Autofills if blank)",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Default Tags : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruDefTagsController,
-                        decoration: InputDecoration(
-                          hintText:"Default search for booru",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
             Container(
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
@@ -299,7 +119,7 @@ class _booruEditState extends State<booruEdit> {
             Container(
               margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
-              child: SelectableText(selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler([Booru('', selectedBooruType, '', '', '')], 1, null)[0].getDescription() : ""),
+              child: SelectableText(selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler([Booru('', selectedBooruType, '', '', '')], 1)[0].getDescription() : ""),
             ),
             Container(
                 child: Column(
@@ -310,28 +130,25 @@ class _booruEditState extends State<booruEdit> {
                         child: TextButton(
                           style: TextButton.styleFrom(
                             shape: RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(20),
-                              side: BorderSide(color: Get.context!.theme.accentColor),
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(color: Get.theme.accentColor),
                             ),
                           ),
                           onPressed: () async{
                             if (selectedBooruType == "Hydrus"){
-                              HydrusHandler hydrus = new HydrusHandler(new Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
+                              HydrusHandler hydrus = HydrusHandler(Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
                               String accessKey = await hydrus.getAccessKey();
                               if (accessKey != ""){
                                 ServiceHandler.displayToast("Access Key Requested \n Click okay on hydrus then apply. You can then test");
-                                //Get.snackbar("Access Key Requested","Click okay on hydrus then apply. You can then test",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                                 booruAPIKeyController.text = accessKey;
                               } else {
                                 ServiceHandler.displayToast("Couldn't get access key \n Do you have the request window open in hydrus?");
-                                //Get.snackbar("Couldn't get access key","Do you have the request window open in hydrus?",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                               }
                             } else {
                               ServiceHandler.displayToast("Hydrus Only \n This button only works for Hydrus");
-                              //Get.snackbar("Hydrus Only","This button only works for Hydrus",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                             }
                           },
-                          child: Text("Get Hydrus Api Key", style: TextStyle(color: Colors.white)),
+                          child: Text("Get Hydrus Api Key"),
                         ),
                       ),
                       Container(
@@ -343,61 +160,113 @@ class _booruEditState extends State<booruEdit> {
                         : []
                 )
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("API Key : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruAPIKeyController,
-                        decoration: InputDecoration(
-                          hintText:"(Can be blank)",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+
+            SettingsTextInput(
+              controller: booruAPIKeyController,
+              title: getApiKeyTitle(),
+              hintText: "(Can be blank)",
+              inputType: TextInputType.text,
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("User ID : "),
-                  new Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: booruUserIDController,
-                        decoration: InputDecoration(
-                          hintText:"(Can be Blank)",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SettingsTextInput(
+              controller: booruUserIDController,
+              title: getUserIDTitle(),
+              hintText: "(Can be blank)",
+              inputType: TextInputType.text,
             ),
           ],
         ),
       ),
+    );
+  }
+  
+  String getApiKeyTitle() {
+    switch (selectedBooruType) {
+      case 'Sankaku':
+        return 'Login';
+      default:
+        return 'API Key';
+    }
+  }
+
+  String getUserIDTitle() {
+    switch (selectedBooruType) {
+      case 'Sankaku':
+        return 'Password';
+      default:
+        return 'User ID';
+    }
+  }
+
+  Widget testButton() {
+    return SettingsButton(
+      name: 'Test Booru',
+      icon: isTesting ? CircularProgressIndicator() : Icon(Icons.public),
+      action: () async {
+        // name and url are required
+        if(booruNameController.text == "") {
+          ServiceHandler.displayToast("Booru Name required!");
+          return;
+        }
+        if(booruURLController.text == "") {
+          ServiceHandler.displayToast("Booru URL required!");
+          return;
+        } else {
+          // add https if not specified
+          if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
+            booruURLController.text = "https://" + booruURLController.text;
+          }
+          // autofill favicon if not specified
+          if(booruFaviconController.text == ""){
+            booruFaviconController.text = booruURLController.text + "/favicon.ico";
+          }
+        }
+
+        // Sankaku api override
+        if(booruURLController.text.contains("chan.sankakucomplex.com")){
+          booruURLController.text = "https://capi-v2.sankakucomplex.com";
+          // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+        } else if(booruURLController.text.contains("idol.sankakucomplex.com")){
+          booruURLController.text = "https://iapi.sankakucomplex.com";
+          // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
+        }
+
+        //Call the booru test
+        Booru testBooru;
+        if(booruAPIKeyController.text == ""){
+          testBooru = Booru(
+            booruNameController.text,
+            widget.booruType,
+            booruFaviconController.text,
+            booruURLController.text,
+            booruDefTagsController.text
+          );
+        } else {
+          testBooru = Booru.withKey(
+            booruNameController.text,
+            widget.booruType,
+            booruFaviconController.text,
+            booruURLController.text,
+            booruDefTagsController.text,
+            booruAPIKeyController.text,
+            booruUserIDController.text
+          );
+        }
+        isTesting = true;
+        setState(() { });
+        String booruType = await booruTest(testBooru, selectedBooruType);
+
+        // If a booru type is returned set the widget state
+        if(booruType != ""){
+          widget.booruType = booruType;
+          selectedBooruType = booruType;
+          // Alert user about the results of the test
+          ServiceHandler.displayToast("Booru Type is $booruType\nClick the save button to save this config");
+        } else {
+          ServiceHandler.displayToast("No Data Returned\nBooru Information may be incorrect or the booru doesn't allow api access");
+        }
+        isTesting = false;
+        setState(() { });
+      },
     );
   }
 
@@ -406,47 +275,58 @@ class _booruEditState extends State<booruEdit> {
    * allowing the user to save the booru config otherwise an empty container is returned
    */
   Widget saveButton(){
-    if (widget.booruType == ""){
-      return const SizedBox();
-    } else {
-      return TextButton(
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: new BorderRadius.circular(20),
-            side: BorderSide(color: Get.context!.theme.accentColor),
-          ),
-        ),
-        onPressed:() async{
-          getPerms();
-          Booru? newBooru;
-          bool booruExists = false;
-          // Call the saveBooru on the settings handler and parse it a new Booru instance with data from the input fields
-          for (int i=0; i < widget.settingsHandler.booruList.length; i++){
-            if (widget.settingsHandler.booruList[i].baseURL == booruURLController.text){
-              if (widget.settingsHandler.booruList.contains(newBooru)){
-                booruExists = true;
-                ServiceHandler.displayToast("Booru Already Exists \n It has not been added");
-                //Get.snackbar("Booru Already Exists","It has not been added",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-              } else {
-                widget.settingsHandler.booruList.removeAt(i);
-              }
+    return SettingsButton(
+      name: 'Save Booru',
+      icon: Icon(Icons.save),
+      action: () async {
+        if(widget.booruType == "") {
+          ServiceHandler.displayToast('Run Test first!');
+          return;
+        }
+  
+        getPerms();
+        Booru? newBooru;
+        bool booruExists = false;
+        // Call the saveBooru on the settings handler and parse it a Booru instance with data from the input fields
+        for (int i=0; i < settingsHandler.booruList.length; i++){
+          if (settingsHandler.booruList[i].baseURL == booruURLController.text){
+            if (settingsHandler.booruList.contains(newBooru)){
+              booruExists = true;
+              ServiceHandler.displayToast("Booru Already Exists \n It has not been added");
+            } else {
+              settingsHandler.booruList.removeAt(i);
             }
           }
-          if(booruAPIKeyController.text == ""){
-            newBooru = new Booru(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text);
-          } else {
-            newBooru = new Booru.withKey(booruNameController.text,widget.booruType,booruFaviconController.text,booruURLController.text,booruDefTagsController.text,booruAPIKeyController.text,booruUserIDController.text);
-          }
-          if (!booruExists){
-            await widget.settingsHandler.saveBooru(newBooru);
-            ServiceHandler.displayToast("Booru Saved! \n It will show in the dropdowns after a search");
-            //Get.snackbar("Booru Saved!","It will show in the dropdowns after a search",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-          }
+        }
 
-        },
-        child: Text("Save", style: TextStyle(color: Colors.white)),
-      );
-    }
+        if(booruAPIKeyController.text == ""){
+          newBooru = Booru(
+            booruNameController.text,
+            widget.booruType,
+            booruFaviconController.text,
+            booruURLController.text,
+            booruDefTagsController.text
+          );
+        } else {
+          newBooru = Booru.withKey(
+            booruNameController.text,
+            widget.booruType,
+            booruFaviconController.text,
+            booruURLController.text,
+            booruDefTagsController.text,
+            booruAPIKeyController.text,
+            booruUserIDController.text
+          );
+        }
+
+        if (!booruExists){
+          await settingsHandler.saveBooru(newBooru);
+          ServiceHandler.displayToast("Booru Saved! \n It will show in the dropdowns after a search");
+          Navigator.of(context).pop(true);
+        }
+
+      },
+    );
   }
 
   /**
@@ -454,10 +334,10 @@ class _booruEditState extends State<booruEdit> {
    * if the searches return null each time it tries the search it uses a different
    * type of BooruHandler
    */
-  Future<String> booruTest(Booru booru, String userBooruType) async{
+  Future<String> booruTest(Booru booru, String userBooruType) async {
     String booruType = "";
     BooruHandler test;
-    List<BooruItem>? testFetched = List.empty();
+    List<BooruItem> testFetched = [];
     booru.type = userBooruType;
 
     if (userBooruType == "AutoDetect"){
@@ -467,25 +347,28 @@ class _booruEditState extends State<booruEdit> {
         }
       }
     } else {
-      List temp = BooruHandlerFactory().getBooruHandler([booru], 5, widget.settingsHandler.dbHandler);
+      List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
       test = temp[0];
-      if (booru.type == "Hydrus"){
-        testFetched = await test.Search(" ", 0);
-      } else {
-        testFetched = await test.Search(" ", 1);
-      }
+      test.pageNum.value = temp[1];
+      test.pageNum.value ++;
+      // TODO ???
+      // if (booru.type == "Hydrus"){
+      //   testFetched = await test.Search(" ", 0);
+      // } else {
+      //   testFetched = await test.Search(" ", 1);
+      // }
+      
+      testFetched = await test.Search(" ", null);
+    }
 
-    }
     if (booruType == "") {
-      if (testFetched != null){
-        if (testFetched.isNotEmpty) {
-          booruType = userBooruType;
-          print("Found Results as $userBooruType");
-          return booruType;
-        }
+      if (testFetched.isNotEmpty) {
+        booruType = userBooruType;
+        print("Found Results as $userBooruType");
+        return booruType;
       }
     }
-    // This can return anything it's needed for the future builder.
+
     return booruType;
   }
 }

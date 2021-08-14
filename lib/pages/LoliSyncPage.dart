@@ -1,32 +1,21 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:core';
 import 'package:get/get.dart';
 
-import '../ServiceHandler.dart';
-import 'LoliSyncSendPage.dart';
-import 'LoliSyncServerPage.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'package:LoliSnatcher/pages/LoliSyncSendPage.dart';
+import 'package:LoliSnatcher/pages/LoliSyncServerPage.dart';
 
-class LoliSyncPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  LoliSyncPage(this.settingsHandler);
-  @override
-  _LoliSyncPageState createState() => _LoliSyncPageState();
-}
-
-class _LoliSyncPageState extends State<LoliSyncPage> {
+class LoliSyncPage extends StatelessWidget {
+  final SettingsHandler settingsHandler = Get.find();
   final ipController = TextEditingController();
   final portController = TextEditingController();
   bool favourites = false, settings = false, booru = false;
-  LoliSync loliSync = new LoliSync();
-  @override
-  // These lines are done in init state as they only need to be run once when the widget is first loaded
-  void initState() {
-    super.initState();
-  }
+  final LoliSync loliSync = LoliSync();
+
   Future<bool> _onWillPop() async {
     return true;
   }
@@ -38,8 +27,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text("Loli Sync"),
-          leading: new IconButton(
-              icon: new Icon(Icons.arrow_back),
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back),
               onPressed: () async{
                 Get.back();
               }
@@ -60,7 +49,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   children: <Widget>[
                     Text("IP Addr:"),
                     Container(width: 10),
-                    new Expanded(
+                    Expanded(
                       child: Container(
                         margin: EdgeInsets.fromLTRB(10,0,0,0),
                         child: TextField(
@@ -72,9 +61,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                           ],
                           decoration: InputDecoration(
                             hintText: "Host IP Address",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
+                            contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(50),
                               gapPadding: 0,
                             ),
                           ),
@@ -92,7 +81,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   children: <Widget>[
                     Text("Port:"),
                     Container(width: 10),
-                    new Expanded(
+                    Expanded(
                       child: Container(
                         margin: EdgeInsets.fromLTRB(10,0,0,0),
                         child: TextField(
@@ -104,9 +93,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                           ],
                           decoration: InputDecoration(
                             hintText: "Host Port",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
+                            contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(50),
                               gapPadding: 0,
                             ),
                           ),
@@ -124,11 +113,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     Checkbox(
                     value: favourites,
                     onChanged: (newValue) {
-                      setState(() {
-                        favourites = newValue!;
-                      });
+                      favourites = newValue!;
                     },
-                   activeColor: Get.context!.theme.primaryColor,
+                   activeColor: Get.theme.primaryColor,
                   ),
                   ]
                 ),
@@ -141,11 +128,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   Checkbox(
                     value: settings,
                     onChanged: (newValue) {
-                      setState(() {
-                        settings = newValue!;
-                      });
+                      settings = newValue!;
                     },
-                    activeColor: Get.context!.theme.primaryColor,
+                    activeColor: Get.theme.primaryColor,
                   ),
                 ]
                 ),
@@ -158,11 +143,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   Checkbox(
                     value: booru,
                     onChanged: (newValue) {
-                      setState(() {
-                        booru = newValue!;
-                      });
+                      booru = newValue!;
                     },
-                    activeColor: Get.context!.theme.primaryColor,
+                    activeColor: Get.theme.primaryColor,
                   ),
                 ]
                 ),
@@ -172,8 +155,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 child: TextButton(
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: Get.theme.accentColor),
                     ),
                   ),
                   onPressed: () async{
@@ -182,19 +165,19 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     } else if(!favourites && !settings && !booru){
                       ServiceHandler.displayToast("You haven't selected anything to sync");
                     } else {
-                      if(widget.settingsHandler.appMode == "Desktop"){
+                      if(settingsHandler.appMode == "Desktop"){
                         Get.dialog(Dialog(
                           child: Container(
                             width: 500,
-                            child: LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text, settings, favourites, booru),
+                            child: LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru),
                           ),
                         ));
                       } else {
-                        Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text, settings, favourites, booru));
+                        Get.to(() => LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru));
                       }
                     }
                   },
-                  child: Text("Start Sync", style: TextStyle(color: Colors.white)),
+                  child: Text("Start Sync"),
                 ),
               ),
               Container(
@@ -206,23 +189,23 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 child: TextButton(
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: Get.theme.accentColor),
                     ),
                   ),
                   onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
+                    if(settingsHandler.appMode == "Desktop"){
                       Get.dialog(Dialog(
                         child: Container(
                           width: 500,
-                          child: LoliSyncServerPage(widget.settingsHandler),
+                          child: LoliSyncServerPage(),
                         ),
                       ));
                     } else {
-                      Get.to(() => LoliSyncServerPage(widget.settingsHandler));
+                      Get.to(() => LoliSyncServerPage());
                     }
                   },
-                  child: Text("Start Server", style: TextStyle(color: Colors.white)),
+                  child: Text("Start Server"),
                 ),
               ),
             ],

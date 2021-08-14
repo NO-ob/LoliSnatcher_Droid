@@ -1,28 +1,14 @@
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/LoliSync.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:core';
 import 'package:get/get.dart';
 
-import '../ServiceHandler.dart';
+class LoliSyncServerPage extends StatelessWidget {
+  final SettingsHandler settingsHandler = Get.find();
+  final LoliSync loliSync = LoliSync();
 
-class LoliSyncServerPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  LoliSyncServerPage(this.settingsHandler);
-  @override
-  _LoliSyncServerPageState createState() => _LoliSyncServerPageState();
-}
-
-class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
-  LoliSync loliSync = new LoliSync();
-  @override
-  // These lines are done in init state as they only need to be run once when the widget is first loaded
-  void initState() {
-    super.initState();
-  }
-  Future<bool> _onWillPop() async {
+  Future<bool> _onWillPop(BuildContext context) async {
     final shouldPop = await showDialog(
       context: context,
       builder: (context) {
@@ -31,14 +17,14 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
           content: Text('Do you want to stop the server?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Yes', style: TextStyle(color: Colors.white)),
+              child: Text('Yes'),
               onPressed: () {
                 loliSync.killServer();
                 Navigator.of(context).pop(true);
               },
             ),
             TextButton(
-              child: Text('No', style: TextStyle(color: Colors.white)),
+              child: Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
@@ -52,15 +38,15 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: _onWillPop,
+      onWillPop: () {return _onWillPop(context);},
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text("Loli Sync"),
-          leading: new IconButton(
-              icon: new Icon(Icons.arrow_back),
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back),
               onPressed: () async{
-                if (await _onWillPop()){
+                if (await _onWillPop(context)){
                   Get.back();
                 }
               }
@@ -68,7 +54,7 @@ class _LoliSyncServerPageState extends State<LoliSyncServerPage> {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startServer(widget.settingsHandler),
+              stream: loliSync.startServer(settingsHandler),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {

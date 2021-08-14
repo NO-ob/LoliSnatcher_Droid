@@ -1,47 +1,46 @@
-import 'package:LoliSnatcher/libBooru/DBHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'Booru.dart';
 import 'BooruHandler.dart';
-import 'BooruItem.dart';
 
 class FavouritesHandler extends BooruHandler{
-  DBHandler? dbHandler;
   FavouritesHandler(Booru booru,int limit): super(booru,limit);
 
   @override
-  Future Search(String tags, int pageNum) async{
-    isActive = true;
+  Future Search(String tags, int? pageNumCustom) async{
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+
     int length = fetched.length;
-    // if(this.pageNum == pageNum){
-    //   return fetched;
-    // }
-    this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = [];
+      fetched.value = [];
     }
-    fetched.addAll(await dbHandler!.searchDB(tags, fetched.length.toString(), limit.toString(),"DESC","Favourites"));
+
+    fetched.addAll(await settingsHandler.dbHandler.searchDB(tags, fetched.length.toString(), limit.toString(), "DESC", "Favourites"));
+    print("dbhandler fetched length is $length");
     prevTags = tags;
     if (fetched.isEmpty){
       Logger.Inst().log("dbhandler dbLocked", "FavouritesHandler", "search", LogTypes.booruHandlerInfo);
-      locked = true;
+      locked.value = true;
     } else {
       if (fetched.length == length){
         Logger.Inst().log("dbhandler dbLocked", "FavouritesHandler", "search", LogTypes.booruHandlerInfo);
-        locked = true;
+        locked.value = true;
       }
     }
-    isActive = false;
     return fetched;
   }
 
   Future<List<String>> tagSearch(String input) async {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     List<String> tags = [];
-    tags = await dbHandler!.getTags(input, limit);
+    tags = await settingsHandler.dbHandler.getTags(input, limit);
     return tags;
   }
 
-  void searchCount(String input) async {
-    this.totalCount = await dbHandler!.searchDBCount(input);
+  Future<void> searchCount(String input) async {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    totalCount.value = await settingsHandler.dbHandler.searchDBCount(input);
+    return;
   }
 }

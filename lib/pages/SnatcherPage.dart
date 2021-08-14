@@ -1,4 +1,5 @@
 //import 'dart:html';
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -15,14 +16,14 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 class SnatcherPage extends StatefulWidget {
   final String tags;
   Booru booru;
-  SettingsHandler settingsHandler;
-  SnatchHandler snatchHandler;
-  SnatcherPage(this.tags,this.booru,this.settingsHandler, this.snatchHandler);
+  SnatcherPage(this.tags, this.booru);
   @override
   _SnatcherPageState createState() => _SnatcherPageState();
 }
 
 class _SnatcherPageState extends State<SnatcherPage> {
+  final SettingsHandler settingsHandler = Get.find();
+  final SnatchHandler snatchHandler = Get.find();
   final snatcherTagsController = TextEditingController();
   final snatcherAmountController = TextEditingController();
   final snatcherSleepController = TextEditingController();
@@ -34,7 +35,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     if (widget.tags != ""){
       snatcherTagsController.text = widget.tags;
     }
-    snatcherSleepController.text = widget.settingsHandler.snatchCooldown.toString();
+    snatcherSleepController.text = settingsHandler.snatchCooldown.toString();
   }
   @override
   Widget build(BuildContext context) {
@@ -52,16 +53,16 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("Tags: "),
-                  new Expanded(
+                  Expanded(
                     child: Container(
                       margin: EdgeInsets.fromLTRB(10,0,0,0),
                       child: TextField(
                         controller: snatcherTagsController,
                         decoration: InputDecoration(
                           hintText:"Enter Tags",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
+                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50),
                             gapPadding: 0,
                           ),
                         ),
@@ -78,7 +79,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("Amount: "),
-                  new Expanded(
+                  Expanded(
                     child: Container(
                       margin: EdgeInsets.fromLTRB(10,0,0,0),
                       child: TextField(
@@ -89,9 +90,9 @@ class _SnatcherPageState extends State<SnatcherPage> {
                         ],
                         decoration: InputDecoration(
                           hintText:"Amount of Images to Snatch",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
+                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50),
                             gapPadding: 0,
                           ),
                         ),
@@ -108,7 +109,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Text("Sleep (MS): "),
-                  new Expanded(
+                  Expanded(
                     child: Container(
                       margin: EdgeInsets.fromLTRB(10,0,0,0),
                       child: TextField(
@@ -119,9 +120,9 @@ class _SnatcherPageState extends State<SnatcherPage> {
                         ],
                         decoration: InputDecoration(
                           hintText:"Timeout between snatching (MS)",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
+                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50),
                             gapPadding: 0,
                           ),
                         ),
@@ -154,8 +155,8 @@ class _SnatcherPageState extends State<SnatcherPage> {
               child: TextButton(
                 style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
+                      borderRadius: BorderRadius.circular(20),
+                      side: BorderSide(color: Get.theme.accentColor),
                     ),
                 ),
                 /**
@@ -166,11 +167,16 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   if (snatcherSleepController.text.isEmpty){
                     snatcherSleepController.text = 0.toString();
                   }
-                  widget.snatchHandler.searchSnatch(snatcherTagsController.text,snatcherAmountController.text,int.parse(snatcherSleepController.text),widget.booru,widget.settingsHandler.jsonWrite);
+                  snatchHandler.searchSnatch(
+                    snatcherTagsController.text,
+                    snatcherAmountController.text,
+                    int.parse(snatcherSleepController.text),
+                    widget.booru
+                  );
                   Get.back();
                   //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
                 },
-                child: Text("Snatch Images", style: TextStyle(color: Colors.white)),
+                child: Text("Snatch Images"),
               ),
             ),
           ],
@@ -185,7 +191,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   Future BooruSelector() async{
     // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
     if (widget.booru == null){
-      widget.booru = widget.settingsHandler.booruList[0];
+      widget.booru = settingsHandler.booruList[0];
     }
     return Container(
       child: DropdownButton<Booru>(
@@ -197,7 +203,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
             widget.booru = newValue;
           });
         },
-        items: widget.settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
+        items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
           // Return a dropdown item
           return DropdownMenuItem<Booru>(
             value: value,
@@ -206,13 +212,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 //Booru Icon
                 value.type == "Favourites"
                 ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                : Image.network(
-                  value.faviconURL!,
-                  width: 16,
-                  errorBuilder: (_, __, ___) {
-                    return Icon(Icons.broken_image, size: 18);
-                  },
-                ),
+                : CachedFavicon(value.faviconURL!),
                 //Booru name
                 Text(" ${value.name}"),
               ],

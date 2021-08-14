@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:LoliSnatcher/Tools.dart';
+import 'package:get/get.dart';
 
 class BooruItem{
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
   String? mediaType;
-  bool isSnatched = false, isFavourite = false;
+  RxBool isSnatched = false.obs, isFavourite = false.obs, isHated = false.obs;
 
   String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
   List<String>? sources;
@@ -68,7 +69,7 @@ class BooruItem{
       tags.add(tagz[i].toString());
     }
     //BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt
-    BooruItem item = new BooruItem(
+    BooruItem item = BooruItem(
       fileURL: json["fileURL"].toString(),
       sampleURL: json["sampleURL"].toString(),
       thumbnailURL: json["thumbnailURL"].toString(),
@@ -76,8 +77,8 @@ class BooruItem{
       postURL: json["postURL"].toString()
       // TODO stringify other options here
     );
-    item.isFavourite = json["isFavourite"].toString() == "true" ? true : false;
-    item.isSnatched = json["isSnatched"].toString() == "true"? true : false;
+    item.isFavourite.value = json["isFavourite"].toString() == "true" ? true : false;
+    item.isSnatched.value = json["isSnatched"].toString() == "true"? true : false;
     return item;
   }
 }

@@ -41,7 +41,7 @@ class MoebooruHandler extends GelbooruHandler{
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
         }
-        fetched.add(new BooruItem(
+        fetched.add(BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: previewURL,
@@ -61,16 +61,15 @@ class MoebooruHandler extends GelbooruHandler{
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
           postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
         ));
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        
+        setTrackedValues(fetched.length - 1);
       }
     }
   }
   @override
   // This will create a url for the http request
   String makeURL(String tags){
-    int cappedPage = max(1, pageNum);
+    int cappedPage = max(1, pageNum.value);
     if (booru.apiKey == ""){
       return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
     } else {

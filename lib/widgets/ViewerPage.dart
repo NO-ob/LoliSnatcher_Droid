@@ -3,10 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,13 +21,18 @@ import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/TimedProgressController.dart';
 import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
 
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/widgets/MediaViewer.dart';
 // import 'package:LoliSnatcher/widgets/PreloadPageView.dart' as PreloadPageView;
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
+import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
+import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
+
 
 
 var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
@@ -41,19 +42,19 @@ var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatche
  *
  */
 class ViewerPage extends StatefulWidget {
-  List fetched;
   int index;
-  SearchGlobals searchGlobals;
-  SettingsHandler settingsHandler;
-  SnatchHandler snatchHandler;
   Function callback;
 
-  ViewerPage(this.fetched, this.index, this.searchGlobals, this.settingsHandler, this.snatchHandler, this.callback);
+  ViewerPage(this.index, this.callback);
   @override
   _ViewerPageState createState() => _ViewerPageState();
 }
 
 class _ViewerPageState extends State<ViewerPage> {
+  final SettingsHandler settingsHandler = Get.find();
+  final SnatchHandler snatchHandler = Get.find();
+  final SearchHandler searchHandler = Get.find();
+
   // PreloadPageView.PageController? controller;
   bool autoScroll = false;
   Timer? autoScrollTimer;
@@ -61,7 +62,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
   PreloadPageController? controller;
   PageController? controllerLinux;
-  ImageWriter writer = new ImageWriter();
+  ImageWriter writer = ImageWriter();
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
@@ -79,39 +80,48 @@ class _ViewerPageState extends State<ViewerPage> {
     );
     setState(() {
       // print("widget index: ${widget.index}");
-      // print("searchglobals index: ${widget.searchGlobals.viewedIndex.value}");
-      widget.searchGlobals.viewedIndex.value = widget.index;
+      // print("searchglobals index: ${searchHandler.currentTab.viewedIndex.value}");
+      searchHandler.currentTab.viewedIndex.value = widget.index;
     });
     kbFocusNode.requestFocus();
-    ServiceHandler.disableSleep();
 
     autoScrollProgressController = TimedProgressController(
-      duration: Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime),
+      duration: Duration(milliseconds: settingsHandler.galleryAutoScrollTime),
     );
 
     // enable volume buttons if opened page is a video AND appbar is visible
-    bool isVideo = widget.fetched[widget.index].isVideo();
-    bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar.value);
+    bool isVideo = getFetched()[widget.index].isVideo();
+    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && searchHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     setVolumeListener();
   }
 
+  List<BooruItem> getFetched() {
+    // TODO this gets called too many times, find a way to call only when needed or once for all cases
+    return searchHandler.currentTab.booruHandler.filteredFetched;
+  }
+
+  Widget getTitle() {
+    return Obx(() => Text("${(searchHandler.currentTab.viewedIndex.value + 1).toString()}/${searchHandler.currentTab.booruHandler.filteredFetched.length.toString()}", style: TextStyle(color: Colors.white)),);
+  }
+
   @override
   Widget build(BuildContext context) {
-    String appBarTitle = "${(widget.searchGlobals.viewedIndex.value + 1).toString()}/${widget.fetched.length.toString()}";
+    // String appBarTitle = "${(searchHandler.currentTab.viewedIndex.value + 1).toString()}/${getFetched().length.toString()}";
     //kbFocusNode.requestFocus();
+
     return Scaffold(
       key: viewerScaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
-      appBar: widget.settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(appBarTitle, appBarActions(), widget.searchGlobals, widget.settingsHandler.autoHideImageBar) : null,
-      bottomNavigationBar: widget.settingsHandler.galleryBarPosition == 'Bottom' ? HideableAppBar(appBarTitle, appBarActions(), widget.searchGlobals, widget.settingsHandler.autoHideImageBar) : null,
+      appBar: settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(getTitle(), appBarActions(), settingsHandler.autoHideImageBar) : null,
+      bottomNavigationBar: settingsHandler.galleryBarPosition == 'Bottom' ? HideableAppBar(getTitle(), appBarActions(), settingsHandler.autoHideImageBar) : null,
       backgroundColor: Colors.transparent,
       body: PhotoViewGestureDetectorScope(
         // vertical to prevent swipe-to-dismiss when zoomed
         axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix for this
         child: Dismissible(
-          direction: widget.settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
+          direction: settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
           // background: Container(color: Colors.black.withOpacity(0.3)),
           key: const Key('imagePageDismissibleKey'),
           resizeDuration: null, // Duration(milliseconds: 100),
@@ -130,7 +140,7 @@ class _ViewerPageState extends State<ViewerPage> {
       endDrawerEnableOpenDragGesture: false,
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Theme.of(context).colorScheme.background.withOpacity(0.66) // copy existing main app theme, but make background semitransparent
+          canvasColor: Theme.of(context).backgroundColor.withOpacity(0.66) // copy existing main app theme, but make background semitransparent
         ),
         child: renderDrawer(),
       )
@@ -140,7 +150,7 @@ class _ViewerPageState extends State<ViewerPage> {
   void setVolumeListener() {
     volumeListener?.cancel();
     volumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
-      // print('in viewer $event');
+      // print('in gallery $event');
       int dir = 0;
       if (event == 'up') {
         dir = -1;
@@ -148,8 +158,8 @@ class _ViewerPageState extends State<ViewerPage> {
         dir = 1;
       }
 
-      // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, widget.fetched.length), 0);
-      int toPage = widget.searchGlobals.viewedIndex.value + dir; // lastScrolledTo; 
+      // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, getFetched().length), 0);
+      int toPage = searchHandler.currentTab.viewedIndex.value + dir; // lastScrolledTo; 
       controller?.animateToPage(toPage, duration: Duration(milliseconds: 30), curve: Curves.easeInOut);
       // controller?.jumpToPage(toPage);
     });
@@ -160,7 +170,7 @@ class _ViewerPageState extends State<ViewerPage> {
     autoScrollProgressController?.dispose();
     autoScrollTimer?.cancel();
     volumeListener?.cancel();
-    ServiceHandler.setVolumeButtons(!widget.settingsHandler.useVolumeButtonsForScroll);
+    ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
     widget.callback();
     ServiceHandler.enableSleep();
@@ -168,36 +178,40 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   Widget androidPageBuilder() {
-    return new RawKeyboardListener(
+    return RawKeyboardListener(
       autofocus: true,
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event){
         if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
-          controller?.jumpToPage(widget.searchGlobals.viewedIndex.value - 1);
+          controller?.jumpToPage(searchHandler.currentTab.viewedIndex.value - 1);
         } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
-          controller?.jumpToPage(widget.searchGlobals.viewedIndex.value + 1);
+          controller?.jumpToPage(searchHandler.currentTab.viewedIndex.value + 1);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
-          widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru,widget.settingsHandler.snatchCooldown);
+          snatchHandler.queue(
+            [getFetched()[searchHandler.currentTab.viewedIndex.value]],
+            searchHandler.currentTab.selectedBooru.value,
+            settingsHandler.snatchCooldown
+          );
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)){
-          if (widget.settingsHandler.dbEnabled){
+          if (settingsHandler.dbEnabled){
             setState(() {
-              widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
-              widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value],"local");
+              getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
+              settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value],"local");
             });
           }
         }
       },
       child: PreloadPageView.builder( // PreloadPageView.PageView.builder(
-        preloadPagesCount: widget.settingsHandler.preloadCount,
+        preloadPagesCount: settingsHandler.preloadCount,
         // allowImplicitScrolling: true,
-        scrollDirection: widget.settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
-        physics: const AlwaysScrollableScrollPhysics(),
+        scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
+        physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
         itemBuilder: (context, index) {
-          String fileURL = widget.fetched[index].fileURL;
-          bool isVideo = widget.fetched[index].isVideo();
-          int preloadCount = widget.settingsHandler.preloadCount;
-          bool isViewed = widget.searchGlobals.viewedIndex.value == index;
-          bool isNear = (widget.searchGlobals.viewedIndex.value - index).abs() <= preloadCount;
+          String fileURL = getFetched()[index].fileURL;
+          bool isVideo = getFetched()[index].isVideo();
+          int preloadCount = settingsHandler.preloadCount;
+          bool isViewed = searchHandler.currentTab.viewedIndex.value == index;
+          bool isNear = (searchHandler.currentTab.viewedIndex.value - index).abs() <= preloadCount;
           // print(fileURL);
           // print('isVideo: '+isVideo.toString());
           // Render only if viewed or in preloadCount range
@@ -205,102 +219,105 @@ class _ViewerPageState extends State<ViewerPage> {
             // Cut to the size of the container, prevents overlapping
             return ClipRect(
               //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
-              child: Stack(
-                children: [
-                  GestureDetector(
-                    // onTapUp: (TapUpDetails tapInfo) {
-                    //   if(isVideo) return;
-                    //   // TODO WIP
-                    //   // change page if tapped on 20% of any side of the screen AND not a video
-                    //   double tapPosX = tapInfo.localPosition.dx;
-                    //   double screenWidth = MediaQuery.of(context).size.width;
-                    //   double sideThreshold = screenWidth / 5;
+              child: Stack(children: [
+                GestureDetector(
+                  // onTapUp: (TapUpDetails tapInfo) {
+                  //   if(isVideo) return;
+                  //   // TODO WIP
+                  //   // change page if tapped on 20% of any side of the screen AND not a video
+                  //   double tapPosX = tapInfo.localPosition.dx;
+                  //   double screenWidth = MediaQuery.of(context).size.width;
+                  //   double sideThreshold = screenWidth / 5;
 
-                    //   if(tapPosX > (screenWidth - sideThreshold)) {
-                    //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                    //   } else if(tapPosX < sideThreshold) {
-                    //     controller?.animateToPage(widget.searchGlobals.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                    //   }
-                    // },
-                      onLongPress: () async {
-                        print('longpress');
-                        bool newAppbarVisibility = !widget.searchGlobals.displayAppbar.value;
-                        widget.searchGlobals.displayAppbar.value = newAppbarVisibility;
+                  //   if(tapPosX > (screenWidth - sideThreshold)) {
+                  //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                  //   } else if(tapPosX < sideThreshold) {
+                  //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                  //   }
+                  // },
+                  onLongPress: () async {
+                    print('longpress');
+                    bool newAppbarVisibility = !searchHandler.displayAppbar.value;
+                    searchHandler.displayAppbar.value = newAppbarVisibility;
 
-                        if(await Vibration.hasVibrator() ?? false) {
-                          Vibration.vibrate(duration: 10);
-                        }
+                    if(await Vibration.hasVibrator() ?? false) {
+                      Vibration.vibrate(duration: 10);
+                    }
 
-                        // enable volume buttons if current page is a video AND appbar is set to visible
-                        bool isVideo = widget.fetched[widget.searchGlobals.viewedIndex.value].isVideo();
-                        bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-                        ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                      },
-                      child: isVideo
-                          ? (!widget.settingsHandler.disableVideo
-                          ? (Platform.isAndroid ? VideoApp(
-                          widget.fetched[index],
-                          index,
-                          widget.searchGlobals,
-                          widget.settingsHandler,
-                          true
-                      ) : desktopVideoPlaceHolder(widget.fetched[index]))
-                          : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
-                      )
-                          : MediaViewer(
-                          widget.fetched[index],
-                          index,
-                          widget.searchGlobals,
-                          widget.settingsHandler
-                      )
+                    // enable volume buttons if current page is a video AND appbar is set to visible
+                    bool isVideo = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo();
+                    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+                    ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                  },
+                  child: isVideo
+                    ? (!settingsHandler.disableVideo
+                      ? ((Platform.isAndroid || Platform.isIOS)
+                          ? VideoApp(
+                            getFetched()[index],
+                            index,
+                            searchHandler.currentTab,
+                            true
+                          )
+                          : desktopVideoPlaceHolder(getFetched()[index], index)
+                        )
+                      : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
+                    )
+                    : MediaViewerBetter(
+                      getFetched()[index],
+                      index,
+                      searchHandler.currentTab
+                    )
+                ),
+
+                if(!(Platform.isAndroid || Platform.isIOS))
+                  Container(
+                    alignment: Alignment.bottomRight,
+                    margin: EdgeInsets.all(60),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 35,
+                          height: 35,
+                          margin: EdgeInsets.all(10),
+                          child: FloatingActionButton(
+                            heroTag: 'prevArrow-$index',
+                            onPressed: () {
+                              if((index - 1) >= 0) {
+                                controller!.animateToPage(
+                                    controller!.page!.toInt() - 1,
+                                    duration: Duration(milliseconds: 400),
+                                    curve: Curves.linear
+                                );
+                              }
+                            },
+                            child: Icon(Icons.arrow_left),
+                            backgroundColor: Get.context!.theme.primaryColor,
+                          ),
+                        ),
+                        Container(
+                          width: 35,
+                          height: 35,
+                          margin: EdgeInsets.all(10),
+                          child: FloatingActionButton(
+                            heroTag: 'nextArrow-$index',
+                            onPressed: () {
+                              if((index + 1) < getFetched().length) {
+                                controller!.animateToPage(
+                                    controller!.page!.toInt() + 1,
+                                    duration: Duration(milliseconds: 400),
+                                    curve: Curves.linear
+                                );
+                              }
+                            },
+                            child: Icon(Icons.arrow_right),
+                            backgroundColor: Get.context!.theme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    )
                   ),
-                  !Platform.isAndroid ? Container(
-                      alignment: Alignment.bottomRight,
-                      margin: EdgeInsets.all(20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            width: 35,
-                            height: 35,
-                            margin: EdgeInsets.all(10),
-                            child:FloatingActionButton(
-                              onPressed: () {
-                                if((index - 1) >= 0) {
-                                  controller!.animateToPage(
-                                      controller!.page!.toInt() - 1,
-                                      duration: Duration(milliseconds: 400),
-                                      curve: Curves.linear
-                                  );
-                                }
-                              },
-                              child: Icon(Icons.arrow_left),
-                              backgroundColor: Get.context!.theme.primaryColor,
-                            ),
-                          ),
-                          Container(
-                            width: 35,
-                            height: 35,
-                            margin: EdgeInsets.all(10),
-                            child:FloatingActionButton(
-                              onPressed: () {
-                                if((index + 1) < widget.fetched.length) {
-                                  controller!.animateToPage(
-                                      controller!.page!.toInt() + 1,
-                                      duration: Duration(milliseconds: 400),
-                                      curve: Curves.linear
-                                  );
-                                }
-                              },
-                              child: Icon(Icons.arrow_right),
-                              backgroundColor: Get.context!.theme.primaryColor,
-                            ),
-                          ),
-                        ],
-
-                      )) : Container(),
-                ],
-              )
+              ])
             );
           } else {
             return Container(
@@ -311,7 +328,7 @@ class _ViewerPageState extends State<ViewerPage> {
         controller: controller,
         onPageChanged: (int index) {
           setState(() {
-            widget.searchGlobals.viewedIndex.value = index;
+            searchHandler.currentTab.viewedIndex.value = index;
             kbFocusNode.requestFocus();
           });
 
@@ -325,21 +342,21 @@ class _ViewerPageState extends State<ViewerPage> {
           }
 
           // enable volume buttons if new page is a video AND appbar is visible
-          bool isVideo = widget.fetched[index].isVideo();
-          bool isVolumeAllowed = !widget.settingsHandler.useVolumeButtonsForScroll || (isVideo && widget.searchGlobals.displayAppbar.value);
+          bool isVideo = getFetched()[index].isVideo();
+          bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && searchHandler.displayAppbar.value);
           ServiceHandler.setVolumeButtons(isVolumeAllowed);
           // print('Page changed ' + index.toString());
         },
-        itemCount: widget.fetched.length,
+        itemCount: getFetched().length,
       ),
     );
   }
 
   void scrollToNextPage() {
     // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
-    final int viewedIndex = widget.searchGlobals.viewedIndex.value;
-    final bool isImage = widget.fetched[viewedIndex].mediaType == "image";
-    if((viewedIndex + 1) < widget.fetched.length) {
+    final int viewedIndex = searchHandler.currentTab.viewedIndex.value;
+    final bool isImage = getFetched()[viewedIndex].mediaType == "image";
+    if((viewedIndex + 1) < getFetched().length) {
       if (viewedIndex == controller!.page!.toInt() && isImage && autoScroll){
         print("autoscrolling");
         controller!.animateToPage(controller!.page!.toInt() + 1,
@@ -353,7 +370,7 @@ class _ViewerPageState extends State<ViewerPage> {
   }
   void setScrollTimer() {
     autoScrollProgressController?.restart();
-    autoScrollTimer = Timer.periodic(Duration(milliseconds: widget.settingsHandler.galleryAutoScrollTime), (timer) {
+    autoScrollTimer = Timer.periodic(Duration(milliseconds: settingsHandler.galleryAutoScrollTime), (timer) {
       scrollToNextPage();
       autoScrollProgressController?.restart();
     });
@@ -363,7 +380,7 @@ class _ViewerPageState extends State<ViewerPage> {
     autoScrollProgressController?.stop();
   }
   void autoScrollState(bool newState) {
-    bool isNotLastPage = (widget.searchGlobals.viewedIndex.value + 1) < widget.fetched.length;
+    bool isNotLastPage = (searchHandler.currentTab.viewedIndex.value + 1) < getFetched().length;
     if(autoScroll != newState) {
       if(isNotLastPage) {
         setState(() {
@@ -380,27 +397,26 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
 
-  Widget desktopVideoPlaceHolder(BooruItem item){
+  Widget desktopVideoPlaceHolder(BooruItem item, int index){
     return Center(
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Container(height: 150),
-          Image.network(item.thumbnailURL,),
+          CachedThumbBetter(item, index, searchHandler.currentTab, 1, false),
+          // Image.network(item.thumbnailURL, fit: BoxFit.fill),
           Container(
-            margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-            child: TextButton(
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(20),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
-                ),
-              ),
-              onPressed: () {
-                Process.run('mpv', ["--loop", item.fileURL]);
+            width: MediaQuery.of(context).size.width / 3,
+            child: SettingsButton(
+              name: 'Open Video in External Player',
+              action: () {
+                if (Platform.isLinux) {
+                  Process.run('mpv', ["--loop", item.fileURL]);
+                }
               },
-              child: Text("Open in MPV", style: TextStyle(color: Colors.white)),
+              icon: Icon(Icons.play_arrow),
+              drawTopBorder: true,
             ),
-          )
+          ),
         ],
       ),
     );
@@ -411,26 +427,26 @@ class _ViewerPageState extends State<ViewerPage> {
         controller: controllerLinux,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
-          String fileURL = widget.fetched[index].fileURL;
-          bool isVideo = widget.fetched[index].isVideo();
+          String fileURL = getFetched()[index].fileURL;
+          bool isVideo = getFetched()[index].isVideo();
           if (isVideo) {
             return Container(
               child: Column(
                 children: [
-                  Image.network(widget.fetched[index].thumbnailURL),
+                  Image.network(getFetched()[index].thumbnailURL),
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                     child: TextButton(
                       style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(20),
-                          side: BorderSide(color: Get.context!.theme.accentColor),
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(color: Get.theme.accentColor),
                         ),
                       ),
                       onPressed: () {
                         Process.run('mpv', ["--loop", fileURL]);
                       },
-                      child: Text("Open in MPV", style: TextStyle(color: Colors.white)),
+                      child: Text("Open in MPV"),
                     ),
                   )
                 ],
@@ -450,7 +466,7 @@ class _ViewerPageState extends State<ViewerPage> {
       width: maxWidth,
       child: Drawer(
         child: SafeArea(
-          child: TagView(widget.fetched[widget.searchGlobals.viewedIndex.value], widget.searchGlobals, widget.settingsHandler)
+          child: TagView(getFetched()[searchHandler.currentTab.viewedIndex.value])
         ),
       )
     );
@@ -459,23 +475,23 @@ class _ViewerPageState extends State<ViewerPage> {
 
   /// Author: [Nani-Sore] ///
   void shareTextAction(String text) {
-    ServiceHandler serviceHandler = new ServiceHandler();
+    ServiceHandler serviceHandler = ServiceHandler();
     serviceHandler.loadShareTextIntent(text);
   }
   void shareHydrusAction(BooruItem item) {
-    if (widget.settingsHandler.hasHydrus){
-      Booru hydrus = widget.settingsHandler.booruList.where((element) => element.type == "Hydrus").first;
-      HydrusHandler hydrusHandler = new HydrusHandler(hydrus, 10);
+    if (settingsHandler.hasHydrus){
+      Booru hydrus = settingsHandler.booruList.where((element) => element.type == "Hydrus").first;
+      HydrusHandler hydrusHandler = HydrusHandler(hydrus, 10);
       hydrusHandler.addURL(item);
     }
   }
 
   /// Author: [Nani-Sore] ///
   void shareFileAction() async {
-    BooruItem item = widget.fetched[widget.searchGlobals.viewedIndex.value];
-    String? path = await ImageWriter().getCachePath(item.fileURL, 'media',widget.settingsHandler);
-    ServiceHandler serviceHandler = new ServiceHandler();
-    ImageWriter writer = new ImageWriter();
+    BooruItem item = getFetched()[searchHandler.currentTab.viewedIndex.value];
+    String? path = await ImageWriter().getCachePath(item.fileURL, 'media');
+    ServiceHandler serviceHandler = ServiceHandler();
+    ImageWriter writer = ImageWriter();
 
     if(path != null) {
       // File is already in cache - share from there
@@ -486,7 +502,7 @@ class _ViewerPageState extends State<ViewerPage> {
       var request = await HttpClient().getUrl(Uri.parse(item.fileURL));
       var response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-      final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media',widget.settingsHandler);
+      final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media');
       if(cacheFile != null) {
         path = cacheFile.path;
         await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
@@ -495,7 +511,7 @@ class _ViewerPageState extends State<ViewerPage> {
       }
 
       // TODO: find a way to detect when share menu was closed, orherwise this is triggered immediately and file is deleted before sending to another app
-      // writer.deleteFromCache(path, 'media');
+      // writer.deleteFileFromCache(path, 'media');
     }
   }
 
@@ -508,24 +524,24 @@ class _ViewerPageState extends State<ViewerPage> {
           const SizedBox(height: 15),
           Column(
             children: [
-              if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '')
+              if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '')
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton.icon(
                       style: TextButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(10),
-                            side: BorderSide(color: Get.context!.theme.accentColor),
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: Get.theme.accentColor),
                           ),
                           padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
                       ),
                       onPressed: (){
                         Navigator.of(context).pop();
-                        shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+                        shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
                       },
                       icon: Icon(CupertinoIcons.link),
-                      label: Text('Post URL', style: TextStyle(color: Colors.white))
+                      label: Text('Post URL')
                     )
                   ]
                 ),
@@ -537,17 +553,17 @@ class _ViewerPageState extends State<ViewerPage> {
                   TextButton.icon(
                     style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(10),
-                          side: BorderSide(color: Get.context!.theme.accentColor),
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(color: Get.theme.accentColor),
                         ),
                         padding: EdgeInsets.fromLTRB(18, 15, 18, 15),
                     ),
                     onPressed: (){
                       Navigator.of(context).pop();
-                      shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+                      shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
                     },
                     icon: Icon(CupertinoIcons.link),
-                    label: Text('File URL', style: TextStyle(color: Colors.white))
+                    label: Text('File URL')
                   )
                 ]
               ),
@@ -559,8 +575,8 @@ class _ViewerPageState extends State<ViewerPage> {
                   TextButton.icon(
                     style: TextButton.styleFrom(
                       shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(10),
-                        side: BorderSide(color: Get.context!.theme.accentColor),
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Get.theme.accentColor),
                       ),
                       padding: EdgeInsets.fromLTRB(32, 15, 32, 15),
                     ),
@@ -569,28 +585,28 @@ class _ViewerPageState extends State<ViewerPage> {
                       shareFileAction();
                     },
                     icon: Icon(Icons.file_present),
-                    label: Text('File', style: TextStyle(color: Colors.white))                  
+                    label: Text('File')                  
                   )
                 ]
               ),
               const SizedBox(height: 15),
-              widget.settingsHandler.hasHydrus && widget.searchGlobals.selectedBooru!.type != "Hydrus" ? Row(
+              settingsHandler.hasHydrus && searchHandler.currentTab.selectedBooru.value.type != "Hydrus" ? Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextButton.icon(
                         style: TextButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(10),
-                            side: BorderSide(color: Get.context!.theme.accentColor),
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(color: Get.theme.accentColor),
                           ),
                           padding: EdgeInsets.fromLTRB(32, 15, 32, 15),
                         ),
                         onPressed: (){
                           Navigator.of(context).pop();
-                          shareHydrusAction(widget.fetched[widget.searchGlobals.viewedIndex.value]);
+                          shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
                         },
                         icon: Icon(Icons.file_present),
-                        label: Text('Hydrus', style: TextStyle(color: Colors.white))
+                        label: Text('Hydrus')
                     )
                   ]
               ) : Container()
@@ -610,18 +626,17 @@ class _ViewerPageState extends State<ViewerPage> {
     List<List<String>> buttonList = [];
     // first 4 buttons will show on toolbar
     int listSplit = (MediaQuery.of(context).size.width / 100).floor();
-    print(MediaQuery.of(context).size.width);
-    if (listSplit < widget.settingsHandler.buttonOrder.length){
-      overFlowList = (widget.settingsHandler.buttonOrder.sublist(listSplit));
-      buttonList = widget.settingsHandler.buttonOrder.sublist(0,listSplit);
+    // print(MediaQuery.of(context).size.width);
+    if (listSplit < settingsHandler.buttonOrder.length){
+      overFlowList = (settingsHandler.buttonOrder.sublist(listSplit));
+      buttonList = settingsHandler.buttonOrder.sublist(0,listSplit);
     } else {
-      buttonList = widget.settingsHandler.buttonOrder;
+      buttonList = settingsHandler.buttonOrder;
     }
     buttonList.forEach((value) {
       actions.add(buildIconButton(value[0]));
     });
     // all buttons after that will be in overflow menu
-
     if (overFlowList.isNotEmpty){
       actions.add(PopupMenuButton(
           icon: Icon(
@@ -718,7 +733,7 @@ class _ViewerPageState extends State<ViewerPage> {
         icon = Icons.save;
         break;
       case("favourite"):
-        icon = widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? Icons.favorite : Icons.favorite_border;
+        icon = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value ? Icons.favorite : Icons.favorite_border;
         break;
       case("share"):
         icon = Icons.share;
@@ -735,7 +750,7 @@ class _ViewerPageState extends State<ViewerPage> {
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
         break;
       case("favourite"):
-        label = widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite ? 'Unfavourite' : defaultLabel;
+        label = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value ? 'Unfavourite' : defaultLabel;
         break;
       default:
         // use default text
@@ -752,7 +767,7 @@ class _ViewerPageState extends State<ViewerPage> {
         viewerScaffoldKey.currentState?.openEndDrawer();
         break;
       case("open"):
-        ServiceHandler.launchURL(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+        ServiceHandler.launchURL(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
         break;
       case("autoscroll"):
         autoScrollState(!autoScroll);
@@ -760,12 +775,16 @@ class _ViewerPageState extends State<ViewerPage> {
       case("snatch"):
         getPerms();
         // call a function to save the currently viewed image when the save button is pressed
-        widget.snatchHandler.queue([widget.fetched[widget.searchGlobals.viewedIndex.value]], widget.settingsHandler.jsonWrite, widget.searchGlobals.selectedBooru, widget.settingsHandler.snatchCooldown);
+        snatchHandler.queue(
+          [getFetched()[searchHandler.currentTab.viewedIndex.value]],
+          searchHandler.currentTab.selectedBooru.value,
+          settingsHandler.snatchCooldown
+        );
         break;
       case("favourite"):
         setState(() {
-          widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite = !widget.fetched[widget.searchGlobals.viewedIndex.value].isFavourite;
-          widget.settingsHandler.dbHandler.updateBooruItem(widget.fetched[widget.searchGlobals.viewedIndex.value],"local");
+          getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
+          settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value],"local");
         });
         break;
       case("share"):
@@ -784,20 +803,20 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   void onShareClick(){
-    String shareSetting = widget.settingsHandler.shareAction;
+    String shareSetting = settingsHandler.shareAction;
     switch(shareSetting) {
       case 'Post URL':
-        if(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL != '') {
-          shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].postURL);
+        if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '') {
+          shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
         } else {
           ServiceHandler.displayToast("No Post URL!");
         }
         break;
       case 'File URL':
-        shareTextAction(widget.fetched[widget.searchGlobals.viewedIndex.value].fileURL);
+        shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
         break;
       case 'Hydrus':
-        shareHydrusAction(widget.fetched[widget.searchGlobals.viewedIndex.value]);
+        shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
         break;
       case 'File':
         shareFileAction();

@@ -8,11 +8,11 @@ import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/progress_bar.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 class LoliControls extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  LoliControls({Key? key, required this.settingsHandler}) : super(key: key);
+  LoliControls({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -20,8 +20,10 @@ class LoliControls extends StatefulWidget {
   }
 }
 
-class _LoliControlsState extends State<LoliControls>
-    with SingleTickerProviderStateMixin {
+class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
+
+  final SettingsHandler settingsHandler = Get.find();
+
   late VideoPlayerValue _latestValue;
   bool _hideStuff = true;
   Timer? _hideTimer;
@@ -129,27 +131,28 @@ class _LoliControlsState extends State<LoliControls>
   ) {
     final iconColor = Theme.of(context).textTheme.button!.color;
 
+    // Don't draw progress bar if shorter than 2 seconds, moves too fast on short durations
+    bool isTooShort = controller.value.duration.inSeconds <= 2;
+    bool drawProgressBar = !(chewieController.isLive || isTooShort);
+
     return AnimatedOpacity(
       opacity: _hideStuff ? 0.0 : 1.0,
       duration: const Duration(milliseconds: 300),
       child: Column(
         children: <Widget>[
-          Container(
-            height: barHeight / 1.5,
-            color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-            child: Row(
-              children: <Widget>[
-                if (chewieController.isLive)
-                  const SizedBox()
-                else
-                  ...[
-                    const SizedBox(width: 10),
-                    _buildProgressBar(),
-                    const SizedBox(width: 10),
-                  ]
-              ],
+          if(drawProgressBar)
+            Container(
+              height: barHeight / 1.5,
+              color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
+              child: Row(
+                children: <Widget>[
+                  const SizedBox(width: 10),
+                  _buildProgressBar(),
+                  const SizedBox(width: 10),
+                ],
+              ),
             ),
-          ),
+
           Container(
             height: barHeight,
             color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
@@ -432,7 +435,7 @@ class _LoliControlsState extends State<LoliControls>
             child: Icon(Icons.speed,
                 color: _latestValue.playbackSpeed == 1.0
                     ? Colors.white
-                    : Theme.of(context).colorScheme.primary),
+                    : Theme.of(context).primaryColor),
           ),
         ),
       ),
@@ -440,7 +443,7 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   GestureDetector _buildMuteButton(VideoPlayerController controller) {
-    bool isGlobalMute = widget.settingsHandler.videoAutoMute;
+    bool isGlobalMute = settingsHandler.videoAutoMute;
 
     return GestureDetector(
       onTap: () {
@@ -452,10 +455,10 @@ class _LoliControlsState extends State<LoliControls>
         }
       },
       onLongPress: (){
-        widget.settingsHandler.videoAutoMute = !widget.settingsHandler.videoAutoMute;
-        if (widget.settingsHandler.videoAutoMute && _latestValue.volume != 0) {
+        settingsHandler.videoAutoMute = !settingsHandler.videoAutoMute;
+        if (settingsHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);
-        } else if (!widget.settingsHandler.videoAutoMute && _latestValue.volume == 0){
+        } else if (!settingsHandler.videoAutoMute && _latestValue.volume == 0){
           controller.setVolume(1);
         }
       },
@@ -679,7 +682,7 @@ class _LoliControlsState extends State<LoliControls>
           videoDurationMillisecs);
       // print(newTime);
       // Skip set amount of seconds if we tapped on left/right third of the screen or play/pause if in the middle
-      controller.seekTo(new Duration(milliseconds: newTime));
+      controller.seekTo(Duration(milliseconds: newTime));
 
       setState(() {
         _doubleTapHideTimer?.cancel();
@@ -754,7 +757,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).colorScheme.primary;
+    final Color selectedColor = Theme.of(context).primaryColor;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

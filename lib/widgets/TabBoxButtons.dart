@@ -8,17 +8,14 @@ import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/HistoryList.dart';
 
 class TabBoxButtons extends StatefulWidget {
-  List<SearchGlobals> searchGlobals;
-  int globalsIndex;
-  TextEditingController searchTagsController;
-  SettingsHandler settingsHandler;
-  final Function setParentGlobalsIndex;
-  TabBoxButtons(this.searchGlobals,this.globalsIndex,this.searchTagsController,this.settingsHandler,this.setParentGlobalsIndex);
+  TabBoxButtons();
   @override
   _TabBoxButtonsState createState() => _TabBoxButtonsState();
 }
 
 class _TabBoxButtonsState extends State<TabBoxButtons> {
+  final SettingsHandler settingsHandler = Get.find();
+  final SearchHandler searchHandler = Get.find();
 
   void showHistory() async {
     showDialog(context: context, builder: (context) {
@@ -26,7 +23,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
         return InfoDialog(
           null,
           [
-            HistoryList(widget.searchGlobals, widget.globalsIndex, widget.searchTagsController, widget.settingsHandler, widget.setParentGlobalsIndex)
+            HistoryList()
           ],
           CrossAxisAlignment.start
         );
@@ -48,36 +45,29 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
               children: [
                 const SizedBox(width: 30),
                 IconButton(
-                  icon: Icon(Icons.remove_circle_outline, color: Get.context!.theme.accentColor),
+                  icon: Icon(Icons.remove_circle_outline, color: Get.theme.accentColor),
                   onPressed: () {
                     // Remove selected searchglobal from list and apply nearest to search bar
-                    setState((){
-                      widget.searchGlobals[widget.globalsIndex].removeTab.value = "remove";
-                    });
+                    searchHandler.removeAt();
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.history, color: Get.context!.theme.accentColor),
+                  icon: Icon(Icons.history, color: Get.theme.accentColor),
                   onPressed: () async {
                     showHistory();
                   },
                 ),
                 GestureDetector(
                   onLongPress: () {
-                    widget.searchTagsController.text = widget.settingsHandler.defTags;
-                    widget.searchGlobals[widget.globalsIndex].newTab.value = widget.settingsHandler.defTags;
-                    widget.setParentGlobalsIndex(widget.searchGlobals.length - 1, null); // set last tab
+                    // add new tab and switch to it
+                    searchHandler.searchTextController.text = settingsHandler.defTags;
+                    searchHandler.addTabByString(settingsHandler.defTags, switchToNew: true);
                   },
                   child: IconButton(
-                    icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor),
+                    icon: Icon(Icons.add_circle_outline, color: Get.theme.accentColor),
                     onPressed: () {
-                      // add a new search global to the list
-                      widget.searchGlobals[widget.globalsIndex].newTab.value = widget.settingsHandler.defTags;
-                      widget.setParentGlobalsIndex(widget.globalsIndex, null);
-                      // setState((){
-                        // widget.searchGlobals.add(new SearchGlobals(widget.searchGlobals[widget.globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
-                        // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
-                      // });
+                      // add new tab to the list end
+                      searchHandler.addTabByString(settingsHandler.defTags);
                     },
                   ),
                 ),

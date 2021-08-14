@@ -26,7 +26,7 @@ class _TextExpanderState extends State<TextExpander> {
               IconButton(
                 icon: Icon(
                     showText ? Icons.remove : Icons.add,
-                    color: Get.context!.theme.accentColor
+                    color: Get.theme.accentColor
                 ),
                 onPressed: () {
                   setState(() {
@@ -60,7 +60,7 @@ class _TextExpanderState extends State<TextExpander> {
             thickness: 1,
             indent: 5,
             endIndent: 5,
-            color: Get.context!.theme.accentColor,
+            color: Get.theme.accentColor,
           ),
         ],
       )

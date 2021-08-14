@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
@@ -35,10 +35,11 @@ class Tools {
     String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
     return fileExt;
   }
+
   static void forceClearMemoryCache({bool withLive = false}) {
     // clears memory image cache on timer or when changing tabs
     // ServiceHandler.displayToast('Clearing cache\n${imageCache?.liveImageCount}/${imageCache?.currentSize}');
-    imageCache?.clear();
-    if(withLive) imageCache?.clearLiveImages();
+    PaintingBinding.instance?.imageCache?.clear();
+    if(withLive) PaintingBinding.instance?.imageCache?.clearLiveImages();
   }
 }

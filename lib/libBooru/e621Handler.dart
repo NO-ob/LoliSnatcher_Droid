@@ -7,14 +7,13 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
-import 'package:LoliSnatcher/Tools.dart';
 
 class e621Handler extends BooruHandler{
   e621Handler(Booru booru,int limit) : super(booru,limit);
   @override
   bool hasSizeData = true;
 
-  void parseResponse(response){
+  void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
@@ -46,7 +45,7 @@ class e621Handler extends BooruHandler{
           sampleURL = current['sample']['url'];
           thumbURL = current['preview']['url'];
         }
-        fetched.add(new BooruItem(
+        fetched.add(BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: thumbURL,
@@ -76,9 +75,7 @@ class e621Handler extends BooruHandler{
           postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
         ));
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }
@@ -117,7 +114,6 @@ class e621Handler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "e621Handler", "tagSearch", LogTypes.exception);
     }
-    print(searchTags.length);
     return searchTags;
   }
 }

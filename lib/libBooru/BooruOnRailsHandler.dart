@@ -9,7 +9,6 @@ import 'package:LoliSnatcher/Tools.dart';
 
 class BooruOnRailsHandler extends BooruHandler {
   bool tagSearchEnabled = true;
-  List<BooruItem> fetched = [];
 
   BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
 
@@ -26,7 +25,7 @@ class BooruOnRailsHandler extends BooruHandler {
     }
   }
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse['search'];
     // Create a BooruItem for each post in the list
@@ -67,9 +66,7 @@ class BooruOnRailsHandler extends BooruHandler {
           postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
         ));
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       } else {
         Logger.Inst().log("post $i skipped", "BooruOnRailsHandler", "parseResponse", LogTypes.booruHandlerInfo);
       }

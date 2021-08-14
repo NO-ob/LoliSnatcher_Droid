@@ -19,16 +19,11 @@ class SankakuHandler extends BooruHandler{
 
   //Tried stripping further but it breaks auth. Putting the auth stuff into the getHeaders function and overriding doesn't work
   // Overriding search having just the auth stuff then calling super.search also doesn't work
-  Future Search(String tags,int pageNum) async{
-    isActive = true;
+  Future Search(String tags, int? pageNumCustom) async{
     hasSizeData = true;
     int length = fetched.length;
-    // if(this.pageNum == pageNum){
-    //   return fetched;
-    // }
-    this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = [];
+      fetched.value = [];
     }
     String url = makeURL(tags);
     Logger.Inst().log(url, "SankakuHandler","Search", LogTypes.booruHandlerSearchURL);
@@ -43,8 +38,7 @@ class SankakuHandler extends BooruHandler{
       if (response.statusCode == 200) {
         prevTags = tags;
         parseResponse(response);
-        if (fetched.length == length){locked = true;}
-        isActive = false;
+        if (fetched.length == length){locked.value = true;}
         return fetched;
       } else {
         Logger.Inst().log("Sankaku load fail ${response.statusCode}", "SankakuHandler","Search", LogTypes.booruHandlerInfo);
@@ -52,13 +46,12 @@ class SankakuHandler extends BooruHandler{
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "SankakuHandler","Search", LogTypes.exception);
-      isActive = false;
       return fetched;
     }
 
   }
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     List<dynamic> parsedResponse = jsonDecode(response.body);
     // Create a BooruItem for each post in the list
     for (int i = 0; i < parsedResponse.length; i++){
@@ -89,12 +82,10 @@ class SankakuHandler extends BooruHandler{
           score: current["total_score"].toString(),
           sources: [current["source"] == null ? "" : current["source"]!],
           md5String: current["md5"],
-          postDate: DateTime.fromMillisecondsSinceEpoch(int.parse(current["created_at"]["s"].toString() + "000")).toString(), // unix time without in seconds (need to x1000?)
-          postDateFormat: "yyyy-MM-dd HH:mm:ss.SSS",
+          postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
+          postDateFormat: "unix",
         ));
-        if (dbHandler!.db != null) {
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }

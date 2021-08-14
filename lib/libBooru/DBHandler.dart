@@ -12,7 +12,7 @@ class DBHandler{
 
   //Connects to the database file and create the database if the tables dont exist
   Future<bool> dbConnect(String path)async{
-    if(Platform.isAndroid){
+    if(Platform.isAndroid || Platform.isIOS){
       db = await openDatabase(path+"store.db", version: 1);
     } else {
       sqfliteFfiInit();
@@ -70,12 +70,12 @@ class DBHandler{
     String resultStr = "";
     if (itemID == null || itemID.isEmpty) {
       var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
-          [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched), Tools.boolToInt(item.isFavourite)]);
+          [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched.value), Tools.boolToInt(item.isFavourite.value)]);
       itemID = result?.toString();
       updateTags(item.tagsList, itemID);
       resultStr = "Inserted";
     } else if (mode == "local") {
-      await db?.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?", [Tools.boolToInt(item.isSnatched), Tools.boolToInt(item.isFavourite), itemID]);
+      await db?.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?", [Tools.boolToInt(item.isSnatched.value), Tools.boolToInt(item.isFavourite.value), itemID]);
       resultStr = "Updated";
     } else {
       resultStr = "Already Exists";
@@ -200,7 +200,7 @@ class DBHandler{
         "WHERE dbid IN (?) GROUP BY dbid",[itemID]);
     BooruItem item;
     if (metaData != null && metaData.isNotEmpty){
-      item = new BooruItem(
+      item = BooruItem(
         fileURL: metaData.first["fileURL"].toString(),
         sampleURL: metaData.first["fileURL"].toString(),
         thumbnailURL: metaData.first["thumbnailURL"].toString(),
@@ -210,11 +210,11 @@ class DBHandler{
       //var tags = await db?.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)", [itemID]);
       //tags?.forEach((tag) {tagsList.add(tag["name"].toString());});
       if (mode == "loliSyncFav"){
-        item.isSnatched = false;
+        item.isSnatched.value = false;
       } else {
-        item.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+        item.isSnatched.value = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
       }
-      item.isFavourite = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
+      item.isFavourite.value = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
       //item.tagsList = tagsList;
       return item;
     } else {
@@ -232,7 +232,7 @@ class DBHandler{
       for(int i=0; i < metaData.length; i++){
         var currentItem = metaData[i];
         if(currentItem != null && currentItem.isNotEmpty) {
-          BooruItem bItem = new BooruItem(
+          BooruItem bItem = BooruItem(
             fileURL: currentItem["fileURL"].toString(),
             sampleURL: currentItem["sampleURL"].toString(),
             thumbnailURL: currentItem["thumbnailURL"].toString(),
@@ -240,11 +240,11 @@ class DBHandler{
             postURL: currentItem["postURL"].toString(),
           );
           if (mode == "loliSyncFav"){
-            bItem.isSnatched = false;
+            bItem.isSnatched.value = false;
           } else {
-            bItem.isSnatched = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+            bItem.isSnatched.value = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
           }
-          bItem.isFavourite = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
+          bItem.isFavourite.value = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
           items.add(bItem);
         }
       }

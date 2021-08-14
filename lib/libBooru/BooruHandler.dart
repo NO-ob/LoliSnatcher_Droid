@@ -1,36 +1,40 @@
-import 'dart:io';
-
 import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:get/get.dart';
 
 import 'Booru.dart';
 import 'BooruItem.dart';
-import 'DBHandler.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+
 abstract class BooruHandler {
   // pagenum = -1 as "didn't load anything yet" state
   // gets set to higher number for special cases in handler factory
-  int pageNum = -1; 
+  RxInt pageNum = (-1).obs; 
   int limit = 20;
   String prevTags = "";
-  bool locked = false;
+  RxBool locked = false.obs;
   Booru booru;
   String verStr = "1.8.3";
-  List<BooruItem> fetched = [];
+  RxList<BooruItem> fetched = RxList<BooruItem>([]);
+  RxString errorString = ''.obs;
+
+  List<BooruItem> get filteredFetched => fetched.where((el) => Get.find<SettingsHandler>().filterHated ? !el.isHated.value : true).toList();
+
   bool tagSearchEnabled = true;
   bool hasSizeData = false;
-  bool isActive = false;
-  DBHandler? dbHandler;
   BooruHandler(this.booru,this.limit);
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
-  Future Search(String tags, int pageNum) async{
+  Future Search(String tags, int? pageNumCustom) async {
+    if(pageNumCustom != null) {
+      pageNum.value = pageNumCustom;
+    }
     tags = validateTags(tags);
-    this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = [];
+      fetched.value = [];
     }
 
     String? url = makeURL(tags);
@@ -42,29 +46,36 @@ abstract class BooruHandler {
       if (response.statusCode == 200) {
         parseResponse(response);
         prevTags = tags;
-        if (fetched.length == length){locked = true;}
-        return fetched;
+        if (fetched.length == length){locked.value = true;}
       } else {
         Logger.Inst().log("BooruHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("BooruHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("BooruHandler url response is: ${response.body}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        errorString.value = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "BooruHandler", "Search", LogTypes.exception);
-      return fetched;
+      errorString.value = e.toString();
+      // return fetched;
     }
+
+    // print('Fetched: ${filteredFetched.length}');
+    return fetched;
   }
 
-  void parseResponse(response){}
+  void parseResponse(response){return;}
   String validateTags(String tags){return tags;}
   String? makePostURL(String id){}
   String? makeURL(String tags){}
   String? makeTagURL(String input){}
   tagSearch(String input) {}
 
-  int totalCount = 0;
-  void searchCount(String input) {
-    this.totalCount = 0;
+  RxInt totalCount = 0.obs;
+  Future<void> searchCount(String input) async {
+    totalCount.value = 0;
+    return;
   }
+
   Map<String,String> getWebHeaders() {
       return {"Accept": "text/html,application/xml,application/json", "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"};
   }
@@ -81,10 +92,13 @@ abstract class BooruHandler {
   void setupMerge(List<Booru> boorus){}
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future setTrackedValues(int fetchedIndex) async{
-    if (dbHandler!.db != null){
-      List<bool> values = await dbHandler!.getTrackedValues(fetched[fetchedIndex].fileURL);
-      fetched[fetchedIndex].isSnatched = values[0];
-      fetched[fetchedIndex].isFavourite = values[1];
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    if (settingsHandler.dbHandler.db != null){
+      // TODO make this work in batches, not calling it on every single item ???
+      List<bool> values = await settingsHandler.dbHandler.getTrackedValues(fetched[fetchedIndex].fileURL);
+      fetched[fetchedIndex].isSnatched.value = values[0];
+      fetched[fetchedIndex].isFavourite.value = values[1];
     }
+    fetched[fetchedIndex].isHated.value = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList)[0].length > 0;
   }
 }

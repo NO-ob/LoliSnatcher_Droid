@@ -2,24 +2,46 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ThemeItem.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 
 /**
  * This class is used loading from and writing settings to files
  */
-class SettingsHandler {
-  ServiceHandler serviceHandler = new ServiceHandler();
-  DBHandler dbHandler = new DBHandler();
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", cachePath = "", previewDisplay = "Waterfall", galleryMode="Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal',extPathOverride = "";
-  List<String> hatedTags = [], lovedTags = [];
-  int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 2, snatchCooldown = 250, volumeButtonsScrollSpeed = 100;
-  int SDKVer = 0, galleryAutoScrollTime = 4000;
+class SettingsHandler extends GetxController {
+  ServiceHandler serviceHandler = ServiceHandler();
+  DBHandler dbHandler = DBHandler();
+
+  // service vars
+  RxBool isInit = false.obs;
+  String cachePath = "";
+  String path = "";
+  String boorusPath = "";
+  int SDKVer = 0;
   String verStr = "1.8.3";
-  bool hasHydrus = false, mergeEnabled = false,showURLInThumb = false;
+  ////////////////////////////////////////////////////
+
+  // runtime settings vars
+  bool hasHydrus = false, mergeEnabled = false, videoAutoMute = false;
+  Size? deviceSize;
+  double? devicePixelRatio;
+  RxBool isDebug = false.obs, showFPS = false.obs, showImageStats = false.obs, isMemeTheme = false.obs, showURLOnThumb = false.obs;
+  ////////////////////////////////////////////////////
+
+  // saveable settings vars
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", previewDisplay = "Square", galleryMode = "Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal', extPathOverride = "", zoomButtonPosition = "Right";
+
+  List<String> hatedTags = [], lovedTags = [];
+
+  int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 1, snatchCooldown = 250, volumeButtonsScrollSpeed = 200, galleryAutoScrollTime = 4000;
+
   List<List<String>> buttonList = [
     ["autoscroll", "AutoScroll"],
     ["snatch", "Save"],
@@ -36,425 +58,777 @@ class SettingsHandler {
     ["share", "Share"],
     ["open", "Open in Browser"]
   ];
-  List<Booru> booruList = [];
-  /*static List<ThemeItem> themes = [
-    new ThemeItem("Pink", Colors.pink[200], Colors.pink[300]),
-    new ThemeItem("Purple", Colors.deepPurple[600], Colors.deepPurple[800]),
-    new ThemeItem("Blue", Colors.lightBlue, Colors.lightBlue[600]),
-    new ThemeItem("Teal", Colors.teal, Colors.teal[600]),
-    new ThemeItem("Red", Colors.red[700], Colors.red[800]),
-    new ThemeItem("Green", Colors.green, Colors.green[700]),
-  ];*/
-  String themeMode = "dark";
-  String path = "";
+
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
         imageCache = false, mediaCache = false, autoHideImageBar = false,
           dbEnabled = true, searchHistoryEnabled = true, filterHated = false,
-            useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false, videoAutoMute = false;
-  Future<bool> writeDefaults() async{
-    if (path == ""){
-      path = await getExtDir();
+            useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
+  
+  RxList<Booru> booruList = RxList<Booru>([]);
+  ////////////////////////////////////////////////////
+
+  // themes wip
+  List<ThemeItem> themes = [
+    ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
+    ThemeItem(name: "Purple", primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
+    ThemeItem(name: "Blue", primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
+    ThemeItem(name: "Teal", primary: Colors.teal, accent: Colors.teal[600]),
+    ThemeItem(name: "Red", primary: Colors.red[700], accent: Colors.red[800]),
+    ThemeItem(name: "Green", primary: Colors.green, accent: Colors.green[700]),
+  ];
+  Rx<ThemeItem> currentTheme = ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]).obs..listen((ThemeItem theme) {
+    print('newTheme ${theme.name} ${theme.primary}');
+  });
+  Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
+  RxBool isAmoled = true.obs;
+  ////////////////////////////////////////////////////
+
+  // default values and possible options map for validation
+  Map<String, Map<String, dynamic>> map = {
+    // stringFromList
+    "appMode": {
+      "type": "stringFromList",
+      "default": "Mobile",
+      "options": <String>["Mobile", "Desktop"],
+    },
+    "previewMode": {
+      "type": "stringFromList",
+      "default": "Sample",
+      "options": <String>["Sample", "Thumbnail"],
+    },
+    "previewDisplay": {
+      "type": "stringFromList",
+      "default": "Square",
+      "options": <String>["Square", "Rectangle"], //, "Staggered"],
+    },
+    "shareAction": {
+      "type": "stringFromList",
+      "default": "Ask",
+      "options": <String>["Ask", "Post URL", "File URL", "File", "Hydrus"],
+    },
+    "videoCacheMode": {
+      "type": "stringFromList",
+      "default": "Stream",
+      "options": <String>["Stream", "Cache", "Stream+Cache"],
+    },
+    "galleryMode": {
+      "type": "stringFromList",
+      "default": "Full Res",
+      "options": <String>["Sample", "Full Res"],
+    },
+    "galleryScrollDirection": {
+      "type": "stringFromList",
+      "default": "Horizontal",
+      "options": <String>["Horizontal", "Vertical"],
+    },
+    "galleryBarPosition": {
+      "type": "stringFromList",
+      "default": "Top",
+      "options": <String>["Top", "Bottom"],
+    },
+    "zoomButtonPosition": {
+      "type": "stringFromList",
+      "default": "Right",
+      "options": <String>["Disabled", "Left", "Right"],
+    },
+
+    // string
+    "deftags": {
+      "type": "string",
+      "default": "rating:safe",
+    },
+    "prefBooru": {
+      "type": "string",
+      "default": "",
+    },
+    "extPathOverride": {
+      "type": "string",
+      "default": "",
+    },
+
+    // stringList
+    "hatedTags": {
+      "type": "stringList",
+      "default": [],
+    },
+    "lovedTags": {
+      "type": "stringList",
+      "default": [],
+    },
+
+    // int
+    "limit": {
+      "type": "int",
+      "default": 20,
+      "upperLimit": 100,
+      "lowerLimit": 10,
+    },
+    "portraitColumns": {
+      "type": "int",
+      "default": 2,
+      "upperLimit": 100,
+      "lowerLimit": 1,
+    },
+    "landscapeColumns": {
+      "type": "int",
+      "default": 4,
+      "upperLimit": 100,
+      "lowerLimit": 1,
+    },
+    "preloadCount": {
+      "type": "int",
+      "default": 1,
+      "upperLimit": 3,
+      "lowerLimit": 0,
+    },
+    "snatchCooldown": {
+      "type": "int",
+      "default": 250,
+      "upperLimit": 1000,
+      "lowerLimit": 0,
+    },
+    "volumeButtonsScrollSpeed": {
+      "type": "int",
+      "default": 200,
+      "upperLimit": 1000000,
+      "lowerLimit": 0,
+    },
+    "galleryAutoScrollTime": {
+      "type": "int",
+      "default": 4000,
+      "upperLimit": 100000,
+      "lowerLimit": 100,
+    },
+
+    // bool
+    "jsonWrite": {
+      "type": "bool",
+      "default": false,
+    },
+    "autoPlayEnabled": {
+      "type": "bool",
+      "default": true,
+    },
+    "loadingGif": {
+      "type": "bool",
+      "default": false,
+    },
+    "imageCache": {
+      "type": "bool",
+      "default": false,
+    },
+    "mediaCache": {
+      "type": "bool",
+      "default": false,
+    },
+    "autoHideImageBar": {
+      "type": "bool",
+      "default": false,
+    },
+    "dbEnabled": {
+      "type": "bool",
+      "default": true,
+    },
+    "searchHistoryEnabled": {
+      "type": "bool",
+      "default": true,
+    },
+    "filterHated": {
+      "type": "bool",
+      "default": false,
+    },
+    "useVolumeButtonsForScroll": {
+      "type": "bool",
+      "default": false,
+    },
+    "shitDevice": {
+      "type": "bool",
+      "default": false,
+    },
+    "disableVideo": {
+      "type": "bool",
+      "default": false,
+    },
+
+    // other
+    "buttonOrder": {
+      "type": "other",
+      "default": [
+        ["autoscroll", "AutoScroll"],
+        ["snatch", "Save"],
+        ["favourite", "Favourite"],
+        ["info", "Display Info"],
+        ["share", "Share"],
+        ["open", "Open in Browser"]
+      ]
+    },
+  };
+
+  dynamic validateValue(String name, dynamic value) {
+    Map<String, dynamic>? settingParams = map[name];
+
+    if(settingParams == null) {
+      return value;
     }
-    if (!File(path+"settings.conf").existsSync()){
-      await Directory(path).create(recursive:true);
-      File settingsFile = new File(path+"settings.conf");
-      var writer = settingsFile.openWrite();
-      writer.write("Default Tags = rating:safe\n");
-      writer.write("Limit = 20\n");
-      writer.write("Preview Mode = Sample\n");
-      writer.close();
+
+    try {
+      switch (settingParams['type']) {
+        case 'stringFromList':
+          String validValue = settingParams['options']?.firstWhere((el) => el == value, orElse: () => '');
+          if(validValue != '') {
+            return validValue;
+          } else {
+            return settingParams['default'];
+          }
+        case 'string':
+          if(!(value is String)) {
+            throw 'value "$value" is not a String';
+          } else {
+            return value;
+          }
+        case 'int':
+          int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
+          if(parse == null) {
+            throw 'value "$value" of type ${value.runtimeType} is not an int';
+          } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
+            return settingParams["default"];
+          } else {
+            return parse;
+          }
+        case 'bool':
+          if(!(value is bool)) {
+            throw 'value "$value" is not a bool';
+          } else {
+            return value;
+          }
+        // case 'stringList': /// TODO special cases parsing ???
+        default:
+          return value;
+      }
+    } catch(err) {
+      print('SettingsHandler value validation error: $err');
+      return settingParams['default'];
     }
+  }
+
+  dynamic valueToJson(String name) {
+    Map<String, dynamic>? settingParams = map[name];
+
+    dynamic value = getByString(name);
+
+    if(settingParams == null) {
+      return value.toString();
+    }
+
+    try {
+      switch (settingParams['type']) {
+        case 'stringFromList':
+        case 'string':
+          if(!(value is String)) {
+            // return "${settingParams['default']}";
+            throw 'value "$value" is not a String';
+          } else {
+            return value;
+          }
+        case 'int':
+          int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
+          if(parse == null) {
+            throw 'value "$value" of type ${value.runtimeType} is not an int';
+          } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
+            return settingParams['default'];
+          } else {
+            return parse;
+          }
+        case 'bool':
+          if(!(value is bool)) {
+            throw 'value "$value" is not a bool';
+          } else {
+            return value;
+          }
+        // case 'stringList': /// TODO special cases parsing ???
+        default:
+          return value;
+      }
+    } catch(err) {
+      print('SettingsHandler value to json error: $name $value $err');
+      return settingParams['default'];
+    }
+  }
+
+  Future<bool> debugLoadAndSaveLegacy() async {
+    if(await checkForLegacySettings()) {
+      await loadLegacySettings();
+    }
+    await saveSettings();
+
     return true;
   }
 
-  Future<bool> loadSettings() async{
-    if (path == ""){
-      path = await getExtDir();
-      print("found path $path");
+  Future<bool> loadSettings() async {
+    if (path == "") await setConfigDir();
+    if (cachePath == "") cachePath = await serviceHandler.getCacheDir();
+    if (SDKVer == 0) SDKVer = await serviceHandler.getSDKVersion();
+    if (Platform.isLinux || Platform.isWindows) appMode = "Desktop";
+
+    if(await checkForSettings()) {
+      await loadSettingsJson();
+    } else if(await checkForLegacySettings()) {
+      await loadLegacySettings();
+    } else {
+      await saveSettings();
     }
-    if (SDKVer == 0){
-      SDKVer = await getSDKVer();
-    }
-    if (cachePath == ""){
-      cachePath = await serviceHandler.getCacheDir();
-    }
-    if(Platform.isLinux){
-      appMode = "Desktop";
-    }
-    File settingsFile = new File(path+"settings.conf");
-    if (settingsFile.existsSync()){
-      List<String> settings = settingsFile.readAsLinesSync();
-      for (int i=0;i < settings.length; i++){
-        switch(settings[i].split(" = ")[0]){
-          case("Default Tags"):
-            if (settings[i].split(" = ").length > 1){
-              defTags = settings[i].split(" = ")[1];
-              // print("Found Default Tags " + settings[i].split(" = ")[1]);
-            }
-            break;
-          case("Limit"):
-            if (settings[i].split(" = ").length > 1){
-              limit = int.parse(settings[i].split(" = ")[1]);
-              // print("Found Limit " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Preview Mode"):
-            if (settings[i].split(" = ").length > 1){
-              previewMode = settings[i].split(" = ")[1];
-              // print("Found Preview Mode " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Portrait Columns"):
-            if (settings[i].split(" = ").length > 1){
-              portraitColumns = int.parse(settings[i].split(" = ")[1]);
-              // print("Found Portrait Columns " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Landscape Columns"):
-            if (settings[i].split(" = ").length > 1){
-              landscapeColumns = int.parse(settings[i].split(" = ")[1]);
-              // print("Found Landscape Columns " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Preload Count"):
-            if (settings[i].split(" = ").length > 1){
-              preloadCount = int.parse(settings[i].split(" = ")[1]);
-              // print("Found Preload Count " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Write Json"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                jsonWrite = true;
-              } else {
-                jsonWrite = false;
-              }
-              // print("Found jsonWrite " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Auto Play"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                autoPlayEnabled = true;
-              } else {
-                autoPlayEnabled = false;
-              }
-              // print("Found Auto Play " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Loading Gif"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                loadingGif = true;
-              } else {
-                loadingGif = false;
-              }
-              // print("Found Loading gif " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Image Cache"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                imageCache = true;
-              } else {
-                imageCache = false;
-              }
-              // print("Found Image Cache " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Media Cache"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                mediaCache = true;
-              } else {
-                mediaCache = false;
-              }
-              // print("Found Image Cache " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Video Cache Mode"):
-            if (settings[i].split(" = ").length > 1){
-              videoCacheMode = settings[i].split(" = ")[1];
-              // print("Found Video Cache Mode " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Share Action"):
-            if (settings[i].split(" = ").length > 1){
-              shareAction = settings[i].split(" = ")[1];
-              // print("Found Share Action " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Pref Booru"):
-            if (settings[i].split(" = ").length > 1){
-              prefBooru = settings[i].split(" = ")[1];
-              if(prefBooru.isEmpty){
-                prefBooru = "";
-              }
-              // print("Found Pref Booru " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Autohide Bar"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                autoHideImageBar = true;
-              } else {
-                autoHideImageBar = false;
-              }
-              // print("Auto hide image bar " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Snatch Cooldown"):
-            if (settings[i].split(" = ").length > 1){
-              snatchCooldown = int.parse(settings[i].split(" = ")[1]);
-              // print("Found Snatch cooldown " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Preview Display"):
-            if (settings[i].split(" = ").length > 1){
-              previewDisplay = settings[i].split(" = ")[1];
-              // print("Found Preview Display Mode " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Gallery Mode"):
-            if (settings[i].split(" = ").length > 1){
-              galleryMode = settings[i].split(" = ")[1];
-              // print("Found Gallery Mode " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Gallery Bar Position"):
-            if (settings[i].split(" = ").length > 1){
-              galleryBarPosition = settings[i].split(" = ")[1];
-              // print("Found Gallery Bar Position " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Gallery Scroll Direction"):
-            if (settings[i].split(" = ").length > 1){
-              galleryScrollDirection = settings[i].split(" = ")[1];
-              // print("Found Gallery Scroll Direction " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Enable Database"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                dbEnabled = true;
-              } else {
-                dbEnabled = false;
-              }
-              // print("Found dbEnabled " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Search History"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                searchHistoryEnabled = true;
-              } else {
-                searchHistoryEnabled = false;
-              }
-              // print("Found searchHistoryEnabled " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("App Mode"):
-            if (settings[i].split(" = ").length > 1){
-              appMode = settings[i].split(" = ")[1];
-              // print("App mode found " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Buttons Order"):
-            if (settings[i].split(" = ").length > 1){
-              buttonOrder = settings[i].split(" = ")[1].split(',').map((bstr) {
-                List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
-                return button;
-              }).where((el) => el[0] != 'null').toList(); // split button names string, get their [name, label] list, filter all wrong values
-              // print("Found Gallery Buttons Order " + settings[i].split(" = ")[1]);
-            }
-            break;
-          case("Hated Tags"):
-            if (settings[i].split(" = ").length > 1){
-              hatedTags = cleanTagsList(settings[i].split(" = ")[1].split(','));
-              // print("Found Hated Tags " + settings[i].split(" = ")[1]);
-            }
-            break;
-          case ("Filter Hated"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                filterHated = true;
-              } else {
-                filterHated = false;
-              }
-              // print("Found filterHated " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Loved Tags"):
-            if (settings[i].split(" = ").length > 1){
-              lovedTags = cleanTagsList(settings[i].split(" = ")[1].split(','));
-              // print("Found Loved Tags " + settings[i].split(" = ")[1]);
-            }
-            break;
-          case ("Volume Buttons Scroll"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                useVolumeButtonsForScroll = true;
-              } else {
-                useVolumeButtonsForScroll = false;
-              }
-              // print("Found useVolumeButtonsForScroll " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case("Volume Buttons Scroll Speed"):
-            if (settings[i].split(" = ").length > 1){
-              volumeButtonsScrollSpeed = int.parse(settings[i].split(" = ")[1]);
-              // print("Volume Buttons Scroll Speed " + settings[i].split(" = ")[1] );
-            }
-            break;
-          case ("Shit Device"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                shitDevice = true;
-              } else {
-                shitDevice = false;
-              }
-            }
-            break;
-          case ("Disable Video"):
-            if (settings[i].split(" = ").length > 1){
-              if (settings[i].split(" = ")[1] == "true"){
-                disableVideo = true;
-              } else {
-                disableVideo = false;
-              }
-            }
-            break;
-          case ("Ext Path"):
-            if (settings[i].split(" = ").length > 1){
-              extPathOverride = settings[i].split(" = ")[1];
-            }
-            break;
-          case ("Gallery Auto Scroll"):
-            if (settings[i].split(" = ").length > 1){
-              galleryAutoScrollTime = int.parse(settings[i].split(" = ")[1]);
-            }
-            break;
-        }
-      }
-    }
-    if(dbEnabled){
+
+    if (dbEnabled) {
       await dbHandler.dbConnect(path);
     } else {
-      dbHandler = new DBHandler();
+      dbHandler = DBHandler();
     }
+
     return true;
   }
-  Map toJSON() {
+
+  Future<bool> checkForSettings() async {
+    File settingsFile = File(path + "settings.json");
+    return await settingsFile.exists();
+  }
+  Future<void> loadSettingsJson() async {
+    File settingsFile = File(path + "settings.json");
+    String settings = await settingsFile.readAsString();
+    loadFromJSON(settings);
+    return;
+  }
+
+  Future<bool> checkForLegacySettings() async {
+    File settingsFile = File(path + "settings.conf");
+    return await settingsFile.exists();
+  }
+  Future<void> loadLegacySettings() async {
+    File settingsFile = File(path + "settings.conf");
+    List<String> settings = await settingsFile.readAsLines();
+    for (int i=0;i < settings.length; i++){
+      List<String> itemSplit = settings[i].split(" = ");
+      if (itemSplit.length < 2) continue; // skip where no ' = ' substring or no value after it
+      String itemName = itemSplit[0];
+      String itemValue = itemSplit[1]; // can be: string, int, double, bool, other special cases
+      switch(itemName) {
+        case("Default Tags"):
+          setByString('defTags', itemValue);
+          break;
+        case("Limit"):
+          setByString('limit', itemValue);
+          break;
+        case("Preview Mode"):
+          setByString('previewMode', itemValue);
+          break;
+        case("Portrait Columns"):
+          setByString('portraitColumns', itemValue);
+          break;
+        case("Landscape Columns"):
+          setByString('landscapeColumns', itemValue);
+          break;
+        case("Preload Count"):
+          setByString('preloadCount', itemValue);
+          break;
+        case("Write Json"):
+          setByString('jsonWrite', itemValue == "true");
+          break;
+        case("Auto Play"):
+          setByString('autoPlayEnabled', itemValue == "true");
+          break;
+        case("Loading Gif"):
+          setByString('loadingGif', itemValue == "true");
+          break;
+        case("Image Cache"):
+          setByString('imageCache', itemValue == "true");
+          break;
+        case("Media Cache"):
+          setByString('mediaCache', itemValue == "true");
+          break;
+        case("Video Cache Mode"):
+          setByString('videoCacheMode', itemValue);
+          break;
+        case("Share Action"):
+          setByString('shareAction', itemValue);
+          break;
+        case("Pref Booru"):
+          setByString('prefBooru', itemValue);
+          break;
+        case ("Autohide Bar"):
+          setByString('autoHideImageBar', itemValue == "true");
+          break;
+        case("Snatch Cooldown"):
+          setByString('snatchCooldown', itemValue);
+          break;
+        case ("Preview Display"):
+          setByString('previewDisplay', itemValue);
+          break;
+        case ("Gallery Mode"):
+          setByString('galleryMode', itemValue);
+          break;
+        case ("Gallery Bar Position"):
+          setByString('galleryBarPosition', itemValue);
+          break;
+        case ("Gallery Scroll Direction"):
+          setByString('galleryScrollDirection', itemValue);
+          break;
+        case ("Enable Database"):
+          setByString('dbEnabled', itemValue == "true");
+          break;
+        case ("Search History"):
+          setByString('searchHistoryEnabled', itemValue == "true");
+          break;
+        case ("App Mode"):
+          setByString('appMode', itemValue);
+          break;
+        case("Buttons Order"):
+          List<List<String>> tempOrder = itemValue.split(',').map((bstr) {
+            List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+            return button;
+          }).where((el) => el[0] != 'null').toList(); // split button names string, get their [name, label] list, filter all wrong values
+
+          tempOrder.addAll(buttonList.where((el) => !tempOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
+          buttonOrder = tempOrder;
+          break;
+        case("Hated Tags"):
+          hatedTags = cleanTagsList(itemValue.split(','));
+          break;
+        case ("Filter Hated"):
+          setByString('filterHated', itemValue == "true");
+          break;
+        case("Loved Tags"):
+          lovedTags = cleanTagsList(itemValue.split(','));
+          break;
+        case ("Volume Buttons Scroll"):
+          setByString('useVolumeButtonsForScroll', itemValue == "true");
+          break;
+        case("Volume Buttons Scroll Speed"):
+          setByString('volumeButtonsScrollSpeed', itemValue);
+          break;
+        case ("Shit Device"):
+          setByString('shitDevice', itemValue == "true");
+          break;
+        case ("Disable Video"):
+          setByString('disableVideo', itemValue == "true");
+          break;
+        case ("Ext Path"):
+          setByString('extPathOverride', itemValue);
+          break;
+        case ("Gallery Auto Scroll"):
+          setByString('galleryAutoScrollTime', itemValue);
+          break;
+      }
+    }
+    return;
+  }
+
+
+  dynamic getByString(String varName) {
+    switch (varName) {
+      case 'defTags':
+        return defTags;
+      case 'previewMode':
+        return previewMode;
+      case 'videoCacheMode':
+        return videoCacheMode;
+      case 'previewDisplay':
+        return previewDisplay;
+      case 'galleryMode':
+        return galleryMode;
+      case 'shareAction':
+        return shareAction;
+      case 'limit':
+        return limit;
+      case 'portraitColumns':
+        return portraitColumns;
+      case 'landscapeColumns':
+        return landscapeColumns;
+      case 'preloadCount':
+        return preloadCount;
+      case 'snatchCooldown':
+        return snatchCooldown;
+      case 'galleryBarPosition':
+        return galleryBarPosition;
+      case 'galleryScrollDirection':
+        return galleryScrollDirection;
+      case 'buttonOrder':
+        return buttonOrder;
+      case 'hatedTags':
+        return hatedTags;
+      case 'lovedTags':
+        return lovedTags;
+      case 'autoPlayEnabled':
+        return autoPlayEnabled;
+      case 'loadingGif':
+        return loadingGif;
+      case 'imageCache':
+        return imageCache;
+      case 'mediaCache':
+        return mediaCache;
+      case 'autoHideImageBar':
+        return autoHideImageBar;
+      case 'dbEnabled':
+        return dbEnabled;
+      case 'searchHistoryEnabled':
+        return searchHistoryEnabled;
+      case 'filterHated':
+        return filterHated;
+      case 'useVolumeButtonsForScroll':
+        return useVolumeButtonsForScroll;
+      case 'volumeButtonsScrollSpeed':
+        return volumeButtonsScrollSpeed;
+      case 'disableVideo':
+        return disableVideo;
+      case 'shitDevice':
+        return shitDevice;
+      case 'galleryAutoScrollTime':
+        return galleryAutoScrollTime;
+      case 'jsonWrite':
+        return jsonWrite;
+      case 'zoomButtonPosition':
+        return zoomButtonPosition;
+
+      // special settings, see toJSON
+      case 'prefBooru':
+        return prefBooru;
+      case 'appMode':
+        return appMode;
+      case 'extPathOverride':
+        return extPathOverride;
+      default:
+        return null;
+    }
+  }
+
+  dynamic setByString(String varName, dynamic value) {
+    dynamic validatedValue = validateValue(varName, value);
+    switch (varName) {
+      case 'defTags':
+        defTags = validatedValue;
+        break;
+      case 'previewMode':
+        previewMode = validatedValue;
+        break;
+      case 'videoCacheMode':
+        videoCacheMode = validatedValue;
+        break;
+      case 'previewDisplay':
+        previewDisplay = validatedValue;
+        break;
+      case 'galleryMode':
+        galleryMode = validatedValue;
+        break;
+      case 'shareAction':
+        shareAction = validatedValue;
+        break;
+      case 'limit':
+        limit = validatedValue;
+        break;
+      case 'portraitColumns':
+        portraitColumns = validatedValue;
+        break;
+      case 'landscapeColumns':
+        landscapeColumns = validatedValue;
+        break;
+      case 'preloadCount':
+        preloadCount = validatedValue;
+        break;
+      case 'snatchCooldown':
+        snatchCooldown = validatedValue;
+        break;
+      case 'galleryBarPosition':
+        galleryBarPosition = validatedValue;
+        break;
+      case 'galleryScrollDirection':
+        galleryScrollDirection = validatedValue;
+        break;
+
+      // TODO special cases
+      // case 'buttonOrder':
+      //   buttonOrder = validatedValue;
+      //   break;
+      // case 'hatedTags':
+      //   hatedTags = validatedValue;
+      //   break;
+      // case 'lovedTags':
+      //   lovedTags = validatedValue;
+      //   break;
+      case 'autoPlayEnabled':
+        autoPlayEnabled = validatedValue;
+        break;
+      case 'loadingGif':
+        loadingGif = validatedValue;
+        break;
+      case 'imageCache':
+        imageCache = validatedValue;
+        break;
+      case 'mediaCache':
+        mediaCache = validatedValue;
+        break;
+      case 'autoHideImageBar':
+        autoHideImageBar = validatedValue;
+        break;
+      case 'dbEnabled':
+        dbEnabled = validatedValue;
+        break;
+      case 'searchHistoryEnabled':
+        searchHistoryEnabled = validatedValue;
+        break;
+      case 'filterHated':
+        filterHated = validatedValue;
+        break;
+      case 'useVolumeButtonsForScroll':
+        useVolumeButtonsForScroll = validatedValue;
+        break;
+      case 'volumeButtonsScrollSpeed':
+        volumeButtonsScrollSpeed = validatedValue;
+        break;
+      case 'disableVideo':
+        disableVideo = validatedValue;
+        break;
+      case 'shitDevice':
+        shitDevice = validatedValue;
+        break;
+      case 'galleryAutoScrollTime':
+        galleryAutoScrollTime = validatedValue;
+        break;
+      case 'jsonWrite':
+        jsonWrite = validatedValue;
+        break;
+      case 'zoomButtonPosition':
+        zoomButtonPosition = validatedValue;
+        break;
+
+      // special settings, see toJSON
+      case 'prefBooru':
+        prefBooru = validatedValue;
+        break;
+      case 'appMode':
+        appMode = validatedValue;
+        break;
+      case 'extPathOverride':
+        extPathOverride = validatedValue;
+        break;
+      default:
+        break;
+    }
+  }
+
+
+  Map<String, dynamic> toJSON() {
     //Dont add prefbooru or appmode since,appmode will mess up syncing between desktop and mobile
     // prefbooru will mess up if the booru configs aren't synced
     return {
-      "defTags": "$defTags",
-      "previewMode": "$previewMode",
-      "videoCacheMode": "$videoCacheMode",
-      "previewDisplay": "$previewDisplay",
-      "galleryMode": "$galleryMode",
-      "shareAction" : "$shareAction",
-      "limit" : "$limit",
-      "portraitColumns" : "$portraitColumns",
-      "landscapeColumns" : "$landscapeColumns",
-      "preloadCount" : "$preloadCount",
-      "snatchCooldown" : "$snatchCooldown",
-      "galleryBarPosition" : "$galleryBarPosition",
-      "galleryScrollDirection" : "$galleryScrollDirection",
-      "buttonOrder": "${buttonOrder.map((e) => e[0]).join(',')}",
+      "defTags": valueToJson("defTags"),
+      "previewMode": valueToJson("previewMode"),
+      "videoCacheMode": valueToJson("videoCacheMode"),
+      "previewDisplay": valueToJson("previewDisplay"),
+      "galleryMode": valueToJson("galleryMode"),
+      "shareAction" : valueToJson("shareAction"),
+      "limit" : valueToJson("limit"),
+      "portraitColumns" : valueToJson("portraitColumns"),
+      "landscapeColumns" : valueToJson("landscapeColumns"),
+      "preloadCount" : valueToJson("preloadCount"),
+      "snatchCooldown" : valueToJson("snatchCooldown"),
+      "galleryBarPosition" : valueToJson("galleryBarPosition"),
+      "galleryScrollDirection" : valueToJson("galleryScrollDirection"),
+      "jsonWrite" : valueToJson("jsonWrite"),
+      "autoPlayEnabled" : valueToJson("autoPlayEnabled"),
+      "loadingGif" : valueToJson("loadingGif"),
+      "imageCache" : valueToJson("imageCache"),
+      "mediaCache": valueToJson("mediaCache"),
+      "autoHideImageBar" : valueToJson("autoHideImageBar"),
+      "dbEnabled" : valueToJson("dbEnabled"),
+      "searchHistoryEnabled" : valueToJson("searchHistoryEnabled"),
+      "filterHated" : valueToJson("filterHated"),
+      "useVolumeButtonsForScroll" : valueToJson("useVolumeButtonsForScroll"),
+      "volumeButtonsScrollSpeed" : valueToJson("volumeButtonsScrollSpeed"),
+      "disableVideo" : valueToJson("disableVideo"),
+      "shitDevice" : valueToJson("shitDevice"),
+      "galleryAutoScrollTime" : valueToJson("galleryAutoScrollTime"),
+      "zoomButtonPosition": valueToJson("zoomButtonPosition"),
+
+      //TODO
+      "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
       "hatedTags": cleanTagsList(hatedTags),
       "lovedTags": cleanTagsList(lovedTags),
-      "jsonWrite" : "${jsonWrite.toString()}",
-      "autoPlayEnabled" : "${autoPlayEnabled.toString()}",
-      "loadingGif" : "${loadingGif.toString()}",
-      "imageCache" : "${imageCache.toString()}",
-      "mediaCache": "${mediaCache.toString()}",
-      "autoHideImageBar" : "${autoHideImageBar.toString()}",
-      "dbEnabled" : "${dbEnabled.toString()}",
-      "searchHistoryEnabled" : "${searchHistoryEnabled.toString()}",
-      "filterHated" : "${filterHated.toString()}",
-      "useVolumeButtonsForScroll" : "${useVolumeButtonsForScroll.toString()}",
-      "volumeButtonsScrollSpeed" : "${volumeButtonsScrollSpeed.toString()}",
-      "disableVideo" : "${disableVideo.toString()}",
-      "shitDevice" : "${shitDevice.toString()}",
-      "galleryAutoScrollTime" : "${galleryAutoScrollTime.toString()}",
+
+      "prefBooru": valueToJson("prefBooru"),
+      "appMode": valueToJson("appMode"),
+      "extPathOverride": valueToJson("extPathOverride"),
+
+      "version": verStr,
+      "SDK": SDKVer,
     };
   }
-  Future<bool> loadFromJSON(String jsonString) async{
+
+  Future<bool> loadFromJSON(String jsonString) async {
     Map<String, dynamic> json = jsonDecode(jsonString);
-    List<List<String>> btnOrder = json["buttonorder"].map((bstr) {
+
+    List<List<String>> btnOrder = List<String>.from(json["buttonOrder"]).map((bstr) {
       List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
       return button;
     }).where((el) => el[0] != 'null').toList();
     buttonOrder = btnOrder;
 
-    List hateTags = json["hatedTags"];
-    List loveTags = json["lovedTags"];
+    List<String> hateTags = List<String>.from(json["hatedTags"]);
     for (int i = 0; i < hateTags.length; i++){
         if (!hatedTags.contains(hateTags.elementAt(i))){
           hatedTags.add(hateTags.elementAt(i));
         }
     }
+
+    List<String> loveTags = List<String>.from(json["lovedTags"]);
     for (int i = 0; i < loveTags.length; i++){
       if (!lovedTags.contains(loveTags.elementAt(i))){
         lovedTags.add(loveTags.elementAt(i));
       }
     }
-    defTags = json["defTags"];
-    previewMode = json["previewMode"];
-    videoCacheMode = json["videoCacheMode"];
-    previewDisplay = json["previewDisplay"];
-    galleryMode = json["galleryMode"];
-    shareAction = json["shareAction"];
-    galleryBarPosition = json["galleryBarPosition"];
-    galleryScrollDirection = json["galleryScrollDirection"];
-    limit = int.parse(json["limit"]);
-    portraitColumns = int.parse(json["portraitColumns"]);
-    landscapeColumns = int.parse(json["landscapeColumns"]);
-    preloadCount = int.parse(json["preloadCount"]);
-    snatchCooldown = int.parse(json["snatchCooldown"]);
-    jsonWrite = Tools.stringToBool(json["jsonWrite"]);
-    autoPlayEnabled = Tools.stringToBool(json["autoPlayEnabled"]);
-    loadingGif = Tools.stringToBool(json["loadingGif"]);
-    imageCache = Tools.stringToBool(json["imageCache"]);
-    mediaCache = Tools.stringToBool(json["mediaCache"]);
-    autoHideImageBar = Tools.stringToBool(json["autoHideImageBar"]);
-    dbEnabled = Tools.stringToBool(json["dbEnabled"]);
-    searchHistoryEnabled = Tools.stringToBool(json["searchHistoryEnabled"]);
-    filterHated = Tools.stringToBool(json["filterHated"]);
-    useVolumeButtonsForScroll = Tools.stringToBool(json["useVolumeButtonsForScroll"]);
-    volumeButtonsScrollSpeed = int.parse(json["volumeButtonsScrollSpeed"]);
-    disableVideo = Tools.stringToBool(json["disableVideo"]);
-    shitDevice = Tools.stringToBool(json["shitDevice"]);
-    galleryAutoScrollTime = int.parse(json["galleryAutoScrollTime"]);
-    print(toJSON());
-    await saveSettings();
+
+    List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
+    for(String key in leftoverKeys) {
+      setByString(key, json[key]);
+    }
+
     return true;
   }
 
-  Future<bool> saveSettings() async {
+  Future<bool> saveSettings({withMessage = true}) async {
     await getPerms();
-    if (path == ""){
-     path = await getExtDir();
-    }
-    print("writing settings------------------------------------------------------------------------------------");
+    if (path == "") await setConfigDir();
     await Directory(path).create(recursive:true);
-    File settingsFile = new File(path+"settings.conf");
+
+    File settingsFile = File(path + "settings.json");
+    var writer = settingsFile.openWrite();
+    writer.write(jsonEncode(toJSON()));
+    writer.close();
+
+    // if(withMessage) ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
+
+    Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
+    return true;
+  }
+
+  Future<bool> saveSettingsLegacy({withMessage = true}) async {
+    await getPerms();
+    if (path == "") await setConfigDir();
+    await Directory(path).create(recursive:true);
+
+    File settingsFile = File(path + "settings.conf");
     var writer = settingsFile.openWrite();
 
     writer.write("Default Tags = $defTags\n");
-    this.defTags = defTags;
+    // this.defTags = defTags;
 
     writer.write("Buttons Order = ${buttonOrder.map((e) => e[0]).join(',')}\n");
-    this.buttonOrder = buttonOrder;
+    // this.buttonOrder = buttonOrder;
 
     writer.write("Hated Tags = ${cleanTagsList(hatedTags).join(',')}\n");
-    this.hatedTags = hatedTags;
+    // this.hatedTags = hatedTags;
 
     writer.write("Filter Hated = $filterHated\n");
 
     writer.write("Loved Tags = ${cleanTagsList(lovedTags).join(',')}\n");
-    this.lovedTags = lovedTags;
+    // this.lovedTags = lovedTags;
 
     writer.write("Volume Buttons Scroll = $useVolumeButtonsForScroll\n");
     writer.write("Volume Buttons Scroll Speed = $volumeButtonsScrollSpeed\n");
@@ -466,7 +840,6 @@ class SettingsHandler {
       // Close writer and alert user
       writer.write("Limit = 20\n");
       ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit amount, Defaulting to 20");
-      //Get.snackbar("Settings Error","$limit is not a valid Limit",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
     }
     writer.write("Landscape Columns = $landscapeColumns\n");
     writer.write("Portrait Columns = $portraitColumns\n");
@@ -494,59 +867,79 @@ class SettingsHandler {
     writer.write("Ext Path = $extPathOverride\n");
     writer.write("Gallery Auto Scroll = $galleryAutoScrollTime\n");
     writer.close();
-    ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
-    //Get.snackbar("Settings Saved!","Some changes may not take effect until the search is refreshed or the app is restarted",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+    if(withMessage) ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
+
+    Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
     return true;
   }
 
-  Future<bool> getBooru() async{
-    booruList = [];
-    print("in getBooru");
-    int prefIndex = 0;
+  Future<bool> loadBoorus() async {
+    List<Booru> tempList = [];
     try {
-      if (path == ""){
-        path = await getExtDir();
+      if (path == "") await setConfigDir();
+
+      Directory directory = Directory(boorusPath);
+      Directory legacyDirectory = Directory(path);
+      bool fromLegacy = false;
+
+      // TODO get rid of this legacy logic after 2.1-2.2, when most users will update to json format
+      List files = [];
+      if(await directory.exists()) {
+        files = directory.listSync();
+      } else if(await legacyDirectory.exists()) {
+        fromLegacy = true;
+        files = legacyDirectory.listSync();
       }
-      var directory = new Directory(path);
-      List files = directory.listSync();
+
       if (files.length > 0) {
         for (int i = 0; i < files.length; i++) {
-          if (files[i].path.contains(".booru")) {
-            print(files[i].toString());
-            booruList.add(Booru.fromFile(files[i]));
-            if (booruList.last.type == "Hydrus"){
+          if (files[i].path.contains(fromLegacy ? ".booru" : ".json")) { // && files[i].path != 'settings.json'
+            // print(files[i].toString());
+            Booru booruFromFile = fromLegacy ? Booru.fromFileLegacy(files[i]) : Booru.fromJSON(files[i].readAsStringSync());
+            tempList.add(booruFromFile);
+            if(fromLegacy) {
+              saveBooru(booruFromFile, onlySave: true);
+            }
+            if (booruFromFile.type == "Hydrus") {
               hasHydrus = true;
             }
           }
         }
       }
-      if (dbEnabled && booruList.isNotEmpty){
-        booruList.add(new Booru("Favourites", "Favourites", "", "", ""));
-      }
-      if (prefBooru != "" && booruList.isNotEmpty){
-        booruList = await sortList();
-      } else{
-        print("NOT SORTING ===============");
-        print(prefBooru);
-        print(booruList.isNotEmpty);
+
+      if (dbEnabled && tempList.isNotEmpty){
+        tempList.add(Booru("Favourites", "Favourites", "", "", ""));
       }
     } catch (e){
-      print(e);
+      print('Booru loading error: $e');
+    }
+
+    // TODO boorus get duplicated on first load after legacy -> json
+    booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates after legacy -> json saving
+
+    if (tempList.isNotEmpty){
+      sortBooruList();
+    } else {
+      print(prefBooru);
+      print(tempList.isNotEmpty);
     }
     return true;
   }
-  Future<List<Booru>> sortList() async{
-    List<Booru> sorted = booruList;
-    booruList.sort((a, b) {
+
+
+
+  void sortBooruList() async {
+    List<Booru> sorted = [...booruList]; // spread the array just in case, to guarantee that we don't affect the original value
+    sorted.sort((a, b) {
       // sort alphabetically
       return a.name!.toLowerCase().compareTo(b.name!.toLowerCase());
     });
 
     int prefIndex = 0;
     for (int i = 0; i < sorted.length; i++){
-      if (sorted[i].name == prefBooru){
+      if (sorted[i].name == prefBooru && prefBooru.isNotEmpty){
         prefIndex = i;
-        print("prefIndex is" + prefIndex.toString());
+        // print("prefIndex is" + prefIndex.toString());
       }
     }
     if (prefIndex != 0){
@@ -566,14 +959,32 @@ class SettingsHandler {
       sorted.remove(tmp);
       sorted.add(tmp);
     }
-    return sorted;
+    booruList.value = sorted;
   }
-  Future saveBooru(Booru booru) async{
-    if (path == ""){
-      path = await getExtDir();
+
+  Future saveBooru(Booru booru, {bool onlySave: false}) async {
+    if (path == "") await setConfigDir();
+
+    await Directory(boorusPath).create(recursive:true);
+    File booruFile = File(boorusPath + "${booru.name}.json");
+    var writer = booruFile.openWrite();
+    writer.write(jsonEncode(booru.toJSON()));
+    writer.close();
+
+    if(!onlySave) {
+      // used only to avoid duplication after migration to json format
+      // TODO remove condition when migration logic is removed
+      booruList.add(booru);
+      sortBooruList();
     }
+    return true;
+  }
+
+  Future saveBooruLegacy(Booru booru) async {
+    if (path == "") await setConfigDir();
+
     await Directory(path).create(recursive:true);
-    File booruFile = new File(path+"${booru.name}.booru");
+    File booruFile = File(path + "${booru.name}.booru");
     var writer = booruFile.openWrite();
     writer.write("Booru Name = ${booru.name}\n");
     writer.write("Booru Type = ${booru.type}\n");
@@ -584,23 +995,26 @@ class SettingsHandler {
     writer.write("Default Tags = ${booru.defTags}\n");
     writer.close();
     booruList.add(booru);
+    sortBooruList();
     return true;
   }
+
   bool deleteBooru(Booru booru){
-    File booruFile = File(path+"${booru.name}.booru");
+    File booruFile = File(boorusPath + "${booru.name}.json");
     booruFile.deleteSync();
     if (prefBooru == booru.name){
       prefBooru = "";
       saveSettings();
     }
     booruList.remove(booru);
+    sortBooruList();
     return true;
   }
 
   List<List<String>> parseTagsList(List<String> itemTags, {bool isCapped = true}) {
     List<String> cleanItemTags = cleanTagsList(itemTags);
-    List<String> hatedInItem = this.hatedTags.where((tag) => cleanItemTags.contains(tag)).toList();
-    List<String> lovedInItem = this.lovedTags.where((tag) => cleanItemTags.contains(tag)).toList();
+    List<String> hatedInItem = hatedTags.where((tag) => cleanItemTags.contains(tag)).toList();
+    List<String> lovedInItem = lovedTags.where((tag) => cleanItemTags.contains(tag)).toList();
     List<String> soundInItem = ['sound', 'sound_edit', 'has_audio', 'voice_acted'].where((tag) => cleanItemTags.contains(tag)).toList();
     // TODO add more sound tags?
 
@@ -620,43 +1034,28 @@ class SettingsHandler {
     return tags.where((tag) => tag != "").map((tag) => tag.trim().toLowerCase()).toList();
   }
 
-  Future<String> getExtDir() async{
-    String path = "";
-    if (Platform.isAndroid){
-      path = await serviceHandler.getExtDir() + "/LoliSnatcher/config/";
-    } else if (Platform.isLinux){
-      path = Platform.environment['HOME']! + "/.loliSnatcher/config/";
-    } else if (Platform.isWindows) {
-      path = Platform.environment['LOCALAPPDATA']! + "/LoliSnatcher/config/";
-    }
-    return path;
+  Future<void> setConfigDir() async {
+    // print('-=-=-=-=-=-=-=-');
+    // print(Platform.environment);
+    path = await serviceHandler.getConfigDir();
+    boorusPath = path + 'boorus/';
+    return;
   }
-  Future getSDKVer() async{
-    if (Platform.isAndroid){
-      return await serviceHandler.getSDKVersion();
-    } else if (Platform.isLinux){
-      return 1;
-    } else if (Platform.isWindows) {
-      return 2;
-    } else {
-      return -1;
-    }
-  }
-  Future getDocumentsDir() async{
-    if (Platform.isAndroid){
-      return await serviceHandler.getDocumentsDir() + "/LoliSnatcher/config/";
-    } else if (Platform.isLinux){
-      return Platform.environment['HOME']! + "/.loliSnatcher/config/";
-    } else if (Platform.isWindows) {
-      path = Platform.environment['LOCALAPPDATA']! + "/LoliSnatcher/config/";
-    }
-  }
-  Future<bool> initialize() async{
+
+  Future<void> initialize() async{
     await getPerms();
     await loadSettings();
     if (booruList.isEmpty){
-      await getBooru();
+      await loadBoorus();
     }
-    return true;
+
+    // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
+    // print(toJSON());
+    // print(jsonEncode(toJSON()));
+
+    deviceSize = Get.mediaQuery.size;
+    devicePixelRatio = Get.mediaQuery.devicePixelRatio;
+    isInit.value = true;
+    return;
   }
 }

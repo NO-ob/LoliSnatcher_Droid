@@ -14,21 +14,21 @@ import 'package:LoliSnatcher/Tools.dart';
 
 class TagView extends StatefulWidget {
   BooruItem booruItem;
-  SearchGlobals searchGlobals;
-  SettingsHandler settingsHandler;
-  TagView(this.booruItem, this.searchGlobals, this.settingsHandler);
+  TagView(this.booruItem);
   @override
   _TagViewState createState() => _TagViewState();
 }
 
 class _TagViewState extends State<TagView> {
+  final SettingsHandler settingsHandler = Get.find();
+  final SearchHandler searchHandler = Get.find();
   List<List<String>> hatedAndLovedTags = [];
   ScrollController scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    hatedAndLovedTags = widget.settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: false);
+    hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: false);
   }
 
   Widget infoBuild() {
@@ -39,7 +39,7 @@ class _TagViewState extends State<TagView> {
     final String itemId = widget.booruItem.serverId ?? '';
     final String rating = widget.booruItem.rating ?? '';
     final String score = widget.booruItem.score ?? '';
-    final List<String> sources = widget.booruItem.sources ?? []; //TODO
+    final List<String> sources = widget.booruItem.sources ?? [];
     String postDate = widget.booruItem.postDate ?? '';
     final String postDateFormat = widget.booruItem.postDateFormat ?? '';
     String formattedDate = '';
@@ -51,7 +51,7 @@ class _TagViewState extends State<TagView> {
         if(postDateFormat == "unix"){
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
         } else {
-          postDate = postDate.replaceAll(new RegExp(r'(?:\+|\-)\d{4}'), '');
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
           parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();
         }
         // print(postDate);
@@ -94,7 +94,7 @@ class _TagViewState extends State<TagView> {
                 onPressed: () {
                   ServiceHandler.launchURL(link);
                 },
-                child: Text(link, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white))
+                child: Text(link, overflow: TextOverflow.ellipsis)
               )).toList()
             )
           ],
@@ -112,12 +112,13 @@ class _TagViewState extends State<TagView> {
         child: TextButton(
           onPressed: () {
             if(canCopy) {
-              Clipboard.setData(new ClipboardData(text: data));
+              Clipboard.setData(ClipboardData(text: data));
               ServiceHandler.displayToast('Copied $title to clipboard!');
             }
           },
           child: Row(children: [
-            Text('$title: ', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900)),
+            // TODO force tagview element to always be white text on black bg or adapt to current theme???
+            Text('$title: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white)),
             Expanded(child: Text(data, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white))),
           ])
         )
@@ -159,8 +160,8 @@ class _TagViewState extends State<TagView> {
                   child: TextButton(
                     onPressed: () {},
                     onLongPress: () {
-                      Clipboard.setData(new ClipboardData(text: currentTag));
-                      ServiceHandler.displayToast('"${currentTag}" copied to clipboard!');
+                      Clipboard.setData(ClipboardData(text: currentTag));
+                      ServiceHandler.displayToast('"$currentTag" copied to clipboard!');
                     },
                     child: MarqueeText(
                       text: currentTag,
@@ -174,29 +175,22 @@ class _TagViewState extends State<TagView> {
                 IconButton(
                   icon: Icon(
                     Icons.add,
-                    color: Get.context!.theme.accentColor,
+                    color: Get.theme.accentColor,
                   ),
                   onPressed: () {
                     setState(() {
-                      if (widget.searchGlobals.selectedBooru!.type == "Hydrus"){
-                        widget.searchGlobals.addTag.value = ", " + currentTag;
-                      } else {
-                        widget.searchGlobals.addTag.value = " " + currentTag;
-                      }
+                      searchHandler.addTag(currentTag);
                     });
                     ServiceHandler.displayToast("Added to search:\n"+ currentTag);
-                    //Get.snackbar("Added to search", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.fiber_new,
-                      color: Get.context!.theme.accentColor),
+                  icon: Icon(Icons.fiber_new, color: Get.theme.accentColor),
                   onPressed: () {
                     setState(() {
-                      widget.searchGlobals.newTab.value = currentTag;
+                      searchHandler.addTabByString(currentTag);
                     });
                     ServiceHandler.displayToast("Added new tab:\n" + currentTag);
-                    //Get.snackbar("Added new tab", "Tag: " + currentTag, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
                   },
                 ),
                 const SizedBox(width: 10),

@@ -15,7 +15,7 @@ class _InfoDialogState extends State<InfoDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Get.context!.theme.colorScheme.surface,
+      backgroundColor: Get.theme.cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: Container(
         margin: EdgeInsets.all(10),

@@ -60,9 +60,7 @@ class PhilomenaHandler extends BooruHandler{
           postDate: current['created_at'],
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
         ));
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }

@@ -1,16 +1,17 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-// import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:get/get.dart';
+// import 'package:flutter/services.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
-  String title;
+  Widget title;
   List<Widget> actions;
-  SearchGlobals searchGlobals;
   bool autoHide;
-  HideableAppBar(this.title, this.actions, this.searchGlobals, this.autoHide);
+  HideableAppBar(this.title, this.actions, this.autoHide);
 
   final double defaultHeight = kToolbarHeight; //56.0
   @override
@@ -20,24 +21,27 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  late StreamSubscription<bool> appbarListener;
+
   @override
   void initState() {
     super.initState();
-    widget.searchGlobals.displayAppbar.value = !widget.autoHide;
-    widget.searchGlobals.displayAppbar.addListener(setSt);
+    searchHandler.displayAppbar.value = !widget.autoHide;
+    appbarListener = searchHandler.displayAppbar.listen((bool value) {
+      setState(() {});
+    });
 
     // Hide system ui on first render
     // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
     // ServiceHandler.makeImmersive();
   }
-  void setSt(){
-    setState(() {});
-  }
+
   @override
   void dispose() {
-    widget.searchGlobals.displayAppbar.removeListener(setSt);
+    appbarListener.cancel();
 
-    // Return system ui after closing viewer
+    // Return system ui after closing gallery
     // ServiceHandler.makeNormal();
     super.dispose();
   }
@@ -53,7 +57,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         duration: Duration(milliseconds: 200),
         curve: Curves.linear,
         color: Colors.transparent,
-        height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
+        height: searchHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
         child: AppBar(
           // toolbarHeight: widget.defaultHeight,
           // elevation: 0, // set to zero to disable a shadow behind
@@ -66,7 +70,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           ),
           title: FittedBox(
             fit: BoxFit.fitWidth,
-            child: Text(widget.title, style: TextStyle(color: Colors.white)),
+            child: widget.title,
           ),
           actions: widget.actions,
         ),

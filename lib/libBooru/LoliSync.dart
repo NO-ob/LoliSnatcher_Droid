@@ -194,7 +194,7 @@ class LoliSync{
           break;
         case "Booru":
           yield "Sync Starting";
-          int booruCount = await settingsHandler.booruList.length;
+          int booruCount = settingsHandler.booruList.length;
           if (booruCount > 0){
             for (int i = 0; i < booruCount; i++){
               if (!syncKilled){

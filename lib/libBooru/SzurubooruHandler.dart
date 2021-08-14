@@ -20,7 +20,7 @@ class SzurubooruHandler extends BooruHandler{
       return tags;
     }
   }
-  void parseResponse(response){
+  void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
@@ -41,7 +41,7 @@ class SzurubooruHandler extends BooruHandler{
         }
       }
       if(current['contentUrl'] != null){
-        fetched.add(new BooruItem(
+        fetched.add(BooruItem(
           fileURL: "${booru.baseURL}/"+current['contentUrl'],
           fileWidth: current['canvasWidth'].toDouble(),
           fileHeight: current['canvasHeight'].toDouble(),
@@ -55,10 +55,7 @@ class SzurubooruHandler extends BooruHandler{
           postDate: current['creationTime'].substring(0,22),
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS",
         ));
-
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }
@@ -77,7 +74,7 @@ class SzurubooruHandler extends BooruHandler{
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "${booru.baseURL}/api/posts/?offset=${pageNum*limit}&limit=${limit.toString()}&query=$tags";
+    return "${booru.baseURL}/api/posts/?offset=${pageNum.value*limit}&limit=${limit.toString()}&query=$tags";
     }
 
   String makeTagURL(String input){

@@ -68,10 +68,7 @@ class ShimmieHandler extends BooruHandler{
             postDateFormat: 'yyyy-MM-dd HH:mm:ss.SSSSSS'
         ));
       }
-
-      if(dbHandler!.db != null){
-        setTrackedValues(fetched.length - 1);
-      }
+      setTrackedValues(fetched.length - 1);
     }
   }
   // This will create a url to goto the images page in the browser
@@ -103,7 +100,7 @@ class ShimmieHandler extends BooruHandler{
       final response = await http.get(uri,headers: getWebHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(new RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
+        searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "ShimmieHandler", "tagSearch", LogTypes.exception);
@@ -111,7 +108,7 @@ class ShimmieHandler extends BooruHandler{
     return searchTags;
   }
 
-  void searchCount(String input) async {
+  Future<void> searchCount(String input) async {
     int result = 0;
     if (booru.baseURL!.contains("rule34.paheal.net") && input != ''){ // paheal limits any search to 500 pages => empty input returns wrong count
       String url = makeURL(input);
@@ -130,6 +127,7 @@ class ShimmieHandler extends BooruHandler{
         Logger.Inst().log(e.toString(), "ShimmieHandler", "searchCount", LogTypes.booruHandlerInfo);
       }
     }
-    this.totalCount = result;
+    totalCount.value = result;
+    return;
   }
 }

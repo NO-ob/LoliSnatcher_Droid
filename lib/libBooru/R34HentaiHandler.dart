@@ -1,12 +1,10 @@
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart';
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
 import 'dart:convert';
-import 'package:LoliSnatcher/Tools.dart';
+
 /**
  * Booru Handler for the r34hentai engine
  */
@@ -16,17 +14,18 @@ class R34HentaiHandler extends BooruHandler{
   bool tagSearchEnabled = false;
 
   @override
-  Future Search(String tags,int pageNum) async{
+  Future Search(String tags, int? pageNumCustom) async{
     if(booru.apiKey == ""){
       booru.apiKey = null;
     }
-    return super.Search(tags, pageNum);
+    return super.Search(tags, pageNumCustom);
   }
 
   @override
   Map<String,String> getHeaders(){
     return {"Accept": "application/json", 'Cookie': '${booru.apiKey};', "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"};
   }
+
   @override
   String validateTags(tags){
     if(tags == " " || tags == ""){
@@ -35,8 +34,9 @@ class R34HentaiHandler extends BooruHandler{
       return tags;
     }
   }
+
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     List<dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse; // Limit doesn't work with this api
     // Create a BooruItem for each post in the list
@@ -50,17 +50,16 @@ class R34HentaiHandler extends BooruHandler{
       String sampleUrl = current['sample_url'];
       String thumbnailUrl = current['preview_url'];
 
-      fetched.add(new BooruItem(
+      fetched.add(BooruItem(
         fileURL: imageUrl,
         sampleURL: sampleUrl,
         thumbnailURL: thumbnailUrl,
         tagsList: current['tags'].split(' '),
         postURL: makePostURL(current['id'].toString()),
       ));
-      if(dbHandler!.db != null){
-        setTrackedValues(fetched.length - 1);
-      }
+      setTrackedValues(fetched.length - 1);
     }
+    return;
   }
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
@@ -88,7 +87,7 @@ class R34HentaiHandler extends BooruHandler{
     // // Don't search until at least 2 symbols are entered
     // if(input.length > 1) { 
     //   try {
-    //     Map<String,String> requestBody = {"text": input.replaceAll(new RegExp(r'^-'), '')};
+    //     Map<String,String> requestBody = {"text": input.replaceAll(RegExp(r'^-'), '')};
     //     final response = await http.post(url, headers: {
     //       "Accept": "application/json",
     //       "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"

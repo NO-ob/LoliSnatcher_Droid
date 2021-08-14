@@ -3,47 +3,61 @@ import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' as GET;
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 
 
 class CachedThumb extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final int columnCount;
-  final SettingsHandler settingsHandler;
-  final SearchGlobals searchGlobals;
+  final SearchGlobal searchGlobal;
   final bool isHated;
-  CachedThumb(this.booruItem, this.index, this.settingsHandler, this.searchGlobals, this.columnCount, this.isHated);
+  final bool isHero;
+  CachedThumb(this.booruItem, this.index, this.searchGlobal, this.columnCount, this.isHated, this.isHero);
 
   @override
   _CachedThumbState createState() => _CachedThumbState();
 }
 
 class _CachedThumbState extends State<CachedThumb> {
+  final SettingsHandler settingsHandler = GET.Get.find();
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0, _restartedCount = 0;
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isVisible = false, isForVideo = false;
-  Timer? _debounceBytes, _restartDelay;
+  Timer? _debounceBytes, _restartDelay, _debounceStart;
   Dio? _client;
   CancelToken? _dioCancelToken;
   ImageProvider? thumbProvider;
+  bool? isThumbQuality;
   late String thumbURL;
+
+  @override
+  void didUpdateWidget(CachedThumb oldWidget) {
+    // force redraw on tab change
+    if(oldWidget.booruItem != widget.booruItem) {
+      restartLoading();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
 
   /// Author: [Nani-Sore] ///
   Future<void> downloadThumb() async {
-    final String? filePath = await imageWriter.getCachePath(thumbURL, widget.settingsHandler.previewMode == 'Sample' ? 'samples' : 'thumbnails',widget.settingsHandler);
+    final String? filePath = await imageWriter.getCachePath(thumbURL, isThumbQuality == true ? 'thumbnails' : 'samples');
 
     // If file is in cache - load
     if (filePath != null) {
@@ -73,7 +87,7 @@ class _CachedThumbState extends State<CachedThumb> {
       //// GET request
       Response<dynamic> response = await _client!.get(
         thumbURL,
-        options: Options(responseType: ResponseType.bytes, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobals, checkForReferer: true)),
+        options: Options(responseType: ResponseType.bytes, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)),
         cancelToken: _dioCancelToken,
         onReceiveProgress: (received, total) {
           if(total > 0) _total = total;
@@ -85,17 +99,19 @@ class _CachedThumbState extends State<CachedThumb> {
       // Sometimes stream ends before fully loading, so we require at least 95% loaded to write to cache
       if (response.data != null && _received > (_total * 0.95)) {
         // resize thumbnail to 500px if wider OR 10px if contains hated tags
-        thumbProvider = getImageProvider(Uint8List.fromList(response.data!));
+        Uint8List temp = Uint8List.fromList(response.data!);
+        thumbProvider = getImageProvider(temp);
 
         isVisible = true;
         if(this.mounted) setState(() { });
-        if (widget.settingsHandler.imageCache) {
-          imageWriter.writeCacheFromBytes(thumbURL, response.data!, widget.settingsHandler.previewMode == 'Sample' ? 'samples' : 'thumbnails',widget.settingsHandler);
+        if (settingsHandler.imageCache) {
+          imageWriter.writeCacheFromBytes(thumbURL, response.data!, isThumbQuality == true ? 'thumbnails' : 'samples');
         }
       } else {
         print('Thumbnail load incomplete');
         throw('Load Incomplete');
       }
+      return;
     } on DioError catch(e) {
       //// Error handling
       if (CancelToken.isCancel(e)) {
@@ -116,53 +132,59 @@ class _CachedThumbState extends State<CachedThumb> {
         }
         print('Dio request cancelled: $e');
       }
+      return;
     }
   }
 
   ImageProvider getImageProvider(Uint8List bytes) {
-    int? thumbWidth;
-    int? thumbHeight;
-    if (widget.isHated) {
-      // pixelate hated images
-      thumbWidth = thumbHeight = 6;
-    } else if (this.mounted) {
+    double? thumbWidth = 100; // set minimum value to avoid exceptions when it attempts to render outside of the view
+    double? thumbHeight;
+    if (this.mounted) {
       // mediaquery will throw an exception if we try to read it after disposing => check mounted
       final MediaQueryData mQuery = MediaQuery.of(context);
-      final double widthLimit = (mQuery.size.width / widget.columnCount) * mQuery.devicePixelRatio;
+      final double widthLimit = (mQuery.size.width / widget.columnCount) * mQuery.devicePixelRatio * 1;
       double thumbRatio = 1;
 
-      switch (widget.settingsHandler.previewDisplay) {
-        case 'Rectangle':
-          // resize to height for rectangle mode
-          thumbRatio = 16 / 9;
-          thumbHeight = (widthLimit * thumbRatio).round();
-          break;
-        case 'Staggered':
-          bool hasSizeData = widget.booruItem.fileHeight != null && widget.booruItem.fileWidth != null;
-          if (hasSizeData) {
-            thumbRatio = widget.booruItem.fileWidth! / widget.booruItem.fileHeight!;
-            if(thumbRatio < 1) { // vertical image - resize to width
-              thumbWidth = widthLimit.round();
-            } else { // horizontal image - resize to height
-              thumbHeight = (widthLimit * thumbRatio).round();
+      if (widget.isHated) {
+        // pixelate hated images
+        thumbWidth = mQuery.size.width * 0.01; // thumbHeight = 6;
+      } else {
+        switch (settingsHandler.previewDisplay) {
+          case 'Rectangle':
+            thumbRatio = 16 / 9;
+            // thumbHeight = widthLimit * thumbRatio;
+            thumbWidth = widthLimit;
+            break;
+          case 'Staggered':
+            bool hasSizeData = widget.booruItem.fileHeight != null && widget.booruItem.fileWidth != null;
+            if (hasSizeData) { // if api gives size data
+              thumbRatio = widget.booruItem.fileWidth! / widget.booruItem.fileHeight!;
+              if(thumbRatio < 1) { // vertical image - resize to width
+                thumbWidth = widthLimit;
+              } else { // horizontal image - resize to height
+                thumbHeight = widthLimit * thumbRatio;
+              }
+            } else {
+              thumbWidth = widthLimit;
             }
-          } else {
-            thumbWidth = widthLimit.round();
-          }
-          break;
-        case 'Waterfall':
-        default:
-          // otherwise resize to widthLimit
-          thumbWidth = widthLimit.round();
-          break;
+            break;
+          case 'Square':
+          default:
+            // otherwise resize to widthLimit
+            thumbWidth = widthLimit;
+            break;
+        }
       }
     }
 
-    return ResizeImage(
-      MemoryImage(bytes),
-      width: thumbWidth,
-      height: thumbHeight,
-    );
+    // debugPrint('ThumbWidth: $thumbWidth');
+
+    return MemoryImageTest(bytes, imageUrl: thumbURL);
+    // return ResizeImage(
+    //   MemoryImage(bytes),
+    //   width: thumbWidth.round(), // ?.
+    //   height: thumbHeight?.round(),
+    // );
   }
 
   /// Author: [Nani-Sore] ///
@@ -183,7 +205,7 @@ class _CachedThumbState extends State<CachedThumb> {
     selectThumbProvider();
   }
 
-  void selectThumbProvider() async {
+  void selectThumbProvider() {
     // bool isVideo = widget.thumbType == "video" && (thumbURL.endsWith(".webm") || thumbURL.endsWith(".mp4"));
     // if (isVideo) {
     //   isForVideo = true; // disabled - hangs the app
@@ -191,10 +213,14 @@ class _CachedThumbState extends State<CachedThumb> {
     //   downloadThumb();
     // }
 
-    bool isThumb = widget.settingsHandler.previewMode == "Thumbnail" || (widget.booruItem.mediaType == 'animation' || widget.booruItem.mediaType == 'video');
-    thumbURL = isThumb ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
+    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (widget.booruItem.mediaType == 'animation' || widget.booruItem.mediaType == 'video');
+    thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
 
-    downloadThumb();
+    // delay loading a little to improve performance when scrolling fast
+    _debounceStart = Timer(Duration(milliseconds: 200), () {
+      downloadThumb();
+    });
+    return;
   }
 
   Future<Uint8List?> getVideoThumb() async {
@@ -209,6 +235,8 @@ class _CachedThumbState extends State<CachedThumb> {
     _total = 0;
     _received = 0;
     isFromCache = false;
+    thumbProvider?.evict();
+    thumbProvider = null;
     if(this.mounted) setState(() { });
 
     selectThumbProvider();
@@ -225,14 +253,15 @@ class _CachedThumbState extends State<CachedThumb> {
     thumbProvider?.evict();
     _restartDelay?.cancel();
     _debounceBytes?.cancel();
+    _debounceStart?.cancel();
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
-    // _client?.close(force: true);
+    _client?.close(force: true);
   }
 
   Widget loadingElementBuilder(BuildContext ctx, Widget? child, ImageChunkEvent? loadingProgress) {
-    // if (loadingProgress == null && !widget.settingsHandler.imageCache) {
+    // if (loadingProgress == null && !settingsHandler.imageCache) {
     //   // Resulting image for network loaded thumbnail
     //   return child;
     // }
@@ -276,11 +305,11 @@ class _CachedThumbState extends State<CachedThumb> {
             width: 100 / widget.columnCount,
             child: CircularProgressIndicator(
               strokeWidth: 14 / widget.columnCount,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
+              valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
               value: percentDone,
             ),
           ),
-          if(widget.columnCount < 4 && percentDoneText != null) // Text element overflows if too many thumbnails are shown
+          if(widget.columnCount < 5 && percentDoneText != null) // Text element overflows if too many thumbnails are shown
             ...[
               Padding(padding: EdgeInsets.only(bottom: 10)),
               Text(
@@ -292,6 +321,72 @@ class _CachedThumbState extends State<CachedThumb> {
             ],
         ]
         : [],
+    );
+  }
+
+  Widget renderImages(BuildContext context, bool isHero) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        if(isThumbQuality == false && !widget.isHated) // fetch thumbnail from network while loading a sample
+          AnimatedSwitcher(
+            duration: Duration(milliseconds: 1000),
+            child: isVisible // hide temp thumbnail when sample is loaded
+              ? null
+              : FadeInImage( // fade in thumbnail
+                placeholder: MemoryImage(kTransparentImage),
+                image: NetworkImage(widget.booruItem.thumbnailURL, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)),
+                fadeInDuration: Duration(milliseconds: 200),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              )
+          ),
+
+        // Image( // just load image from network - debug
+        //   image: ResizeImage(
+        //     NetworkImage(thumbURL, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)),
+        //     width: ((MediaQuery.of(context).size.width / widget.columnCount) * MediaQuery.of(context).devicePixelRatio).round()
+        //   ),
+        //   fit: BoxFit.cover,
+        //   width: double.infinity,
+        //   height: double.infinity,
+        // ),
+
+        AnimatedOpacity( // fade in image
+          opacity: isVisible ? 1.0 : 0.0,
+          duration: Duration(milliseconds: 300),
+          child: thumbProvider != null
+            ? Image(
+                image: thumbProvider!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              )
+            : null
+        ),
+
+        if(thumbProvider == null && isHero)
+          loadingElementBuilder(context, null, null),
+
+        if(widget.isHated)
+          Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.66),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            width: 50,
+            height: 50,
+            child: Icon(CupertinoIcons.eye_slash, color: Colors.white)
+          ),
+
+        if (settingsHandler.showURLOnThumb.value)
+          Container(
+            color: Colors.black,
+            child: Text(thumbURL),
+          ),
+      ]
     );
   }
 
@@ -308,9 +403,9 @@ class _CachedThumbState extends State<CachedThumb> {
     //         if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
     //           return Image(
     //             image: ResizeImage(MemoryImage(Uint8List.fromList(snapshot.data!)), width: 500), //ResizeImage(MemoryImage(_totalBytes), width: 500, allowUpscaling: true),
-    //             fit: widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
-    //             width: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
-    //             height: widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
+    //             fit: settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain ,
+    //             width: settingsHandler.previewDisplay == "Waterfall" ? double.infinity : Get.width,
+    //             height: settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
     //           );
     //         } else {
     //           return CircularProgressIndicator();
@@ -319,47 +414,13 @@ class _CachedThumbState extends State<CachedThumb> {
     //   );
     // }
 
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        if(thumbProvider == null)
-          loadingElementBuilder(context, null, null),
-
-          AnimatedOpacity(
-            opacity: isVisible ? 1.0 : 0.0,
-            duration: Duration(milliseconds: 300),
-            child: thumbProvider != null
-              ? 
-              Hero(
-                tag: 'imageHero' + widget.index.toString(),
-                child: Image(
-                  image: thumbProvider!, //ResizeImage(MemoryImage(_totalBytes), width: 500, allowUpscaling: true),
-                  fit: BoxFit.cover, //widget.settingsHandler.previewDisplay == "Waterfall" ? BoxFit.cover : BoxFit.contain,
-                  width: double.infinity, //widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
-                  height: double.infinity, //widget.settingsHandler.previewDisplay == "Waterfall" ? double.infinity : null,
-                )
-              )
-              : null
-          ),
-
-        if(widget.isHated)
-          Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.66),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            width: 50,
-            height: 50,
-            child: Icon(CupertinoIcons.eye_slash, color: Colors.white)
-          ),
-        if (widget.settingsHandler.showURLInThumb)
-          Container(
-            color: Colors.black,
-            child: Text(thumbURL),
-          )
-
-      ]
-    );
+    if(widget.isHero) {
+      return Hero(
+        tag: 'imageHero' + widget.index.toString(),
+        child: renderImages(context, widget.isHero),
+      );
+    } else {
+      return renderImages(context, widget.isHero);
+    }
   }
 }

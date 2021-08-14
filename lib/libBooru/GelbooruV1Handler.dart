@@ -22,7 +22,7 @@ class GelbooruV1Handler extends BooruHandler{
         return tags;
       }
     }
-    void parseResponse(response){
+    void parseResponse(response) {
       var document = parse(response.body);
       var spans = document.getElementsByClassName("thumb");
       for (int i = 0; i < spans.length; i++){
@@ -43,9 +43,7 @@ class GelbooruV1Handler extends BooruHandler{
             md5String: getHashFromURL(thumbURL),
             postURL: makePostURL(id),
           ));
-          if(dbHandler!.db != null){
-            setTrackedValues(fetched.length - 1);
-          }
+          setTrackedValues(fetched.length - 1);
         }
       }
     }
@@ -59,6 +57,6 @@ class GelbooruV1Handler extends BooruHandler{
     }
     // This will create a url for the http request
     String makeURL(String tags){
-      return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum * 20).toString()}";
+      return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum.value * 20).toString()}";
     }
 }

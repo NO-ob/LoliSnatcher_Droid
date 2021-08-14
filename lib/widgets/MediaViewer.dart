@@ -4,8 +4,10 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' as GET;
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
@@ -19,17 +21,20 @@ import 'package:LoliSnatcher/widgets/BorderedText.dart';
 class MediaViewer extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
-  final SearchGlobals searchGlobals;
-  final SettingsHandler settingsHandler;
-  MediaViewer(this.booruItem, this.index, this.searchGlobals, this.settingsHandler);
+  final SearchGlobal searchGlobal;
+  MediaViewer(this.booruItem, this.index, this.searchGlobal);
 
   @override
   _MediaViewerState createState() => _MediaViewerState();
 }
 
 class _MediaViewerState extends State<MediaViewer> {
+  final SettingsHandler settingsHandler = GET.Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = GET.Get.find<SearchHandler>();
+
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
+  StreamSubscription<bool>? appbarListener;
 
   final ImageWriter imageWriter = ImageWriter();
   int _total = 0, _received = 0;
@@ -48,9 +53,19 @@ class _MediaViewerState extends State<MediaViewer> {
   Dio? _client;
   CancelToken? _dioCancelToken;
 
+  @override
+  void didUpdateWidget(MediaViewer oldWidget) {
+    // force redraw on tab change
+    if(oldWidget.booruItem != widget.booruItem) {
+      killLoading([]);
+      setState(() {initViewer(false);});
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
   /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
-    final String? filePath = await imageWriter.getCachePath(imageURL!, imageType!,widget.settingsHandler);
+    final String? filePath = await imageWriter.getCachePath(imageURL!, imageType!);
 
     // If file is in cache - load
     // print(filePath);
@@ -77,7 +92,7 @@ class _MediaViewerState extends State<MediaViewer> {
       //// GET request
       Response<dynamic> response = await _client!.get(
         imageURL!,
-        options: Options(responseType: ResponseType.bytes, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobals, checkForReferer: true)),
+        options: Options(responseType: ResponseType.bytes, headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)),
         cancelToken: _dioCancelToken,
         onReceiveProgress: (received, total) {
           _total = total;
@@ -93,8 +108,8 @@ class _MediaViewerState extends State<MediaViewer> {
 
         _checkInterval?.cancel();
 
-        if(widget.settingsHandler.mediaCache) {
-          imageWriter.writeCacheFromBytes(imageURL!, response.data!, imageType!,widget.settingsHandler);
+        if(settingsHandler.mediaCache) {
+          imageWriter.writeCacheFromBytes(imageURL!, response.data!, imageType!);
         }
       } else {
         print('Image load incomplete');
@@ -129,12 +144,15 @@ class _MediaViewerState extends State<MediaViewer> {
   @override
   void initState() {
     super.initState();
-    widget.searchGlobals.displayAppbar.addListener(setZoomVisibility);
+    appbarListener = searchHandler.displayAppbar.listen((bool value) {
+      isZoomButtonVisible = value;
+      setState(() { });
+    });
     initViewer(false);
   }
 
   void initViewer(bool ignoreTagsCheck) {
-    if ((widget.settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) || widget.booruItem.sampleURL == widget.booruItem.fileURL){
+    if ((settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) || widget.booruItem.sampleURL == widget.booruItem.fileURL){
       // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
       imageURL = widget.booruItem.sampleURL;
       imageType = 'samples';
@@ -144,13 +162,13 @@ class _MediaViewerState extends State<MediaViewer> {
     }
 
     // load thumbnail preview
-    bool isThumbSample = widget.settingsHandler.previewMode == "Sample" && widget.booruItem.mediaType != "animation" && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL;
+    bool isThumbSample = settingsHandler.previewMode == "Sample" && widget.booruItem.mediaType != "animation" && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL;
     thumbnailFileURL = isThumbSample ? widget.booruItem.sampleURL : widget.booruItem.thumbnailURL;
     thumbnailFolder = isThumbSample ? 'samples' : 'thumbnails';
     bool isPreviewEqualToFull = thumbnailFileURL == widget.booruItem.fileURL;
     if(!isPreviewEqualToFull) getThumbnail();
 
-    List<List<String>> hatedAndLovedTags = widget.settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+    List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
     if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
       isHated = true;
       thumbnailBlur = 20;
@@ -177,11 +195,11 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   void getThumbnail() async {
-    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!,widget.settingsHandler);
+    String? previewPath = await imageWriter.getCachePath(thumbnailFileURL!, thumbnailFolder!);
     File? preview = previewPath != null ? File(previewPath) : null;
 
     if (preview != null){
-      thumbProvider = ResizeImage(MemoryImage(await preview.readAsBytes()), width: 4096); // FileImage(preview);
+      thumbProvider = ResizeImage(MemoryImage(await preview.readAsBytes()), width: 2048); // FileImage(preview);
     } else {
       thumbProvider = NetworkImage(thumbnailFileURL!);
     }
@@ -189,7 +207,7 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   ImageProvider getImageProvider(Uint8List bytes) {
-    return ResizeImage(MemoryImage(bytes), width: 4096);
+    return ResizeImage(MemoryImage(bytes), width: (settingsHandler.deviceSize!.width * settingsHandler.devicePixelRatio! * 1.5).round());
   }
 
   void killLoading(List<String> reason) {
@@ -231,7 +249,7 @@ class _MediaViewerState extends State<MediaViewer> {
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
 
-    widget.searchGlobals.displayAppbar.removeListener(setZoomVisibility);
+    appbarListener?.cancel();
 
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
@@ -261,11 +279,6 @@ class _MediaViewerState extends State<MediaViewer> {
     setState(() { });
   }
 
-  void setZoomVisibility() {
-    isZoomButtonVisible = widget.searchGlobals.displayAppbar.value;
-    setState(() { });
-  }
-
   Widget zoomButtonBuild() {
     if(isZoomButtonVisible && mainProvider != null) {
       return Positioned(
@@ -273,7 +286,7 @@ class _MediaViewerState extends State<MediaViewer> {
         right: -15,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            primary: Theme.of(context).colorScheme.secondary.withOpacity(0.33),
+            primary: Theme.of(context).accentColor.withOpacity(0.33),
             minimumSize: Size(28, 28),
             padding: EdgeInsets.all(3),
           ),
@@ -289,12 +302,12 @@ class _MediaViewerState extends State<MediaViewer> {
 
   /// Author: [Nani-Sore] ///
   Widget loadingElementBuilder(BuildContext ctx, ImageChunkEvent? loadingProgress) {
-    if(widget.settingsHandler.loadingGif) {
+    if(settingsHandler.loadingGif) {
       return Container(
         width: MediaQuery.of(context).size.width - 30,
         child: Image(image: AssetImage('assets/images/loading.gif'))
       );
-    } else if(widget.settingsHandler.shitDevice) {
+    } else if(settingsHandler.shitDevice) {
       return Center(child: CircularProgressIndicator());
     }
 
@@ -338,16 +351,16 @@ class _MediaViewerState extends State<MediaViewer> {
     double opacityValue = startOpacity + (1 - startOpacity) * lerpDouble(0.0, 1.0, percentDone ?? 0.33)!;
 
     return Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          image: thumbProvider != null 
-          ? DecorationImage(
-              image: thumbProvider!,
-              fit: BoxFit.contain,
-              colorFilter: ColorFilter.mode(Colors.black.withOpacity(opacityValue), BlendMode.dstATop)
-          )
-          : null,
-        ),
+        // decoration: BoxDecoration(
+        //   color: Colors.black,
+        //   image: thumbProvider != null 
+        //   ? DecorationImage(
+        //       image: thumbProvider!,
+        //       fit: BoxFit.contain,
+        //       colorFilter: ColorFilter.mode(Colors.black.withOpacity(opacityValue), BlendMode.dstATop)
+        //   )
+        //   : null,
+        // ),
         child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: thumbnailBlur, sigmaY: thumbnailBlur),
             child: Container(
@@ -359,123 +372,135 @@ class _MediaViewerState extends State<MediaViewer> {
                     child: RotatedBox(
                       quarterTurns: -1,
                       child: LinearProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
+                          valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                          backgroundColor: Colors.transparent,
                           value: percentDone),
                     ),
                   ),
-                  Column(
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width - 80,
+                    child: Column(
                       // move loading info lower if preview is of sample quality (except when item is hated)
                       mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
-                      children: widget.settingsHandler.loadingGif
-                          ? [
-                              Container(
-                                width: MediaQuery.of(context).size.width - 30,
-                                child: Image(image: AssetImage('assets/images/loading.gif'))
-                              ),
-                              const SizedBox(height: 30),
-                            ]
-                          : (isStopped
-                            ? [
-                                ...stopReason.map((reason){
-                                  return BorderedText(
-                                    child: Text(
-                                      reason,
-                                      style: TextStyle(
-                                        fontSize: 22,
-                                      ),
-                                    )
-                                  );
-                                }),
-                                TextButton.icon(
-                                  icon: Icon(Icons.play_arrow, size: 44),
-                                  label: BorderedText(
-                                    child: Text(
-                                      isHated ? 'Load Anyway' : 'Restart Loading',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                      ),
-                                    )
+                      children: isStopped
+                        ? [
+                            ...stopReason.map((reason){
+                              return BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  reason,
+                                  style: TextStyle(
+                                    fontSize: 18,
                                   ),
-                                  onPressed: () {
-                                    setState(() { initViewer(true); });
-                                  },
-                                ),
-                                if(isMovedBelow) const SizedBox(height: 60),
-                              ]
-                            : [
-                              if(percentDoneText != '')
-                                BorderedText(
-                                  child: Text(
-                                    percentDoneText,
-                                    style: TextStyle(
-                                      fontSize: 28,
-                                    ),
-                                  )
-                                ),
-                              if(filesizeText != '')
-                                BorderedText(
-                                  child: Text(
-                                    filesizeText,
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                    ),
-                                  )
-                                ),
-                              if(expectedSpeedText != '')
-                                BorderedText(
-                                  child: Text(
-                                    expectedSpeedText,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  )
-                                ),
-                              if(expectedTimeText != '')
-                                BorderedText(
-                                  child: Text(
-                                    expectedTimeText,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  )
-                                ),
-                              if(sinceStartText != '')
-                                BorderedText(
-                                  child: Text(
-                                    sinceStartText,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                    ),
-                                  )
-                                ),
-                              const SizedBox(height: 10),
-                              TextButton.icon(
-                                icon: Icon(Icons.stop, size: 44, color: Colors.red),
-                                label: BorderedText(
-                                  child: Text(
-                                    'Stop Loading',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.red,
-                                    ),
-                                  )
-                                ),
-                                onPressed: () {
-                                  killLoading(['Stopped by User']);
-                                },
+                                )
+                              );
+                            }),
+                            TextButton.icon(
+                              icon: Icon(Icons.play_arrow, size: 44),
+                              label: BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  isHated ? 'Load Anyway' : 'Restart Loading',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                  ),
+                                )
                               ),
-                              if(isMovedBelow) const SizedBox(height: 60),
-                            ]
-                          )
+                              onPressed: () {
+                                setState(() { initViewer(true); });
+                              },
+                            ),
+                            if(isMovedBelow) const SizedBox(height: 60),
+                          ]
+                        : (settingsHandler.loadingGif
+                          ? [
+                            // TODO redo
+                            Center(child: Container(
+                              width: MediaQuery.of(context).size.width - 30,
+                              child: Image(image: AssetImage('assets/images/loading.gif'))
+                            )),
+                            const SizedBox(height: 30),
+                          ]
+                          : [
+                            if(percentDoneText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  percentDoneText,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                  ),
+                                )
+                              ),
+                            if(filesizeText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  filesizeText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                )
+                              ),
+                            if(expectedSpeedText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  expectedSpeedText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ),
+                            if(expectedTimeText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  expectedTimeText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ),
+                            if(sinceStartText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  sinceStartText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                )
+                              ),
+                            const SizedBox(height: 10),
+                            TextButton.icon(
+                              icon: Icon(Icons.stop, size: 44, color: Colors.red),
+                              label: BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  'Stop Loading',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.red,
+                                  ),
+                                )
+                              ),
+                              onPressed: () {
+                                killLoading(['Stopped by User']);
+                              },
+                            ),
+                            if(isMovedBelow) const SizedBox(height: 60),
+                          ]
+                        )
+                    )
                   ),
                   SizedBox(
                     width: 10,
                     child: RotatedBox(
                       quarterTurns: percentDone != null ? -1 : 1,
                       child: LinearProgressIndicator(
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.pink[300]!),
+                          valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                          backgroundColor: Colors.transparent,
                           value: percentDone),
                     ),
                   ),
@@ -485,7 +510,7 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   Widget build(BuildContext context) {
-    final bool isViewed = widget.searchGlobals.viewedIndex.value == widget.index;
+    final bool isViewed = widget.searchGlobal.viewedIndex.value == widget.index;
     if (!isViewed) {
       // reset zoom if not viewed
       resetZoom();
@@ -496,24 +521,31 @@ class _MediaViewerState extends State<MediaViewer> {
       child: Material( // without this every text element will have broken styles on first frames
         child: Stack(
           children: [
-            if(mainProvider == null)
-              loadingElementBuilder(context, null)
-            else
-              PhotoView(
-                //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-                imageProvider: mainProvider,
-                filterQuality: FilterQuality.high,
-                minScale: PhotoViewComputedScale.contained,
-                maxScale: PhotoViewComputedScale.covered * 8,
-                initialScale: PhotoViewComputedScale.contained,
-                enableRotation: false,
-                basePosition: Alignment.center,
-                controller: viewController,
-                // tightMode: true,
-                // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.viewedIndex == widget.index ? '' : 'ignore') + widget.index.toString()),
-                scaleStateController: scaleController,
-                loadingBuilder: loadingElementBuilder,
-              ),
+            AnimatedSwitcher(
+              duration: Duration(milliseconds: 300),
+              child: mainProvider == null
+                ? Stack(children: [
+                  // TODO remove from loading indicator
+                  // TODO get rid of flickering after main image loads
+                  CachedThumb(widget.booruItem, widget.index, widget.searchGlobal, 1, isHated, false),
+                  loadingElementBuilder(context, null),
+                ])
+                : PhotoView(
+                  //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+                  imageProvider: mainProvider,
+                  filterQuality: FilterQuality.high,
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 8,
+                  initialScale: PhotoViewComputedScale.contained,
+                  enableRotation: false,
+                  basePosition: Alignment.center,
+                  controller: viewController,
+                  // tightMode: true,
+                  // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.viewedIndex == widget.index ? '' : 'ignore') + widget.index.toString()),
+                  scaleStateController: scaleController,
+                  loadingBuilder: loadingElementBuilder,
+                )
+            ),
 
             zoomButtonBuild(),
           ]

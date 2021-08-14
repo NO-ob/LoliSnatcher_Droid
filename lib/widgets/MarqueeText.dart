@@ -1,30 +1,33 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
 // Based on code from: https://github.com/nt4f04uNd/nt4f04unds_widgets/blob/f14e448d23d347f17c05549972e638d61cf300b4/lib/src/widgets/marquee.dart
 
 class MarqueeText extends StatelessWidget {
-  const MarqueeText({
+  MarqueeText({
     required this.text,
     required this.fontSize,
     this.fontWeight = FontWeight.normal,
     this.addedHeight = 6,
-    this.color = Colors.white,
+    this.color,
     this.velocity = 75.0,
     this.blankSpace = 75.0,
     this.startPadding = 2.0,
     this.startAfter = const Duration(milliseconds: 1000),
     this.pauseAfterRound = const Duration(milliseconds: 1500),
     this.isExpanded = true,
-  });
+  }) {
+    this.color = this.color == null ? Get.theme.colorScheme.onBackground : this.color;
+  }
 
   final String text;
   final double fontSize;
   final FontWeight fontWeight;
   final double addedHeight;
-  final Color color;
+  Color? color;
   final double velocity;
   final double blankSpace;
   final double startPadding;

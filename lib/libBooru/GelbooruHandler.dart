@@ -8,18 +8,17 @@ import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
-import 'package:LoliSnatcher/Tools.dart';
 
 /**
  * Booru Handler for the gelbooru engine
  */
-class GelbooruHandler extends BooruHandler{
+class GelbooruHandler extends BooruHandler {
   // Dart constructors are weird so it has to call super with the args
   GelbooruHandler(Booru booru, int limit): super(booru,limit);
   @override
   bool hasSizeData = true;
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     var parsedResponse = xml.parse(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
@@ -44,7 +43,7 @@ class GelbooruHandler extends BooruHandler{
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
         }
-        fetched.add(new BooruItem(
+        fetched.add(BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: previewURL,
@@ -65,9 +64,7 @@ class GelbooruHandler extends BooruHandler{
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
           postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
         ));
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }
@@ -79,7 +76,7 @@ class GelbooruHandler extends BooruHandler{
 
   // This will create a url for the http request
   String makeURL(String tags){
-    int cappedPage = max(0, pageNum); // needed because searchCount happens before first page increment
+    int cappedPage = max(0, pageNum.value); // needed because searchCount happens before first page increment
     if (booru.apiKey == ""){
       return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}";
     } else {
@@ -133,7 +130,7 @@ class GelbooruHandler extends BooruHandler{
     return searchTags;
   }
 
-  void searchCount(String input) async {
+  Future<void> searchCount(String input) async {
     int result = 0;
     String url = makeURL(input);
     try {
@@ -150,7 +147,7 @@ class GelbooruHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "GelbooruHandler", "searchCount", LogTypes.exception);
     }
-    this.totalCount = result;
+    totalCount.value = result;
+    return;
   }
-
 }

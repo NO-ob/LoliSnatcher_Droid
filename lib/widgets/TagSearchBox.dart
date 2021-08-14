@@ -4,52 +4,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:get/get.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 
 class TagSearchBox extends StatefulWidget {
-  SearchGlobals searchGlobals;
-  TextEditingController searchTagsController;
-  FocusNode _focusNode;
-  SettingsHandler settingsHandler;
-  Function searchAction;
-  TagSearchBox(this.searchGlobals, this.searchTagsController, this._focusNode, this.settingsHandler, this.searchAction);
+  TagSearchBox();
   @override
   _TagSearchBoxState createState() => _TagSearchBoxState();
 }
 
 class _TagSearchBoxState extends State<TagSearchBox> {
+  final SettingsHandler settingsHandler = Get.find();
+  final SearchHandler searchHandler = Get.find();
+
   OverlayEntry? _overlayEntry;
   String input = "";
   String lastTag = "";
   List splitInput = [];
   ScrollController scrollController = ScrollController();
 
-  void setBooruHandler() {
-    List temp = new BooruHandlerFactory()
-        .getBooruHandler([widget.searchGlobals.selectedBooru!], widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
-    widget.searchGlobals.booruHandler = temp[0];
-    widget.searchGlobals.pageNum = temp[1];
-    if (widget.searchGlobals.booruHandler!.booru.type == "Szurubooru" &&
-        widget.searchGlobals.booruHandler!.booru.apiKey != "" &&
-        widget.searchGlobals.booruHandler!.booru.userID != "") {
-      widget.searchGlobals.booruHandler!.tagSearchEnabled = false;
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    widget._focusNode.addListener(onFocusChange);
-    input = widget.searchTagsController.text;
+    searchHandler.searchBoxFocus.addListener(onFocusChange);
+    input = searchHandler.searchTextController.text;
     splitInput = input.split(" ");
     lastTag = input;
   }
 
   void onFocusChange(){
-    if (widget._focusNode.hasFocus){
+    if (searchHandler.searchBoxFocus.hasFocus){
       createOverlay();
     } else {
       removeOverlay();
@@ -57,7 +42,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   void createOverlay() {
-    if (widget._focusNode.hasFocus){
+    if (searchHandler.searchBoxFocus.hasFocus){
       if (this._overlayEntry == null){
         tagStuff();
         this._overlayEntry = _createOverlayEntry();
@@ -75,7 +60,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   void _updateOverlay() {
-    if (widget._focusNode.hasFocus) {
+    if (searchHandler.searchBoxFocus.hasFocus) {
       print("textbox is focused");
       if (!this._overlayEntry!.mounted) {
         Overlay.of(context)!.insert(this._overlayEntry!);
@@ -93,46 +78,46 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   @override
   void dispose() {
     removeOverlay();
-    widget._focusNode.unfocus();
+    searchHandler.searchBoxFocus.unfocus();
     super.dispose();
   }
 
   void tagStuff(){
-    if (widget.searchGlobals.booruHandler!.tagSearchEnabled) {
-      input = widget.searchTagsController.text;
+    if (searchHandler.currentTab.booruHandler.tagSearchEnabled) {
+      input = searchHandler.searchTextController.text;
       splitInput = input.split(" ");
       // lastTag = input;
       // if (splitInput.length > 1) {
         // Get last tag in the input and remove minus (exclude symbol)
         // TODO /bug?: use the tag behind the current cursor position, not the last tag
         setState(() {
-          lastTag = splitInput[splitInput.length - 1].replaceAll(new RegExp(r'^-'), '');
+          lastTag = splitInput[splitInput.length - 1].replaceAll(RegExp(r'^-'), '');
         });
       // }
     }
   }
 
   Future<List<List<String>?>> combinedSearch(String input) async {
-    List<String?>? getFromBooru = await widget.searchGlobals.booruHandler!.tagSearch(lastTag);
+    List<String?>? getFromBooru = await searchHandler.currentTab.booruHandler.tagSearch(lastTag);
     final List<List<String>> booruResults = getFromBooru?.map((tag){
       final String tagTemp = tag != null ? tag : '';
       return [tagTemp, 'booru'];
     }).toList() ?? [];
 
     final List<List<String>> historyResults = input.isNotEmpty
-      ? (await widget.settingsHandler.dbHandler.getSearchHistoryByInput(input, 2)).map((tag){
+      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(input, 2)).map((tag){
         return [tag, 'history'];
       }).toList()
       : [];
     final List<List<String>> favouritesResults = input.isNotEmpty
-      ? (await widget.settingsHandler.dbHandler.getTags(input, 2)).map((tag){
+      ? (await settingsHandler.dbHandler.getTags(input, 2)).map((tag){
         return [tag, 'favourites'];
       }).toList()
       : [];
 
     // TODO add a list of search modifiers (rating:s, sort:score...) to every booru handler
     // final List<List<String>> searchModifiersResults = input.isNotEmpty
-    //   ? widget.searchGlobals.booruHandler!.searchModifiers().where((String sm) => sm.contains(input))
+    //   ? searchHandler.booruHandler.searchModifiers().where((String sm) => sm.contains(input))
     //   : [];
 
     return [
@@ -145,8 +130,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   OverlayEntry? _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    setBooruHandler();
-    widget.searchGlobals.booruHandler!.limit = 20;
+    // searchHandler.currentTab.booruHandler.limit = 20;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
       return OverlayEntry(
@@ -202,15 +186,15 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                                   isExpanded: false,
                                 ),
                                 onTap: (() {
-                                  // widget._focusNode.unfocus();
+                                  // widget.searchBoxFocus.unfocus();
                                   // Keep minus if its in the beggining of current (last) tag
-                                  bool isExclude = new RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
+                                  bool isExclude = RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
                                   String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
                                   setState(() {
-                                    widget.searchTagsController.text = newInput;
+                                    searchHandler.searchTextController.text = newInput;
 
                                     // Set the cursor to the end of the search and reset the overlay data
-                                    widget.searchTagsController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
+                                    searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
                                   });
                                   this._overlayEntry!.markNeedsBuild();
                                 }),
@@ -235,38 +219,38 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   Widget build(BuildContext context) {
     return Expanded(
         child: TextField(
-          controller: widget.searchTagsController,
-          focusNode: widget._focusNode,
+          controller: searchHandler.searchTextController,
+          focusNode: searchHandler.searchBoxFocus,
           onChanged: (text) {
             createOverlay();
           },
           onSubmitted: (String text) {
-            widget._focusNode.unfocus();
-            widget.searchAction(text);
+            searchHandler.searchBoxFocus.unfocus();
+            searchHandler.searchAction(text, null);
           },
           onEditingComplete: (){
-            widget._focusNode.unfocus();
+            searchHandler.searchBoxFocus.unfocus();
           },
           onTap: (){
-            if(!widget._focusNode.hasFocus) {
+            if(!searchHandler.searchBoxFocus.hasFocus) {
               // set cursor to the end when tapped unfocused
-              widget.searchTagsController.selection = TextSelection.fromPosition(TextPosition(offset: widget.searchTagsController.text.length));
+              searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
             }
           },
           decoration: InputDecoration(
-            fillColor: Get.context!.theme.canvasColor,
+            fillColor: Get.theme.colorScheme.surface,
             filled: true,
             hintText: "Enter Tags",
-            prefixIcon: widget.searchTagsController.text.length > 0
+            prefixIcon: searchHandler.searchTextController.text.length > 0
               ? IconButton(
                   padding: const EdgeInsets.all(5),
-                  onPressed: () => setState(() {widget.searchTagsController.clear();}),
+                  onPressed: () => setState(() {searchHandler.searchTextController.clear();}),
                   icon: Icon(Icons.clear),
                 )
               : null,
             contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
-            border: new OutlineInputBorder(
-              borderRadius: new BorderRadius.circular(30),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(30),
               gapPadding: 0,
             ),
           ),

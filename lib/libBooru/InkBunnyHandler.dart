@@ -8,7 +8,6 @@ import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
-import 'package:LoliSnatcher/Tools.dart';
 
 /**
  * Booru Handler for the gelbooru engine
@@ -69,7 +68,7 @@ class InkBunnyHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
-  Future Search(String tags, int pageNum) async{
+  Future Search(String tags, int? pageNumCustom) async{
     if (sessionToken.isEmpty){
       bool gotToken = await setSessionToken();
       if (!gotToken){
@@ -77,11 +76,9 @@ class InkBunnyHandler extends BooruHandler{
       }
     }
     tags = validateTags(tags);
-    this.pageNum = pageNum;
     if (prevTags != tags){
-      fetched = [];
+      fetched.value = [];
       resultsID = "";
-      totalCount = 0;
     }
 
     String? url = makeURL(tags);
@@ -91,13 +88,13 @@ class InkBunnyHandler extends BooruHandler{
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: getHeaders());
       if (response.statusCode == 200) {
-        if (totalCount > 0 && pageNum * 30 > totalCount){
-          if (fetched.length == length){locked = true;}
+        if (totalCount.value > 0 && (pageNum.value * 30) > totalCount.value){
+          if (fetched.length == length){locked.value = true;}
         } else {
           parseResponse(await getSubmissionResponse(response));
           prevTags = tags;
         }
-        if (fetched.length == length){locked = true;}
+        if (fetched.length == length){locked.value = true;}
         return fetched;
       } else {
         Logger.Inst().log("InkBunnyHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
@@ -111,7 +108,7 @@ class InkBunnyHandler extends BooruHandler{
 
   Future getSubmissionResponse(response) async{
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    totalCount = int.parse(parsedResponse["results_count_all"]);
+    totalCount.value = int.parse(parsedResponse["results_count_all"]);
     resultsID = parsedResponse["rid"];
     String ids = "";
     for (int i =0; i < parsedResponse["submissions"].length; i++){
@@ -183,9 +180,8 @@ class InkBunnyHandler extends BooruHandler{
             rating: normalizeRating(current["rating_name"]),
             postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
           ));
-          if(dbHandler!.db != null){
-            setTrackedValues(fetched.length - 1);
-          }
+
+          setTrackedValues(fetched.length - 1);
         }
 
 
@@ -261,10 +257,6 @@ class InkBunnyHandler extends BooruHandler{
       Logger.Inst().log(e.toString(), "InkBunnyHandler", "tagSearch", LogTypes.exception);
     }
     return searchTags;
-  }
-
-  void searchCount(String input) async {
-    //set totalCount in search
   }
 
 }

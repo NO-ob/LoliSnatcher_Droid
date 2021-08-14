@@ -17,7 +17,7 @@ class DanbooruHandler extends BooruHandler{
   bool hasSizeData = true;
 
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     var parsedResponse = xml.parse(response.body);
     var posts = parsedResponse.findAllElements('post');
     // Create a BooruItem for each post in the list
@@ -29,7 +29,7 @@ class DanbooruHandler extends BooruHandler{
        * to go with the rest of the data so cannot be displayed and are pointless for the app
        */
       if ((current.findElements("file-url").length > 0)) {
-        fetched.add(new BooruItem(
+        fetched.add(BooruItem(
           fileURL: current.findElements("file-url").elementAt(0).text,
           sampleURL: current.findElements("large-file-url").elementAt(0).text,
           thumbnailURL: current.findElements("preview-file-url").elementAt(0).text,
@@ -47,9 +47,7 @@ class DanbooruHandler extends BooruHandler{
           postDate: current.findElements("created-at").elementAt(0).text, // 2021-06-17T16:27:45-04:00
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ssZ",
         ));
-        if(dbHandler!.db != null){
-          setTrackedValues(fetched.length - 1);
-        }
+        setTrackedValues(fetched.length - 1);
       }
     }
   }
@@ -88,7 +86,6 @@ class DanbooruHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "DanbooruHandler", "tagSearch", LogTypes.exception);
     }
-    print(searchTags.length);
     return searchTags;
   }
 }

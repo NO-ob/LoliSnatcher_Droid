@@ -6,7 +6,7 @@ class Logger {
   List<LogTypes> ignoreLogTypes = [LogTypes.booruHandlerInfo, LogTypes.booruHandlerRawFetched,LogTypes.settingsLoad,LogTypes.booruItemLoad];
   static Logger Inst(){
     if (_loggerInstance == null){
-      _loggerInstance = new Logger();
+      _loggerInstance = Logger();
     }
     return _loggerInstance!;
   }

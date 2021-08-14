@@ -2,16 +2,15 @@ import 'dart:io';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 class DirPicker extends StatefulWidget {
-  SettingsHandler settingsHandler;
   String path = "";
-  DirPicker(this.settingsHandler,this.path);
+  DirPicker(this.path);
   @override
   _DirPickerState createState() => _DirPickerState();
 }
@@ -19,6 +18,7 @@ class DirPicker extends StatefulWidget {
 // Might also use a grid and add folder icons isntead of listing text
 // Need to make a dialog to create a new folder
 class _DirPickerState extends State<DirPicker> {
+  final SettingsHandler settingsHandler = Get.find();
   final newDirNameController = TextEditingController();
   String path = "";
   @override
@@ -36,13 +36,13 @@ class _DirPickerState extends State<DirPicker> {
             content: Text('Do you want to close the picker without choosing a directory?'),
             actions: <Widget>[
               TextButton(
-                child: Text('Yes', style: TextStyle(color: Colors.white)),
+                child: Text('Yes'),
                 onPressed: () {
                   Get.back(result: true);
                 },
               ),
               TextButton(
-                child: Text('No', style: TextStyle(color: Colors.white)),
+                child: Text('No'),
                 onPressed: () {
                   Get.back(result: false);
                 },
@@ -52,13 +52,15 @@ class _DirPickerState extends State<DirPicker> {
         },
       );
       return shouldPop;
-      } else {
+    } else {
+      if(path.lastIndexOf("/") > -1) {
         setState(() {
           path = path.substring(0,path.lastIndexOf("/"));
           print(path);
         });
-        return false;
       }
+      return false;
+    }
   }
 
   void mkdir(){
@@ -128,7 +130,8 @@ class _DirPickerState extends State<DirPicker> {
                                 if (!path.endsWith(snapshot.data[index])){
                                   path += snapshot.data[index];
                                   print(path);
-                                }                widget.settingsHandler.extPathOverride = path + "/";
+                                }
+                                settingsHandler.extPathOverride = path + "/";
                               });
                             },
                             child: Container(
@@ -147,7 +150,7 @@ class _DirPickerState extends State<DirPicker> {
                               path += "/0";
                               print(path);
                             }
-                            widget.settingsHandler.extPathOverride = path + "/";
+                            settingsHandler.extPathOverride = path + "/";
                           });
                         },
                         child: Container(
@@ -178,7 +181,7 @@ class _DirPickerState extends State<DirPicker> {
                 }
               },
               child: const Icon(Icons.check),
-              backgroundColor: Get.context!.theme.accentColor,
+              backgroundColor: Get.theme.accentColor,
             ),
             Container(width: 5,),
             FloatingActionButton(
@@ -196,9 +199,9 @@ class _DirPickerState extends State<DirPicker> {
                         ],
                         decoration: InputDecoration(
                           hintText:"Dir Name",
-                          contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: new OutlineInputBorder(
-                            borderRadius: new BorderRadius.circular(50),
+                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50),
                             gapPadding: 0,
                           ),
                         ),
@@ -207,13 +210,13 @@ class _DirPickerState extends State<DirPicker> {
                   ),
                   actions: <Widget>[
                     TextButton(
-                      child: Text('Cancel', style: TextStyle(color: Colors.white)),
+                      child: Text('Cancel'),
                       onPressed: () {
                         Get.back();
                       },
                     ),
                     TextButton(
-                      child: Text('Create', style: TextStyle(color: Colors.white)),
+                      child: Text('Create'),
                       onPressed: () {
                         mkdir();
                         Get.back();
@@ -224,7 +227,7 @@ class _DirPickerState extends State<DirPicker> {
                 // Add your onPressed code here!
               },
               child: const Icon(Icons.add),
-              backgroundColor: Get.context!.theme.accentColor,
+              backgroundColor: Get.theme.accentColor,
             ),
           ],
         )

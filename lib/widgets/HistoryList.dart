@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,17 +12,15 @@ import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class HistoryList extends StatefulWidget {
-  List<SearchGlobals> searchGlobals;
-  int globalsIndex;
-  TextEditingController searchTagsController;
-  SettingsHandler settingsHandler;
-  final Function setParentGlobalsIndex;
-  HistoryList(this.searchGlobals, this.globalsIndex, this.searchTagsController, this.settingsHandler, this.setParentGlobalsIndex);
+  HistoryList();
   @override
   _HistoryListState createState() => _HistoryListState();
 }
 
 class _HistoryListState extends State<HistoryList> {
+  final SettingsHandler settingsHandler = Get.find();
+  final SearchHandler searchHandler = Get.find();
+
   List<List<String>> history = [], filteredHistory = [];
   ScrollController scrollController = ScrollController();
   TextEditingController filterSearchController = TextEditingController();
@@ -34,8 +33,8 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   void getHistory() async {
-    history = (widget.settingsHandler.dbEnabled && widget.settingsHandler.searchHistoryEnabled)
-      ? await widget.settingsHandler.dbHandler.getSearchHistory()
+    history = (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled)
+      ? await settingsHandler.dbHandler.getSearchHistory()
       : [];
     history.sort(compareFavourites);
     filteredHistory = history;
@@ -94,24 +93,24 @@ class _HistoryListState extends State<HistoryList> {
               style: TextButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
+                  side: BorderSide(color: Get.theme.accentColor),
                 ),
               ),
               onPressed: () async {
-                await widget.settingsHandler.dbHandler.deleteFromSearchHistory(data[0]);
+                await settingsHandler.dbHandler.deleteFromSearchHistory(data[0]);
                 history = history.where((el) => el[0] != data[0]).toList();
                 filterHistory();
                 Navigator.of(context).pop(true);
               },
-              icon: Icon(Icons.delete_forever, color: Get.context!.theme.errorColor),
-              label: Expanded(child: Text('Delete', style: TextStyle(color: Get.context!.theme.errorColor))),
+              icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+              label: Expanded(child: Text('Delete', style: TextStyle(color: Get.theme.errorColor))),
             ),
             const SizedBox(height: 5),
             TextButton.icon(
               style: TextButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
+                  side: BorderSide(color: Get.theme.accentColor),
                 ),
               ),
               onPressed: () {
@@ -123,19 +122,19 @@ class _HistoryListState extends State<HistoryList> {
                 history.sort(compareFavourites);
                 filterHistory();
 
-                widget.settingsHandler.dbHandler.setFavouriteSearchHistory(data[0], newFavourite);
+                settingsHandler.dbHandler.setFavouriteSearchHistory(data[0], newFavourite);
                 
                 Navigator.of(context).pop(true);
               },
               icon: Icon(data[4] == '1' ? Icons.favorite_border : Icons.favorite, color: data[4] == '1' ? Colors.grey : Colors.red),
-              label: Expanded(child: Text(data[4] == '1' ? 'Remove from Favourites' : 'Set as Favourite', style: TextStyle(color: Colors.white))),
+              label: Expanded(child: Text(data[4] == '1' ? 'Remove from Favourites' : 'Set as Favourite')),
             ),
             const SizedBox(height: 5),
             TextButton.icon(
               style: TextButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
+                  side: BorderSide(color: Get.theme.accentColor),
                 ),
               ),
               onPressed: () async {
@@ -144,7 +143,7 @@ class _HistoryListState extends State<HistoryList> {
                 Navigator.of(context).pop(true);
               },
               icon: Icon(Icons.copy),
-              label: Expanded(child: Text('Copy', style: TextStyle(color: Colors.white))),
+              label: Expanded(child: Text('Copy')),
             ),
             
           ],
@@ -188,8 +187,8 @@ class _HistoryListState extends State<HistoryList> {
   Widget listEntryBuild(BuildContext context, int index) {
     List<String> currentEntry = filteredHistory[index]; //0-id, 1-text, 2-booru type, 3-booru name, 4-isFavourite, 5-timestamp
     Booru booru = Booru(null, null, null, null, null);
-    if (widget.settingsHandler.booruList.isNotEmpty) {
-      booru = widget.settingsHandler.booruList.firstWhere(
+    if (settingsHandler.booruList.isNotEmpty) {
+      booru = settingsHandler.booruList.firstWhere(
         (b) => b.type == currentEntry[2] && b.name == currentEntry[3],
         orElse: () => Booru(null, null, null, null, null)
       );
@@ -199,18 +198,14 @@ class _HistoryListState extends State<HistoryList> {
       style: TextButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
-          side: BorderSide(color: Get.context!.theme.accentColor),
+          side: BorderSide(color: Get.theme.accentColor),
         ),
       ),
       onPressed: () {
         if (booru.type != null) {
-          widget.searchTagsController.text = currentEntry[1];
-          setState(() {
-            widget.searchGlobals[widget.globalsIndex].tags = currentEntry[1];
-            widget.searchGlobals[widget.globalsIndex].selectedBooru = booru;
-          });
+          searchHandler.searchTextController.text = currentEntry[1];
           Navigator.of(context).pop(true);
-          widget.setParentGlobalsIndex(widget.globalsIndex, currentEntry[1]);
+          searchHandler.searchAction(currentEntry[1], booru);
         } else {
           ServiceHandler.displayToast('Unknown booru type');
         }
@@ -218,12 +213,7 @@ class _HistoryListState extends State<HistoryList> {
       icon: booru.faviconURL != null
         ? (booru.type == "Favourites"
           ? Icon(Icons.favorite, color: Colors.red, size: 18)
-          : Image.network(booru.faviconURL!,
-              width: 16,
-              errorBuilder: (_, __, ___) {
-                return Icon(Icons.broken_image, size: 18);
-              }
-            )
+          : CachedFavicon(booru.faviconURL!)
           )
         : Icon(CupertinoIcons.question, size: 18),
       label: MarqueeText(
@@ -303,7 +293,7 @@ class _HistoryListState extends State<HistoryList> {
   Widget errorsBuild() {
     bool areThereErrors = isLoading ||
         (history.length == 0) || (filteredHistory.length == 0) ||
-        (!widget.settingsHandler.searchHistoryEnabled) || (!widget.settingsHandler.dbEnabled);
+        (!settingsHandler.searchHistoryEnabled) || (!settingsHandler.dbEnabled);
     if(areThereErrors) {
       return Column(
         mainAxisSize: MainAxisSize.min,
@@ -315,9 +305,9 @@ class _HistoryListState extends State<HistoryList> {
           else if (filteredHistory.length == 0)
             Text('Nothing found'),
 
-          if(!widget.settingsHandler.searchHistoryEnabled)
+          if(!settingsHandler.searchHistoryEnabled)
             Text('Search History is disabled.'),
-          if(!widget.settingsHandler.dbEnabled)
+          if(!settingsHandler.dbEnabled)
             Text('Search History requires enabling Database in settings.'),
         ]
       );

@@ -1,8 +1,6 @@
-//import 'dart:html';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
@@ -11,41 +9,33 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 
-class SnatchHandler {
-  ValueNotifier<bool> snatchActive = ValueNotifier(false);
-  ValueNotifier<String> snatchStatus = ValueNotifier("");
-  ValueNotifier<int> queuedItems = ValueNotifier(0);
-  List? queuedList = [];
-  List<int>? cooldownList = [];
-  List<Booru>? booruList = [];
-  bool? jsonWrite = false;
-  int? cooldown = 250;
-  SettingsHandler? settingsHandler;
+
+class SnatchHandler extends GetxController {
+  RxBool snatchActive = false.obs;
+  RxString snatchStatus = "".obs;
+  RxList<List<BooruItem>> queuedList = RxList<List<BooruItem>>([]);
+  RxList<int> cooldownList = RxList<int>([]);
+  RxList<Booru> booruList = RxList<Booru>([]);
+
   SnatchHandler(){
-    addQueueHandler();
+    queuedList.listen((List<List<BooruItem>> list) {
+      // print("queuedList updated");
+      // print(list);
+      // print(list.length);
+      trySnatch();
+    });
   }
-  void addQueueHandler(){
-    if (!queuedItems.hasListeners) {
-      print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
-      print("queuedItems listener added");
-      queuedItems.addListener(() {
-        print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
-        print("queuedItems updated");
-        trySnatch();
-      });
-    }
-  }
-  Future snatch(List<BooruItem> booruItems, SettingsHandler settingsHandler, Booru booru,int cooldown) async{
-    print("+++++++++++++++++++++++++++++++++++++++++++++++++++");
-    print("snatching");
+
+  Future snatch(List<BooruItem> booruItems, Booru booru, int cooldown) async {
+    // print("snatching");
     if (!snatchActive.value){
       snatchActive.value = true;
-      ImageWriter writer = new ImageWriter();
-      writer.writeMultiple(booruItems, settingsHandler, booru, cooldown).listen(
-            (data) {
+      ImageWriter writer = ImageWriter();
+      writer.writeMultiple(booruItems, booru, cooldown).listen(
+        (data) {
           snatchStatus.value = "$data / ${booruItems.length}";
         },
-        onDone: (){
+        onDone: () {
           snatchActive.value = false;
           snatchStatus.value = "";
           trySnatch();
@@ -53,51 +43,52 @@ class SnatchHandler {
       );
     }
   }
-  void trySnatch(){
-    if (!snatchActive.value && queuedItems.value > 0){
-      queuedItems.value --;
-      snatch(queuedList!.removeLast(),settingsHandler!,booruList!.removeLast(),cooldownList!.removeLast());
+
+  void trySnatch() {
+    if (!snatchActive.value && queuedList.length > 0 && booruList.length > 0 && cooldownList.length > 0) {
+      snatch(queuedList.removeLast(), booruList.removeLast(), cooldownList.removeLast());
     }
   }
-  void queue(List<BooruItem> booruItems, bool jsonWrite, booru, int cooldown){
-      this.jsonWrite = jsonWrite;
-      if (booruItems.isNotEmpty){
-        queuedList!.add(booruItems);
-        cooldownList!.add(cooldown);
-        booruList!.add(booru);
-        queuedItems.value ++;
-        if (booruItems.length > 1){
-          ServiceHandler.displayToast("Items added to snatch queue\nAmount: ${booruItems.length}\nQueue Position: ${queuedItems.value}");
-          //Get.snackbar("Items added to snatch queue", "Amount: ${booruItems.length}\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-        } else {
-          ServiceHandler.displayToast("Item added to snatch queue\nQueue Position: ${queuedItems.value}");
-          //Get.snackbar("Item added to snatch queue", booruItems[0].fileURL + "\n Queue Position: ${queuedItems.value}", snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 2), colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-        }
+
+  void queue(List<BooruItem> booruItems, Booru booru, int cooldown) {
+    if (booruItems.isNotEmpty) {
+      cooldownList.add(cooldown);
+      booruList.add(booru);
+      queuedList.add(booruItems); // change this last because it triggers a listener
+      if (booruItems.length > 1){
+        ServiceHandler.displayToast("Items added to snatch queue\nAmount: ${booruItems.length}\nQueue Position: ${queuedList.length}");
+      } else {
+        ServiceHandler.displayToast("Item added to snatch queue\nQueue Position: ${queuedList.length}");
       }
+    }
   }
-  Future searchSnatch(String tags, String amount, int cooldown, Booru booru, bool jsonWrite) async{
-    int count = 0, limit,page = 0;
+
+  Future searchSnatch(String tags, String amount, int cooldown, Booru booru) async{
+    int count = 0, limit;
     BooruHandler booruHandler;
     var booruItems;
+
     if (int.parse(amount) <= 100){
       limit = int.parse(amount);
     } else {
       limit = 100;
     }
-    List temp = new BooruHandlerFactory().getBooruHandler([booru], limit, settingsHandler!.dbHandler);
+
+    List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
     booruHandler = temp[0];
-    page = temp[1];
-    page ++;
+    booruHandler.pageNum.value = temp[1];
+    booruHandler.pageNum ++;
+
     ServiceHandler.displayToast("Snatching Images\nDo not close the app!");
-    //Get.snackbar("Snatching Images","Do not close the app!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
-    while (count < int.parse(amount) && !booruHandler.locked){
-      booruItems = await booruHandler.Search(tags,page);
-      page ++;
+    while (count < int.parse(amount) && !booruHandler.locked.value){
+      booruItems = await booruHandler.Search(tags, null);
+      booruHandler.pageNum ++;
       count = booruItems.length;
       print(count);
+      // TODO error handling?
     }
-    queue(booruItems, jsonWrite, booru, cooldown);
-    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.context!.theme.primaryColor);
+    queue(booruItems, booru, cooldown);
+    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.theme.primaryColor);
   }
 }
 

@@ -5,18 +5,17 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
-import 'package:LoliSnatcher/widgets/ScrollingText.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class FiltersEdit extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  FiltersEdit(this.settingsHandler);
+  FiltersEdit();
 
   @override
   _FiltersEditState createState() => _FiltersEditState();
 }
 
 class _FiltersEditState extends State<FiltersEdit> {
+  final SettingsHandler settingsHandler = Get.find();
   TextEditingController newTagController = TextEditingController();
   List<String> hatedList = [];
   List<String> lovedList = [];
@@ -24,17 +23,17 @@ class _FiltersEditState extends State<FiltersEdit> {
 
   @override
   void initState() {
-    hatedList = widget.settingsHandler.hatedTags;
-    lovedList = widget.settingsHandler.lovedTags;
-    filterHated = widget.settingsHandler.filterHated;
+    hatedList = settingsHandler.hatedTags;
+    lovedList = settingsHandler.lovedTags;
+    filterHated = settingsHandler.filterHated;
     super.initState();
   }
 
   Future<bool> _onWillPop() async {
-    widget.settingsHandler.hatedTags = widget.settingsHandler.cleanTagsList(hatedList);
-    widget.settingsHandler.lovedTags = widget.settingsHandler.cleanTagsList(lovedList);
-    widget.settingsHandler.filterHated = filterHated;
-    bool result = await widget.settingsHandler.saveSettings();
+    settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
+    settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
+    settingsHandler.filterHated = filterHated;
+    bool result = await settingsHandler.saveSettings();
     return result;
   }
 
@@ -64,7 +63,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                           filterHated = newValue!;
                         });
                       },
-                      activeColor: Get.context!.theme.primaryColor,
+                      activeColor: Get.theme.primaryColor,
                     )
                   ],)
               ),
@@ -93,7 +92,7 @@ class _FiltersEditState extends State<FiltersEdit> {
         child: Container(
           height: 200,
           child: Material(
-            color: Get.context!.theme.dialogBackgroundColor.withOpacity(0.5),
+            color: Get.theme.dialogBackgroundColor.withOpacity(0.5),
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               shrinkWrap: true,
@@ -107,7 +106,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                   style: TextButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
+                      side: BorderSide(color: Get.theme.accentColor),
                     ),
                   ),
                   onPressed: null,
@@ -219,7 +218,7 @@ class _FiltersEditState extends State<FiltersEdit> {
               style: TextButton.styleFrom(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
+                  side: BorderSide(color: Get.theme.accentColor),
                 ),
               ),
               onPressed: () async {
@@ -235,14 +234,14 @@ class _FiltersEditState extends State<FiltersEdit> {
                 }
               },
               icon: Icon(Icons.save),
-              label: Expanded(child: Text('Save', style: TextStyle(color: Colors.white))),
+              label: Expanded(child: Text('Save')),
             ),
             if(!isAddButton)
               TextButton.icon(
                 style: TextButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
-                    side: BorderSide(color: Get.context!.theme.accentColor),
+                    side: BorderSide(color: Get.theme.accentColor),
                   ),
                 ),
                 onPressed: () async {
@@ -255,8 +254,8 @@ class _FiltersEditState extends State<FiltersEdit> {
                   });
                   Navigator.of(context).pop(true);
                 },
-                icon: Icon(Icons.delete_forever, color: Get.context!.theme.errorColor),
-                label: Expanded(child: Text('Delete', style: TextStyle(color: Get.context!.theme.errorColor))),
+                icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+                label: Expanded(child: Text('Delete', style: TextStyle(color: Get.theme.errorColor))),
               ),
             const SizedBox(height: 5),
           ],
