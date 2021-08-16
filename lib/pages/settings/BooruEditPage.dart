@@ -32,7 +32,7 @@ class _booruEditState extends State<booruEdit> {
   final booruDefTagsController = TextEditingController();
   List<String> booruTypes = [
     "Danbooru", "e621", "Gelbooru", "GelbooruV1", "Moebooru", "Philomena", "Sankaku", "Shimmie", "Szurubooru", "Hydrus", "BooruOnRails", "Rainbooru",
-    "R34Hentai", "World", "IdolSankaku","InkBunny"
+    "R34Hentai", "World", "IdolSankaku","InkBunny","AGNPH"
   ];
   String selectedBooruType = "AutoDetect";
   @override
@@ -90,6 +90,9 @@ class _booruEditState extends State<booruEdit> {
                         // add https if not specified
                         if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
                           booruURLController.text = "https://" + booruURLController.text;
+                        }
+                        if (booruURLController.text.contains("agn.ph")){
+                          booruFaviconController.text = "https://agn.ph/skin/Retro/favicon.ico";
                         }
                         // autofill favicon if not specified
                         if(booruFaviconController.text == ""){

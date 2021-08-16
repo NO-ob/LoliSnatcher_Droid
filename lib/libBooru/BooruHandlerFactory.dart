@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/libBooru/AGNPHHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
 import 'package:LoliSnatcher/libBooru/InkBunnyHandler.dart';
@@ -90,6 +91,10 @@ class BooruHandlerFactory{
           pageNum = 0;
           booruHandler = new InkBunnyHandler(booru[0], limit);
           break;
+        case("AGNPH"):
+        pageNum = 0;
+        booruHandler = new AGNPHHandler(booru[0], limit);
+        break;
       }
     } else {
       booruHandler = new MergebooruHandler(Booru("Merge","Merge","","",""), limit);
