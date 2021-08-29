@@ -68,7 +68,7 @@ class _BooruPageState extends State<BooruPage> {
         child:Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: Text("Booru/Search"),
+            title: Text("Boorus & Search"),
           ),
           body: Center(
             child: ListView(

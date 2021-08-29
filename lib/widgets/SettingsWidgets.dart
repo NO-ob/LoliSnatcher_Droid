@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
@@ -6,11 +8,14 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
+const double borderWidth = 1;
+
 class SettingsButton extends StatelessWidget {
   const SettingsButton({
     Key? key,
     required this.name,
     this.icon,
+    this.subtitle,
 
     this.page, // which page to open after button was pressed (needs to be wrapped in anonymous function, i.e.: () => Page)
     // OR
@@ -24,6 +29,7 @@ class SettingsButton extends StatelessWidget {
 
   final String name;
   final Widget? icon;
+  final Widget? subtitle;
   final Function? page;
   final void Function()? action;
   final Widget? trailingIcon;
@@ -36,6 +42,7 @@ class SettingsButton extends StatelessWidget {
     return ListTile(
       leading: icon,
       title: Text(name),
+      subtitle: subtitle,
       trailing: trailingIcon,
       enabled: enabled,
       dense: false,
@@ -44,7 +51,7 @@ class SettingsButton extends StatelessWidget {
           action?.call();
         } else {
           if(page != null) {
-            if(Get.find<SettingsHandler>().appMode == "Desktop"){
+            if(Get.find<SettingsHandler>().appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
               Get.dialog(Dialog(
                 child: Container(
                   width: 500,
@@ -63,9 +70,9 @@ class SettingsButton extends StatelessWidget {
 
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -109,9 +116,9 @@ class SettingsToggle extends StatelessWidget {
       activeColor: activeColor ?? Get.theme.accentColor,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -127,6 +134,7 @@ class SettingsDropdown extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon = const SizedBox(),
+    this.childBuilder,
   }) : super(key: key);
 
   final String selected;
@@ -136,6 +144,7 @@ class SettingsDropdown extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget trailingIcon;
+  final Widget Function(String)? childBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -149,21 +158,27 @@ class SettingsDropdown extends StatelessWidget {
         value: selected,
         icon: Icon(Icons.arrow_downward),
         onChanged: onChanged,
+        menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+        isExpanded: true,
         underline: const SizedBox(),
-        items: values.map<DropdownMenuItem<String>>((String value){
+        items: values.map<DropdownMenuItem<String>>((String value) {
           bool isCurrent = value == selected;
 
           return DropdownMenuItem<String>(
             value: value,
             child: Container(
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.all(8),
               decoration: isCurrent
-              ? BoxDecoration(
-                border: Border.all(color: Get.theme.accentColor, width: 1),
-                borderRadius: BorderRadius.circular(5),
-              )
-              : null,
-              child: Text(value)
+                ? BoxDecoration(
+                  border: Border.all(color: Get.theme.accentColor, width: 1),
+                  borderRadius: BorderRadius.circular(5),
+                )
+                : null,
+              child: Row(
+                children: [
+                  childBuilder?.call(value) ?? Text(value)
+                ]
+              ),
             ),
           );
         }).toList(),
@@ -172,9 +187,9 @@ class SettingsDropdown extends StatelessWidget {
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -210,6 +225,8 @@ class SettingsBooruDropdown extends StatelessWidget {
         value: selected,
         icon: Icon(Icons.arrow_downward),
         onChanged: onChanged,
+        menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+        isExpanded: true,
         underline: const SizedBox(),
         items: Get.find<SettingsHandler>().booruList.map<DropdownMenuItem<Booru>>((Booru value){
           bool isCurrent = value == selected;
@@ -217,7 +234,7 @@ class SettingsBooruDropdown extends StatelessWidget {
           return DropdownMenuItem<Booru>(
             value: value,
             child: Container(
-              padding: EdgeInsets.all(5),
+              padding: EdgeInsets.all(8),
               decoration: isCurrent
               ? BoxDecoration(
                 border: Border.all(color: Get.theme.accentColor, width: 1),
@@ -241,9 +258,9 @@ class SettingsBooruDropdown extends StatelessWidget {
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -288,10 +305,23 @@ class SettingsTextInput extends StatelessWidget {
           keyboardType: inputType,
           inputFormatters: inputFormatters,
           decoration: InputDecoration(
+            fillColor: Get.theme.colorScheme.surface,
+            filled: true,
             hintText: hintText,
             errorText: validator?.call(controller.text),
             contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Get.theme.accentColor),
+              borderRadius: BorderRadius.circular(50),
+              gapPadding: 0,
+            ),
+            errorBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Get.theme.errorColor),
+              borderRadius: BorderRadius.circular(50),
+              gapPadding: 0,
+            ),
             border: OutlineInputBorder(
+              borderSide: BorderSide(color: Get.theme.accentColor),
               borderRadius: BorderRadius.circular(50),
               gapPadding: 0,
             ),
@@ -302,9 +332,9 @@ class SettingsTextInput extends StatelessWidget {
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: 3) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }

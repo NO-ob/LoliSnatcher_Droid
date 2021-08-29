@@ -13,7 +13,8 @@ class DioLoader {
     this.onProgress,
     this.onEvent,
     this.onError,
-    required this.onDone,
+    this.onDone,
+    this.onDoneFile,
     required this.cacheEnabled,
     required this.cacheFolder,
     this.timeoutTime,
@@ -25,7 +26,8 @@ class DioLoader {
   final void Function(int, int)? onProgress;
   final void Function(String)? onEvent;
   final void Function(Exception)? onError;
-  final void Function(Uint8List, String) onDone;
+  final void Function(Uint8List, String)? onDone;
+  final void Function(File, String)? onDoneFile;
   final bool cacheEnabled;
   final String cacheFolder;
   final int? timeoutTime;
@@ -51,9 +53,17 @@ class DioLoader {
       if (filePath != null) {
         // read from cache
         final File file = File(filePath);
+        final FileStat fileStat = await file.stat();
         onEvent?.call('isFromCache');
+        onProgress?.call(fileStat.size, fileStat.size);
         onEvent?.call('loaded');
-        onDone.call(await file.readAsBytes(), url);
+
+        if (onDoneFile != null) {
+          await file.readAsBytes();
+          onDoneFile?.call(file, url);
+        } else if(onDone != null) {
+          onDone?.call(await file.readAsBytes(), url);
+        }
       } else {
         onEvent?.call('isFromNetwork');
         // load from network and cache if enabled
@@ -76,12 +86,25 @@ class DioLoader {
           throw DioLoadException(url: resolved, message: "File didn\'t load");
         }
 
+        File? tempFile;
         if (cacheEnabled) {
-          imageWriter.writeCacheFromBytes(resolved, response.data, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
+          tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
+          if(tempFile != null) {
+            onEvent?.call('isFromCache');
+          }
         }
 
         onEvent?.call('loaded');
-        onDone.call(response.data, url);
+        // if(onDoneFile != null) {
+        //   print(tempFile);
+        //   print(onDoneFile);
+        // }
+        if (onDoneFile != null && tempFile != null) {
+          onDoneFile?.call(tempFile, url);
+        } else if(onDone != null) {
+          onDone?.call(response.data, url);
+        }
+        
       }
     } catch (e) {
       if(e is Exception) {

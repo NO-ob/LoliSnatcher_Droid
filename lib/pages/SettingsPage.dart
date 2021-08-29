@@ -1,4 +1,5 @@
 import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
+import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
 import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ class SettingsPage extends StatelessWidget {
             children: <Widget>[
               SettingsButton(
                 name: 'Boorus & Search',
-                icon: Icon(Icons.art_track),
+                icon: Icon(Icons.image_search),
                 page: () => BooruPage()
               ),
               SettingsButton(
@@ -59,7 +60,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => UserInterfacePage()
               ),
               SettingsButton(
-                name: 'Themes [TODO]',
+                name: 'Themes',
                 icon: Icon(Icons.palette),
                 page: () => ThemePage()
               ),
@@ -85,11 +86,9 @@ class SettingsPage extends StatelessWidget {
               ),
               SettingsButton(
                 // TODO
-                name: 'Backup & Restore [TODO]',
-                icon: Icon(Icons.list_alt),
-                action: () {
-                  ServiceHandler.displayToast('WIP');
-                },
+                name: 'Backup & Restore [WIP]',
+                icon: Icon(Icons.restore_page),
+                page: () => BackupRestorePage(),
               ),
               SettingsButton(
                 name: 'Loli Sync',
@@ -118,7 +117,7 @@ class SettingsPage extends StatelessWidget {
                 if(settingsHandler.isDebug.value) {
                   return SettingsButton(
                     name: 'Debug',
-                    icon: Icon(Icons.art_track),
+                    icon: Icon(Icons.developer_mode),
                     page: () => DebugPage()
                   );
                 } else {

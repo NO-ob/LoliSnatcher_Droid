@@ -50,7 +50,7 @@ class _TabBoxState extends State<TabBox> {
                   underline: const SizedBox(),
                   dropdownColor: Get.theme.cardColor,
                   onChanged: (SearchGlobal? newValue){
-                    searchHandler.searchTextController.text = newValue?.tags ?? ''; // set search box text anyway
+                    // searchHandler.searchTextController.text = newValue?.tags ?? ''; // set search box text anyway
                     if (newValue != null && list.indexOf(newValue) != index){
                       // ...but change tab only if it exists(?) and if it's not a current one
                       searchHandler.changeTabIndex(list.indexOf(newValue));

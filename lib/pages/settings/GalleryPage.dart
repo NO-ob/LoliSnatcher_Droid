@@ -75,8 +75,8 @@ class _GalleryPageState extends State<GalleryPage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color oddItemColor = theme.primaryColor.withOpacity(0.05);
-    final Color evenItemColor = theme.primaryColor.withOpacity(0.15);
+    final Color oddItemColor = theme.accentColor.withOpacity(0.25);
+    final Color evenItemColor = theme.accentColor.withOpacity(0.15);
 
     return WillPopScope(
       onWillPop: _onWillPop,

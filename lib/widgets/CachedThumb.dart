@@ -55,7 +55,6 @@ class _CachedThumbState extends State<CachedThumb> {
     super.didUpdateWidget(oldWidget);
   }
 
-  /// Author: [Nani-Sore] ///
   Future<void> downloadThumb() async {
     final String? filePath = await imageWriter.getCachePath(thumbURL, isThumbQuality == true ? 'thumbnails' : 'samples');
 
@@ -187,7 +186,6 @@ class _CachedThumbState extends State<CachedThumb> {
     // );
   }
 
-  /// Author: [Nani-Sore] ///
   void _onBytesAdded(int addedBytes) {
     // always save incoming bytes, but restate only after [debounceDelay]MS
     const int debounceDelay = 250;
@@ -305,7 +303,7 @@ class _CachedThumbState extends State<CachedThumb> {
             width: 100 / widget.columnCount,
             child: CircularProgressIndicator(
               strokeWidth: 14 / widget.columnCount,
-              valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+              valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.accentColor),
               value: percentDone,
             ),
           ),

@@ -170,7 +170,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                         width: 130,
                         alignment: Alignment.center,
                         child: chewieController.isLive
-                          ? Expanded(child: const Text('LIVE'))
+                          ? Expanded(child: const Text('LIVE', style: TextStyle(color: Colors.white)))
                           : _buildPosition(iconColor),
                       ),
                     ]
@@ -265,7 +265,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                       bottom: 8,
                     ),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: TextStyle(fontSize: 20))
+                    child: Text(msgText, style: TextStyle(fontSize: 20, color: Colors.white))
                   )
                 )
               else
@@ -284,7 +284,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                       bottom: 8,
                     ),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: TextStyle(fontSize: 20))
+                    child: Text(msgText, style: TextStyle(fontSize: 20, color: Colors.white))
                   )
                 )
               else
@@ -314,6 +314,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                 chewieController.isFullScreen
                     ? Icons.fullscreen_exit
                     : Icons.fullscreen,
+                color: Colors.white,
               ),
             ),
           ),
@@ -366,10 +367,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                         padding: const EdgeInsets.all(12.0),
                         child: IconButton(
                           icon: isFinished
-                              ? const Icon(Icons.replay, size: 32.0)
+                              ? const Icon(Icons.replay, size: 32.0, color: Colors.white)
                               : AnimatedIcon(
                                   icon: AnimatedIcons.play_pause,
                                   progress: playPauseIconAnimationController,
+                                  color: Colors.white,
                                   size: 32.0,
                                 ),
                           onPressed: () {
@@ -385,7 +387,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     child: Center(
                       widthFactor: 3,
                       heightFactor: 3,
-                      child: CircularProgressIndicator(strokeWidth: 5),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(Get.theme.accentColor),
+                        strokeWidth: 5,
+                      ),
                     ),
                   ),
               ]
@@ -435,7 +440,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             child: Icon(Icons.speed,
                 color: _latestValue.playbackSpeed == 1.0
                     ? Colors.white
-                    : Theme.of(context).primaryColor),
+                    : Theme.of(context).accentColor),
           ),
         ),
       ),
@@ -473,7 +478,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               right: 8.0,
             ),
             child: Icon(
-              _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
+              _latestValue.volume > 0
+                ? Icons.volume_up
+                : (isGlobalMute
+                    ? Icons.volume_off
+                    : Icons.volume_mute),
+              color: Colors.white,
             ),
           ),
         ),
@@ -492,7 +502,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           right: 12.0,
         ),
         child: Icon(
-          controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          controller.value.isPlaying
+            ? Icons.pause
+            : Icons.play_arrow,
+          color: Colors.white,
         ),
       ),
     );
@@ -506,6 +519,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
       style: const TextStyle(
         fontSize: 14.0,
+        color: Colors.white,
       ),
     );
   }
@@ -757,7 +771,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).primaryColor;
+    final Color selectedColor = Theme.of(context).accentColor;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -767,7 +781,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 16.0),
-              Text('Select Video Speed:'),
+              Text('Select Video Speed:', style: TextStyle(color: Colors.black)),
             ]
           )
         ),
@@ -789,7 +803,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
                   else
                     Container(width: 20.0),
                   const SizedBox(width: 16.0),
-                  Text(_speed.toString()),
+                  Text(_speed.toString(), style: TextStyle(color: Colors.black)),
                 ],
               ),
               selected: _speed == _selected,

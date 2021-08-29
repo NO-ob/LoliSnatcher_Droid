@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,7 @@ import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
-
-import 'DirPicker.dart';
+import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
 
 class BehaviourPage extends StatefulWidget {
   BehaviourPage();
@@ -29,15 +29,16 @@ class _BehaviourPageState extends State<BehaviourPage> {
   bool jsonWrite = false, imageCache = false, mediaCache = false;
 
   final ImageWriter imageWriter = ImageWriter();
-  final List<List<String?>> cacheTypes = [
-    [null, 'Total'],
+  final List<Map<String, String?>> cacheTypes = [
+    {'folder': null, 'label': 'Total'},
     // TODO ask before deleting favicons, since they cause unneeded network requests on each render if not cached
-    ['favicons', 'Favicons'],
-    ['thumbnails', 'Thumbnails'],
-    ['samples', 'Samples'],
-    ['media', 'Media']
+    {'folder': 'favicons', 'label': 'Favicons'},
+    {'folder': 'thumbnails', 'label': 'Thumbnails'},
+    {'folder': 'samples', 'label': 'Samples'},
+    {'folder': 'media', 'label': 'Media'}
   ]; // [cache folder, displayed name]
-  List<Map<String,int>> cacheStats = [];
+  List<Map<String, dynamic>> cacheStats = [];
+  late Isolate isolate;
 
   @override
   void initState() {
@@ -52,14 +53,70 @@ class _BehaviourPageState extends State<BehaviourPage> {
     getCacheStats();
   }
 
-  Future<void> getCacheStats() async {
+  void getCacheStats() async {
     cacheStats = [];
-    for(List<String?> type in cacheTypes) {
-      // TODO isolate to fix lags on open?
-      cacheStats.add(await imageWriter.getCacheStat(type[0]));
+    for(Map<String, String?> type in cacheTypes) {
+      if(imageWriter.cacheRootPath?.isEmpty ?? true) {
+        await imageWriter.setPaths();
+      }
+
+      final ReceivePort receivePort = ReceivePort();
+      isolate = await Isolate.spawn(_isolateEntry, receivePort.sendPort);
+
+      receivePort.listen((dynamic data) {
+        if (mounted) {
+          if (data is SendPort) {
+            data.send({
+              'path': imageWriter.cacheRootPath,
+              'type': type['folder'],
+            });
+          }else {
+            cacheStats.add(data);
+            setState(() { });
+          }
+        }
+      });
     }
-    setState(() { });
     return;
+  }
+
+  static _isolateEntry(dynamic d) async {
+    final ReceivePort receivePort = ReceivePort();
+    d.send(receivePort.sendPort);
+
+    final config = await receivePort.first;
+    d.send(await getCacheStatIsolate(config['path'], config['type']));
+  }
+
+  // calculates cache (total or by type) size and file count
+  static Future<Map<String, dynamic>> getCacheStatIsolate(String cacheRootPath, String? typeFolder) async {
+    String cacheDirPath;
+    int fileNum = 0;
+    int totalSize = 0;
+    try {
+      cacheDirPath = cacheRootPath + (typeFolder ?? '') + "/";
+
+      Directory cacheDir = Directory(cacheDirPath);
+      bool dirExists = await cacheDir.exists();
+      if (dirExists) {
+        cacheDir.listSync(recursive: true, followLinks: false)
+          .forEach((FileSystemEntity entity) {
+            if (entity is File) {
+              fileNum++;
+              totalSize += entity.lengthSync();
+            }
+          });
+      }
+    } catch (e) {
+      print("Image Writer Exception");
+      print(e);
+    }
+
+    return {
+      'type': typeFolder,
+      'fileNum': fileNum,
+      'totalSize': totalSize,
+    };
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
@@ -77,7 +134,6 @@ class _BehaviourPageState extends State<BehaviourPage> {
   void setPath(String path) {
     print("path is $path");
     if (path.isNotEmpty){
-      print(path);
       settingsHandler.extPathOverride = path;
     }
   }
@@ -210,15 +266,15 @@ class _BehaviourPageState extends State<BehaviourPage> {
                   String path = await serviceHandler.getExtDir();
 
                   if (SDKVer < 30){
-                    if(settingsHandler.appMode == "Desktop"){
+                    if(settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux){
                       Get.dialog(Dialog(
                         child: Container(
                           width: 500,
                           child: DirPicker(path),
                         ),
-                      )).then((value) => {setPath(value == null ? "" : value)});
+                      )).then((value) => {setPath(value ?? '')});
                     } else {
-                      Get.to(() => DirPicker(path))!.then((value) => {setPath(value == null ? "" : value)});
+                      Get.to(() => DirPicker(path))!.then((value) => {setPath(value ?? '')});
                     }
                   } else {
                     ServiceHandler.displayToast("Not available on android 11+");
@@ -232,33 +288,43 @@ class _BehaviourPageState extends State<BehaviourPage> {
               SettingsButton(name: 'Max Cache size [TODO]', action: () { ServiceHandler.displayToast('WIP'); }),
 
               SettingsButton(name: 'Cache Stats:'),
-              ...cacheStats.map((stat) {
-                int index = cacheStats.indexOf(stat);
-                String? name = cacheTypes[index][0];
-                String label = cacheTypes[index][1]!;
+              ...cacheTypes.map((type) {
+                Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type['folder'], orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
+                String? folder = type['folder'];
+                String label = type['label'] ?? '???';
                 String size = Tools.formatBytes(stat['totalSize']!, 2);
-                int count = stat['fileNum'] ?? 0;
-                bool isEmpty = stat['fileNum'] == 0;
-                String text = isEmpty ? 'Empty' : '$size in ${count.toString()} file${count == 1 ? '' : 's'}';
+                int fileCount = stat['fileNum'] ?? 0;
+                bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
+                bool isLoading = stat['type'] == 'loading';
+                String text = isLoading
+                  ? 'Loading...'
+                  : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} file${fileCount == 1 ? '' : 's'}');
+
                 return SettingsButton(
                   name: '$label: $text',
-                  icon: Icon(null),
+                  icon: isLoading
+                    ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                      )
+                    : Icon(null),
                   action: () async {
-                    if(name != null){
-                      await imageWriter.deleteCacheFolder(name);
+                    if (folder != null && folder != 'favicons' && !isEmpty) {
                       ServiceHandler.displayToast('Cleared $label cache');
+                      await imageWriter.deleteCacheFolder(folder);
                       getCacheStats();
                     }
                   }
                 );
               }),
+
               SettingsButton(
                 name: 'Clear Cache',
                 icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
-                action: (){
-                  serviceHandler.emptyCache();
+                action: () async {
                   ServiceHandler.displayToast("Cache cleared!\nRestart may be required!");
-                  Timer(Duration(seconds: 2), () {getCacheStats();});
+                  await imageWriter.deleteCacheFolder('');
+                  // await serviceHandler.emptyCache();
+                  getCacheStats();
                 },
                 drawBottomBorder: false
               ),

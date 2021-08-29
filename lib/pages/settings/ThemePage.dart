@@ -21,7 +21,7 @@ class ThemePage extends StatefulWidget {
 class _ThemePageState extends State<ThemePage> {
   final SettingsHandler settingsHandler = Get.find();
   ServiceHandler serviceHandler = ServiceHandler();
-  late ThemeItem currentTheme;
+  late ThemeItem theme;
   late ThemeMode themeMode;
   late bool isAmoled;
 
@@ -32,29 +32,38 @@ class _ThemePageState extends State<ThemePage> {
   void initState() {
     super.initState();
     print('init-----');
-    currentTheme = settingsHandler.currentTheme.value;
+    theme = settingsHandler.theme.value;
     themeMode = settingsHandler.themeMode.value;
     isAmoled = settingsHandler.isAmoled.value;
 
-    primaryPickerColor = settingsHandler.currentTheme.value.primary;
-    accentPickerColor = settingsHandler.currentTheme.value.accent;
+    primaryPickerColor = settingsHandler.customPrimaryColor.value;
+    accentPickerColor = settingsHandler.customAccentColor.value;
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
-    settingsHandler.currentTheme.value = ThemeItem(name: 'Custom', primary: primaryPickerColor, accent: accentPickerColor);
-    print('onPrimary: ${ThemeData.estimateBrightnessForColor(primaryPickerColor!) == Brightness.dark}');
-    print('onAccent: ${ThemeData.estimateBrightnessForColor(accentPickerColor!) == Brightness.dark}');
-    // settingsHandler.currentTheme.value = currentTheme;
+    settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
     settingsHandler.isAmoled.value = isAmoled;
+
+    print('onPrimary: ${ThemeData.estimateBrightnessForColor(primaryPickerColor!) == Brightness.dark}');
+    print('onAccent: ${ThemeData.estimateBrightnessForColor(accentPickerColor!) == Brightness.dark}');
+    settingsHandler.customPrimaryColor.value = primaryPickerColor;
+    settingsHandler.customAccentColor.value = accentPickerColor;
+
     Get.find<SearchHandler>().rootRestate();
     bool result = await settingsHandler.saveSettings();
     return result;
   }
 
-  void updateTheme() {
+  void updateTheme() async {
     _onWillPop();
+    Timer(Duration(milliseconds: 200), () {
+      // trigger second time to force dropdowns to rerender completely
+      _onWillPop();
+      setState(() { });
+    });
+    setState(() { });
   }
 
   Future<bool> colorPickerDialog(Color startColor, void Function(Color) onChange) async {
@@ -69,15 +78,15 @@ class _ThemePageState extends State<ThemePage> {
       wheelDiameter: 300,
       heading: Text(
         'Select color',
-        style: Theme.of(context).textTheme.subtitle1,
+        style: Get.theme.textTheme.subtitle1,
       ),
       subheading: Text(
         'Selected color and its shades',
-        style: Theme.of(context).textTheme.subtitle1,
+        style: Get.theme.textTheme.subtitle1,
       ),
       wheelSubheading: Text(
         'Selected color and its shades',
-        style: Theme.of(context).textTheme.subtitle1,
+        style: Get.theme.textTheme.subtitle1,
       ),
       showMaterialName: true,
       showColorName: true,
@@ -85,11 +94,11 @@ class _ThemePageState extends State<ThemePage> {
       copyPasteBehavior: const ColorPickerCopyPasteBehavior(
         longPressMenu: true,
       ),
-      materialNameTextStyle: Theme.of(context).textTheme.caption,
-      colorNameTextStyle: Theme.of(context).textTheme.caption,
-      colorCodeTextStyle: Theme.of(context).textTheme.bodyText2,
-      colorCodePrefixStyle: Theme.of(context).textTheme.caption,
-      selectedPickerTypeColor: Theme.of(context).colorScheme.primary,
+      materialNameTextStyle: Get.theme.textTheme.caption,
+      colorNameTextStyle: Get.theme.textTheme.caption,
+      colorCodeTextStyle: Get.theme.textTheme.bodyText2,
+      colorCodePrefixStyle: Get.theme.textTheme.caption,
+      selectedPickerTypeColor: Get.theme.colorScheme.primary,
       pickersEnabled: const <ColorPickerType, bool>{
         ColorPickerType.both: true,
         ColorPickerType.primary: false,
@@ -98,6 +107,11 @@ class _ThemePageState extends State<ThemePage> {
         ColorPickerType.custom: true,
         ColorPickerType.wheel: true,
       },
+      actionButtons: ColorPickerActionButtons(
+        okIcon: Icons.save,
+        closeIcon: Icons.cancel,
+        dialogActionIcons: true,
+      ),
     ).showPickerDialog(
       context,
       constraints:
@@ -119,104 +133,101 @@ class _ThemePageState extends State<ThemePage> {
             children: [
               SettingsDropdown(
                 selected: themeMode.toString(),
-                values: ThemeMode.values.map((e) => e.toString()).toList(),
-                onChanged: (String? newValue){
-                  setState((){
-                    themeMode = ThemeMode.values.where((element) => element.toString() == newValue).toList()[0];
-                  });
+                values: ThemeMode.values.map((e) => e.toString()).toList().reversed.toList(),
+                onChanged: (String? newValue) {
+                  themeMode = ThemeMode.values.where((element) => element.toString() == newValue).toList()[0];
                   updateTheme();
                 },
-                title: 'Mode'
+                title: 'Theme Mode',
+                childBuilder: (String value) {
+                  final String prettyValue = value.toString().split('.')[1].capitalizeFirst!;
+                  const double size = 40;
+                  switch (prettyValue) {
+                    case ("Dark"):
+                      return Row(
+                        children: [
+                          const SizedBox(width: size, child: const Icon(Icons.dark_mode)),
+                          Text(prettyValue),
+                        ]
+                      );
+                    case ("Light"):
+                      return Row(
+                        children: [
+                          const SizedBox(width: size, child: const Icon(Icons.light_mode)),
+                          Text(prettyValue),
+                        ]
+                      );
+                    case ("System"):
+                      return Row(
+                        children: [
+                          SizedBox(
+                            width: size,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                ClipPath(
+                                  clipper: SunClipper(),
+                                  child: const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.light_mode)),
+                                ),
+                                ClipPath(
+                                  clipper: MoonClipper(),
+                                  child: const Padding(padding: EdgeInsets.only(left: 5), child: Icon(Icons.dark_mode)),
+                                ),
+                              ]
+                            )
+                          ),
+                          Text(prettyValue),
+                        ]
+                      );
+                    default:
+                      return Text(prettyValue);
+                  }
+                },
               ),
-              // Container(
-              //   width: double.infinity,
-              //   margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
-              //   child: Row(
-              //     mainAxisSize: MainAxisSize.max,
-              //     children: <Widget>[
-              //       Text("Mode:     "),
-              //       DropdownButton<ThemeMode>(
-              //         value: themeMode,
-              //         icon: Icon(Icons.arrow_downward),
-              //         onChanged: (ThemeMode? newValue){
-              //           setState((){
-              //             themeMode = newValue!;
-              //           });
-              //           updateTheme();
-              //         },
-              //         items: ThemeMode.values.map<DropdownMenuItem<ThemeMode>>((ThemeMode value){
-              //           // get mode name from ThemeMode.values, then uppercase first letter
-              //           String modeName = value.toString().split('.')[1].capitalizeFirst!;
-
-              //           return DropdownMenuItem<ThemeMode>(
-              //             value: value,
-              //             child: Text(modeName),
-              //           );
-              //         }).toList(),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              // Container(
-              //   width: double.infinity,
-              //   margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
-              //   child: Row(
-              //     mainAxisSize: MainAxisSize.max,
-              //     children: <Widget>[
-              //       Text("Theme:     "),
-              //       DropdownButton<String>(
-              //         value: currentTheme.name,
-              //         icon: Icon(Icons.arrow_downward),
-              //         onChanged: (String? newValue){
-              //           setState((){
-              //             currentTheme = settingsHandler.themes.firstWhere((e) => e.name == newValue);
-              //           });
-              //           updateTheme();
-              //         },
-              //         items: List<String>.from(settingsHandler.themes.map((e) => e.name)).map<DropdownMenuItem<String>>((String value){
-              //           ThemeItem theme = settingsHandler.themes.firstWhere((e) => e.name == value);
-              //           Color? primary = theme.primary;
-              //           Color? accent = theme.accent;
-              //           return DropdownMenuItem<String>(
-              //             value: value,
-              //             child: Row(children: [
-              //               Text(value),
-              //               Column(children: [
-              //                 Container(height: 10, width: 50, color: primary),
-              //                 Container(height: 10, width: 50, color: accent),
-              //               ]),
-              //             ])
-              //           );
-              //         }).toList(),
-              //       ),
-              //     ],
-              //   ),
-              // ),
 
               SettingsToggle(
                 value: isAmoled,
                 onChanged: (bool newValue) {
-                  setState(() {
-                    isAmoled = newValue;
-                  });
+                  isAmoled = newValue;
                   updateTheme();
                 },
                 title: 'AMOLED',
               ),
 
-              ListTile(
-                title: const Text('Primary Dialog'),
-                subtitle: Text(
-                  '${ColorTools.materialNameAndCode(primaryPickerColor!)} '
-                  'aka ${ColorTools.nameThatColor(primaryPickerColor!)}',
-                ),
-                trailing: ColorIndicator(
-                  width: 44,
-                  height: 44,
-                  borderRadius: 4,
-                  color: primaryPickerColor!,
-                  onSelectFocus: false,
-                  onSelect: () async {
+              SettingsDropdown(
+                selected: theme.name,
+                values: List<String>.from(settingsHandler.map['theme']?['options'].map((e) => e.name).toList()),
+                onChanged: (String? newValue) {
+                  theme = settingsHandler.map['theme']?['options'].where((e) => e.name == newValue).toList()[0];
+                  updateTheme();
+                },
+                title: 'Theme',
+                childBuilder: (String value) {
+                  ThemeItem theme = settingsHandler.map['theme']?['options'].firstWhere((e) => e.name == value);
+                  Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
+                  Color? accent = theme.name == 'Custom' ? accentPickerColor : theme.accent;
+
+                  return Row(
+                      children: [
+                        Column(children: [
+                          Container(height: 10, width: 50, color: primary),
+                          Container(height: 10, width: 50, color: accent),
+                        ]),
+                        const SizedBox(width: 10, height: 0),
+                        Text(value),
+                      ]
+                    );
+                },
+              ),
+
+              if(theme.name == 'Custom')
+                SettingsButton(
+                  name: 'Primary Color',
+                  subtitle: Text(
+                    '${ColorTools.materialNameAndCode(primaryPickerColor!)} '
+                    'aka ${ColorTools.nameThatColor(primaryPickerColor!)}',
+                  ),
+                  action: () async {
                     // Store current color before we open the dialog.
                     final Color colorBeforeDialog = primaryPickerColor!;
                     // Wait for the picker to close, if dialog was dismissed,
@@ -226,30 +237,31 @@ class _ThemePageState extends State<ThemePage> {
                       primaryPickerColor!,
                       (Color newColor) {
                         primaryPickerColor = newColor;
-                        setState(() { });
                         updateTheme();
-                       }
+                      }
                     ))) {
                         primaryPickerColor = colorBeforeDialog;
-                        setState(() { });
                         updateTheme();
                     }
                   },
+                  trailingIcon: ColorIndicator(
+                    width: 44,
+                    height: 44,
+                    hasBorder: true,
+                    borderRadius: 4,
+                    borderColor: Colors.grey,
+                    color: primaryPickerColor!,
+                  ),
                 ),
-              ),
-              ListTile(
-                title: const Text('Accent Dialog'),
-                subtitle: Text(
-                  '${ColorTools.materialNameAndCode(accentPickerColor!)} '
-                  'aka ${ColorTools.nameThatColor(accentPickerColor!)}',
-                ),
-                trailing: ColorIndicator(
-                  width: 44,
-                  height: 44,
-                  borderRadius: 4,
-                  color: accentPickerColor!,
-                  onSelectFocus: false,
-                  onSelect: () async {
+
+              if(theme.name == 'Custom')
+                SettingsButton(
+                  name: 'Secondary Color',
+                  subtitle: Text(
+                    '${ColorTools.materialNameAndCode(accentPickerColor!)} '
+                    'aka ${ColorTools.nameThatColor(accentPickerColor!)}',
+                  ),
+                  action: () async {
                     // Store current color before we open the dialog.
                     final Color colorBeforeDialog = accentPickerColor!;
                     // Wait for the picker to close, if dialog was dismissed,
@@ -259,22 +271,74 @@ class _ThemePageState extends State<ThemePage> {
                       accentPickerColor!,
                       (Color newColor) {
                         accentPickerColor = newColor;
-                        setState(() { });
                         updateTheme();
-                       }
+                      }
                     ))) {
                         accentPickerColor = colorBeforeDialog;
-                        setState(() { });
                         updateTheme();
                     }
                   },
+                  trailingIcon: ColorIndicator(
+                    width: 44,
+                    height: 44,
+                    hasBorder: true,
+                    borderRadius: 4,
+                    borderColor: Colors.grey,
+                    color: accentPickerColor!,
+                  ),
                 ),
-              ),
+
+              if(theme.name == 'Custom')
+                SettingsButton(
+                  name: 'Reset Custom Colors',
+                  icon: Icon(Icons.refresh),
+                  drawTopBorder: true,
+                  action: () {
+                    ThemeItem theme = settingsHandler.map['theme']?['default'];
+                    primaryPickerColor = theme.primary;
+                    accentPickerColor = theme.accent;
+                    updateTheme();
+                  },
+                )
+
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class SunClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height);
+    path.lineTo(size.width * 0.37, size.height);
+    path.lineTo(size.width * 0.37, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class MoonClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width * 0.45, size.height);
+    path.lineTo(size.width * 0.45, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
@@ -10,6 +11,7 @@ import 'package:statsfl/statsfl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/getPerms.dart';
@@ -34,6 +36,11 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  if(Platform.isWindows || Platform.isLinux) {
+    DartVLC.initialize();
+  }
+
   runApp(MainApp());
 }
 
@@ -57,9 +64,17 @@ class _MainAppState extends State<MainApp> {
     snatchHandler = Get.put(SnatchHandler());
 
     if(Platform.isAndroid || Platform.isIOS) {
+      var window = WidgetsBinding.instance!.window;
+      window.onPlatformBrightnessChanged = () {
+        // This callback is called every time the brightness changes and forces the app root to restate.
+        // This allows to not use darkTheme to avoid coloring bugs on AppBars
+        updateState();
+      };
+
       // force always on display
       // TODO force it only when in gallery
       ServiceHandler.disableSleep();
+
       // enable higher fps
       // TODO make this a setting?
       FlutterDisplayMode.setHighRefreshRate();
@@ -84,21 +99,47 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      ThemeItem theme = settingsHandler.currentTheme.value;
+      ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
+        ? ThemeItem(
+          name: 'Custom',
+          primary: settingsHandler.customPrimaryColor.value,
+          accent: settingsHandler.customAccentColor.value
+        )
+        : settingsHandler.theme.value;
       ThemeMode themeMode = settingsHandler.themeMode.value;
       Brightness? platformBrightness = SchedulerBinding.instance?.window.platformBrightness;
       bool isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrightness == Brightness.dark);
       bool isAmoled = settingsHandler.isAmoled.value;
 
+      Brightness primaryBrightness = ThemeData.estimateBrightnessForColor(theme.primary!);
+      bool onPrimaryIsDark = primaryBrightness == Brightness.dark;
+      Brightness accentBrightness = ThemeData.estimateBrightnessForColor(theme.accent!);
+      bool onAccentIsDark = accentBrightness == Brightness.dark;
+
+      TextTheme textTheme = TextTheme(
+        headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
+        headline6: GoogleFonts.quicksand(fontSize: 36.0),
+        bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
+        bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
+      );
+
+      TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
+        cursorColor: theme.accent,
+        selectionColor: Colors.blue.withOpacity(0.66),
+        selectionHandleColor: theme.accent,
+      );
+
+      print('isDark $isDark');
+
       final ColorScheme alternateColorScheme = ColorScheme(
         primary: theme.primary!,
-        onPrimary: ThemeData.estimateBrightnessForColor(theme.primary!) ==
-        Brightness.dark ? Colors.white : Colors.black, //isDark ? Colors.white : Colors.black,
+        onPrimary: onPrimaryIsDark ? Colors.white : Colors.black,
+        // onPrimary: isDark ? Colors.white : Colors.black,
         primaryVariant: theme.primary!,
 
         secondary: theme.accent!,
-        onSecondary: ThemeData.estimateBrightnessForColor(theme.accent!) ==
-        Brightness.dark ? Colors.white : Colors.black, // isDark ? Colors.white : Colors.black,
+        onSecondary: onAccentIsDark ? Colors.white : Colors.black,
+        // onSecondary: isDark ? Colors.white : Colors.black,
         secondaryVariant: theme.accent!,
 
         surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
@@ -137,27 +178,37 @@ class _MainAppState extends State<MainApp> {
               canvasColor: (isDark && isAmoled) ? Colors.black : null,
 
               brightness: isDark ? Brightness.dark : Brightness.light,
-              // primarySwatch: //Colors.pink,
               primaryColor: theme.primary,
               accentColor: theme.accent,
 
               colorScheme: alternateColorScheme,
-              textTheme: theme.text,
+              textTheme: textTheme,
+              textSelectionTheme: textSelectionTheme,
             ),
 
-            darkTheme: ThemeData.dark().copyWith(
-              scaffoldBackgroundColor: isAmoled ? Colors.black : null,
-              backgroundColor: isAmoled ? Colors.black : null,
-              canvasColor: isAmoled ? Colors.black : null,
+            // TODO doesnt detect when appbar text color should change depending on the background ???
+            // darkTheme: ThemeData.dark().copyWith(
+            //   appBarTheme: AppBarTheme(
+            //     brightness: primaryBrightness,
+            //     titleTextStyle: TextStyle(color: onPrimaryIsDark ? Colors.black : Colors.black),
+            //     toolbarTextStyle: TextStyle(color: onPrimaryIsDark ? Colors.black : Colors.black),
+            //     backgroundColor: theme.primary,
+            //     foregroundColor: onPrimaryIsDark ? Colors.black : Colors.black,
+            //   ),
+            //   scaffoldBackgroundColor: isAmoled ? Colors.black : null,
+            //   backgroundColor: isAmoled ? Colors.black : null,
+            //   canvasColor: isAmoled ? Colors.black : null,
 
-              brightness: Brightness.dark,
-              // primarySwatch: //Colors.pink,
-              primaryColor: theme.primary,
-              accentColor: theme.accent,
+            //   brightness: Brightness.dark,
+            //   primaryColor: theme.primary,
+            //   accentColor: theme.accent,
 
-              colorScheme: alternateColorScheme,
-              textTheme: theme.text,
-            ),
+            //   colorScheme: alternateColorScheme.copyWith(
+            //     brightness: Brightness.dark
+            //   ),
+            //   textTheme: theme.text,
+            //   textSelectionTheme: textSelectionTheme,
+            // ),
 
             themeMode: themeMode,
             navigatorKey: Get.key,
@@ -178,17 +229,31 @@ class Preloader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Obx(() {
       if(settingsHandler.isInit.value) {        
-        if((Platform.isAndroid || Platform.isIOS) && settingsHandler.appMode != "Mobile") {
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.landscapeRight,
-            DeviceOrientation.landscapeLeft,
-          ]);
+        if(Platform.isAndroid || Platform.isIOS) {
+          // force landscape orientation if enabled desktop mode on mobile device
+          if(settingsHandler.appMode != "Mobile") {
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.landscapeRight,
+              DeviceOrientation.landscapeLeft,
+            ]);
+          } else {
+            SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+          }
         }
 
         return Home();
       } else {
         settingsHandler.initialize();
-        return Center(child: CircularProgressIndicator());
+
+        // no custom theme data here yet, fallback to black bg + pink loading spinner
+        return Container(
+          color: Colors.black,
+          child: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Colors.pink)
+            )
+          )
+        );
       }
     });
   }
@@ -217,6 +282,7 @@ class _HomeState extends State<Home> {
 
   int memeCount = 0;
   Timer? memeTimer;
+  ThemeItem? selectedTheme;
 
   @override
   void initState() {
@@ -232,15 +298,20 @@ class _HomeState extends State<Home> {
 
     // memeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
     //   if(settingsHandler.isMemeTheme.value) { 
-    //     if(memeCount + 1 < settingsHandler.themes.length) {
+    //     if(memeCount + 1 < settingsHandler.map['theme']?['options'].length) {
     //       memeCount ++;
     //     } else {
     //       memeCount = 0;
     //     }
 
-    //     settingsHandler.currentTheme.value = settingsHandler.themes[memeCount];
+    //     if(selectedTheme == null) selectedTheme = settingsHandler.theme.value;
+
+    //     settingsHandler.theme.value = settingsHandler.map['theme']?['options'][memeCount];
     //   } else {
-    //     settingsHandler.currentTheme.value = settingsHandler.themes[0];
+    //     if(selectedTheme != null) {
+    //       settingsHandler.theme.value = selectedTheme!;
+    //       selectedTheme = null;
+    //     }
     //   }
     // });
   }
@@ -322,7 +393,6 @@ class _HomeState extends State<Home> {
       ServiceHandler.displayToast('Restored ${restoredGlobals.length} tabs from previous session!');
       searchHandler.list.value = restoredGlobals;
       searchHandler.changeTabIndex(newIndex);
-      searchHandler.searchTextController.text = restoredGlobals[newIndex].tags;
       setState(() { });
     } else {
       Booru defaultBooru = Booru(null, null, null, null, null);
@@ -449,7 +519,7 @@ class _HomeState extends State<Home> {
                             });
                           }
                         },
-                        activeColor: Get.context!.theme.primaryColor,
+                        activeColor: Get.context!.theme.accentColor,
                       )
                     ],
                   ),
@@ -485,7 +555,7 @@ class _HomeState extends State<Home> {
                   SettingsButton(
                     name: "Snatcher",
                     icon: Icon(Icons.download_sharp),
-                    page: () => SnatcherPage(searchHandler.searchTextController.text, searchHandler.currentTab.selectedBooru.value),
+                    page: () => SnatcherPage(),
                     drawTopBorder: true,
                   ),
                   SettingsButton(

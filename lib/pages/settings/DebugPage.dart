@@ -60,6 +60,15 @@ class _DebugPageState extends State<DebugPage> {
                 title: 'Show Image Stats'
               ),
               SettingsToggle(
+                value: settingsHandler.disableImageScaling.value,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.disableImageScaling.value = newValue;
+                  });
+                },
+                title: "Don't scale images"
+              ),
+              SettingsToggle(
                 value: settingsHandler.showURLOnThumb.value,
                 onChanged: (newValue) {
                   setState(() {
@@ -68,15 +77,15 @@ class _DebugPageState extends State<DebugPage> {
                 },
                 title: 'Show URL on thumb'
               ),
-              SettingsToggle(
-                value: settingsHandler.isMemeTheme.value,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.isMemeTheme.value = newValue;
-                  });
-                },
-                title: 'Meme Theme'
-              ),
+              // SettingsToggle(
+              //   value: settingsHandler.isMemeTheme.value,
+              //   onChanged: (newValue) {
+              //     setState(() {
+              //       settingsHandler.isMemeTheme.value = newValue;
+              //     });
+              //   },
+              //   title: 'Meme Theme'
+              // ),
               SettingsButton(
                 name: 'Load and Save Legacy Settings',
                 action: () {

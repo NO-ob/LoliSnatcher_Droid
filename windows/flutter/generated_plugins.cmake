@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  dart_vlc
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

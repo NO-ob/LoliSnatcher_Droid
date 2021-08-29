@@ -6,7 +6,7 @@ class BooruItem{
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
   String? mediaType;
-  RxBool isSnatched = false.obs, isFavourite = false.obs, isHated = false.obs;
+  RxBool isSnatched = false.obs, isFavourite = false.obs, isHated = false.obs, isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
   List<String>? sources;

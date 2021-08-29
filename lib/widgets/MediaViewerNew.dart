@@ -10,7 +10,7 @@ import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' as GET;
+import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
@@ -32,8 +32,8 @@ class MediaViewerNew extends StatefulWidget {
 }
 
 class _MediaViewerNewState extends State<MediaViewerNew> {
-  final SettingsHandler settingsHandler = GET.Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = GET.Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
@@ -251,7 +251,11 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
         child: Image(image: AssetImage('assets/images/loading.gif'))
       );
     } else if(settingsHandler.shitDevice) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+        )
+      );
     }
 
     // if(loadingProgress != null) {
@@ -319,7 +323,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -446,7 +450,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
             child: RotatedBox(
               quarterTurns: percentDone != null ? -1 : 1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),

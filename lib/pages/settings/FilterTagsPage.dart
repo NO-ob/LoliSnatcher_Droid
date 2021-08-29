@@ -63,7 +63,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                           filterHated = newValue!;
                         });
                       },
-                      activeColor: Get.theme.primaryColor,
+                      activeColor: Get.theme.accentColor,
                     )
                   ],)
               ),
@@ -82,13 +82,13 @@ class _FiltersEditState extends State<FiltersEdit> {
 
     return Column(children: [
       const SizedBox(height: 10),
-      TextButton.icon(
-        onPressed: null,
-        icon: Icon(type == 'Hated' ? CupertinoIcons.eye_slash : Icons.star, color: type == 'Hated' ? Colors.red : Colors.yellow),
-        label: Text('$type Tags:', style: TextStyle(fontSize: 22, color: Colors.white)),
+      ListTile(
+        onTap: null,
+        leading: Icon(type == 'Hated' ? CupertinoIcons.eye_slash : Icons.star, color: type == 'Hated' ? Colors.red : Colors.yellow),
+        title: Text('$type Tags:', style: TextStyle(fontSize: 22)),
       ),
       ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(5),
         child: Container(
           height: 200,
           child: Material(
@@ -102,20 +102,19 @@ class _FiltersEditState extends State<FiltersEdit> {
                 bool isAddButton = index == (tagsList.length);
                 String currentEntry = isAddButton ? '[Add]' : tagsList[index];
 
-                Widget entryRow = TextButton.icon(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(color: Get.theme.accentColor),
-                    ),
+                Widget entryRow = ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    side: BorderSide(color: Get.theme.accentColor),
                   ),
-                  onPressed: null,
-                  icon: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
+                  onTap: null,
+                  leading: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
                   // label: Expanded(child: ScrollingText(currentEntry, 25, "infiniteWithPause", Colors.white)),
-                  label: MarqueeText(
+                  title: MarqueeText(
                     text: currentEntry,
                     fontSize: 16,
                     startPadding: 0,
+                    isExpanded: false,
                   ),
                 );
 
@@ -214,14 +213,12 @@ class _FiltersEditState extends State<FiltersEdit> {
                 ],
               ),
             ),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.theme.accentColor),
-                ),
+            ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Get.theme.accentColor),
               ),
-              onPressed: () async {
+              onTap: () async {
                 String text = newTagController.text;
                 if(text.trim() != '') {
                   isAddButton
@@ -233,18 +230,16 @@ class _FiltersEditState extends State<FiltersEdit> {
                   ServiceHandler.displayToast('Empty input!');
                 }
               },
-              icon: Icon(Icons.save),
-              label: Expanded(child: Text('Save')),
+              leading: Icon(Icons.save),
+              title: Text('Save'),
             ),
             if(!isAddButton)
-              TextButton.icon(
-                style: TextButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    side: BorderSide(color: Get.theme.accentColor),
-                  ),
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                  side: BorderSide(color: Get.theme.accentColor),
                 ),
-                onPressed: () async {
+                onTap: () async {
                   setState(() {
                     if(type == 'Hated') {
                       hatedList = tagsList.where((t) => t != tag).toList();
@@ -254,8 +249,8 @@ class _FiltersEditState extends State<FiltersEdit> {
                   });
                   Navigator.of(context).pop(true);
                 },
-                icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
-                label: Expanded(child: Text('Delete', style: TextStyle(color: Get.theme.errorColor))),
+                leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+                title: Text('Delete', style: TextStyle(color: Get.theme.errorColor)),
               ),
             const SizedBox(height: 5),
           ],

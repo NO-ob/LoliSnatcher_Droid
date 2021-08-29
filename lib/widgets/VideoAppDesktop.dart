@@ -8,10 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
@@ -19,42 +17,39 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/widgets/LoliControls.dart';
 import 'package:LoliSnatcher/widgets/BorderedText.dart';
 
-class VideoApp extends StatefulWidget {
+class VideoAppDesktop extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
-  final bool enableFullscreen;
-  VideoApp(this.booruItem, this.index, this.searchGlobal, this.enableFullscreen);
+  VideoAppDesktop(this.booruItem, this.index, this.searchGlobal);
   @override
-  _VideoAppState createState() => _VideoAppState();
+  _VideoAppDesktopState createState() => _VideoAppDesktopState();
 }
 
-class _VideoAppState extends State<VideoApp> {
+class _VideoAppDesktopState extends State<VideoAppDesktop> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  VideoPlayerController? _videoController;
-  ChewieController? _chewieController;
+  Player? _videoController;
+  Playlist playlist = Playlist(medias: []);
 
   StreamSubscription<bool>? appbarListener;
 
-  // VideoPlayerValue _latestValue;
   int _total = 0, _received = 0, _lastViewedIndex = -1;
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
   Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false, isZoomed = false, isZoomButtonVisible = true;
+  bool isFromCache = false, isStopped = false, isZoomed = false, isZoomButtonVisible = true, firstViewFix = false;
   List<String> stopReason = [];
 
   CancelToken? _dioCancelToken;
   File? _video;
 
   @override
-  void didUpdateWidget(VideoApp oldWidget) {
+  void didUpdateWidget(VideoAppDesktop oldWidget) {
     // force redraw on item data change
     if(oldWidget.booruItem != widget.booruItem) {
       killLoading([]);
@@ -107,9 +102,15 @@ class _VideoAppState extends State<VideoApp> {
       onDoneFile: (File file, String url) {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if(!(_videoController?.value.isInitialized ?? false)) {
-          initPlayer();
-          updateState();
+        if(_videoController == null) {
+          _debounceBytes?.cancel();
+          _debounceBytes = Timer(
+            const Duration(milliseconds: 400),
+            () {
+              initPlayer();
+              updateState();
+            }
+          );
         }
       },
       cacheEnabled: settingsHandler.mediaCache,
@@ -123,7 +124,7 @@ class _VideoAppState extends State<VideoApp> {
     // always save incoming bytes, but restate only after [debounceDelay]MS
     const int debounceDelay = 50;
     bool isActive = _debounceBytes?.isActive ?? false;
-    bool isAllowedToRestate = settingsHandler.videoCacheMode == 'Cache' || !(_videoController != null && _videoController!.value.isInitialized);
+    bool isAllowedToRestate = settingsHandler.videoCacheMode == 'Cache' || _video == null;
 
     _received = received;
     _total = total;
@@ -199,6 +200,8 @@ class _VideoAppState extends State<VideoApp> {
   void killLoading(List<String> reason) {
     disposables();
 
+    _video = null;
+
     _total = 0;
     _received = 0;
 
@@ -211,9 +214,9 @@ class _VideoAppState extends State<VideoApp> {
     isStopped = true;
     stopReason = reason;
 
-    resetZoom();
+    firstViewFix = false;
 
-    _video = null;
+    resetZoom();
 
     updateState();
   }
@@ -230,7 +233,7 @@ class _VideoAppState extends State<VideoApp> {
     _videoController?.setVolume(0);
     _videoController?.pause();
     _videoController?.dispose();
-    _chewieController?.dispose();
+    _videoController = null;
 
     appbarListener?.cancel();
 
@@ -280,7 +283,7 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   Widget zoomButtonBuild() {
-    if(isZoomButtonVisible && (_videoController != null && _videoController!.value.isInitialized)) {
+    if(isZoomButtonVisible && (_videoController != null)) {
       return Positioned(
         bottom: 180,
         right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
@@ -304,92 +307,44 @@ class _VideoAppState extends State<VideoApp> {
     }
   }
 
-  void _updateState() {
-    // print(_videoController?.value);
-    // setState(() {
-    //   _latestValue = _videoController?.value;
-    // });
-    if(_chewieController == null) return;
-
-    searchHandler.isFullscreen.value = _chewieController!.isFullScreen;
-    if(widget.searchGlobal.viewedIndex.value == widget.index) {
-      if(_chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
-        ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
-      } else {
-        ServiceHandler.setVolumeButtons(searchHandler.displayAppbar.value); // same as app bar value
-      }
-    }
-  }
-
-
   Future<void> initPlayer() async {
-    // Start from cache if was already cached or only caching is allowed
     if(_video != null) { // if (settingsHandler.mediaCache || _video != null) {
-      _videoController = VideoPlayerController.file(
-        _video!,
-        videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
+      // Start from cache if was already cached or only caching is allowed
+      playlist = Playlist(
+        medias: [
+          Media.file(_video!)
+        ],
+        playlistMode: PlaylistMode.repeat,
       );
     } else {
       // Otherwise load from network
-      _videoController = VideoPlayerController.network(
-        widget.booruItem.fileURL,
-        videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
-        httpHeaders: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      print('uri: ${widget.booruItem.fileURL}');
+      playlist = Playlist(
+        medias: [
+          Media.network(
+            widget.booruItem.fileURL,
+            extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)
+          )
+        ],
+        playlistMode: PlaylistMode.repeat,
       );
     }
-    // mixWithOthers: true, allows to not interrupt audio sources from other apps
-    await Future.wait([_videoController!.initialize()]);
-    _videoController?.addListener(_updateState);
+    _videoController = Player(id: widget.index);
+    _videoController!.open(
+      playlist,
+      autoStart: true,
+    );
+
+    _videoController!.playbackStream.listen((PlaybackState state) {
+      // dart_vlc has loop logic integrated into playlists, but it is not working?
+      // this will force restart videos on completion
+      if(state.isCompleted && state.isPlaying) {
+        _videoController!.play();
+      }
+    });
 
     // Stop force restating loading indicators when video is initialized
     _checkInterval?.cancel();
-
-    // Player wrapper to allow controls, looping...
-    _chewieController = ChewieController(
-      videoPlayerController: _videoController!,
-      // autoplay is disabled here, because videos started playing randomly, but videos will still autoplay when in view (see isViewed check later)
-      autoPlay: false,
-      allowedScreenSleep: false,
-      looping: true,
-      allowFullScreen: widget.enableFullscreen,
-      showControls: true,
-      showControlsOnInitialize: searchHandler.displayAppbar.value,
-      customControls: SafeArea(child: LoliControls()),
-      // TODO safe area replaces hideable padding?
-        // settingsHandler.galleryBarPosition == 'Bottom'
-        //   ? SafeArea(child: HideableControlsPadding(LoliControls()))
-        //   : SafeArea(child: LoliControls()),
-
-        // MaterialControls(),
-        // CupertinoControls(
-        //   backgroundColor: Color.fromRGBO(41, 41, 41, 0.7),
-        //   iconColor: Color.fromARGB(255, 200, 200, 200)
-        // ),
-      materialProgressColors: ChewieProgressColors(
-        playedColor: Get.theme.accentColor,
-        handleColor: Get.theme.accentColor,
-        backgroundColor: Colors.grey,
-        bufferedColor: Colors.white,
-      ),
-      // placeholder: Container(
-      //   color: Colors.black,
-      // ),
-      systemOverlaysOnEnterFullScreen: [],
-      systemOverlaysAfterFullScreen: [],
-      errorBuilder: (context, errorMessage) {
-        return Center(
-          child: Text(errorMessage, style: TextStyle(color: Colors.white)),
-        );
-      },
-
-      // Specify this to allow any orientation in fullscreen, otherwise it will decide for itself based on video dimensions
-      // deviceOrientationsOnEnterFullScreen: [
-      //     DeviceOrientation.landscapeLeft,
-      //     DeviceOrientation.landscapeRight,
-      //     DeviceOrientation.portraitUp,
-      //     DeviceOrientation.portraitDown,
-      // ],
-    );
 
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
@@ -595,7 +550,7 @@ class _VideoAppState extends State<VideoApp> {
   Widget build(BuildContext context) {
     int viewedIndex = widget.searchGlobal.viewedIndex.value;
     bool isViewed = viewedIndex == widget.index || widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
-    bool initialized = _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
+    bool initialized = _videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     bool needsRestart = _lastViewedIndex != viewedIndex;
@@ -609,11 +564,24 @@ class _VideoAppState extends State<VideoApp> {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          _videoController!.seekTo(Duration());
+          _videoController!.seek(Duration());
         }
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-          _videoController!.play();
+          _videoController!.pause();
+          if(!firstViewFix) {
+            // crutch to fix video feed not working after changing videos
+            _debounceBytes?.cancel();
+            _debounceBytes = Timer(
+              const Duration(milliseconds: 500),
+              () {
+                _videoController!.play();
+                firstViewFix = true;
+              }
+            );
+          } else {
+            _videoController!.play();
+          }
         }
         if (settingsHandler.videoAutoMute){
           _videoController!.setVolume(0);
@@ -636,7 +604,16 @@ class _VideoAppState extends State<VideoApp> {
           children: [
             PhotoView.customChild(
               child: initialized
-                ? Chewie(controller: _chewieController!)
+                ? Video(
+                    player: _videoController,
+                    scale: 1.0,
+                    showControls: true,
+                    progressBarInactiveColor: Colors.grey,
+                    progressBarActiveColor: Get.theme.accentColor,
+                    progressBarThumbColor: Get.theme.accentColor,
+                    volumeThumbColor: Get.theme.accentColor,
+                    volumeActiveColor: Get.theme.accentColor,
+                  )
                 : Stack(children: [
                     CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
                     loadingElementBuilder(),

@@ -5,6 +5,10 @@ import 'dart:core';
 import 'package:get/get.dart';
 
 class LoliSyncServerPage extends StatelessWidget {
+  final String? selectedIP;
+  final String customPort;
+  LoliSyncServerPage(this.selectedIP, this.customPort);
+
   final SettingsHandler settingsHandler = Get.find();
   final LoliSync loliSync = LoliSync();
 
@@ -35,6 +39,7 @@ class LoliSyncServerPage extends StatelessWidget {
     );
     return shouldPop;
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -54,7 +59,7 @@ class LoliSyncServerPage extends StatelessWidget {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startServer(settingsHandler),
+              stream: loliSync.startServer(settingsHandler, selectedIP, customPort),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {

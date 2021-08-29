@@ -95,6 +95,8 @@ class SearchHandler extends GetxController {
       index.value = i;
       Tools.forceClearMemoryCache(withLive: true);
     }
+    // set search text anyway
+    searchTextController.text = list[index.value].tags;
   }
 
   SearchGlobal get currentTab => list[index.value];
@@ -164,7 +166,7 @@ class SearchGlobal {
   RxList<Booru>? secondaryBoorus;
   double scrollPosition = 0;
   late BooruHandler booruHandler;
-  ValueNotifier<int> viewedIndex = ValueNotifier(0);
+  RxInt viewedIndex = 0.obs;
   Rx<BooruItem> currentItem = BooruItem(
     fileURL: "",
     sampleURL: "",

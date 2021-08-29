@@ -63,7 +63,6 @@ class _MediaViewerState extends State<MediaViewer> {
     super.didUpdateWidget(oldWidget);
   }
 
-  /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
     final String? filePath = await imageWriter.getCachePath(imageURL!, imageType!);
 
@@ -126,7 +125,6 @@ class _MediaViewerState extends State<MediaViewer> {
     }
   }
 
-  /// Author: [Nani-Sore] ///
   void _onBytesAdded(int received) {
     // always save incoming bytes, but restate only after [debounceDelay]MS
     const int debounceDelay = 100;
@@ -300,7 +298,6 @@ class _MediaViewerState extends State<MediaViewer> {
     }
   }
 
-  /// Author: [Nani-Sore] ///
   Widget loadingElementBuilder(BuildContext ctx, ImageChunkEvent? loadingProgress) {
     if(settingsHandler.loadingGif) {
       return Container(
@@ -372,7 +369,7 @@ class _MediaViewerState extends State<MediaViewer> {
                     child: RotatedBox(
                       quarterTurns: -1,
                       child: LinearProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.accentColor),
                           backgroundColor: Colors.transparent,
                           value: percentDone),
                     ),
@@ -499,7 +496,7 @@ class _MediaViewerState extends State<MediaViewer> {
                     child: RotatedBox(
                       quarterTurns: percentDone != null ? -1 : 1,
                       child: LinearProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                          valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.accentColor),
                           backgroundColor: Colors.transparent,
                           value: percentDone),
                     ),

@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 
@@ -32,11 +33,13 @@ class SettingsHandler extends GetxController {
   bool hasHydrus = false, mergeEnabled = false, videoAutoMute = false;
   Size? deviceSize;
   double? devicePixelRatio;
-  RxBool isDebug = false.obs, showFPS = false.obs, showImageStats = false.obs, isMemeTheme = false.obs, showURLOnThumb = false.obs;
+
+  // debug toggles
+  RxBool isDebug = (kDebugMode || false).obs, showFPS = false.obs, showImageStats = false.obs, isMemeTheme = false.obs, showURLOnThumb = false.obs, disableImageScaling = false.obs;
   ////////////////////////////////////////////////////
 
   // saveable settings vars
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", previewDisplay = "Square", galleryMode = "Full Res", shareAction = "Ask", appMode = "Mobile", galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal', extPathOverride = "", zoomButtonPosition = "Right";
+  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", previewDisplay = "Square", galleryMode = "Full Res", shareAction = "Ask", appMode = (Platform.isWindows || Platform.isLinux) ? 'Desktop' : 'Mobile', galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal', extPathOverride = "", zoomButtonPosition = "Right", lastSyncIp = '', lastSyncPort = '';
 
   List<String> hatedTags = [], lovedTags = [];
 
@@ -48,7 +51,8 @@ class SettingsHandler extends GetxController {
     ["favourite", "Favourite"],
     ["info", "Display Info"],
     ["share", "Share"],
-    ["open", "Open in Browser"]
+    ["open", "Open in Browser"],
+    ["reloadnoscale", "Reload without scaling"]
   ];
   List<List<String>> buttonOrder = [
     ["autoscroll", "AutoScroll"],
@@ -56,7 +60,8 @@ class SettingsHandler extends GetxController {
     ["favourite", "Favourite"],
     ["info", "Display Info"],
     ["share", "Share"],
-    ["open", "Open in Browser"]
+    ["open", "Open in Browser"],
+    ["reloadnoscale", "Reload without scaling"]
   ];
 
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
@@ -68,19 +73,14 @@ class SettingsHandler extends GetxController {
   ////////////////////////////////////////////////////
 
   // themes wip
-  List<ThemeItem> themes = [
-    ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
-    ThemeItem(name: "Purple", primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
-    ThemeItem(name: "Blue", primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
-    ThemeItem(name: "Teal", primary: Colors.teal, accent: Colors.teal[600]),
-    ThemeItem(name: "Red", primary: Colors.red[700], accent: Colors.red[800]),
-    ThemeItem(name: "Green", primary: Colors.green, accent: Colors.green[700]),
-  ];
-  Rx<ThemeItem> currentTheme = ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]).obs..listen((ThemeItem theme) {
+  Rx<ThemeItem> theme = ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]).obs..listen((ThemeItem theme) {
     print('newTheme ${theme.name} ${theme.primary}');
   });
+  Rx<Color?> customPrimaryColor = Colors.pink[200].obs;
+  Rx<Color?> customAccentColor = Colors.pink[600].obs;
+
   Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
-  RxBool isAmoled = true.obs;
+  RxBool isAmoled = false.obs;
   ////////////////////////////////////////////////////
 
   // default values and possible options map for validation
@@ -99,7 +99,7 @@ class SettingsHandler extends GetxController {
     "previewDisplay": {
       "type": "stringFromList",
       "default": "Square",
-      "options": <String>["Square", "Rectangle"], //, "Staggered"],
+      "options": <String>["Square", "Rectangle", "Staggered"],
     },
     "shareAction": {
       "type": "stringFromList",
@@ -145,15 +145,23 @@ class SettingsHandler extends GetxController {
       "type": "string",
       "default": "",
     },
+    "lastSyncIp": {
+      "type": "string",
+      "default": "",
+    },
+    "lastSyncPort": {
+      "type": "string",
+      "default": "",
+    },
 
     // stringList
     "hatedTags": {
       "type": "stringList",
-      "default": [],
+      "default": <String>[],
     },
     "lovedTags": {
       "type": "stringList",
-      "default": [],
+      "default": <String>[],
     },
 
     // int
@@ -253,105 +261,167 @@ class SettingsHandler extends GetxController {
     // other
     "buttonOrder": {
       "type": "other",
-      "default": [
+      "default": <List<String>>[
         ["autoscroll", "AutoScroll"],
         ["snatch", "Save"],
         ["favourite", "Favourite"],
         ["info", "Display Info"],
         ["share", "Share"],
-        ["open", "Open in Browser"]
+        ["open", "Open in Browser"],
+        ["reloadnoscale", "Reload without scaling"]
       ]
+    },
+
+    // theme
+    "theme": {
+      "type": "theme",
+      "default": ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
+      "options": <ThemeItem>[
+        ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
+        ThemeItem(name: "Purple", primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
+        ThemeItem(name: "Blue", primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
+        ThemeItem(name: "Teal", primary: Colors.teal, accent: Colors.teal[600]),
+        ThemeItem(name: "Red", primary: Colors.red[700], accent: Colors.red[800]),
+        ThemeItem(name: "Green", primary: Colors.green, accent: Colors.green[700]),
+        ThemeItem(name: "Custom", primary: null, accent: null),
+      ]
+    },
+    "themeMode": {
+      "type": "themeMode",
+      "default": ThemeMode.dark,
+      "options": ThemeMode.values,
+    },
+    "isAmoled": {
+      "type": "rxbool",
+      "default": false,
+    },
+    "customPrimaryColor": {
+      "type": "rxcolor",
+      "default": Colors.pink[200],
+    },
+    "customAccentColor": {
+      "type": "rxcolor",
+      "default": Colors.pink[600],
     },
   };
 
-  dynamic validateValue(String name, dynamic value) {
+  dynamic validateValue(String name, dynamic value, {bool toJSON = false}) {
     Map<String, dynamic>? settingParams = map[name];
 
+    if(toJSON) {
+      value = getByString(name);
+    }
+
     if(settingParams == null) {
-      return value;
+      if(toJSON) {
+        return value.toString();
+      } else {
+        return value;
+      }
     }
 
     try {
-      switch (settingParams['type']) {
+      switch (settingParams["type"]) {
         case 'stringFromList':
-          String validValue = settingParams['options']?.firstWhere((el) => el == value, orElse: () => '');
+          String validValue = List<String>.from(settingParams["options"]!).firstWhere((el) => el == value, orElse: () => '');
           if(validValue != '') {
             return validValue;
           } else {
-            return settingParams['default'];
+            return settingParams["default"];
           }
+
         case 'string':
           if(!(value is String)) {
-            throw 'value "$value" is not a String';
+            throw 'value "$value" for $name is not a String';
           } else {
             return value;
           }
+
         case 'int':
           int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
           if(parse == null) {
-            throw 'value "$value" of type ${value.runtimeType} is not an int';
+            throw 'value "$value" of type ${value.runtimeType} for $name is not an int';
           } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
             return settingParams["default"];
           } else {
             return parse;
           }
+
         case 'bool':
           if(!(value is bool)) {
-            throw 'value "$value" is not a bool';
+            throw 'value "$value" for $name is not a bool';
           } else {
             return value;
           }
-        // case 'stringList': /// TODO special cases parsing ???
+
+        case 'rxbool':
+          if (toJSON) {
+            // rxbool to bool
+            return value.value;
+          } else {
+            // bool to rxbool
+            if(!(value is bool)) {
+              throw 'value "$value" for $name is not a bool';
+            } else {
+              return value;
+            }
+          }
+
+        case 'theme':
+          if(toJSON) {
+            // rxobject to string
+            return value.value.name;
+          } else {
+            if(value is String) {
+              // string to rxobject
+              final ThemeItem findTheme = List<ThemeItem>.from(settingParams["options"]!).firstWhere((el) => el.name == value, orElse: () => settingParams["default"]);
+              return findTheme;
+            } else {
+              return settingParams["default"];
+            }
+          }
+
+        case 'themeMode':
+          if (toJSON) {
+            // rxobject to string
+            return value.value.toString().split('.')[1]; // ThemeMode.dark => dark
+          } else {
+            if (value is String) {
+              // string to rxobject
+              final List<ThemeMode> findMode = ThemeMode.values.where((element) => element.toString() == 'ThemeMode.$value').toList();
+              if (findMode.length > 0) {
+                // if theme mode is present
+                return findMode[0];
+              } else {
+                // if not theme mode with given name
+                return settingParams["default"];
+              }
+            } else {
+              return settingParams["default"];
+            }
+          }
+
+        case 'rxcolor':
+          if (toJSON) {
+            // rxobject to int
+            return value.value.value; // Color => int
+          } else {
+            // int to rxobject
+            if (value is int) {
+              return Color(value);
+            } else {
+              return settingParams["default"];
+            }
+          }
+
+        // case 'stringList':
         default:
           return value;
       }
     } catch(err) {
+      // return default value on exceptions
       print('SettingsHandler value validation error: $err');
-      return settingParams['default'];
-    }
-  }
-
-  dynamic valueToJson(String name) {
-    Map<String, dynamic>? settingParams = map[name];
-
-    dynamic value = getByString(name);
-
-    if(settingParams == null) {
-      return value.toString();
-    }
-
-    try {
-      switch (settingParams['type']) {
-        case 'stringFromList':
-        case 'string':
-          if(!(value is String)) {
-            // return "${settingParams['default']}";
-            throw 'value "$value" is not a String';
-          } else {
-            return value;
-          }
-        case 'int':
-          int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
-          if(parse == null) {
-            throw 'value "$value" of type ${value.runtimeType} is not an int';
-          } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
-            return settingParams['default'];
-          } else {
-            return parse;
-          }
-        case 'bool':
-          if(!(value is bool)) {
-            throw 'value "$value" is not a bool';
-          } else {
-            return value;
-          }
-        // case 'stringList': /// TODO special cases parsing ???
-        default:
-          return value;
-      }
-    } catch(err) {
-      print('SettingsHandler value to json error: $name $value $err');
-      return settingParams['default'];
+      return settingParams["default"];
     }
   }
 
@@ -368,7 +438,6 @@ class SettingsHandler extends GetxController {
     if (path == "") await setConfigDir();
     if (cachePath == "") cachePath = await serviceHandler.getCacheDir();
     if (SDKVer == 0) SDKVer = await serviceHandler.getSDKVersion();
-    if (Platform.isLinux || Platform.isWindows) appMode = "Desktop";
 
     if(await checkForSettings()) {
       await loadSettingsJson();
@@ -394,6 +463,7 @@ class SettingsHandler extends GetxController {
   Future<void> loadSettingsJson() async {
     File settingsFile = File(path + "settings.json");
     String settings = await settingsFile.readAsString();
+    // print('loadJSON $settings');
     loadFromJSON(settings);
     return;
   }
@@ -594,6 +664,23 @@ class SettingsHandler extends GetxController {
         return appMode;
       case 'extPathOverride':
         return extPathOverride;
+
+      case 'lastSyncIp':
+        return lastSyncIp;
+      case 'lastSyncPort':
+        return lastSyncPort;
+
+      // theme stuff
+      case 'theme':
+        return theme;
+      case 'themeMode':
+        return themeMode;
+      case 'isAmoled':
+        return isAmoled;
+      case 'customPrimaryColor':
+        return customPrimaryColor;
+      case 'customAccentColor':
+        return customAccentColor;
       default:
         return null;
     }
@@ -708,6 +795,31 @@ class SettingsHandler extends GetxController {
       case 'extPathOverride':
         extPathOverride = validatedValue;
         break;
+      
+      case 'lastSyncIp':
+        lastSyncIp = validatedValue;
+        break;
+      case 'lastSyncPort':
+        lastSyncPort = validatedValue;
+        break;
+
+      // theme stuff
+      case 'theme':
+        theme.value = validatedValue;
+        break;
+      case 'themeMode':
+        themeMode.value = validatedValue;
+        break;
+      case 'isAmoled':
+        isAmoled.value = validatedValue;
+        break;
+      case 'customPrimaryColor':
+        customPrimaryColor.value = validatedValue;
+        break;
+      case 'customAccentColor':
+        customAccentColor.value = validatedValue;
+        break;
+
       default:
         break;
     }
@@ -717,48 +829,60 @@ class SettingsHandler extends GetxController {
   Map<String, dynamic> toJSON() {
     //Dont add prefbooru or appmode since,appmode will mess up syncing between desktop and mobile
     // prefbooru will mess up if the booru configs aren't synced
-    return {
-      "defTags": valueToJson("defTags"),
-      "previewMode": valueToJson("previewMode"),
-      "videoCacheMode": valueToJson("videoCacheMode"),
-      "previewDisplay": valueToJson("previewDisplay"),
-      "galleryMode": valueToJson("galleryMode"),
-      "shareAction" : valueToJson("shareAction"),
-      "limit" : valueToJson("limit"),
-      "portraitColumns" : valueToJson("portraitColumns"),
-      "landscapeColumns" : valueToJson("landscapeColumns"),
-      "preloadCount" : valueToJson("preloadCount"),
-      "snatchCooldown" : valueToJson("snatchCooldown"),
-      "galleryBarPosition" : valueToJson("galleryBarPosition"),
-      "galleryScrollDirection" : valueToJson("galleryScrollDirection"),
-      "jsonWrite" : valueToJson("jsonWrite"),
-      "autoPlayEnabled" : valueToJson("autoPlayEnabled"),
-      "loadingGif" : valueToJson("loadingGif"),
-      "imageCache" : valueToJson("imageCache"),
-      "mediaCache": valueToJson("mediaCache"),
-      "autoHideImageBar" : valueToJson("autoHideImageBar"),
-      "dbEnabled" : valueToJson("dbEnabled"),
-      "searchHistoryEnabled" : valueToJson("searchHistoryEnabled"),
-      "filterHated" : valueToJson("filterHated"),
-      "useVolumeButtonsForScroll" : valueToJson("useVolumeButtonsForScroll"),
-      "volumeButtonsScrollSpeed" : valueToJson("volumeButtonsScrollSpeed"),
-      "disableVideo" : valueToJson("disableVideo"),
-      "shitDevice" : valueToJson("shitDevice"),
-      "galleryAutoScrollTime" : valueToJson("galleryAutoScrollTime"),
-      "zoomButtonPosition": valueToJson("zoomButtonPosition"),
+    Map<String, dynamic> json = {
+      "defTags": validateValue("defTags", null, toJSON: true),
+      "previewMode": validateValue("previewMode", null, toJSON: true),
+      "videoCacheMode": validateValue("videoCacheMode", null, toJSON: true),
+      "previewDisplay": validateValue("previewDisplay", null, toJSON: true),
+      "galleryMode": validateValue("galleryMode", null, toJSON: true),
+      "shareAction" : validateValue("shareAction", null, toJSON: true),
+      "limit" : validateValue("limit", null, toJSON: true),
+      "portraitColumns" : validateValue("portraitColumns", null, toJSON: true),
+      "landscapeColumns" : validateValue("landscapeColumns", null, toJSON: true),
+      "preloadCount" : validateValue("preloadCount", null, toJSON: true),
+      "snatchCooldown" : validateValue("snatchCooldown", null, toJSON: true),
+      "galleryBarPosition" : validateValue("galleryBarPosition", null, toJSON: true),
+      "galleryScrollDirection" : validateValue("galleryScrollDirection", null, toJSON: true),
+      "jsonWrite" : validateValue("jsonWrite", null, toJSON: true),
+      "autoPlayEnabled" : validateValue("autoPlayEnabled", null, toJSON: true),
+      "loadingGif" : validateValue("loadingGif", null, toJSON: true),
+      "imageCache" : validateValue("imageCache", null, toJSON: true),
+      "mediaCache": validateValue("mediaCache", null, toJSON: true),
+      "autoHideImageBar" : validateValue("autoHideImageBar", null, toJSON: true),
+      "dbEnabled" : validateValue("dbEnabled", null, toJSON: true),
+      "searchHistoryEnabled" : validateValue("searchHistoryEnabled", null, toJSON: true),
+      "filterHated" : validateValue("filterHated", null, toJSON: true),
+      "useVolumeButtonsForScroll" : validateValue("useVolumeButtonsForScroll", null, toJSON: true),
+      "volumeButtonsScrollSpeed" : validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
+      "disableVideo" : validateValue("disableVideo", null, toJSON: true),
+      "shitDevice" : validateValue("shitDevice", null, toJSON: true),
+      "galleryAutoScrollTime" : validateValue("galleryAutoScrollTime", null, toJSON: true),
+      "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
       "hatedTags": cleanTagsList(hatedTags),
       "lovedTags": cleanTagsList(lovedTags),
 
-      "prefBooru": valueToJson("prefBooru"),
-      "appMode": valueToJson("appMode"),
-      "extPathOverride": valueToJson("extPathOverride"),
+      "prefBooru": validateValue("prefBooru", null, toJSON: true),
+      "appMode": validateValue("appMode", null, toJSON: true),
+      "extPathOverride": validateValue("extPathOverride", null, toJSON: true),
+
+      "lastSyncIp": validateValue("lastSyncIp", null, toJSON: true),
+      "lastSyncPort": validateValue("lastSyncPort", null, toJSON: true),
+
+      "theme": validateValue("theme", null, toJSON: true),
+      "themeMode": validateValue("themeMode", null, toJSON: true),
+      "isAmoled": validateValue("isAmoled", null, toJSON: true),
+      "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
+      "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
 
       "version": verStr,
       "SDK": SDKVer,
     };
+
+    // print('JSON $json');
+    return json;
   }
 
   Future<bool> loadFromJSON(String jsonString) async {
@@ -768,6 +892,7 @@ class SettingsHandler extends GetxController {
       List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
       return button;
     }).where((el) => el[0] != 'null').toList();
+    btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
     buttonOrder = btnOrder;
 
     List<String> hateTags = List<String>.from(json["hatedTags"]);

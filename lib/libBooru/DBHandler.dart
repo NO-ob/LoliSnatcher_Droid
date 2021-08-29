@@ -13,11 +13,11 @@ class DBHandler{
   //Connects to the database file and create the database if the tables dont exist
   Future<bool> dbConnect(String path)async{
     if(Platform.isAndroid || Platform.isIOS){
-      db = await openDatabase(path+"store.db", version: 1);
+      db = await openDatabase(path + "store.db", version: 1);
     } else {
       sqfliteFfiInit();
       var databaseFactory = databaseFactoryFfi;
-      db = await databaseFactory.openDatabase(path+"store.db");
+      db = await databaseFactory.openDatabase(path + "store.db");
     }
     await updateTable();
     await deleteUntracked();
@@ -186,7 +186,7 @@ class DBHandler{
     result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
     Logger.Inst().log("got results from db", "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
     Logger.Inst().log(result, "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
-    if (result != null){
+    if (result != null) {
       return result.first["count"];
     }
     return 0;

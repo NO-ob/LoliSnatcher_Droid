@@ -68,7 +68,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                       Get.dialog(Dialog(
                         child: Container(
                           width: 500,
-                          child: SnatcherPage(searchHandler.searchTextController.text, searchHandler.currentTab.selectedBooru.value),
+                          child: SnatcherPage(),
                         ),
                       ));
                     },
@@ -136,7 +136,11 @@ class _DesktopHomeState extends State<DesktopHome> {
                   Expanded(
                     flex: 1,
                     child: Obx(() => searchHandler.list.length == 0
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center(
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                          )
+                        )
                       : DesktopTagListener(searchHandler.currentTab)
                     )
                   ),

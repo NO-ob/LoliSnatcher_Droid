@@ -5,21 +5,21 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
-
 import 'BooruItem.dart';
 
 class LoliSync{
   String ip = "";
-  String port = "1234";
+  int port = 1234;
   int amount = -1;
   int current = -1;
   var server;
   bool syncKilled = false;
-  Stream<String> startServer(SettingsHandler settingsHandler) async* {
-    ip = await ServiceHandler.getIP();
-    server = await HttpServer.bind(ip, 1234);
+
+  Stream<String> startServer(SettingsHandler settingsHandler, String? ipOverride, String? portOverride) async* {
+    ip = ipOverride ?? await ServiceHandler.getIP();
+    port = int.tryParse(portOverride ?? '1234') ?? 1234;
+    server = await HttpServer.bind(ip, port);
+
     yield "Server active at $ip:$port";
     await for (var req in server) {
       Logger.Inst().log(req.uri.path.toString(), "LoliSync", "startServer", LogTypes.loliSyncInfo);
@@ -32,6 +32,9 @@ class LoliSync{
           break;
         case("/lolisync/booru"):
           yield await storeBooru(req, settingsHandler);
+          break;
+        case("/lolisync/test"):
+          yield 'Test';
           break;
       }
       await req.response.close();
@@ -95,7 +98,7 @@ class LoliSync{
         current = int.parse(req.uri.queryParameters["current"]!);
         String content = await utf8.decoder.bind(req).join(); /*2*/
         Booru booru = Booru.fromJSON(content);
-        if (booru.name != "Favourites"){
+        if (booru.name != "Favourites") {
           for (int i=0; i < settingsHandler.booruList.length; i++){
             if (settingsHandler.booruList.isNotEmpty) {
               if (settingsHandler.booruList[i].baseURL == booru.baseURL) {
@@ -159,21 +162,23 @@ class LoliSync{
     return responseStr;
   }
   Stream<String> startSync(SettingsHandler settingsHandler, String ip, String port, List<String> toSync) async*{
-    for (int i = 0; i < toSync.length; i++){
-      switch(toSync.elementAt(i)){
+    for (int i = 0; i < toSync.length; i++) {
+      switch(toSync.elementAt(i)) {
         case "Favourites":
           yield "Sync Starting";
           int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
-          if (favouritesCount > 0){
-            int ceiling = (favouritesCount / 10).ceil();
+          if (favouritesCount > 0) {
+            int limit = 100;
+            int ceiling = (favouritesCount / limit).ceil();
             for(int i=0; i < ceiling; i++){
-              if (!syncKilled){
-                int tens = i*10;
-                List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("",tens.toString(),"10","ASC","loliSyncFav");
+              if (!syncKilled) {
+                int offset = i * limit;
+                List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("", offset.toString(), limit.toString(), "ASC", "loliSyncFav");
                 Logger.Inst().log("fetched is ${fetched.length} i is $i", "LoliSync", "startSync", LogTypes.loliSyncInfo);
                 for (int x = 0; x < fetched.length; x++){
-                  int count = tens + x;
-                  if (count < favouritesCount){
+                  int count = offset + x;
+                  if (count < favouritesCount) {
+                    // TODO send in batches, not in singles
                     String resp = await sendBooruItem(fetched.elementAt(x), ip, port, favouritesCount, count);
                     yield "$count / $favouritesCount - $resp";
                   } else {

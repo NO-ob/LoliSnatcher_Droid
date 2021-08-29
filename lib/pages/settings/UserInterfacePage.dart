@@ -52,7 +52,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
       child:Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("User Interface"),
+          title: Text("Interface"),
         ),
         body: Center(
           child: ListView(

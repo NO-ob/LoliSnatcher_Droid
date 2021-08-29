@@ -207,7 +207,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       );
                     }
                   } else {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                      )
+                    );
                   }
                 }),
           ),
@@ -218,43 +222,54 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: TextField(
-          controller: searchHandler.searchTextController,
-          focusNode: searchHandler.searchBoxFocus,
-          onChanged: (text) {
-            createOverlay();
-          },
-          onSubmitted: (String text) {
-            searchHandler.searchBoxFocus.unfocus();
-            searchHandler.searchAction(text, null);
-          },
-          onEditingComplete: (){
-            searchHandler.searchBoxFocus.unfocus();
-          },
-          onTap: (){
-            if(!searchHandler.searchBoxFocus.hasFocus) {
-              // set cursor to the end when tapped unfocused
-              searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
-            }
-          },
-          decoration: InputDecoration(
-            fillColor: Get.theme.colorScheme.surface,
-            filled: true,
-            hintText: "Enter Tags",
-            prefixIcon: searchHandler.searchTextController.text.length > 0
-              ? IconButton(
-                  padding: const EdgeInsets.all(5),
-                  onPressed: () => setState(() {searchHandler.searchTextController.clear();}),
-                  icon: Icon(Icons.clear),
-                )
-              : null,
-            contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              gapPadding: 0,
-            ),
+      child: TextField(
+        controller: searchHandler.searchTextController,
+        focusNode: searchHandler.searchBoxFocus,
+        onChanged: (text) {
+          createOverlay();
+        },
+        onSubmitted: (String text) {
+          searchHandler.searchBoxFocus.unfocus();
+          searchHandler.searchAction(text, null);
+        },
+        onEditingComplete: (){
+          searchHandler.searchBoxFocus.unfocus();
+        },
+        onTap: (){
+          if(!searchHandler.searchBoxFocus.hasFocus) {
+            // set cursor to the end when tapped unfocused
+            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+          }
+        },
+        decoration: InputDecoration(
+          fillColor: Get.theme.colorScheme.surface,
+          filled: true,
+          hintText: "Enter Tags",
+          prefixIcon: searchHandler.searchTextController.text.length > 0
+            ? IconButton(
+                padding: const EdgeInsets.all(5),
+                onPressed: () => setState(() {searchHandler.searchTextController.clear();}),
+                icon: Icon(Icons.clear),
+              )
+            : null,
+          contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderRadius: BorderRadius.circular(50),
+            gapPadding: 0,
           ),
-        )
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Get.theme.errorColor),
+            borderRadius: BorderRadius.circular(50),
+            gapPadding: 0,
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderRadius: BorderRadius.circular(50),
+            gapPadding: 0,
+          ),
+        ),
+      )
     );
   }
 }

@@ -1,9 +1,7 @@
-import 'dart:io';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/main.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:get/get.dart';
@@ -12,7 +10,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' as GET;
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -26,7 +23,7 @@ class CachedThumbBetter extends StatefulWidget {
   final int index;
   final int columnCount;
   final SearchGlobal searchGlobal;
-  final bool isStandalone;
+  final bool isStandalone; // set to true when used in gallery preview to enable hero animation
   CachedThumbBetter(this.booruItem, this.index, this.searchGlobal, this.columnCount, this.isStandalone);
 
   @override
@@ -34,7 +31,7 @@ class CachedThumbBetter extends StatefulWidget {
 }
 
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
-  final SettingsHandler settingsHandler = GET.Get.find();
+  final SettingsHandler settingsHandler = Get.find();
 
   int _total = 0, _received = 0, _restartedCount = 0;
   bool? isFromCache;
@@ -61,7 +58,6 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     super.didUpdateWidget(oldWidget);
   }
 
-  /// Author: [Nani-Sore] ///
   Future<void> downloadThumb(bool isMain) async {
     _dioCancelToken = CancelToken();
     final DioLoader client = DioLoader(
@@ -82,33 +78,40 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
       },
       cacheEnabled: settingsHandler.imageCache,
       cacheFolder: isMain ? thumbFolder : 'thumbnails',
-      timeoutTime: 10000,
+      timeoutTime: 20000,
     );
     client.runRequest();
     return;
   }
 
   ImageProvider getImageProvider(Uint8List bytes, String url) {
-    double thumbWidth = 100; // set minimum value to avoid exceptions when it attempts to render outside of the view
+    if(widget.booruItem.isHated.value) {
+      // pixelate hated images
+      return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
+    }
+
+    if(settingsHandler.disableImageScaling.value) {
+      // if resizing is disabled => huge memory usage
+      return MemoryImageTest(bytes, imageUrl: url);
+    }
+
+    double? thumbWidth;
     double? thumbHeight;
+
     if (this.mounted) {
-      // mediaquery will throw an exception if we try to read it after disposing => check mounted
+      // mediaquery will throw an exception if we try to read it after disposing => check if mounted
       final MediaQueryData mQuery = MediaQuery.of(context);
       final double widthLimit = (mQuery.size.width / widget.columnCount) * mQuery.devicePixelRatio * 1;
       double thumbRatio = 1;
+      bool hasSizeData = widget.booruItem.fileHeight != null && widget.booruItem.fileWidth != null;
 
-      if (widget.booruItem.isHated.value) {
-        // pixelate hated images
-        thumbWidth = mQuery.size.width * 0.05; // thumbHeight = 6;
+      if(widget.isStandalone) {
+        thumbWidth = widthLimit;
       } else {
         switch (settingsHandler.previewDisplay) {
           case 'Rectangle':
-            thumbRatio = 16 / 9;
-            // thumbHeight = widthLimit * thumbRatio;
-            thumbWidth = widthLimit;
-            break;
           case 'Staggered':
-            bool hasSizeData = widget.booruItem.fileHeight != null && widget.booruItem.fileWidth != null;
+            // thumbRatio = 16 / 9;
             if (hasSizeData) { // if api gives size data
               thumbRatio = widget.booruItem.fileWidth! / widget.booruItem.fileHeight!;
               if(thumbRatio < 1) { // vertical image - resize to width
@@ -120,6 +123,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
               thumbWidth = widthLimit;
             }
             break;
+
           case 'Square':
           default:
             // otherwise resize to widthLimit
@@ -131,13 +135,11 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
     // debugPrint('ThumbWidth: $thumbWidth');
 
-    return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: thumbWidth.round());
-
-    // return ResizeImage(
-    //   MemoryImage(bytes),
-    //   width: thumbWidth.round(), // ?.
-    //   height: thumbHeight?.round(),
-    // );
+    return ResizeImage(
+      MemoryImageTest(bytes, imageUrl: url),
+      width: thumbWidth?.round(),
+      height: thumbWidth == null ? thumbHeight?.round() : null,
+    );
   }
 
   void _onBytesAdded(int received, int total) {
@@ -331,7 +333,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -342,7 +344,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -352,7 +354,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
           //   width: 100 / widget.columnCount,
           //   child: CircularProgressIndicator(
           //     strokeWidth: 14 / widget.columnCount,
-          //     valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+          //     valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.accentColor),
           //     value: percentDone,
           //   ),
           // ),
@@ -385,8 +387,12 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
               ? Image(
                   image: extraProvider!,
                   fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                  isAntiAlias: true,
                   width: double.infinity, // widget.isStandalone ? double.infinity : null,
                   height: double.infinity, // widget.isStandalone ? double.infinity : null,
+                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                    return const Icon(Icons.broken_image, size: 30);
+                  },
                 )
               : null
           ),
@@ -397,8 +403,13 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             ? Image(
                 image: mainProvider!,
                 fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                isAntiAlias: true,
                 width: double.infinity,
                 height: double.infinity,
+                errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                  _onError(exception as Exception);
+                  return const Icon(Icons.broken_image, size: 30);
+                },
               )
             : null
         ),

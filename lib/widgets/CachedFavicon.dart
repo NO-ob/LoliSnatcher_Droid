@@ -37,7 +37,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<void> downloadThumb() async {
+  Future<void> downloadFavicon() async {
     _dioCancelToken = CancelToken();
     final DioLoader client = DioLoader(
       widget.faviconURL,
@@ -75,7 +75,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
   @override
   void initState() {
     super.initState();
-    downloadThumb();
+    downloadFavicon();
   }
 
   void updateState() {
@@ -85,11 +85,11 @@ class _CachedFaviconState extends State<CachedFavicon> {
   void restartLoading() {
     disposables();
 
-    // faviconProvider?.evict();
-    faviconProvider = null;
+    isFailed = false;
+    
     updateState();
 
-    downloadThumb();
+    downloadFavicon();
   }
 
   @override
@@ -100,6 +100,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
 
   void disposables() {
     faviconProvider?.evict();
+    faviconProvider = null;
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }

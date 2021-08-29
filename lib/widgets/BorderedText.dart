@@ -64,6 +64,7 @@ class BorderedText extends StatelessWidget {
           ..color = strokeColor,
       );
     }
+
     return Stack(
       alignment: Alignment.center,
       textDirection: child.textDirection,

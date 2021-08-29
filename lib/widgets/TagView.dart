@@ -40,6 +40,7 @@ class _TagViewState extends State<TagView> {
     final String rating = widget.booruItem.rating ?? '';
     final String score = widget.booruItem.score ?? '';
     final List<String> sources = widget.booruItem.sources ?? [];
+    final bool tagsAvailable = widget.booruItem.tagsList.length > 0;
     String postDate = widget.booruItem.postDate ?? '';
     final String postDateFormat = widget.booruItem.postDateFormat ?? '';
     String formattedDate = '';
@@ -74,8 +75,8 @@ class _TagViewState extends State<TagView> {
         infoText('Has Notes', hasNotes, canCopy: false),
         infoText('Posted', formattedDate),
         sourcesList(sources),
-        Divider(height: 10, thickness: 2, color: Colors.grey),
-        infoText('Tags', ' ', canCopy: false),
+        if(tagsAvailable) Divider(height: 4, thickness: 2, color: Colors.grey[800]),
+        if(tagsAvailable) infoText('Tags', ' ', canCopy: false),
       ]
     );
   }
@@ -84,17 +85,16 @@ class _TagViewState extends State<TagView> {
     sources = sources.where((link) => link.trim().isNotEmpty).toList();
     if(sources.isNotEmpty) {
       return Container(
-        padding: EdgeInsets.only(left: 5),
         child: Column(
           children: [
-            Divider(height: 10, thickness: 2, color: Colors.grey),
+            Divider(height: 4, thickness: 2, color: Colors.grey[800]),
             infoText(sources.length == 1 ? 'Source' : 'Sources', ' ', canCopy: false),
             Column(children: 
-              sources.map((link) => TextButton(
-                onPressed: () {
+              sources.map((link) => ListTile(
+                onTap: () {
                   ServiceHandler.launchURL(link);
                 },
-                child: Text(link, overflow: TextOverflow.ellipsis)
+                title: Text(link, overflow: TextOverflow.ellipsis)
               )).toList()
             )
           ],
@@ -108,19 +108,20 @@ class _TagViewState extends State<TagView> {
   Widget infoText(String title, String data, {bool canCopy = true}) {
     if(data.isNotEmpty) {
       return Container(
-        padding: EdgeInsets.only(left: 5),
-        child: TextButton(
-          onPressed: () {
+        child: ListTile(
+          onTap: () {
             if(canCopy) {
               Clipboard.setData(ClipboardData(text: data));
               ServiceHandler.displayToast('Copied $title to clipboard!');
             }
           },
-          child: Row(children: [
-            // TODO force tagview element to always be white text on black bg or adapt to current theme???
-            Text('$title: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white)),
-            Expanded(child: Text(data, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white))),
-          ])
+          title: Row(
+            children: [
+              // TODO force tagview element to always be white text on black bg or adapt to current theme???
+              Text('$title: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
+              Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
+            ]
+          )
         )
       );
     } else {
@@ -147,30 +148,24 @@ class _TagViewState extends State<TagView> {
 
         if (currentTag != '') {
           return Column(children: <Widget>[
-            Row(
-              children: [
-                const SizedBox(width: 5),
+            ListTile(
+              onTap: () {},
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: currentTag));
+                ServiceHandler.displayToast('"$currentTag" copied to clipboard!');
+              },
+              title: Row(children: [
                 if(tagIconAndColor.length > 0)
                   ...[
                     ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
                     const SizedBox(width: 5),
                   ],
-
-                Expanded(
-                  child: TextButton(
-                    onPressed: () {},
-                    onLongPress: () {
-                      Clipboard.setData(ClipboardData(text: currentTag));
-                      ServiceHandler.displayToast('"$currentTag" copied to clipboard!');
-                    },
-                    child: MarqueeText(
-                      text: currentTag,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      startPadding: 0,
-                      isExpanded: false,
-                    )
-                  ),
+                MarqueeText(
+                  text: currentTag,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  startPadding: 0,
+                  isExpanded: true,
                 ),
                 IconButton(
                   icon: Icon(
@@ -185,7 +180,10 @@ class _TagViewState extends State<TagView> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.fiber_new, color: Get.theme.accentColor),
+                  icon: Icon(
+                    Icons.fiber_new,
+                    color: Get.theme.accentColor
+                  ),
                   onPressed: () {
                     setState(() {
                       searchHandler.addTabByString(currentTag);
@@ -193,11 +191,10 @@ class _TagViewState extends State<TagView> {
                     ServiceHandler.displayToast("Added new tab:\n" + currentTag);
                   },
                 ),
-                const SizedBox(width: 10),
-              ],
+              ])
             ),
             Divider(
-              color: Colors.white,
+              color: Colors.grey[800],
               height: 2,
             ),
           ]);

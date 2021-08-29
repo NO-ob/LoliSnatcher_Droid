@@ -46,7 +46,9 @@ class _ImagePreviewsState extends State<ImagePreviews> {
       return Center(
         child: Column(
           children: [
-            CircularProgressIndicator(),
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+            ),
             Text('Restoring previous session...')
           ]
         )

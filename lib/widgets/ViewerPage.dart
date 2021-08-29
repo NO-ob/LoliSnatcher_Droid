@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +22,7 @@ import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
 
 // import 'package:LoliSnatcher/widgets/PreloadPageView.dart' as PreloadPageView;
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
+import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
@@ -32,7 +32,6 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
-
 
 
 var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
@@ -140,7 +139,8 @@ class _ViewerPageState extends State<ViewerPage> {
       endDrawerEnableOpenDragGesture: false,
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Theme.of(context).backgroundColor.withOpacity(0.66) // copy existing main app theme, but make background semitransparent
+          canvasColor: Colors.black.withOpacity(0.66), // copy existing main app theme, but make background semitransparent
+          textTheme: Typography.material2018().white,
         ),
         child: renderDrawer(),
       )
@@ -182,10 +182,10 @@ class _ViewerPageState extends State<ViewerPage> {
       autofocus: true,
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event){
-        if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
-          controller?.jumpToPage(searchHandler.currentTab.viewedIndex.value - 1);
+        if(event.isKeyPressed(LogicalKeyboardKey.arrowLeft) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
+          controller?.previousPage(duration: Duration(milliseconds: 10), curve: Curves.linear);
         } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
-          controller?.jumpToPage(searchHandler.currentTab.viewedIndex.value + 1);
+          controller?.nextPage(duration: Duration(milliseconds: 10), curve: Curves.linear);
         } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
           snatchHandler.queue(
             [getFetched()[searchHandler.currentTab.viewedIndex.value]],
@@ -240,7 +240,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     bool newAppbarVisibility = !searchHandler.displayAppbar.value;
                     searchHandler.displayAppbar.value = newAppbarVisibility;
 
-                    if(await Vibration.hasVibrator() ?? false) {
+                    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
                       Vibration.vibrate(duration: 10);
                     }
 
@@ -258,7 +258,8 @@ class _ViewerPageState extends State<ViewerPage> {
                             searchHandler.currentTab,
                             true
                           )
-                          : desktopVideoPlaceHolder(getFetched()[index], index)
+                          : VideoAppDesktop(getFetched()[index], 1, searchHandler.currentTab)
+                          // desktopVideoPlaceHolder(getFetched()[index], index)
                         )
                       : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
                     )
@@ -269,7 +270,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     )
                 ),
 
-                if(!(Platform.isAndroid || Platform.isIOS))
+                if(!(Platform.isAndroid || Platform.isIOS) && searchHandler.displayAppbar.value)
                   Container(
                     alignment: Alignment.bottomRight,
                     margin: EdgeInsets.all(60),
@@ -292,7 +293,7 @@ class _ViewerPageState extends State<ViewerPage> {
                               }
                             },
                             child: Icon(Icons.arrow_left),
-                            backgroundColor: Get.context!.theme.primaryColor,
+                            backgroundColor: Get.context!.theme.accentColor,
                           ),
                         ),
                         Container(
@@ -311,7 +312,7 @@ class _ViewerPageState extends State<ViewerPage> {
                               }
                             },
                             child: Icon(Icons.arrow_right),
-                            backgroundColor: Get.context!.theme.primaryColor,
+                            backgroundColor: Get.context!.theme.accentColor,
                           ),
                         ),
                       ],
@@ -327,6 +328,9 @@ class _ViewerPageState extends State<ViewerPage> {
         },
         controller: controller,
         onPageChanged: (int index) {
+          // rehide system ui on every page change
+          SystemChrome.setEnabledSystemUIOverlays([]);
+
           setState(() {
             searchHandler.currentTab.viewedIndex.value = index;
             kbFocusNode.requestFocus();
@@ -473,10 +477,14 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
 
-  /// Author: [Nani-Sore] ///
   void shareTextAction(String text) {
-    ServiceHandler serviceHandler = ServiceHandler();
-    serviceHandler.loadShareTextIntent(text);
+    if (Platform.isWindows || Platform.isLinux) {
+      Clipboard.setData(ClipboardData(text: text));
+      ServiceHandler.displayToast('Copied to clipboard!');
+    } else if (Platform.isAndroid) {
+      ServiceHandler serviceHandler = ServiceHandler();
+      serviceHandler.loadShareTextIntent(text);
+    }
   }
   void shareHydrusAction(BooruItem item) {
     if (settingsHandler.hasHydrus){
@@ -486,7 +494,7 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
 
-  /// Author: [Nani-Sore] ///
+
   void shareFileAction() async {
     BooruItem item = getFetched()[searchHandler.currentTab.viewedIndex.value];
     String? path = await ImageWriter().getCachePath(item.fileURL, 'media');
@@ -515,7 +523,7 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
 
-  /// Author: [Nani-Sore] ///
+
   void showShareDialog({bool showTip = true}) {
     // TODO change layout so the buttons set their width automatically, without padding stuff
     Get.dialog(
@@ -525,91 +533,62 @@ class _ViewerPageState extends State<ViewerPage> {
           Column(
             children: [
               if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '')
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton.icon(
-                      style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: Get.theme.accentColor),
-                          ),
-                          padding: EdgeInsets.fromLTRB(15, 15, 15, 15),
-                      ),
-                      onPressed: (){
-                        Navigator.of(context).pop();
-                        shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
-                      },
-                      icon: Icon(CupertinoIcons.link),
-                      label: Text('Post URL')
-                    )
-                  ]
+              ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Get.theme.accentColor),
+                  ),
+                onTap: (){
+                  Navigator.of(context).pop();
+                  shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
+                },
+                leading: Icon(CupertinoIcons.link),
+                title: Text('Post URL'),
+              ),
+
+              const SizedBox(height: 15),
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: Get.theme.accentColor),
                 ),
-
-              const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: Get.theme.accentColor),
-                        ),
-                        padding: EdgeInsets.fromLTRB(18, 15, 18, 15),
-                    ),
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                      shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
-                    },
-                    icon: Icon(CupertinoIcons.link),
-                    label: Text('File URL')
-                  )
-                ]
+                onTap: (){
+                  Navigator.of(context).pop();
+                  shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
+                },
+                leading: Icon(CupertinoIcons.link),
+                title: Text('File URL'),
               ),
 
               const SizedBox(height: 15),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Get.theme.accentColor),
-                      ),
-                      padding: EdgeInsets.fromLTRB(32, 15, 32, 15),
-                    ),
-                    onPressed: (){
-                      Navigator.of(context).pop();
-                      shareFileAction();
-                    },
-                    icon: Icon(Icons.file_present),
-                    label: Text('File')                  
-                  )
-                ]
+              ListTile(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(color: Get.theme.accentColor),
+                ),
+                onTap: (){
+                  Navigator.of(context).pop();
+                  shareFileAction();
+                },
+                leading: Icon(Icons.file_present),
+                title: Text('File'),                  
               ),
+
               const SizedBox(height: 15),
-              settingsHandler.hasHydrus && searchHandler.currentTab.selectedBooru.value.type != "Hydrus" ? Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TextButton.icon(
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: Get.theme.accentColor),
-                          ),
-                          padding: EdgeInsets.fromLTRB(32, 15, 32, 15),
-                        ),
-                        onPressed: (){
-                          Navigator.of(context).pop();
-                          shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
-                        },
-                        icon: Icon(Icons.file_present),
-                        label: Text('Hydrus')
-                    )
-                  ]
-              ) : Container()
+              settingsHandler.hasHydrus && searchHandler.currentTab.selectedBooru.value.type != "Hydrus"
+                ? ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: Get.theme.accentColor),
+                    ),
+                    onTap: (){
+                      Navigator.of(context).pop();
+                      shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
+                    },
+                    leading: Icon(Icons.file_present),
+                    title: Text('Hydrus'),
+                  )
+                : Container()
             ]
           ),
           const SizedBox(height: 15),
@@ -621,27 +600,44 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   List<Widget> appBarActions() {
+    // remove reload without scaling button on videos (possibly more filters for the future actions?)
+    List<List<String>> filteredButtonOrder = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo()
+      ? settingsHandler.buttonOrder.where((btn) => btn[0] != 'reloadnoscale').toList()
+      : settingsHandler.buttonOrder;
+
     List<Widget> actions = [];
     List<List<String>> overFlowList = [];
     List<List<String>> buttonList = [];
     // first 4 buttons will show on toolbar
     int listSplit = (MediaQuery.of(context).size.width / 100).floor();
     // print(MediaQuery.of(context).size.width);
-    if (listSplit < settingsHandler.buttonOrder.length){
-      overFlowList = (settingsHandler.buttonOrder.sublist(listSplit));
-      buttonList = settingsHandler.buttonOrder.sublist(0,listSplit);
+    if (listSplit < filteredButtonOrder.length){
+      overFlowList = (filteredButtonOrder.sublist(listSplit));
+      buttonList = filteredButtonOrder.sublist(0,listSplit);
     } else {
-      buttonList = settingsHandler.buttonOrder;
+      buttonList = filteredButtonOrder;
     }
     buttonList.forEach((value) {
       actions.add(buildIconButton(value[0]));
     });
     // all buttons after that will be in overflow menu
-    if (overFlowList.isNotEmpty){
+    if (overFlowList.isNotEmpty) {
+      final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
+
       actions.add(PopupMenuButton(
-          icon: Icon(
-            Icons.more_vert,
-            color: Colors.white,
+          icon: Stack(
+            alignment: Alignment.center,
+            children: [
+              if(autoScroll && isAutoscrollOverflowed)
+                RestartableProgressIndicator(
+                  controller: autoScrollProgressController!,
+                ),
+
+              Icon(
+                Icons.more_vert,
+                color: Colors.white,
+              ),
+            ]
           ),
           itemBuilder: (BuildContext itemBuilder) =>
               overFlowList.map((value) =>
@@ -649,21 +645,21 @@ class _ViewerPageState extends State<ViewerPage> {
                       padding: EdgeInsets.all(0), // remove empty space around the button
                       child: SizedBox(
                           width: double.infinity, // force button to take full width
-                          child: TextButton.icon(
+                          child: ListTile(
                               onLongPress: () {
                                 buttonHold(value[0]);
                               },
-                              onPressed: () {
+                              onTap: () {
                                 Navigator.of(context).pop(); // remove overflow menu
                                 buttonClick(value[0]);
                               },
-                              style: ButtonStyle(
-                                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
-                                  alignment: Alignment.centerLeft,
-                                  padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
-                              ),
-                              icon: buttonIcon(value[0]),
-                              label: Text(buttonText(value))
+                              // style: ButtonStyle(
+                              //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
+                              //     alignment: Alignment.centerLeft,
+                              //     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
+                              // ),
+                              leading: buttonIcon(value[0]),
+                              title: Text(buttonText(value))
                           )
                       ),
                       value: value[0]
@@ -737,6 +733,10 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
       case("share"):
         icon = Icons.share;
+        break;
+      case("reloadnoscale"):
+        icon = Icons.refresh;
+        break;
     }
     return Icon(icon);
   }
@@ -752,6 +752,9 @@ class _ViewerPageState extends State<ViewerPage> {
       case("favourite"):
         label = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value ? 'Unfavourite' : defaultLabel;
         break;
+      // case("reloadnoscale"):
+      //   label = "$defaultLabel${getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.value ? ' (Already Loaded)' : ''}";
+      //   break;
       default:
         // use default text
         label = defaultLabel;
@@ -789,6 +792,11 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
       case("share"):
         onShareClick();
+        break;
+      case("reloadnoscale"):
+        setState(() {
+          getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.value = true;
+        });
         break;
     }
   }
@@ -828,7 +836,7 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
   void onShareHold() async {
-    if(await Vibration.hasVibrator() ?? false) {
+    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
       Vibration.vibrate(duration: 10);
     }
     // Ignore share setting on long press

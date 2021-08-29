@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
+import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -28,38 +29,42 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   final SnatchHandler snatchHandler = Get.find();
   final SearchHandler searchHandler = Get.find();
 
+  bool isFullScreen = false;
+
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value){
       if (!value.isVideo()){
         return MediaViewerBetter(value, 1, searchHandler.currentTab);
       } else {
         if (Platform.isAndroid || Platform.isIOS) {
-          return VideoApp(value, 1, searchHandler.currentTab, false);
+          return VideoApp(value, 1, searchHandler.currentTab, true);
         } else {
-          return Center(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Image.network(value.thumbnailURL, fit: BoxFit.fill),
-                ),
-                Container(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(color: Get.theme.accentColor),
-                      ),
-                    ),
-                    onPressed: (){
-                      Process.run('mpv', ["--loop", "${value.fileURL}"]);
-                    },
-                    child: Text(" Open in Video Player "),
-                  ),
-                ),
-              ],
-            ),
-          );
+          return VideoAppDesktop(value, 1, searchHandler.currentTab);
+
+          // return Center(
+          //   child: Column(
+          //     children: [
+          //       Expanded(
+          //         child: Image.network(value.thumbnailURL, fit: BoxFit.fill),
+          //       ),
+          //       Container(
+          //         alignment: Alignment.center,
+          //         child: TextButton(
+          //           style: TextButton.styleFrom(
+          //             shape: RoundedRectangleBorder(
+          //               borderRadius: BorderRadius.circular(20),
+          //               side: BorderSide(color: Get.theme.accentColor),
+          //             ),
+          //           ),
+          //           onPressed: (){
+          //             Process.run('mpv', ["--loop", "${value.fileURL}"]);
+          //           },
+          //           child: Text(" Open in Video Player "),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // );
         }
       }
   }
@@ -78,8 +83,10 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         return const SizedBox();
       }
 
+      Widget itemWidget = getImageWidget(item);
+
       return Stack(children: [
-        Container(child: getImageWidget(searchHandler.currentTab.currentItem.value)),
+        Container(child: isFullScreen ? const SizedBox() : itemWidget),
         Container(
           alignment: Alignment.topRight,
           child:Column(
@@ -97,7 +104,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     );
                   },
                   child: Icon(Icons.save),
-                  backgroundColor: Get.theme.primaryColor,
+                  backgroundColor: Get.theme.accentColor,
                 ),
               ),
               Container(
@@ -112,45 +119,48 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     });
                   },
                   child: Icon(item.isFavourite.value ? Icons.favorite : Icons.favorite_border),
-                  backgroundColor: Get.theme.primaryColor,
+                  backgroundColor: Get.theme.accentColor,
                 ),
               ),
-              item.isVideo()
-                ? const SizedBox()
-                : Container(
-                  width: 30,
-                  height: 30,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      Get.dialog(
-                        Stack(
-                          children: [
-                            getImageWidget(item),
-                            Container(
-                                padding: EdgeInsets.all(10),
-                                alignment: Alignment.topRight,
-                                child: Container(
-                                  width: 30,
-                                  height: 30,
-                                  child: FloatingActionButton(
-                                    onPressed: (){
-                                      Get.back();
-                                    },
-                                    child: Icon(Icons.close),
-                                    backgroundColor: Get.theme.primaryColor,
-                                  ),
-                                )
-                            )
-                          ],
-                        ),
-                        transitionDuration: Duration(milliseconds: 200),
-                        barrierColor: Colors.black,
-                      );
-                    },
-                    child: Icon(Icons.fullscreen),
-                    backgroundColor: Get.theme.primaryColor,
-                  ),
-                )
+              // TODO with videoappdesktop we can now play videos, now we need a fullscreen that will reuse the same widget without restarting video/recreating a widget
+              Container(
+                width: 30,
+                height: 30,
+                child: FloatingActionButton(
+                  onPressed: () {
+                    isFullScreen = true;
+                    setState(() { });
+                    Get.dialog(
+                      Stack(
+                        children: [
+                          itemWidget,
+                          Container(
+                              padding: EdgeInsets.all(10),
+                              alignment: Alignment.topRight,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                child: FloatingActionButton(
+                                  onPressed: () {
+                                    isFullScreen = false;
+                                    setState(() { });
+                                    Get.back();
+                                  },
+                                  child: Icon(Icons.fullscreen_exit),
+                                  backgroundColor: Get.theme.accentColor,
+                                ),
+                              )
+                          )
+                        ],
+                      ),
+                      transitionDuration: Duration(milliseconds: 200),
+                      barrierColor: Colors.black,
+                    );
+                  },
+                  child: Icon(Icons.fullscreen),
+                  backgroundColor: Get.theme.accentColor,
+                ),
+              ),
             ],
           ),
         )

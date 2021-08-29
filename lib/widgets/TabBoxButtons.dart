@@ -43,7 +43,18 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               mainAxisSize: MainAxisSize.max,
               children: [
-                const SizedBox(width: 30),
+                const SizedBox(width: 15),
+                IconButton(
+                  icon: Icon(Icons.arrow_upward, color: Get.theme.accentColor),
+                  onPressed: () {
+                    // switch to the prev tab, loop if reached the first
+                    if((searchHandler.index.value - 1) < 0) {
+                      searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                    } else {
+                      searchHandler.changeTabIndex(searchHandler.index.value - 1);
+                    }
+                  },
+                ),
                 IconButton(
                   icon: Icon(Icons.remove_circle_outline, color: Get.theme.accentColor),
                   onPressed: () {
@@ -71,7 +82,18 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
                     },
                   ),
                 ),
-                const SizedBox(width: 30),
+                IconButton(
+                  icon: Icon(Icons.arrow_downward, color: Get.theme.accentColor),
+                  onPressed: () {
+                    // switch to the next tab, loop if reached the last
+                    if((searchHandler.index.value + 1) > (searchHandler.list.length - 1)) {
+                      searchHandler.changeTabIndex(0);
+                    } else {
+                      searchHandler.changeTabIndex(searchHandler.index.value + 1);
+                    }
+                  },
+                ),
+                const SizedBox(width: 15),
               ]
             )
           )

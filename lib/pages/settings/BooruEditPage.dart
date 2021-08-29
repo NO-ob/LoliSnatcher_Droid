@@ -200,7 +200,11 @@ class _BooruEditState extends State<BooruEdit> {
   Widget testButton() {
     return SettingsButton(
       name: 'Test Booru',
-      icon: isTesting ? CircularProgressIndicator() : Icon(Icons.public),
+      icon: isTesting
+        ? CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+          )
+        : Icon(Icons.public),
       action: () async {
         // name and url are required
         if(booruNameController.text == "") {

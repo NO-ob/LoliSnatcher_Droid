@@ -20,7 +20,7 @@ class MarqueeText extends StatelessWidget {
     this.pauseAfterRound = const Duration(milliseconds: 1500),
     this.isExpanded = true,
   }) {
-    this.color = this.color == null ? Get.theme.colorScheme.onBackground : this.color;
+    // this.color = this.color == null ? Get.theme.colorScheme.onBackground : this.color;
   }
 
   final String text;

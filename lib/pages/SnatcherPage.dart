@@ -1,5 +1,7 @@
 //import 'dart:html';
-import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -14,211 +16,100 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
  * This is the page which allows the user to batch download images
  */
 class SnatcherPage extends StatefulWidget {
-  final String tags;
-  Booru booru;
-  SnatcherPage(this.tags, this.booru);
+  SnatcherPage();
   @override
   _SnatcherPageState createState() => _SnatcherPageState();
 }
 
 class _SnatcherPageState extends State<SnatcherPage> {
+  final SearchHandler searchHandler = Get.find();
   final SettingsHandler settingsHandler = Get.find();
   final SnatchHandler snatchHandler = Get.find();
+
   final snatcherTagsController = TextEditingController();
   final snatcherAmountController = TextEditingController();
   final snatcherSleepController = TextEditingController();
+
+  late Booru? selectedBooru;
+
   @override
   void initState() {
     super.initState();
     getPerms();
     //If the user has searched tags on the main window they will be loaded into the tags field
-    if (widget.tags != ""){
-      snatcherTagsController.text = widget.tags;
-    }
+    snatcherTagsController.text = searchHandler.currentTab.tags;
+    selectedBooru = searchHandler.currentTab.selectedBooru.value;
     snatcherSleepController.text = settingsHandler.snatchCooldown.toString();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("Snatcher")
+        title: Text("Snatcher")
       ),
-      body:Center(
+      body: Center(
         child: ListView(
           children: <Widget>[
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Tags: "),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: snatcherTagsController,
-                        decoration: InputDecoration(
-                          hintText:"Enter Tags",
-                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SettingsTextInput(
+              controller: snatcherTagsController,
+              title: 'Tags',
+              hintText: "Enter Tags",
+              inputType: TextInputType.text,
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Amount: "),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: snatcherAmountController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        decoration: InputDecoration(
-                          hintText:"Amount of Images to Snatch",
-                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SettingsTextInput(
+              controller: snatcherAmountController,
+              title: 'Amount',
+              hintText: "Amount of Files to Snatch",
+              inputType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly
+              ],
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Text("Sleep (MS): "),
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: snatcherSleepController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        decoration: InputDecoration(
-                          hintText:"Timeout between snatching (MS)",
-                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            SettingsTextInput(
+              controller: snatcherSleepController,
+              title: 'Delay (in ms)',
+              hintText: "Delay between each download",
+              inputType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly
+              ],
             ),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  FutureBuilder(
-                    future: BooruSelector(),
-                    builder: (context, AsyncSnapshot snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done && snapshot.hasData){
-                        return snapshot.data;
-                      } else {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                    },
-                  ),
-                ],
-              ),
+            SettingsBooruDropdown(
+              selected: selectedBooru,
+              onChanged: (Booru? newValue) {
+                setState(() {
+                  selectedBooru = newValue;
+                });
+              },
+              title: 'Booru',
             ),
-            Container(
-              alignment: Alignment.center,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      side: BorderSide(color: Get.theme.accentColor),
-                    ),
-                ),
-                /**
-                 * When the snatch button is pressed the snatch function is called and then
-                 * Get.back is used to close the snatcher window
-                 */
-                onPressed: (){
-                  if (snatcherSleepController.text.isEmpty){
-                    snatcherSleepController.text = 0.toString();
-                  }
-                  snatchHandler.searchSnatch(
-                    snatcherTagsController.text,
-                    snatcherAmountController.text,
-                    int.parse(snatcherSleepController.text),
-                    widget.booru
-                  );
-                  Get.back();
-                  //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
-                },
-                child: Text("Snatch Images"),
-              ),
+
+            SettingsButton(name: '', enabled: false),
+            SettingsButton(
+              name: 'Snatch Files',
+              icon: Icon(Icons.download),
+              action: () {
+                if (snatcherSleepController.text.isEmpty){
+                  snatcherSleepController.text = 0.toString();
+                }
+                if(selectedBooru == null) {
+                  ServiceHandler.displayToast('No Booru Selected');
+                  return;
+                }
+
+                snatchHandler.searchSnatch(
+                  snatcherTagsController.text,
+                  snatcherAmountController.text,
+                  int.parse(snatcherSleepController.text),
+                  selectedBooru!,
+                );
+                Get.back();
+                //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
+              },
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  /** This Future function will call getBooru on the settingsHandler to load the booru configs
-   * After these are loaded it returns a drop down list which is used to select which booru to search
-   * **/
-  Future BooruSelector() async{
-    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
-    if (widget.booru == null){
-      widget.booru = settingsHandler.booruList[0];
-    }
-    return Container(
-      child: DropdownButton<Booru>(
-        value: widget.booru,
-        icon: Icon(Icons.arrow_downward),
-        onChanged: (Booru? newValue){
-          print(newValue!.baseURL);
-          setState((){
-            widget.booru = newValue;
-          });
-        },
-        items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value){
-          // Return a dropdown item
-          return DropdownMenuItem<Booru>(
-            value: value,
-            child: Row(
-              children: <Widget>[
-                //Booru Icon
-                value.type == "Favourites"
-                ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                : CachedFavicon(value.faviconURL!),
-                //Booru name
-                Text(" ${value.name}"),
-              ],
-            ),
-          );
-        }).toList(),
       ),
     );
   }

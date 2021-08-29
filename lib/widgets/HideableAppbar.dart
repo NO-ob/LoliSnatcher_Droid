@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 // import 'package:flutter/services.dart';
 
@@ -33,7 +34,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     });
 
     // Hide system ui on first render
-    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
+    SystemChrome.setEnabledSystemUIOverlays([]);
     // ServiceHandler.makeImmersive();
   }
 
@@ -60,7 +61,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         height: searchHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
         child: AppBar(
           // toolbarHeight: widget.defaultHeight,
-          // elevation: 0, // set to zero to disable a shadow behind
+          elevation: 1, // set to zero to disable a shadow behind
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           leading: IconButton(

@@ -1,16 +1,16 @@
-import 'dart:io';
+import 'dart:math';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:LoliSnatcher/ViewUtils.dart';
-import 'package:LoliSnatcher/widgets/CachedThumb.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' as GET;
+import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
@@ -31,8 +31,8 @@ class MediaViewerBetter extends StatefulWidget {
 }
 
 class _MediaViewerBetterState extends State<MediaViewerBetter> {
-  final SettingsHandler settingsHandler = GET.Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = GET.Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
@@ -49,9 +49,11 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   late String imageFolder;
   CancelToken _dioCancelToken = CancelToken();
 
+  StreamSubscription? noScaleListener;
+
   @override
   void didUpdateWidget(MediaViewerBetter oldWidget) {
-    // force redraw on tab change
+    // force redraw on item data change
     if(oldWidget.booruItem != widget.booruItem) {
       killLoading([]);
       initViewer(false);
@@ -59,7 +61,6 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     super.didUpdateWidget(oldWidget);
   }
 
-  /// Author: [Nani-Sore] ///
   Future<void> _downloadImage() async {
     _dioCancelToken = CancelToken();
     final DioLoader client = DioLoader(
@@ -71,9 +72,10 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       onError: _onError,
       onDone: (Uint8List bytes, String url) {
         mainProvider = getImageProvider(bytes, url);
+        _checkInterval?.cancel();
         updateState();
       },
-      cacheEnabled: settingsHandler.imageCache,
+      cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: imageFolder,
     );
     client.runRequest();
@@ -87,6 +89,12 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
     _received = received;
     _total = total;
+    if (total > 0 && widget.booruItem.fileSize == null) {
+      // set item file size if it wasn't received from api
+      widget.booruItem.fileSize = total;
+      updateState();
+    }
+
     if (!isActive) {
       updateState();
       _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
@@ -142,6 +150,13 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       imageFolder = 'media';
     }
 
+    noScaleListener = widget.booruItem.isNoScale.listen((bool value) {
+      if(value == true) {
+        killLoading([]);
+        initViewer(false);
+      }
+    });
+
     if(widget.booruItem.isHated.value) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
@@ -169,7 +184,15 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   ImageProvider getImageProvider(Uint8List bytes, String url) {
-    return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: (settingsHandler.deviceSize!.width * settingsHandler.devicePixelRatio! * 2).round());
+    if(settingsHandler.disableImageScaling.value || widget.booruItem.isNoScale.value) {
+      return MemoryImageTest(bytes, imageUrl: url);
+    } else {
+      int? widthLimit = settingsHandler.disableImageScaling.value ? null : (settingsHandler.deviceSize!.width * settingsHandler.devicePixelRatio! * 2).round();
+      return ResizeImage(
+        MemoryImageTest(bytes, imageUrl: url),
+        width: widthLimit,
+      );
+    }
   }
 
   void killLoading(List<String> reason) {
@@ -186,6 +209,8 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     isFromCache = false;
     isStopped = true;
     stopReason = reason;
+
+    resetZoom();
 
     updateState();
   }
@@ -218,6 +243,8 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
     appbarListener?.cancel();
 
+    noScaleListener?.cancel();
+
     if (!(_dioCancelToken.isCancelled)){
       _dioCancelToken.cancel();
     }
@@ -225,7 +252,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
-    print(scaleState);
+    // print(scaleState);
 
     // manual zoom || double tap || double tap AFTER double tap
     isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
@@ -240,6 +267,22 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     updateState();
   }
 
+  void scrollZoomImage(double value) {
+    final double upperLimit = min(8, (viewController.scale ?? 1) + (value / 200));
+    // zoom on which image fits to container can be less than limit
+    // therefore don't clump the value to lower limit if we are zooming in to avoid unnecessary zoom jumps
+    final double lowerLimit = value > 0 ? upperLimit : max(0.75, upperLimit);
+
+    // print('ll $lowerLimit $value');
+    // if zooming out and zoom is smaller than limit - reset to container size
+    // TODO minimal scale to fit can be different from limit
+    if(lowerLimit == 0.75 && value < 0) {
+      scaleController.scaleState = PhotoViewScaleState.initial;
+    } else {
+      viewController.scale = lowerLimit;
+    }
+  }
+
   void doubleTapZoom() {
     scaleController.scaleState = PhotoViewScaleState.covering;
     updateState();
@@ -251,14 +294,17 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
         bottom: 180,
         right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
         left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
-        child: ElevatedButton.icon(
+        child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Theme.of(context).accentColor.withOpacity(0.33),
+            primary: Get.theme.accentColor.withOpacity(0.33),
             minimumSize: Size(28, 28),
             padding: EdgeInsets.all(3),
           ),
-          icon: Icon(isZoomed ? Icons.zoom_out : Icons.zoom_in, size: 28),
-          label: Text(''),
+          child: Icon(
+            isZoomed ? Icons.zoom_out : Icons.zoom_in,
+            size: 28,
+            color: Get.theme.colorScheme.onSecondary
+          ),
           onPressed: isZoomed ? resetZoom : doubleTapZoom,
         )
       );
@@ -267,15 +313,16 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     }
   }
 
-  /// Author: [Nani-Sore] ///
   Widget loadingElementBuilder(BuildContext ctx, ImageChunkEvent? loadingProgress) {
     if(settingsHandler.shitDevice) {
       if(settingsHandler.loadingGif) {
-        return Expanded(
-          child: Image(image: AssetImage('assets/images/loading.gif'))
-        );
+        return Center(child: Image(image: AssetImage('assets/images/loading.gif')));
       } else {
-        return Center(child: CircularProgressIndicator());
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+          )
+        );
       }
     }
 
@@ -306,28 +353,28 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
     String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone! < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
     int sinceStart = Duration(milliseconds: nowMils - _startedAt).inSeconds;
-    String sinceStartText = "Started " + sinceStart.toString() + " second${sinceStart == 1 ? '' : 's'} ago";
+    String sinceStartText = 'Started ${sinceStart.toString()} second${sinceStart == 1 ? '' : 's'} ago';
 
     String percentDoneText = hasProgressData
-        ? ((percentDone == 1 || mainProvider != null) ? 'Rendering...' : '${(percentDone! * 100).toStringAsFixed(2)}%')
+        ? ((percentDone == 1 || mainProvider != null) ? '${isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...' : '${(percentDone! * 100).toStringAsFixed(2)}%')
         : 'Loading${isFromCache ? ' from cache' : ''}...';
     String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
 
-    // start opacity from (0% if hated) OR (50% if of sample qulaity) OR (33% if no progress data) OR 20%
     bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.booruItem.isHated.value;
 
     return Container(
       child: Row(
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SizedBox(
             width: 6,
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
-                  backgroundColor: Colors.transparent,
-                  value: percentDone),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                backgroundColor: Colors.transparent,
+                value: percentDone
+              ),
             ),
           ),
           Expanded(
@@ -343,18 +390,20 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                           reason,
                           style: TextStyle(
                             fontSize: 18,
+                            color: Colors.white,
                           ),
                         )
                       );
                     }),
                     TextButton.icon(
-                      icon: Icon(Icons.play_arrow, size: 44),
+                      icon: Icon(Icons.play_arrow, size: 44, color: Colors.blue),
                       label: BorderedText(
                         strokeWidth: 3,
                         child: Text(
                           widget.booruItem.isHated.value ? 'Load Anyway' : 'Restart Loading',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
+                            color: Colors.blue,
                           ),
                         )
                       ),
@@ -366,10 +415,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                   ]
                 : (settingsHandler.loadingGif
                   ? [
-                    // TODO redo
-                    Center(child: Expanded(
-                      child: Image(image: AssetImage('assets/images/loading.gif'))
-                    )),
+                    Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
                     const SizedBox(height: 30),
                   ]
                   : [
@@ -380,6 +426,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                           percentDoneText,
                           style: TextStyle(
                             fontSize: 18,
+                            color: Colors.white,
                           ),
                         )
                       ),
@@ -390,6 +437,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                           filesizeText,
                           style: TextStyle(
                             fontSize: 16,
+                            color: Colors.white,
                           ),
                         )
                       ),
@@ -400,6 +448,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                           expectedSpeedText,
                           style: TextStyle(
                             fontSize: 14,
+                            color: Colors.white,
                           ),
                         )
                       ),
@@ -410,6 +459,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                           expectedTimeText,
                           style: TextStyle(
                             fontSize: 14,
+                            color: Colors.white,
                           ),
                         )
                       ),
@@ -420,6 +470,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                           sinceStartText,
                           style: TextStyle(
                             fontSize: 14,
+                            color: Colors.white,
                           ),
                         )
                       ),
@@ -450,7 +501,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
             child: RotatedBox(
               quarterTurns: percentDone != null ? -1 : 1,
               child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.primaryColor),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
                 backgroundColor: Colors.transparent,
                 value: percentDone
               ),
@@ -462,7 +513,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   Widget build(BuildContext context) {
-    final bool isViewed = widget.searchGlobal.viewedIndex.value == widget.index;
+    final bool isViewed = widget.searchGlobal.viewedIndex.value == widget.index || widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
     if (!isViewed) {
       // reset zoom if not viewed
       resetZoom();
@@ -471,6 +522,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
       child: Material( // without this every text element will have broken styles on first frames
+        color: Colors.black,
         child: Stack(
           alignment: Alignment.center,
           children: [
@@ -478,21 +530,28 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
             loadingElementBuilder(context, null),
             AnimatedSwitcher(
               child: mainProvider != null
-                ? PhotoView(
-                  //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-                  imageProvider: mainProvider,
-                  filterQuality: FilterQuality.high,
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 8,
-                  initialScale: PhotoViewComputedScale.contained,
-                  enableRotation: false,
-                  basePosition: Alignment.center,
-                  controller: viewController,
-                  // tightMode: true,
-                  // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.viewedIndex == widget.index ? '' : 'ignore') + widget.index.toString()),
-                  scaleStateController: scaleController,
-                  // loadingBuilder: loadingElementBuilder,
-                )
+                ? Listener(
+                    onPointerSignal: (pointerSignal) {
+                      if(pointerSignal is PointerScrollEvent) {
+                        scrollZoomImage(pointerSignal.scrollDelta.dy);
+                      }
+                    },
+                    child: PhotoView(
+                      //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+                      imageProvider: mainProvider,
+                      filterQuality: FilterQuality.high,
+                      minScale: PhotoViewComputedScale.contained,
+                      maxScale: PhotoViewComputedScale.covered * 8,
+                      initialScale: PhotoViewComputedScale.contained,
+                      enableRotation: false,
+                      basePosition: Alignment.center,
+                      controller: viewController,
+                      // tightMode: true,
+                      // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.viewedIndex == widget.index ? '' : 'ignore') + widget.index.toString()),
+                      scaleStateController: scaleController,
+                      // loadingBuilder: loadingElementBuilder,
+                    )
+                  )
                 : null,
               duration: Duration(milliseconds: 400)
             ),

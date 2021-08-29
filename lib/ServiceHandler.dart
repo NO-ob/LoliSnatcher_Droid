@@ -163,8 +163,8 @@ class ServiceHandler{
     }
   }
 
-  void emptyCache() async {
-    try{
+  Future<void> emptyCache() async {
+    try {
       if (Platform.isAndroid){
         await platform.invokeMethod("emptyCache");
       } else if(Platform.isIOS) {
@@ -173,12 +173,13 @@ class ServiceHandler{
         String cacheD = await getCacheDir();
         File cacheDir = File(cacheD);
         // TODO parse through possible folder list and don't do recursive to exclude wrong path problems
-        cacheDir.delete(recursive: true);
+        await cacheDir.delete(recursive: true);
       }
 
     } catch(e){
       print(e);
     }
+    return;
   }
 
   void deleteDB(SettingsHandler settingsHandler) async{
@@ -208,18 +209,22 @@ class ServiceHandler{
     }
   }
 
-  static Future<String> getIP() async{
+  static Future<String> getIP() async {
     String ip = "";
     // TODO WIP
     if (Platform.isAndroid){
       ip = await platform.invokeMethod("getIP");
     } else {
-      var interface = await NetworkInterface.list(type: InternetAddressType.IPv4);
-      if (interface.isNotEmpty){
-        ip = interface[0].addresses[0].address;
+      var interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
+      if (interfaces.isNotEmpty) {
+        ip = interfaces[0].addresses[0].address;
       }
     }
     return ip;
+  }
+
+  static Future<List<NetworkInterface>> getIPList() async {
+    return await NetworkInterface.list(type: InternetAddressType.IPv4);
   }
 
   static void setVolume(int volume, int showSystemUI) {

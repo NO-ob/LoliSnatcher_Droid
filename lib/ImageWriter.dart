@@ -23,6 +23,10 @@ class ImageWriter {
   String? cacheRootPath = "";
   ServiceHandler serviceHandler = ServiceHandler();
   int SDKVer = 0;
+
+  ImageWriter() {
+    setPaths();
+  }
   /**
    * return null - file already exists
    * return String - file saved
@@ -240,10 +244,9 @@ class ImageWriter {
     String cacheDirPath;
     int fileNum = 0;
     int totalSize = 0;
-    if(typeFolder == null) typeFolder = '';
     try {
       await setPaths();
-      cacheDirPath = cacheRootPath! + typeFolder + "/";
+      cacheDirPath = cacheRootPath! + (typeFolder ?? '') + "/";
 
       Directory cacheDir = Directory(cacheDirPath);
       bool dirExists = await cacheDir.exists();
@@ -291,7 +294,7 @@ class ImageWriter {
     // TODO truncate to 255 symbols for windows?
   }
 
-  Future<bool> setPaths() async{
+  Future<bool> setPaths() async {
     if(path == ""){
       if (settingsHandler.extPathOverride.isEmpty){
         path = await serviceHandler.getPicturesDir();

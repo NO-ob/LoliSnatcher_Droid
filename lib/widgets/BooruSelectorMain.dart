@@ -72,7 +72,11 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
       return Text('Add Boorus in Settings');
     }
     if(searchHandler.list.length == 0) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+        )
+      );
     }
     // if(!settingsHandler.booruList.contains(widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0])) {
     //   return Center(child: CircularProgressIndicator());

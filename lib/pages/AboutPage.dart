@@ -77,6 +77,13 @@ class AboutPage extends StatelessWidget {
                 ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/releases");
               }
             ),
+            SettingsButton(
+              name: 'Licenses',
+              icon: Icon(Icons.document_scanner),
+              action: () {
+                showLicensePage(context: context, applicationName: 'Loli Snatcher');
+              }
+            ),
           ],
         ),
       ),

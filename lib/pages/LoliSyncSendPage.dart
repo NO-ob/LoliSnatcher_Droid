@@ -19,6 +19,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
   LoliSync loliSync = LoliSync();
   List<String> toSync = [];
   bool serverStarted = false;
+
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -33,6 +34,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     }
     super.initState();
   }
+
   Future<bool> _onWillPop() async {
     final shouldPop = await showDialog(
       context: context,
@@ -60,6 +62,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     );
     return shouldPop;
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
