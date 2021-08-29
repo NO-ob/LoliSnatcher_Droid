@@ -42,7 +42,7 @@ class _FiltersEditState extends State<FiltersEdit> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
             title: Text("Filters Editor"),
           actions: [

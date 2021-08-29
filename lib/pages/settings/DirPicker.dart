@@ -109,8 +109,8 @@ class _DirPickerState extends State<DirPicker> {
     }
     return WillPopScope(
       onWillPop: _onWillPop,
-      child:Scaffold(
-        resizeToAvoidBottomInset: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text(title),
         ),

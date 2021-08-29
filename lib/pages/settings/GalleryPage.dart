@@ -80,8 +80,8 @@ class _GalleryPageState extends State<GalleryPage> {
 
     return WillPopScope(
       onWillPop: _onWillPop,
-      child:Scaffold(
-        resizeToAvoidBottomInset: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Gallery"),
         ),

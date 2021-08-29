@@ -65,8 +65,8 @@ class _BooruPageState extends State<BooruPage> {
 
     return WillPopScope(
         onWillPop: _onWillPop,
-        child:Scaffold(
-          resizeToAvoidBottomInset: false,
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: AppBar(
             title: Text("Boorus & Search"),
           ),

@@ -124,7 +124,7 @@ class _ThemePageState extends State<ThemePage> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Themes"),
         ),

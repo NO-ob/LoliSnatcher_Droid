@@ -638,6 +638,7 @@ class _WaterfallState extends State<WaterfallView> {
                   action: () {
                     retryLastPage();
                   },
+                  drawBottomBorder: false,
                 );
               } else { //if(widget.tab.booruHandler.filteredFetched.length > 0) {
                 // .. has items loaded
@@ -648,6 +649,7 @@ class _WaterfallState extends State<WaterfallView> {
                   action: () {
                     retryLastPage();
                   },
+                  drawBottomBorder: false,
                 );
               }
             } else {
@@ -668,6 +670,7 @@ class _WaterfallState extends State<WaterfallView> {
                       valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
                     ),
                   ),
+                  drawBottomBorder: false,
                 );
               } else {
                 if (widget.tab.booruHandler.errorString.isNotEmpty) {
@@ -679,6 +682,7 @@ class _WaterfallState extends State<WaterfallView> {
                     action: () {
                       retryLastPage();
                     },
+                    drawBottomBorder: false,
                   );
                 } else if(widget.tab.booruHandler.filteredFetched.length == 0) {
                   // ... no items loaded
@@ -689,6 +693,7 @@ class _WaterfallState extends State<WaterfallView> {
                     action: () {
                       retryLastPage();
                     },
+                    drawBottomBorder: false,
                   );
                 } else {
                   return const SizedBox();

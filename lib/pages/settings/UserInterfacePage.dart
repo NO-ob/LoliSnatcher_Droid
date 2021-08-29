@@ -49,8 +49,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child:Scaffold(
-        resizeToAvoidBottomInset: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Interface"),
         ),

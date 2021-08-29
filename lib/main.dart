@@ -581,7 +581,10 @@ class _HomeState extends State<Home> {
                               margin: EdgeInsets.zero,
                               decoration: BoxDecoration(
                                 color: Get.theme.primaryColor,
-                                image: DecorationImage(fit: BoxFit.cover, image: AssetImage('assets/images/drawer_icon.png'),),
+                                image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: AssetImage('assets/images/drawer_icon.png')
+                                ),
                               ),
                               child: null,
                             ),

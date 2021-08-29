@@ -48,6 +48,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
       appBar: AppBar(
         title: Text("Snatcher")
       ),
+      resizeToAvoidBottomInset: true,
       body: Center(
         child: ListView(
           children: <Widget>[

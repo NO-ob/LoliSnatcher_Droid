@@ -34,7 +34,7 @@ class _DebugPageState extends State<DebugPage> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Debug"),
         ),

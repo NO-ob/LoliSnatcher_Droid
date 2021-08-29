@@ -58,7 +58,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Loli Sync"),
           leading: IconButton(

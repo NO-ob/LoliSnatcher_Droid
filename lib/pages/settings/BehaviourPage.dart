@@ -143,7 +143,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child:Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Behaviour"),
         ),
