@@ -39,7 +39,8 @@ class _BooruEditState extends State<BooruEdit> {
     "GelbooruV1", "Moebooru", "Philomena",
     "Sankaku", "Shimmie", "Szurubooru",
     "Hydrus", "BooruOnRails", "Rainbooru",
-    "R34Hentai", "World", "IdolSankaku", "InkBunny"
+    "R34Hentai", "World", "IdolSankaku",
+    "InkBunny", "AGNPH"
   ];
 
   bool isTesting = false;
@@ -222,6 +223,10 @@ class _BooruEditState extends State<BooruEdit> {
           // autofill favicon if not specified
           if(booruFaviconController.text == ""){
             booruFaviconController.text = booruURLController.text + "/favicon.ico";
+          }
+          // TODO make a list of default favicons for boorus where ^default^ one won't work
+          if (booruURLController.text.contains("agn.ph")){
+            booruFaviconController.text = "https://agn.ph/skin/Retro/favicon.ico";
           }
         }
 
