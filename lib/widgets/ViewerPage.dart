@@ -41,10 +41,10 @@ var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatche
  *
  */
 class ViewerPage extends StatefulWidget {
-  int index;
-  Function callback;
+  final int index;
 
-  ViewerPage(this.index, this.callback);
+  ViewerPage(this.index);
+
   @override
   _ViewerPageState createState() => _ViewerPageState();
 }
@@ -172,7 +172,6 @@ class _ViewerPageState extends State<ViewerPage> {
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
-    widget.callback();
     ServiceHandler.enableSleep();
     super.dispose();
   }

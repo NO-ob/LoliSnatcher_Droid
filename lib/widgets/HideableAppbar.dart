@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
+
 // import 'package:flutter/services.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
-  Widget title;
-  List<Widget> actions;
-  bool autoHide;
+  final Widget title;
+  final List<Widget> actions;
+  final bool autoHide;
   HideableAppBar(this.title, this.actions, this.autoHide);
 
   final double defaultHeight = kToolbarHeight; //56.0
@@ -32,27 +32,16 @@ class _HideableAppBarState extends State<HideableAppBar> {
     appbarListener = searchHandler.displayAppbar.listen((bool value) {
       setState(() {});
     });
-
-    // Hide system ui on first render
-    SystemChrome.setEnabledSystemUIOverlays([]);
-    // ServiceHandler.makeImmersive();
   }
 
   @override
   void dispose() {
     appbarListener.cancel();
-
-    // Return system ui after closing gallery
-    // ServiceHandler.makeNormal();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    //Hide status bar and bottom navbar
-    // Bug: triggers restate => forces video restart, animation lags
-    // !widget.searchGlobals.displayAppbar.value ? SystemChrome.setEnabledSystemUIOverlays([]) : SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-
     return SafeArea( // to fix height bug when bar on top
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),

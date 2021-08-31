@@ -502,38 +502,33 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text("Merge "),
-                      Checkbox(
-                        value: settingsHandler.mergeEnabled,
-                        onChanged: (newValue) {
-                          if(settingsHandler.booruList.length < 2) {
-                            ServiceHandler.displayToast('You need at least 2 booru configs to use this feature!');
-                          } else {
-                            setState(() {
-                              settingsHandler.mergeEnabled = newValue!;
-                              searchHandler.mergeAction(null);
-                            });
-                          }
-                        },
-                        activeColor: Get.context!.theme.accentColor,
-                      )
-                    ],
-                  ),
-                  settingsHandler.mergeEnabled ? Container(
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                        BooruSelectorMain(false),
-                      ],
+                  if(settingsHandler.booruList.length > 1)
+                    SettingsToggle(
+                      title: 'Multibooru Mode',
+                      value: settingsHandler.mergeEnabled,
+                      onChanged: (newValue) {
+                        if(settingsHandler.booruList.length < 2) {
+                          ServiceHandler.displayToast('You need at least 2 booru configs to use this feature!');
+                        } else {
+                          setState(() {
+                            settingsHandler.mergeEnabled = newValue;
+                            searchHandler.mergeAction(null);
+                          });
+                        }
+                      },
                     ),
-                  ) : Container(),
+                  if(settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled)
+                    Container(
+                      margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          BooruSelectorMain(false),
+                        ],
+                      ),
+                    ),
 
                   //Add merge popup window
                   /*TextButton.icon(

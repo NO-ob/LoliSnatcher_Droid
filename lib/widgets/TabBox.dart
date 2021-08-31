@@ -1,10 +1,11 @@
-import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 
 class TabBox extends StatefulWidget {
   TabBox();
@@ -16,7 +17,8 @@ class _TabBoxState extends State<TabBox> {
 
   @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = Get.find();
+    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
     return Obx(() {
       List<SearchGlobal> list = searchHandler.list;
@@ -33,7 +35,7 @@ class _TabBoxState extends State<TabBox> {
           children: <Widget>[
             Expanded(
               child: Container(
-                constraints: BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100),
+                constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
                 padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
                 decoration: BoxDecoration(
                   color: Get.theme.canvasColor,
@@ -71,7 +73,7 @@ class _TabBoxState extends State<TabBox> {
                     return DropdownMenuItem<SearchGlobal>(
                       value: value,
                       child: Container(
-                        padding: EdgeInsets.all(5),
+                        padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
                         decoration: isCurrent
                         ? BoxDecoration(
                           border: Border.all(color: Get.theme.accentColor, width: 1),

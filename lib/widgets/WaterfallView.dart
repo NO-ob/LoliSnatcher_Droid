@@ -37,7 +37,7 @@ class _WaterfallState extends State<WaterfallView> {
   final SearchHandler searchHandler = Get.find();
 
   bool inViewer = false;
-  Timer? loadingDelay, _checkInterval;
+  Timer? loadingDelay, _checkInterval, toggleBarsDelay;
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   StreamSubscription? viewedListener;
@@ -131,6 +131,7 @@ class _WaterfallState extends State<WaterfallView> {
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
     loadingDelay?.cancel();
+    toggleBarsDelay?.cancel();
     _checkInterval?.cancel();
     super.dispose();
   }
@@ -187,15 +188,11 @@ class _WaterfallState extends State<WaterfallView> {
       }
     }
     
-    // delay every new page load after fetching 100+ images
-    // if(widget.tab.booruHandler.filteredFetched.length > 100) {
+    // delay every new page load
     loadingDelay = Timer(Duration(milliseconds: 200), () {
       searchHandler.isLoading(false);
       updateState();
     });
-    // } else {
-    //   searchHandler.isLoading(false);
-    // }
 
     updateState();
     // this.mounted prevents an exception on first load
@@ -211,33 +208,40 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   void viewerCallback() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-    // ServiceHandler.makeNormal();
+    toggleBarsDelay?.cancel();
+    toggleBarsDelay = Timer(Duration(seconds: 1), () {
+      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    });
     kbFocusNode.requestFocus();
     inViewer = false;
     setVolumeListener();
   }
 
-  void onThumbTap(int index) {
+  void onThumbTap(int index) async {
     // Load the image viewer
     kbFocusNode.unfocus();
     if (settingsHandler.appMode == "Mobile") {
+      // delay system ui hiding a bit to avoid animation lags
+      toggleBarsDelay?.cancel();
+      toggleBarsDelay = Timer(Duration(seconds: 1), () {
+        SystemChrome.setEnabledSystemUIOverlays([]);
+      });
       inViewer = true;
       volumeListener?.cancel();
 
-      Navigator.push(
+      await Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, anim1, anim2) => 
-            // Opacity(opacity: 0.5, child: ViewerPage(index, viewerCallback)),
-            ViewerPage(index, viewerCallback),
+            // Opacity(opacity: 0.5, child: ViewerPage(index)),
+            ViewerPage(index),
           fullscreenDialog: true,
           opaque: false,
           transitionDuration: Duration(milliseconds: 300),
           barrierColor: Colors.black26,
         ),
       );
-      // .whenComplete(() { }); // doesn't work - fires immediately, NOT after route closing
+      viewerCallback();
     } else {
       widget.tab.currentItem.value = widget.tab.booruHandler.filteredFetched[index];
       widget.tab.viewedIndex.value = index;

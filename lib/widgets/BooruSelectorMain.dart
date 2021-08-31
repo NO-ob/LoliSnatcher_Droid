@@ -21,36 +21,10 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
   void initState() {
     super.initState();
 
-    // TODO don't need this? settingsHandler should handle this
-    // if (settingsHandler.booruList.isEmpty) {
-    //   settingsHandler.getBooru();
-    // }
-    // if (settingsHandler.prefBooru == ""){
-    //   settingsHandler.loadSettings();
-    // }
-    // if ((settingsHandler.prefBooru != "") && (settingsHandler.prefBooru != settingsHandler.booruList.elementAt(0).name)){
-    //   settingsHandler.booruList = await settingsHandler.sortBooruList();
-    // }
-
-
-    // This null check is used otherwise the selected booru resets when the state changes, the state changes when a booru is selected
-    if(searchHandler.list.length > 0) {
-      // if (searchHandler.currentTab.selectedBooru.value == null){
-      //   print("selectedBooru is null setting to: " + settingsHandler.booruList[0].toString());
-      //   searchHandler.currentTab.selectedBooru.value = settingsHandler.booruList[0];
-      // }
-      // if (!settingsHandler.booruList.contains(searchHandler.currentTab.selectedBooru.value)){
-      //   searchHandler.currentTab.selectedBooru.value = settingsHandler.booruList.firstWhere(
-      //     (element) => element.name == searchHandler.currentTab.selectedBooru.value.name,
-      //     orElse: () => settingsHandler.booruList[0]
-      //   );
-      //   print("booru changing because its not in the list");
-      // }
-    }
-
-    if (!widget.isPrimary && searchHandler.currentTab.secondaryBoorus == null){
-      print("secondary Booru is null setting to: " + settingsHandler.booruList[1].toString());
-      searchHandler.currentTab.secondaryBoorus = [settingsHandler.booruList[1]].obs;
+    if (!widget.isPrimary && searchHandler.currentTab.secondaryBoorus == null && settingsHandler.booruList.length > 1) {
+      List<Booru> leftoverBoorus = settingsHandler.booruList.where((booru) => booru.name != searchHandler.currentTab.selectedBooru.value.name).toList();
+      print("secondary Booru is null setting to: " + leftoverBoorus[1].toString());
+      searchHandler.currentTab.secondaryBoorus = [leftoverBoorus[1]].obs;
     }
   }
 
@@ -62,15 +36,19 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
     }
   }
 
-  Widget BooruSelector() {
+  @override
+  Widget build(BuildContext context) {
     // print('BooruSelector:');
     // for (var booru in settingsHandler.booruList) {
     //   print(booru);
     // }
 
+    // no boorus
     if(settingsHandler.booruList.isEmpty) {
       return Text('Add Boorus in Settings');
     }
+
+    // no tabs
     if(searchHandler.list.length == 0) {
       return Center(
         child: CircularProgressIndicator(
@@ -78,13 +56,19 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         )
       );
     }
-    // if(!settingsHandler.booruList.contains(widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0])) {
-    //   return Center(child: CircularProgressIndicator());
-    // }
+
+    // protection from exceptions when somehow selected booru is not on the list
+    if(!settingsHandler.booruList.contains(widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0])) {
+      return Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+        )
+      );
+    }
 
     return Expanded(
       child: Container(
-        constraints: BoxConstraints(maxHeight: 40, minHeight: 20),
+        constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
         padding: EdgeInsets.fromLTRB(5, 0, 2, 0),
         decoration: BoxDecoration(
           color: Get.theme.canvasColor,
@@ -125,7 +109,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             return DropdownMenuItem<Booru>(
               value: value,
               child: Container(
-                padding: EdgeInsets.all(5),
+                padding: EdgeInsets.fromLTRB(5, 10, 5, 10),
                 decoration: isCurrent
                 ? BoxDecoration(
                   border: Border.all(color: Get.theme.accentColor, width: 1),
@@ -148,9 +132,5 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         )),
       )
     );
-  }
-  @override
-  Widget build(BuildContext context) {
-    return BooruSelector();
   }
 }
