@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -245,14 +246,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
-    print(scaleState);
+    // print(scaleState);
 
     isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
     updateState();
   }
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
-    print(viewState);
+    // print(viewState);
   }
 
   void resetZoom() {
@@ -318,7 +319,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       );
     } else {
       // Otherwise load from network
-      print('uri: ${widget.booruItem.fileURL}');
+      // print('uri: ${widget.booruItem.fileURL}');
       playlist = Playlist(
         medias: [
           Media.network(
@@ -549,7 +550,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   @override
   Widget build(BuildContext context) {
     int viewedIndex = widget.searchGlobal.viewedIndex.value;
-    bool isViewed = viewedIndex == widget.index || widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
+    final bool isViewed = settingsHandler.appMode == 'Mobile'
+      ? widget.searchGlobal.viewedIndex.value == widget.index
+      : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
     bool initialized = _videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
@@ -595,38 +598,53 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       _lastViewedIndex = viewedIndex;
     }
 
-    // TODO move controls outside of chewie, to exclude them from zoom
+    int nowMils = DateTime.now().millisecondsSinceEpoch;
+    int sinceStart = nowMils - _startedAt;
+    bool showLoading = sinceStart > 500;
+    // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
       child: Material(
         child: Stack(
           children: [
-            PhotoView.customChild(
-              child: initialized
-                ? Video(
-                    player: _videoController,
-                    scale: 1.0,
-                    showControls: true,
-                    progressBarInactiveColor: Colors.grey,
-                    progressBarActiveColor: Get.theme.accentColor,
-                    progressBarThumbColor: Get.theme.accentColor,
-                    volumeThumbColor: Get.theme.accentColor,
-                    volumeActiveColor: Get.theme.accentColor,
-                  )
-                : Stack(children: [
-                    CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-                    loadingElementBuilder(),
-                  ]),
-              minScale: PhotoViewComputedScale.contained,
-              maxScale: PhotoViewComputedScale.covered * 8,
-              initialScale: PhotoViewComputedScale.contained,
-              enableRotation: false,
-              basePosition: Alignment.center,
-              controller: viewController,
-              // tightMode: true,
-              // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.searchGlobal.viewedIndex.value == widget.index ? '' : 'ignore') + widget.index.toString()),
-              scaleStateController: scaleController,
+            Listener(
+              onPointerSignal: (pointerSignal) {
+                if(pointerSignal is PointerScrollEvent) {
+                  scrollZoomImage(pointerSignal.scrollDelta.dy);
+                }
+              },
+              child: PhotoView.customChild(
+                child: initialized
+                  ? Video(
+                      player: _videoController,
+                      scale: 1.0,
+                      showControls: true,
+                      progressBarInactiveColor: Colors.grey,
+                      progressBarActiveColor: Get.theme.accentColor,
+                      progressBarThumbColor: Get.theme.accentColor,
+                      volumeThumbColor: Get.theme.accentColor,
+                      volumeActiveColor: Get.theme.accentColor,
+                    )
+                  : Stack(children: [
+                      CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+                      AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.linear,
+                        opacity: showLoading ? 1 : 0,
+                        child: loadingElementBuilder(),
+                      ),
+                    ]),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 8,
+                initialScale: PhotoViewComputedScale.contained,
+                enableRotation: false,
+                basePosition: Alignment.center,
+                controller: viewController,
+                // tightMode: true,
+                // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.searchGlobal.viewedIndex.value == widget.index ? '' : 'ignore') + widget.index.toString()),
+                scaleStateController: scaleController,
+              )
             ),
 
             zoomButtonBuild(),

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:vibration/vibration.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -243,6 +244,18 @@ class _WaterfallState extends State<WaterfallView> {
     }
   }
 
+  void onThumbDoubleTap(int index) async {
+    BooruItem item = widget.tab.booruHandler.filteredFetched[index];
+    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
+      Vibration.vibrate(duration: 10);
+    }
+
+    setState(() {
+      item.isFavourite.toggle();
+      settingsHandler.dbHandler.updateBooruItem(item, "local");
+    });
+  }
+
   void onThumbLongPress(int index) {
     if (widget.tab.selected.contains(index)) {
       widget.tab.selected.remove(index);
@@ -281,6 +294,9 @@ class _WaterfallState extends State<WaterfallView> {
               onTap: () {
                 onThumbTap(index);
               },
+              onDoubleTap: () {
+                onThumbDoubleTap(index);
+              },
               onLongPress: () {
                 onThumbLongPress(index);
               },
@@ -315,48 +331,65 @@ class _WaterfallState extends State<WaterfallView> {
           // CachedThumbNew(item, index, searchGlobal, columnCount, true),
           CachedThumbBetter(item, index, searchGlobal, columnCount, true),
           Container(
-            alignment: Alignment.bottomRight,
-            child: Container(
-              padding: EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.66),
-                borderRadius: BorderRadius.only(topLeft: Radius.circular(5))
-              ),
-              child: Obx(() => Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // reserved for elements on the left side
+                const SizedBox(),
 
-                  if(item.isFavourite.value || isLoved)
-                    Icon(
-                      item.isFavourite.value ? Icons.favorite : Icons.star,
-                      color: item.isFavourite.value ? Colors.red : Colors.grey,
-                      size: 14,
-                    ),
-
-                  if(item.isSnatched.value)
-                    Icon(
-                      Icons.save_alt,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-
-                  if(isSound)
-                    Icon(
-                      Icons.volume_up_rounded,
-                      color: Colors.white,
-                      size: 14,
-                    ),
-
-                  Icon(
-                    itemIcon,
-                    color: Colors.white,
-                    size: 14,
+                Container(
+                  padding: EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.66),
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5))
                   ),
-                ],
-              )),
-            ),
-          ),
+                  child: Obx(() =>  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
+
+                      AnimatedCrossFade(
+                        duration: Duration(milliseconds: 200),
+                        crossFadeState: (item.isFavourite.value || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                        firstChild: AnimatedSwitcher(
+                          duration: Duration(milliseconds: 200),
+                          child: Icon(
+                            item.isFavourite.value ? Icons.favorite : Icons.star,
+                            color: item.isFavourite.value ? Colors.red : Colors.grey,
+                            key: ValueKey<Color>(item.isFavourite.value ? Colors.red : Colors.grey),
+                            size: 14,
+                          )
+                        ),
+                        secondChild: const SizedBox(),
+                      ),
+
+                      if(item.isSnatched.value)
+                        Icon(
+                          Icons.save_alt,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+
+                      if(isSound)
+                        Icon(
+                          Icons.volume_up_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+
+                      Icon(
+                        itemIcon,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ],
+                  )),
+                ),
+              ]
+            )
+          )
         ]
       )
     );

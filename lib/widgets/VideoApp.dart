@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -242,14 +243,14 @@ class _VideoAppState extends State<VideoApp> {
 
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
-    print(scaleState);
+    // print(scaleState);
 
     isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
     updateState();
   }
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
-    print(viewState);
+    // print(viewState);
   }
 
   void resetZoom() {
@@ -594,7 +595,9 @@ class _VideoAppState extends State<VideoApp> {
   @override
   Widget build(BuildContext context) {
     int viewedIndex = widget.searchGlobal.viewedIndex.value;
-    bool isViewed = viewedIndex == widget.index || widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
+    final bool isViewed = settingsHandler.appMode == 'Mobile'
+      ? widget.searchGlobal.viewedIndex.value == widget.index
+      : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
     bool initialized = _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
@@ -627,6 +630,11 @@ class _VideoAppState extends State<VideoApp> {
       _lastViewedIndex = viewedIndex;
     }
 
+    int nowMils = DateTime.now().millisecondsSinceEpoch;
+    int sinceStart = nowMils - _startedAt;
+    bool showLoading = sinceStart > 500;
+    // delay showing loading info a bit, so we don't clutter interface for fast loading files
+
     // TODO move controls outside of chewie, to exclude them from zoom
 
     return Hero(
@@ -634,22 +642,34 @@ class _VideoAppState extends State<VideoApp> {
       child: Material(
         child: Stack(
           children: [
-            PhotoView.customChild(
-              child: initialized
-                ? Chewie(controller: _chewieController!)
-                : Stack(children: [
-                    CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-                    loadingElementBuilder(),
-                  ]),
-              minScale: PhotoViewComputedScale.contained,
-              maxScale: PhotoViewComputedScale.covered * 8,
-              initialScale: PhotoViewComputedScale.contained,
-              enableRotation: false,
-              basePosition: Alignment.center,
-              controller: viewController,
-              // tightMode: true,
-              // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.searchGlobal.viewedIndex.value == widget.index ? '' : 'ignore') + widget.index.toString()),
-              scaleStateController: scaleController,
+            Listener(
+              onPointerSignal: (pointerSignal) {
+                if(pointerSignal is PointerScrollEvent) {
+                  scrollZoomImage(pointerSignal.scrollDelta.dy);
+                }
+              },
+              child: PhotoView.customChild(
+                child: initialized
+                  ? Chewie(controller: _chewieController!)
+                  : Stack(children: [
+                      CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+                      AnimatedOpacity(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.linear,
+                        opacity: showLoading ? 1 : 0,
+                        child: loadingElementBuilder(),
+                      ),
+                    ]),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 8,
+                initialScale: PhotoViewComputedScale.contained,
+                enableRotation: false,
+                basePosition: Alignment.center,
+                controller: viewController,
+                // tightMode: true,
+                // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.searchGlobal.viewedIndex.value == widget.index ? '' : 'ignore') + widget.index.toString()),
+                scaleStateController: scaleController,
+              )
             ),
 
             zoomButtonBuild(),

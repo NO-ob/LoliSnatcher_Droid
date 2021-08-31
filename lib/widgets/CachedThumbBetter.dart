@@ -33,7 +33,7 @@ class CachedThumbBetter extends StatefulWidget {
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
   final SettingsHandler settingsHandler = Get.find();
 
-  int _total = 0, _received = 0, _restartedCount = 0;
+  int _total = 0, _received = 0, _restartedCount = 0, _startedAt = 0;
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isForVideo = false;
@@ -206,6 +206,8 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     //   downloadThumb();
     // }
 
+    _startedAt = DateTime.now().millisecondsSinceEpoch;
+
     isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (widget.booruItem.mediaType == 'animation' || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
     thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
@@ -253,6 +255,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
     _total = 0;
     _received = 0;
+    _startedAt = 0;
     isFromCache = false;
     mainProvider?.evict();
     mainProvider = null;
@@ -377,45 +380,52 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     double screenWidth = MediaQuery.of(context).size.width;
     double iconSize = (screenWidth / widget.columnCount) * 0.55;
 
+    int nowMils = DateTime.now().millisecondsSinceEpoch;
+    int sinceStart = nowMils - _startedAt;
+    bool showLoading = sinceStart > 500;
+
     return Obx(() => Stack(
       alignment: Alignment.center,
       children: [
         if(isThumbQuality == false && !widget.booruItem.isHated.value) // fetch thumbnail from network while loading a sample
           AnimatedSwitcher( // fade in image
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),
-            child: (extraProvider != null) // && mainProvider == null)
-              ? Image(
-                  image: extraProvider!,
-                  fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-                  isAntiAlias: true,
-                  width: double.infinity, // widget.isStandalone ? double.infinity : null,
-                  height: double.infinity, // widget.isStandalone ? double.infinity : null,
-                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                    return const Icon(Icons.broken_image, size: 30);
-                  },
-                )
-              : null
+            child: Image(
+              image: extraProvider ?? MemoryImage(kTransparentImage),
+              fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+              isAntiAlias: true,
+              width: double.infinity, // widget.isStandalone ? double.infinity : null,
+              height: double.infinity, // widget.isStandalone ? double.infinity : null,
+              key: ValueKey<bool>(extraProvider != null),
+              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                return const Icon(Icons.broken_image, size: 30);
+              },
+            )
           ),
 
         AnimatedSwitcher( // fade in image
           duration: Duration(milliseconds: widget.isStandalone ? 300 : 10),
-          child: mainProvider != null
-            ? Image(
-                image: mainProvider!,
-                fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-                isAntiAlias: true,
-                width: double.infinity,
-                height: double.infinity,
-                errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                  _onError(exception as Exception);
-                  return const Icon(Icons.broken_image, size: 30);
-                },
-              )
-            : null
+          child: Image(
+            image: mainProvider ?? MemoryImage(kTransparentImage),
+            fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+            isAntiAlias: true,
+            width: double.infinity,
+            height: double.infinity,
+            key: ValueKey<bool>(mainProvider != null),
+            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+              _onError(exception as Exception);
+              return const Icon(Icons.broken_image, size: 30);
+            },
+          )
         ),
 
         if(mainProvider == null && widget.isStandalone)
-          loadingElementBuilder(context, null, null),
+          AnimatedOpacity(
+            duration: Duration(milliseconds: 200),
+            curve: Curves.linear,
+            opacity: showLoading ? 1 : 0,
+            child: loadingElementBuilder(context, null, null),
+          ),
 
         if(widget.booruItem.isHated.value)
           Container(

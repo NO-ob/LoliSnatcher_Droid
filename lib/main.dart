@@ -320,18 +320,18 @@ class _HomeState extends State<Home> {
     final shouldPop = await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return SettingsDialog(
           title: Text('Are you sure?'),
-          content: Text('Do you want to exit the App?'),
-          actions: <Widget>[
+          contentItems: <Widget>[Text('Do you want to exit the App?')],
+          actionButtons: <Widget>[
             TextButton(
-              child: Text('Yes'),
+              child: Text('Yes', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
             ),
             TextButton(
-              child: Text('No'),
+              child: Text('No', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },

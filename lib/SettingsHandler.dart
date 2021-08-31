@@ -911,6 +911,7 @@ class SettingsHandler extends GetxController {
 
     List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
     for(String key in leftoverKeys) {
+      // print('key $key val ${json[key]} type ${json[key].runtimeType}');
       setByString(key, json[key]);
     }
 

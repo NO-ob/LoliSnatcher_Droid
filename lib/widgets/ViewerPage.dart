@@ -729,8 +729,15 @@ class _ViewerPageState extends State<ViewerPage> {
         icon = Icons.save;
         break;
       case("favourite"):
-        icon = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value ? Icons.favorite : Icons.favorite_border;
-        break;
+        final bool isFav = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value;
+        icon = isFav ? Icons.favorite : Icons.favorite_border;
+        // early return to override with animated icon
+        return AnimatedCrossFade(
+          duration: Duration(milliseconds: 200),
+          crossFadeState: isFav ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          firstChild: Icon(Icons.favorite),
+          secondChild: Icon(Icons.favorite_border_sharp),
+        );
       case("share"):
         icon = Icons.share;
         break;
@@ -764,7 +771,7 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   // execute button action
-  void buttonClick(String action) {
+  void buttonClick(String action) async {
     switch(action) {
       case("info"):
         viewerScaffoldKey.currentState?.openEndDrawer();
@@ -785,9 +792,12 @@ class _ViewerPageState extends State<ViewerPage> {
         );
         break;
       case("favourite"):
+        if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
+          Vibration.vibrate(duration: 10);
+        }
         setState(() {
           getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
-          settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value],"local");
+          settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value], "local");
         });
         break;
       case("share"):

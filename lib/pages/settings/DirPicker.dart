@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,18 +32,18 @@ class _DirPickerState extends State<DirPicker> {
       final shouldPop = await showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
+          return SettingsDialog(
             title: Text('Are you sure?'),
-            content: Text('Do you want to close the picker without choosing a directory?'),
-            actions: <Widget>[
+            contentItems: <Widget>[Text('Do you want to close the picker without choosing a directory?')],
+            actionButtons: <Widget>[
               TextButton(
-                child: Text('Yes'),
+                child: Text('Yes', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
                 onPressed: () {
                   Get.back(result: true);
                 },
               ),
               TextButton(
-                child: Text('No'),
+                child: Text('No', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
                 onPressed: () {
                   Get.back(result: false);
                 },
@@ -191,36 +192,26 @@ class _DirPickerState extends State<DirPicker> {
             FloatingActionButton(
               heroTag: null,
               onPressed: () {
-                Get.dialog(AlertDialog(
+                Get.dialog(SettingsDialog(
                   title: Text('New Directory'),
-                  content: Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        controller: newDirNameController,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))
-                        ],
-                        decoration: InputDecoration(
-                          hintText:"Dir Name",
-                          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
+                  content: SettingsTextInput(
+                    controller: newDirNameController,
+                    title: 'Directory Name',
+                    hintText: 'Directory Name',
+                    onlyInput: true,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))
+                    ],
                   ),
-                  actions: <Widget>[
+                  actionButtons: <Widget>[
                     TextButton(
-                      child: Text('Cancel'),
+                      child: Text('Cancel', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
                       onPressed: () {
                         Get.back();
                       },
                     ),
                     TextButton(
-                      child: Text('Create'),
+                      child: Text('Create', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
                       onPressed: () {
                         mkdir();
                         Get.back();
@@ -228,7 +219,6 @@ class _DirPickerState extends State<DirPicker> {
                     ),
                   ],
                 ));
-                // Add your onPressed code here!
               },
               child: const Icon(Icons.add),
               backgroundColor: Get.theme.accentColor,

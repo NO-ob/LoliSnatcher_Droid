@@ -68,19 +68,16 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
                     showHistory();
                   },
                 ),
-                GestureDetector(
-                  onLongPress: () {
+                IconButton(
+                  icon: Icon(Icons.add_circle_outline, color: Get.theme.accentColor),
+                  onPressed: () {
                     // add new tab and switch to it
                     searchHandler.searchTextController.text = settingsHandler.defTags;
                     searchHandler.addTabByString(settingsHandler.defTags, switchToNew: true);
+
+                    // add new tab to the list end
+                    // searchHandler.addTabByString(settingsHandler.defTags);
                   },
-                  child: IconButton(
-                    icon: Icon(Icons.add_circle_outline, color: Get.theme.accentColor),
-                    onPressed: () {
-                      // add new tab to the list end
-                      searchHandler.addTabByString(settingsHandler.defTags);
-                    },
-                  ),
                 ),
                 IconButton(
                   icon: Icon(Icons.arrow_downward, color: Get.theme.accentColor),

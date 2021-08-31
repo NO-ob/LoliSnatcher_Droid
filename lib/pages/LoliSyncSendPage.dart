@@ -1,5 +1,6 @@
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:core';
@@ -39,19 +40,19 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     final shouldPop = await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return SettingsDialog(
           title: Text('Are you sure?'),
-          content: Text('Do you want to stop syncing?'),
-          actions: <Widget>[
+          contentItems: <Widget>[Text('Do you want to stop syncing?')],
+          actionButtons: <Widget>[
             TextButton(
-              child: Text('Yes'),
+              child: Text('Yes', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
               onPressed: () {
                 loliSync.killSync();
                 Navigator.of(context).pop(true);
               },
             ),
             TextButton(
-              child: Text('No'),
+              child: Text('No', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },

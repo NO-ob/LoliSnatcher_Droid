@@ -111,6 +111,7 @@ class SettingsToggle extends StatelessWidget {
         ),
         trailingIcon
       ]),
+      subtitle: subtitle,
       value: value,
       onChanged: onChanged,
       activeColor: activeColor ?? Get.theme.accentColor,
@@ -278,6 +279,7 @@ class SettingsTextInput extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon = const SizedBox(),
+    this.onlyInput = false,
   }) : super(key: key);
 
   final TextEditingController controller;
@@ -289,45 +291,52 @@ class SettingsTextInput extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget trailingIcon;
+  final bool onlyInput; // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
 
   @override
   Widget build(BuildContext context) {
+    final Widget field = Container(
+      margin: EdgeInsets.only(top: 10),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: inputType,
+        inputFormatters: inputFormatters,
+        decoration: InputDecoration(
+          fillColor: Get.theme.colorScheme.surface,
+          filled: true,
+          hintText: hintText,
+          errorText: validator?.call(controller.text),
+          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderRadius: BorderRadius.circular(50),
+            gapPadding: 0,
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Get.theme.errorColor),
+            borderRadius: BorderRadius.circular(50),
+            gapPadding: 0,
+          ),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderRadius: BorderRadius.circular(50),
+            gapPadding: 0,
+          ),
+        ),
+      )
+    );
+
+    if(onlyInput) {
+      return field;
+    }
+
     return ListTile(
       title: MarqueeText(
         text: title,
         fontSize: 16,
         isExpanded: false,
       ),
-      subtitle: Container(
-        margin: EdgeInsets.only(top: 10),
-        child: TextFormField(
-          controller: controller,
-          keyboardType: inputType,
-          inputFormatters: inputFormatters,
-          decoration: InputDecoration(
-            fillColor: Get.theme.colorScheme.surface,
-            filled: true,
-            hintText: hintText,
-            errorText: validator?.call(controller.text),
-            contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Get.theme.accentColor),
-              borderRadius: BorderRadius.circular(50),
-              gapPadding: 0,
-            ),
-            errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Get.theme.errorColor),
-              borderRadius: BorderRadius.circular(50),
-              gapPadding: 0,
-            ),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Get.theme.accentColor),
-              borderRadius: BorderRadius.circular(50),
-              gapPadding: 0,
-            ),
-          ),
-        )
-      ),
+      subtitle: field,
       trailing: trailingIcon,
       dense: false,
       shape: Border(
@@ -344,11 +353,13 @@ class SettingsDialog extends StatelessWidget {
   const SettingsDialog({
     Key? key,
     required this.title,
+    this.content,
     this.contentItems,
     this.actionButtons
   }) : super(key: key);
 
   final Widget title;
+  final Widget? content;
   final List<Widget>? contentItems;
   final List<Widget>? actionButtons;
 
@@ -356,12 +367,10 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
-      content: (contentItems != null)
-        ? Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: contentItems ?? [],
-        )
-        : null,
+      content: content ?? Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: contentItems ?? [],
+      ),
       actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : null,
       scrollable: true,
     );

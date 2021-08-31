@@ -42,14 +42,21 @@ class _DesktopHomeState extends State<DesktopHome> {
               children: <Widget>[
                 TagSearchBox(),
                 BooruSelectorMain(true),
-                IconButton(
-                  padding: const EdgeInsets.all(5),
-                  icon: Icon(Icons.search),
-                  onPressed: () {
+                GestureDetector(
+                  onLongPress: (){
                     searchHandler.searchTextController.clearComposing();
                     searchHandler.searchBoxFocus.unfocus();
-                    searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                    searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
                   },
+                  child: IconButton(
+                    padding: const EdgeInsets.all(5),
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      searchHandler.searchTextController.clearComposing();
+                      searchHandler.searchBoxFocus.unfocus();
+                      searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                    },
+                  )
                 ),
                 TabBox(),
                 TabBoxButtons(),

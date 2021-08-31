@@ -259,7 +259,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     updateState();
   }
   void onViewStateChanged(PhotoViewControllerValue viewState) {
-    print(viewState);
+    // print(viewState);
   }
 
   void resetZoom() {
@@ -513,11 +513,18 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   Widget build(BuildContext context) {
-    final bool isViewed = widget.searchGlobal.viewedIndex.value == widget.index || widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
+    final bool isViewed = settingsHandler.appMode == 'Mobile'
+      ? widget.searchGlobal.viewedIndex.value == widget.index
+      : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
     if (!isViewed) {
       // reset zoom if not viewed
       resetZoom();
     }
+
+    int nowMils = DateTime.now().millisecondsSinceEpoch;
+    int sinceStart = nowMils - _startedAt;
+    bool showLoading = sinceStart > 500;
+    // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
@@ -527,7 +534,12 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
           alignment: Alignment.center,
           children: [
             CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-            loadingElementBuilder(context, null),
+            AnimatedOpacity(
+              duration: Duration(milliseconds: 300),
+              curve: Curves.linear,
+              opacity: showLoading ? 1 : 0,
+              child: loadingElementBuilder(context, null),
+            ),
             AnimatedSwitcher(
               child: mainProvider != null
                 ? Listener(
