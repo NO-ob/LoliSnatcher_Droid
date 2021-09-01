@@ -52,6 +52,7 @@ class _VideoAppState extends State<VideoApp> {
   List<String> stopReason = [];
 
   CancelToken? _dioCancelToken;
+  DioLoader? client;
   File? _video;
 
   @override
@@ -98,7 +99,7 @@ class _VideoAppState extends State<VideoApp> {
     }
 
     _dioCancelToken = CancelToken();
-    final DioLoader client = DioLoader(
+    client = DioLoader(
       widget.booruItem.fileURL,
       headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
       cancelToken: _dioCancelToken,
@@ -110,13 +111,15 @@ class _VideoAppState extends State<VideoApp> {
         // save video from cache, but restate only if player is not initialized yet
         if(!(_videoController?.value.isInitialized ?? false)) {
           initPlayer();
+          disposeClient();
           updateState();
         }
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: 'media',
     );
-    client.runRequest();
+    // client!.runRequest();
+    client!.runRequestIsolate();
     return;
   }
 
@@ -218,10 +221,16 @@ class _VideoAppState extends State<VideoApp> {
 
     updateState();
   }
+
   @override
   void dispose() {
     disposables();
     super.dispose();
+  }
+
+  void disposeClient() {
+    client?.dispose();
+    client = null;
   }
 
   void disposables() {
@@ -238,6 +247,7 @@ class _VideoAppState extends State<VideoApp> {
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
+    disposeClient();
   }
 
 

@@ -38,7 +38,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
     {'folder': 'media', 'label': 'Media'}
   ]; // [cache folder, displayed name]
   List<Map<String, dynamic>> cacheStats = [];
-  late Isolate isolate;
+  Isolate? isolate;
 
   @override
   void initState() {
@@ -51,6 +51,13 @@ class _BehaviourPageState extends State<BehaviourPage> {
     jsonWrite = settingsHandler.jsonWrite;
 
     getCacheStats();
+  }
+
+  @override
+  void dispose() {
+    isolate?.kill(priority: Isolate.immediate);
+    isolate = null;
+    super.dispose();
   }
 
   void getCacheStats() async {

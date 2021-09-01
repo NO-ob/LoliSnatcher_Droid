@@ -61,7 +61,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
   PreloadPageController? controller;
   PageController? controllerLinux;
-  ImageWriter writer = ImageWriter();
+  ImageWriter imageWriter = ImageWriter();
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
@@ -496,9 +496,8 @@ class _ViewerPageState extends State<ViewerPage> {
 
   void shareFileAction() async {
     BooruItem item = getFetched()[searchHandler.currentTab.viewedIndex.value];
-    String? path = await ImageWriter().getCachePath(item.fileURL, 'media');
+    String? path = await imageWriter.getCachePath(item.fileURL, 'media');
     ServiceHandler serviceHandler = ServiceHandler();
-    ImageWriter writer = ImageWriter();
 
     if(path != null) {
       // File is already in cache - share from there
@@ -509,7 +508,7 @@ class _ViewerPageState extends State<ViewerPage> {
       var request = await HttpClient().getUrl(Uri.parse(item.fileURL));
       var response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-      final File? cacheFile = await writer.writeCacheFromBytes(item.fileURL, bytes, 'media');
+      final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media');
       if(cacheFile != null) {
         path = cacheFile.path;
         await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);

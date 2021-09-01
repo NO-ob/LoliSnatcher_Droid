@@ -40,12 +40,13 @@ class LoliSync{
       await req.response.close();
     }
   }
+
   Future<String> storeSettings(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
         Logger.Inst().log("request to update settings recieved", "LoliSync", "storeSettings", LogTypes.loliSyncInfo);
         String content = await utf8.decoder.bind(req).join(); /*2*/
-        await settingsHandler.loadFromJSON(content);
+        await settingsHandler.loadFromJSON(content, false);
         req.response.statusCode = 200;
         req.response.write("Settings Sent");
         return "Settings Saved";
@@ -90,6 +91,7 @@ class LoliSync{
     }
     return "Something went wrong";
   }
+
   Future<String> storeBooru(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
@@ -134,6 +136,7 @@ class LoliSync{
   void killSync(){
     syncKilled = true;
   }
+
   Future<String> sendBooruItem(BooruItem item, String ip, String port, int favouritesCount, int current) async{
     Logger.Inst().log("Sending item $current / $favouritesCount", "LoliSync", "sendBooruItem", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/booruitem?amount=$favouritesCount&current=$current")
@@ -143,6 +146,7 @@ class LoliSync{
     String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
   }
+
   Future<String> sendSettings(Map settingsJSON, String ip, String port) async{
     Logger.Inst().log("Sending settings $settingsJSON", "LoliSync", "sendSettings", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/settings")
@@ -152,6 +156,7 @@ class LoliSync{
     String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
   }
+
   Future<String> sendBooru(Booru booru, String ip, String port, int booruCount, int current) async{
     Logger.Inst().log("Sending item $current / $booruCount", "LoliSync", "sendBooru", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, int.parse(port), "/lolisync/booru?amount=$booruCount&current=$current")
@@ -161,6 +166,7 @@ class LoliSync{
     String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
   }
+
   Stream<String> startSync(SettingsHandler settingsHandler, String ip, String port, List<String> toSync) async*{
     for (int i = 0; i < toSync.length; i++) {
       switch(toSync.elementAt(i)) {
@@ -194,7 +200,11 @@ class LoliSync{
           break;
         case "Settings":
           yield "Sync Starting";
-          String resp = await sendSettings(settingsHandler.toJSON(), ip, port);
+          Map<String, dynamic> settingsJSON = settingsHandler.toJSON();
+          settingsHandler.deviceSpecificSettings.forEach((element) {
+            settingsJSON.remove(element);
+          });
+          String resp = await sendSettings(settingsJSON, ip, port);
           yield resp;
           break;
         case "Booru":

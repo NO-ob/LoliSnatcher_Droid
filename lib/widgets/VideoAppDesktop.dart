@@ -47,6 +47,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   List<String> stopReason = [];
 
   CancelToken? _dioCancelToken;
+  DioLoader? client;
   File? _video;
 
   @override
@@ -93,7 +94,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
 
     _dioCancelToken = CancelToken();
-    final DioLoader client = DioLoader(
+    client = DioLoader(
       widget.booruItem.fileURL,
       headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
       cancelToken: _dioCancelToken,
@@ -109,6 +110,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             const Duration(milliseconds: 400),
             () {
               initPlayer();
+              disposeClient();
               updateState();
             }
           );
@@ -117,7 +119,8 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: 'media',
     );
-    client.runRequest();
+    // client!.runRequest();
+    client!.runRequestIsolate();
     return;
   }
 
@@ -221,10 +224,16 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
     updateState();
   }
+
   @override
   void dispose() {
     disposables();
     super.dispose();
+  }
+
+  void disposeClient() {
+    client?.dispose();
+    client = null;
   }
 
   void disposables() {
@@ -241,6 +250,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
+    disposeClient();
   }
 
 

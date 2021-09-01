@@ -48,6 +48,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   late String imageURL;
   late String imageFolder;
   CancelToken _dioCancelToken = CancelToken();
+  DioLoader? client;
 
   StreamSubscription? noScaleListener;
 
@@ -63,7 +64,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
   Future<void> _downloadImage() async {
     _dioCancelToken = CancelToken();
-    final DioLoader client = DioLoader(
+    client = DioLoader(
       imageURL,
       headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
       cancelToken: _dioCancelToken,
@@ -73,12 +74,14 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       onDone: (Uint8List bytes, String url) {
         mainProvider = getImageProvider(bytes, url);
         _checkInterval?.cancel();
+        disposeClient();
         updateState();
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: imageFolder,
     );
-    client.runRequest();
+    // client.runRequest();
+    client!.runRequestIsolate();
     return;
   }
 
@@ -225,6 +228,11 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     if(this.mounted) setState(() { });
   }
 
+  void disposeClient() {
+    client?.dispose();
+    client = null;
+  }
+
   void disposables() {
     mainProvider?.evict();
     mainProvider = null;
@@ -248,6 +256,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     if (!(_dioCancelToken.isCancelled)){
       _dioCancelToken.cancel();
     }
+    disposeClient();
   }
 
   // debug functions

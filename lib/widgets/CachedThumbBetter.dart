@@ -39,6 +39,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   bool isFailed = false, isForVideo = false;
   Timer? _debounceBytes, _restartDelay, _debounceStart;
   CancelToken _dioCancelToken = CancelToken();
+  DioLoader? client, extraClient;
 
   bool? isThumbQuality;
   late String thumbURL;
@@ -60,7 +61,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
   Future<void> downloadThumb(bool isMain) async {
     _dioCancelToken = CancelToken();
-    final DioLoader client = DioLoader(
+    DioLoader newClient = DioLoader(
       isMain ? thumbURL : widget.booruItem.thumbnailURL,
       headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
       cancelToken: _dioCancelToken,
@@ -74,13 +75,20 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
           extraProvider = getImageProvider(bytes, url);
         }
         // if(!widget.isStandalone) print('$url $mainProvider ${bytes.lengthInBytes}');
+        disposeClients(isMain);
         updateState();
       },
       cacheEnabled: settingsHandler.imageCache,
       cacheFolder: isMain ? thumbFolder : 'thumbnails',
       timeoutTime: 20000,
     );
-    client.runRequest();
+    if(isMain) {
+      client = newClient;
+    } else {
+      extraClient = newClient;
+    }
+    // newClient.runRequest();
+    newClient.runRequestIsolate();
     return;
   }
 
@@ -134,6 +142,11 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     }
 
     // debugPrint('ThumbWidth: $thumbWidth');
+
+    // return empty image if no size rectrictions were calculated (propably happens because widget is not mounted)
+    if(thumbWidth == null && thumbHeight == null) {
+      return MemoryImage(kTransparentImage);
+    }
 
     return ResizeImage(
       MemoryImageTest(bytes, imageUrl: url),
@@ -256,12 +269,11 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     _total = 0;
     _received = 0;
     _startedAt = 0;
+
     isFromCache = false;
-    mainProvider?.evict();
-    mainProvider = null;
-    extraProvider?.evict();
-    extraProvider = null;
+
     hateListener?.cancel();
+
     updateState();
 
     selectThumbProvider();
@@ -269,6 +281,23 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
   void updateState() {
     if(this.mounted) setState(() { });
+  }
+
+  void disposeClients(bool? isMain) {
+    // print('disposing class ${widget.index} $isMain');
+    // dispose given or many clients
+    if(isMain == true) {
+      client?.dispose();
+      client = null;
+    } else if (isMain == false) {
+      extraClient?.dispose();
+      extraClient = null;
+    } else {
+      client?.dispose();
+      client = null;
+      extraClient?.dispose();
+      extraClient = null;
+    }
   }
 
   @override
@@ -280,14 +309,19 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   void disposables() {
     // if(widget.isStandalone) { // evict from cache only when in grid
     mainProvider?.evict();
+    mainProvider = null;
     // }
     extraProvider?.evict();
+    extraProvider = null;
+
     _restartDelay?.cancel();
     _debounceBytes?.cancel();
     _debounceStart?.cancel();
+
     if (!(_dioCancelToken.isCancelled)){
       _dioCancelToken.cancel();
     }
+    disposeClients(null);
   }
 
   Widget loadingElementBuilder(BuildContext ctx, Widget? child, ImageChunkEvent? loadingProgress) {

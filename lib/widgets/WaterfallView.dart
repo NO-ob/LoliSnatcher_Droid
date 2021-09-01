@@ -214,7 +214,6 @@ class _WaterfallState extends State<WaterfallView> {
     });
     kbFocusNode.requestFocus();
     inViewer = false;
-    setVolumeListener();
   }
 
   void onThumbTap(int index) async {
@@ -227,7 +226,6 @@ class _WaterfallState extends State<WaterfallView> {
         SystemChrome.setEnabledSystemUIOverlays([]);
       });
       inViewer = true;
-      volumeListener?.cancel();
 
       await Navigator.push(
         context,

@@ -83,6 +83,18 @@ class SettingsHandler extends GetxController {
   RxBool isAmoled = false.obs;
   ////////////////////////////////////////////////////
 
+  // list of setting names which shouldnt be synced with other devices
+  List<String> deviceSpecificSettings = [
+    'shitDevice', 'disableVideo',
+    'imageCache', 'mediaCache',
+    'dbEnabled', 'searchHistoryEnabled',
+    'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
+    'prefBooru', 'appMode', 'extPathOverride',
+    'lastSyncIp', 'lastSyncPort',
+    'theme', 'themeMode', 'isAmoled',
+    'customPrimaryColor', 'customAccentColor',
+    'version', 'SDK',
+  ];
   // default values and possible options map for validation
   Map<String, Map<String, dynamic>> map = {
     // stringFromList
@@ -464,7 +476,7 @@ class SettingsHandler extends GetxController {
     File settingsFile = File(path + "settings.json");
     String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
-    loadFromJSON(settings);
+    loadFromJSON(settings, true);
     return;
   }
 
@@ -827,8 +839,6 @@ class SettingsHandler extends GetxController {
 
 
   Map<String, dynamic> toJSON() {
-    //Dont add prefbooru or appmode since,appmode will mess up syncing between desktop and mobile
-    // prefbooru will mess up if the booru configs aren't synced
     Map<String, dynamic> json = {
       "defTags": validateValue("defTags", null, toJSON: true),
       "previewMode": validateValue("previewMode", null, toJSON: true),
@@ -885,7 +895,7 @@ class SettingsHandler extends GetxController {
     return json;
   }
 
-  Future<bool> loadFromJSON(String jsonString) async {
+  Future<bool> loadFromJSON(String jsonString, bool setMissingKeys) async {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
     List<List<String>> btnOrder = List<String>.from(json["buttonOrder"]).map((bstr) {
@@ -913,6 +923,17 @@ class SettingsHandler extends GetxController {
     for(String key in leftoverKeys) {
       // print('key $key val ${json[key]} type ${json[key].runtimeType}');
       setByString(key, json[key]);
+    }
+
+    if(setMissingKeys) {
+      // find all keys that are missing in the file and set them to default values
+      map.forEach((key, value) {
+        if (!json.keys.contains(key)) {
+          if (map[key] != null) {
+            setByString(key, map[key]!['default']);
+          }
+        }
+      });
     }
 
     return true;

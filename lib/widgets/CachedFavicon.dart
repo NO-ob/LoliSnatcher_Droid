@@ -26,6 +26,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
 
   bool isFailed = false;
   CancelToken? _dioCancelToken;
+  DioLoader? client;
   ImageProvider? faviconProvider;
 
   @override
@@ -39,7 +40,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
 
   Future<void> downloadFavicon() async {
     _dioCancelToken = CancelToken();
-    final DioLoader client = DioLoader(
+    client = DioLoader(
       widget.faviconURL,
       cancelToken: _dioCancelToken,
       onError: _onError,
@@ -48,12 +49,14 @@ class _CachedFaviconState extends State<CachedFavicon> {
           faviconProvider = getImageProvider(bytes, url);
           updateState();
         }
+        disposeClient();
       },
       cacheEnabled: settingsHandler.imageCache,
       cacheFolder: 'favicons',
       timeoutTime: 2000,
     );
-    client.runRequest();
+    // client.runRequest();
+    client!.runRequestIsolate();
     return;
   }
 
@@ -92,6 +95,11 @@ class _CachedFaviconState extends State<CachedFavicon> {
     downloadFavicon();
   }
 
+  void disposeClient() {
+    client?.dispose();
+    client = null;
+  }
+
   @override
   void dispose() {
     disposables();
@@ -104,6 +112,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
     }
+    disposeClient();
   }
 
   Widget loadingElementBuilder(BuildContext ctx) {
