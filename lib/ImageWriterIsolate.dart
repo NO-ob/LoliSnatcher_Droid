@@ -30,9 +30,10 @@ class ImageWriterIsolate {
       String cachePath = cacheRootPath + typeFolder + "/";
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
       image = File(cachePath + fileName);
-      // if(await image.exists()) {
-      //   await image.readAsBytes();
-      // }
+      // TODO is readBytes required here?
+      if(await image.exists()) {
+        await image.readAsBytes();
+      }
     } catch (e){
       print("Image Writer Exception:: cache write");
       print(e);

@@ -470,6 +470,7 @@ class _HomeState extends State<Home> {
               },
               child: ListView(
                 children: [
+                  // TODO tabbox and booruselector cause lag when opening a drawer
                   Container(
                     margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
                     child: Row(
@@ -596,8 +597,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
-    //searchTagsController.text = searchHandler.currentTab.tags;
 
     if(settingsHandler.appMode != "Mobile"){
       return DesktopHome();

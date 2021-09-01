@@ -178,17 +178,17 @@ class DioLoader {
           throw DioLoadException(url: resolved, message: "File didn\'t load");
         }
 
-        File? tempFile;
         if (cacheEnabled) {
-          await start(response.data, writeToCache, (dynamic data) {
-            if(tempFile != null) {
-              onEvent?.call('isFromCache');
-            }
+          if(onDoneFile == null && onDone != null) {
+            // return bytes immediately if file is not requested
             onEvent?.call('loaded');
-            if (onDoneFile != null && tempFile != null) {
-              onDoneFile?.call(tempFile, url);
-            } else if(onDone != null) {
-              onDone?.call(response.data, url);
+            onDone?.call(response.data, url);
+          }
+          await start(response.data, writeToCache, (dynamic data) {
+            if(data != null) {
+              onEvent?.call('isFromCache');
+              onEvent?.call('loaded');
+              onDoneFile?.call(data, url);
             }
           });
         } else {

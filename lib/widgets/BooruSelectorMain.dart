@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BooruSelectorMain extends StatefulWidget {
-  bool isPrimary = true;
+  final bool isPrimary;
   BooruSelectorMain(this.isPrimary);
   @override
   _BooruSelectorMainState createState() => _BooruSelectorMainState();
@@ -103,7 +103,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               bool isCurrent = isItemSelected(booru, true);
               return !isCurrent;
             }
-          }).map<DropdownMenuItem<Booru>>((Booru value){
+          }).map<DropdownMenuItem<Booru>>((Booru value) {
             bool isCurrent = isItemSelected(value, widget.isPrimary);
             // Return a dropdown item
             return DropdownMenuItem<Booru>(
