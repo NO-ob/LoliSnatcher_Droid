@@ -75,7 +75,6 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
           extraProvider = getImageProvider(bytes, url);
         }
         // if(!widget.isStandalone) print('$url $mainProvider ${bytes.lengthInBytes}');
-        disposeClients(isMain);
         updateState();
       },
       cacheEnabled: settingsHandler.imageCache,

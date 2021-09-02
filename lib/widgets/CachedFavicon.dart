@@ -49,7 +49,6 @@ class _CachedFaviconState extends State<CachedFavicon> {
           faviconProvider = getImageProvider(bytes, url);
           updateState();
         }
-        disposeClient();
       },
       cacheEnabled: settingsHandler.imageCache,
       cacheFolder: 'favicons',

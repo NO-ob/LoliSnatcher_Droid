@@ -110,7 +110,6 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             const Duration(milliseconds: 400),
             () {
               initPlayer();
-              disposeClient();
               updateState();
             }
           );

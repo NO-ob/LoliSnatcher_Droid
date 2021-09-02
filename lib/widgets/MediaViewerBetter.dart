@@ -74,7 +74,6 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       onDone: (Uint8List bytes, String url) {
         mainProvider = getImageProvider(bytes, url);
         _checkInterval?.cancel();
-        disposeClient();
         updateState();
       },
       cacheEnabled: settingsHandler.mediaCache,

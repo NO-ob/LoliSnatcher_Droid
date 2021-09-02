@@ -111,7 +111,6 @@ class _VideoAppState extends State<VideoApp> {
         // save video from cache, but restate only if player is not initialized yet
         if(!(_videoController?.value.isInitialized ?? false)) {
           initPlayer();
-          disposeClient();
           updateState();
         }
       },
