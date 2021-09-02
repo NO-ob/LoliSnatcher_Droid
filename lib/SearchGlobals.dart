@@ -1,17 +1,26 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:uuid/uuid.dart';
+import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:uuid/uuid.dart';
 
-import 'libBooru/BooruHandler.dart';
-import 'libBooru/Booru.dart';
-import 'libBooru/BooruItem.dart';
-import 'package:get/get.dart';
+
+
 
 var uuid = Uuid();
+
+var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
 
 class SearchHandler extends GetxController {
   // alternative way to get instance of the controller
@@ -150,9 +159,19 @@ class SearchHandler extends GetxController {
   RxBool isLastPage = false.obs;
   RxBool displayAppbar = true.obs;
   RxBool isFullscreen = false.obs;
+  RxBool isRestored = false.obs;
+
+  // ignore: close_sinks
+  StreamController<String>? volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
+  // ignore: cancel_subscriptions
+  StreamSubscription? rootVolumeListener;
 
   Function rootRestate;
-  SearchHandler(this.rootRestate);
+  SearchHandler(this.rootRestate) {
+    rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
+      volumeStream?.sink.add(event);
+    });
+  }
 }
 
 

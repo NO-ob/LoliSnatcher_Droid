@@ -42,7 +42,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
     }
 
     // temp message while restoring tabs (or for some reason initial tab was not created)
-    if(searchHandler.list.isEmpty) {
+    if(searchHandler.list.isEmpty && !searchHandler.isRestored.value) {
       return Center(
         child: Column(
           children: [
@@ -52,6 +52,12 @@ class _ImagePreviewsState extends State<ImagePreviews> {
             Text('Restoring previous session...')
           ]
         )
+      );
+    }
+
+    if(searchHandler.list.isEmpty) {
+      return Center(
+        child: Text('No Tabs???')
       );
     }
 

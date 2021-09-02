@@ -388,23 +388,25 @@ class _HomeState extends State<Home> {
       }
     }
 
+    searchHandler.isRestored.value = true;
+
     // set parsed tabs OR set first default tab if nothing to restore
     if(restoredGlobals.length > 0) {
       ServiceHandler.displayToast('Restored ${restoredGlobals.length} tabs from previous session!');
       searchHandler.list.value = restoredGlobals;
       searchHandler.changeTabIndex(newIndex);
-      setState(() { });
     } else {
       Booru defaultBooru = Booru(null, null, null, null, null);
       // settingsHandler.getBooru();
       // Set the default booru and tags at the start
       print('BOORULIST ${settingsHandler.booruList.isNotEmpty}');
-      if (settingsHandler.booruList.isNotEmpty){
+      if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
       if(defaultBooru.type != null) searchHandler.list.add(SearchGlobal(defaultBooru.obs, null, settingsHandler.defTags));
       searchHandler.searchTextController.text = settingsHandler.defTags;
     }
+    setState(() { });
   }
 
   // Saves current tabs list to DB

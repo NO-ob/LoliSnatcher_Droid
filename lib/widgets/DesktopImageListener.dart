@@ -73,7 +73,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   Widget build(BuildContext context) {
     return Obx(() {
       // while restoring tabs
-      if(searchHandler.list.length == 0) {
+      if(searchHandler.list.isEmpty && !searchHandler.isRestored.value) {
         return const SizedBox();
       }
 

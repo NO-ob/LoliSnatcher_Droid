@@ -297,23 +297,35 @@ class DBHandler{
 
   // functions related to tab backup logic:
   Future<void> addTabRestore(String restore) async {
-    await clearTabRestore();
-    await db?.rawInsert("INSERT INTO TabRestore(restore) VALUES(?)", [restore]);
+    var result = await db?.rawQuery("SELECT id FROM TabRestore ORDER BY id DESC LIMIT 1");
+    if(result != null && result.isNotEmpty) {
+      // replace existing entry
+      await db?.rawUpdate("UPDATE TabRestore SET restore = ? WHERE id = ?;", [restore, result[0]["id"].toString()]);
+    } else {
+      // or add new if no entries
+      await db?.rawInsert("INSERT INTO TabRestore(restore) VALUES(?);", [restore]);
+    }
+    // clear all then add a new one
+    // await clearTabRestore();
+    // await db?.rawInsert("INSERT INTO TabRestore(restore) VALUES(?);", [restore]);
     return;
   }
+
   Future<void> clearTabRestore() async {
     await db?.rawDelete("DELETE FROM TabRestore WHERE id IN (SELECT id FROM TabRestore);"); // remove previous items
     return;
   }
+
   Future<List<String>> getTabRestore() async {
-    var result = await db?.rawQuery("SELECT id, restore FROM TabRestore ORDER BY id DESC LIMIT 1");
+    var result = await db?.rawQuery("SELECT id, restore FROM TabRestore ORDER BY id DESC LIMIT 1;");
     List<String> restoreItem = []; // id, restoreString
-    if (result != null && result.isNotEmpty){
+    if (result != null && result.isNotEmpty) {
       restoreItem.add(result[0]["id"].toString());
       restoreItem.add(result[0]["restore"].toString());
     }
     return restoreItem;
   }
+
   Future<void> removeTabRestore(String id) async {
     await db?.rawDelete("DELETE FROM TabRestore WHERE id=?;", [id]);
     return;

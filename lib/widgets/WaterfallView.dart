@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -16,13 +14,10 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
-
-var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
-
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class WaterfallView extends StatefulWidget {
   final SearchGlobal tab;
@@ -108,9 +103,9 @@ class _WaterfallState extends State<WaterfallView> {
 
   void setVolumeListener() {
     volumeListener?.cancel();
-    volumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
+    volumeListener = searchHandler.volumeStream?.stream.listen((event) {
       // print('in grid $event $inViewer');
-      if(!inViewer){
+      if(!inViewer) {
         int dir = 0;
         if (event == 'up') {
           dir = -1;
@@ -208,24 +203,25 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   void viewerCallback() {
+    inViewer = false;
     toggleBarsDelay?.cancel();
     toggleBarsDelay = Timer(Duration(seconds: 1), () {
+      // delay restoring system ui to avoid lags in hero animation
       SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
     });
     kbFocusNode.requestFocus();
-    inViewer = false;
   }
 
   void onThumbTap(int index) async {
     // Load the image viewer
     kbFocusNode.unfocus();
     if (settingsHandler.appMode == "Mobile") {
+      inViewer = true;
       // delay system ui hiding a bit to avoid animation lags
       toggleBarsDelay?.cancel();
       toggleBarsDelay = Timer(Duration(seconds: 1), () {
         SystemChrome.setEnabledSystemUIOverlays([]);
       });
-      inViewer = true;
 
       await Navigator.push(
         context,

@@ -33,8 +33,6 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
 
-
-var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
 /**
  * The image page is what is dispalyed when an iamge is clicked it shows a full resolution
  * version of an image and allows scrolling left and right through the currently loaded booruItems
@@ -89,7 +87,9 @@ class _ViewerPageState extends State<ViewerPage> {
     );
 
     // enable volume buttons if opened page is a video AND appbar is visible
-    bool isVideo = getFetched()[widget.index].isVideo();
+    BooruItem item = getFetched()[widget.index];
+    bool isVideo = item.isVideo();
+    bool isHated = item.isHated.value;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && searchHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     setVolumeListener();
@@ -149,7 +149,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
   void setVolumeListener() {
     volumeListener?.cancel();
-    volumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
+    volumeListener = searchHandler.volumeStream?.stream.listen((event) {
       // print('in gallery $event');
       int dir = 0;
       if (event == 'up') {
@@ -166,7 +166,7 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   @override
-  void dispose(){
+  void dispose() {
     autoScrollProgressController?.dispose();
     autoScrollTimer?.cancel();
     volumeListener?.cancel();
