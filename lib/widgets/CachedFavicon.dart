@@ -54,8 +54,8 @@ class _CachedFaviconState extends State<CachedFavicon> {
       cacheFolder: 'favicons',
       timeoutTime: 2000,
     );
-    // client.runRequest();
-    client!.runRequestIsolate();
+    client!.runRequest();
+    // client!.runRequestIsolate();
     return;
   }
 

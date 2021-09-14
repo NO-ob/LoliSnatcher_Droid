@@ -29,7 +29,7 @@ class MergebooruHandler extends BooruHandler{
     List<bool> isGelbooruV1List = [];
     int fetchedMax = 0;
     for(int i = 0; i < booruHandlers.length; i++){
-      List<BooruItem> tmpFetched = await booruHandlers[i].Search(tags, pageNum.value + booruHandlerPageNums[i]);
+      List<BooruItem> tmpFetched = (await booruHandlers[i].Search(tags, pageNum.value + booruHandlerPageNums[i])) ?? [];
       tmpFetchedList.add(tmpFetched);
       if (booruHandlers[i].booru.type == "GelbooruV1"){
         isGelbooruV1List.add(true);
@@ -49,7 +49,7 @@ class MergebooruHandler extends BooruHandler{
               tmpFetchedList[i][innerFetchedIndex].md5String = makeSha1Hash(tmpFetchedList[i][innerFetchedIndex].md5String!);
             }
           }
-          if (!hashInFetched(fetched, tmpFetchedList[i][innerFetchedIndex].md5String,tmpFetchedList[i][innerFetchedIndex].fileURL)){
+          if (!hashInFetched(fetched, tmpFetchedList[i][innerFetchedIndex].md5String, tmpFetchedList[i][innerFetchedIndex].fileURL)){
             fetched.add(tmpFetchedList[i][innerFetchedIndex]);
           } else {
             Logger.Inst().log("Skipped because hash match: ${tmpFetchedList[i][innerFetchedIndex].fileURL}", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);

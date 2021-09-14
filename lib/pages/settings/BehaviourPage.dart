@@ -188,7 +188,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                 },
                 title: 'Default Share Action',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                         InfoDialog("Share Actions",
@@ -245,7 +245,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                 },
                 title: 'Video Cache Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                         InfoDialog("Video Cache Modes",
@@ -311,7 +311,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                   name: '$label: $text',
                   icon: isLoading
                     ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                       )
                     : Icon(null),
                   action: () async {

@@ -63,7 +63,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                           filterHated = newValue!;
                         });
                       },
-                      activeColor: Get.theme.accentColor,
+                      activeColor: Get.theme.colorScheme.secondary,
                     )
                   ],)
               ),
@@ -105,7 +105,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                 Widget entryRow = ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
-                    side: BorderSide(color: Get.theme.accentColor),
+                    side: BorderSide(color: Get.theme.colorScheme.secondary),
                   ),
                   onTap: null,
                   leading: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
@@ -216,7 +216,7 @@ class _FiltersEditState extends State<FiltersEdit> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.accentColor),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
               onTap: () async {
                 String text = newTagController.text;
@@ -237,7 +237,7 @@ class _FiltersEditState extends State<FiltersEdit> {
               ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.theme.accentColor),
+                  side: BorderSide(color: Get.theme.colorScheme.secondary),
                 ),
                 onTap: () async {
                   setState(() {

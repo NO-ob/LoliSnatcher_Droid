@@ -230,7 +230,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
         right: -15,
         child: ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            primary: Theme.of(context).accentColor.withOpacity(0.33),
+            primary: Theme.of(context).colorScheme.secondary.withOpacity(0.33),
             minimumSize: Size(28, 28),
             padding: EdgeInsets.all(3),
           ),
@@ -253,7 +253,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
     } else if(settingsHandler.shitDevice) {
       return Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+          valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
         )
       );
     }
@@ -323,7 +323,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -450,7 +450,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
             child: RotatedBox(
               quarterTurns: percentDone != null ? -1 : 1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),

@@ -75,8 +75,8 @@ class _GalleryPageState extends State<GalleryPage> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color oddItemColor = theme.accentColor.withOpacity(0.25);
-    final Color evenItemColor = theme.accentColor.withOpacity(0.15);
+    final Color oddItemColor = theme.colorScheme.secondary.withOpacity(0.25);
+    final Color evenItemColor = theme.colorScheme.secondary.withOpacity(0.15);
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -119,7 +119,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Gallery Quality',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                       InfoDialog("Gallery Quality",
@@ -184,7 +184,7 @@ class _GalleryPageState extends State<GalleryPage> {
                           name: 'Toolbar Buttons Order',
                           drawBottomBorder: false,
                           trailingIcon: IconButton(
-                            icon: Icon(Icons.info, color: Get.theme.accentColor),
+                            icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                             onPressed: () {
                               Get.dialog(
                                   InfoDialog("Buttons Order",
@@ -240,7 +240,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Disable Video',
                 drawTopBorder: true, // instead of border in reorder list
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                         InfoDialog("Disable Video",
@@ -291,7 +291,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Low Performance Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                         InfoDialog("Low Performance Mode",
@@ -321,7 +321,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Use Volume Buttons for Scrolling',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                         InfoDialog("Volume Buttons Scrolling",
@@ -379,7 +379,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   }
                 },
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                         InfoDialog("AutoScroll / Slideshow",

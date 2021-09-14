@@ -292,7 +292,7 @@ class _ViewerPageState extends State<ViewerPage> {
                               }
                             },
                             child: Icon(Icons.arrow_left),
-                            backgroundColor: Get.context!.theme.accentColor,
+                            backgroundColor: Get.context!.theme.colorScheme.secondary,
                           ),
                         ),
                         Container(
@@ -311,7 +311,7 @@ class _ViewerPageState extends State<ViewerPage> {
                               }
                             },
                             child: Icon(Icons.arrow_right),
-                            backgroundColor: Get.context!.theme.accentColor,
+                            backgroundColor: Get.context!.theme.colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -328,7 +328,7 @@ class _ViewerPageState extends State<ViewerPage> {
         controller: controller,
         onPageChanged: (int index) {
           // rehide system ui on every page change
-          SystemChrome.setEnabledSystemUIOverlays([]);
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
           setState(() {
             searchHandler.currentTab.viewedIndex.value = index;
@@ -443,7 +443,7 @@ class _ViewerPageState extends State<ViewerPage> {
                       style: TextButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(color: Get.theme.accentColor),
+                          side: BorderSide(color: Get.theme.colorScheme.secondary),
                         ),
                       ),
                       onPressed: () {
@@ -534,7 +534,7 @@ class _ViewerPageState extends State<ViewerPage> {
               ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Get.theme.accentColor),
+                    side: BorderSide(color: Get.theme.colorScheme.secondary),
                   ),
                 onTap: (){
                   Navigator.of(context).pop();
@@ -548,7 +548,7 @@ class _ViewerPageState extends State<ViewerPage> {
               ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: Get.theme.accentColor),
+                  side: BorderSide(color: Get.theme.colorScheme.secondary),
                 ),
                 onTap: (){
                   Navigator.of(context).pop();
@@ -562,7 +562,7 @@ class _ViewerPageState extends State<ViewerPage> {
               ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: Get.theme.accentColor),
+                  side: BorderSide(color: Get.theme.colorScheme.secondary),
                 ),
                 onTap: (){
                   Navigator.of(context).pop();
@@ -577,7 +577,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 ? ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Get.theme.accentColor),
+                      side: BorderSide(color: Get.theme.colorScheme.secondary),
                     ),
                     onTap: (){
                       Navigator.of(context).pop();

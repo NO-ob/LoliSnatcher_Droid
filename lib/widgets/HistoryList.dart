@@ -92,7 +92,7 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.accentColor),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
               onTap: () async {
                 await settingsHandler.dbHandler.deleteFromSearchHistory(data[0]);
@@ -107,7 +107,7 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.accentColor),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
               onTap: () {
                 int indexWhere = history.indexWhere((el) => el[0] == data[0]);
@@ -129,7 +129,7 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.accentColor),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
               onTap: () async {
                 Clipboard.setData(ClipboardData(text: data[1]));
@@ -191,7 +191,7 @@ class _HistoryListState extends State<HistoryList> {
     Widget entryRow = ListTile(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(5),
-        side: BorderSide(color: Get.theme.accentColor),
+        side: BorderSide(color: Get.theme.colorScheme.secondary),
       ),
       onTap: () {
         if (booru.type != null) {
@@ -221,7 +221,9 @@ class _HistoryListState extends State<HistoryList> {
     return Row(children: <Widget>[
       Expanded(
         child: GestureDetector(
-          onLongPress: () {showHistoryEntryActions(entryRow, currentEntry);},
+          onLongPress: () {
+            showHistoryEntryActions(entryRow, currentEntry);
+          },
           child: entryRow
         )
       ),
@@ -295,7 +297,7 @@ class _HistoryListState extends State<HistoryList> {
         children: [
           if(isLoading)
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+              valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
             )
           else if (history.length == 0)
             Text('Search History is empty')

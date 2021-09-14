@@ -168,10 +168,11 @@ class LoliSync{
   }
 
   Stream<String> startSync(SettingsHandler settingsHandler, String ip, String port, List<String> toSync) async*{
+    final String address = '$ip:$port';
     for (int i = 0; i < toSync.length; i++) {
       switch(toSync.elementAt(i)) {
         case "Favourites":
-          yield "Sync Starting";
+          yield "Sync Starting $address";
           int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
           if (favouritesCount > 0) {
             int limit = 100;
@@ -199,7 +200,7 @@ class LoliSync{
           }
           break;
         case "Settings":
-          yield "Sync Starting";
+          yield "Sync Starting $address";
           Map<String, dynamic> settingsJSON = settingsHandler.toJSON();
           settingsHandler.deviceSpecificSettings.forEach((element) {
             settingsJSON.remove(element);
@@ -208,7 +209,7 @@ class LoliSync{
           yield resp;
           break;
         case "Booru":
-          yield "Sync Starting";
+          yield "Sync Starting $address";
           int booruCount = settingsHandler.booruList.length;
           if (booruCount > 0){
             for (int i = 0; i < booruCount; i++){

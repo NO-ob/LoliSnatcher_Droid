@@ -209,7 +209,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                   } else {
                     return Center(
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                       )
                     );
                   }
@@ -254,7 +254,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             : null,
           contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             borderRadius: BorderRadius.circular(50),
             gapPadding: 0,
           ),
@@ -264,7 +264,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             gapPadding: 0,
           ),
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             borderRadius: BorderRadius.circular(50),
             gapPadding: 0,
           ),

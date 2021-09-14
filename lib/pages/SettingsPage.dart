@@ -141,6 +141,28 @@ class SettingsPage extends StatelessWidget {
                 },
                 drawBottomBorder: false
               ),
+
+              Container(
+                child: Align(
+                  alignment: FractionalOffset.bottomCenter,
+                  child: Container(
+                    child: SizedBox(
+                      height: (MediaQuery.of(context).size.height * 0.35),
+                      child: DrawerHeader(
+                        margin: EdgeInsets.zero,
+                        decoration: BoxDecoration(
+                          color: Get.theme.colorScheme.primary,
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: AssetImage('assets/images/drawer_icon.png')
+                          ),
+                        ),
+                        child: null,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

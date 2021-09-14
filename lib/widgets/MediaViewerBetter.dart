@@ -304,7 +304,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
         left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Get.theme.accentColor.withOpacity(0.33),
+            primary: Get.theme.colorScheme.secondary.withOpacity(0.33),
             minimumSize: Size(28, 28),
             padding: EdgeInsets.all(3),
           ),
@@ -328,7 +328,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       } else {
         return Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
           )
         );
       }
@@ -379,7 +379,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                 backgroundColor: Colors.transparent,
                 value: percentDone
               ),
@@ -509,7 +509,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
             child: RotatedBox(
               quarterTurns: percentDone != null ? -1 : 1,
               child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                 backgroundColor: Colors.transparent,
                 value: percentDone
               ),

@@ -125,11 +125,21 @@ class SearchHandler extends GetxController {
     }
 
     // set new tab data
-    list[index.value] = SearchGlobal(
-      newBooru != null ? newBooru.obs : list[index.value].selectedBooru,
-      settingsHandler.mergeEnabled ? list[index.value].secondaryBoorus : null,
-      text
-    );
+    if(list.isEmpty) {
+      if(settingsHandler.booruList.isNotEmpty) {
+        list.add(SearchGlobal(
+          settingsHandler.booruList[0].obs,
+          settingsHandler.mergeEnabled ? list[index.value].secondaryBoorus : null,
+          text
+        ));
+      }
+    } else {
+      list[index.value] = SearchGlobal(
+        newBooru != null ? newBooru.obs : list[index.value].selectedBooru,
+        settingsHandler.mergeEnabled ? list[index.value].secondaryBoorus : null,
+        text
+      );
+    }
 
     // write to history
     if(text != "" && settingsHandler.searchHistoryEnabled) {
@@ -160,6 +170,7 @@ class SearchHandler extends GetxController {
   RxBool displayAppbar = true.obs;
   RxBool isFullscreen = false.obs;
   RxBool isRestored = false.obs;
+  RxBool inViewer = false.obs;
 
   // ignore: close_sinks
   StreamController<String>? volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;

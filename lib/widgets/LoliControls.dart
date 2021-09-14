@@ -388,7 +388,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                       widthFactor: 3,
                       heightFactor: 3,
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Get.theme.accentColor),
+                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
                         strokeWidth: 5,
                       ),
                     ),
@@ -440,7 +440,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             child: Icon(Icons.speed,
                 color: _latestValue.playbackSpeed == 1.0
                     ? Colors.white
-                    : Theme.of(context).accentColor),
+                    : Theme.of(context).colorScheme.secondary),
           ),
         ),
       ),
@@ -459,7 +459,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           controller.setVolume(0);
         }
       },
-      onLongPress: (){
+      onLongPress: () {
         settingsHandler.videoAutoMute = !settingsHandler.videoAutoMute;
         if (settingsHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);
@@ -747,8 +747,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         drawShadow: true,
         colors: chewieController.materialProgressColors ??
             ChewieProgressColors(
-              playedColor: Theme.of(context).accentColor,
-              handleColor: Theme.of(context).accentColor,
+              playedColor: Theme.of(context).colorScheme.secondary,
+              handleColor: Theme.of(context).colorScheme.secondary,
               bufferedColor: Theme.of(context).backgroundColor,
               backgroundColor: Theme.of(context).disabledColor,
             ),
@@ -771,7 +771,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).accentColor;
+    final Color selectedColor = Theme.of(context).colorScheme.secondary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,

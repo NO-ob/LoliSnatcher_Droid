@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
@@ -131,6 +133,68 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       ServiceHandler.displayToast('Restored!');
                     } else {
                       ServiceHandler.displayToast('No Restore File Found!');
+                    }
+                  } else {
+                    ServiceHandler.displayToast('No Access!');
+                  }
+                },
+              ),
+
+              SettingsButton(name: '', enabled: false),
+
+              SettingsButton(
+                name: 'Backup Boorus',
+                action: () async {
+                  Directory? dlDir = (await getExternalStorageDirectories())?.first;
+                  if(dlDir != null) {
+                    String configBoorusPath = await serviceHandler.getConfigDir() + 'boorus/';
+                    Directory configBoorusDir = Directory(configBoorusPath);
+                    if(await configBoorusDir.exists()) {
+                      String restoreBoorusPath = dlDir.path + '/boorus/';
+                      Directory restoreBoorusDir = await Directory(restoreBoorusPath).create(recursive:true);
+                      List files = configBoorusDir.listSync();
+                      if (files.length > 0) {
+                        for (int i = 0; i < files.length; i++) {
+                          if (files[i].path.contains(".json")) {
+                            Booru booruFromFile = Booru.fromJSON(files[i].readAsStringSync());
+                            File booruFile = File(restoreBoorusPath + "${booruFromFile.name}.json");
+                            var writer = booruFile.openWrite();
+                            writer.write(jsonEncode(booruFromFile.toJSON()));
+                            writer.close();
+                          }
+                        }
+                        ServiceHandler.displayToast('Saved!');
+                      }
+                    }
+                  } else {
+                    ServiceHandler.displayToast('No Access!');
+                  }
+                },
+              ),
+              SettingsButton(
+                name: 'Restore Boorus',
+                action: () async {
+                  Directory? dlDir = (await getExternalStorageDirectories())?.first;
+                  if(dlDir != null) {
+                    String restoreBoorusPath = dlDir.path + '/boorus/';
+                    Directory restoreBoorusDir = Directory(restoreBoorusPath);
+                    if(await restoreBoorusDir.exists()) {
+                      String configBoorusPath = await serviceHandler.getConfigDir() + 'boorus/';
+                      Directory configBoorusDir = await Directory(configBoorusPath).create(recursive:true);
+                      List files = restoreBoorusDir.listSync();
+                      if (files.length > 0) {
+                        for (int i = 0; i < files.length; i++) {
+                          if (files[i].path.contains(".json")) {
+                            Booru booruFromFile = Booru.fromJSON(files[i].readAsStringSync());
+                            File booruFile = File(configBoorusDir.path + "${booruFromFile.name}.json");
+                            var writer = booruFile.openWrite();
+                            writer.write(jsonEncode(booruFromFile.toJSON()));
+                            writer.close();
+                          }
+                        }
+                        settingsHandler.loadBoorus();
+                        ServiceHandler.displayToast('Restored!');
+                      }
                     }
                   } else {
                     ServiceHandler.displayToast('No Access!');

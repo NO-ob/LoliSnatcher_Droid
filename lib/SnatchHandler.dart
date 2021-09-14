@@ -81,7 +81,7 @@ class SnatchHandler extends GetxController {
 
     ServiceHandler.displayToast("Snatching Images\nDo not close the app!");
     while (count < int.parse(amount) && !booruHandler.locked.value){
-      booruItems = await booruHandler.Search(tags, null);
+      booruItems = (await booruHandler.Search(tags, null)) ?? [];
       booruHandler.pageNum ++;
       count = booruItems.length;
       print(count);

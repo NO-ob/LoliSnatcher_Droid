@@ -34,78 +34,53 @@ class _DesktopHomeState extends State<DesktopHome> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        toolbarHeight: 35,
+        toolbarHeight: 60,
         actions: <Widget>[
           Expanded(
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
+                const SizedBox(width: 15),
                 TagSearchBox(),
+                const SizedBox(width: 15),
                 BooruSelectorMain(true),
-                GestureDetector(
-                  onLongPress: (){
+                IconButton(
+                  padding: const EdgeInsets.all(5),
+                  icon: Icon(Icons.search),
+                  onPressed: () {
                     searchHandler.searchTextController.clearComposing();
                     searchHandler.searchBoxFocus.unfocus();
-                    searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
+                    searchHandler.searchAction(searchHandler.searchTextController.text, null);
                   },
-                  child: IconButton(
-                    padding: const EdgeInsets.all(5),
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      searchHandler.searchTextController.clearComposing();
-                      searchHandler.searchBoxFocus.unfocus();
-                      searchHandler.searchAction(searchHandler.searchTextController.text, null);
-                    },
-                  )
                 ),
                 TabBox(),
-                TabBoxButtons(),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(color: Get.theme.accentColor),
-                      ),
-                        backgroundColor: Get.theme.canvasColor,
-                    ),
-                    onPressed: (){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: SnatcherPage(),
-                        ),
-                      ));
-                    },
-                    child: Text(" Snatcher "),
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.fromLTRB(10, 0,0,0),
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(color: Get.theme.accentColor),
-                      ),
-                      backgroundColor: Get.theme.canvasColor,
-                    ),
-                    onPressed: (){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: SettingsPage(),
-                        ),
-                      ));
-                    },
-                    child: Text("Settings"),
-                  ),
-                ),
+                TabBoxButtons(false, MainAxisAlignment.start),
               ],
             ),
+          ),
+
+          IconButton(
+            icon: Icon(Icons.download),
+            onPressed: (){
+              Get.dialog(Dialog(
+                child: Container(
+                  width: 500,
+                  child: SnatcherPage(),
+                ),
+              ));
+            },
+          ),
+
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: (){
+              Get.dialog(Dialog(
+                child: Container(
+                  width: 500,
+                  child: SettingsPage(),
+                ),
+              ));
+            },
           ),
 
           IconButton(
@@ -145,7 +120,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                     child: Obx(() => searchHandler.list.length == 0
                       ? Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                           )
                         )
                       : DesktopTagListener(searchHandler.currentTab)
@@ -185,7 +160,7 @@ class _DesktopTagListenerState extends State<DesktopTagListener> {
           child: TagView(item),
           padding: EdgeInsets.all(5),
           decoration: BoxDecoration(
-              border: Border.all(color: Get.theme.accentColor,width: 2),
+              border: Border.all(color: Get.theme.colorScheme.secondary,width: 2),
           ),
       );
     });

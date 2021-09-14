@@ -114,7 +114,7 @@ class SettingsToggle extends StatelessWidget {
       subtitle: subtitle,
       value: value,
       onChanged: onChanged,
-      activeColor: activeColor ?? Get.theme.accentColor,
+      activeColor: activeColor ?? Get.theme.colorScheme.secondary,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
         top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
@@ -171,7 +171,7 @@ class SettingsDropdown extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: isCurrent
                 ? BoxDecoration(
-                  border: Border.all(color: Get.theme.accentColor, width: 1),
+                  border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
                   borderRadius: BorderRadius.circular(5),
                 )
                 : null,
@@ -238,7 +238,7 @@ class SettingsBooruDropdown extends StatelessWidget {
               padding: EdgeInsets.all(8),
               decoration: isCurrent
               ? BoxDecoration(
-                border: Border.all(color: Get.theme.accentColor, width: 1),
+                border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
                 borderRadius: BorderRadius.circular(5),
               )
               : null,
@@ -308,7 +308,7 @@ class SettingsTextInput extends StatelessWidget {
           errorText: validator?.call(controller.text),
           contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             borderRadius: BorderRadius.circular(50),
             gapPadding: 0,
           ),
@@ -318,7 +318,7 @@ class SettingsTextInput extends StatelessWidget {
             gapPadding: 0,
           ),
           border: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.accentColor),
+            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             borderRadius: BorderRadius.circular(50),
             gapPadding: 0,
           ),

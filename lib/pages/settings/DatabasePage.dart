@@ -59,7 +59,7 @@ class _DatabasePageState extends State<DatabasePage> {
                 },
                 title: 'Enable Database',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(
@@ -82,7 +82,7 @@ class _DatabasePageState extends State<DatabasePage> {
                 },
                 title: 'Enable Search History',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(

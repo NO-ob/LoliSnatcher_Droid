@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flash/flash.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/getPerms.dart';
@@ -29,7 +30,6 @@ import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
 import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
-import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
@@ -116,12 +116,12 @@ class _MainAppState extends State<MainApp> {
       Brightness accentBrightness = ThemeData.estimateBrightnessForColor(theme.accent!);
       bool onAccentIsDark = accentBrightness == Brightness.dark;
 
-      TextTheme textTheme = TextTheme(
-        headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
-        headline6: GoogleFonts.quicksand(fontSize: 36.0),
-        bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
-        bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
-      );
+      // TextTheme textTheme = TextTheme(
+      //   headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
+      //   headline6: GoogleFonts.quicksand(fontSize: 36.0),
+      //   bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
+      //   bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
+      // );
 
       TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
         cursorColor: theme.accent,
@@ -179,10 +179,13 @@ class _MainAppState extends State<MainApp> {
 
               brightness: isDark ? Brightness.dark : Brightness.light,
               primaryColor: theme.primary,
-              accentColor: theme.accent,
+              appBarTheme: AppBarTheme(
+                backgroundColor: alternateColorScheme.primary,
+                foregroundColor: alternateColorScheme.onPrimary,
+              ),
 
               colorScheme: alternateColorScheme,
-              textTheme: textTheme,
+              // textTheme: textTheme,
               textSelectionTheme: textSelectionTheme,
             ),
 
@@ -230,6 +233,7 @@ class Preloader extends StatelessWidget {
     return Obx(() {
       if(settingsHandler.isInit.value) {        
         if(Platform.isAndroid || Platform.isIOS) {
+          // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
           // force landscape orientation if enabled desktop mode on mobile device
           if(settingsHandler.appMode != "Mobile") {
             SystemChrome.setPreferredOrientations([
@@ -273,6 +277,8 @@ class _HomeState extends State<Home> {
   final SettingsHandler settingsHandler = Get.find();
   final SnatchHandler snatchHandler = Get.find();
   final SearchHandler searchHandler = Get.find();
+
+  final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 
   bool firstRun = true;
   bool isSnatching = false;
@@ -444,7 +450,7 @@ class _HomeState extends State<Home> {
                 //Tags/Search field
                 TagSearchBox(),
                 GestureDetector(
-                  onLongPress: (){
+                  onLongPress: () {
                     searchHandler.searchTextController.clearComposing();
                     searchHandler.searchBoxFocus.unfocus();
                     searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
@@ -479,7 +485,7 @@ class _HomeState extends State<Home> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        // const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
                         TabBox(),
                       ],
                     ),
@@ -490,7 +496,7 @@ class _HomeState extends State<Home> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        TabBoxButtons(),
+                        TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
                       ],
                     ),
                   ),
@@ -500,7 +506,7 @@ class _HomeState extends State<Home> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
-                        const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                        // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
                         BooruSelectorMain(true),
                       ],
                     ),
@@ -527,7 +533,7 @@ class _HomeState extends State<Home> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         mainAxisSize: MainAxisSize.max,
                         children: <Widget>[
-                          const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
                           BooruSelectorMain(false),
                         ],
                       ),
@@ -536,11 +542,11 @@ class _HomeState extends State<Home> {
                   //Add merge popup window
                   /*TextButton.icon(
                       style: TextButton.styleFrom(
-                        primary: Get.context!.theme.accentColor,
+                        primary: Get.context!.theme.colorScheme.secondary,
                         padding: EdgeInsets.all(10),
                         shape: RoundedRectangleBorder(
                           borderRadius: new BorderRadius.circular(5),
-                          side: BorderSide(color: Get.context!.theme.accentColor),
+                          side: BorderSide(color: Get.context!.theme.colorScheme.secondary),
                         ),
                       ),
                       onPressed: (){
@@ -565,33 +571,6 @@ class _HomeState extends State<Home> {
               ),
             )
           ),
-          Container(
-            child: Align(
-              alignment: FractionalOffset.bottomCenter,
-              child: Container(
-                child: Column(
-                  children: [
-                    (MediaQuery.of(context).orientation == Orientation.landscape && MediaQuery.of(context).size.height < 550)
-                        ? const SizedBox()
-                        : SizedBox(
-                            height: (MediaQuery.of(context).size.height * 0.25),
-                            child: DrawerHeader(
-                              margin: EdgeInsets.zero,
-                              decoration: BoxDecoration(
-                                color: Get.theme.primaryColor,
-                                image: DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: AssetImage('assets/images/drawer_icon.png')
-                                ),
-                              ),
-                              child: null,
-                            ),
-                          ),
-                  ]
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     ));
@@ -605,16 +584,59 @@ class _HomeState extends State<Home> {
     }
 
     return Scaffold(
+      key: mainScaffoldKey,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: ActiveTitle(),
         actions: <Widget>[
           // debug buttons
           // IconButton(
-          //   icon: Icon(Icons.list),
-          //   onPressed: (){
-          //     print('Current boorus list:');
-          //     print(settingsHandler.booruList.map((e) => '${e.name} ${e.type}').toList().toString());
+          //   icon: Icon(Icons.flash_on),
+          //   onPressed: () {
+          //     showFlash(
+          //       context: context,
+          //       duration: Duration(seconds: 5),
+          //       builder: (_, controller) {
+          //         return Flash(
+          //           controller: controller,
+          //           margin: EdgeInsets.zero,
+          //           behavior: FlashBehavior.fixed,
+          //           position: FlashPosition.bottom,
+          //           borderRadius: BorderRadius.circular(8.0),
+          //           borderColor: Colors.blue,
+          //           boxShadows: kElevationToShadow[8],
+          //           backgroundGradient: RadialGradient(
+          //             colors: [Get.theme.colorScheme.secondary, Colors.black87],
+          //             center: Alignment.topLeft,
+          //             radius: 2,
+          //           ),
+          //           onTap: () => controller.dismiss(),
+          //           forwardAnimationCurve: Curves.easeInCirc,
+          //           reverseAnimationCurve: Curves.bounceIn,
+          //           child: DefaultTextStyle(
+          //             style: TextStyle(color: Colors.white),
+          //             child: FlashBar(
+          //               title: Text('Hello Flash'),
+          //               content: Text('You can put any message of any length here.'),
+          //               indicatorColor: Colors.red,
+          //               icon: Icon(Icons.info_outline),
+          //               primaryAction: TextButton(
+          //                 onPressed: () => controller.dismiss(),
+          //                 child: Text('DISMISS'),
+          //               ),
+          //               actions: <Widget>[
+          //                 TextButton(
+          //                     onPressed: () => controller.dismiss('Yes, I do!'),
+          //                     child: Text('YES')),
+          //                 TextButton(
+          //                     onPressed: () => controller.dismiss('No, I do not!'),
+          //                     child: Text('NO')),
+          //               ],
+          //             ),
+          //           ),
+          //         );
+          //       },
+          //     );
           //   },
           // ),
           // IconButton(
@@ -660,6 +682,12 @@ class _HomeState extends State<Home> {
               } else {
                 ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
               }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () {
+              mainScaffoldKey.currentState?.openEndDrawer();
             },
           )
         ],

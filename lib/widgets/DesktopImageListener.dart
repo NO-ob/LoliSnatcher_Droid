@@ -53,7 +53,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
           //           style: TextButton.styleFrom(
           //             shape: RoundedRectangleBorder(
           //               borderRadius: BorderRadius.circular(20),
-          //               side: BorderSide(color: Get.theme.accentColor),
+          //               side: BorderSide(color: Get.theme.colorScheme.secondary),
           //             ),
           //           ),
           //           onPressed: (){
@@ -104,7 +104,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     );
                   },
                   child: Icon(Icons.save),
-                  backgroundColor: Get.theme.accentColor,
+                  backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
               Container(
@@ -119,7 +119,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     });
                   },
                   child: Icon(item.isFavourite.value ? Icons.favorite : Icons.favorite_border),
-                  backgroundColor: Get.theme.accentColor,
+                  backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
               // TODO with videoappdesktop we can now play videos, now we need a fullscreen that will reuse the same widget without restarting video/recreating a widget
@@ -147,7 +147,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                                     Get.back();
                                   },
                                   child: Icon(Icons.fullscreen_exit),
-                                  backgroundColor: Get.theme.accentColor,
+                                  backgroundColor: Get.theme.colorScheme.secondary,
                                 ),
                               )
                           )
@@ -158,7 +158,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     );
                   },
                   child: Icon(Icons.fullscreen),
-                  backgroundColor: Get.theme.accentColor,
+                  backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
             ],

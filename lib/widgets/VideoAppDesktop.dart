@@ -300,7 +300,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
         left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Get.theme.accentColor.withOpacity(0.33),
+            primary: Get.theme.colorScheme.secondary.withOpacity(0.33),
             minimumSize: Size(28, 28),
             padding: EdgeInsets.all(3),
           ),
@@ -368,7 +368,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       } else {
         return Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
           )
         );
       }
@@ -415,7 +415,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                 backgroundColor: Colors.transparent,
                 value: percentDone
               ),
@@ -546,7 +546,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             child: RotatedBox(
               quarterTurns: percentDone != null ? -1 : 1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -630,10 +630,10 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
                       scale: 1.0,
                       showControls: true,
                       progressBarInactiveColor: Colors.grey,
-                      progressBarActiveColor: Get.theme.accentColor,
-                      progressBarThumbColor: Get.theme.accentColor,
-                      volumeThumbColor: Get.theme.accentColor,
-                      volumeActiveColor: Get.theme.accentColor,
+                      progressBarActiveColor: Get.theme.colorScheme.secondary,
+                      progressBarThumbColor: Get.theme.colorScheme.secondary,
+                      volumeThumbColor: Get.theme.colorScheme.secondary,
+                      volumeActiveColor: Get.theme.colorScheme.secondary,
                     )
                   : Stack(children: [
                       CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),

@@ -31,7 +31,6 @@ class _WaterfallState extends State<WaterfallView> {
   final SettingsHandler settingsHandler = Get.find();
   final SearchHandler searchHandler = Get.find();
 
-  bool inViewer = false;
   Timer? loadingDelay, _checkInterval, toggleBarsDelay;
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
@@ -64,7 +63,7 @@ class _WaterfallState extends State<WaterfallView> {
     // reset bools
     searchHandler.isLastPage(false);
     searchHandler.isLoading(true);
-    inViewer = false;
+    searchHandler.inViewer(false);
 
     updateState();
 
@@ -104,8 +103,7 @@ class _WaterfallState extends State<WaterfallView> {
   void setVolumeListener() {
     volumeListener?.cancel();
     volumeListener = searchHandler.volumeStream?.stream.listen((event) {
-      // print('in grid $event $inViewer');
-      if(!inViewer) {
+      if(!searchHandler.inViewer.value) {
         int dir = 0;
         if (event == 'up') {
           dir = -1;
@@ -203,12 +201,13 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   void viewerCallback() {
-    inViewer = false;
-    toggleBarsDelay?.cancel();
-    toggleBarsDelay = Timer(Duration(seconds: 1), () {
-      // delay restoring system ui to avoid lags in hero animation
-      SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-    });
+    searchHandler.inViewer(false);
+    // toggleBarsDelay?.cancel();
+    // toggleBarsDelay = Timer(Duration(seconds: 1), () {
+    //   // delay restoring system ui to avoid lags in hero animation
+    //   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // });
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     kbFocusNode.requestFocus();
   }
 
@@ -216,12 +215,13 @@ class _WaterfallState extends State<WaterfallView> {
     // Load the image viewer
     kbFocusNode.unfocus();
     if (settingsHandler.appMode == "Mobile") {
-      inViewer = true;
+      searchHandler.inViewer(true);
       // delay system ui hiding a bit to avoid animation lags
-      toggleBarsDelay?.cancel();
-      toggleBarsDelay = Timer(Duration(seconds: 1), () {
-        SystemChrome.setEnabledSystemUIOverlays([]);
-      });
+      // toggleBarsDelay?.cancel();
+      // toggleBarsDelay = Timer(Duration(seconds: 1), () {
+      //   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      // });
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
       await Navigator.push(
         context,
@@ -254,7 +254,11 @@ class _WaterfallState extends State<WaterfallView> {
     });
   }
 
-  void onThumbLongPress(int index) {
+  void onThumbLongPress(int index) async {
+    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
+      Vibration.vibrate(duration: 5);
+    }
+
     if (widget.tab.selected.contains(index)) {
       widget.tab.selected.remove(index);
     } else {
@@ -278,7 +282,7 @@ class _WaterfallState extends State<WaterfallView> {
             decoration: (isCurrent || isSelected)
               ? BoxDecoration(
                 border: Border.all(
-                  color: isCurrent ? Colors.red : Get.theme.accentColor,
+                  color: isCurrent ? Colors.red : Get.theme.colorScheme.secondary,
                   width: 2.0,
                 ),
               )
@@ -287,7 +291,7 @@ class _WaterfallState extends State<WaterfallView> {
               enableFeedback: true,
               highlightShape: BoxShape.rectangle,
               containedInkWell: false,
-              highlightColor: Get.theme.accentColor,
+              highlightColor: Get.theme.colorScheme.secondary,
               child: sampleorThumb(index, columnsCount, widget.tab),
               onTap: () {
                 onThumbTap(index);
@@ -404,7 +408,7 @@ class _WaterfallState extends State<WaterfallView> {
         controller: searchHandler.gridScrollController,
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         addAutomaticKeepAlives: false,
-        cacheExtent: MediaQuery.of(context).size.height / 3, // 100,
+        cacheExtent: 200,
         shrinkWrap: false,
         itemCount: widget.tab.booruHandler.filteredFetched.length,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -485,7 +489,7 @@ class _WaterfallState extends State<WaterfallView> {
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         shrinkWrap: true,
         addAutomaticKeepAlives: false,
-        cacheExtent: MediaQuery.of(context).size.height / 3, // 100,
+        cacheExtent: 200,
         gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnsCount,
           mainAxisSpacing: 4.0,
@@ -576,9 +580,10 @@ class _WaterfallState extends State<WaterfallView> {
                 radius: Radius.circular(10),
                 isAlwaysShown: true,
                 child: RefreshIndicator(
+                  triggerMode: RefreshIndicatorTriggerMode.anywhere,
                   displacement: 80,
                   strokeWidth: 4,
-                  color: Get.theme.accentColor,
+                  color: Get.theme.colorScheme.secondary,
                   onRefresh: () async {
                     searchHandler.searchAction(widget.tab.tags, null);
                   },
@@ -635,7 +640,7 @@ class _WaterfallState extends State<WaterfallView> {
           //       width: 30,
           //       height: 30,
           //       child: CircularProgressIndicator(
-          //         valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+          //         valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
           //       ),
           //     ),
           //   ),
@@ -698,7 +703,7 @@ class _WaterfallState extends State<WaterfallView> {
                     width: 30,
                     height: 30,
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                      valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                     ),
                   ),
                   drawBottomBorder: false,

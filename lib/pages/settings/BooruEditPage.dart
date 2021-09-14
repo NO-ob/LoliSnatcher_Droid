@@ -132,7 +132,7 @@ class _BooruEditState extends State<BooruEdit> {
                           style: TextButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(color: Get.theme.accentColor),
+                              side: BorderSide(color: Get.theme.colorScheme.secondary),
                             ),
                           ),
                           onPressed: () async{
@@ -203,7 +203,7 @@ class _BooruEditState extends State<BooruEdit> {
       name: 'Test Booru',
       icon: isTesting
         ? CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
           )
         : Icon(Icons.public),
       action: () async {
@@ -367,7 +367,7 @@ class _BooruEditState extends State<BooruEdit> {
       //   testFetched = await test.Search(" ", 1);
       // }
       
-      testFetched = await test.Search(" ", null);
+      testFetched = (await test.Search(" ", null)) ?? [];
     }
 
     if (booruType == "") {

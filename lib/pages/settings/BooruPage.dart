@@ -113,7 +113,7 @@ class _BooruPageState extends State<BooruPage> {
                   },
                   title: 'Booru',
                   trailingIcon: IconButton(
-                    icon: Icon(Icons.info, color: Get.theme.accentColor),
+                    icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                     onPressed: () {
                       Get.dialog(
                           InfoDialog("Booru",

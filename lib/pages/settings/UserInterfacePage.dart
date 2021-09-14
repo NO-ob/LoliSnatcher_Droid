@@ -67,7 +67,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'App UI Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(
@@ -133,7 +133,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Preview Quality',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.accentColor),
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(

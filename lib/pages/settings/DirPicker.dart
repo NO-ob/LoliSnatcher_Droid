@@ -166,7 +166,7 @@ class _DirPickerState extends State<DirPicker> {
                 } else {
                   return Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+                      valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                     )
                   );
                 }
@@ -186,7 +186,7 @@ class _DirPickerState extends State<DirPicker> {
                 }
               },
               child: const Icon(Icons.check),
-              backgroundColor: Get.theme.accentColor,
+              backgroundColor: Get.theme.colorScheme.secondary,
             ),
             Container(width: 5,),
             FloatingActionButton(
@@ -221,7 +221,7 @@ class _DirPickerState extends State<DirPicker> {
                 ));
               },
               child: const Icon(Icons.add),
-              backgroundColor: Get.theme.accentColor,
+              backgroundColor: Get.theme.colorScheme.secondary,
             ),
           ],
         )

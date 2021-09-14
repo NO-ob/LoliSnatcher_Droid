@@ -303,7 +303,7 @@ class _CachedThumbState extends State<CachedThumb> {
             width: 100 / widget.columnCount,
             child: CircularProgressIndicator(
               strokeWidth: 14 / widget.columnCount,
-              valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.accentColor),
+              valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.colorScheme.secondary),
               value: percentDone,
             ),
           ),

@@ -83,11 +83,11 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     );
     if(isMain) {
       client = newClient;
+      client!.runRequestIsolate();
     } else {
       extraClient = newClient;
+      extraClient!.runRequest();
     }
-    // newClient.runRequest();
-    newClient.runRequestIsolate();
     return;
   }
 
@@ -369,7 +369,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -380,7 +380,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
@@ -390,7 +390,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
           //   width: 100 / widget.columnCount,
           //   child: CircularProgressIndicator(
           //     strokeWidth: 14 / widget.columnCount,
-          //     valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.accentColor),
+          //     valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.colorScheme.secondary),
           //     value: percentDone,
           //   ),
           // ),

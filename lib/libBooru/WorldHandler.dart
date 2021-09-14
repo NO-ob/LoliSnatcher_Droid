@@ -5,10 +5,7 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
 import 'dart:convert';
-import 'package:LoliSnatcher/Tools.dart';
-/**
- * Booru Handler for the World engine
- */
+
 class WorldHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   WorldHandler(Booru booru,int limit) : super(booru,limit);
@@ -53,7 +50,7 @@ class WorldHandler extends BooruHandler{
       List<String> originalTags = current['tags'] != null ? [...current['tags']] : [];
       var fixedTags = originalTags.map((tag) => tag.replaceAll(RegExp(r' '), '_')).toList();
 
-      String dateString = current['posted'].split('.')[0]; //split off microseconds // use posted or created?
+      String dateString = current['created'].split('.')[0]; //split off microseconds // use posted or created?
       fetched.add(BooruItem(
           fileURL: bestFile,
           sampleURL: sampleImage,

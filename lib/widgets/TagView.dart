@@ -170,7 +170,7 @@ class _TagViewState extends State<TagView> {
                 IconButton(
                   icon: Icon(
                     Icons.add,
-                    color: Get.theme.accentColor,
+                    color: Get.theme.colorScheme.secondary,
                   ),
                   onPressed: () {
                     setState(() {
@@ -182,7 +182,7 @@ class _TagViewState extends State<TagView> {
                 IconButton(
                   icon: Icon(
                     Icons.fiber_new,
-                    color: Get.theme.accentColor
+                    color: Get.theme.colorScheme.secondary
                   ),
                   onPressed: () {
                     setState(() {

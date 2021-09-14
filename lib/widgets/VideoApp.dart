@@ -297,7 +297,7 @@ class _VideoAppState extends State<VideoApp> {
         left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
         child: ElevatedButton(
           style: ElevatedButton.styleFrom(
-            primary: Get.theme.accentColor.withOpacity(0.33),
+            primary: Get.theme.colorScheme.secondary.withOpacity(0.33),
             minimumSize: Size(28, 28),
             padding: EdgeInsets.all(3),
           ),
@@ -376,8 +376,8 @@ class _VideoAppState extends State<VideoApp> {
         //   iconColor: Color.fromARGB(255, 200, 200, 200)
         // ),
       materialProgressColors: ChewieProgressColors(
-        playedColor: Get.theme.accentColor,
-        handleColor: Get.theme.accentColor,
+        playedColor: Get.theme.colorScheme.secondary,
+        handleColor: Get.theme.colorScheme.secondary,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white,
       ),
@@ -413,7 +413,7 @@ class _VideoAppState extends State<VideoApp> {
       } else {
         return Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.accentColor)
+            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
           )
         );
       }
@@ -460,7 +460,7 @@ class _VideoAppState extends State<VideoApp> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                 backgroundColor: Colors.transparent,
                 value: percentDone
               ),
@@ -591,7 +591,7 @@ class _VideoAppState extends State<VideoApp> {
             child: RotatedBox(
               quarterTurns: percentDone != null ? -1 : 1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.accentColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
                   backgroundColor: Colors.transparent,
                   value: percentDone),
             ),
