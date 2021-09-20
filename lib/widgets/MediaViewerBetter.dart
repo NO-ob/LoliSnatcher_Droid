@@ -153,15 +153,13 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     }
 
     noScaleListener = widget.booruItem.isNoScale.listen((bool value) {
-      if(value == true) {
-        killLoading([]);
-        initViewer(false);
-      }
+      killLoading([]);
+      initViewer(false);
     });
 
-    if(widget.booruItem.isHated.value) {
+    if(widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      if (hatedAndLovedTags[0].length > 0 && !ignoreTagsCheck) {
+      if (hatedAndLovedTags[0].length > 0) {
         killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
         return;
       }

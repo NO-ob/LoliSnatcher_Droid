@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -52,21 +53,17 @@ class _FiltersEditState extends State<FiltersEdit> {
           child: ListView(
             children: <Widget>[
               editableTagsList('Hated'),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10, 2, 10, 2),
-                  child: Row(children: [
-                    Text("Remove Items with Hated Tags: "),
-                    Checkbox(
-                      value: filterHated,
-                      onChanged: (newValue) {
-                        setState(() {
-                          filterHated = newValue!;
-                        });
-                      },
-                      activeColor: Get.theme.colorScheme.secondary,
-                    )
-                  ],)
+
+              SettingsToggle(
+                title: "Remove Items with Hated Tags",
+                value: filterHated,
+                onChanged: (bool newValue) {
+                  setState(() {
+                    filterHated = newValue;
+                  });
+                },
               ),
+
               editableTagsList('Loved'),
             ],
           ),
@@ -99,8 +96,8 @@ class _FiltersEditState extends State<FiltersEdit> {
               itemCount: tagsList.length + 1,
               scrollDirection: Axis.vertical,
               itemBuilder: (BuildContext context, int index) {
-                bool isAddButton = index == (tagsList.length);
-                String currentEntry = isAddButton ? '[Add]' : tagsList[index];
+                bool isAddButton = index == 0;
+                String currentEntry = isAddButton ? '[Add]' : tagsList[index - 1];
 
                 Widget entryRow = ListTile(
                   shape: RoundedRectangleBorder(
@@ -169,7 +166,7 @@ class _FiltersEditState extends State<FiltersEdit> {
   void showFilterEntryActions(Widget row, String tag, int index, String type) {
     showDialog(context: context, builder: (context) {
       List<String> tagsList = getTagsList(type);
-      bool isAddButton = index == tagsList.length;
+      bool isAddButton = index == 0;
       return StatefulBuilder(builder: (context, setDialogState) {
         return InfoDialog(
           null,
@@ -192,7 +189,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                           if(text.trim() != '') {
                             isAddButton
                               ? addTag(text.trim().toLowerCase(), type)
-                              : editTag(text.trim().toLowerCase(), index, type);
+                              : editTag(text.trim().toLowerCase(), index - 1, type);
                             newTagController.text = '';
                             Navigator.of(context).pop(true);
                           } else {
@@ -223,7 +220,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                 if(text.trim() != '') {
                   isAddButton
                     ? addTag(text.trim().toLowerCase(), type)
-                    : editTag(text.trim().toLowerCase(), index, type);
+                    : editTag(text.trim().toLowerCase(), index - 1, type);
                   newTagController.text = '';
                   Navigator.of(context).pop(true);
                 } else {

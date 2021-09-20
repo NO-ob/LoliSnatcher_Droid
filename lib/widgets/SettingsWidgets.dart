@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,7 @@ class SettingsButton extends StatelessWidget {
   final String name;
   final Widget? icon;
   final Widget? subtitle;
-  final Function? page;
+  final Widget Function()? page;
   final void Function()? action;
   final Widget? trailingIcon;
   final bool drawTopBorder;
@@ -59,10 +60,11 @@ class SettingsButton extends StatelessWidget {
                 ),
               ));
             } else {
-              Get.to(
-                page,
-                // duration: Duration(milliseconds: 500)
-              );
+              Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => page!.call()));
+              // Get.to(
+              //   page,
+              //   // duration: Duration(milliseconds: 500)
+              // );
             }
           }
         }

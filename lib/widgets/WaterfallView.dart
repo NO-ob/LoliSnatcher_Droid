@@ -244,14 +244,16 @@ class _WaterfallState extends State<WaterfallView> {
 
   void onThumbDoubleTap(int index) async {
     BooruItem item = widget.tab.booruHandler.filteredFetched[index];
-    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-      Vibration.vibrate(duration: 10);
-    }
+    if(item.isFavourite.value != null) {
+      if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
+        Vibration.vibrate(duration: 10);
+      }
 
-    setState(() {
-      item.isFavourite.toggle();
-      settingsHandler.dbHandler.updateBooruItem(item, "local");
-    });
+      setState(() {
+        item.isFavourite.toggle();
+        settingsHandler.dbHandler.updateBooruItem(item, "local");
+      });
+    }
   }
 
   void onThumbLongPress(int index) async {
@@ -352,22 +354,25 @@ class _WaterfallState extends State<WaterfallView> {
                     children: [
                       // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
 
+                      if(item.isFavourite.value == null)
+                        Text('.'),
+
                       AnimatedCrossFade(
                         duration: Duration(milliseconds: 200),
-                        crossFadeState: (item.isFavourite.value || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                        crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                         firstChild: AnimatedSwitcher(
                           duration: Duration(milliseconds: 200),
                           child: Icon(
-                            item.isFavourite.value ? Icons.favorite : Icons.star,
-                            color: item.isFavourite.value ? Colors.red : Colors.grey,
-                            key: ValueKey<Color>(item.isFavourite.value ? Colors.red : Colors.grey),
+                            item.isFavourite.value == true ? Icons.favorite : Icons.star,
+                            color: item.isFavourite.value == true ? Colors.red : Colors.grey,
+                            key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
                             size: 14,
                           )
                         ),
                         secondChild: const SizedBox(),
                       ),
 
-                      if(item.isSnatched.value)
+                      if(item.isSnatched.value == true)
                         Icon(
                           Icons.save_alt,
                           color: Colors.white,

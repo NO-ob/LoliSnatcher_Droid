@@ -192,7 +192,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     // viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    if (widget.booruItem.isHated.isTrue && !ignoreTagsCheck) {
+    if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
     } else {

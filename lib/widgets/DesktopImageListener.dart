@@ -73,7 +73,8 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   Widget build(BuildContext context) {
     return Obx(() {
       // while restoring tabs
-      if(searchHandler.list.isEmpty && !searchHandler.isRestored.value) {
+      // if(searchHandler.list.isEmpty && !searchHandler.isRestored.value) {
+      if(searchHandler.list.isEmpty) {
         return const SizedBox();
       }
 
@@ -113,12 +114,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                 margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: FloatingActionButton(
                   onPressed: () {
-                    setState(() {
-                      item.isFavourite.toggle();
-                      settingsHandler.dbHandler.updateBooruItem(item, "local");
-                    });
+                    if(item.isFavourite.value != null) {
+                      setState(() {
+                        item.isFavourite.toggle();
+                        settingsHandler.dbHandler.updateBooruItem(item, "local");
+                      });
+                    }
                   },
-                  child: Icon(item.isFavourite.value ? Icons.favorite : Icons.favorite_border),
+                  child: Obx(() => Icon(item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
                   backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),

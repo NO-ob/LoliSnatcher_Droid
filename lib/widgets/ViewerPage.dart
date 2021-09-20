@@ -180,23 +180,25 @@ class _ViewerPageState extends State<ViewerPage> {
     return RawKeyboardListener(
       autofocus: true,
       focusNode: kbFocusNode,
-      onKey: (RawKeyEvent event){
-        if(event.isKeyPressed(LogicalKeyboardKey.arrowLeft) || event.isKeyPressed(LogicalKeyboardKey.keyH)){
+      onKey: (RawKeyEvent event) {
+        if(event.isKeyPressed(LogicalKeyboardKey.arrowLeft) || event.isKeyPressed(LogicalKeyboardKey.keyH)) {
           controller?.previousPage(duration: Duration(milliseconds: 10), curve: Curves.linear);
-        } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)){
+        } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)) {
           controller?.nextPage(duration: Duration(milliseconds: 10), curve: Curves.linear);
-        } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)){
+        } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)) {
           snatchHandler.queue(
             [getFetched()[searchHandler.currentTab.viewedIndex.value]],
             searchHandler.currentTab.selectedBooru.value,
             settingsHandler.snatchCooldown
           );
-        } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)){
-          if (settingsHandler.dbEnabled){
-            setState(() {
-              getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
-              settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value],"local");
-            });
+        } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)) {
+          if (settingsHandler.dbEnabled) {
+            if(getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value != null) {
+              setState(() {
+                getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
+                settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value], "local");
+              });
+            }
           }
         }
       },
@@ -616,7 +618,7 @@ class _ViewerPageState extends State<ViewerPage> {
       buttonList = filteredButtonOrder;
     }
     buttonList.forEach((value) {
-      actions.add(buildIconButton(value[0]));
+      actions.add(buildIconButton(value[0], true));
     });
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
@@ -656,7 +658,7 @@ class _ViewerPageState extends State<ViewerPage> {
                               //     alignment: Alignment.centerLeft,
                               //     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
                               // ),
-                              leading: buttonIcon(value[0]),
+                              leading: buildIconButton(value[0], false),
                               title: Text(buttonText(value))
                           )
                       ),
@@ -669,17 +671,19 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   // generate widget for toolbar button
-  Widget buildIconButton(String action) {
-    if(action == 'autoscroll') {
-      // custom build to add progress indicator to slideshow button
-      return GestureDetector(
+  Widget buildIconButton(String action, bool clickable) {
+    // custom build to add progress indicator to slideshow button
+    Widget subicon = buttonSubicon(action);
+    return AbsorbPointer(
+      absorbing: !clickable,
+      child: GestureDetector(
         onLongPress: () {
           buttonHold(action);
         },
         child: Stack(
           alignment: Alignment.center,
           children: [
-            if(autoScroll)
+            if(autoScroll && action == 'autoscroll')
               RestartableProgressIndicator(
                 controller: autoScrollProgressController!,
               ),
@@ -691,23 +695,12 @@ class _ViewerPageState extends State<ViewerPage> {
                 buttonClick(action);
               },
             ),
+
+            subicon,
           ]
         )
-      );
-    } else {
-      return GestureDetector(
-        onLongPress: () {
-          buttonHold(action);
-        },
-        child: IconButton(
-          icon: buttonIcon(action),
-          color: Colors.white,
-          onPressed: () {
-            buttonClick(action);
-          },
-        ),
-      );
-    }
+      )
+    );
   }
 
   // get button icon
@@ -727,15 +720,17 @@ class _ViewerPageState extends State<ViewerPage> {
         icon = Icons.save;
         break;
       case("favourite"):
-        final bool isFav = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value;
-        icon = isFav ? Icons.favorite : Icons.favorite_border;
+        // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
-        return AnimatedCrossFade(
-          duration: Duration(milliseconds: 200),
-          crossFadeState: isFav ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-          firstChild: Icon(Icons.favorite),
-          secondChild: Icon(Icons.favorite_border_sharp),
-        );
+        return Obx(() {
+          final bool? isFav = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value;
+          return AnimatedCrossFade(
+            duration: Duration(milliseconds: 200),
+            crossFadeState: isFav == true ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+            firstChild: Icon(Icons.favorite),
+            secondChild: Icon(isFav == true ? Icons.favorite : (isFav == false ? Icons.favorite_border : CupertinoIcons.heart_slash)),
+          );
+        });
       case("share"):
         icon = Icons.share;
         break;
@@ -744,6 +739,27 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
     }
     return Icon(icon);
+  }
+
+  Widget buttonSubicon(String action) {
+    switch (action) {
+      case 'snatch':
+        return Obx(() {
+          final bool isSnatched = getFetched()[searchHandler.currentTab.viewedIndex.value].isSnatched.value == true;
+          if(!isSnatched) {
+            return const SizedBox();
+          } else {
+          return Positioned(
+            child: Icon(Icons.save_alt, size: Get.theme.buttonTheme.height / 2.1),
+            right: 2,
+            bottom: 5,
+          );
+          }
+        });
+        
+      default:
+       return const SizedBox();
+    }
   }
 
   // get button text for overflow menu
@@ -755,11 +771,11 @@ class _ViewerPageState extends State<ViewerPage> {
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
         break;
       case("favourite"):
-        label = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value ? 'Unfavourite' : defaultLabel;
+        label = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value == true ? 'Unfavourite' : defaultLabel;
         break;
-      // case("reloadnoscale"):
-      //   label = "$defaultLabel${getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.value ? ' (Already Loaded)' : ''}";
-      //   break;
+      case("reloadnoscale"):
+        label = getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.value ? 'Reload with scaling' : defaultLabel;
+        break;
       default:
         // use default text
         label = defaultLabel;
@@ -790,20 +806,23 @@ class _ViewerPageState extends State<ViewerPage> {
         );
         break;
       case("favourite"):
-        if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-          Vibration.vibrate(duration: 10);
+        if(getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value != null) {
+          if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
+            Vibration.vibrate(duration: 10);
+          }
+
+          setState(() {
+            getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
+            settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value], "local");
+          });
         }
-        setState(() {
-          getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
-          settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value], "local");
-        });
         break;
       case("share"):
         onShareClick();
         break;
       case("reloadnoscale"):
         setState(() {
-          getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.value = true;
+          getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.toggle();
         });
         break;
     }

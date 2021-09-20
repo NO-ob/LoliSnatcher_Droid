@@ -89,7 +89,9 @@ abstract class BooruHandler {
   List<String> searchModifiers() {
     return [];
   }
+
   void setupMerge(List<Booru> boorus){}
+
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future setTrackedValues(int fetchedIndex) async{
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
@@ -99,6 +101,8 @@ abstract class BooruHandler {
       fetched[fetchedIndex].isSnatched.value = values[0];
       fetched[fetchedIndex].isFavourite.value = values[1];
     }
-    fetched[fetchedIndex].isHated.value = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList)[0].length > 0;
+    List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList);
+    fetched[fetchedIndex].isHated.value = tagLists[0].length > 0;
+    // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
   }
 }

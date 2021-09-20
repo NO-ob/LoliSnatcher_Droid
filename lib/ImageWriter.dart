@@ -56,7 +56,7 @@ class ImageWriter {
     File image = File(path! + fileName);
     // print(path! + fileName);
     bool fileExists = await image.exists();
-    if(fileExists || item.isSnatched.value) return null;
+    if(fileExists || item.isSnatched.value == true) return null;
     try {
       Uri fileURI = Uri.parse(item.fileURL);
       var response = await http.get(fileURI);

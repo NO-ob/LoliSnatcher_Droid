@@ -52,7 +52,7 @@ class SettingsHandler extends GetxController {
     ["info", "Display Info"],
     ["share", "Share"],
     ["open", "Open in Browser"],
-    ["reloadnoscale", "Reload without scaling"]
+    ["reloadnoscale", "Reload w/out scaling"]
   ];
   List<List<String>> buttonOrder = [
     ["autoscroll", "AutoScroll"],
@@ -61,7 +61,7 @@ class SettingsHandler extends GetxController {
     ["info", "Display Info"],
     ["share", "Share"],
     ["open", "Open in Browser"],
-    ["reloadnoscale", "Reload without scaling"]
+    ["reloadnoscale", "Reload w/out scaling"]
   ];
 
   bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
@@ -280,7 +280,7 @@ class SettingsHandler extends GetxController {
         ["info", "Display Info"],
         ["share", "Share"],
         ["open", "Open in Browser"],
-        ["reloadnoscale", "Reload without scaling"]
+        ["reloadnoscale", "Reload w/out scaling"]
       ]
     },
 

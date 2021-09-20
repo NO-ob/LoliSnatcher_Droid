@@ -6,7 +6,8 @@ class BooruItem{
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
   String? mediaType;
-  RxBool isSnatched = false.obs, isFavourite = false.obs, isHated = false.obs, isNoScale = false.obs;
+  RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
+  RxBool isHated = false.obs, isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
   List<String>? sources;
@@ -59,7 +60,16 @@ class BooruItem{
     return (this.mediaType == "video");
   }
   Map toJSON() {
-    return {"postURL": "$postURL","fileURL": "$fileURL", "sampleURL": "$sampleURL", "thumbnailURL": "$thumbnailURL", "tags": tagsList, "fileExt": fileExt, "isFavourite": "${isFavourite.toString()}","isSnatched" : "${isSnatched.toString()}"};
+    return {
+      "postURL": postURL,
+      "fileURL": fileURL,
+      "sampleURL": sampleURL,
+      "thumbnailURL": thumbnailURL,
+      "tags": tagsList,
+      "fileExt": fileExt,
+      "isFavourite": isFavourite.value,
+      "isSnatched" : isSnatched.value,
+    };
   }
   static BooruItem fromJSON(String jsonString){
     Map<String, dynamic> json = jsonDecode(jsonString);
