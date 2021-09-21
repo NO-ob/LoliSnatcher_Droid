@@ -46,7 +46,7 @@ class AboutPage extends StatelessWidget {
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Text("A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),
             ),
-            Container(
+            /*Container(
               alignment: Alignment.center,
               child: TextButton(
                 style: TextButton.styleFrom(
@@ -60,7 +60,7 @@ class AboutPage extends StatelessWidget {
                 },
                 child: Text("Showers-U - Pixiv", style: TextStyle(color: Colors.white)),
               ),
-            ),
+            ),*/
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Text("A big thanks to NANI-SORE for fixing a bunch of bugs and adding some needed features"),

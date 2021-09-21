@@ -44,7 +44,7 @@ class BooruItem{
     this.fileExt = this.fileExt!.toLowerCase();
     if (["jpg", "jpeg", "png", "webp"].any((val) => this.fileExt == val)) {
       this.mediaType = "image";
-    } else if (["webm", "mp4"].any((val) => this.fileExt == val)) {
+    } else if (["webm", "mp4","avi"].any((val) => this.fileExt == val)) {
       this.mediaType = "video";
     } else if (["gif"].any((val) => this.fileExt == val)) {
       this.mediaType = "animation";

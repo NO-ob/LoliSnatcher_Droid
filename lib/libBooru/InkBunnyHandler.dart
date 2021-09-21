@@ -29,7 +29,7 @@ class InkBunnyHandler extends BooruHandler{
     if (booru.apiKey!.isEmpty && booru.userID!.isEmpty){
         url += "&username=guest";
     } else {
-      url += "&username=${booru.userID}&password=${booru.apiKey}";
+      url += "&username=${booru.userID}&password=${Uri.encodeComponent(booru.apiKey!)}";
     }
     try{
       final response = await http.get(Uri.parse(url),headers: getHeaders());
