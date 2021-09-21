@@ -4,6 +4,7 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
 import 'package:LoliSnatcher/libBooru/InkBunnyHandler.dart';
 import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/NyanPalsHandler.dart';
 import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
 import 'package:get/get.dart';
 
@@ -97,6 +98,10 @@ class BooruHandlerFactory{
         case("AGNPH"):
           pageNum = 0;
           booruHandler = new AGNPHHandler(boorus[0], limit);
+          break;
+        case("NyanPals"):
+          pageNum = -1;
+          booruHandler = new NyanPalsHandler(boorus[0], limit);
           break;
         default:
           booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);

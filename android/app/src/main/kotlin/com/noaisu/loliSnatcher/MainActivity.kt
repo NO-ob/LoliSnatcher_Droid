@@ -248,7 +248,8 @@ class MainActivity: FlutterActivity() {
         if (thisMediaType == "animation"){
             thisMediaType = "image";
         }
-        if(mediaType == "image"){
+
+        if(thisMediaType == "image"){
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
             contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
             contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")

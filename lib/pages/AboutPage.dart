@@ -43,14 +43,14 @@ class AboutPage extends StatelessWidget {
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Text("A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),
             ),
-            SettingsButton(
-              name: 'Showers-U - Pixiv',
-              icon: Icon(Icons.public),
-              trailingIcon: Icon(Icons.exit_to_app),
-              action: () {
-                ServiceHandler.launchURL("https://www.pixiv.net/en/users/28366691");
-              }
-            ),
+            // SettingsButton(
+            //   name: 'Showers-U - Pixiv',
+            //   icon: Icon(Icons.public),
+            //   trailingIcon: Icon(Icons.exit_to_app),
+            //   action: () {
+            //     ServiceHandler.launchURL("https://www. pixiv .net/en/users/2 8 3 6 6 6 9 1");
+            //   }
+            // ),
 
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
