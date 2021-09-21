@@ -30,9 +30,12 @@ class _ImagePreviewsState extends State<ImagePreviews> {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Text("No Booru Configs Found"),
               SettingsButton(
-                name: 'Open Settings',
+                name: 'No Booru Configs Found',
+                icon: Icon(null),
+              ),
+              SettingsButton(
+                name: 'Add New Booru',
                 icon: Icon(Icons.settings),
                 page: () => BooruEdit(Booru("New","","","",""))
               ),

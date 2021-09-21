@@ -124,12 +124,12 @@ class _CachedThumbNewState extends State<CachedThumbNew> {
 
   double getMaxWidth() {
     double? thumbWidth = 100; // set minimum value to avoid exceptions when it attempts to render outside of the view
-    final double widthLimit = (settingsHandler.deviceSize!.width / widget.columnCount) * settingsHandler.devicePixelRatio! * 1;
+    final double widthLimit = (GET.Get.mediaQuery.size.width / widget.columnCount) * GET.Get.mediaQuery.devicePixelRatio * 1;
     double thumbRatio = 1;
 
     if (widget.booruItem.isHated.value) {
       // pixelate hated images
-      thumbWidth = settingsHandler.deviceSize!.width * 0.01; // thumbHeight = 6;
+      thumbWidth = GET.Get.mediaQuery.size.width * 0.01; // thumbHeight = 6;
     } else {
       switch (settingsHandler.previewDisplay) {
         case 'Rectangle':

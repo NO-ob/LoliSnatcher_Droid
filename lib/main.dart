@@ -441,33 +441,35 @@ class _HomeState extends State<Home> {
     return SafeArea(child: Drawer(
       child: Column(
         children: <Widget>[
-          Container(
-            padding: EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5,0),
-            width: double.infinity,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                //Tags/Search field
-                TagSearchBox(),
-                GestureDetector(
-                  onLongPress: () {
-                    searchHandler.searchTextController.clearComposing();
-                    searchHandler.searchBoxFocus.unfocus();
-                    searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
-                  },
-                  child: IconButton(
-                    padding: const EdgeInsets.all(5),
-                    icon: Icon(Icons.search),
-                    onPressed: () {
+          if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+            Container(
+              padding: EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5,0),
+              width: double.infinity,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  //Tags/Search field
+                  TagSearchBox(),
+                  GestureDetector(
+                    onLongPress: () {
                       searchHandler.searchTextController.clearComposing();
                       searchHandler.searchBoxFocus.unfocus();
-                      searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                      searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
                     },
-                  )
-                ),
-              ],
+                    child: IconButton(
+                      padding: const EdgeInsets.all(5),
+                      icon: Icon(Icons.search),
+                      onPressed: () {
+                        searchHandler.searchTextController.clearComposing();
+                        searchHandler.searchBoxFocus.unfocus();
+                        searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                      },
+                    )
+                  ),
+                ],
+              ),
             ),
-          ),
+
           Expanded(
             child: Listener(
               onPointerDown: (event) {
@@ -556,12 +558,13 @@ class _HomeState extends State<Home> {
                       label: Text("Merge", style: TextStyle(color: Colors.white))
                   ),*/
 
-                  SettingsButton(
-                    name: "Snatcher",
-                    icon: Icon(Icons.download_sharp),
-                    page: () => SnatcherPage(),
-                    drawTopBorder: true,
-                  ),
+                  if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+                    SettingsButton(
+                      name: "Snatcher",
+                      icon: Icon(Icons.download_sharp),
+                      page: () => SnatcherPage(),
+                      drawTopBorder: true,
+                    ),
                   SettingsButton(
                     name: "Settings",
                     icon: Icon(Icons.settings),

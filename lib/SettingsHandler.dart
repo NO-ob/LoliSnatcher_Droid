@@ -31,8 +31,6 @@ class SettingsHandler extends GetxController {
 
   // runtime settings vars
   bool hasHydrus = false, mergeEnabled = false, videoAutoMute = false;
-  Size? deviceSize;
-  double? devicePixelRatio;
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs, showFPS = false.obs, showImageStats = false.obs, isMemeTheme = false.obs, showURLOnThumb = false.obs, disableImageScaling = false.obs;
@@ -1200,8 +1198,6 @@ class SettingsHandler extends GetxController {
     // print(toJSON());
     // print(jsonEncode(toJSON()));
 
-    deviceSize = Get.mediaQuery.size;
-    devicePixelRatio = Get.mediaQuery.devicePixelRatio;
     isInit.value = true;
     return;
   }

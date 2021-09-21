@@ -92,6 +92,9 @@ class _DebugPageState extends State<DebugPage> {
                   settingsHandler.debugLoadAndSaveLegacy();
                 }
               ),
+
+              SettingsButton(name: 'Res: ${Get.mediaQuery.size.width}x${Get.mediaQuery.size.height}'),
+              SettingsButton(name: 'Pixel Ratio: ${Get.mediaQuery.devicePixelRatio}'),
             ],
           ),
         ),

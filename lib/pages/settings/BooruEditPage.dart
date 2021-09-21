@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
@@ -25,7 +26,9 @@ class BooruEdit extends StatefulWidget {
 }
 
 class _BooruEditState extends State<BooruEdit> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+
   final booruNameController = TextEditingController();
   final booruURLController = TextEditingController();
   final booruFaviconController = TextEditingController();
@@ -285,11 +288,11 @@ class _BooruEditState extends State<BooruEdit> {
    */
   Widget saveButton(){
     return SettingsButton(
-      name: 'Save Booru',
-      icon: Icon(Icons.save),
+      name: "Save Booru${widget.booruType == '' ? ' (Run Test First)' : ''}",
+      icon: Icon(Icons.save, color: widget.booruType == '' ? Colors.red : Colors.green),
       action: () async {
         if(widget.booruType == "") {
-          ServiceHandler.displayToast('Run Test first!');
+          ServiceHandler.displayToast('Run Test First!');
           return;
         }
   
@@ -331,6 +334,13 @@ class _BooruEditState extends State<BooruEdit> {
         if (!booruExists){
           await settingsHandler.saveBooru(newBooru);
           ServiceHandler.displayToast("Booru Saved! \n It will show in the dropdowns after a search");
+
+          // force global restate
+          searchHandler.rootRestate();
+          if(searchHandler.list.isEmpty) {
+            // force first tab creation after creating first booru
+            searchHandler.list.add(SearchGlobal(newBooru.obs, null, settingsHandler.defTags));
+          }
           Navigator.of(context).pop(true);
         }
 

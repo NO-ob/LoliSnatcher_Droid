@@ -17,8 +17,8 @@ class TabBoxButtons extends StatefulWidget {
 }
 
 class _TabBoxButtonsState extends State<TabBoxButtons> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   void showHistory() async {
     showDialog(context: context, builder: (context) {
@@ -36,6 +36,10 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
 
   @override
   Widget build(BuildContext context) {
+    if(searchHandler.list.length == 0) {
+      return const SizedBox();
+    }
+
     return Expanded(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

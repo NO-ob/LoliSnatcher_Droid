@@ -119,7 +119,7 @@ class _MediaViewerNewState extends State<MediaViewerNew> {
         cacheFolder: imageFolder,
         onProgress: (int received, int total) => _onBytesAdded(received, total)
       ),
-      width: (settingsHandler.deviceSize!.width * settingsHandler.devicePixelRatio! * 1.5).round(),
+      width: (Get.mediaQuery.size.width * Get.mediaQuery.devicePixelRatio * 1.5).round(),
     );
 
     // load thumbnail preview

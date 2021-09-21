@@ -45,7 +45,7 @@ class _TabBoxState extends State<TabBox> {
       int index = searchHandler.index.value;
 
       if(list.length == 0) {
-        return Text('Add Boorus in Settings');
+        return const SizedBox();
       }
 
       return Expanded(

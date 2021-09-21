@@ -24,52 +24,56 @@ class DesktopHome extends StatefulWidget {
 }
 
 class _DesktopHomeState extends State<DesktopHome> {
-  final SnatchHandler snatchHandler = Get.find();
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
         actions: <Widget>[
-          Expanded(
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                const SizedBox(width: 15),
-                TagSearchBox(),
-                const SizedBox(width: 15),
-                BooruSelectorMain(true),
-                IconButton(
-                  padding: const EdgeInsets.all(5),
-                  icon: Icon(Icons.search),
-                  onPressed: () {
-                    searchHandler.searchTextController.clearComposing();
-                    searchHandler.searchBoxFocus.unfocus();
-                    searchHandler.searchAction(searchHandler.searchTextController.text, null);
-                  },
-                ),
-                TabBox(),
-                TabBoxButtons(false, MainAxisAlignment.start),
-              ],
+          if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+            Expanded(
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  const SizedBox(width: 15),
+                  TagSearchBox(),
+                  const SizedBox(width: 15),
+                  BooruSelectorMain(true),
+                  IconButton(
+                    padding: const EdgeInsets.all(5),
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      searchHandler.searchTextController.clearComposing();
+                      searchHandler.searchBoxFocus.unfocus();
+                      searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                    },
+                  ),
+                  TabBox(),
+                  TabBoxButtons(false, MainAxisAlignment.start),
+                ],
+              ),
             ),
-          ),
 
-          IconButton(
-            icon: Icon(Icons.download),
-            onPressed: (){
-              Get.dialog(Dialog(
-                child: Container(
-                  width: 500,
-                  child: SnatcherPage(),
-                ),
-              ));
-            },
-          ),
+          if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.download),
+              onPressed: (){
+                Get.dialog(Dialog(
+                  child: Container(
+                    width: 500,
+                    child: SnatcherPage(),
+                  ),
+                ));
+              },
+            ),
+
+          if (settingsHandler.booruList.isEmpty || searchHandler.list.isEmpty)
+            Center(child: Text('Add Boorus in Settings')),
 
           IconButton(
             icon: Icon(Icons.settings),

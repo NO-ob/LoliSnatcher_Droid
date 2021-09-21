@@ -205,7 +205,7 @@ class _MediaViewerState extends State<MediaViewer> {
   }
 
   ImageProvider getImageProvider(Uint8List bytes) {
-    return ResizeImage(MemoryImage(bytes), width: (settingsHandler.deviceSize!.width * settingsHandler.devicePixelRatio! * 1.5).round());
+    return ResizeImage(MemoryImage(bytes), width: (GET.Get.mediaQuery.size.width * GET.Get.mediaQuery.devicePixelRatio * 1.5).round());
   }
 
   void killLoading(List<String> reason) {

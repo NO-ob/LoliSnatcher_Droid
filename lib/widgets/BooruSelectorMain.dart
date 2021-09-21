@@ -68,7 +68,9 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
 
     // no boorus
     if(settingsHandler.booruList.isEmpty) {
-      return Text('Add Boorus in Settings');
+      return Center(
+        child: Text('Add Boorus in Settings'),
+      );
     }
 
     // no tabs

@@ -187,7 +187,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     if(settingsHandler.disableImageScaling.value || widget.booruItem.isNoScale.value) {
       return MemoryImageTest(bytes, imageUrl: url);
     } else {
-      int? widthLimit = settingsHandler.disableImageScaling.value ? null : (settingsHandler.deviceSize!.width * settingsHandler.devicePixelRatio! * 2).round();
+      int? widthLimit = settingsHandler.disableImageScaling.value ? null : (Get.mediaQuery.size.width * Get.mediaQuery.devicePixelRatio * 2).round();
       return ResizeImage(
         MemoryImageTest(bytes, imageUrl: url),
         width: widthLimit,
