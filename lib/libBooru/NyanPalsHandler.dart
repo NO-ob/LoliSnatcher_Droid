@@ -2,14 +2,10 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
-import 'package:image/image.dart';
-import 'package:xml/xml.dart' as xml;
 import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
-import 'package:LoliSnatcher/Tools.dart';
 
 /**
  * Booru Handler for the gelbooru engine
@@ -56,9 +52,7 @@ class NyanPalsHandler extends BooruHandler{
         fetched.add(item);
       }
 
-      if(dbHandler!.db != null){
-        setTrackedValues(fetched.length - 1);
-      }
+      setTrackedValues(fetched.length - 1);
     }
 
   }
@@ -71,7 +65,6 @@ class NyanPalsHandler extends BooruHandler{
   // This will create a url for the http request
   String makeURL(String tags){
     //https://nyanpals.com/kontent?include=nsfw&exclude=&allow=&limit=50&method=uploaded&offset=0&order=DESC&token=null
-    int cappedPage = max(0, pageNum); // needed because searchCount happens before first page increment
     String includeTags = "";
     String excludeTags = "";
     tags.split(" ").forEach((element) {
@@ -82,8 +75,7 @@ class NyanPalsHandler extends BooruHandler{
         includeTags += tag + ",";
       }
     });
-    return "${booru.baseURL}/kontent?include=$includeTags&exclude=$excludeTags&allow=&limit=$limit&method=uploaded&offset=${pageNum * limit}&order=DESC&token=null";
-    return "${booru.baseURL}/index.php?api_key=${booru.apiKey}&user_id=${booru.userID}&page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}";
+    return "${booru.baseURL}/kontent?include=$includeTags&exclude=$excludeTags&allow=&limit=$limit&method=uploaded&offset=${pageNum.value * limit}&order=DESC&token=null";
   }
 
   String makeTagURL(String input){
@@ -97,10 +89,6 @@ class NyanPalsHandler extends BooruHandler{
   @override
   Future tagSearch(String input) async {
     return [];
-  }
-
-  void searchCount(String input) async {
-
   }
 
 }
