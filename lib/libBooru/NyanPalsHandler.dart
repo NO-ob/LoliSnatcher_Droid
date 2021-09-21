@@ -13,12 +13,14 @@ import 'Booru.dart';
 class NyanPalsHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   NyanPalsHandler(Booru booru, int limit): super(booru,limit);
+
   @override
   bool hasSizeData = false;
+
   @override
   void parseResponse(response){
     var parsedResponse = jsonDecode(response.body);
-    totalCount = parsedResponse["total"]!;
+    totalCount.value = parsedResponse["total"]!;
     for (int i =0; i < parsedResponse['rows'].length; i++){
       var current = parsedResponse['rows'][i];
 
@@ -35,7 +37,14 @@ class NyanPalsHandler extends BooruHandler{
           currentTags[x] = currentTags[x].replaceAll(" ", "_");
         }
       }
-      BooruItem item = new BooruItem(fileURL: fileURL, sampleURL: fileURL, thumbnailURL: "", tagsList: currentTags, postURL: fileURL ,md5String: md5);
+      BooruItem item = new BooruItem(
+        fileURL: fileURL,
+        sampleURL: fileURL,
+        thumbnailURL: "",
+        tagsList: currentTags,
+        postURL: fileURL,
+        md5String: md5
+      );
 
       thumbURL = booru.baseURL! + "/img/pettankontent/";
       if (item.mediaType == "video"){

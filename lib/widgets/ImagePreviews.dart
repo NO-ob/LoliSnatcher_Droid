@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,14 @@ class _ImagePreviewsState extends State<ImagePreviews> {
                 name: 'Add New Booru',
                 icon: Icon(Icons.settings),
                 page: () => BooruEdit(Booru("New","","","",""))
+              ),
+              SettingsButton(
+                name: 'Help',
+                icon: Icon(Icons.help_center_outlined),
+                action: () {
+                  ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
+                },
+                trailingIcon: Icon(Icons.exit_to_app)
               ),
             ]
           )
