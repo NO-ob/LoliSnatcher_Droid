@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -11,7 +12,6 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/Tools.dart';
 
@@ -72,7 +72,23 @@ class SearchHandler extends GetxController {
         list.removeAt(index.value);
       }
     } else {
-      ServiceHandler.displayToast('Removed last tab!\nResetting to default tags');
+      FlashElements.showSnackbar(
+        context: Get.context!,
+        title: Text(
+          "Removed Last Tab",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Resetting search to default tags!'),
+          ],
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.yellow,
+        sideColor: Colors.yellow,
+      );
+
       final SettingsHandler settingsHandler = Get.find();
       searchTextController.text = settingsHandler.defTags;
       list[0] = SearchGlobal(list[index.value].selectedBooru, null, settingsHandler.defTags);
@@ -120,8 +136,18 @@ class SearchHandler extends GetxController {
     Tools.forceClearMemoryCache(withLive: true);
 
     // UOOOOOHHHHH
-    if(text.toLowerCase().contains("loli")){
-      ServiceHandler.displayToast("UOOOOOHHHHH\n 😭 ");
+    if (text.toLowerCase().contains("loli")) {
+      FlashElements.showSnackbar(
+        context: Get.context!,
+        duration: Duration(seconds: 2),
+        title: Text(
+          "UOOOOOOOHHH",
+          style: TextStyle(fontSize: 20)
+        ),
+        // TODO replace with image asset to avoid system-to-system font differences
+        overrideLeadingIconWidget: Text(' 😭 ', style: TextStyle(fontSize: 40)),
+        sideColor: Colors.pink,
+      );
     }
 
     // set new tab data

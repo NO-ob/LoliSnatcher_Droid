@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart' as GET;
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'BooruHandler.dart';
@@ -149,8 +151,27 @@ class HydrusHandler extends BooruHandler{
           "filterable_tags":item.tagsList
         }),
       );
-    }catch(e){
-      ServiceHandler.displayToast("Something went wrong importing to hydrus you might not have given the correct api permissions this can be edited in Review Services. Add tags to file and Add Urls");
+    } catch(e) {
+      FlashElements.showSnackbar(
+        context: GET.Get.context!,
+        duration: null,
+        title: Text(
+          "Error!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Something went wrong importing to hydrus. You might not have given the correct api permissions, this can be edited in Review Services. Add tags to file and Add Urls'),
+            Text('You might not have given the correct api permissions, this can be edited in Review Services.'),
+            Text('Add tags to file and Add Urls.'),
+          ],
+        ),
+        leadingIcon: Icons.error_outline,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
+
       Logger.Inst().log(e.toString(), "HydrusHandler", "addURL", LogTypes.exception);
     }
     return fetched;

@@ -254,17 +254,19 @@ class _ViewerPageState extends State<ViewerPage> {
                     ? (!settingsHandler.disableVideo
                       ? ((Platform.isAndroid || Platform.isIOS)
                           ? VideoApp(
+                            null,
                             getFetched()[index],
                             index,
                             searchHandler.currentTab,
                             true
                           )
-                          : VideoAppDesktop(getFetched()[index], 1, searchHandler.currentTab)
+                          : VideoAppDesktop(null, getFetched()[index], 1, searchHandler.currentTab)
                           // desktopVideoPlaceHolder(getFetched()[index], index)
                         )
                       : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
                     )
                     : MediaViewerBetter(
+                      null,
                       getFetched()[index],
                       index,
                       searchHandler.currentTab
@@ -830,6 +832,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
   // long tap action
   void buttonHold(String action) {
+    // TODO long press slideshow button to set the timer
     switch(action) {
       case("share"):
         onShareHold();

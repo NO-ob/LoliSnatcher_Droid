@@ -1,7 +1,8 @@
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
@@ -56,9 +57,38 @@ class SnatchHandler extends GetxController {
       booruList.add(booru);
       queuedList.add(booruItems); // change this last because it triggers a listener
       if (booruItems.length > 1){
-        ServiceHandler.displayToast("Items added to snatch queue\nAmount: ${booruItems.length}\nQueue Position: ${queuedList.length}");
+        FlashElements.showSnackbar(
+          context: Get.context!,
+          title: Text(
+            "Added to snatch queue",
+            style: TextStyle(fontSize: 20)
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                Text('Amount: ${booruItems.length}'),
+                Text('Position: ${queuedList.length}'),
+            ],
+          ),
+          leadingIcon: Icons.info_outline,
+          sideColor: Colors.green,
+        );
       } else {
-        ServiceHandler.displayToast("Item added to snatch queue\nQueue Position: ${queuedList.length}");
+        FlashElements.showSnackbar(
+          context: Get.context!,
+          title: Text(
+            "Added to snatch queue",
+            style: TextStyle(fontSize: 20)
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                Text('Position: ${queuedList.length}'),
+            ],
+          ),
+          leadingIcon: Icons.info_outline,
+          sideColor: Colors.green,
+        );
       }
     }
   }
@@ -79,7 +109,23 @@ class SnatchHandler extends GetxController {
     booruHandler.pageNum.value = temp[1];
     booruHandler.pageNum ++;
 
-    ServiceHandler.displayToast("Snatching Images\nDo not close the app!");
+    FlashElements.showSnackbar(
+      context: Get.context!,
+      title: Text(
+        "Snatching Images",
+        style: TextStyle(fontSize: 20)
+      ),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+            Text('Do not close the app!'),
+        ],
+      ),
+      leadingIcon: Icons.warning_amber,
+      leadingIconColor: Colors.yellow,
+      sideColor: Colors.yellow,
+    );
+
     while (count < int.parse(amount) && !booruHandler.locked.value){
       booruItems = (await booruHandler.Search(tags, null)) ?? [];
       booruHandler.pageNum ++;

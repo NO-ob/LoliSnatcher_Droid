@@ -28,7 +28,7 @@ class VideoApp extends StatefulWidget {
   final int index;
   final SearchGlobal searchGlobal;
   final bool enableFullscreen;
-  VideoApp(this.booruItem, this.index, this.searchGlobal, this.enableFullscreen);
+  VideoApp(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
   @override
   _VideoAppState createState() => _VideoAppState();
 }

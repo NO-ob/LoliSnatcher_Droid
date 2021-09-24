@@ -31,15 +31,19 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   bool isFullScreen = false;
 
+  // TODO fix duplicate exception
+  GlobalKey mediaStateKey = GlobalKey();
+  GlobalKey videoStateKey = GlobalKey();
+
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value){
-      if (!value.isVideo()){
-        return MediaViewerBetter(value, 1, searchHandler.currentTab);
+      if (!value.isVideo()) {
+        return MediaViewerBetter(mediaStateKey, value, 1, searchHandler.currentTab);
       } else {
         if (Platform.isAndroid || Platform.isIOS) {
-          return VideoApp(value, 1, searchHandler.currentTab, true);
+          return VideoApp(videoStateKey, value, 1, searchHandler.currentTab, true);
         } else {
-          return VideoAppDesktop(value, 1, searchHandler.currentTab);
+          return VideoAppDesktop(videoStateKey, value, 1, searchHandler.currentTab);
 
           // return Center(
           //   child: Column(
@@ -125,18 +129,17 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
-              // TODO with videoappdesktop we can now play videos, now we need a fullscreen that will reuse the same widget without restarting video/recreating a widget
               Container(
                 width: 30,
                 height: 30,
                 child: FloatingActionButton(
-                  onPressed: () {
+                  onPressed: () async {
                     isFullScreen = true;
                     setState(() { });
-                    Get.dialog(
+                    await Get.dialog(
                       Stack(
                         children: [
-                          itemWidget,
+                          isFullScreen ? itemWidget : const SizedBox(),
                           Container(
                               padding: EdgeInsets.all(10),
                               alignment: Alignment.topRight,
@@ -145,8 +148,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                                 height: 30,
                                 child: FloatingActionButton(
                                   onPressed: () {
-                                    isFullScreen = false;
-                                    setState(() { });
                                     Get.back();
                                   },
                                   child: Icon(Icons.fullscreen_exit),
@@ -159,6 +160,8 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       transitionDuration: Duration(milliseconds: 200),
                       barrierColor: Colors.black,
                     );
+                    isFullScreen = false;
+                    setState(() { });
                   },
                   child: Icon(Icons.fullscreen),
                   backgroundColor: Get.theme.colorScheme.secondary,

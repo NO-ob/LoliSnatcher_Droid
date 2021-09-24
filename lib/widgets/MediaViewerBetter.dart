@@ -24,7 +24,7 @@ class MediaViewerBetter extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
-  MediaViewerBetter(this.booruItem, this.index, this.searchGlobal);
+  MediaViewerBetter(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
 
   @override
   _MediaViewerBetterState createState() => _MediaViewerBetterState();

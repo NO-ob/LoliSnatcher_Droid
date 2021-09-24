@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 // import 'package:flutter/foundation.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -121,14 +123,28 @@ class ImageWriter {
       });
       yield snatchedCounter++;
     }
-    String toastString = "Snatching Complete ¡¡¡( •̀ ᴗ •́ )و!!! \n";
-    if (existsList.length > 0){
-      toastString += "Some files were already snatched! \n File Count: ${existsList.length} \n";
-    }
-    if (failedList.length > 0){
-      toastString += "Snatching failed for some files!  \n File Count: ${failedList.length} \n";
-    }
-    ServiceHandler.displayToast(toastString);
+
+    FlashElements.showSnackbar(
+        context: Get.context!,
+        title: Text(
+          "Snatching Complete",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (existsList.length > 0)
+              Text('${existsList.length} file${existsList.length == 1 ? ' was' : 's were'} already snatched!'),
+
+            if (failedList.length > 0)
+              Text('Failed to snatch ${failedList.length} file${failedList.length == 1 ? '' : 's'}!'),
+          ],
+        ),
+        leadingIcon: Icons.error,
+        sideColor: Colors.red,
+        //TODO restart buttons?
+      );
+    // String toastString = "Snatching Complete ¡¡¡( •̀ ᴗ •́ )و!!! \n";
   }
 
   Future writeCache(String fileURL, String typeFolder) async{

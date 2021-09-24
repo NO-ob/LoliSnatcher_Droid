@@ -24,7 +24,7 @@ class VideoAppDesktop extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
-  VideoAppDesktop(this.booruItem, this.index, this.searchGlobal);
+  VideoAppDesktop(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
   @override
   _VideoAppDesktopState createState() => _VideoAppDesktopState();
 }

@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -102,7 +103,17 @@ class _DesktopHomeState extends State<DesktopHome> {
                   searchHandler.currentTab.selected = [];
                 });
               } else {
-                ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: Text(
+                    "No items selected",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  overrideLeadingIconWidget: Text(
+                    " (」°ロ°)」 ",
+                    style: TextStyle(fontSize: 18)
+                  ),
+                );
               }
             },
           ),

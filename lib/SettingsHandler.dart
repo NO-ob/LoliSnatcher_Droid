@@ -937,7 +937,7 @@ class SettingsHandler extends GetxController {
     return true;
   }
 
-  Future<bool> saveSettings({withMessage = true}) async {
+  Future<bool> saveSettings() async {
     await getPerms();
     if (path == "") await setConfigDir();
     await Directory(path).create(recursive:true);
@@ -946,8 +946,6 @@ class SettingsHandler extends GetxController {
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJSON()));
     writer.close();
-
-    // if(withMessage) ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
 
     Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
     return true;

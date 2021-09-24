@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flash/flash.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/getPerms.dart';
@@ -387,18 +387,35 @@ class _HomeState extends State<Home> {
           foundBrokenItem = true;
         }
       });
-
-      // notify user if there was unknown booru or invalid entry in the list
-      if(foundBrokenItem) {
-        ServiceHandler.displayToast('Some restored tabs had unknown boorus or broken characters\nThey were set to default or ignored');
-      }
     }
 
     searchHandler.isRestored.value = true;
 
     // set parsed tabs OR set first default tab if nothing to restore
     if(restoredGlobals.length > 0) {
-      ServiceHandler.displayToast('Restored ${restoredGlobals.length} tabs from previous session!');
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          "Tabs restored",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Restored ${restoredGlobals.length} tab${restoredGlobals.length == 1 ? '' : 's'} from previous session!'),
+
+            if(foundBrokenItem)
+              // notify user if there was unknown booru or invalid entry in the list
+              ...[
+                Text('Some restored tabs had unknown boorus or broken characters.'),
+                Text('They were set to default or ignored.')
+              ],
+          ],
+        ),
+        sideColor: foundBrokenItem ? Colors.yellow : Colors.green,
+        leadingIcon: foundBrokenItem ? Icons.warning_amber: Icons.settings_backup_restore,
+      );
+
       searchHandler.list.value = restoredGlobals;
       searchHandler.changeTabIndex(newIndex);
     } else {
@@ -519,7 +536,21 @@ class _HomeState extends State<Home> {
                       value: settingsHandler.mergeEnabled,
                       onChanged: (newValue) {
                         if(settingsHandler.booruList.length < 2) {
-                          ServiceHandler.displayToast('You need at least 2 booru configs to use this feature!');
+                          FlashElements.showSnackbar(
+                            context: context,
+                            title: Text(
+                              "Error!",
+                              style: TextStyle(fontSize: 20)
+                            ),
+                            content: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('You need at least 2 booru configs to use this feature!'),
+                              ],
+                            ),
+                            leadingIcon: Icons.error,
+                            leadingIconColor: Colors.red,
+                          );
                         } else {
                           setState(() {
                             settingsHandler.mergeEnabled = newValue;
@@ -596,49 +627,9 @@ class _HomeState extends State<Home> {
           // IconButton(
           //   icon: Icon(Icons.flash_on),
           //   onPressed: () {
-          //     showFlash(
+          //     FlashElements.showSnackbar(
           //       context: context,
-          //       duration: Duration(seconds: 5),
-          //       builder: (_, controller) {
-          //         return Flash(
-          //           controller: controller,
-          //           margin: EdgeInsets.zero,
-          //           behavior: FlashBehavior.fixed,
-          //           position: FlashPosition.bottom,
-          //           borderRadius: BorderRadius.circular(8.0),
-          //           borderColor: Colors.blue,
-          //           boxShadows: kElevationToShadow[8],
-          //           backgroundGradient: RadialGradient(
-          //             colors: [Get.theme.colorScheme.secondary, Colors.black87],
-          //             center: Alignment.topLeft,
-          //             radius: 2,
-          //           ),
-          //           onTap: () => controller.dismiss(),
-          //           forwardAnimationCurve: Curves.easeInCirc,
-          //           reverseAnimationCurve: Curves.bounceIn,
-          //           child: DefaultTextStyle(
-          //             style: TextStyle(color: Colors.white),
-          //             child: FlashBar(
-          //               title: Text('Hello Flash'),
-          //               content: Text('You can put any message of any length here.'),
-          //               indicatorColor: Colors.red,
-          //               icon: Icon(Icons.info_outline),
-          //               primaryAction: TextButton(
-          //                 onPressed: () => controller.dismiss(),
-          //                 child: Text('DISMISS'),
-          //               ),
-          //               actions: <Widget>[
-          //                 TextButton(
-          //                     onPressed: () => controller.dismiss('Yes, I do!'),
-          //                     child: Text('YES')),
-          //                 TextButton(
-          //                     onPressed: () => controller.dismiss('No, I do not!'),
-          //                     child: Text('NO')),
-          //               ],
-          //             ),
-          //           ),
-          //         );
-          //       },
+          //       title: Text('Test Flash'),
           //     );
           //   },
           // ),
@@ -683,7 +674,17 @@ class _HomeState extends State<Home> {
                   searchHandler.currentTab.selected = [];
                 });
               } else {
-                ServiceHandler.displayToast("No items selected \n (」°ロ°)」");
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: Text(
+                    "No items selected",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  overrideLeadingIconWidget: Text(
+                    " (」°ロ°)」 ",
+                    style: TextStyle(fontSize: 18)
+                  ),
+                );
               }
             },
           ),

@@ -269,6 +269,11 @@ class _WaterfallState extends State<WaterfallView> {
     updateState();
   }
 
+  void onThumbSecondaryTap(int index) {
+    BooruItem item = widget.tab.booruHandler.filteredFetched[index];
+    Clipboard.setData(ClipboardData(text: item.fileURL));
+  }
+
   Widget cardItemBuild(int index, int columnsCount) {
     return Obx(() {
       bool isSelected = widget.tab.selected.contains(index);
@@ -289,21 +294,26 @@ class _WaterfallState extends State<WaterfallView> {
                 ),
               )
               : null,
-            child: InkResponse(
-              enableFeedback: true,
-              highlightShape: BoxShape.rectangle,
-              containedInkWell: false,
-              highlightColor: Get.theme.colorScheme.secondary,
-              child: sampleorThumb(index, columnsCount, widget.tab),
-              onTap: () {
-                onThumbTap(index);
+            child: GestureDetector(
+              onSecondaryTap: () {
+                onThumbSecondaryTap(index);
               },
-              onDoubleTap: () {
-                onThumbDoubleTap(index);
-              },
-              onLongPress: () {
-                onThumbLongPress(index);
-              },
+              child: InkResponse(
+                enableFeedback: true,
+                highlightShape: BoxShape.rectangle,
+                containedInkWell: false,
+                highlightColor: Get.theme.colorScheme.secondary,
+                child: sampleorThumb(index, columnsCount, widget.tab),
+                onTap: () {
+                  onThumbTap(index);
+                },
+                onDoubleTap: () {
+                  onThumbDoubleTap(index);
+                },
+                onLongPress: () {
+                  onThumbLongPress(index);
+                },
+              ),
             ),
           ),
         )

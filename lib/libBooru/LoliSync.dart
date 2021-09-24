@@ -5,6 +5,9 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'BooruItem.dart';
 
 class LoliSync{
@@ -129,7 +132,17 @@ class LoliSync{
   }
   void killServer() async{
     await server.close();
-    ServiceHandler.displayToast("LoliSync server killed");
+    FlashElements.showSnackbar(
+      context: Get.context!,
+      duration: null,
+      title: Text(
+        "LoliSync server killed!",
+        style: TextStyle(fontSize: 20)
+      ),
+      leadingIcon: Icons.warning_amber,
+      leadingIconColor: Colors.yellow,
+      sideColor: Colors.yellow,
+    );
   }
 
 
