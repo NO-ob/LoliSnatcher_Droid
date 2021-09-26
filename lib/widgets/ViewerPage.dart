@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -208,7 +209,7 @@ class _ViewerPageState extends State<ViewerPage> {
         scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
         physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
         itemBuilder: (context, index) {
-          String fileURL = getFetched()[index].fileURL;
+          // String fileURL = getFetched()[index].fileURL;
           bool isVideo = getFetched()[index].isVideo();
           int preloadCount = settingsHandler.preloadCount;
           bool isViewed = searchHandler.currentTab.viewedIndex.value == index;
@@ -395,7 +396,22 @@ class _ViewerPageState extends State<ViewerPage> {
         });
         newState ? setScrollTimer() : unsetScrollTimer();
       } else {
-        if(newState == true) ServiceHandler.displayToast("Can't start slideshow\nReached the last loaded item");
+        if (newState == true) {
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              "Can't start Slideshow",
+              style: TextStyle(fontSize: 20)
+            ),
+            content: Text(
+              "Reached the Last loaded Item",
+              style: TextStyle(fontSize: 16)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
+        }
         setState(() {
           autoScroll = false;
         });
@@ -483,7 +499,19 @@ class _ViewerPageState extends State<ViewerPage> {
   void shareTextAction(String text) {
     if (Platform.isWindows || Platform.isLinux) {
       Clipboard.setData(ClipboardData(text: text));
-      ServiceHandler.displayToast('Copied to clipboard!');
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          "Copied to clipboard!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          text,
+          style: TextStyle(fontSize: 16)
+        ),
+        leadingIcon: Icons.copy,
+        sideColor: Colors.green,
+      );
     } else if (Platform.isAndroid) {
       ServiceHandler serviceHandler = ServiceHandler();
       serviceHandler.loadShareTextIntent(text);
@@ -503,12 +531,37 @@ class _ViewerPageState extends State<ViewerPage> {
     String? path = await imageWriter.getCachePath(item.fileURL, 'media');
     ServiceHandler serviceHandler = ServiceHandler();
 
+    // TODO rewrite to DioDownloader
+    // TODO delete from cache after share window closes
+    // TODO show progress bar when loading from network
+
     if(path != null) {
       // File is already in cache - share from there
       await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
-      ServiceHandler.displayToast("Loading file from network...\nPlease wait");
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          "Loading File...",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          "This can take some time, please wait...",
+          style: TextStyle(fontSize: 16)
+        ),
+        overrideLeadingIconWidget: Container(
+          width: 50,
+          height: 50,
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+            ),
+          )
+        ),
+        sideColor: Colors.yellow,
+      );
       var request = await HttpClient().getUrl(Uri.parse(item.fileURL));
       var response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
@@ -517,7 +570,20 @@ class _ViewerPageState extends State<ViewerPage> {
         path = cacheFile.path;
         await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
       } else {
-        ServiceHandler.displayToast("Error!\nSomething went wrong when saving file to share");
+        FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              "Error!",
+              style: TextStyle(fontSize: 20)
+            ),
+            content: Text(
+              "Something went wrong when saving the File before Sharing",
+              style: TextStyle(fontSize: 16)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
       }
 
       // TODO: find a way to detect when share menu was closed, orherwise this is triggered immediately and file is deleted before sending to another app
@@ -847,7 +913,16 @@ class _ViewerPageState extends State<ViewerPage> {
         if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '') {
           shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
         } else {
-          ServiceHandler.displayToast("No Post URL!");
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              "No Post URL!",
+              style: TextStyle(fontSize: 20)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
         }
         break;
       case 'File URL':

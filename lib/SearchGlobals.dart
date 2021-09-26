@@ -73,7 +73,6 @@ class SearchHandler extends GetxController {
       }
     } else {
       FlashElements.showSnackbar(
-        context: Get.context!,
         title: Text(
           "Removed Last Tab",
           style: TextStyle(fontSize: 20)
@@ -138,7 +137,6 @@ class SearchHandler extends GetxController {
     // UOOOOOHHHHH
     if (text.toLowerCase().contains("loli")) {
       FlashElements.showSnackbar(
-        context: Get.context!,
         duration: Duration(seconds: 2),
         title: Text(
           "UOOOOOOOHHH",
@@ -230,7 +228,7 @@ class SearchGlobal {
     tagsList: [],
     postURL: ""
   ).obs;
-  List selected = [];
+  RxList selected = [].obs;
 
   SearchGlobal(this.selectedBooru, this.secondaryBoorus, this.tags) {
     List<Booru> tempBooruList = [];

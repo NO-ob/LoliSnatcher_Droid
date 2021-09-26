@@ -1,6 +1,6 @@
 //import 'dart:html';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
@@ -95,7 +95,16 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   snatcherSleepController.text = 0.toString();
                 }
                 if(selectedBooru == null) {
-                  ServiceHandler.displayToast('No Booru Selected');
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: Text(
+                      "No Booru Selected!",
+                      style: TextStyle(fontSize: 18)
+                    ),
+                    leadingIcon: Icons.error_outline,
+                    leadingIconColor: Colors.red,
+                    sideColor: Colors.red,
+                  );
                   return;
                 }
 

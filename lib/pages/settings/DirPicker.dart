@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -76,7 +76,21 @@ class _DirPickerState extends State<DirPicker> {
       });
     } else {
       newDirNameController.text = "";
-      ServiceHandler.displayToast("Failed to create directory");
+
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          "Error!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          "Failed to create directory!",
+          style: TextStyle(fontSize: 16)
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
     }
 
   }
@@ -88,7 +102,20 @@ class _DirPickerState extends State<DirPicker> {
       file.deleteSync();
       return true;
     } on FileSystemException catch(e) {
-      ServiceHandler.displayToast("Directory is not writable");
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          "Error!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          "Directory is not writable!",
+          style: TextStyle(fontSize: 16)
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
       return false;
     }
   }

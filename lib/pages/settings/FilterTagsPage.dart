@@ -1,10 +1,10 @@
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
@@ -139,7 +139,20 @@ class _FiltersEditState extends State<FiltersEdit> {
     List<String> changedList = getTagsList(type);
     setState(() {
       if(changedList.contains(tag)) {
-        ServiceHandler.displayToast('"$tag" is already in $type list');
+        FlashElements.showSnackbar(
+          context: context,
+          title: Text(
+            "Duplicate tag!",
+            style: TextStyle(fontSize: 20)
+          ),
+          content: Text(
+            "'$tag' is already in $type list",
+            style: TextStyle(fontSize: 16)
+          ),
+          leadingIcon: Icons.warning_amber,
+          leadingIconColor: Colors.yellow,
+          sideColor: Colors.yellow,
+        );
       } else {
         changedList.add(tag);
       }
@@ -193,7 +206,16 @@ class _FiltersEditState extends State<FiltersEdit> {
                             newTagController.text = '';
                             Navigator.of(context).pop(true);
                           } else {
-                            ServiceHandler.displayToast('Empty input!');
+                            FlashElements.showSnackbar(
+                              context: context,
+                              title: Text(
+                                "Empty input!",
+                                style: TextStyle(fontSize: 20)
+                              ),
+                              leadingIcon: Icons.warning_amber,
+                              leadingIconColor: Colors.red,
+                              sideColor: Colors.red,
+                            );
                           }
                         },
                         decoration: InputDecoration(
@@ -224,7 +246,16 @@ class _FiltersEditState extends State<FiltersEdit> {
                   newTagController.text = '';
                   Navigator.of(context).pop(true);
                 } else {
-                  ServiceHandler.displayToast('Empty input!');
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: Text(
+                      "Empty input!",
+                      style: TextStyle(fontSize: 20)
+                    ),
+                    leadingIcon: Icons.warning_amber,
+                    leadingIconColor: Colors.red,
+                    sideColor: Colors.red,
+                  );
                 }
               },
               leading: Icon(Icons.save),

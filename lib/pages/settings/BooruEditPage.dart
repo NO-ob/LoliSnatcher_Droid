@@ -4,6 +4,7 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -139,17 +140,56 @@ class _BooruEditState extends State<BooruEdit> {
                             ),
                           ),
                           onPressed: () async{
-                            if (selectedBooruType == "Hydrus"){
+                            if (selectedBooruType == "Hydrus") {
                               HydrusHandler hydrus = HydrusHandler(Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
                               String accessKey = await hydrus.getAccessKey();
-                              if (accessKey != ""){
-                                ServiceHandler.displayToast("Access Key Requested \n Click okay on hydrus then apply. You can then test");
+                              if (accessKey != "") {
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    'Access Key Requested',
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  content: Text(
+                                    'Click okay on hydrus then apply. You can test afterwards',
+                                    style: TextStyle(fontSize: 16)
+                                  ),
+                                  leadingIcon: Icons.warning_amber,
+                                  leadingIconColor: Colors.yellow,
+                                  sideColor: Colors.yellow,
+                                );
                                 booruAPIKeyController.text = accessKey;
                               } else {
-                                ServiceHandler.displayToast("Couldn't get access key \n Do you have the request window open in hydrus?");
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    'Failed to get access key',
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  content: Text(
+                                    'Do you have the request window open in hydrus?',
+                                    style: TextStyle(fontSize: 16)
+                                  ),
+                                  leadingIcon: Icons.warning_amber,
+                                  leadingIconColor: Colors.red,
+                                  sideColor: Colors.red,
+                                );
                               }
                             } else {
-                              ServiceHandler.displayToast("Hydrus Only \n This button only works for Hydrus");
+                              FlashElements.showSnackbar(
+                                context: context,
+                                title: Text(
+                                  'Hydrus Only',
+                                  style: TextStyle(fontSize: 20)
+                                ),
+                                content: Text(
+                                  'This button only works for Hydrus',
+                                  style: TextStyle(fontSize: 16)
+                                ),
+                                leadingIcon: Icons.warning_amber,
+                                leadingIconColor: Colors.red,
+                                sideColor: Colors.red,
+                              );
                             }
                           },
                           child: Text("Get Hydrus Api Key"),
@@ -212,11 +252,29 @@ class _BooruEditState extends State<BooruEdit> {
       action: () async {
         // name and url are required
         if(booruNameController.text == "") {
-          ServiceHandler.displayToast("Booru Name required!");
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              'Booru Name is required!',
+              style: TextStyle(fontSize: 20)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
           return;
         }
         if(booruURLController.text == "") {
-          ServiceHandler.displayToast("Booru URL required!");
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              'Booru URL is required!',
+              style: TextStyle(fontSize: 20)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
           return;
         } else {
           // add https if not specified
@@ -272,9 +330,35 @@ class _BooruEditState extends State<BooruEdit> {
           widget.booruType = booruType;
           selectedBooruType = booruType;
           // Alert user about the results of the test
-          ServiceHandler.displayToast("Booru Type is $booruType\nClick the save button to save this config");
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              'Booru Type is $booruType',
+              style: TextStyle(fontSize: 20)
+            ),
+            content: Text(
+              'Click the Save button to save this config',
+              style: TextStyle(fontSize: 16)
+            ),
+            leadingIcon: Icons.done,
+            leadingIconColor: Colors.green,
+            sideColor: Colors.green,
+          );
         } else {
-          ServiceHandler.displayToast("No Data Returned\nBooru Information may be incorrect or the booru doesn't allow api access");
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              'No Data Returned',
+              style: TextStyle(fontSize: 20)
+            ),
+            content: Text(
+              "Entered Information may be incorrect, booru doesn't allow api access or there was a network error",
+              style: TextStyle(fontSize: 16)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
         }
         isTesting = false;
         setState(() { });
@@ -292,7 +376,16 @@ class _BooruEditState extends State<BooruEdit> {
       icon: Icon(Icons.save, color: widget.booruType == '' ? Colors.red : Colors.green),
       action: () async {
         if(widget.booruType == "") {
-          ServiceHandler.displayToast('Run Test First!');
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              'Run Test First!',
+              style: TextStyle(fontSize: 20)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.yellow,
+            sideColor: Colors.yellow,
+          );
           return;
         }
   
@@ -301,10 +394,23 @@ class _BooruEditState extends State<BooruEdit> {
         bool booruExists = false;
         // Call the saveBooru on the settings handler and parse it a Booru instance with data from the input fields
         for (int i=0; i < settingsHandler.booruList.length; i++){
-          if (settingsHandler.booruList[i].baseURL == booruURLController.text){
-            if (settingsHandler.booruList.contains(newBooru)){
+          if (settingsHandler.booruList[i].baseURL == booruURLController.text) {
+            if (settingsHandler.booruList.contains(newBooru) || settingsHandler.booruList.where((el) => el.name == booruNameController.text || el.baseURL == booruURLController.text).isNotEmpty) {
               booruExists = true;
-              ServiceHandler.displayToast("Booru Already Exists \n It has not been added");
+              FlashElements.showSnackbar(
+                context: context,
+                title: Text(
+                  'This Config Already Exists',
+                  style: TextStyle(fontSize: 20)
+                ),
+                content: Text(
+                  '...and will not be added',
+                  style: TextStyle(fontSize: 16)
+                ),
+                leadingIcon: Icons.warning_amber,
+                leadingIconColor: Colors.red,
+                sideColor: Colors.red,
+              );
             } else {
               settingsHandler.booruList.removeAt(i);
             }
@@ -331,9 +437,18 @@ class _BooruEditState extends State<BooruEdit> {
           );
         }
 
-        if (!booruExists){
+        if (!booruExists) {
           await settingsHandler.saveBooru(newBooru);
-          ServiceHandler.displayToast("Booru Saved! \n It will show in the dropdowns after a search");
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              'Booru Config Saved!',
+              style: TextStyle(fontSize: 20)
+            ),
+            leadingIcon: Icons.done,
+            leadingIconColor: Colors.green,
+            sideColor: Colors.green,
+          );
 
           // force global restate
           searchHandler.rootRestate();

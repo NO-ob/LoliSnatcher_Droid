@@ -1,4 +1,4 @@
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
@@ -207,7 +207,16 @@ class _GalleryPageState extends State<GalleryPage> {
                           for (int index = 0; index < buttonOrder!.length; index++)
                             ListTile(
                               onTap: () {
-                                ServiceHandler.displayToast('Long Press to move items');
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Long Press to move items",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  leadingIcon: Icons.warning_amber,
+                                  leadingIconColor: Colors.yellow,
+                                  sideColor: Colors.yellow,
+                                );
                               },
                               key: Key('$index'),
                               tileColor: index.isOdd ? oddItemColor : evenItemColor,

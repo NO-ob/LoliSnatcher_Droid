@@ -1,4 +1,5 @@
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +7,6 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
@@ -87,7 +87,7 @@ class _HistoryListState extends State<HistoryList> {
           null,
           [
             AbsorbPointer(absorbing: true, child: row),
-            Text("Last searched on: ${searchDateStr}"),
+            Text("Last searched on: $searchDateStr"),
             const SizedBox(height: 20),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -133,7 +133,19 @@ class _HistoryListState extends State<HistoryList> {
               ),
               onTap: () async {
                 Clipboard.setData(ClipboardData(text: data[1]));
-                ServiceHandler.displayToast('Text copied to clipboard!');
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: Text(
+                    "Copied to clipboard!",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  content: Text(
+                    data[1],
+                    style: TextStyle(fontSize: 16)
+                  ),
+                  leadingIcon: Icons.copy,
+                  sideColor: Colors.green,
+                );
                 Navigator.of(context).pop(true);
               },
               leading: Icon(Icons.copy),
@@ -199,7 +211,16 @@ class _HistoryListState extends State<HistoryList> {
           Navigator.of(context).pop(true);
           searchHandler.searchAction(currentEntry[1], booru);
         } else {
-          ServiceHandler.displayToast('Unknown booru type');
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              "Unknown Booru type!",
+              style: TextStyle(fontSize: 20)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
         }
       },
       minLeadingWidth: 20,

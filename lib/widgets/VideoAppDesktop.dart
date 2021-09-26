@@ -353,6 +353,11 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       }
     });
 
+    _videoController!.setVolume(settingsHandler.videoVolume);
+    _videoController!.generalStream.listen((GeneralState state) {
+      settingsHandler.videoVolume = state.volume;
+    });
+
     // Stop force restating loading indicators when video is initialized
     _checkInterval?.cancel();
 
@@ -587,6 +592,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             _debounceBytes = Timer(
               const Duration(milliseconds: 500),
               () {
+                _videoController!.setVolume(settingsHandler.videoVolume);
                 _videoController!.play();
                 firstViewFix = true;
               }

@@ -7,7 +7,6 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'BooruItem.dart';
 
 class LoliSync{
@@ -133,7 +132,6 @@ class LoliSync{
   void killServer() async{
     await server.close();
     FlashElements.showSnackbar(
-      context: Get.context!,
       duration: null,
       title: Text(
         "LoliSync server killed!",

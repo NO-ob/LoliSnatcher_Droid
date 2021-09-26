@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:intl/intl.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -112,7 +113,19 @@ class _TagViewState extends State<TagView> {
           onTap: () {
             if(canCopy) {
               Clipboard.setData(ClipboardData(text: data));
-              ServiceHandler.displayToast('Copied $title to clipboard!');
+              FlashElements.showSnackbar(
+                context: context,
+                title: Text(
+                  "Copied $title to clipboard!",
+                  style: TextStyle(fontSize: 20)
+                ),
+                content: Text(
+                  data,
+                  style: TextStyle(fontSize: 16)
+                ),
+                leadingIcon: Icons.copy,
+                sideColor: Colors.green,
+              );
             }
           },
           title: Row(
@@ -152,7 +165,19 @@ class _TagViewState extends State<TagView> {
               onTap: () {},
               onLongPress: () {
                 Clipboard.setData(ClipboardData(text: currentTag));
-                ServiceHandler.displayToast('"$currentTag" copied to clipboard!');
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: Text(
+                    "Copied to clipboard!",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  content: Text(
+                    currentTag,
+                    style: TextStyle(fontSize: 16)
+                  ),
+                  leadingIcon: Icons.copy,
+                  sideColor: Colors.green,
+                );
               },
               title: Row(children: [
                 if(tagIconAndColor.length > 0)
@@ -176,7 +201,19 @@ class _TagViewState extends State<TagView> {
                     setState(() {
                       searchHandler.addTag(currentTag);
                     });
-                    ServiceHandler.displayToast("Added to search:\n"+ currentTag);
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Added to search bar:",
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      content: Text(
+                        currentTag,
+                        style: TextStyle(fontSize: 16)
+                      ),
+                      leadingIcon: Icons.add,
+                      sideColor: Colors.green,
+                    );
                   },
                 ),
                 IconButton(
@@ -188,7 +225,19 @@ class _TagViewState extends State<TagView> {
                     setState(() {
                       searchHandler.addTabByString(currentTag);
                     });
-                    ServiceHandler.displayToast("Added new tab:\n" + currentTag);
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Added new tab:",
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      content: Text(
+                        currentTag,
+                        style: TextStyle(fontSize: 16)
+                      ),
+                      leadingIcon: Icons.fiber_new,
+                      sideColor: Colors.green,
+                    );
                   },
                 ),
               ])

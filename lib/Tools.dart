@@ -38,7 +38,6 @@ class Tools {
 
   static void forceClearMemoryCache({bool withLive = false}) {
     // clears memory image cache on timer or when changing tabs
-    // ServiceHandler.displayToast('Clearing cache\n${imageCache?.liveImageCount}/${imageCache?.currentSize}');
     PaintingBinding.instance?.imageCache?.clear();
     if(withLive) PaintingBinding.instance?.imageCache?.clearLiveImages();
   }

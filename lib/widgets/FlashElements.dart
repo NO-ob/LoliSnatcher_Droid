@@ -1,4 +1,5 @@
 
+import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
@@ -6,20 +7,25 @@ import 'package:get/get.dart';
 
 class FlashElements {
   static showSnackbar({
-    required BuildContext context,
-    required Widget title,
+    BuildContext? context, // current build context, if no given - get it from Getx
+    required Widget title, // title widget - required
     Widget content = const SizedBox(height: 20),
-    Color sideColor = Colors.red,
-    IconData? leadingIcon = Icons.info_outline,
-    Color? leadingIconColor,
-    double leadingIconSize = 30,
-    Widget? overrideLeadingIconWidget,
-    Duration? duration = const Duration(seconds: 5), // set to null to leave until closed by user
-    bool tapToClose = true,
-    bool shouldLeadingPulse = true,
+    Color sideColor = Colors.red, // color of the strip on the left side
+    IconData? leadingIcon = Icons.info_outline, // icon on the left side
+    Color? leadingIconColor, // icon color
+    double leadingIconSize = 36, // icon size
+    Widget? overrideLeadingIconWidget, // custom widget which will replace the icon
+    Duration? duration = const Duration(seconds: 4), // set to null to leave until closed by user
+    bool tapToClose = true, // close the tip by tapping anywhere on it
+    bool shouldLeadingPulse = true, // should icon widget play pulse animation
+    bool allowInViewer = true, // should tip open when user is in viewer
   }) {
+    if(!allowInViewer && Get.find<SearchHandler>().inViewer.value) {
+      return;
+    }
+
     showFlash(
-      context: context,
+      context: context ?? Get.context!,
       duration: duration,
       builder: (_, controller) {
         return Flash(
@@ -45,10 +51,13 @@ class FlashElements {
               title: title,
               content: content,
               indicatorColor: sideColor,
-              icon: overrideLeadingIconWidget ?? Icon(
-                leadingIcon,
-                color: leadingIconColor ?? Get.theme.colorScheme.onBackground,
-                size: leadingIconSize,
+              icon: overrideLeadingIconWidget ?? Padding(
+                padding: EdgeInsets.all(12),
+                child: Icon(
+                  leadingIcon,
+                  color: leadingIconColor ?? Get.theme.colorScheme.onBackground,
+                  size: leadingIconSize,
+                )
               ),
               shouldIconPulse: shouldLeadingPulse,
               primaryAction: IconButton(

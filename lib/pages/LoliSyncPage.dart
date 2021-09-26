@@ -24,7 +24,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   bool favourites = false, settings = false, booru = false;
   final LoliSync loliSync = LoliSync();
   List<NetworkInterface> ipList = [];
-  List<String> ipListNames = ['Auto'];
+  List<String> ipListNames = ['Auto', 'Localhost'];
   String selectedInterface = 'Auto';
   String? selectedAddress;
 
@@ -123,6 +123,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 icon: Icon(Icons.send_to_mobile),
                 page: ((ipController.text.isNotEmpty && portController.text.isNotEmpty) && (favourites || settings || booru)) ? () => LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru) : null,
                 action: !((ipController.text.isNotEmpty && portController.text.isNotEmpty) && (favourites || settings || booru)) ? () {
+                  // TODO fix condition checks + add new snackbar style
                   if (ipController.text.isEmpty || portController.text.isEmpty) {
                     ServiceHandler.displayToast("The Port and IP fields cannot be empty");
                   } else if (!favourites && !settings && !booru) {
@@ -149,7 +150,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   } catch (e) {
                     
                   }
-                  selectedAddress = findInterface?.addresses[0].address;
+                  if(newValue == 'Localhost') {
+                    selectedAddress = '127.0.0.1';
+                  } else {
+                    selectedAddress = findInterface?.addresses[0].address;
+                  }
                   setState(() { });
                 },
                 title: 'Available Network Interfaces'

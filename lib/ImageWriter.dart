@@ -125,25 +125,24 @@ class ImageWriter {
     }
 
     FlashElements.showSnackbar(
-        context: Get.context!,
-        title: Text(
-          "Snatching Complete",
-          style: TextStyle(fontSize: 20)
-        ),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (existsList.length > 0)
-              Text('${existsList.length} file${existsList.length == 1 ? ' was' : 's were'} already snatched!'),
+      title: Text(
+        "Snatching Complete",
+        style: TextStyle(fontSize: 20)
+      ),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (existsList.length > 0)
+            Text('${existsList.length} file${existsList.length == 1 ? ' was' : 's were'} already snatched'),
 
-            if (failedList.length > 0)
-              Text('Failed to snatch ${failedList.length} file${failedList.length == 1 ? '' : 's'}!'),
-          ],
-        ),
-        leadingIcon: Icons.error,
-        sideColor: Colors.red,
-        //TODO restart buttons?
-      );
+          if (failedList.length > 0)
+            Text('Failed to snatch ${failedList.length} file${failedList.length == 1 ? '' : 's'}'),
+        ],
+      ),
+      leadingIcon: Icons.done_all,
+      sideColor: (existsList.length > 0 || failedList.length > 0) ? Colors.yellow : Colors.green,
+      //TODO restart buttons?
+    );
     // String toastString = "Snatching Complete ¡¡¡( •̀ ᴗ •́ )و!!! \n";
   }
 

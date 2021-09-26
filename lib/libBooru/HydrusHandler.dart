@@ -5,7 +5,6 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart' as GET;
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'BooruHandler.dart';
@@ -153,7 +152,6 @@ class HydrusHandler extends BooruHandler{
       );
     } catch(e) {
       FlashElements.showSnackbar(
-        context: GET.Get.context!,
         duration: null,
         title: Text(
           "Error!",

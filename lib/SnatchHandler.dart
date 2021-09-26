@@ -58,7 +58,6 @@ class SnatchHandler extends GetxController {
       queuedList.add(booruItems); // change this last because it triggers a listener
       if (booruItems.length > 1){
         FlashElements.showSnackbar(
-          context: Get.context!,
           title: Text(
             "Added to snatch queue",
             style: TextStyle(fontSize: 20)
@@ -75,7 +74,6 @@ class SnatchHandler extends GetxController {
         );
       } else {
         FlashElements.showSnackbar(
-          context: Get.context!,
           title: Text(
             "Added to snatch queue",
             style: TextStyle(fontSize: 20)
@@ -110,7 +108,6 @@ class SnatchHandler extends GetxController {
     booruHandler.pageNum ++;
 
     FlashElements.showSnackbar(
-      context: Get.context!,
       title: Text(
         "Snatching Images",
         style: TextStyle(fontSize: 20)

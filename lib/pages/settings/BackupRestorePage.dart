@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,23 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
   @override
   void initState() {
     super.initState();
+  }
+
+  void showSnackbar(BuildContext context, String text, bool isError) {
+    FlashElements.showSnackbar(
+      context: context,
+      title: Text(
+        isError ? 'Error!' : 'Success!',
+        style: TextStyle(fontSize: 20)
+      ),
+      content: Text(
+        text,
+        style: TextStyle(fontSize: 16)
+      ),
+      leadingIcon: isError ? Icons.error_outline : Icons.done,
+      leadingIconColor: isError ? Colors.red : Colors.green,
+      sideColor: isError ? Colors.red : Colors.green,
+    );
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
@@ -67,9 +85,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       await newFile.create();
                     }
                     newFile.writeAsBytes(await file.readAsBytes());
-                    ServiceHandler.displayToast('Saved!');
+                    showSnackbar(context, 'Settings saved to settings.json', false);
                   } else {
-                    ServiceHandler.displayToast('No Access!');
+                    showSnackbar(context, 'No Access to backup folder!', true);
                   }
                 },
                 drawTopBorder: true,
@@ -87,12 +105,12 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       }
                       newFile.writeAsBytes(await file.readAsBytes());
                       settingsHandler.loadSettingsJson();
-                      ServiceHandler.displayToast('Restored!');
+                      showSnackbar(context, 'Settings restored from backup!', false);
                     } else {
-                      ServiceHandler.displayToast('No Restore File Found!');
+                      showSnackbar(context, 'No Restore File Found!', true);
                     }
                   } else {
-                    ServiceHandler.displayToast('No Access!');
+                    showSnackbar(context, 'No Access to backup folder!', true);
                   }
                 },
               ),
@@ -110,9 +128,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       await newFile.create();
                     }
                     newFile.writeAsBytes(await file.readAsBytes());
-                    ServiceHandler.displayToast('Saved!');
+                    showSnackbar(context, 'Database saved to store.db', false);
                   } else {
-                    ServiceHandler.displayToast('No Access!');
+                    showSnackbar(context, 'No Access to backup folder!', true);
                   }
                 },
               ),
@@ -130,12 +148,12 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       await newFile.writeAsBytes(await file.readAsBytes());
                       settingsHandler.dbHandler = DBHandler();
                       await settingsHandler.dbHandler.dbConnect(newFile.path);
-                      ServiceHandler.displayToast('Restored!');
+                      showSnackbar(context, 'Database restored from backup!', false);
                     } else {
-                      ServiceHandler.displayToast('No Restore File Found!');
+                      showSnackbar(context, 'No Restore File Found!', true);
                     }
                   } else {
-                    ServiceHandler.displayToast('No Access!');
+                    showSnackbar(context, 'No Access to backup folder!', true);
                   }
                 },
               ),
@@ -163,11 +181,11 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                             writer.close();
                           }
                         }
-                        ServiceHandler.displayToast('Saved!');
+                        showSnackbar(context, 'Boorus saved in /boorus folder', false);
                       }
                     }
                   } else {
-                    ServiceHandler.displayToast('No Access!');
+                    showSnackbar(context, 'No Access to backup folder!', true);
                   }
                 },
               ),
@@ -193,11 +211,11 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           }
                         }
                         settingsHandler.loadBoorus();
-                        ServiceHandler.displayToast('Restored!');
+                        showSnackbar(context, 'Boorus restored from backup!', false);
                       }
                     }
                   } else {
-                    ServiceHandler.displayToast('No Access!');
+                    showSnackbar(context, 'No Access to backup folder!', true);
                   }
                 },
               ),

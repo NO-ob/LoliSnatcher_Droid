@@ -1,3 +1,4 @@
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -114,7 +115,21 @@ class _DatabasePageState extends State<DatabasePage> {
                         TextButton(
                           onPressed: () {
                             serviceHandler.deleteDB(settingsHandler);
-                            ServiceHandler.displayToast("Database Deleted! \n An app restart is required!");
+
+                            FlashElements.showSnackbar(
+                              context: context,
+                              title: Text(
+                                "Database Deleted!",
+                                style: TextStyle(fontSize: 20)
+                              ),
+                              content: Text(
+                                "An app restart is required!",
+                                style: TextStyle(fontSize: 16)
+                              ),
+                              leadingIcon: Icons.delete_forever,
+                              leadingIconColor: Colors.red,
+                              sideColor: Colors.yellow,
+                            );
                             Navigator.of(context).pop(true);
                           },
                           child: Text('Delete', style: TextStyle(color: Get.theme.errorColor))
@@ -141,7 +156,21 @@ class _DatabasePageState extends State<DatabasePage> {
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.clearSnatched();
-                                ServiceHandler.displayToast("Snatched Cleared! \n An app restart may be required!");
+
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Snatched Cleared!",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  content: Text(
+                                    "An app restart may be required!",
+                                    style: TextStyle(fontSize: 16)
+                                  ),
+                                  leadingIcon: Icons.delete_forever,
+                                  leadingIconColor: Colors.red,
+                                  sideColor: Colors.yellow,
+                                );
                               }
                               Navigator.of(context).pop(true);
                             },
@@ -169,7 +198,20 @@ class _DatabasePageState extends State<DatabasePage> {
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.clearFavourites();
-                                ServiceHandler.displayToast("Favourites Cleared! \n An app restart may be required!");
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Favourites Cleared!",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  content: Text(
+                                    "An app restart may be required!",
+                                    style: TextStyle(fontSize: 16)
+                                  ),
+                                  leadingIcon: Icons.delete_forever,
+                                  leadingIconColor: Colors.red,
+                                  sideColor: Colors.yellow,
+                                );
                               }
                               Navigator.of(context).pop(true);
                             },
@@ -197,7 +239,20 @@ class _DatabasePageState extends State<DatabasePage> {
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.deleteFromSearchHistory(null);
-                                ServiceHandler.displayToast("Search History Cleared!");
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Search History Cleared!",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  content: Text(
+                                    "An app restart may be required!",
+                                    style: TextStyle(fontSize: 16)
+                                  ),
+                                  leadingIcon: Icons.delete_forever,
+                                  leadingIconColor: Colors.red,
+                                  sideColor: Colors.yellow,
+                                );
                               }
                               Navigator.of(context).pop(true);
                             },

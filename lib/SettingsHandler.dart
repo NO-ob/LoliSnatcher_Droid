@@ -29,8 +29,10 @@ class SettingsHandler extends GetxController {
   String verStr = "1.8.3";
   ////////////////////////////////////////////////////
 
+  // TODO move these to separate controller?
   // runtime settings vars
   bool hasHydrus = false, mergeEnabled = false, videoAutoMute = false;
+  double videoVolume = 1;
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs, showFPS = false.obs, showImageStats = false.obs, isMemeTheme = false.obs, showURLOnThumb = false.obs, disableImageScaling = false.obs;

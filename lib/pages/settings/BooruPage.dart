@@ -1,12 +1,12 @@
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../ServiceHandler.dart';
 import '../../SettingsHandler.dart';
 import 'BooruEditPage.dart';
 
@@ -141,18 +141,49 @@ class _BooruPageState extends State<BooruPage> {
                   action: (){
                     // do nothing if no selected or selected "Favourites" or there are tabs with it
                     if(selectedBooru == null) {
-                      ServiceHandler.displayToast("No Booru Selected!");
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          'No Booru Selected!',
+                          style: TextStyle(fontSize: 20)
+                        ),
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.red,
+                        sideColor: Colors.red,
+                      );
                       return;
                     }
                     if(selectedBooru?.type == 'Favourites') {
-                      ServiceHandler.displayToast("Can't delete this booru!");
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          "Can't delete this Booru!",
+                          style: TextStyle(fontSize: 20)
+                        ),
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.red,
+                        sideColor: Colors.red,
+                      );
                       return;
                     }
 
                     // TODO reset all tabs to next available booru?
                     List<SearchGlobal> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
                     if(tabsWithBooru.isNotEmpty) {
-                      ServiceHandler.displayToast("Can't delete this booru!\nRemove all tabs with it first");
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          "Can't delete this Booru!",
+                          style: TextStyle(fontSize: 20)
+                        ),
+                        content: Text(
+                          "Remove all tabs which use it first!",
+                          style: TextStyle(fontSize: 16)
+                        ),
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.red,
+                        sideColor: Colors.red,
+                      );
                       return;
                     }
 
@@ -185,14 +216,37 @@ class _BooruPageState extends State<BooruPage> {
                               // restate to avoid an exception due to changed booru list
                               setState(() { });
 
-                              if (settingsHandler.deleteBooru(tempSelected)){
-                                ServiceHandler.displayToast("Booru Deleted!");
+                              if (settingsHandler.deleteBooru(tempSelected)) {
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Booru Deleted!",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  leadingIcon: Icons.delete_forever,
+                                  leadingIconColor: Colors.red,
+                                  sideColor: Colors.yellow,
+                                );
                               } else {
                                 // restore selected and prefbooru if something went wrong
                                 selectedBooru = tempSelected;
                                 settingsHandler.prefBooru = tempSelected.name ?? '';
                                 settingsHandler.sortBooruList();
-                                ServiceHandler.displayToast("Something went wrong during deletion of a booru config!");
+
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Error!",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  content: Text(
+                                    "Something went wrong during deletion of a booru config!",
+                                    style: TextStyle(fontSize: 16)
+                                  ),
+                                  leadingIcon: Icons.warning_amber,
+                                  leadingIconColor: Colors.red,
+                                  sideColor: Colors.red,
+                                );
                               }
 
                               setState(() { });

@@ -1,6 +1,7 @@
 import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
 import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
 import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -85,8 +86,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => DatabasePage()
               ),
               SettingsButton(
-                // TODO
-                name: 'Backup & Restore [WIP]',
+                name: 'Backup & Restore [Beta]',
                 icon: Icon(Icons.restore_page),
                 page: () => BackupRestorePage(),
               ),
@@ -94,7 +94,17 @@ class SettingsPage extends StatelessWidget {
                 name: 'Loli Sync',
                 icon: Icon(Icons.sync),
                 action: settingsHandler.dbEnabled ? null : () {
-                  ServiceHandler.displayToast("Database must be enabled to use Loli Sync");
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: Text(
+                      "Error!",
+                      style: TextStyle(fontSize: 20)
+                    ),
+                    content: Text("Database must be enabled to use Loli Sync"),
+                    leadingIcon: Icons.error_outline,
+                    leadingIconColor: Colors.red,
+                    sideColor: Colors.red,
+                  );
                 },
                 page: settingsHandler.dbEnabled ? () => LoliSyncPage() : null,
               ),
@@ -130,12 +140,30 @@ class SettingsPage extends StatelessWidget {
                 icon: Icon(null), // to align with other items
                 action: () {
                   if(settingsHandler.isDebug.value) {
-                    ServiceHandler.displayToast('Debug mode is already enabled!');
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Debug mode is already enabled!",
+                        style: TextStyle(fontSize: 18)
+                      ),
+                      leadingIcon: Icons.warning_amber,
+                      leadingIconColor: Colors.yellow,
+                      sideColor: Colors.yellow,
+                    );
                   } else {
                     debugTaps++;
                     if(debugTaps > 5) {
                       settingsHandler.isDebug.value = true;
-                      ServiceHandler.displayToast('Debug mode enabled!');
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          "Debug mode is enabled!",
+                          style: TextStyle(fontSize: 18)
+                        ),
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.green,
+                        sideColor: Colors.green,
+                      );
                     }
                   }
                 },

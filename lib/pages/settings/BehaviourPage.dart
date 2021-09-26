@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -284,7 +285,20 @@ class _BehaviourPageState extends State<BehaviourPage> {
                       Get.to(() => DirPicker(path))!.then((value) => {setPath(value ?? '')});
                     }
                   } else {
-                    ServiceHandler.displayToast("Not available on android 11+");
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        'Error!',
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      content: Text(
+                        'Not available on Android 11+',
+                        style: TextStyle(fontSize: 16)
+                      ),
+                      leadingIcon: Icons.error_outline,
+                      leadingIconColor: Colors.red,
+                      sideColor: Colors.red,
+                    );
                   }
                 },
               ),
@@ -316,7 +330,21 @@ class _BehaviourPageState extends State<BehaviourPage> {
                     : Icon(null),
                   action: () async {
                     if (folder != null && folder != 'favicons' && !isEmpty) {
-                      ServiceHandler.displayToast('Cleared $label cache');
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          'Cache cleared!',
+                          style: TextStyle(fontSize: 20)
+                        ),
+                        content: Text(
+                          'Cleared $label cache!',
+                          style: TextStyle(fontSize: 16)
+                        ),
+                        leadingIcon: Icons.delete_forever,
+                        leadingIconColor: Colors.red,
+                        leadingIconSize: 40,
+                        sideColor: Colors.yellow,
+                      );
                       await imageWriter.deleteCacheFolder(folder);
                       getCacheStats();
                     }
@@ -325,10 +353,33 @@ class _BehaviourPageState extends State<BehaviourPage> {
               }),
 
               SettingsButton(
-                name: 'Clear Cache',
+                name: 'Clear cache completely',
                 icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
                 action: () async {
-                  ServiceHandler.displayToast("Cache cleared!\nRestart may be required!");
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: Text(
+                      'Cache cleared!',
+                      style: TextStyle(fontSize: 20)
+                    ),
+                    content: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Cleared cache completely!',
+                          style: TextStyle(fontSize: 16)
+                        ),
+                        Text(
+                          'App Restart may be required!',
+                          style: TextStyle(fontSize: 16)
+                        ),
+                      ]
+                    ),
+                    leadingIcon: Icons.delete_forever,
+                    leadingIconColor: Colors.red,
+                    leadingIconSize: 40,
+                    sideColor: Colors.yellow,
+                  );
                   await imageWriter.deleteCacheFolder('');
                   // await serviceHandler.emptyCache();
                   getCacheStats();

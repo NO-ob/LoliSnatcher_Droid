@@ -200,7 +200,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
         updateState();
         // this.mounted prevents exceptions when using staggered view
       }
-      print('Dio request cancelled: $error');
+      print('Dio request cancelled: $thumbURL $error');
     }
   }
 

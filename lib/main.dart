@@ -659,35 +659,69 @@ class _HomeState extends State<Home> {
           //     Tools.forceClearMemoryCache(withLive: true);
           //   },
           // ),
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: (){
-              getPerms();
-              // call a function to save the currently viewed image when the save button is pressed
-              if (searchHandler.currentTab.selected.length > 0){
-                snatchHandler.queue(
-                  searchHandler.currentTab.getSelected(),
-                  searchHandler.currentTab.selectedBooru.value,
-                  settingsHandler.snatchCooldown
-                );
-                setState(() {
-                  searchHandler.currentTab.selected = [];
-                });
-              } else {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: Text(
-                    "No items selected",
-                    style: TextStyle(fontSize: 20)
-                  ),
-                  overrideLeadingIconWidget: Text(
-                    " (」°ロ°)」 ",
-                    style: TextStyle(fontSize: 18)
-                  ),
-                );
-              }
-            },
-          ),
+
+          if(searchHandler.list.isNotEmpty)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.save),
+                  onPressed: () {
+                    getPerms();
+                    // call a function to save the currently viewed image when the save button is pressed
+                    if (searchHandler.currentTab.selected.length > 0){
+                      snatchHandler.queue(
+                        searchHandler.currentTab.getSelected(),
+                        searchHandler.currentTab.selectedBooru.value,
+                        settingsHandler.snatchCooldown
+                      );
+                      searchHandler.currentTab.selected.value = [];
+                    } else {
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          "No items selected",
+                          style: TextStyle(fontSize: 20)
+                        ),
+                        overrideLeadingIconWidget: Text(
+                          " (」°ロ°)」 ",
+                          style: TextStyle(fontSize: 18)
+                        ),
+                      );
+                    }
+                  },
+                ),
+
+                Obx(() {
+                  if(searchHandler.currentTab.selected.isEmpty) {
+                    return const SizedBox();
+                  } else {
+                    return Positioned(
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          color: Get.theme.colorScheme.secondary,
+                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Center(
+                          child: FittedBox(
+                            child: Text(
+                              '${searchHandler.currentTab.selected.length}',
+                              style: TextStyle(color: Get.theme.colorScheme.onSecondary)
+                            ),
+                          )
+                        )
+                      ),
+                      right: 2,
+                      bottom: 5,
+                    );
+                  }
+                })
+              ]
+            ),
+
           IconButton(
             icon: Icon(Icons.menu),
             onPressed: () {
