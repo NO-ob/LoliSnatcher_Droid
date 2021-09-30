@@ -97,9 +97,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       // if (splitInput.length > 1) {
         // Get last tag in the input and remove minus (exclude symbol)
         // TODO /bug?: use the tag behind the current cursor position, not the last tag
-        setState(() {
-          lastTag = splitInput[splitInput.length - 1].replaceAll(RegExp(r'^-'), '');
-        });
+        lastTag = splitInput[splitInput.length - 1].replaceAll(RegExp(r'^-'), '');
+        setState(() { });
       // }
     }
   }
@@ -186,14 +185,27 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           elevation: 4.0,
           child: Obx(() {
             List<List<String>> items = [
-              ...historyResults,
-              ...databaseResults,
+              ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
+              ...databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
               ...booruResults,
             ];
             if(items.length == 0) {
-              return Container(
-                padding: EdgeInsets.all(10),
-                child: Text('No results!', style: TextStyle(fontSize: 16))
+              return ListTile(
+                horizontalTitleGap: 4,
+                minLeadingWidth: 20,
+                minVerticalPadding: 0,
+                leading: null,
+                title: MarqueeText(
+                  text: 'No results!',
+                  fontSize: 16,
+                  startPadding: 0,
+                  isExpanded: false,
+                ),
+                onTap: () {
+                  tagStuff();
+                  combinedSearch();
+                  this._overlayEntry!.markNeedsBuild();
+                },
               );
             } else {
               return Scrollbar(
@@ -222,6 +234,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           itemIcon = CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                           );
+                        break;
+                        default:
+                          itemIcon = Icon(null);
+                        break;
                       }
                       return ListTile(
                         horizontalTitleGap: 4,
@@ -234,7 +250,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           startPadding: 0,
                           isExpanded: false,
                         ),
-                        onTap: (() {
+                        onTap: () {
                           // widget.searchBoxFocus.unfocus();
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
@@ -245,8 +261,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             // Set the cursor to the end of the search and reset the overlay data
                             searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
                           });
+
+                          tagStuff();
+                          combinedSearch();
                           this._overlayEntry!.markNeedsBuild();
-                        }),
+                        },
                       );
                     } else {
                       return const SizedBox();
