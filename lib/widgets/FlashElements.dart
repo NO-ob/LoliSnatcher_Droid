@@ -1,4 +1,3 @@
-
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flash/flash.dart';
@@ -19,6 +18,7 @@ class FlashElements {
     bool tapToClose = true, // close the tip by tapping anywhere on it
     bool shouldLeadingPulse = true, // should icon widget play pulse animation
     bool allowInViewer = true, // should tip open when user is in viewer
+    FlashPosition position = FlashPosition.bottom,
   }) {
     if(!allowInViewer && Get.find<SearchHandler>().inViewer.value) {
       return;
@@ -30,11 +30,11 @@ class FlashElements {
       builder: (_, controller) {
         return Flash(
           controller: controller,
-          margin: Get.find<SettingsHandler>().appMode == 'Desktop'
-            ? EdgeInsets.symmetric(horizontal: Get.mediaQuery.size.width / 3)
+          margin: (Get.find<SettingsHandler>().appMode == 'Desktop' && Get.mediaQuery.size.width > 500)
+            ? EdgeInsets.symmetric(horizontal: Get.mediaQuery.size.width / 4)
             : EdgeInsets.zero,
           behavior: FlashBehavior.fixed,
-          position: FlashPosition.bottom,
+          position: position,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(12),
             topRight: Radius.circular(12)

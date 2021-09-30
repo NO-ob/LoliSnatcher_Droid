@@ -24,6 +24,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   List splitInput = [];
   ScrollController scrollController = ScrollController();
 
+  RxList<List<String>> booruResults = RxList([]);
+  RxList<List<String>> historyResults = RxList([]);
+  RxList<List<String>> databaseResults = RxList([]);
+  RxList<List<String>> searchModifiersResults = RxList([]);
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +50,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     if (searchHandler.searchBoxFocus.hasFocus){
       if (this._overlayEntry == null){
         tagStuff();
+        combinedSearch();
         this._overlayEntry = _createOverlayEntry();
       }
       this._updateOverlay();
@@ -66,6 +72,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         Overlay.of(context)!.insert(this._overlayEntry!);
       } else {
         tagStuff();
+        combinedSearch();
         this._overlayEntry!.markNeedsBuild();
       }
     } else {
@@ -82,7 +89,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     super.dispose();
   }
 
-  void tagStuff(){
+  void tagStuff() {
     if (searchHandler.currentTab.booruHandler.tagSearchEnabled) {
       input = searchHandler.searchTextController.text;
       splitInput = input.split(" ");
@@ -97,7 +104,42 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     }
   }
 
-  Future<List<List<String>?>> combinedSearch(String input) async {
+  void searchBooru(String input) async {
+    booruResults.value = [[' ', 'loading']];
+    List<String?>? getFromBooru = await searchHandler.currentTab.booruHandler.tagSearch(lastTag);
+    booruResults.value = getFromBooru?.map((tag){
+      final String tagTemp = tag != null ? tag : '';
+      return [tagTemp, 'booru'];
+    }).toList() ?? [];
+  }
+  void searchHistory(String input) async {
+    historyResults.value = [[' ', 'loading']];
+    historyResults.value = input.isNotEmpty
+      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(input, 2)).map((tag){
+        return [tag, 'history'];
+      }).toList()
+      : [];
+    historyResults.value = historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
+  }
+  void searchDatabase(String input) async {
+    databaseResults.value = [[' ', 'loading']];
+    databaseResults.value = input.isNotEmpty
+      ? (await settingsHandler.dbHandler.getTags(input, 2)).map((tag){
+        return [tag, 'database'];
+      }).toList()
+      : [];
+    databaseResults.value = databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList();
+  }
+  // void searchModifiers(String input) async { }
+
+  void combinedSearch() {
+    searchBooru(lastTag);
+    searchHistory(lastTag);
+    searchDatabase(lastTag);
+    // searchModifiers(lastTag);
+  }
+
+  Future<List<List<String>?>> combinedSearchOld(String input) async {
     List<String?>? getFromBooru = await searchHandler.currentTab.booruHandler.tagSearch(lastTag);
     final List<List<String>> booruResults = getFromBooru?.map((tag){
       final String tagTemp = tag != null ? tag : '';
@@ -109,9 +151,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         return [tag, 'history'];
       }).toList()
       : [];
-    final List<List<String>> favouritesResults = input.isNotEmpty
+    final List<List<String>> databaseResults = input.isNotEmpty
       ? (await settingsHandler.dbHandler.getTags(input, 2)).map((tag){
-        return [tag, 'favourites'];
+        return [tag, 'database'];
       }).toList()
       : [];
 
@@ -122,7 +164,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
     return [
       ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1), // filter out duplicates
-      ...favouritesResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
+      ...databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
       ...booruResults
     ];
   }
@@ -133,91 +175,91 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     // searchHandler.currentTab.booruHandler.limit = 20;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
-      return OverlayEntry(
-        builder: (context) => Positioned(
-          left: offset.dx,
-          top: offset.dy + size.height + 5.0,
-          width: size.width * 1.2,
-          height: 300,
-          child: Material(
-            elevation: 4.0,
-            child: FutureBuilder(
-                future: combinedSearch(lastTag),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done && snapshot.data != null) {
-                    if(snapshot.data.length == 0) {
-                      return Container(
-                        padding: EdgeInsets.all(10),
-                        child: Text('No results!', style: TextStyle(fontSize: 16))
+
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        left: offset.dx,
+        top: offset.dy + size.height + 5.0,
+        width: size.width * 1.2,
+        height: 300,
+        child: Material(
+          elevation: 4.0,
+          child: Obx(() {
+            List<List<String>> items = [
+              ...historyResults,
+              ...databaseResults,
+              ...booruResults,
+            ];
+            if(items.length == 0) {
+              return Container(
+                padding: EdgeInsets.all(10),
+                child: Text('No results!', style: TextStyle(fontSize: 16))
+              );
+            } else {
+              return Scrollbar(
+                controller: scrollController,
+                interactive: true,
+                isAlwaysShown: true,
+                thickness: 10,
+                radius: Radius.circular(10),
+                child: ListView.builder(
+                  controller: scrollController,
+                  padding: EdgeInsets.zero,
+                  shrinkWrap: true,
+                  itemCount: items.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final List<String> item = items[index];
+                    if (item[0].isNotEmpty) {
+                      Widget? itemIcon;
+                      switch (item[1]) {
+                        case 'history':
+                          itemIcon = Icon(Icons.history);
+                        break;
+                        case 'database':
+                          itemIcon = Icon(Icons.archive);
+                        break;
+                        case 'loading':
+                          itemIcon = CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+                          );
+                      }
+                      return ListTile(
+                        horizontalTitleGap: 4,
+                        minLeadingWidth: 20,
+                        minVerticalPadding: 0,
+                        leading: itemIcon,
+                        title: MarqueeText(
+                          text: item[0],
+                          fontSize: 16,
+                          startPadding: 0,
+                          isExpanded: false,
+                        ),
+                        onTap: (() {
+                          // widget.searchBoxFocus.unfocus();
+                          // Keep minus if its in the beggining of current (last) tag
+                          bool isExclude = RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
+                          String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
+                          setState(() {
+                            searchHandler.searchTextController.text = newInput;
+
+                            // Set the cursor to the end of the search and reset the overlay data
+                            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
+                          });
+                          this._overlayEntry!.markNeedsBuild();
+                        }),
                       );
                     } else {
-                      return Scrollbar(
-                        controller: scrollController,
-                        interactive: true,
-                        isAlwaysShown: true,
-                        thickness: 10,
-                        radius: Radius.circular(10),
-                        child: ListView.builder(
-                          controller: scrollController,
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: snapshot.data.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final List<String> item = snapshot.data[index];
-                            if (item[0].isNotEmpty){
-                              IconData? itemIcon;
-                              switch (item[1]) {
-                                case 'history':
-                                  itemIcon = Icons.history;
-                                break;
-                                case 'favourites':
-                                  itemIcon = Icons.archive;
-                                break;
-                              }
-                              return ListTile(
-                                horizontalTitleGap: 4,
-                                minLeadingWidth: 20,
-                                minVerticalPadding: 0,
-                                leading: Icon(itemIcon),
-                                title: MarqueeText(
-                                  text: item[0],
-                                  fontSize: 16,
-                                  startPadding: 0,
-                                  isExpanded: false,
-                                ),
-                                onTap: (() {
-                                  // widget.searchBoxFocus.unfocus();
-                                  // Keep minus if its in the beggining of current (last) tag
-                                  bool isExclude = RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
-                                  String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
-                                  setState(() {
-                                    searchHandler.searchTextController.text = newInput;
-
-                                    // Set the cursor to the end of the search and reset the overlay data
-                                    searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
-                                  });
-                                  this._overlayEntry!.markNeedsBuild();
-                                }),
-                              );
-                            } else {
-                              return const SizedBox();
-                            }
-                          }
-                        )
-                      );
+                      return const SizedBox();
                     }
-                  } else {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-                      )
-                    );
                   }
-                }),
-          ),
+                )
+              );
+            }
+          }),
         ),
-      );
-    }
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

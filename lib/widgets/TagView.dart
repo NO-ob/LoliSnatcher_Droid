@@ -115,6 +115,7 @@ class _TagViewState extends State<TagView> {
               Clipboard.setData(ClipboardData(text: data));
               FlashElements.showSnackbar(
                 context: context,
+                duration: Duration(seconds: 2),
                 title: Text(
                   "Copied $title to clipboard!",
                   style: TextStyle(fontSize: 20)
@@ -167,6 +168,7 @@ class _TagViewState extends State<TagView> {
                 Clipboard.setData(ClipboardData(text: currentTag));
                 FlashElements.showSnackbar(
                   context: context,
+                  duration: Duration(seconds: 2),
                   title: Text(
                     "Copied to clipboard!",
                     style: TextStyle(fontSize: 20)
@@ -203,6 +205,7 @@ class _TagViewState extends State<TagView> {
                     });
                     FlashElements.showSnackbar(
                       context: context,
+                      duration: Duration(seconds: 2),
                       title: Text(
                         "Added to search bar:",
                         style: TextStyle(fontSize: 20)
@@ -227,6 +230,7 @@ class _TagViewState extends State<TagView> {
                     });
                     FlashElements.showSnackbar(
                       context: context,
+                      duration: Duration(seconds: 2),
                       title: Text(
                         "Added new tab:",
                         style: TextStyle(fontSize: 20)

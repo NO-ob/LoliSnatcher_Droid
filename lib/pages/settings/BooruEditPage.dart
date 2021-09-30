@@ -395,7 +395,7 @@ class _BooruEditState extends State<BooruEdit> {
         // Call the saveBooru on the settings handler and parse it a Booru instance with data from the input fields
         for (int i=0; i < settingsHandler.booruList.length; i++){
           if (settingsHandler.booruList[i].baseURL == booruURLController.text) {
-            if (settingsHandler.booruList.contains(newBooru) || settingsHandler.booruList.where((el) => el.name == booruNameController.text || el.baseURL == booruURLController.text).isNotEmpty) {
+            if (widget.booru.name == "New" && (settingsHandler.booruList.contains(newBooru) || settingsHandler.booruList.where((el) => el.name == booruNameController.text || el.baseURL == booruURLController.text).isNotEmpty)) {
               booruExists = true;
               FlashElements.showSnackbar(
                 context: context,

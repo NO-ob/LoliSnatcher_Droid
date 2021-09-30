@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:vibration/vibration.dart';
@@ -272,6 +274,20 @@ class _WaterfallState extends State<WaterfallView> {
   void onThumbSecondaryTap(int index) {
     BooruItem item = widget.tab.booruHandler.filteredFetched[index];
     Clipboard.setData(ClipboardData(text: item.fileURL));
+    FlashElements.showSnackbar(
+      context: context,
+      duration: Duration(seconds: 2),
+      title: Text(
+        "Copied File URL to clipboard!",
+        style: TextStyle(fontSize: 20)
+      ),
+      content: Text(
+        item.fileURL,
+        style: TextStyle(fontSize: 16)
+      ),
+      leadingIcon: Icons.copy,
+      sideColor: Colors.green,
+    );
   }
 
   Widget cardItemBuild(int index, int columnsCount) {
@@ -421,7 +437,7 @@ class _WaterfallState extends State<WaterfallView> {
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: (Platform.isWindows || Platform.isLinux) ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         addAutomaticKeepAlives: false,
         cacheExtent: 200,
         shrinkWrap: false,
@@ -454,7 +470,7 @@ class _WaterfallState extends State<WaterfallView> {
 
       return StaggeredGridView.countBuilder(
         controller: searchHandler.gridScrollController,
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: (Platform.isWindows || Platform.isLinux) ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         addAutomaticKeepAlives: false,
         shrinkWrap: true,
         itemCount: widget.tab.booruHandler.filteredFetched.length,
@@ -501,7 +517,7 @@ class _WaterfallState extends State<WaterfallView> {
       return WaterfallFlow.builder(
         controller: searchHandler.gridScrollController,
         padding: const EdgeInsets.all(5.0),
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: (Platform.isWindows || Platform.isLinux) ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         shrinkWrap: true,
         addAutomaticKeepAlives: false,
         cacheExtent: 200,
@@ -605,7 +621,38 @@ class _WaterfallState extends State<WaterfallView> {
                   // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height + 100),
-                    child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData) ? gridBuilder() : staggeredBetterBuilder() //staggeredBuilder()
+                    child: ImprovedScrolling(
+                      scrollController: searchHandler.gridScrollController,
+                      onScroll: (scrollOffset) => debugPrint(
+                        'Scroll offset: $scrollOffset',
+                      ),
+                      onMMBScrollStateChanged: (scrolling) => debugPrint(
+                        'Is scrolling: $scrolling',
+                      ),
+                      onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
+                            'Cursor position: $localCursorOffset\n'
+                            'Scroll activity: $scrollActivity',
+                      ),
+                      enableMMBScrolling: true,
+                      enableKeyboardScrolling: true,
+                      enableCustomMouseWheelScrolling: true,
+                      // mmbScrollConfig: MMBScrollConfig(
+                      //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
+                      // ),
+                      keyboardScrollConfig: KeyboardScrollConfig(
+                        arrowsScrollAmount: 250.0,
+                        homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
+                          return const Duration(milliseconds: 100);
+                        },
+                        endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
+                          return const Duration(milliseconds: 2000);
+                        },
+                      ),
+                      customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
+                        scrollAmountMultiplier: 15.0,
+                      ),
+                      child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData) ? gridBuilder() : staggeredBetterBuilder() //staggeredBuilder()
+                    )
                   ),
                 ),
               ),

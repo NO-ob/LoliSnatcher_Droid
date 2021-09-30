@@ -58,6 +58,7 @@ dependencies:
   preload_page_view: ^0.1.6
   flutter_displaymode: ^0.3.2
   crypto: ^3.0.1
+  flutter_improved_scrolling: ^0.0.3
 
 flutter_icons:
   android: "launcher_icon"

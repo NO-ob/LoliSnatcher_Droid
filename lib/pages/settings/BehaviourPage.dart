@@ -332,6 +332,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                     if (folder != null && folder != 'favicons' && !isEmpty) {
                       FlashElements.showSnackbar(
                         context: context,
+                        duration: Duration(seconds: 2),
                         title: Text(
                           'Cache cleared!',
                           style: TextStyle(fontSize: 20)

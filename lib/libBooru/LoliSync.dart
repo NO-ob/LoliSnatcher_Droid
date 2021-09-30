@@ -132,7 +132,6 @@ class LoliSync{
   void killServer() async{
     await server.close();
     FlashElements.showSnackbar(
-      duration: null,
       title: Text(
         "LoliSync server killed!",
         style: TextStyle(fontSize: 20)

@@ -501,6 +501,7 @@ class _ViewerPageState extends State<ViewerPage> {
       Clipboard.setData(ClipboardData(text: text));
       FlashElements.showSnackbar(
         context: context,
+        duration: Duration(seconds: 2),
         title: Text(
           "Copied to clipboard!",
           style: TextStyle(fontSize: 20)
