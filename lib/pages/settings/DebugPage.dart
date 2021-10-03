@@ -93,8 +93,8 @@ class _DebugPageState extends State<DebugPage> {
                 }
               ),
 
-              SettingsButton(name: 'Res: ${Get.mediaQuery.size.width}x${Get.mediaQuery.size.height}'),
-              SettingsButton(name: 'Pixel Ratio: ${Get.mediaQuery.devicePixelRatio}'),
+              SettingsButton(name: 'Res: ${Get.mediaQuery.size.width.toPrecision(4)}x${Get.mediaQuery.size.height.toPrecision(4)}'),
+              SettingsButton(name: 'Pixel Ratio: ${Get.mediaQuery.devicePixelRatio.toPrecision(4)}'),
             ],
           ),
         ),

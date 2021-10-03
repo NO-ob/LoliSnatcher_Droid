@@ -201,43 +201,46 @@ class _HistoryListState extends State<HistoryList> {
       );
     }
 
-    Widget entryRow = ListTile(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
-        side: BorderSide(color: Get.theme.colorScheme.secondary),
-      ),
-      onTap: () {
-        if (booru.type != null) {
-          searchHandler.searchTextController.text = currentEntry[1];
-          Navigator.of(context).pop(true);
-          searchHandler.searchAction(currentEntry[1], booru);
-        } else {
-          FlashElements.showSnackbar(
-            context: context,
-            title: Text(
-              "Unknown Booru type!",
-              style: TextStyle(fontSize: 20)
-            ),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-        }
-      },
-      minLeadingWidth: 20,
-      leading: booru.faviconURL != null
-        ? (booru.type == "Favourites"
-          ? Icon(Icons.favorite, color: Colors.red, size: 18)
-          : CachedFavicon(booru.faviconURL!)
-          )
-        : Icon(CupertinoIcons.question, size: 18),
-      title: MarqueeText(
-        text: currentEntry[1],
-        fontSize: 14,
-        fontWeight: FontWeight.bold,
-        startPadding: 0,
-        isExpanded: false,
-      ),
+    Widget entryRow = Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+          side: BorderSide(color: Get.theme.colorScheme.secondary),
+        ),
+        onTap: () {
+          if (booru.type != null) {
+            searchHandler.searchTextController.text = currentEntry[1];
+            Navigator.of(context).pop(true);
+            searchHandler.searchAction(currentEntry[1], booru);
+          } else {
+            FlashElements.showSnackbar(
+              context: context,
+              title: Text(
+                "Unknown Booru type!",
+                style: TextStyle(fontSize: 20)
+              ),
+              leadingIcon: Icons.warning_amber,
+              leadingIconColor: Colors.red,
+              sideColor: Colors.red,
+            );
+          }
+        },
+        minLeadingWidth: 20,
+        leading: booru.faviconURL != null
+          ? (booru.type == "Favourites"
+              ? Icon(Icons.favorite, color: Colors.red, size: 18)
+              : CachedFavicon(booru.faviconURL!)
+            )
+          : Icon(CupertinoIcons.question, size: 18),
+        title: MarqueeText(
+          text: currentEntry[1],
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+          startPadding: 0,
+          isExpanded: false,
+        ),
+      )
     );
 
     return Row(children: <Widget>[

@@ -623,16 +623,16 @@ class _WaterfallState extends State<WaterfallView> {
                     constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height + 100),
                     child: ImprovedScrolling(
                       scrollController: searchHandler.gridScrollController,
-                      onScroll: (scrollOffset) => debugPrint(
-                        'Scroll offset: $scrollOffset',
-                      ),
-                      onMMBScrollStateChanged: (scrolling) => debugPrint(
-                        'Is scrolling: $scrolling',
-                      ),
-                      onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
-                            'Cursor position: $localCursorOffset\n'
-                            'Scroll activity: $scrollActivity',
-                      ),
+                      // onScroll: (scrollOffset) => debugPrint(
+                      //   'Scroll offset: $scrollOffset',
+                      // ),
+                      // onMMBScrollStateChanged: (scrolling) => debugPrint(
+                      //   'Is scrolling: $scrolling',
+                      // ),
+                      // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
+                      //       'Cursor position: $localCursorOffset\n'
+                      //       'Scroll activity: $scrollActivity',
+                      // ),
                       enableMMBScrolling: true,
                       enableKeyboardScrolling: true,
                       enableCustomMouseWheelScrolling: true,

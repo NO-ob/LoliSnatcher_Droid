@@ -99,20 +99,23 @@ class _FiltersEditState extends State<FiltersEdit> {
                 bool isAddButton = index == 0;
                 String currentEntry = isAddButton ? '[Add]' : tagsList[index - 1];
 
-                Widget entryRow = ListTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    side: BorderSide(color: Get.theme.colorScheme.secondary),
-                  ),
-                  onTap: null,
-                  leading: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
-                  // label: Expanded(child: ScrollingText(currentEntry, 25, "infiniteWithPause", Colors.white)),
-                  title: MarqueeText(
-                    text: currentEntry,
-                    fontSize: 16,
-                    startPadding: 0,
-                    isExpanded: false,
-                  ),
+                Widget entryRow = Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                  child: ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      side: BorderSide(color: Get.theme.colorScheme.secondary),
+                    ),
+                    onTap: null,
+                    leading: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
+                    // label: Expanded(child: ScrollingText(currentEntry, 25, "infiniteWithPause", Colors.white)),
+                    title: MarqueeText(
+                      text: currentEntry,
+                      fontSize: 16,
+                      startPadding: 0,
+                      isExpanded: false,
+                    ),
+                  )
                 );
 
                 return Row(children: <Widget>[

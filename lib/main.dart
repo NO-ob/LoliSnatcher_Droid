@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -32,6 +31,7 @@ import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 
 void main() {
@@ -455,111 +455,71 @@ class _HomeState extends State<Home> {
   }
 
   Widget buildDrawer() {
-    return SafeArea(child: Drawer(
-      child: Column(
-        children: <Widget>[
-          if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
-            Container(
-              padding: EdgeInsets.fromLTRB(10, MediaQuery.of(context).padding.top + 4, 5,0),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  //Tags/Search field
-                  TagSearchBox(),
-                  GestureDetector(
-                    onLongPress: () {
-                      searchHandler.searchTextController.clearComposing();
-                      searchHandler.searchBoxFocus.unfocus();
-                      searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
-                    },
-                    child: IconButton(
-                      padding: const EdgeInsets.all(5),
-                      icon: Icon(Icons.search),
-                      onPressed: () {
+    return SafeArea(
+      child: Drawer(
+        child: Column(
+          children: <Widget>[
+            if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+              Container(
+                margin: EdgeInsets.fromLTRB(5, 20, 5, 10),
+                width: double.infinity,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    //Tags/Search field
+                    TagSearchBox(),
+                    GestureDetector(
+                      onLongPress: () {
                         searchHandler.searchTextController.clearComposing();
                         searchHandler.searchBoxFocus.unfocus();
-                        searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                        searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
                       },
-                    )
-                  ),
-                ],
+                      child: IconButton(
+                        iconSize: 30,
+                        icon: Icon(Icons.search),
+                        onPressed: () {
+                          searchHandler.searchTextController.clearComposing();
+                          searchHandler.searchBoxFocus.unfocus();
+                          searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                        },
+                      )
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-          Expanded(
-            child: Listener(
-              onPointerDown: (event) {
-                // print("pointer down");
-                if(searchHandler.searchBoxFocus.hasFocus){
-                  searchHandler.searchBoxFocus.unfocus();
-                }
-              },
-              child: ListView(
-                children: [
-                  // TODO tabbox and booruselector cause lag when opening a drawer
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        // const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                        TabBox(),
-                      ],
+            Expanded(
+              child: Listener(
+                onPointerDown: (event) {
+                  // print("pointer down");
+                  if(searchHandler.searchBoxFocus.hasFocus){
+                    searchHandler.searchBoxFocus.unfocus();
+                  }
+                },
+                child: ListView(
+                  children: [
+                    // TODO tabbox and booruselector cause lag when opening a drawer
+                    Container(
+                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          // const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                          TabBox(),
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
-                      ],
+                    Container(
+                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
-                        // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                        BooruSelectorMain(true),
-                      ],
-                    ),
-                  ),
-                  if(settingsHandler.booruList.length > 1)
-                    SettingsToggle(
-                      title: 'Multibooru Mode',
-                      value: settingsHandler.mergeEnabled,
-                      onChanged: (newValue) {
-                        if(settingsHandler.booruList.length < 2) {
-                          FlashElements.showSnackbar(
-                            context: context,
-                            title: Text(
-                              "Error!",
-                              style: TextStyle(fontSize: 20)
-                            ),
-                            content: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('You need at least 2 booru configs to use this feature!'),
-                              ],
-                            ),
-                            leadingIcon: Icons.error,
-                            leadingIconColor: Colors.red,
-                          );
-                        } else {
-                          setState(() {
-                            settingsHandler.mergeEnabled = newValue;
-                            searchHandler.mergeAction(null);
-                          });
-                        }
-                      },
-                    ),
-                  if(settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled)
                     Container(
                       margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                       child: Row(
@@ -567,47 +527,72 @@ class _HomeState extends State<Home> {
                         mainAxisSize: MainAxisSize.max,
                         children: <Widget>[
                           // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                          BooruSelectorMain(false),
+                          BooruSelectorMain(true),
                         ],
                       ),
                     ),
-
-                  //Add merge popup window
-                  /*TextButton.icon(
-                      style: TextButton.styleFrom(
-                        primary: Get.context!.theme.colorScheme.secondary,
-                        padding: EdgeInsets.all(10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(5),
-                          side: BorderSide(color: Get.context!.theme.colorScheme.secondary),
+                    if(settingsHandler.booruList.length > 1)
+                      SettingsToggle(
+                        title: 'Multibooru Mode',
+                        value: settingsHandler.mergeEnabled,
+                        onChanged: (newValue) {
+                          if(settingsHandler.booruList.length < 2) {
+                            FlashElements.showSnackbar(
+                              context: context,
+                              title: Text(
+                                "Error!",
+                                style: TextStyle(fontSize: 20)
+                              ),
+                              content: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('You need at least 2 booru configs to use this feature!'),
+                                ],
+                              ),
+                              leadingIcon: Icons.error,
+                              leadingIconColor: Colors.red,
+                            );
+                          } else {
+                            setState(() {
+                              settingsHandler.mergeEnabled = newValue;
+                              searchHandler.mergeAction(null);
+                            });
+                          }
+                        },
+                      ),
+                    if(settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled)
+                      Container(
+                        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.max,
+                          children: <Widget>[
+                            // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
+                            BooruSelectorMain(false),
+                          ],
                         ),
                       ),
-                      onPressed: (){
-                        Get.to(() => SnatcherPage(searchTagsController.text,searchGlobals[globalsIndex].selectedBooru!,widget.settingsHandler, widget.snatchHandler));
-                      },
-                      icon: Icon(Icons.download_sharp),
-                      label: Text("Merge", style: TextStyle(color: Colors.white))
-                  ),*/
 
-                  if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+                    if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+                      SettingsButton(
+                        name: "Snatcher",
+                        icon: Icon(Icons.download_sharp),
+                        page: () => SnatcherPage(),
+                        drawTopBorder: true,
+                      ),
                     SettingsButton(
-                      name: "Snatcher",
-                      icon: Icon(Icons.download_sharp),
-                      page: () => SnatcherPage(),
-                      drawTopBorder: true,
+                      name: "Settings",
+                      icon: Icon(Icons.settings),
+                      page: () => SettingsPage(),
                     ),
-                  SettingsButton(
-                    name: "Settings",
-                    icon: Icon(Icons.settings),
-                    page: () => SettingsPage(),
-                  ),
-                ],
-              ),
-            )
-          ),
-        ],
-      ),
-    ));
+                  ],
+                ),
+              )
+            ),
+          ],
+        ),
+      )
+    );
   }
 
   @override

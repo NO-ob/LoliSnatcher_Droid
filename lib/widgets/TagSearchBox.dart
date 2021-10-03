@@ -1,11 +1,14 @@
 import 'dart:ui';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:get/get.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+
+// TODO
+// - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
 
 
 class TagSearchBox extends StatefulWidget {
@@ -18,54 +21,80 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   final SettingsHandler settingsHandler = Get.find();
   final SearchHandler searchHandler = Get.find();
 
+  ScrollController suggestionsScrollController = ScrollController();
+  ScrollController searchScrollController = ScrollController();
+
   OverlayEntry? _overlayEntry;
+  bool isFocused = false;
+
   String input = "";
   String lastTag = "";
-  List splitInput = [];
-  ScrollController scrollController = ScrollController();
+  List<String> splitInput = [];
+  RxList<String> inputTags = RxList([]);
 
   RxList<List<String>> booruResults = RxList([]);
   RxList<List<String>> historyResults = RxList([]);
   RxList<List<String>> databaseResults = RxList([]);
-  RxList<List<String>> searchModifiersResults = RxList([]);
+  RxList<List<String>> modifiersResults = RxList([]);
 
   @override
   void initState() {
     super.initState();
     searchHandler.searchBoxFocus.addListener(onFocusChange);
-    input = searchHandler.searchTextController.text;
-    splitInput = input.split(" ");
-    lastTag = input;
+    searchHandler.searchTextController.addListener(onTextChanged);
+    tagStuff();
   }
 
-  void onFocusChange(){
-    if (searchHandler.searchBoxFocus.hasFocus){
-      createOverlay();
-    } else {
-      removeOverlay();
+  void onTextChanged() {
+    // force rerender if text changed when search is not focused
+    if (!searchHandler.searchBoxFocus.hasFocus && input != searchHandler.searchTextController.text) {
+      tagStuff();
     }
   }
 
+  void onFocusChange() {
+    if (searchHandler.searchBoxFocus.hasFocus) {
+      createOverlay();
+      isFocused = true;
+    } else {
+      removeOverlay();
+      isFocused = false;
+    }
+    setState(() { });
+  }
+
+  void animateTransition() {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (searchScrollController.hasClients) {
+        searchScrollController.animateTo(
+          searchScrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+        );
+      }
+    });
+  }
+
   void createOverlay() {
-    if (searchHandler.searchBoxFocus.hasFocus){
-      if (this._overlayEntry == null){
+    if (searchHandler.searchBoxFocus.hasFocus) {
+      if (this._overlayEntry == null) {
         tagStuff();
         combinedSearch();
         this._overlayEntry = _createOverlayEntry();
       }
-      this._updateOverlay();
+      this.updateOverlay();
     }
   }
 
-  void removeOverlay(){
-    if (this._overlayEntry != null){
+  void removeOverlay() {
+    if (this._overlayEntry != null) {
       if (this._overlayEntry!.mounted) {
         this._overlayEntry!.remove();
       }
     }
   }
 
-  void _updateOverlay() {
+  void updateOverlay() {
     if (searchHandler.searchBoxFocus.hasFocus) {
       print("textbox is focused");
       if (!this._overlayEntry!.mounted) {
@@ -86,21 +115,78 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void dispose() {
     removeOverlay();
     searchHandler.searchBoxFocus.unfocus();
+    searchHandler.searchBoxFocus.removeListener(onFocusChange);
+    searchHandler.searchTextController.removeListener(onTextChanged);
+
+    suggestionsScrollController.dispose();
+    searchScrollController.dispose();
     super.dispose();
   }
 
-  void tagStuff() {
-    if (searchHandler.currentTab.booruHandler.tagSearchEnabled) {
-      input = searchHandler.searchTextController.text;
-      splitInput = input.split(" ");
-      // lastTag = input;
-      // if (splitInput.length > 1) {
-        // Get last tag in the input and remove minus (exclude symbol)
-        // TODO /bug?: use the tag behind the current cursor position, not the last tag
-        lastTag = splitInput[splitInput.length - 1].replaceAll(RegExp(r'^-'), '');
-        setState(() { });
-      // }
+  List<Widget> getTags() {
+    // based on https://github.com/eyoeldefare/textfield_tags
+    List<Widget> tags = [];
+
+    for (var i = 0; i < splitInput.length; i++) {
+      String stringContent = splitInput.elementAt(i);
+      final bool isExclude = stringContent.startsWith('-');
+      if(isExclude) {
+        stringContent = stringContent.substring(1);
+      }
+
+      // TODO mark stuff like rating:safe, order:id... with purple color
+      // final bool isModifier = false;
+
+      if(stringContent.isEmpty) {
+        break;
+      }
+
+      final Container tag = Container(
+        padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+        decoration: BoxDecoration(
+          color: isExclude ? Get.theme.colorScheme.error : Colors.green,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        margin: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Text(
+                stringContent,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isExclude ? Get.theme.colorScheme.onError : Colors.white,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
+              child: GestureDetector(
+                onTap: () {
+                  splitInput.removeAt(i);
+                  searchHandler.searchTextController.text = splitInput.join(' ');
+                  tagStuff();
+                },
+                child: Icon(Icons.cancel),
+              ),
+            ),
+          ],
+        ),
+      );
+      tags.add(tag);
     }
+    return tags;
+  }
+
+  void tagStuff() {
+    input = searchHandler.searchTextController.text;
+    splitInput = input.split(" ");
+    // Get last tag in the input and remove minus (exclude symbol)
+    // TODO /bug?: use the tag behind the current cursor position, not the last tag
+    lastTag = splitInput[splitInput.length - 1].replaceAll(RegExp(r'^-'), '');
+    setState(() { });
   }
 
   void searchBooru(String input) async {
@@ -189,6 +275,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               ...databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
               ...booruResults,
             ];
+
             if(items.length == 0) {
               return ListTile(
                 horizontalTitleGap: 4,
@@ -196,7 +283,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 minVerticalPadding: 0,
                 leading: null,
                 title: MarqueeText(
-                  text: 'No results!',
+                  text: 'No Suggestions!',
                   fontSize: 16,
                   startPadding: 0,
                   isExpanded: false,
@@ -209,13 +296,13 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               );
             } else {
               return Scrollbar(
-                controller: scrollController,
+                controller: suggestionsScrollController,
                 interactive: true,
                 isAlwaysShown: true,
                 thickness: 10,
                 radius: Radius.circular(10),
                 child: ListView.builder(
-                  controller: scrollController,
+                  controller: suggestionsScrollController,
                   padding: EdgeInsets.zero,
                   shrinkWrap: true,
                   itemCount: items.length,
@@ -255,16 +342,17 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
                           String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
-                          setState(() {
-                            searchHandler.searchTextController.text = newInput;
+                          searchHandler.searchTextController.text = newInput;
 
-                            // Set the cursor to the end of the search and reset the overlay data
-                            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
-                          });
+                          // Set the cursor to the end of the search and reset the overlay data
+                          searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
+                          animateTransition();
 
                           tagStuff();
                           combinedSearch();
                           this._overlayEntry!.markNeedsBuild();
+
+                          setState(() { });
                         },
                       );
                     } else {
@@ -284,7 +372,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   Widget build(BuildContext context) {
     return Expanded(
       child: TextField(
-        controller: searchHandler.searchTextController,
+        controller: isFocused ? searchHandler.searchTextController : TextEditingController(),
+        scrollController: searchScrollController,
         focusNode: searchHandler.searchBoxFocus,
         onChanged: (text) {
           createOverlay();
@@ -296,23 +385,54 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         onEditingComplete: (){
           searchHandler.searchBoxFocus.unfocus();
         },
-        onTap: (){
+        onTap: () {
           if(!searchHandler.searchBoxFocus.hasFocus) {
+            // add space to the end
+            if(input.isNotEmpty && input[input.length - 1] != ' ') {
+              searchHandler.searchTextController.text = input + ' ';
+              tagStuff();
+            }
             // set cursor to the end when tapped unfocused
             searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+            animateTransition();
           }
         },
         decoration: InputDecoration(
           fillColor: Get.theme.colorScheme.surface,
           filled: true,
-          hintText: "Enter Tags",
-          prefixIcon: searchHandler.searchTextController.text.length > 0
+          hintText: searchHandler.searchTextController.text.length == 0 ? "Enter Tags" : '',
+          prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
             ? IconButton(
                 padding: const EdgeInsets.all(5),
-                onPressed: () => setState(() {searchHandler.searchTextController.clear();}),
-                icon: Icon(Icons.clear),
+                onPressed: () {
+                  searchHandler.searchTextController.clear();
+                  setState(() {});
+                },
+                icon: Icon(Icons.clear, color: Get.theme.colorScheme.onBackground),
               )
-            : null,
+            : Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50)
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: SingleChildScrollView(
+                    // controller: searchScrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ...getTags(),
+                        if(input.isNotEmpty)
+                          const SizedBox(width: 60),
+                      ],
+                    ),
+                  ),
+                )
+              ),
           contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
