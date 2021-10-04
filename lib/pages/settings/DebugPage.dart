@@ -4,6 +4,7 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -91,6 +92,19 @@ class _DebugPageState extends State<DebugPage> {
                 action: () {
                   settingsHandler.debugLoadAndSaveLegacy();
                 }
+              ),
+
+              SettingsButton(
+                name: 'Animation speed (${(1/timeDilation).toPrecision(2)})',
+                icon: Icon(Icons.timelapse),
+                action: () {
+                  if(timeDilation == 4) {
+                    timeDilation = 1;
+                  } else {
+                    timeDilation = timeDilation + 1;
+                  }
+                  setState(() { });
+                },
               ),
 
               SettingsButton(name: 'Res: ${Get.mediaQuery.size.width.toPrecision(4)}x${Get.mediaQuery.size.height.toPrecision(4)}'),

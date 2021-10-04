@@ -3,9 +3,8 @@ import 'dart:ui';
 import 'dart:io';
 
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart' show timeDilation, SchedulerBinding;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:get/get.dart';
 import 'package:statsfl/statsfl.dart';
 import 'package:flutter/material.dart';
@@ -608,43 +607,6 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: ActiveTitle(),
         actions: <Widget>[
-          // debug buttons
-          // IconButton(
-          //   icon: Icon(Icons.flash_on),
-          //   onPressed: () {
-          //     FlashElements.showSnackbar(
-          //       context: context,
-          //       title: Text('Test Flash'),
-          //     );
-          //   },
-          // ),
-          // IconButton(
-          //   icon: Icon(Icons.info),
-          //   onPressed: (){
-          //     print('Current tab:');
-          //     print(searchHandler.currentTab);
-          //     print(searchHandler.currentTab.selectedBooru);
-          //     print(searchHandler.currentTab.secondaryBoorus);
-          //     print(searchHandler.currentTab.booruHandler);
-          //   },
-          // ),
-          // IconButton(
-          //   icon: Icon(Icons.timelapse),
-          //   onPressed: (){
-          //     if(timeDilation == 1) {
-          //       timeDilation = 2;
-          //     } else {
-          //       timeDilation = 1;
-          //     }
-          //   },
-          // ),
-          // IconButton(
-          //   icon: Icon(Icons.delete),
-          //   onPressed: (){
-          //     Tools.forceClearMemoryCache(withLive: true);
-          //   },
-          // ),
-
           if(searchHandler.list.isNotEmpty)
             Stack(
               alignment: Alignment.center,

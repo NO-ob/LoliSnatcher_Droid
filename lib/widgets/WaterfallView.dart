@@ -33,7 +33,7 @@ class _WaterfallState extends State<WaterfallView> {
   final SettingsHandler settingsHandler = Get.find();
   final SearchHandler searchHandler = Get.find();
 
-  Timer? loadingDelay, _checkInterval, toggleBarsDelay;
+  Timer? loadingDelay, _checkInterval;
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   StreamSubscription? viewedListener;
@@ -126,7 +126,6 @@ class _WaterfallState extends State<WaterfallView> {
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
     loadingDelay?.cancel();
-    toggleBarsDelay?.cancel();
     _checkInterval?.cancel();
     super.dispose();
   }
@@ -204,12 +203,7 @@ class _WaterfallState extends State<WaterfallView> {
 
   void viewerCallback() {
     searchHandler.inViewer(false);
-    // toggleBarsDelay?.cancel();
-    // toggleBarsDelay = Timer(Duration(seconds: 1), () {
-    //   // delay restoring system ui to avoid lags in hero animation
-    //   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // });
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     kbFocusNode.requestFocus();
   }
 
@@ -218,12 +212,7 @@ class _WaterfallState extends State<WaterfallView> {
     kbFocusNode.unfocus();
     if (settingsHandler.appMode == "Mobile") {
       searchHandler.inViewer(true);
-      // delay system ui hiding a bit to avoid animation lags
-      // toggleBarsDelay?.cancel();
-      // toggleBarsDelay = Timer(Duration(seconds: 1), () {
-      //   // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      // });
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+      // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
       await Navigator.push(
         context,
@@ -237,6 +226,7 @@ class _WaterfallState extends State<WaterfallView> {
           barrierColor: Colors.black26,
         ),
       );
+
       viewerCallback();
     } else {
       widget.tab.currentItem.value = widget.tab.booruHandler.filteredFetched[index];

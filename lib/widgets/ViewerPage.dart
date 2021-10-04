@@ -81,6 +81,8 @@ class _ViewerPageState extends State<ViewerPage> {
       // print("searchglobals index: ${searchHandler.currentTab.viewedIndex.value}");
       searchHandler.currentTab.viewedIndex.value = widget.index;
     });
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
     kbFocusNode.requestFocus();
 
     autoScrollProgressController = TimedProgressController(
@@ -174,6 +176,7 @@ class _ViewerPageState extends State<ViewerPage> {
     ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
     ServiceHandler.enableSleep();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     super.dispose();
   }
 
