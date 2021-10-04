@@ -142,17 +142,16 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       }
 
       final Container tag = Container(
-        padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
         decoration: BoxDecoration(
           color: isExclude ? Get.theme.colorScheme.error : Colors.green,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(16),
         ),
         margin: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              padding: const EdgeInsets.fromLTRB(10, 3, 0, 3),
               child: Text(
                 stringContent,
                 style: TextStyle(
@@ -161,16 +160,19 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 ),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
-              child: GestureDetector(
-                onTap: () {
-                  splitInput.removeAt(i);
-                  searchHandler.searchTextController.text = splitInput.join(' ');
-                  tagStuff();
-                },
-                child: Icon(Icons.cancel),
-              ),
+            GestureDetector(
+              onTap: () {
+                splitInput.removeAt(i);
+                searchHandler.searchTextController.text = splitInput.join(' ');
+                tagStuff();
+              },
+              child: Container(
+                // color: Colors.yellow.withOpacity(0.5),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  child: Icon(Icons.cancel, size: 24),
+                )
+              )
             ),
           ],
         ),
@@ -416,7 +418,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(50),
+                  borderRadius: BorderRadius.circular(48.5),
                   child: SingleChildScrollView(
                     // controller: searchScrollController,
                     scrollDirection: Axis.horizontal,

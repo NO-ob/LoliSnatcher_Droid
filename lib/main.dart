@@ -461,7 +461,7 @@ class _HomeState extends State<Home> {
           children: <Widget>[
             if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
               Container(
-                margin: EdgeInsets.fromLTRB(5, 20, 5, 10),
+                margin: EdgeInsets.fromLTRB(5, 30, 5, 15),
                 width: double.infinity,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
