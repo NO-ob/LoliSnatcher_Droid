@@ -31,6 +31,7 @@ import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/ImageWriter.dart';
 
 
 void main() {
@@ -284,6 +285,8 @@ class _HomeState extends State<Home> {
   String snatchStatus = "";
 
   Timer? cacheClearTimer;
+  Timer? cacheStaleTimer;
+  ImageWriter imageWriter = ImageWriter();
 
   int memeCount = 0;
   Timer? memeTimer;
@@ -298,7 +301,17 @@ class _HomeState extends State<Home> {
     cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       // TODO we don't need to clear cache so much, since all images are aleared on dispose
       // Tools.forceClearMemoryCache(withLive: false);
+      // TODO rework so it happens on every tab change/addition, NOT on timer
       backupTabs();
+    });
+
+    imageWriter.clearStaleCache();
+    imageWriter.clearCacheOverflow();
+    // run check for stale cache files
+    // TODO find a better way and/or cases when it will be better to call these
+    cacheStaleTimer = Timer.periodic(Duration(minutes: 5), (timer) {
+      imageWriter.clearStaleCache();
+      imageWriter.clearCacheOverflow();
     });
 
     // memeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
@@ -319,6 +332,14 @@ class _HomeState extends State<Home> {
     //     }
     //   }
     // });
+  }
+
+  @override
+  void dispose() {
+    cacheClearTimer?.cancel();
+    cacheStaleTimer?.cancel();
+    memeTimer?.cancel();
+    super.dispose();
   }
 
   Future<bool> _onBackPressed() async {

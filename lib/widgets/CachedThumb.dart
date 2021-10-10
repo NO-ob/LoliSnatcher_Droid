@@ -103,7 +103,7 @@ class _CachedThumbState extends State<CachedThumb> {
 
         isVisible = true;
         if(this.mounted) setState(() { });
-        if (settingsHandler.imageCache) {
+        if (settingsHandler.thumbnailCache) {
           imageWriter.writeCacheFromBytes(thumbURL, response.data!, isThumbQuality == true ? 'thumbnails' : 'samples');
         }
       } else {
@@ -259,7 +259,7 @@ class _CachedThumbState extends State<CachedThumb> {
   }
 
   Widget loadingElementBuilder(BuildContext ctx, Widget? child, ImageChunkEvent? loadingProgress) {
-    // if (loadingProgress == null && !settingsHandler.imageCache) {
+    // if (loadingProgress == null && !settingsHandler.thumbnailCache) {
     //   // Resulting image for network loaded thumbnail
     //   return child;
     // }

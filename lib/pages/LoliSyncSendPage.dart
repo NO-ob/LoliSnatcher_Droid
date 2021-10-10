@@ -71,7 +71,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Loli Sync"),
+          title: Text("LoliSync"),
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () async{

@@ -22,23 +22,23 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.3
-  http: ^0.13.3
+  http: ^0.13.4
   dio: ^4.0.0
   xml: ^5.3.0
   intl: ^0.17.0
-  uuid: ^3.0.4
+  uuid: ^3.0.5
   path_provider: ^2.0.5
   flex_color_picker: ^2.1.2
   flutter_launcher_icons: ^0.9.2
-  flash: ^2.0.2
-  dropdown_search: ^1.0.0
+  flash: ^2.0.3
+  dropdown_search: ^1.0.3
   marquee: ^2.2.0
   auto_size_text: ^3.0.0-nullsafety.0
   statsfl: ^2.0.1+1
   vibration: ^1.7.4-nullsafety.0
   get: ^4.3.8
-  permission_handler: ^8.1.6
-  image: ^3.0.5
+  permission_handler: ^8.1.6 # next update will require android sdk version 31
+  image: ^3.0.8
   google_fonts: ^2.1.0
   photo_view: # ^0.12.0
     git:
@@ -51,13 +51,14 @@ dependencies:
   scroll_to_index: ^2.1.0
   transparent_image: ^2.0.0
   video_player: ^2.2.5
-  dart_vlc: ^0.1.7
+  dart_vlc: ^0.1.8
   chewie: ^1.2.2
   sqflite: ^2.0.0+4
   sqflite_common_ffi: ^2.0.0+3
   preload_page_view: ^0.1.6
   flutter_displaymode: ^0.3.2
   crypto: ^3.0.1
+  keyboard_actions: ^3.4.4
   flutter_improved_scrolling: ^0.0.3
 
 flutter_icons:

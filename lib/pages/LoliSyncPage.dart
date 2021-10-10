@@ -60,7 +60,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Loli Sync"),
+          title: Text("LoliSync"),
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
               onPressed: () async {

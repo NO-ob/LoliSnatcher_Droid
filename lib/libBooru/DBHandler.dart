@@ -397,7 +397,7 @@ class DBHandler{
   }
 
   //Return a list of boolean for isSnatched and isFavourite
-  Future<List<bool>> getTrackedValues(String fileURL) async{
+  Future<List<bool>> getTrackedValues(String fileURL) async {
     List<bool> values = [false,false];
     var result;
     // search filename, not full url (for example: r34xxx changes urls based on country)
@@ -414,17 +414,51 @@ class DBHandler{
     }
     return values;
   }
+
+  // FAILED EXPERIMENT: Return a list of lists of boolean for isSnatched and isFavourite, attempt to make a bulk fetcher
+  Future<List<List<bool>>> getMultipleTrackedValues(List<String> fileURLs) async {
+    List<List<bool>> values = [];
+
+    List<String> queryParts = [];
+    List<String> queryArgs = [];
+    fileURLs.forEach((url) {
+      // search filename, not full url (for example: r34xxx changes urls based on country)
+      if (url.contains("s.sankakucomplex.com") || url.contains("rule34.xxx") || url.contains("paheal.net")) {
+        queryParts.add("fileURL LIKE (?)");
+        queryArgs.add('%${Tools.getFileName(url)}%');
+      } else {
+        queryParts.add('fileURL = (?)');
+        queryArgs.add(url);
+      }
+    });
+
+    List? result = await db?.rawQuery("SELECT fileURL, isFavourite, isSnatched FROM BooruItem WHERE ${queryParts.join(' OR ')};", queryArgs);
+
+    if (result != null && result.isNotEmpty) {
+      fileURLs.asMap().forEach((index, url) {
+        final res = result.firstWhere((el) => el["fileURL"].toString() == url, orElse: () => {"isSnatched": 0, "isFavourite": 0});
+        // Logger.Inst().log("file url is: $fileURL", "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
+        Logger.Inst().log(res.toString(), "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
+        values.add([
+          Tools.intToBool(res["isSnatched"]),
+          Tools.intToBool(res["isFavourite"])
+        ]);
+      });
+    }
+    return values;
+  }
+
   // Deletes booruItems which are no longer favourited or snatched
-  Future<bool> deleteUntracked() async{
+  Future<bool> deleteUntracked() async {
     var result = await db?.rawQuery("SELECT id FROM BooruItem WHERE isFavourite = 0 and isSnatched = 0");
-    if (result != null && result.isNotEmpty){
+    if (result != null && result.isNotEmpty) {
       deleteItem(result.map((r) => r["id"].toString()).toList());
     }
     return true;
   }
 
   //Deletes a BooruItem and its tags from the database
-  void deleteItem(List<String> itemIDs) async{
+  void deleteItem(List<String> itemIDs) async {
     Logger.Inst().log("DBHandler deleting: $itemIDs", "DBHandler", "deleteItem", LogTypes.booruHandlerInfo);
     String questionMarks = "?";
     for (int i = 1; i < itemIDs.length; i++){

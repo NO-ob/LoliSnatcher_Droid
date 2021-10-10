@@ -70,6 +70,37 @@ class ImageWriterIsolate {
     return result;
   }
 
+  // calculates cache (total or by type) size and file count
+  Future<Map<String, dynamic>> getCacheStat(String? typeFolder) async {
+    String cacheDirPath;
+    int fileNum = 0;
+    int totalSize = 0;
+    try {
+      cacheDirPath = cacheRootPath + (typeFolder ?? '') + "/";
+
+      Directory cacheDir = Directory(cacheDirPath);
+      bool dirExists = await cacheDir.exists();
+      if (dirExists) {
+        cacheDir.listSync(recursive: true, followLinks: false)
+          .forEach((FileSystemEntity entity) {
+            if (entity is File) {
+              fileNum++;
+              totalSize += entity.lengthSync();
+            }
+          });
+      }
+    } catch (e) {
+      print("Image Writer Exception");
+      print(e);
+    }
+
+    return {
+      'type': typeFolder,
+      'fileNum': fileNum,
+      'totalSize': totalSize,
+    };
+  }
+
   String sanitizeName(String fileName, {String replacement = ''}) {
     RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
     RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');

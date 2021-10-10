@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:LoliSnatcher/ImageWriterIsolate.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,10 +27,12 @@ class _BehaviourPageState extends State<BehaviourPage> {
   final SettingsHandler settingsHandler = Get.find();
   late String shareAction, videoCacheMode;
   final TextEditingController snatchCooldownController = TextEditingController();
+  final TextEditingController cacheSizeController = TextEditingController();
   final ServiceHandler serviceHandler = ServiceHandler();
-  bool jsonWrite = false, imageCache = false, mediaCache = false;
+  bool jsonWrite = false, thumbnailCache = true, mediaCache = false;
 
   final ImageWriter imageWriter = ImageWriter();
+  
   final List<Map<String, String?>> cacheTypes = [
     {'folder': null, 'label': 'Total'},
     // TODO ask before deleting favicons, since they cause unneeded network requests on each render if not cached
@@ -39,6 +42,8 @@ class _BehaviourPageState extends State<BehaviourPage> {
     {'folder': 'media', 'label': 'Media'}
   ]; // [cache folder, displayed name]
   List<Map<String, dynamic>> cacheStats = [];
+  Map<String, dynamic>? cacheDurationSelected;
+  late Duration cacheDuration;
   Isolate? isolate;
 
   @override
@@ -46,10 +51,15 @@ class _BehaviourPageState extends State<BehaviourPage> {
     super.initState();
     shareAction = settingsHandler.shareAction;
     snatchCooldownController.text = settingsHandler.snatchCooldown.toString();
-    imageCache = settingsHandler.imageCache;
+    thumbnailCache = settingsHandler.thumbnailCache;
     mediaCache = settingsHandler.mediaCache;
     videoCacheMode = settingsHandler.videoCacheMode;
     jsonWrite = settingsHandler.jsonWrite;
+    cacheDuration = settingsHandler.cacheDuration;
+    cacheDurationSelected = settingsHandler.map['cacheDuration']?['options'].firstWhere((dur) {
+      return dur["value"].inSeconds == cacheDuration.inSeconds;
+    });
+    cacheSizeController.text = settingsHandler.cacheSize.toString();
 
     getCacheStats();
   }
@@ -64,18 +74,14 @@ class _BehaviourPageState extends State<BehaviourPage> {
   void getCacheStats() async {
     cacheStats = [];
     for(Map<String, String?> type in cacheTypes) {
-      if(imageWriter.cacheRootPath?.isEmpty ?? true) {
-        await imageWriter.setPaths();
-      }
-
       final ReceivePort receivePort = ReceivePort();
       isolate = await Isolate.spawn(_isolateEntry, receivePort.sendPort);
 
-      receivePort.listen((dynamic data) {
+      receivePort.listen((dynamic data) async {
         if (mounted) {
           if (data is SendPort) {
             data.send({
-              'path': imageWriter.cacheRootPath,
+              'path': await serviceHandler.getCacheDir(),
               'type': type['folder'],
             });
           }else {
@@ -93,38 +99,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
     d.send(receivePort.sendPort);
 
     final config = await receivePort.first;
-    d.send(await getCacheStatIsolate(config['path'], config['type']));
-  }
-
-  // calculates cache (total or by type) size and file count
-  static Future<Map<String, dynamic>> getCacheStatIsolate(String cacheRootPath, String? typeFolder) async {
-    String cacheDirPath;
-    int fileNum = 0;
-    int totalSize = 0;
-    try {
-      cacheDirPath = cacheRootPath + (typeFolder ?? '') + "/";
-
-      Directory cacheDir = Directory(cacheDirPath);
-      bool dirExists = await cacheDir.exists();
-      if (dirExists) {
-        cacheDir.listSync(recursive: true, followLinks: false)
-          .forEach((FileSystemEntity entity) {
-            if (entity is File) {
-              fileNum++;
-              totalSize += entity.lengthSync();
-            }
-          });
-      }
-    } catch (e) {
-      print("Image Writer Exception");
-      print(e);
-    }
-
-    return {
-      'type': typeFolder,
-      'fileNum': fileNum,
-      'totalSize': totalSize,
-    };
+    d.send(await ImageWriterIsolate(config['path']).getCacheStat(config['type']));
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
@@ -133,8 +108,10 @@ class _BehaviourPageState extends State<BehaviourPage> {
     settingsHandler.snatchCooldown = int.parse(snatchCooldownController.text);
     settingsHandler.jsonWrite = jsonWrite;
     settingsHandler.mediaCache = mediaCache;
-    settingsHandler.imageCache = imageCache;
+    settingsHandler.thumbnailCache = thumbnailCache;
     settingsHandler.videoCacheMode = videoCacheMode;
+    settingsHandler.cacheDuration = cacheDuration;
+    settingsHandler.cacheSize = int.parse(cacheSizeController.text);
     bool result = await settingsHandler.saveSettings();
     return result;
   }
@@ -219,10 +196,10 @@ class _BehaviourPageState extends State<BehaviourPage> {
                 title: 'Write Image Data to JSON on save',
               ),
               SettingsToggle(
-                value: imageCache,
+                value: thumbnailCache,
                 onChanged: (newValue) {
                   setState(() {
-                    imageCache = newValue;
+                    thumbnailCache = newValue;
                   });
                 },
                 title: 'Cache Thumbnails',
@@ -305,8 +282,31 @@ class _BehaviourPageState extends State<BehaviourPage> {
               SettingsButton(name: '', enabled: false),
 
               // TODO
-              SettingsButton(name: 'Delete cache after X days [TODO]', action: () { ServiceHandler.displayToast('WIP'); }),
-              SettingsButton(name: 'Max Cache size [TODO]', action: () { ServiceHandler.displayToast('WIP'); }),
+              SettingsDropdown(
+                selected: cacheDurationSelected?["label"] ?? '',
+                values: List<String>.from(settingsHandler.map['cacheDuration']?['options'].map((dur) {
+                  return dur["label"];
+                })),
+                onChanged: (String? newValue) {
+                  setState((){
+                    cacheDurationSelected = settingsHandler.map['cacheDuration']?['options'].firstWhere((dur) {
+                      return dur["label"] == newValue;
+                    });
+                    cacheDuration = cacheDurationSelected!["value"];
+                  });
+                },
+                title: 'Delete Cache older than:',
+              ),
+
+              SettingsTextInput(
+                controller: cacheSizeController,
+                title: 'Cache Size Limit (GB)',
+                hintText: "Maximum Total Cache Size",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+              ),
 
               SettingsButton(name: 'Cache Stats:'),
               ...cacheTypes.map((type) {

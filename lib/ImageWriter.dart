@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
-// import 'package:flutter/foundation.dart';
+import 'dart:math';
+
+import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -125,6 +127,7 @@ class ImageWriter {
     }
 
     FlashElements.showSnackbar(
+      duration: Duration(seconds: 2),
       title: Text(
         "Snatching Complete",
         style: TextStyle(fontSize: 20)
@@ -280,6 +283,91 @@ class ImageWriter {
     }
 
     return {'fileNum': fileNum, 'totalSize': totalSize};
+  }
+
+  // TODO move to isolate
+  Future<void> clearStaleCache() async {
+    if(settingsHandler.cacheDuration.inMilliseconds == 0) {
+      return;
+    }
+
+    String cacheDirPath;
+    try {
+      await setPaths();
+      cacheDirPath = cacheRootPath! + "/";
+
+      Directory cacheDir = Directory(cacheDirPath);
+      bool dirExists = await cacheDir.exists();
+      if (dirExists) {
+        cacheDir.listSync(recursive: true, followLinks: false)
+          .forEach((FileSystemEntity entity) {
+            final bool isNotExcludedExt = Tools.getFileExt(entity.path) != 'ico';
+            final bool isStale = (entity.statSync().modified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < DateTime.now().millisecondsSinceEpoch;
+            if (entity is File && isNotExcludedExt && isStale) {
+              entity.delete();
+            }
+          });
+      }
+    } catch (e){
+      print("Image Writer Exception");
+      print(e);
+    }
+    return;
+  }
+
+  // TODO move to isolate
+  Future<void> clearCacheOverflow() async {
+    if(settingsHandler.cacheSize == 0) {
+      return;
+    }
+
+    String cacheDirPath;
+    List<FileSystemEntity> toDelete = [];
+    int toDeleteSize = 0;
+    int currentCacheSize = 0;
+    try {
+      await setPaths();
+      cacheDirPath = cacheRootPath! + "/";
+
+      Directory cacheDir = Directory(cacheDirPath);
+      bool dirExists = await cacheDir.exists();
+      if (dirExists) {
+        cacheDir.listSync(recursive: true, followLinks: false)
+          .forEach((FileSystemEntity entity) {
+            if (entity is File) {
+              currentCacheSize += entity.lengthSync();
+            }
+          });
+
+        final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
+        final int overflowSize = currentCacheSize - limitSize;
+        if(overflowSize > 0) {
+          List<FileSystemEntity> files = cacheDir.listSync(recursive: true, followLinks: false).where((element) => element is File).toList();
+          files.sort((FileSystemEntity a, FileSystemEntity b) {
+            return a.statSync().modified.millisecondsSinceEpoch.compareTo(b.statSync().modified.millisecondsSinceEpoch);
+          });
+          files.forEach((FileSystemEntity entity) {
+            final bool isNotExcludedExt = Tools.getFileExt(entity.path) != 'ico';
+            final FileStat stat = entity.statSync();
+            final bool stillOverflows = toDeleteSize < overflowSize;
+            if (entity is File && isNotExcludedExt && stillOverflows) {
+              toDelete.add(entity);
+              toDeleteSize += stat.size;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      print("Image Writer Exception");
+      print(e);
+    }
+
+    // print(toDelete);
+    // print(toDeleteSize);
+    toDelete.forEach((file) {
+      file.delete();
+    });
+    return;
   }
 
   String parseThumbUrlToName(String thumbURL) {

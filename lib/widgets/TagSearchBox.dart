@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,9 +7,11 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
+// - debounce search a bit
 
 
 class TagSearchBox extends StatefulWidget {
@@ -121,6 +124,93 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     suggestionsScrollController.dispose();
     searchScrollController.dispose();
     super.dispose();
+  }
+
+  KeyboardActionsConfig _buildConfig(BuildContext context) {
+    return KeyboardActionsConfig(
+      keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
+      keyboardBarColor: Colors.grey[200],
+      nextFocus: false,
+      actions: [
+        KeyboardActionsItem(
+          focusNode: searchHandler.searchBoxFocus,
+          displayActionBar: false,
+          displayArrows: false,
+          displayDoneButton: false,
+          footerBuilder: (_) => PreferredSize(
+            child: Container(
+              color: Get.theme.colorScheme.background,
+              height: 44,
+              child: Row(
+                children: [
+                  const SizedBox(width: 10),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        height: 40,
+                        color: Get.theme.colorScheme.secondary,
+                        child: TextButton(
+                          onPressed: () {
+                            searchHandler.searchTextController.text += '_';
+                            // set cursor to the end when tapped unfocused
+                            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                            animateTransition();
+                            createOverlay();
+                          },
+                          child: Text('__', style: TextStyle(fontSize: 20, color: Get.theme.colorScheme.onSecondary)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        height: 40,
+                        color: Get.theme.colorScheme.secondary,
+                        child: TextButton(
+                          onPressed: () {
+                            searchHandler.searchBoxFocus.unfocus();
+                          },
+                          child: Icon(Icons.keyboard_hide, color: Get.theme.colorScheme.onSecondary),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        height: 40,
+                        color: Get.theme.colorScheme.secondary,
+                        child: TextButton(
+                          onPressed: () {
+                            searchHandler.searchTextController.clearComposing();
+                            searchHandler.searchBoxFocus.unfocus();
+                            searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                          },
+                          onLongPress: () {
+                            searchHandler.searchTextController.clearComposing();
+                            searchHandler.searchBoxFocus.unfocus();
+                            searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
+                          },
+                          child: Icon(Icons.search, color: Get.theme.colorScheme.onSecondary),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ]
+              ),
+            ),
+            preferredSize: Size.fromHeight(44)
+          ),
+        ),
+      ],
+    );
   }
 
   List<Widget> getTags() {
@@ -372,86 +462,99 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO see if it is possible to make keyboardactions movement a bit smoother
+    // keyboardactions don't avoid keyboard in emulator for some reason
     return Expanded(
-      child: TextField(
-        controller: isFocused ? searchHandler.searchTextController : TextEditingController(),
-        scrollController: searchScrollController,
-        focusNode: searchHandler.searchBoxFocus,
-        onChanged: (text) {
-          createOverlay();
-        },
-        onSubmitted: (String text) {
-          searchHandler.searchBoxFocus.unfocus();
-          searchHandler.searchAction(text, null);
-        },
-        onEditingComplete: (){
-          searchHandler.searchBoxFocus.unfocus();
-        },
-        onTap: () {
-          if(!searchHandler.searchBoxFocus.hasFocus) {
-            // add space to the end
-            if(input.isNotEmpty && input[input.length - 1] != ' ') {
-              searchHandler.searchTextController.text = input + ' ';
-              tagStuff();
-            }
-            // set cursor to the end when tapped unfocused
-            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
-            animateTransition();
-          }
-        },
-        decoration: InputDecoration(
-          fillColor: Get.theme.colorScheme.surface,
-          filled: true,
-          hintText: searchHandler.searchTextController.text.length == 0 ? "Enter Tags" : '',
-          prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
-            ? IconButton(
-                padding: const EdgeInsets.all(5),
-                onPressed: () {
-                  searchHandler.searchTextController.clear();
-                  setState(() {});
-                },
-                icon: Icon(Icons.clear, color: Get.theme.colorScheme.onBackground),
-              )
-            : Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50)
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(48.5),
-                  child: SingleChildScrollView(
-                    // controller: searchScrollController,
-                    scrollDirection: Axis.horizontal,
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ...getTags(),
-                        if(input.isNotEmpty)
-                          const SizedBox(width: 60),
-                      ],
+      child: Container(
+        height: 50,
+        child: KeyboardActions(
+          enable: Platform.isAndroid || Platform.isIOS,
+          config: _buildConfig(context),
+          autoScroll: false,
+          overscroll: 0,
+          isDialog: true,
+          child: TextField(
+            controller: isFocused ? searchHandler.searchTextController : TextEditingController(),
+            scrollController: searchScrollController,
+            textInputAction: TextInputAction.search,
+            focusNode: searchHandler.searchBoxFocus,
+            onChanged: (text) {
+              createOverlay();
+            },
+            onSubmitted: (String text) {
+              searchHandler.searchBoxFocus.unfocus();
+              searchHandler.searchAction(text, null);
+            },
+            onEditingComplete: (){
+              searchHandler.searchBoxFocus.unfocus();
+            },
+            onTap: () {
+              if(!searchHandler.searchBoxFocus.hasFocus) {
+                // add space to the end
+                if(input.isNotEmpty && input[input.length - 1] != ' ') {
+                  searchHandler.searchTextController.text = input + ' ';
+                  createOverlay();
+                }
+                // set cursor to the end when tapped unfocused
+                searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                animateTransition();
+              }
+            },
+            decoration: InputDecoration(
+              fillColor: Get.theme.colorScheme.surface,
+              filled: true,
+              hintText: searchHandler.searchTextController.text.length == 0 ? "Enter Tags" : '',
+              prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
+                ? IconButton(
+                    padding: const EdgeInsets.all(5),
+                    onPressed: () {
+                      searchHandler.searchTextController.clear();
+                      setState(() {});
+                    },
+                    icon: Icon(Icons.clear, color: Get.theme.colorScheme.onBackground),
+                  )
+                : Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50)
                     ),
+                    padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(48.5),
+                      child: SingleChildScrollView(
+                        // controller: searchScrollController,
+                        scrollDirection: Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ...getTags(),
+                            if(input.isNotEmpty)
+                              const SizedBox(width: 60),
+                          ],
+                        ),
+                      ),
+                    )
                   ),
-                )
+              contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+                borderRadius: BorderRadius.circular(50),
+                gapPadding: 0,
               ),
-          contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-            borderRadius: BorderRadius.circular(50),
-            gapPadding: 0,
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.errorColor),
-            borderRadius: BorderRadius.circular(50),
-            gapPadding: 0,
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-            borderRadius: BorderRadius.circular(50),
-            gapPadding: 0,
-          ),
-        ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.errorColor),
+                borderRadius: BorderRadius.circular(50),
+                gapPadding: 0,
+              ),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+                borderRadius: BorderRadius.circular(50),
+                gapPadding: 0,
+              ),
+            ),
+          )
+        )
       )
     );
   }

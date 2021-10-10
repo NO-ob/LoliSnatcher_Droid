@@ -77,7 +77,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
         // if(!widget.isStandalone) print('$url $mainProvider ${bytes.lengthInBytes}');
         updateState();
       },
-      cacheEnabled: settingsHandler.imageCache,
+      cacheEnabled: settingsHandler.thumbnailCache,
       cacheFolder: isMain ? thumbFolder : 'thumbnails',
       timeoutTime: 20000,
     );
@@ -220,7 +220,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
     _startedAt = DateTime.now().millisecondsSinceEpoch;
 
-    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (widget.booruItem.mediaType == 'animation' || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
+    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || ((widget.booruItem.mediaType == 'animation' && !settingsHandler.disableImageScaling.value) || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
     thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
 
@@ -324,7 +324,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   }
 
   Widget loadingElementBuilder(BuildContext ctx, Widget? child, ImageChunkEvent? loadingProgress) {
-    // if (loadingProgress == null && !settingsHandler.imageCache) {
+    // if (loadingProgress == null && !settingsHandler.thumbnailCache) {
     //   // Resulting image for network loaded thumbnail
     //   return child;
     // }

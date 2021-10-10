@@ -71,7 +71,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => GalleryPage()
               ),
               SettingsButton(
-                name: 'Behaviour',
+                name: 'Saving & Caching',
                 icon: Icon(Icons.settings),
                 page: () => BehaviourPage()
               ),
@@ -91,7 +91,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => BackupRestorePage(),
               ),
               SettingsButton(
-                name: 'Loli Sync',
+                name: 'LoliSync',
                 icon: Icon(Icons.sync),
                 action: settingsHandler.dbEnabled ? null : () {
                   FlashElements.showSnackbar(
@@ -100,7 +100,7 @@ class SettingsPage extends StatelessWidget {
                       "Error!",
                       style: TextStyle(fontSize: 20)
                     ),
-                    content: Text("Database must be enabled to use Loli Sync"),
+                    content: Text("Database must be enabled to use LoliSync"),
                     leadingIcon: Icons.error_outline,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,

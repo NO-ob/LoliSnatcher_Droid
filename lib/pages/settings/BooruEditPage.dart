@@ -44,7 +44,7 @@ class _BooruEditState extends State<BooruEdit> {
     "Sankaku", "Shimmie", "Szurubooru",
     "Hydrus", "BooruOnRails", "Rainbooru",
     "R34Hentai", "World", "IdolSankaku",
-    "InkBunny", "AGNPH", "NyanPals"
+    "InkBunny", "AGNPH"
   ];
 
   bool isTesting = false;

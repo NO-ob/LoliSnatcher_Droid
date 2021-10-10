@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:get/get.dart';
@@ -93,9 +95,9 @@ abstract class BooruHandler {
   void setupMerge(List<Booru> boorus){}
 
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
-  Future setTrackedValues(int fetchedIndex) async{
+  Future<void> setTrackedValues(int fetchedIndex) async{
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    if (settingsHandler.dbHandler.db != null){
+    if (settingsHandler.dbHandler.db != null) {
       // TODO make this work in batches, not calling it on every single item ???
       List<bool> values = await settingsHandler.dbHandler.getTrackedValues(fetched[fetchedIndex].fileURL);
       fetched[fetchedIndex].isSnatched.value = values[0];
@@ -104,5 +106,30 @@ abstract class BooruHandler {
     List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList);
     fetched[fetchedIndex].isHated.value = tagLists[0].length > 0;
     // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
+    return;
+  }
+
+  void setMultipleTrackedValues(int start, int end) async {
+    // start can be -1, clamp to 0
+    start = max(0, start);
+    // diff can be negative, clamp to 0
+    final int diff = max(0, end - start);
+    // end can be -1, clamp to 0
+    end = max(0, end - 1);
+
+    // generate list of new fetched indexes
+    final List<int> fetchedIndexes = List.generate(diff, (index) => start + index);
+
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    if (settingsHandler.dbHandler.db != null && diff > 0) {
+      List<List<bool>> valuesList = await settingsHandler.dbHandler.getMultipleTrackedValues(
+        fetched.sublist(fetchedIndexes.first, fetchedIndexes.last).map((e) => e.fileURL).toList()
+      );
+
+      valuesList.asMap().forEach((index, values) {
+        fetched[fetchedIndexes[index]].isSnatched.value = values[0];
+        fetched[fetchedIndexes[index]].isFavourite.value = values[1];
+      });
+    }
   }
 }

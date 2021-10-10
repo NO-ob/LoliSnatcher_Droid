@@ -50,7 +50,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
           updateState();
         }
       },
-      cacheEnabled: settingsHandler.imageCache,
+      cacheEnabled: settingsHandler.thumbnailCache,
       cacheFolder: 'favicons',
       timeoutTime: 2000,
     );
@@ -115,7 +115,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
   }
 
   Widget loadingElementBuilder(BuildContext ctx) {
-    // if (loadingProgress == null && !settingsHandler.imageCache) {
+    // if (loadingProgress == null && !settingsHandler.thumbnailCache) {
     //   // Resulting image for network loaded thumbnail
     //   return child;
     // }

@@ -85,7 +85,7 @@ class _CachedThumbNewState extends State<CachedThumbNew> {
       LoliImage(
         thumbURL,
         headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
-        cacheEnabled: settingsHandler.imageCache,
+        cacheEnabled: settingsHandler.thumbnailCache,
         cacheFolder: thumbFolder,
         onProgress: _onBytesAdded
       ),
@@ -164,7 +164,7 @@ class _CachedThumbNewState extends State<CachedThumbNew> {
   }
 
   Widget loadingElementBuilder(BuildContext ctx, Widget? child, ImageChunkEvent? loadingProgress) {
-    // if (loadingProgress == null && !settingsHandler.imageCache) {
+    // if (loadingProgress == null && !settingsHandler.thumbnailCache) {
     //   // Resulting image for network loaded thumbnail
     //   return child;
     // }
@@ -237,7 +237,7 @@ class _CachedThumbNewState extends State<CachedThumbNew> {
             image: LoliImage(
               widget.booruItem.thumbnailURL,
               headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
-              cacheEnabled: settingsHandler.imageCache,
+              cacheEnabled: settingsHandler.thumbnailCache,
               cacheFolder: 'thumbnails',
             ),
             fadeInDuration: Duration(milliseconds: 200),

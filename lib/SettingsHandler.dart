@@ -31,19 +31,49 @@ class SettingsHandler extends GetxController {
 
   // TODO move these to separate controller?
   // runtime settings vars
-  bool hasHydrus = false, mergeEnabled = false, videoAutoMute = false;
+  bool hasHydrus = false;
+  bool mergeEnabled = false;
+  bool videoAutoMute = false;
   double videoVolume = 1;
 
   // debug toggles
-  RxBool isDebug = (kDebugMode || false).obs, showFPS = false.obs, showImageStats = false.obs, isMemeTheme = false.obs, showURLOnThumb = false.obs, disableImageScaling = false.obs;
+  RxBool isDebug = (kDebugMode || false).obs;
+  RxBool showFPS = false.obs;
+  RxBool showImageStats = false.obs;
+  RxBool isMemeTheme = false.obs;
+  RxBool showURLOnThumb = false.obs;
+  RxBool disableImageScaling = false.obs;
   ////////////////////////////////////////////////////
 
   // saveable settings vars
-  String defTags = "rating:safe", previewMode = "Sample", videoCacheMode = "Stream", prefBooru = "", previewDisplay = "Square", galleryMode = "Full Res", shareAction = "Ask", appMode = (Platform.isWindows || Platform.isLinux) ? 'Desktop' : 'Mobile', galleryBarPosition = 'Top', galleryScrollDirection = 'Horizontal', extPathOverride = "", zoomButtonPosition = "Right", lastSyncIp = '', lastSyncPort = '';
+  String defTags = "rating:safe";
+  String previewMode = "Sample";
+  String videoCacheMode = "Stream";
+  String prefBooru = "";
+  String previewDisplay = "Square";
+  String galleryMode = "Full Res";
+  String shareAction = "Ask";
+  String appMode = (Platform.isWindows || Platform.isLinux) ? 'Desktop' : 'Mobile';
+  String galleryBarPosition = 'Top';
+  String galleryScrollDirection = 'Horizontal';
+  String extPathOverride = "";
+  String zoomButtonPosition = "Right";
+  String lastSyncIp = '';
+  String lastSyncPort = '';
 
-  List<String> hatedTags = [], lovedTags = [];
+  List<String> hatedTags = [];
+  List<String> lovedTags = [];
 
-  int limit = 20, portraitColumns = 2, landscapeColumns = 4, preloadCount = 1, snatchCooldown = 250, volumeButtonsScrollSpeed = 200, galleryAutoScrollTime = 4000;
+  int limit = 20;
+  int portraitColumns = 2;
+  int landscapeColumns = 4;
+  int preloadCount = 1;
+  int snatchCooldown = 250;
+  int volumeButtonsScrollSpeed = 200;
+  int galleryAutoScrollTime = 4000;
+  int cacheSize = 0;
+
+  Duration cacheDuration = Duration(days: 0);
 
   List<List<String>> buttonList = [
     ["autoscroll", "AutoScroll"],
@@ -64,18 +94,31 @@ class SettingsHandler extends GetxController {
     ["reloadnoscale", "Reload w/out scaling"]
   ];
 
-  bool jsonWrite = false, autoPlayEnabled = true, loadingGif = false,
-        imageCache = false, mediaCache = false, autoHideImageBar = false,
-          dbEnabled = true, searchHistoryEnabled = true, filterHated = false,
-            useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
-  
+  bool jsonWrite = false;
+  bool autoPlayEnabled = true;
+  bool loadingGif = false;
+  bool thumbnailCache = true;
+  bool mediaCache = false;
+  bool autoHideImageBar = false;
+  bool dbEnabled = true;
+  bool searchHistoryEnabled = true;
+  bool filterHated = false;
+  bool useVolumeButtonsForScroll = false;
+  bool shitDevice = false;
+  bool disableVideo = false;
+
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
   // themes wip
-  Rx<ThemeItem> theme = ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]).obs..listen((ThemeItem theme) {
+  Rx<ThemeItem> theme = ThemeItem(
+    name: "Pink",
+    primary: Colors.pink[200],
+    accent: Colors.pink[600]
+  ).obs..listen((ThemeItem theme) {
     print('newTheme ${theme.name} ${theme.primary}');
   });
+
   Rx<Color?> customPrimaryColor = Colors.pink[200].obs;
   Rx<Color?> customAccentColor = Colors.pink[600].obs;
 
@@ -86,16 +129,19 @@ class SettingsHandler extends GetxController {
   // list of setting names which shouldnt be synced with other devices
   List<String> deviceSpecificSettings = [
     'shitDevice', 'disableVideo',
-    'imageCache', 'mediaCache',
+    'thumbnailCache', 'mediaCache',
     'dbEnabled', 'searchHistoryEnabled',
     'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
     'prefBooru', 'appMode', 'extPathOverride',
     'lastSyncIp', 'lastSyncPort',
     'theme', 'themeMode', 'isAmoled',
     'customPrimaryColor', 'customAccentColor',
-    'version', 'SDK',
+    'version', 'SDK', 'disableImageScaling',
+    'cacheDuration', 'cacheSize'
   ];
   // default values and possible options map for validation
+  // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
+  // TODO move it in another file?
   Map<String, Map<String, dynamic>> map = {
     // stringFromList
     "appMode": {
@@ -204,7 +250,7 @@ class SettingsHandler extends GetxController {
     "snatchCooldown": {
       "type": "int",
       "default": 250,
-      "upperLimit": 1000,
+      "upperLimit": 10000,
       "lowerLimit": 0,
     },
     "volumeButtonsScrollSpeed": {
@@ -218,6 +264,12 @@ class SettingsHandler extends GetxController {
       "default": 4000,
       "upperLimit": 100000,
       "lowerLimit": 100,
+    },
+    "cacheSize": {
+      "type": "int",
+      "default": 5,
+      "upperLimit": 10,
+      "lowerLimit": 0,
     },
 
     // bool
@@ -233,9 +285,9 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
-    "imageCache": {
+    "thumbnailCache": {
       "type": "bool",
-      "default": false,
+      "default": true,
     },
     "mediaCache": {
       "type": "bool",
@@ -269,6 +321,11 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
+    "disableImageScaling": {
+      "type": "rxbool",
+      "default": false.obs,
+    },
+
 
     // other
     "buttonOrder": {
@@ -281,7 +338,22 @@ class SettingsHandler extends GetxController {
         ["share", "Share"],
         ["open", "Open in Browser"],
         ["reloadnoscale", "Reload w/out scaling"]
-      ]
+      ],
+    },
+    "cacheDuration": {
+      "type": "duration",
+      "default": Duration(days: 0),
+      "options": <Map<String, dynamic>>[
+        {'label': 'Never', 'value': Duration(days: 0)},
+        {'label': '30 minutes', 'value': Duration(minutes: 30)},
+        {'label': '1 hour', 'value': Duration(hours: 1)},
+        {'label': '6 hours', 'value': Duration(hours: 6)},
+        {'label': '12 hours', 'value': Duration(hours: 12)},
+        {'label': '1 day', 'value': Duration(days: 1)},
+        {'label': '2 days', 'value': Duration(days: 2)},
+        {'label': '1 week', 'value': Duration(days: 7)},
+        {'label': '1 month', 'value': Duration(days: 30)},
+      ],
     },
 
     // theme
@@ -305,7 +377,7 @@ class SettingsHandler extends GetxController {
     },
     "isAmoled": {
       "type": "rxbool",
-      "default": false,
+      "default": false.obs,
     },
     "customPrimaryColor": {
       "type": "rxcolor",
@@ -372,10 +444,12 @@ class SettingsHandler extends GetxController {
             return value.value;
           } else {
             // bool to rxbool
-            if(!(value is bool)) {
-              throw 'value "$value" for $name is not a bool';
-            } else {
+            if(value is RxBool) {
               return value;
+            } else if (value is bool) {
+              return value.obs;
+            } else {
+              throw 'value "$value" for $name is not a rxbool';
             }
           }
 
@@ -421,6 +495,20 @@ class SettingsHandler extends GetxController {
             // int to rxobject
             if (value is int) {
               return Color(value);
+            } else {
+              return settingParams["default"];
+            }
+          }
+
+        case 'duration':
+          if (toJSON) {
+            return value.inSeconds; // Duration => int
+          } else {
+            if (value is Duration) {
+              return value;
+            } else if(value is int) {
+              // int to Duration
+              return Duration(seconds: value);
             } else {
               return settingParams["default"];
             }
@@ -521,7 +609,7 @@ class SettingsHandler extends GetxController {
           setByString('loadingGif', itemValue == "true");
           break;
         case("Image Cache"):
-          setByString('imageCache', itemValue == "true");
+          setByString('thumbnailCache', itemValue == "true");
           break;
         case("Media Cache"):
           setByString('mediaCache', itemValue == "true");
@@ -642,8 +730,8 @@ class SettingsHandler extends GetxController {
         return autoPlayEnabled;
       case 'loadingGif':
         return loadingGif;
-      case 'imageCache':
-        return imageCache;
+      case 'thumbnailCache':
+        return thumbnailCache;
       case 'mediaCache':
         return mediaCache;
       case 'autoHideImageBar':
@@ -668,8 +756,13 @@ class SettingsHandler extends GetxController {
         return jsonWrite;
       case 'zoomButtonPosition':
         return zoomButtonPosition;
+      case 'disableImageScaling':
+        return disableImageScaling;
+      case 'cacheDuration':
+        return cacheDuration;
+      case 'cacheSize':
+        return cacheSize;
 
-      // special settings, see toJSON
       case 'prefBooru':
         return prefBooru;
       case 'appMode':
@@ -757,8 +850,8 @@ class SettingsHandler extends GetxController {
       case 'loadingGif':
         loadingGif = validatedValue;
         break;
-      case 'imageCache':
-        imageCache = validatedValue;
+      case 'thumbnailCache':
+        thumbnailCache = validatedValue;
         break;
       case 'mediaCache':
         mediaCache = validatedValue;
@@ -796,8 +889,16 @@ class SettingsHandler extends GetxController {
       case 'zoomButtonPosition':
         zoomButtonPosition = validatedValue;
         break;
+      case 'disableImageScaling':
+        disableImageScaling = validatedValue;
+        break;
+      case 'cacheDuration':
+        cacheDuration = validatedValue;
+        break;
+      case 'cacheSize':
+        cacheSize = validatedValue;
+        break;
 
-      // special settings, see toJSON
       case 'prefBooru':
         prefBooru = validatedValue;
         break;
@@ -823,7 +924,7 @@ class SettingsHandler extends GetxController {
         themeMode.value = validatedValue;
         break;
       case 'isAmoled':
-        isAmoled.value = validatedValue;
+        isAmoled = validatedValue;
         break;
       case 'customPrimaryColor':
         customPrimaryColor.value = validatedValue;
@@ -856,7 +957,7 @@ class SettingsHandler extends GetxController {
       "jsonWrite" : validateValue("jsonWrite", null, toJSON: true),
       "autoPlayEnabled" : validateValue("autoPlayEnabled", null, toJSON: true),
       "loadingGif" : validateValue("loadingGif", null, toJSON: true),
-      "imageCache" : validateValue("imageCache", null, toJSON: true),
+      "thumbnailCache" : validateValue("thumbnailCache", null, toJSON: true),
       "mediaCache": validateValue("mediaCache", null, toJSON: true),
       "autoHideImageBar" : validateValue("autoHideImageBar", null, toJSON: true),
       "dbEnabled" : validateValue("dbEnabled", null, toJSON: true),
@@ -868,6 +969,9 @@ class SettingsHandler extends GetxController {
       "shitDevice" : validateValue("shitDevice", null, toJSON: true),
       "galleryAutoScrollTime" : validateValue("galleryAutoScrollTime", null, toJSON: true),
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
+      "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
+      "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
+      "cacheSize" : validateValue("cacheSize", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
@@ -994,7 +1098,7 @@ class SettingsHandler extends GetxController {
     writer.write("Pref Booru = $prefBooru\n");
     writer.write("Auto Play = $autoPlayEnabled\n");
     writer.write("Loading Gif = $loadingGif\n");
-    writer.write("Image Cache = $imageCache\n");
+    writer.write("Image Cache = $thumbnailCache\n");
     writer.write("Media Cache = $mediaCache\n");
     writer.write("Video Cache Mode = $videoCacheMode\n");
     writer.write("Share Action = $shareAction\n");
