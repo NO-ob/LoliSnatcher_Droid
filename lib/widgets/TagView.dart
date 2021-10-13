@@ -131,7 +131,6 @@ class _TagViewState extends State<TagView> {
           },
           title: Row(
             children: [
-              // TODO force tagview element to always be white text on black bg or adapt to current theme???
               Text('$title: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
               Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
             ]

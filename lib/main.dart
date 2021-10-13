@@ -60,6 +60,7 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
     settingsHandler = Get.put(SettingsHandler());
+    settingsHandler.initialize();
     searchHandler = Get.put(SearchHandler(updateState));
     snatchHandler = Get.put(SnatchHandler());
 
@@ -172,6 +173,7 @@ class _MainAppState extends State<MainApp> {
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
             showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showFPS.value,
+            scrollBehavior: CustomScrollBehavior(),
             theme: ThemeData(
               scaffoldBackgroundColor: (isDark && isAmoled) ? Colors.black : null,
               backgroundColor: (isDark && isAmoled) ? Colors.black : null,
@@ -247,7 +249,7 @@ class Preloader extends StatelessWidget {
 
         return Home();
       } else {
-        settingsHandler.initialize();
+        // settingsHandler.initialize();
 
         // no custom theme data here yet, fallback to black bg + pink loading spinner
         return Container(
@@ -714,3 +716,13 @@ class _HomeState extends State<Home> {
 
 }
 
+
+class CustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => { 
+    ...PointerDeviceKind.values
+    // PointerDeviceKind.touch,
+    // PointerDeviceKind.mouse,
+  };
+}

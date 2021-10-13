@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -26,6 +27,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   ScrollController suggestionsScrollController = ScrollController();
   ScrollController searchScrollController = ScrollController();
+  ScrollController tagsScrollController = ScrollController();
 
   OverlayEntry? _overlayEntry;
   bool isFocused = false;
@@ -123,6 +125,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
     suggestionsScrollController.dispose();
     searchScrollController.dispose();
+    tagsScrollController.dispose();
     super.dispose();
   }
 
@@ -214,6 +217,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   List<Widget> getTags() {
+    // TODO on desktop - set cursor to where user clicked?
     // based on https://github.com/eyoeldefare/textfield_tags
     List<Widget> tags = [];
 
@@ -256,11 +260,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 searchHandler.searchTextController.text = splitInput.join(' ');
                 tagStuff();
               },
-              child: Container(
-                // color: Colors.yellow.withOpacity(0.5),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  child: Icon(Icons.cancel, size: 24),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Container(
+                  // color: Colors.yellow.withOpacity(0.5),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    child: Icon(Icons.cancel, size: 24),
+                  )
                 )
               )
             ),
@@ -520,19 +527,30 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(48.5),
-                      child: SingleChildScrollView(
-                        // controller: searchScrollController,
-                        scrollDirection: Axis.horizontal,
-                        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ...getTags(),
-                            if(input.isNotEmpty)
-                              const SizedBox(width: 60),
-                          ],
-                        ),
+                      child: Listener(
+                        onPointerSignal: (pointerSignal) {
+                          if(pointerSignal is PointerScrollEvent) {
+                            tagsScrollController.jumpTo(
+                              tagsScrollController.offset + pointerSignal.scrollDelta.dy,
+                              // duration: Duration(milliseconds: 20),
+                              // curve: Curves.linear
+                            );
+                          }
+                        },
+                        child: SingleChildScrollView(
+                          controller: tagsScrollController,
+                          scrollDirection: Axis.horizontal,
+                          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ...getTags(),
+                              if(input.isNotEmpty)
+                                const SizedBox(width: 60),
+                            ],
+                          ),
+                        )
                       ),
                     )
                   ),

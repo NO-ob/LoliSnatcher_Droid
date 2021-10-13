@@ -529,7 +529,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
     int nowMils = DateTime.now().millisecondsSinceEpoch;
     int sinceStart = nowMils - _startedAt;
-    bool showLoading = sinceStart > 500;
+    bool showLoading = isViewed && sinceStart > 500;
     // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
     return Hero(

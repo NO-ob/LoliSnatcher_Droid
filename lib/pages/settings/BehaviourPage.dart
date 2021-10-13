@@ -281,7 +281,6 @@ class _BehaviourPageState extends State<BehaviourPage> {
               ),
               SettingsButton(name: '', enabled: false),
 
-              // TODO
               SettingsDropdown(
                 selected: cacheDurationSelected?["label"] ?? '',
                 values: List<String>.from(settingsHandler.map['cacheDuration']?['options'].map((dur) {

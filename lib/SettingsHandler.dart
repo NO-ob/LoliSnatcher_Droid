@@ -71,7 +71,7 @@ class SettingsHandler extends GetxController {
   int snatchCooldown = 250;
   int volumeButtonsScrollSpeed = 200;
   int galleryAutoScrollTime = 4000;
-  int cacheSize = 0;
+  int cacheSize = 3;
 
   Duration cacheDuration = Duration(days: 0);
 
@@ -267,7 +267,7 @@ class SettingsHandler extends GetxController {
     },
     "cacheSize": {
       "type": "int",
-      "default": 5,
+      "default": 3,
       "upperLimit": 10,
       "lowerLimit": 0,
     },
