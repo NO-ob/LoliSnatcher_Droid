@@ -17,7 +17,7 @@ abstract class BooruHandler {
   String prevTags = "";
   RxBool locked = false.obs;
   Booru booru;
-  String verStr = "1.8.3";
+  String verStr = Get.find<SettingsHandler>().verStr;
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   RxString errorString = ''.obs;
 

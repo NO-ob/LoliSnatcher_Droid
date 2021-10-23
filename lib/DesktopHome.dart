@@ -43,7 +43,7 @@ class _DesktopHomeState extends State<DesktopHome> {
                   const SizedBox(width: 15),
                   TagSearchBox(),
                   const SizedBox(width: 15),
-                  BooruSelectorMain(true),
+                  Expanded(child: BooruSelectorMain(true)),
                   IconButton(
                     padding: const EdgeInsets.all(5),
                     icon: Icon(Icons.search),
@@ -53,8 +53,8 @@ class _DesktopHomeState extends State<DesktopHome> {
                       searchHandler.searchAction(searchHandler.searchTextController.text, null);
                     },
                   ),
-                  TabBox(),
-                  TabBoxButtons(false, MainAxisAlignment.start),
+                  Expanded(child: TabBox()),
+                  Expanded(child: TabBoxButtons(false, MainAxisAlignment.start)),
                 ],
               ),
             ),

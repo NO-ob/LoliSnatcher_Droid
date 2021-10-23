@@ -18,7 +18,6 @@ import 'package:LoliSnatcher/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/DesktopHome.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
@@ -517,38 +516,10 @@ class _HomeState extends State<Home> {
                 child: ListView(
                   children: [
                     // TODO tabbox and booruselector cause lag when opening a drawer
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          // const Text("Tab: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                          TabBox(),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        children: <Widget>[
-                          // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                          BooruSelectorMain(true),
-                        ],
-                      ),
-                    ),
+                    TabBox(),
+                    TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
+                    BooruSelectorMain(true),
+
                     if(settingsHandler.booruList.length > 1)
                       SettingsToggle(
                         title: 'Multibooru Mode',
@@ -603,6 +574,31 @@ class _HomeState extends State<Home> {
                       icon: Icon(Icons.settings),
                       page: () => SettingsPage(),
                     ),
+                    if(settingsHandler.updateInfo != null)
+                      SettingsButton(
+                        name: 'Update Available!',
+                        icon: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Icon(Icons.update),
+                            Positioned(
+                              top: 1,
+                              left: 1,
+                              child: Center(child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ))
+                            ),
+                          ]
+                        ),
+                        action: () async {
+                          settingsHandler.showUpdate();
+                        },
+                      ),
                   ],
                 ),
               )

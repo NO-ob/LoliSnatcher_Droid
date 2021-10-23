@@ -115,6 +115,13 @@ class SettingsPage extends StatelessWidget {
                 page: () => AboutPage()
               ),
               SettingsButton(
+                name: 'Check for Updates',
+                icon: Icon(Icons.update),
+                action: () {
+                  settingsHandler.checkUpdate(withMessage: true);
+                },
+              ),
+              SettingsButton(
                 name: 'Help',
                 icon: Icon(Icons.help_center_outlined),
                 action: () {

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -12,6 +13,8 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 /**
  * This class is used loading from and writing settings to files
@@ -27,6 +30,8 @@ class SettingsHandler extends GetxController {
   String boorusPath = "";
   int SDKVer = 0;
   String verStr = "1.8.3";
+  int verCode = 1803;
+  UpdateInfo? updateInfo;
   ////////////////////////////////////////////////////
 
   // TODO move these to separate controller?
@@ -427,6 +432,10 @@ class SettingsHandler extends GetxController {
           if(parse == null) {
             throw 'value "$value" of type ${value.runtimeType} for $name is not an int';
           } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
+            if(toJSON) {
+              // force default value when not passing validation when saving
+              setByString(name, settingParams["default"]);
+            }
             return settingParams["default"];
           } else {
             return parse;
@@ -1285,6 +1294,116 @@ class SettingsHandler extends GetxController {
     return tags.where((tag) => tag != "").map((tag) => tag.trim().toLowerCase()).toList();
   }
 
+  void checkUpdate({bool withMessage = false}) async {
+    // String fakeUpdate = '{"version_code": 9999, "version_name": "9.9.9", "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}';
+    // String fakeUpdate = '123';
+    try {
+      final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NANI-SORE/LoliSnatcher_Droid/getxrework/update.json'));
+      final json = jsonDecode(response.body);
+      // final json = jsonDecode(fakeUpdate);
+
+      updateInfo = UpdateInfo(
+        versionCode: json["version_code"] ?? 0,
+        versionName: json["version_name"] ?? '0.0.0',
+        title: json["title"] ?? '...',
+        changelog: json["changelog"] ?? '...',
+        isInStore: json["is_in_store"] ?? false,
+        isImportant: json["is_important"] ?? false,
+        storePackage: json["store_package"] ?? '',
+        githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
+      );
+
+      if(verCode < (updateInfo?.versionCode ?? 0)) {
+        if((withMessage || updateInfo!.isImportant)) {
+          showUpdate();
+        }
+      } else {
+        if(withMessage) {
+          FlashElements.showSnackbar(
+            title: Text(
+              "You already have the latest version!",
+              style: TextStyle(fontSize: 20)
+            ),
+            sideColor: Colors.green,
+            leadingIcon: Icons.update,
+            leadingIconColor: Colors.green,
+          );
+        }
+        updateInfo = null;
+      }
+    } catch (e) {
+      if(withMessage) {
+        FlashElements.showSnackbar(
+          title: Text(
+            "Update Check Error!",
+            style: TextStyle(fontSize: 20)
+          ),
+          content: Text(
+            e.toString()
+          ),
+          sideColor: Colors.red,
+          leadingIcon: Icons.update,
+          leadingIconColor: Colors.red,
+        );
+      }
+    }
+  }
+
+  void showUpdate() {
+    if(updateInfo != null) {
+      // TODO get from some external variable when building
+      bool isFromStore = false;
+
+      Get.dialog(
+        SettingsDialog(
+          title: Text('Update Available: ${updateInfo!.versionName}'),
+          contentItems: [
+            Text('Currently Installed: $verStr'),
+            Text(''),
+            Text('${updateInfo!.title}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(''),
+            Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(''),
+            Text(updateInfo!.changelog),
+            // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+          ],
+          actionButtons: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(Get.context!).pop(true);
+              },
+              child: Text('Later', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+            ),
+            if(isFromStore && updateInfo!.isInStore)
+              TextButton.icon(
+                onPressed: () async {
+                  // try {
+                  //   ServiceHandler.launchURL("market://details?id=" + updateInfo!.storePackage);
+                  // } on PlatformException catch(e) {
+                  //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo!.storePackage);
+                  // }
+                  ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo!.storePackage);
+                  Navigator.of(Get.context!).pop(true);
+                },
+                icon: Icon(Icons.play_arrow, color: Get.theme.colorScheme.onBackground),
+                label: Text('Visit Play Store', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              )
+            else
+              TextButton.icon(
+                onPressed: () {
+                  ServiceHandler.launchURL(updateInfo!.githubURL);
+                  Navigator.of(Get.context!).pop(true);
+                },
+                icon: Icon(Icons.exit_to_app, color: Get.theme.colorScheme.onBackground),
+                label: Text('Visit Releases', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              ),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+    }
+  }
+
   Future<void> setConfigDir() async {
     // print('-=-=-=-=-=-=-=-');
     // print(Platform.environment);
@@ -1299,6 +1418,7 @@ class SettingsHandler extends GetxController {
     if (booruList.isEmpty){
       await loadBoorus();
     }
+    checkUpdate(withMessage: false);
 
     // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
     // print(toJSON());
@@ -1307,4 +1427,28 @@ class SettingsHandler extends GetxController {
     isInit.value = true;
     return;
   }
+}
+
+
+
+class UpdateInfo {
+  int versionCode;
+  String versionName;
+  String title;
+  String changelog;
+  bool isInStore;
+  bool isImportant;
+  String storePackage;
+  String githubURL;
+
+  UpdateInfo({
+    required this.versionCode,
+    required this.versionName,
+    required this.title,
+    required this.changelog,
+    required this.isInStore,
+    required this.isImportant,
+    required this.storePackage,
+    required this.githubURL,
+  });
 }

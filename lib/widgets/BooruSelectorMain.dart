@@ -168,80 +168,45 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         ))
       );
 
-    return Expanded(
-      child: Container(
-        // constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
-        padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 5) : EdgeInsets.fromLTRB(5, 0, 2, 0),
-        child: Obx(() => GestureDetector(
-          onTap: openItemsList,
-          child: DropdownButtonFormField<Booru>(
-            key: dropdownKey,
-            isExpanded: true,
-            value: widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0],
-            icon: Icon(Icons.arrow_drop_down),
-            // underline: const SizedBox(),
-            decoration: InputDecoration(
-              labelText: 'Booru',
-              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground),
-              // contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-              contentPadding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(4) : null,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
+    return Container(
+      // constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
+      padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
+      child: Obx(() => GestureDetector(
+        onTap: openItemsList,
+        child: DropdownButtonFormField<Booru>(
+          key: dropdownKey,
+          isExpanded: true,
+          value: widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0],
+          icon: Icon(Icons.arrow_drop_down),
+          // underline: const SizedBox(),
+          decoration: InputDecoration(
+            labelText: 'Booru',
+            labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground),
+            // contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+            contentPadding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.symmetric(horizontal: 12, vertical: 2) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             ),
-            dropdownColor: Get.theme.cardColor,
-            onChanged: (Booru? newValue) {
-              if((widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0]) != newValue) { // if not already selected
-                if(widget.isPrimary) {
-                  searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
-                } else {
-                  searchHandler.mergeAction([newValue!]);
-                }
-              }
-            },
-            selectedItemBuilder: (BuildContext context) {
-              return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
-                return DropdownMenuItem<Booru>(
-                  value: value,
-                  child: Container(
-                    // padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(5) : EdgeInsets.fromLTRB(5, 10, 5, 10),
-                    child: Row(
-                      children: <Widget>[
-                        //Booru Icon
-                        value.type == "Favourites"
-                          ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                          : CachedFavicon(value.faviconURL!),
-                        //Booru name
-                        Text(" ${value.name}"),
-                      ],
-                    )
-                  ),
-                );
-              }).toList();
-            },
-            items: settingsHandler.booruList.where((Booru booru) {
+            border: OutlineInputBorder(
+              borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+            ),
+          ),
+          dropdownColor: Get.theme.cardColor,
+          onChanged: (Booru? newValue) {
+            if((widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0]) != newValue) { // if not already selected
               if(widget.isPrimary) {
-                return true;
+                searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
               } else {
-                bool isCurrent = isItemSelected(booru, true);
-                return !isCurrent;
+                searchHandler.mergeAction([newValue!]);
               }
-            }).map<DropdownMenuItem<Booru>>((Booru value) {
-              bool isCurrent = isItemSelected(value, widget.isPrimary);
-              // Return a dropdown item
+            }
+          },
+          selectedItemBuilder: (BuildContext context) {
+            return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
               return DropdownMenuItem<Booru>(
                 value: value,
                 child: Container(
-                  padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(5) : EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  decoration: isCurrent
-                  ? BoxDecoration(
-                    border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                    borderRadius: BorderRadius.circular(5),
-                  )
-                  : null,
+                  // padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(5) : EdgeInsets.fromLTRB(5, 10, 5, 10),
                   child: Row(
                     children: <Widget>[
                       //Booru Icon
@@ -254,10 +219,43 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                   )
                 ),
               );
-            }).toList(),
-          )
-        )),
-      )
+            }).toList();
+          },
+          items: settingsHandler.booruList.where((Booru booru) {
+            if(widget.isPrimary) {
+              return true;
+            } else {
+              bool isCurrent = isItemSelected(booru, true);
+              return !isCurrent;
+            }
+          }).map<DropdownMenuItem<Booru>>((Booru value) {
+            bool isCurrent = isItemSelected(value, widget.isPrimary);
+            // Return a dropdown item
+            return DropdownMenuItem<Booru>(
+              value: value,
+              child: Container(
+                padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(5) : EdgeInsets.fromLTRB(5, 10, 5, 10),
+                decoration: isCurrent
+                ? BoxDecoration(
+                  border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                  borderRadius: BorderRadius.circular(5),
+                )
+                : null,
+                child: Row(
+                  children: <Widget>[
+                    //Booru Icon
+                    value.type == "Favourites"
+                      ? Icon(Icons.favorite,color: Colors.red, size: 18)
+                      : CachedFavicon(value.faviconURL!),
+                    //Booru name
+                    Text(" ${value.name}"),
+                  ],
+                )
+              ),
+            );
+          }).toList(),
+        )
+      )),
     );
   }
 }

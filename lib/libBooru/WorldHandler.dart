@@ -29,7 +29,7 @@ class WorldHandler extends BooruHandler{
        * Parse Data Object and Add a new BooruItem to the list
        */
       var current = posts.elementAt(i);
-      Logger.Inst().log(current.toString(), "WorldHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
+      // Logger.Inst().log(current.toString(), "WorldHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       List<dynamic> imageLinks = current['imageLinks'];
       bool isVideo = current['type'] == 1; //type 1 - video, type 0 - image
       String bestFile = imageLinks.where((f) => f["type"] == (isVideo ? 10 : 2)).toList()[0]["url"];

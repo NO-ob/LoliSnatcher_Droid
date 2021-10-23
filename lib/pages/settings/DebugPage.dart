@@ -104,14 +104,16 @@ class _DebugPageState extends State<DebugPage> {
               ),
 
               SettingsButton(
-                name: 'Animation speed (${(1/timeDilation).toPrecision(2)})',
+                name: 'Animation speed ($timeDilation)',
                 icon: Icon(Icons.timelapse),
                 action: () {
-                  if(timeDilation == 4) {
-                    timeDilation = 1;
-                  } else {
-                    timeDilation = timeDilation + 1;
+                  const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4];
+                  int currentIndex = speeds.indexOf(timeDilation);
+                  int newIndex = 0;
+                  if((currentIndex + 1) <= (speeds.length - 1)) {
+                    newIndex = currentIndex + 1;
                   }
+                  timeDilation = speeds[newIndex];
                   setState(() { });
                 },
               ),

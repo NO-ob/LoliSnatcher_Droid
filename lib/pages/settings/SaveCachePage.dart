@@ -118,7 +118,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
   void setPath(String path) {
     print("path is $path");
-    if (path.isNotEmpty){
+    if (path.isNotEmpty) {
       settingsHandler.extPathOverride = path;
     }
   }
@@ -165,6 +165,47 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 title: 'Write Image Data to JSON on save',
               ),
+
+              SettingsButton(
+                name: 'Set Storage Directory',
+                icon: Icon(Icons.folder_outlined),
+                action: () async {
+                  //String url = await ServiceHandler.setExtDir();
+
+                  if (Platform.isAndroid) {
+                    extPathOverride = await ServiceHandler.setExtDir();
+                    // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
+                  } else {
+                    // TODO need to update dir picker to work on desktop
+                    /*if(widget.settingsHandler.appMode == "Desktop") {
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child: DirPicker(path),
+                        ),
+                      )).then((value) => {setPath(value == null ? "" : value)});
+                    } else {
+                      Get.to(() => DirPicker(path))!.then((value) => {setPath(value == null ? "" : value)});
+                    }*/
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        'Error!',
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      content: Text(
+                        'Currently not available for this platform',
+                        style: TextStyle(fontSize: 16)
+                      ),
+                      leadingIcon: Icons.error_outline,
+                      leadingIconColor: Colors.red,
+                      sideColor: Colors.red,
+                    );
+                  }
+                },
+              ),
+              SettingsButton(name: '', enabled: false),
+
               SettingsToggle(
                 value: thumbnailCache,
                 onChanged: (newValue) {
@@ -186,8 +227,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
               SettingsDropdown(
                 selected: videoCacheMode,
                 values: settingsHandler.map['videoCacheMode']?['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']?['default'];
                   });
                 },
@@ -211,52 +252,13 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 ),
               ),
 
-              SettingsButton(name: '', enabled: false),
-              SettingsButton(
-                name: 'Set Storage Directory',
-                icon: Icon(Icons.folder_outlined),
-                action: () async {
-                  //String url = await ServiceHandler.setExtDir();
-                  if (Platform.isAndroid) {
-                    extPathOverride = await ServiceHandler.setExtDir();
-                  } else {
-                    // TODO need to update dir picker to work on desktop
-                    /*if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child:DirPicker(widget.settingsHandler,path),
-                        ),
-                      )).then((value) => {setPath(value == null ? "" : value)});
-                    } else {
-                      Get.to(() => DirPicker(widget.settingsHandler,path))!.then((value) => {setPath(value == null ? "" : value)});
-                    }*/
-                    FlashElements.showSnackbar(
-                      context: context,
-                      title: Text(
-                        'Error!',
-                        style: TextStyle(fontSize: 20)
-                      ),
-                      content: Text(
-                        'Currently not available for this platform',
-                        style: TextStyle(fontSize: 16)
-                      ),
-                      leadingIcon: Icons.error_outline,
-                      leadingIconColor: Colors.red,
-                      sideColor: Colors.red,
-                    );
-                  }
-                },
-              ),
-              SettingsButton(name: '', enabled: false),
-
               SettingsDropdown(
                 selected: cacheDurationSelected?["label"] ?? '',
                 values: List<String>.from(settingsHandler.map['cacheDuration']?['options'].map((dur) {
                   return dur["label"];
                 })),
                 onChanged: (String? newValue) {
-                  setState((){
+                  setState(() {
                     cacheDurationSelected = settingsHandler.map['cacheDuration']?['options'].firstWhere((dur) {
                       return dur["label"] == newValue;
                     });
@@ -276,6 +278,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 ],
               ),
 
+              SettingsButton(name: '', enabled: false),
+
               SettingsButton(name: 'Cache Stats:'),
               ...cacheTypes.map((type) {
                 Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type['folder'], orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
@@ -289,15 +293,17 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   ? 'Loading...'
                   : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} file${fileCount == 1 ? '' : 's'}');
 
+                bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
+
                 return SettingsButton(
                   name: '$label: $text',
                   icon: isLoading
                     ? CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                       )
-                    : Icon(null),
+                    : Icon(allowedToClear ? Icons.delete : null),
                   action: () async {
-                    if (folder != null && folder != 'favicons' && !isEmpty) {
+                    if (allowedToClear) {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: Duration(seconds: 2),
