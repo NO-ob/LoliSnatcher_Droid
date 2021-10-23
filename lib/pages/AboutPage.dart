@@ -18,7 +18,7 @@ class AboutPage extends StatelessWidget {
           children: <Widget>[
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
-              child: Text("Loli Snatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo."),
+              child: Text("LoliSnatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo."),
             ),
             SettingsButton(
               name: 'Contact: $email',
@@ -81,7 +81,7 @@ class AboutPage extends StatelessWidget {
               name: 'Licenses',
               icon: Icon(Icons.document_scanner),
               action: () {
-                showLicensePage(context: context, applicationName: 'Loli Snatcher');
+                showLicensePage(context: context, applicationName: 'LoliSnatcher');
               }
             ),
           ],

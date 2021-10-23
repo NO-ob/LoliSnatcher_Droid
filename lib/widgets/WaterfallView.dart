@@ -347,8 +347,6 @@ class _WaterfallState extends State<WaterfallView> {
       child: Stack(
         alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
         children: [
-          // CachedThumb(item, index, searchGlobal, columnCount, isHated, true),
-          // CachedThumbNew(item, index, searchGlobal, columnCount, true),
           CachedThumbBetter(item, index, searchGlobal, columnCount, true),
           Container(
             alignment: Alignment.bottomCenter,
@@ -427,7 +425,7 @@ class _WaterfallState extends State<WaterfallView> {
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,
-        physics: (Platform.isWindows || Platform.isLinux) ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         addAutomaticKeepAlives: false,
         cacheExtent: 200,
         shrinkWrap: false,
@@ -460,7 +458,7 @@ class _WaterfallState extends State<WaterfallView> {
 
       return StaggeredGridView.countBuilder(
         controller: searchHandler.gridScrollController,
-        physics: (Platform.isWindows || Platform.isLinux) ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         addAutomaticKeepAlives: false,
         shrinkWrap: true,
         itemCount: widget.tab.booruHandler.filteredFetched.length,
@@ -496,51 +494,53 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   Widget staggeredBetterBuilder() {
-    return Obx(() {
-      int columnsCount =
-        (MediaQuery.of(context).orientation == Orientation.portrait)
-            ? settingsHandler.portraitColumns
-            : settingsHandler.landscapeColumns;
-      double itemMaxWidth = MediaQuery.of(context).size.width / columnsCount;
-      double itemMaxHeight = MediaQuery.of(context).size.height * 0.6;
-
-      return WaterfallFlow.builder(
-        controller: searchHandler.gridScrollController,
-        padding: const EdgeInsets.all(5.0),
-        physics: (Platform.isWindows || Platform.isLinux) ? const NeverScrollableScrollPhysics() : const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        shrinkWrap: true,
-        addAutomaticKeepAlives: false,
-        cacheExtent: 200,
-        gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
-          crossAxisCount: columnsCount,
-          mainAxisSpacing: 4.0,
-          crossAxisSpacing: 4.0,
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          double? widthData = widget.tab.booruHandler.filteredFetched[index].fileWidth ?? null;
-          double? heightData = widget.tab.booruHandler.filteredFetched[index].fileHeight ?? null;
-          
-          double possibleWidth = itemMaxWidth;
-          double possibleHeight = itemMaxWidth;
-          bool hasSizeData = heightData != null && widthData != null;
-          if(hasSizeData) {
-            double aspectRatio = widthData / heightData;
-            possibleHeight = possibleWidth / aspectRatio;
-          }
-          // force to use minimum 100 px and max 60% of screen height
-          possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
-          
-          return Container(
-            height: possibleHeight,
-            width: possibleWidth,
-            // constraints: hasSizeData
-            //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
-            //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
-            child: cardItemBuild(index, columnsCount),
-          );
-        },
-        itemCount: widget.tab.booruHandler.filteredFetched.length,
-      );
+    int columnsCount =
+      (MediaQuery.of(context).orientation == Orientation.portrait)
+          ? settingsHandler.portraitColumns
+          : settingsHandler.landscapeColumns;
+      
+    return LayoutBuilder(builder: (ctx, constraints) { 
+      double itemMaxWidth = constraints.maxWidth / columnsCount; //MediaQuery.of(context).size.width / columnsCount;
+      double itemMaxHeight = itemMaxWidth * (16 / 9); //MediaQuery.of(context).size.height * 0.6;
+      return Obx(() {
+        return WaterfallFlow.builder(
+          controller: searchHandler.gridScrollController,
+          padding: const EdgeInsets.all(5.0),
+          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          shrinkWrap: true,
+          addAutomaticKeepAlives: false,
+          cacheExtent: 200,
+          gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columnsCount,
+            mainAxisSpacing: 4.0,
+            crossAxisSpacing: 4.0,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            double? widthData = widget.tab.booruHandler.filteredFetched[index].fileWidth ?? null;
+            double? heightData = widget.tab.booruHandler.filteredFetched[index].fileHeight ?? null;
+            
+            double possibleWidth = itemMaxWidth;
+            double possibleHeight = itemMaxWidth;
+            bool hasSizeData = heightData != null && widthData != null;
+            if(hasSizeData) {
+              double aspectRatio = widthData / heightData;
+              possibleHeight = possibleWidth / aspectRatio;
+            }
+            // force to use minimum 100 px and max 60% of screen height
+            possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
+            
+            return Container(
+              height: possibleHeight,
+              width: possibleWidth,
+              // constraints: hasSizeData
+              //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
+              //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
+              child: cardItemBuild(index, columnsCount),
+            );
+          },
+          itemCount: widget.tab.booruHandler.filteredFetched.length,
+        );
+      });
     });
   }
 
@@ -608,41 +608,40 @@ class _WaterfallState extends State<WaterfallView> {
                   onRefresh: () async {
                     searchHandler.searchAction(widget.tab.tags, null);
                   },
-                  // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height + 100),
-                    child: ImprovedScrolling(
-                      scrollController: searchHandler.gridScrollController,
-                      // onScroll: (scrollOffset) => debugPrint(
-                      //   'Scroll offset: $scrollOffset',
-                      // ),
-                      // onMMBScrollStateChanged: (scrolling) => debugPrint(
-                      //   'Is scrolling: $scrolling',
-                      // ),
-                      // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
-                      //       'Cursor position: $localCursorOffset\n'
-                      //       'Scroll activity: $scrollActivity',
-                      // ),
-                      enableMMBScrolling: true,
-                      enableKeyboardScrolling: true,
-                      enableCustomMouseWheelScrolling: true,
-                      // mmbScrollConfig: MMBScrollConfig(
-                      //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
-                      // ),
-                      keyboardScrollConfig: KeyboardScrollConfig(
-                        arrowsScrollAmount: 250.0,
-                        homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
-                          return const Duration(milliseconds: 100);
-                        },
-                        endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
-                          return const Duration(milliseconds: 2000);
-                        },
-                      ),
-                      customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
-                        scrollAmountMultiplier: 15.0,
-                      ),
-                      child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData) ? gridBuilder() : staggeredBetterBuilder() //staggeredBuilder()
-                    )
+                  child: ImprovedScrolling(
+                    scrollController: searchHandler.gridScrollController,
+                    // onScroll: (scrollOffset) => debugPrint(
+                    //   'Scroll offset: $scrollOffset',
+                    // ),
+                    // onMMBScrollStateChanged: (scrolling) => debugPrint(
+                    //   'Is scrolling: $scrolling',
+                    // ),
+                    // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
+                    //       'Cursor position: $localCursorOffset\n'
+                    //       'Scroll activity: $scrollActivity',
+                    // ),
+                    enableMMBScrolling: true,
+                    enableKeyboardScrolling: true,
+                    enableCustomMouseWheelScrolling: true,
+                    // mmbScrollConfig: MMBScrollConfig(
+                    //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
+                    // ),
+                    keyboardScrollConfig: KeyboardScrollConfig(
+                      arrowsScrollAmount: 250.0,
+                      homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
+                        return const Duration(milliseconds: 100);
+                      },
+                      endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
+                        return const Duration(milliseconds: 2000);
+                      },
+                    ),
+                    customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
+                      scrollAmountMultiplier: 15.0,
+                    ),
+                    // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
+                    child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData)
+                      ? gridBuilder()
+                      : staggeredBetterBuilder() //staggeredBuilder()
                   ),
                 ),
               ),

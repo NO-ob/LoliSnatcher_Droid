@@ -73,7 +73,7 @@ class SettingsHandler extends GetxController {
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
 
-  Duration cacheDuration = Duration(days: 0);
+  Duration cacheDuration = Duration.zero;
 
   List<List<String>> buttonList = [
     ["autoscroll", "AutoScroll"],
@@ -342,9 +342,9 @@ class SettingsHandler extends GetxController {
     },
     "cacheDuration": {
       "type": "duration",
-      "default": Duration(days: 0),
+      "default": Duration.zero,
       "options": <Map<String, dynamic>>[
-        {'label': 'Never', 'value': Duration(days: 0)},
+        {'label': 'Never', 'value': Duration.zero},
         {'label': '30 minutes', 'value': Duration(minutes: 30)},
         {'label': '1 hour', 'value': Duration(hours: 1)},
         {'label': '6 hours', 'value': Duration(hours: 6)},

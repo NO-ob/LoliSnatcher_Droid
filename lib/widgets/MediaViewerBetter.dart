@@ -557,7 +557,8 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                     child: PhotoView(
                       //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
                       imageProvider: mainProvider,
-                      filterQuality: FilterQuality.high,
+                      // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                      filterQuality: FilterQuality.medium,
                       minScale: PhotoViewComputedScale.contained,
                       maxScale: PhotoViewComputedScale.covered * 8,
                       initialScale: PhotoViewComputedScale.contained,

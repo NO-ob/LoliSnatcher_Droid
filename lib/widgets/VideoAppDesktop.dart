@@ -36,7 +36,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
   Player? _videoController;
-  Playlist playlist = Playlist(medias: []);
+  Media? media;
 
   StreamSubscription<bool>? appbarListener;
 
@@ -54,8 +54,25 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   void didUpdateWidget(VideoAppDesktop oldWidget) {
     // force redraw on item data change
     if(oldWidget.booruItem != widget.booruItem) {
-      killLoading([]);
-      initVideo(false);
+      // reset stuff here
+      firstViewFix = false;
+      resetZoom();
+      switch (settingsHandler.videoCacheMode) {
+        case 'Cache':
+          // TODO load video in bg without destroying the player object, then replace with a new one
+          killLoading([]);
+          initVideo(false);
+          break;
+
+        case 'Stream+Cache':
+          changeNetworkVideo();
+          break;
+
+        case 'Stream':
+        default:
+          changeNetworkVideo();
+          break;
+      }
       updateState();
     }
     super.didUpdateWidget(oldWidget);
@@ -204,6 +221,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     disposables();
 
     _video = null;
+    media = null;
 
     _total = 0;
     _received = 0;
@@ -239,7 +257,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     _debounceBytes?.cancel();
     _checkInterval?.cancel();
 
-    _videoController?.setVolume(0);
+    // _videoController?.setVolume(0);
     _videoController?.pause();
     _videoController?.dispose();
     _videoController = null;
@@ -317,31 +335,39 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
   }
 
-  Future<void> initPlayer() async {
+  Future<void> changeNetworkVideo() async {
     if(_video != null) { // if (settingsHandler.mediaCache || _video != null) {
       // Start from cache if was already cached or only caching is allowed
-      playlist = Playlist(
-        medias: [
-          Media.file(_video!)
-        ],
-        playlistMode: PlaylistMode.repeat,
-      );
+      media = Media.file(_video!);
     } else {
       // Otherwise load from network
       // print('uri: ${widget.booruItem.fileURL}');
-      playlist = Playlist(
-        medias: [
-          Media.network(
-            widget.booruItem.fileURL,
-            extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)
-          )
-        ],
-        playlistMode: PlaylistMode.repeat,
+      media = Media.network(
+        widget.booruItem.fileURL,
+        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)
+      );
+    }
+    _videoController!.open(
+      media!,
+      autoStart: true,
+    );
+  }
+
+  Future<void> initPlayer() async {
+    if(_video != null) { // if (settingsHandler.mediaCache || _video != null) {
+      // Start from cache if was already cached or only caching is allowed
+      media = Media.file(_video!);
+    } else {
+      // Otherwise load from network
+      // print('uri: ${widget.booruItem.fileURL}');
+      media = Media.network(
+        widget.booruItem.fileURL,
+        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)
       );
     }
     _videoController = Player(id: widget.index);
     _videoController!.open(
-      playlist,
+      media!,
       autoStart: true,
     );
 
@@ -581,7 +607,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          _videoController!.seek(Duration());
+          _videoController!.seek(Duration.zero);
         }
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
@@ -592,7 +618,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             _debounceBytes = Timer(
               const Duration(milliseconds: 500),
               () {
+                // print('first view fix ${widget.booruItem.fileURL}');
                 _videoController!.setVolume(settingsHandler.videoVolume);
+                _videoController!.seek(Duration(milliseconds: 100));
                 _videoController!.play();
                 firstViewFix = true;
               }

@@ -28,21 +28,5 @@ Supported Booru engines:
 ![github-small](https://s1.desu-usergeneratedcontent.xyz/g/image/1616/61/1616619170446.png)
 
 ![github-small](https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/sancucku.png)
-## To Do
-- [ ] Search remembering
-    - [ ] Add setting for remembering tabs
-    - [ ] Dump tab searchGlobals to database on search if setting enabled
-- [ ] UI Extra
-    - [ ] Add buttons for ratings instead of typing it
-    - [ ] Add save location functionality
-    - [ ] Hamburger menu gesture/ popup on finger hold (kuroba does this)
-    - [x] Add option to make thumbs show at normal aspect ratio instead of square
-    - [x] Use stream builders when writing image to give a real time progress count (https://www.youtube.com/watch?v=PRd4Y_E2od4)
-    - [ ] Themes
-- [ ] Bugs
-    - [ ] Preview grid refreshes when tag textbox is focused
-
-
-
 
 

@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/pages/AboutPage.dart';
-import 'package:LoliSnatcher/pages/settings/BehaviourPage.dart';
+import 'package:LoliSnatcher/pages/settings/SaveCachePage.dart';
 import 'package:LoliSnatcher/pages/settings/BooruPage.dart';
 import 'package:LoliSnatcher/pages/settings/DatabasePage.dart';
 import 'package:LoliSnatcher/pages/settings/DebugPage.dart';
@@ -71,9 +71,9 @@ class SettingsPage extends StatelessWidget {
                 page: () => GalleryPage()
               ),
               SettingsButton(
-                name: 'Saving & Caching',
+                name: 'Snatching & Caching',
                 icon: Icon(Icons.settings),
-                page: () => BehaviourPage()
+                page: () => SaveCachePage()
               ),
               SettingsButton(
                 name: 'Tag Filters',

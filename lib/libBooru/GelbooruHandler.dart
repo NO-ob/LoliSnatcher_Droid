@@ -28,7 +28,7 @@ class GelbooruHandler extends BooruHandler {
     // Create a BooruItem for each post in the list
     for (int i = 0; i < posts.length; i++){
       var current = posts.elementAt(i);
-      Logger.Inst().log("dbhandler dbLocked", "GelbooruHandler", "search", LogTypes.booruHandlerRawFetched);
+      // Logger.Inst().log("dbhandler dbLocked", "GelbooruHandler", "search", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */

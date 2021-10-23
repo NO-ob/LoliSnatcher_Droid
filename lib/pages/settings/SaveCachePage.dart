@@ -17,15 +17,15 @@ import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
 
-class BehaviourPage extends StatefulWidget {
-  BehaviourPage();
+class SaveCachePage extends StatefulWidget {
+  SaveCachePage();
   @override
-  _BehaviourPageState createState() => _BehaviourPageState();
+  _SaveCachePageState createState() => _SaveCachePageState();
 }
 
-class _BehaviourPageState extends State<BehaviourPage> {
+class _SaveCachePageState extends State<SaveCachePage> {
   final SettingsHandler settingsHandler = Get.find();
-  late String shareAction, videoCacheMode;
+  late String videoCacheMode;
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
   final ServiceHandler serviceHandler = ServiceHandler();
@@ -49,7 +49,6 @@ class _BehaviourPageState extends State<BehaviourPage> {
   @override
   void initState() {
     super.initState();
-    shareAction = settingsHandler.shareAction;
     snatchCooldownController.text = settingsHandler.snatchCooldown.toString();
     thumbnailCache = settingsHandler.thumbnailCache;
     mediaCache = settingsHandler.mediaCache;
@@ -104,7 +103,6 @@ class _BehaviourPageState extends State<BehaviourPage> {
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
-    settingsHandler.shareAction = shareAction;
     settingsHandler.snatchCooldown = int.parse(snatchCooldownController.text);
     settingsHandler.jsonWrite = jsonWrite;
     settingsHandler.mediaCache = mediaCache;
@@ -130,7 +128,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
       child:Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Behaviour"),
+          title: Text("Snatching & Caching"),
         ),
         body: Center(
           child: ListView(
@@ -155,36 +153,6 @@ class _BehaviourPageState extends State<BehaviourPage> {
                     return null;
                   }
                 }
-              ),
-              SettingsDropdown(
-                selected: shareAction,
-                values: settingsHandler.map['shareAction']?['options'],
-                onChanged: (String? newValue){
-                  setState((){
-                    shareAction = newValue ?? settingsHandler.map['shareAction']?['default'];
-                  });
-                },
-                title: 'Default Share Action',
-                trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
-                  onPressed: () {
-                    Get.dialog(
-                        InfoDialog("Share Actions",
-                          [
-                            Text("- Ask - always ask what to share"),
-                            Text("- Post URL"),
-                            Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
-                            Text("- File - shares viewed file itself"),
-                            Text("- Hydrus - sends the post url to Hydrus for import"),
-                            const SizedBox(height: 10),
-                            Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
-                            Text("[Tip]: You can open Share Actions Menu by long pressing Share button")
-                          ],
-                          CrossAxisAlignment.start,
-                        )
-                    );
-                  },
-                ),
               ),
               SettingsToggle(
                 value: jsonWrite,

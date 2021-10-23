@@ -35,18 +35,18 @@ class SearchHandler extends GetxController {
   // add new tab by the given search string
   addTabByString(String searchText, {bool switchToNew = false}) {
     // Add after the current tab
-    // list.insert(index.value + 1, SearchGlobal(list[index.value].selectedBooru, null, searchText));
+    // list.insert(index.value + 1, SearchGlobal(currentTab.selectedBooru, null, searchText));
 
     // Add new tab to the end
-    list.add(SearchGlobal(list[index.value].selectedBooru, null, searchText));
+    list.add(SearchGlobal(currentTab.selectedBooru, null, searchText));
 
     // record search query to db
     final SettingsHandler settingsHandler = Get.find();
     if(searchText != "" && settingsHandler.searchHistoryEnabled) {
       settingsHandler.dbHandler.updateSearchHistory(
         searchText,
-        list[index.value].selectedBooru.value.type,
-        list[index.value].selectedBooru.value.name
+        currentTab.selectedBooru.value.type,
+        currentTab.selectedBooru.value.name
       );
     }
 
@@ -65,7 +65,7 @@ class SearchHandler extends GetxController {
     if(list.length > 1) {
       if(index.value == list.length - 1){
         index.value --;
-        searchTextController.text = list[index.value].tags;
+        searchTextController.text = currentTab.tags;
         list.removeAt(index.value + 1);
       } else {
         searchTextController.text = list[index.value + 1].tags;
@@ -90,7 +90,7 @@ class SearchHandler extends GetxController {
 
       final SettingsHandler settingsHandler = Get.find();
       searchTextController.text = settingsHandler.defTags;
-      list[0] = SearchGlobal(list[index.value].selectedBooru, null, settingsHandler.defTags);
+      list[0] = SearchGlobal(currentTab.selectedBooru, null, settingsHandler.defTags);
     }
   }
 
@@ -101,7 +101,7 @@ class SearchHandler extends GetxController {
   final TextEditingController searchTextController = TextEditingController();
   addTag(String tag) {
     if(tag.isNotEmpty) {
-      if(list[index.value].selectedBooru.value.type == 'Hydrus') {
+      if(currentTab.selectedBooru.value.type == 'Hydrus') {
         searchTextController.text += ', $tag';
       } else {
         searchTextController.text += ' $tag';
@@ -120,7 +120,7 @@ class SearchHandler extends GetxController {
       Tools.forceClearMemoryCache(withLive: true);
     }
     // set search text anyway
-    searchTextController.text = list[index.value].tags;
+    searchTextController.text = currentTab.tags;
   }
 
   SearchGlobal get currentTab => list[index.value];
@@ -153,14 +153,14 @@ class SearchHandler extends GetxController {
       if(settingsHandler.booruList.isNotEmpty) {
         list.add(SearchGlobal(
           settingsHandler.booruList[0].obs,
-          settingsHandler.mergeEnabled ? list[index.value].secondaryBoorus : null,
+          settingsHandler.mergeEnabled ? currentTab.secondaryBoorus : null,
           text
         ));
       }
     } else {
       list[index.value] = SearchGlobal(
-        newBooru != null ? newBooru.obs : list[index.value].selectedBooru,
-        settingsHandler.mergeEnabled ? list[index.value].secondaryBoorus : null,
+        newBooru != null ? newBooru.obs : currentTab.selectedBooru,
+        settingsHandler.mergeEnabled ? currentTab.secondaryBoorus : null,
         text
       );
     }
@@ -169,8 +169,8 @@ class SearchHandler extends GetxController {
     if(text != "" && settingsHandler.searchHistoryEnabled) {
       settingsHandler.dbHandler.updateSearchHistory(
         text,
-        list[index.value].selectedBooru.value.type!,
-        list[index.value].selectedBooru.value.name!
+        currentTab.selectedBooru.value.type!,
+        currentTab.selectedBooru.value.name!
       );
     }
   }
@@ -178,14 +178,14 @@ class SearchHandler extends GetxController {
   void mergeAction(List<Booru>? secondaryBoorus) {
     final SettingsHandler settingsHandler = Get.find();
 
-    bool canAddSecondary = settingsHandler.mergeEnabled && (secondaryBoorus != null || list[index.value].secondaryBoorus == null) && settingsHandler.booruList.length > 1;
+    bool canAddSecondary = settingsHandler.mergeEnabled && (secondaryBoorus != null || currentTab.secondaryBoorus == null) && settingsHandler.booruList.length > 1;
     RxList<Booru>? secondary = canAddSecondary
       ? (secondaryBoorus == null
         ? [settingsHandler.booruList[1]].obs
         : secondaryBoorus.obs)
       : null;
 
-    SearchGlobal newSearchGlobal = SearchGlobal(list[index.value].selectedBooru, secondary, searchTextController.text);
+    SearchGlobal newSearchGlobal = SearchGlobal(currentTab.selectedBooru, secondary, searchTextController.text);
     list[index.value] = newSearchGlobal;
   }
 

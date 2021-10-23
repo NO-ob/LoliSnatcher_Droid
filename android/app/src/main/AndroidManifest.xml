@@ -14,8 +14,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="Loli Snatcher"
-        android:icon="@mipmap/launcher_icon"
+        android:label="LoliSnatcher"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         <activity

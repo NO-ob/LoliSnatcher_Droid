@@ -617,7 +617,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           });
         } else {
           if (isFinished) {
-            controller.seekTo(const Duration());
+            controller.seekTo(Duration.zero);
           }
           playPauseIconAnimationController.forward();
           controller.play();
@@ -781,7 +781,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 16.0),
-              Text('Select Video Speed:', style: TextStyle(color: Colors.black)),
+              Text('Select Video Speed:', style: TextStyle(color: Colors.white)),
             ]
           )
         ),
@@ -803,7 +803,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
                   else
                     Container(width: 20.0),
                   const SizedBox(width: 16.0),
-                  Text(_speed.toString(), style: TextStyle(color: Colors.black)),
+                  Text(_speed.toString(), style: TextStyle(color: Colors.white)),
                 ],
               ),
               selected: _speed == _selected,

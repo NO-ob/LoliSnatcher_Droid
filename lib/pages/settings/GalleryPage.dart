@@ -17,7 +17,7 @@ class GalleryPage extends StatefulWidget {
 class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = Get.find();
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
-  late String galleryMode, galleryBarPosition, galleryScrollDirection, zoomButtonPosition;
+  late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition;
   List<List<String>>? buttonOrder;
   TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
@@ -30,6 +30,7 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryBarPosition = settingsHandler.galleryBarPosition;
     buttonOrder = settingsHandler.buttonOrder;
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
+    shareAction = settingsHandler.shareAction;
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     autoPlay = settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
@@ -49,6 +50,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.galleryBarPosition = galleryBarPosition;
     settingsHandler.buttonOrder = buttonOrder!;
     settingsHandler.galleryScrollDirection = galleryScrollDirection;
+    settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.loadingGif = loadingGif;
@@ -143,6 +145,36 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: 'Gallery Scroll Direction',
+              ),
+              SettingsDropdown(
+                selected: shareAction,
+                values: settingsHandler.map['shareAction']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    shareAction = newValue ?? settingsHandler.map['shareAction']?['default'];
+                  });
+                },
+                title: 'Default Share Action',
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    Get.dialog(
+                        InfoDialog("Share Actions",
+                          [
+                            Text("- Ask - always ask what to share"),
+                            Text("- Post URL"),
+                            Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
+                            Text("- File - shares viewed file itself"),
+                            Text("- Hydrus - sends the post url to Hydrus for import"),
+                            const SizedBox(height: 10),
+                            Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
+                            Text("[Tip]: You can open Share Actions Menu by long pressing Share button")
+                          ],
+                          CrossAxisAlignment.start,
+                        )
+                    );
+                  },
+                ),
               ),
               SettingsDropdown(
                 selected: galleryBarPosition,

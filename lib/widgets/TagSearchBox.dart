@@ -216,7 +216,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     );
   }
 
-  List<Widget> getTags() {
+  List<Widget> getTagsChips() {
     // TODO on desktop - set cursor to where user clicked?
     // based on https://github.com/eyoeldefare/textfield_tags
     List<Widget> tags = [];
@@ -232,7 +232,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       // final bool isModifier = false;
 
       if(stringContent.isEmpty) {
-        break;
+        // skip creating chip element for empty tags (i.e double spaces...)
+        continue;
       }
 
       final Container tag = Container(
@@ -545,7 +546,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              ...getTags(),
+                              ...getTagsChips(),
                               if(input.isNotEmpty)
                                 const SizedBox(width: 60),
                             ],

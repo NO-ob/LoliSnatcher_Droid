@@ -20,7 +20,7 @@ class _ActiveTitleState extends State<ActiveTitle> {
       if(snatchHandler.snatchActive.value) {
         return Text("Snatching: ${snatchHandler.snatchStatus}");
       } else {
-        return Text("Loli Snatcher");
+        return Text("LoliSnatcher");
       }
     });
   }

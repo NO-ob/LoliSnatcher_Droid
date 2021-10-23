@@ -621,7 +621,7 @@ class _VideoAppState extends State<VideoApp> {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          _videoController!.seekTo(Duration());
+          _videoController!.seekTo(Duration.zero);
         }
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
