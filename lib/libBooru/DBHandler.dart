@@ -66,7 +66,7 @@ class DBHandler{
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   Future<String?> updateBooruItem(BooruItem item, String mode) async{
     Logger.Inst().log("updateBooruItem called fileURL is:" + item.fileURL, "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
-    String? itemID = await getItemID(item.fileURL);
+    String? itemID = await getItemID(item.postURL);
     String resultStr = "";
     if (itemID == null || itemID.isEmpty) {
       var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
@@ -77,6 +77,9 @@ class DBHandler{
     } else if (mode == "local") {
       await db?.rawUpdate("UPDATE BooruItem SET isSnatched = ?, isFavourite = ? WHERE id = ?", [Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true), itemID]);
       resultStr = "Updated";
+    } else if (mode == "urlUpdate"){
+      await db?.rawUpdate("UPDATE BooruItem SET thumbnailURL = ?,sampleURL = ?,fileURL = ? WHERE id = ?", [item.thumbnailURL,item.sampleURL,item.fileURL, itemID]);
+      resultStr = "Updated Urls";
     } else {
       resultStr = "Already Exists";
     }
@@ -86,14 +89,16 @@ class DBHandler{
 
 
   //Gets a BooruItem id from the database based on a fileurl
-  Future<String?> getItemID(String fileURL) async{
+  Future<String?> getItemID(String postURL) async{
     var result;
+    /* I dont think this if will be needed with post url
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx") || fileURL.contains("paheal.net")){
-      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
+    if (postURL.contains("s.sankakucomplex.com") || postURL.contains("rule34.xxx") || postURL.contains("paheal.net")){
+      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL LIKE (?)", ["%" + Tools.getFileName(postURL) + "%"]);
     } else {
-      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
-    }
+      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL IN (?)", [postURL]);
+    }*/
+    result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL IN (?)", [postURL]);
     if (result != null && result.isNotEmpty){
       return result.first["id"].toString();
     } else {
@@ -101,6 +106,29 @@ class DBHandler{
     }
   }
 
+  Future<List<BooruItem>> getSankakuItems() async {
+    var metaData = await db?.rawQuery(
+        "SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite FROM BooruItem WHERE postURL like '%chan.sankakucomplex%'");
+    List<BooruItem> items = [];
+    if (metaData != null && metaData.isNotEmpty){
+      for(int i=0; i < metaData.length; i++){
+        var currentItem = metaData[i];
+        if(currentItem != null && currentItem.isNotEmpty) {
+          BooruItem bItem = BooruItem(
+            fileURL: currentItem["fileURL"].toString(),
+            sampleURL: currentItem["sampleURL"].toString(),
+            thumbnailURL: currentItem["thumbnailURL"].toString(),
+            tagsList: [],
+            postURL: currentItem["postURL"].toString(),
+          );
+          bItem.isSnatched.value = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
+          bItem.isFavourite.value = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
+          items.add(bItem);
+        }
+      }
+    }
+    return items;
+  }
   //Gets a list of BooruItem from the database
   Future<List<BooruItem>> searchDB(String tagString, String offset, String limit, String order, String mode) async {
     List<String> tags;
