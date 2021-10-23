@@ -289,11 +289,12 @@ class _BehaviourPageState extends State<BehaviourPage> {
                     int SDKVer = 0;
                     String path = await serviceHandler.getExtDir();
                     if (Platform.isAndroid){
-                      SDKVer = await serviceHandler.getSDKVersion();
-                      print(SDKVer);
-                    }
-                    if (SDKVer < 30){
-                      if(widget.settingsHandler.appMode == "Desktop"){
+                      ServiceHandler.setExtDir();
+                      //TODO Store uri in settings and make another button so can set seetings dir and pictures dir
+                      //ServiceHandler.displayToast("Not available on android 11+");
+                    } else {
+                      // need to update dir picker to work on desktop
+                      /*if(widget.settingsHandler.appMode == "Desktop"){
                         Get.dialog(Dialog(
                           child: Container(
                             width: 500,
@@ -302,9 +303,7 @@ class _BehaviourPageState extends State<BehaviourPage> {
                         )).then((value) => {setPath(value == null ? "" : value)});
                       } else {
                         Get.to(() => DirPicker(widget.settingsHandler,path))!.then((value) => {setPath(value == null ? "" : value)});
-                      }
-                    } else {
-                      ServiceHandler.displayToast("Not available on android 11+");
+                      }*/
                     }
                   },
                   child: Text("Set Storage Directory", style: TextStyle(color: Colors.white)),

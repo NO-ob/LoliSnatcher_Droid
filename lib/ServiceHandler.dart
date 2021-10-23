@@ -34,12 +34,27 @@ class ServiceHandler{
     String result = "";
     try {
       result = await platform.invokeMethod("setExtPath");
-      print(result);
+      print("Service handler got uri back: $result");
     } catch (e) {
       print(e);
     }
+    //new File(result+"/test.txt").create(recursive: true);
     return result;
   }
+  static Future<String> testSAFPersistence() async {
+    print("test saf persistence");
+    String result = "";
+    String safuri = "content://com.android.externalstorage.documents/tree/1206-2917%3ALolisnatcher";
+    try {
+      result = await platform.invokeMethod("testSAF",{"uri" : safuri});
+      print("got saf result" + result);
+    } catch (e) {
+      print(e);
+    }
+    Directory dir = Directory(result);
+    return result;
+  }
+
   Future<int> getSDKVersion() async{
     int result = 0;
     try{

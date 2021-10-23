@@ -1,5 +1,6 @@
 package com.noaisu.loliSnatcher
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.media.AudioManager
 import android.content.ContentValues
@@ -11,15 +12,19 @@ import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.KeyEvent
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
+import androidx.documentfile.provider.DocumentFile
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -29,8 +34,6 @@ import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.util.*
-import android.R.attr.streamType
-import android.content.Context
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
@@ -41,7 +44,9 @@ class MainActivity: FlutterActivity() {
     private var sink: EventChannel.EventSink? = null
     private var isSinkingVolume: Boolean = false
     private var audioManager: AudioManager? = null
-
+    private var SAFUri: String? = "";
+    private var methodResult: MethodChannel.Result? = null
+    @SuppressLint("WrongThread")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler {
@@ -179,9 +184,44 @@ class MainActivity: FlutterActivity() {
             } else if(call.method == "getIP"){
                result.success(getIpv4HostAddress());
             } else if (call.method == "setExtPath"){
-                //val uwu = askPermission();
-                //print(uwu);
-                result.success("")
+                methodResult = result
+                getDirAccess();
+            } else if (call.method == "testSAF"){
+                val uri: String? = call.argument("uri");
+                val permissions =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            this.contentResolver.persistedUriPermissions.takeWhile { it.isReadPermission && it.isWritePermission }
+                        } else {
+                            TODO("VERSION.SDK_INT < KITKAT")
+                        }
+
+                if (permissions.isEmpty()) {
+                    getDirAccess()
+                } else {
+                    val cr = this.contentResolver;
+                    val docFile: DocumentFile? = DocumentFile.fromTreeUri(context, Uri.parse(uri))
+                    val newFile = docFile?.createFile("text/*","testpersist")
+                    try {
+                        val output : String? = "test writing"
+                        val stream = newFile?.uri?.let { cr.openOutputStream(it) }
+                        if (output != null) {
+                            stream?.write(output.toByteArray())
+                        }
+                    } catch (e: IOException){
+                        e.stackTrace
+                    }
+                }
+                val parentUri =
+                        permissions
+                                .first().uri
+
+                //result.success(permissions.last().uri.toString())
+                val tag = "loSnService"
+                Log.i(tag, contentResolver.persistedUriPermissions.toString())
+                Log.i(tag, parentUri.toString());
+                Log.i(tag, permissions.toString());
+
+
             }
         }
 
@@ -196,13 +236,34 @@ class MainActivity: FlutterActivity() {
     }
     //Doesn't work and idk why, it should get a uri after selecting a directory but doesn't
     //https://developer.android.com/training/data-storage/shared/documents-files#perform-operations
-    /*private fun askPermission(): String {
+    private fun getDirAccess() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-        startActivityForResult(intent, 1);
-        return intent.data.toString()
+        intent.flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        startActivityForResult(intent, 1)
+            //return intent.data.toString();
+
 
     }
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, resultData: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, resultData)
+
+        if (resultCode == Activity.RESULT_OK && resultData != null) {
+            resultData?.data?.also { uri ->
+               //println(uri)
+                SAFUri = uri.toString()
+                intent.data = uri
+                println("got uri as $uri")
+                this.contentResolver.takePersistableUriPermission(intent.data!!,Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                methodResult?.success(uri.toString())
+            }
+
+            //println("got storage uri as ${resultData.data as Uri}")
+        }
+    }
+    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == 1) {
             data?.data?.also { uri ->
