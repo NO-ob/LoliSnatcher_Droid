@@ -78,6 +78,15 @@ class _DebugPageState extends State<DebugPage> {
                 },
                 title: 'Show URL on thumb'
               ),
+              SettingsToggle(
+                value: settingsHandler.hideSystemUIinViewer.value,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.hideSystemUIinViewer.value = newValue;
+                  });
+                },
+                title: 'Hide System UI in Viewer'
+              ),
               // SettingsToggle(
               //   value: settingsHandler.isMemeTheme.value,
               //   onChanged: (newValue) {

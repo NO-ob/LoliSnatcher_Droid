@@ -72,10 +72,6 @@ class _MainAppState extends State<MainApp> {
         updateState();
       };
 
-      // force always on display
-      // TODO force it only when in gallery
-      ServiceHandler.disableSleep();
-
       // enable higher fps
       // TODO make this a setting?
       FlutterDisplayMode.setHighRefreshRate();

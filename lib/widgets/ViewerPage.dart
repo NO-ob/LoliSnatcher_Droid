@@ -82,7 +82,8 @@ class _ViewerPageState extends State<ViewerPage> {
       searchHandler.currentTab.viewedIndex.value = widget.index;
     });
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+    ServiceHandler.disableSleep();
+    if(settingsHandler.hideSystemUIinViewer.value) SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
     kbFocusNode.requestFocus();
 
     autoScrollProgressController = TimedProgressController(
@@ -336,7 +337,8 @@ class _ViewerPageState extends State<ViewerPage> {
         controller: controller,
         onPageChanged: (int index) {
           // rehide system ui on every page change
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+          ServiceHandler.disableSleep();
+          if(settingsHandler.hideSystemUIinViewer.value) SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
           setState(() {
             searchHandler.currentTab.viewedIndex.value = index;

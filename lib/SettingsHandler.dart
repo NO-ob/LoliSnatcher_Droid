@@ -43,6 +43,7 @@ class SettingsHandler extends GetxController {
   RxBool isMemeTheme = false.obs;
   RxBool showURLOnThumb = false.obs;
   RxBool disableImageScaling = false.obs;
+  RxBool hideSystemUIinViewer = false.obs;
   ////////////////////////////////////////////////////
 
   // saveable settings vars
@@ -608,9 +609,10 @@ class SettingsHandler extends GetxController {
         case("Loading Gif"):
           setByString('loadingGif', itemValue == "true");
           break;
-        case("Image Cache"):
-          setByString('thumbnailCache', itemValue == "true");
-          break;
+        // don't restore thumbnail cache setting, because in 2.0 we need to force enable it for everyone
+        // case("Image Cache"):
+        //   setByString('thumbnailCache', itemValue == "true");
+        //   break;
         case("Media Cache"):
           setByString('mediaCache', itemValue == "true");
           break;
