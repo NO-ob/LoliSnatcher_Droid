@@ -2,7 +2,7 @@
     "version_code": 2000,
     "version_name": "2.0.0",
     "title": "Test Title",
-    "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n",
+    "changelog": "Test Changelog\r\n- Test Changelog\r\n-- Test Changelog\r\n",
     "is_in_store": true,
     "is_important": false,
     "store_package": "com.android.chrome",

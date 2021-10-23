@@ -1298,7 +1298,7 @@ class SettingsHandler extends GetxController {
     // String fakeUpdate = '{"version_code": 9999, "version_name": "9.9.9", "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}';
     // String fakeUpdate = '123';
     try {
-      final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NANI-SORE/LoliSnatcher_Droid/getxrework/update.json'));
+      final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/update.json'));
       final json = jsonDecode(response.body);
       // final json = jsonDecode(fakeUpdate);
 
