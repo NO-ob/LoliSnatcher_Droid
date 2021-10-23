@@ -29,6 +29,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
   final ServiceHandler serviceHandler = ServiceHandler();
+  String extPathOverride = "";
   bool jsonWrite = false, thumbnailCache = true, mediaCache = false;
 
   final ImageWriter imageWriter = ImageWriter();
@@ -110,6 +111,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.videoCacheMode = videoCacheMode;
     settingsHandler.cacheDuration = cacheDuration;
     settingsHandler.cacheSize = int.parse(cacheSizeController.text);
+    settingsHandler.extPathOverride = extPathOverride;
     bool result = await settingsHandler.saveSettings();
     return result;
   }
@@ -215,12 +217,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 icon: Icon(Icons.folder_outlined),
                 action: () async {
                   //String url = await ServiceHandler.setExtDir();
-                  int SDKVer = await serviceHandler.getSDKVersion();
-                  String path = await serviceHandler.getExtDir();
-
                   if (Platform.isAndroid) {
-                    ServiceHandler.setExtDir();
-                    // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
+                    extPathOverride = await ServiceHandler.setExtDir();
                   } else {
                     // TODO need to update dir picker to work on desktop
                     /*if(widget.settingsHandler.appMode == "Desktop"){

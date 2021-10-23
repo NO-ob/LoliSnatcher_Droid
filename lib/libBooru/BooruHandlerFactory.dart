@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'Booru.dart';
 import 'BooruOnRailsHandler.dart';
 import 'DanbooruHandler.dart';
+import 'EmptyHandler.dart';
 import 'GelbooruHandler.dart';
 import 'GelbooruV1Handler.dart';
 import 'HydrusHandler.dart';
@@ -23,7 +24,7 @@ import 'e621Handler.dart';
 import 'WorldHandler.dart';
 import 'R34HentaiHandler.dart';
 import 'IdolSankakuHandler.dart';
-import 'Emptyhandler.dart';
+
 
 class BooruHandlerFactory{
   BooruHandler? booruHandler;

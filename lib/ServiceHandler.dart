@@ -88,7 +88,6 @@ class ServiceHandler{
     }
     return result;
   }
-
   static Future<String> testSAFPersistence() async {
     print("test saf persistence");
     String result = "";
@@ -285,10 +284,10 @@ class ServiceHandler{
     return thumbnail;
   }
 
-  Future<String?> writeImage(var imageData, fileName, mediaType, fileExt) async{
+  Future<String?> writeImage(var imageData, fileName, mediaType, fileExt, extPathOverride) async{
     String? result;
     try{
-      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt});
+      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt,"extPathOverride":extPathOverride});
     } catch(e){
       print(e);
     }

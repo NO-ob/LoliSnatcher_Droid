@@ -64,7 +64,7 @@ class ImageWriter {
     try {
       Uri fileURI = Uri.parse(item.fileURL);
       var response = await http.get(fileURI);
-      if (SDKVer < 30) {
+      if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
         await Directory(path!).create(recursive:true);
         await image.writeAsBytes(response.bodyBytes, flush: true);
         print("Image written: " + path! + fileName);
@@ -87,7 +87,8 @@ class ImageWriter {
       } else {
         print("files ext is " + item.fileExt!);
         //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
-          var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt);
+          print("Ext path override is: ${settingsHandler.extPathOverride}");
+          var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt,settingsHandler.extPathOverride);
           if (writeResp != null){
             print("write response: $writeResp");
             item.isSnatched.value = true;

@@ -111,9 +111,9 @@ class MainActivity: FlutterActivity() {
                 val fileName = call.argument<String>("fileName");
                 val mediaType = call.argument<String>("mediaType");
                 val fileExt = call.argument<String>("fileExt");
-
+                val extPathOverride = call.argument<String?>("extPathOverride")
                 if (imageBytes!= null && mediaType != null && fileExt != null && fileName != null){
-                    writeImage(imageBytes,fileName,mediaType,fileExt);
+                    writeImage(imageBytes,fileName,mediaType,fileExt,extPathOverride);
                     result.success(fileName);
                 } else {
                     result.success(null);
@@ -300,32 +300,45 @@ class MainActivity: FlutterActivity() {
     }
 
     @Throws(IOException::class)
-    private fun writeImage(fileBytes: ByteArray, name: String, mediaType: String, fileExt: String) {
+    private fun writeImage(fileBytes: ByteArray, name: String, mediaType: String, fileExt: String,extPathOverride: String?) {
         val fos: OutputStream?
         val resolver = contentResolver
         val contentValues = ContentValues()
-        val imageUri: Uri?
+        var imageUri: Uri?
         var thisMediaType: String = mediaType;
         if (thisMediaType == "animation"){
             thisMediaType = "image";
         }
-
-        if(thisMediaType == "image"){
-            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
-            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
-            contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
-            imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        if (extPathOverride != null && extPathOverride.isNotEmpty()){
+            val doc = DocumentFile.fromTreeUri(context,Uri.parse(extPathOverride))
+            if (doc != null) {
+                if (doc.canWrite()){
+                    doc.createFile("$thisMediaType/$fileExt","$name.$fileExt")?.uri?.let {
+                        fos = contentResolver.openOutputStream(it)
+                        fos?.write(fileBytes)
+                        Objects.requireNonNull(fos)?.close()
+                    }
+                }
+            }
         } else {
-            contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "$name.$fileExt")
-            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$thisMediaType/$fileExt")
-            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
-            imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+            if(thisMediaType == "image"){
+                contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.$fileExt")
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "$thisMediaType/$fileExt")
+                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/LoliSnatcher/")
+                imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            } else {
+                contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, "$name.$fileExt")
+                contentValues.put(MediaStore.Video.Media.MIME_TYPE, "$thisMediaType/$fileExt")
+                contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/LoliSnatcher/")
+                imageUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+            }
+            if (imageUri != null){
+                fos = imageUri?.let { resolver.openOutputStream(it) };
+                fos?.write(fileBytes);
+                Objects.requireNonNull(fos)?.close()
+            }
         }
 
-        if (imageUri != null){
-            fos = resolver.openOutputStream(imageUri);
-            fos?.write(fileBytes);
-            Objects.requireNonNull(fos)?.close()
-        }
+
     }
 }
