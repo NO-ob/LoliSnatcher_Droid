@@ -89,6 +89,28 @@ class SankakuHandler extends BooruHandler{
       }
     }
   }
+  Future<List> updateFavourites(List<BooruItem> booruItems) async {
+    if(authToken == "" && booru.userID != "" && booru.apiKey != "") {
+      authToken = await getAuthToken();
+    }
+    for (int x = 0; x < booruItems.length; x ++){
+      http.Response response = await http.get(Uri.parse(makeApiPostURL(booruItems[x].postURL.split("/").last)), headers: getHeaders());
+      if (response.statusCode != 200){
+        return [booruItems,false];
+      } else {
+        var current = jsonDecode(response.body);
+        Logger.Inst().log(current.toString(), "SankakuHandler", "updateFavourites", LogTypes.booruHandlerRawFetched);
+        if (current["file_url"] != null) {
+          booruItems[x].fileURL = current["file_url"];
+          booruItems[x].sampleURL = current["sample_url"];
+          booruItems[x].thumbnailURL = current["preview_url"];
+        }
+      }
+    }
+    return [booruItems,true];
+  }
+
+
   @override
   Map<String,String> getHeaders(){
     return authToken == ""
@@ -111,7 +133,10 @@ class SankakuHandler extends BooruHandler{
   String makeURL(String tags){
     return "${booru.baseURL}/posts?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
-
+  //Makes a url for a single post from the api
+  String makeApiPostURL(String id){
+    return "${booru.baseURL}/posts/$id";
+  }
   // This will fetch authToken on the first load
   Future<String> getAuthToken() async {
     String token = "";

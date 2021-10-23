@@ -1,3 +1,6 @@
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,6 +33,69 @@ class _DatabasePageState extends State<DatabasePage> {
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;
     bool result = await settingsHandler.saveSettings();
     return result;
+  }
+  Booru? getSankakuBooru(){
+    for (int i = 0; i < settingsHandler.booruList.length; i++){
+      if (settingsHandler.booruList[i].baseURL == "https://capi-v2.sankakucomplex.com"){
+        return settingsHandler.booruList[i];
+      }
+    }
+    return null;
+  }
+  Future<bool> updateSankakuItems() async{
+    FlashElements.showSnackbar(
+      context: Get.context,
+      title: Text(
+          'Sancucku Url Update Started!',
+          style: TextStyle(fontSize: 20)
+      ),
+      content: Text(
+          'New image urls will be fetched for Sancucku items in your favourites',
+          style: TextStyle(fontSize: 16)
+      ),
+      leadingIcon: Icons.info_outline,
+      leadingIconColor: Colors.green,
+      sideColor: Colors.green,
+    );
+    print("something went wrong updating favourites");
+    List<BooruItem> items = await settingsHandler.dbHandler.getSankakuItems();
+    Booru? sankakuBooru = getSankakuBooru();
+    SankakuHandler sankakuHandler = new SankakuHandler(sankakuBooru!, 10);
+    List result = await sankakuHandler.updateFavourites(items);
+    if (result[1] == false){
+      FlashElements.showSnackbar(
+        context: Get.context,
+        title: Text(
+            'Sancucku Url Update Failed!',
+            style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+            'Something went wrong when requesting new urls from the api',
+            style: TextStyle(fontSize: 16)
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.red,
+        sideColor: Colors.red,
+      );
+      print("something went wrong updating favourites");
+    } else {
+      items = result[0];
+      for(int i = 0; i < items.length; i++){
+        print("Updating $i");
+        settingsHandler.dbHandler.updateBooruItem(items[i], "urlUpdate");
+      }
+      FlashElements.showSnackbar(
+        context: Get.context,
+        title: Text(
+            'Sancucku Url Update Complete!',
+            style: TextStyle(fontSize: 20)
+        ),
+        leadingIcon: Icons.check,
+        leadingIconColor: Colors.green,
+        sideColor: Colors.green,
+      );
+    }
+    return true;
   }
 
   @override
@@ -262,6 +328,13 @@ class _DatabasePageState extends State<DatabasePage> {
                       ),
                     );
                 }
+              ),
+              SettingsButton(
+                  name: 'Update Sankaku URLs',
+                  trailingIcon: Icon(Icons.image),
+                  action: () {
+                    updateSankakuItems();
+                  }
               ),
             ],
           ),
