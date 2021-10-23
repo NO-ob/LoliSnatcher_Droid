@@ -21,9 +21,9 @@ class ServiceHandler{
   }
 
   Future<int> getSDKVersion() async {
-    if (Platform.isAndroid){
+    if (Platform.isAndroid) {
       return getAndroidSDKVersion();
-    } else if (Platform.isLinux){
+    } else if (Platform.isLinux) {
       return 1;
     } else if (Platform.isWindows) {
       return 2;
@@ -67,10 +67,11 @@ class ServiceHandler{
     String result = "";
     try {
       result = await platform.invokeMethod("setExtPath");
-      print(result);
+      print("Service handler got uri back: $result");
     } catch (e) {
       print(e);
     }
+    //new File(result+"/test.txt").create(recursive: true);
     return result;
   }
 
@@ -84,6 +85,30 @@ class ServiceHandler{
       result = "${await getExtDir()}/LoliSnatcher/config/";
     } else if(Platform.isIOS) {
       result = "${await getExtDir()}/LoliSnatcher/config/";
+    }
+    return result;
+  }
+
+  static Future<String> testSAFPersistence() async {
+    print("test saf persistence");
+    String result = "";
+    String safuri = "content://com.android.externalstorage.documents/tree/1206-2917%3ALolisnatcher";
+    try {
+      result = await platform.invokeMethod("testSAF",{"uri" : safuri});
+      print("got saf result" + result);
+    } catch (e) {
+      print(e);
+    }
+    Directory dir = Directory(result);
+    return result;
+  }
+
+  Future<String> getDocumentsDir() async{
+    String result = "";
+    try{
+      result = await platform.invokeMethod("getDocumentsPath");
+    } catch(e){
+      print(e);
     }
     return result;
   }

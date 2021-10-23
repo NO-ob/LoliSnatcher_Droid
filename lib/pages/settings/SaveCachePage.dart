@@ -218,18 +218,21 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   int SDKVer = await serviceHandler.getSDKVersion();
                   String path = await serviceHandler.getExtDir();
 
-                  if (SDKVer < 30){
-                    if(settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux){
+                  if (Platform.isAndroid) {
+                    ServiceHandler.setExtDir();
+                    // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
+                  } else {
+                    // TODO need to update dir picker to work on desktop
+                    /*if(widget.settingsHandler.appMode == "Desktop"){
                       Get.dialog(Dialog(
                         child: Container(
                           width: 500,
-                          child: DirPicker(path),
+                          child:DirPicker(widget.settingsHandler,path),
                         ),
-                      )).then((value) => {setPath(value ?? '')});
+                      )).then((value) => {setPath(value == null ? "" : value)});
                     } else {
-                      Get.to(() => DirPicker(path))!.then((value) => {setPath(value ?? '')});
-                    }
-                  } else {
+                      Get.to(() => DirPicker(widget.settingsHandler,path))!.then((value) => {setPath(value == null ? "" : value)});
+                    }*/
                     FlashElements.showSnackbar(
                       context: context,
                       title: Text(
@@ -237,7 +240,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                         style: TextStyle(fontSize: 20)
                       ),
                       content: Text(
-                        'Not available on Android 11+',
+                        'Currently not available for this platform',
                         style: TextStyle(fontSize: 16)
                       ),
                       leadingIcon: Icons.error_outline,
