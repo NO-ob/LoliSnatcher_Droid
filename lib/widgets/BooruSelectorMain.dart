@@ -92,13 +92,12 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
     }
 
     if(!widget.isPrimary)
-      return Expanded(
+      return Container(
+        padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
         child: Obx(() => DropdownSearch<Booru>.multiSelection(
           mode: Mode.MENU,
           // showSearchBox: true,
           items: settingsHandler.booruList.where((b) => b != searchHandler.currentTab.selectedBooru.value).toList(),
-          label: "Secondary Boorus",
-          hint: "Secondary Boorus",
           onChange: (List<Booru> newList) {
             searchHandler.mergeAction(newList);
           },
@@ -119,7 +118,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           },
           popupSelectionWidget: (BuildContext context, Booru item, bool isSelected) {
             return Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               child: Checkbox(
                 value: isSelected,
                 onChanged: (bool? value) {},
@@ -128,8 +127,10 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             );
           },
           dropdownSearchDecoration: InputDecoration(
+            labelText: "Secondary Boorus",
             labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground),
-            contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+            hintText: "Secondary Boorus",
+            contentPadding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.symmetric(horizontal: 12, vertical: 2) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(color: Get.theme.colorScheme.secondary)
             ),
@@ -149,7 +150,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             return Wrap(
               children: selectedItems.map((value) {
                 return Padding(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(4),
                   child: Row(
                     children: <Widget>[
                       //Booru Icon

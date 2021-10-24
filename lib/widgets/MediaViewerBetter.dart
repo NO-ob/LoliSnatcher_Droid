@@ -541,7 +541,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
           children: [
             CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
             AnimatedOpacity(
-              duration: Duration(milliseconds: 300),
+              duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300),
               curve: Curves.linear,
               opacity: showLoading ? 1 : 0,
               child: loadingElementBuilder(context, null),
@@ -572,7 +572,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                     )
                   )
                 : null,
-              duration: Duration(milliseconds: 400)
+              duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300)
             ),
 
             zoomButtonBuild(),

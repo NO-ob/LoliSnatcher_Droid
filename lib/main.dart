@@ -550,17 +550,7 @@ class _HomeState extends State<Home> {
                         },
                       ),
                     if(settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled)
-                      Container(
-                        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.max,
-                          children: <Widget>[
-                            // const Text("Booru: ", style: TextStyle(fontWeight: FontWeight.bold)),
-                            BooruSelectorMain(false),
-                          ],
-                        ),
-                      ),
+                      BooruSelectorMain(false),
 
                     if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
                       SettingsButton(

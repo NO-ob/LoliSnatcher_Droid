@@ -204,10 +204,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         for (int i = 0; i < files.length; i++) {
                           if (files[i].path.contains(".json")) {
                             Booru booruFromFile = Booru.fromJSON(files[i].readAsStringSync());
-                            File booruFile = File(configBoorusDir.path + "${booruFromFile.name}.json");
-                            var writer = booruFile.openWrite();
-                            writer.write(jsonEncode(booruFromFile.toJSON()));
-                            writer.close();
+                            bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booruFromFile.baseURL && el.name == booruFromFile.name) != -1;
+                            if(!alreadyExists) {
+                              File booruFile = File(configBoorusDir.path + "${booruFromFile.name}.json");
+                              var writer = booruFile.openWrite();
+                              writer.write(jsonEncode(booruFromFile.toJSON()));
+                              writer.close();
+                            }
                           }
                         }
                         settingsHandler.loadBoorus();

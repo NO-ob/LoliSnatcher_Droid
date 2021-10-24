@@ -102,15 +102,19 @@ class LoliSync{
         current = int.parse(req.uri.queryParameters["current"]!);
         String content = await utf8.decoder.bind(req).join(); /*2*/
         Booru booru = Booru.fromJSON(content);
+
         if (booru.name != "Favourites") {
-          for (int i=0; i < settingsHandler.booruList.length; i++){
-            if (settingsHandler.booruList.isNotEmpty) {
-              if (settingsHandler.booruList[i].baseURL == booru.baseURL) {
-                settingsHandler.booruList.removeAt(i);
-              }
-            }
-          }
-          await settingsHandler.saveBooru(booru);
+          // Remove existing booru if base url is the same
+          // TODO merge their data (i.e. api keys) or don't do anything if they have the same name+base url instead
+          // for (int i=0; i < settingsHandler.booruList.length; i++){
+          //   if (settingsHandler.booruList.isNotEmpty) {
+          //     if (settingsHandler.booruList[i].baseURL == booru.baseURL) {
+          //       settingsHandler.booruList.removeAt(i);
+          //     }
+          //   }
+          // }
+          bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
+          if(!alreadyExists) await settingsHandler.saveBooru(booru);
         }
         req.response.statusCode = 200;
         req.response.write("Success");
@@ -127,6 +131,8 @@ class LoliSync{
       req.response.write("Invalid Query");
       return "Invalid Query";
     }
+    req.response.statusCode = 404;
+    req.response.write("Invalid Query");
     return "Something went wrong";
   }
   void killServer() async{

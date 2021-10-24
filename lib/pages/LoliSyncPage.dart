@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'dart:io';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -121,17 +122,49 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               SettingsButton(
                 name: 'Start Sync',
                 icon: Icon(Icons.send_to_mobile),
-                page: ((ipController.text.isNotEmpty && portController.text.isNotEmpty) && (favourites || settings || booru)) ? () => LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru) : null,
-                action: !((ipController.text.isNotEmpty && portController.text.isNotEmpty) && (favourites || settings || booru)) ? () {
-                  // TODO fix condition checks + add new snackbar style
-                  if (ipController.text.isEmpty || portController.text.isEmpty) {
-                    ServiceHandler.displayToast("The Port and IP fields cannot be empty");
-                  } else if (!favourites && !settings && !booru) {
-                    ServiceHandler.displayToast("You haven't selected anything to sync");
+                action: () {
+                  bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
+                  bool isAnySyncSelected = favourites || settings || booru;
+                  bool syncAllowed = isAddressEntered && isAnySyncSelected;
+
+                  if(syncAllowed) {
+                    var page = () => LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru);
+                    // TODO move the desktop check and dialog build to separate unified function
+                    if(Get.find<SettingsHandler>().appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
+                      Get.dialog(Dialog(
+                        child: Container(
+                          width: 500,
+                          child: page.call(),
+                        ),
+                      ));
+                    } else {
+                      Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => page.call()));
+                    }
                   } else {
-                    ServiceHandler.displayToast("${((ipController.text.isNotEmpty && portController.text.isNotEmpty) && (favourites || settings || booru)).toString()}");
+                    String errorString = '???';
+                    if (!isAddressEntered) {
+                      errorString = 'The Port and IP fields cannot be empty!';
+                    } else if (!isAnySyncSelected) {
+                      errorString = "You haven't selected anything to sync!";
+                    }
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Error!",
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(errorString),
+                        ],
+                      ),
+                      sideColor: Colors.red,
+                      leadingIcon: Icons.error,
+                      leadingIconColor: Colors.red,
+                    );
                   }
-                } : null,
+                },
               ),
 
               SettingsButton(name: '', enabled: false),

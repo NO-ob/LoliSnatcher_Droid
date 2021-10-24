@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
+import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -37,40 +38,17 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value){
-      if (!value.isVideo()) {
-        return MediaViewerBetter(mediaStateKey, value, 1, searchHandler.currentTab);
+    if (!value.isVideo()) {
+      return MediaViewerBetter(mediaStateKey, value, 1, searchHandler.currentTab);
+    } else {
+      if (Platform.isAndroid || Platform.isIOS) {
+        return VideoApp(videoStateKey, value, 1, searchHandler.currentTab, true);
+      } else if(Platform.isWindows) {
+        return VideoAppDesktop(videoStateKey, value, 1, searchHandler.currentTab);
       } else {
-        if (Platform.isAndroid || Platform.isIOS) {
-          return VideoApp(videoStateKey, value, 1, searchHandler.currentTab, true);
-        } else {
-          return VideoAppDesktop(videoStateKey, value, 1, searchHandler.currentTab);
-
-          // return Center(
-          //   child: Column(
-          //     children: [
-          //       Expanded(
-          //         child: Image.network(value.thumbnailURL, fit: BoxFit.fill),
-          //       ),
-          //       Container(
-          //         alignment: Alignment.center,
-          //         child: TextButton(
-          //           style: TextButton.styleFrom(
-          //             shape: RoundedRectangleBorder(
-          //               borderRadius: BorderRadius.circular(20),
-          //               side: BorderSide(color: Get.theme.colorScheme.secondary),
-          //             ),
-          //           ),
-          //           onPressed: (){
-          //             Process.run('mpv', ["--loop", "${value.fileURL}"]);
-          //           },
-          //           child: Text(" Open in Video Player "),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // );
-        }
+        return VideoAppPlaceholder(item: value, index: 1);
       }
+    }
   }
 
   @override
