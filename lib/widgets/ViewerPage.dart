@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,9 +26,9 @@ import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
-import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
@@ -221,6 +220,35 @@ class _ViewerPageState extends State<ViewerPage> {
           // print(fileURL);
           // print('isVideo: '+isVideo.toString());
           // Render only if viewed or in preloadCount range
+
+          late Widget itemWidget;
+          if(isVideo) {
+            if(settingsHandler.disableVideo) {
+              itemWidget = Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
+            } else {
+              if(Platform.isAndroid || Platform.isIOS) {
+                itemWidget = VideoApp(
+                  null,
+                  getFetched()[index],
+                  index,
+                  searchHandler.currentTab,
+                  true
+                );
+              } else if(Platform.isWindows) {
+                itemWidget = VideoAppDesktop(null, getFetched()[index], 1, searchHandler.currentTab);
+              } else { // Linux
+                itemWidget = VideoAppPlaceholder(item: getFetched()[index], index: index);
+              }
+            }
+          } else {
+            itemWidget = MediaViewerBetter(
+              null,
+              getFetched()[index],
+              index,
+              searchHandler.currentTab
+            );
+          }
+
           if (isViewed || isNear) {
             // Cut to the size of the container, prevents overlapping
             return ClipRect(
@@ -255,27 +283,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
                     ServiceHandler.setVolumeButtons(isVolumeAllowed);
                   },
-                  child: isVideo
-                    ? (!settingsHandler.disableVideo
-                      ? ((Platform.isAndroid || Platform.isIOS)
-                          ? VideoApp(
-                            null,
-                            getFetched()[index],
-                            index,
-                            searchHandler.currentTab,
-                            true
-                          )
-                          : VideoAppDesktop(null, getFetched()[index], 1, searchHandler.currentTab)
-                          // desktopVideoPlaceHolder(getFetched()[index], index)
-                        )
-                      : Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)))
-                    )
-                    : MediaViewerBetter(
-                      null,
-                      getFetched()[index],
-                      index,
-                      searchHandler.currentTab
-                    )
+                  child: itemWidget,
                 ),
 
                 if(!(Platform.isAndroid || Platform.isIOS) && searchHandler.displayAppbar.value)
@@ -425,30 +433,6 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
 
-  Widget desktopVideoPlaceHolder(BooruItem item, int index){
-    return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CachedThumbBetter(item, index, searchHandler.currentTab, 1, false),
-          // Image.network(item.thumbnailURL, fit: BoxFit.fill),
-          Container(
-            width: MediaQuery.of(context).size.width / 3,
-            child: SettingsButton(
-              name: 'Open Video in External Player',
-              action: () {
-                if (Platform.isLinux) {
-                  Process.run('mpv', ["--loop", item.fileURL]);
-                }
-              },
-              icon: Icon(Icons.play_arrow),
-              drawTopBorder: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
   // Might not be needed anymore prelaodpageview is nw working on flutter linux, might not work with go-flutter though
   Widget linuxPageBuilder() {
     return PageView.builder(

@@ -347,6 +347,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)
       );
     }
+    _videoController!.stop();
     _videoController!.open(
       media!,
       autoStart: true,

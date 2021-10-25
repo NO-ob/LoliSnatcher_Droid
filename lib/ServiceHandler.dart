@@ -272,7 +272,7 @@ class ServiceHandler{
     } else if (Platform.isLinux) {
       Process.run('xdg-open', [url]);
     } else if (Platform.isWindows) {
-      Process.run('start', [url]);
+      Process.run('start', [url], runInShell: true);
     }
   }
 

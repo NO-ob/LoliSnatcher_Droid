@@ -443,7 +443,11 @@ class SettingsHandler extends GetxController {
 
         case 'bool':
           if(!(value is bool)) {
-            throw 'value "$value" for $name is not a bool';
+            if(value is String && (value == 'true' || value == 'false')) {
+              return value == 'true' ? true : false;
+            } else {
+              throw 'value "$value" for $name is not a bool';
+            }
           } else {
             return value;
           }
@@ -1013,21 +1017,51 @@ class SettingsHandler extends GetxController {
   Future<bool> loadFromJSON(String jsonString, bool setMissingKeys) async {
     Map<String, dynamic> json = jsonDecode(jsonString);
 
-    List<List<String>> btnOrder = List<String>.from(json["buttonOrder"]).map((bstr) {
+    var tempBtnOrder = json["buttonOrder"];
+    if(tempBtnOrder is List) {
+      print('btnorder is a list');
+    } else if(tempBtnOrder is String) {
+      print('btnorder is a string');
+      tempBtnOrder = tempBtnOrder.split(',');
+    } else {
+      print('btnorder is a ${tempBtnOrder.runtimeType} type');
+      tempBtnOrder = [];
+    }
+    List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
       List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
       return button;
     }).where((el) => el[0] != 'null').toList();
     btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
     buttonOrder = btnOrder;
 
-    List<String> hateTags = List<String>.from(json["hatedTags"]);
+    var tempHatedTags = json["hatedTags"];
+    if(tempHatedTags is List) {
+      print('hatedTags is a list');
+    } else if(tempHatedTags is String) {
+      print('hatedTags is a string');
+      tempHatedTags = tempHatedTags.split(',');
+    } else {
+      print('hatedTags is a ${tempHatedTags.runtimeType} type');
+      tempHatedTags = [];
+    }
+    List<String> hateTags = List<String>.from(tempHatedTags);
     for (int i = 0; i < hateTags.length; i++){
-        if (!hatedTags.contains(hateTags.elementAt(i))){
-          hatedTags.add(hateTags.elementAt(i));
-        }
+      if (!hatedTags.contains(hateTags.elementAt(i))) {
+        hatedTags.add(hateTags.elementAt(i));
+      }
     }
 
-    List<String> loveTags = List<String>.from(json["lovedTags"]);
+    var tempLovedTags = json["lovedTags"];
+    if(tempLovedTags is List) {
+      print('lovedTags is a list');
+    } else if(tempLovedTags is String) {
+      print('lovedTags is a string');
+      tempLovedTags = tempLovedTags.split(',');
+    } else {
+      print('lovedTags is a ${tempLovedTags.runtimeType} type');
+      tempLovedTags = [];
+    }
+    List<String> loveTags = List<String>.from(tempLovedTags);
     for (int i = 0; i < loveTags.length; i++){
       if (!lovedTags.contains(loveTags.elementAt(i))){
         lovedTags.add(loveTags.elementAt(i));
@@ -1352,7 +1386,7 @@ class SettingsHandler extends GetxController {
   void showUpdate() {
     if(updateInfo != null) {
       // TODO get from some external variable when building
-      bool isFromStore = false;
+      bool isFromStore = EnvironmentConfig.isFromStore;
 
       Get.dialog(
         SettingsDialog(
@@ -1420,6 +1454,8 @@ class SettingsHandler extends GetxController {
     }
     checkUpdate(withMessage: false);
 
+    print('isFromStore: ${EnvironmentConfig.isFromStore}');
+
     // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
     // print(toJSON());
     // print(jsonEncode(toJSON()));
@@ -1451,4 +1487,11 @@ class UpdateInfo {
     required this.storePackage,
     required this.githubURL,
   });
+}
+
+class EnvironmentConfig {
+  static const isFromStore = bool.fromEnvironment(
+    'LS_IS_STORE',
+    defaultValue: false
+  );
 }
