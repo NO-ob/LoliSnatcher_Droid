@@ -23,7 +23,7 @@ Supported Booru engines:
 - Booru On Rails (Twibooru)
 - InkBunny
 
-![github-small](https://loli.rehab/images/posts/loliSnatcherDroid/preview.png)
+![github-small](https://github.com/NO-ob/no-ob.github.io/blob/master/images/posts/loliSnatcherDroid/preview.png)
 
 ![github-small](https://s1.desu-usergeneratedcontent.xyz/g/image/1616/61/1616619170446.png)
 
