@@ -74,6 +74,40 @@ class ServiceHandler{
     //new File(result+"/test.txt").create(recursive: true);
     return result;
   }
+  static Future<String> getImageSAFUri() async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("selectImage");
+      print("Service handler got uri back: $result");
+    } catch (e) {
+      print(e);
+    }
+    //new File(result+"/test.txt").create(recursive: true);
+    return result;
+  }
+  static Future<Uint8List?> getSAFFile(String contentUri) async {
+    Uint8List? result;
+    try {
+      result = await platform.invokeMethod("getFileBytes",{"uri":contentUri});
+      print("Got file back");
+    } catch (e) {
+      print(e);
+    }
+    //new File(result+"/test.txt").create(recursive: true);
+    return result;
+  }
+  static Future<String> getSAFFileExtension(String contentUri) async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("getFileExtension",{"uri":contentUri});
+      print("Got file ext back");
+      print(result);
+    } catch (e) {
+      print(e);
+    }
+    //new File(result+"/test.txt").create(recursive: true);
+    return result;
+  }
 
   Future<String> getConfigDir() async {
     String result = '';

@@ -26,6 +26,7 @@ class Logger {
 
 enum LogTypes{
   settingsLoad,
+  settingsError,
   booruItemLoad,
   booruHandlerSearchURL,
   booruHandlerFetchFailed,

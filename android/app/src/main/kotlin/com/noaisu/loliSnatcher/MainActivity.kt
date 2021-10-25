@@ -2,6 +2,7 @@ package com.noaisu.loliSnatcher
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentResolver
 import android.media.AudioManager
 import android.content.ContentValues
 import android.content.Intent
@@ -20,6 +21,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.KeyEvent
 import android.view.WindowManager
+import android.webkit.MimeTypeMap
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
@@ -29,13 +31,13 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.EventChannel
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.IOException
-import java.io.OutputStream
+import java.io.*
 import java.util.*
 import java.net.Inet4Address
 import java.net.NetworkInterface
+
+
+
 
 
 class MainActivity: FlutterActivity() {
@@ -186,7 +188,17 @@ class MainActivity: FlutterActivity() {
             } else if (call.method == "setExtPath"){
                 methodResult = result
                 getDirAccess();
-            } else if (call.method == "testSAF"){
+            } else if (call.method == "selectImage"){
+                methodResult = result
+                getImageAccess();
+            } else if (call.method == "getFileBytes"){
+                val uri: String? = call.argument("uri");
+                result.success(uri?.let { getFileBytesFromUri(it) });
+            } else if (call.method == "getFileExtension"){
+                val uri: String? = call.argument("uri");
+                result.success(uri?.let { getFileExt(it)});
+            }
+            else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
                 val permissions =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -238,11 +250,20 @@ class MainActivity: FlutterActivity() {
     //https://developer.android.com/training/data-storage/shared/documents-files#perform-operations
     private fun getDirAccess() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.putExtra("pickerMode","directory")
         intent.flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
         startActivityForResult(intent, 1)
             //return intent.data.toString();
+    }
 
-
+    private fun getImageAccess(){
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        val mimeTypes = arrayOf("image/png", "image/jpeg","image/jpg")
+        intent.type = "*/*"
+        intent.putExtra("pickerMode","image")
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+        intent.flags = Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        startActivityForResult(intent, 1)
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -257,11 +278,39 @@ class MainActivity: FlutterActivity() {
                 intent.data = uri
                 println("got uri as $uri")
                 this.contentResolver.takePersistableUriPermission(intent.data!!,Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                methodResult?.success(uri.toString())
+               val mode = intent.getStringExtra("pickerMode")
+                if (mode == "image"){
+                    methodResult?.success(uri.toString())
+                } else {
+                    methodResult?.success(uri.toString())
+                }
+
             }
 
             //println("got storage uri as ${resultData.data as Uri}")
         }
+    }
+
+    private fun getFileBytesFromUri(uriString: String): ByteArray?{
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            println()
+            val inputStream: InputStream? = contentResolver.openInputStream(uri)
+            return inputStream?.readBytes();
+        }
+        return null;
+    }
+
+    private fun getFileExt(uriString: String): String {
+        val uri: Uri = Uri.parse(uriString)
+        var fileExt: String? = null
+        fileExt = if (ContentResolver.SCHEME_CONTENT.equals(uri.scheme)) {
+            val cr: ContentResolver = context.contentResolver
+            cr.getType(uri)?.split("/")?.get(1)
+        } else {
+            MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+        }
+        return fileExt ?: ""
     }
     /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

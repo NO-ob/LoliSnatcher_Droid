@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,7 +15,6 @@ import 'package:LoliSnatcher/ThemeItem.dart';
 
 class ThemePage extends StatefulWidget {
   ThemePage();
-
   @override
   _ThemePageState createState() => _ThemePageState();
 }
@@ -24,10 +25,11 @@ class _ThemePageState extends State<ThemePage> {
   late ThemeItem theme;
   late ThemeMode themeMode;
   late bool isAmoled;
-
+  late bool enableMascot;
+  late String mascotPathOverride;
   late Color? primaryPickerColor; // Color for picker shown in Card on the screen.
   late Color? accentPickerColor; // Color for picker in dialog using onChanged
-
+  bool needToWriteMascot = false;
   @override
   void initState() {
     super.initState();
@@ -35,7 +37,8 @@ class _ThemePageState extends State<ThemePage> {
     theme = settingsHandler.theme.value;
     themeMode = settingsHandler.themeMode.value;
     isAmoled = settingsHandler.isAmoled.value;
-
+    enableMascot = settingsHandler.enableDrawerMascot;
+    mascotPathOverride = settingsHandler.drawerMascotPathOverride;
     primaryPickerColor = settingsHandler.customPrimaryColor.value;
     accentPickerColor = settingsHandler.customAccentColor.value;
   }
@@ -45,12 +48,21 @@ class _ThemePageState extends State<ThemePage> {
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
     settingsHandler.isAmoled.value = isAmoled;
+    settingsHandler.enableDrawerMascot = enableMascot;
 
     print('onPrimary: ${ThemeData.estimateBrightnessForColor(primaryPickerColor!) == Brightness.dark}');
     print('onAccent: ${ThemeData.estimateBrightnessForColor(accentPickerColor!) == Brightness.dark}');
     settingsHandler.customPrimaryColor.value = primaryPickerColor;
     settingsHandler.customAccentColor.value = accentPickerColor;
-
+    //This needs to be done here because if its done in the buttons onclick
+    //and you back out too fast the image path will not be returned in time to save it to settings
+    if (needToWriteMascot){
+      if (mascotPathOverride.isNotEmpty){
+        mascotPathOverride = await new ImageWriter().writeMascotImage(mascotPathOverride);
+        settingsHandler.drawerMascotPathOverride = mascotPathOverride;
+        needToWriteMascot = false;
+      }
+    }
     Get.find<SearchHandler>().rootRestate();
     bool result = await settingsHandler.saveSettings();
     return result;
@@ -299,7 +311,38 @@ class _ThemePageState extends State<ThemePage> {
                     accentPickerColor = theme.accent;
                     updateTheme();
                   },
-                )
+                ),
+
+              SettingsToggle(
+                value: enableMascot,
+                onChanged: (bool newValue) {
+                  enableMascot = newValue;
+                  updateTheme();
+                },
+                title: 'Enable Drawer Mascot',
+              ),
+              SettingsButton(
+                name: 'Set Custom Mascot',
+                icon: Icon(Icons.image_search_outlined),
+                drawTopBorder: true,
+                action: () async{
+                    mascotPathOverride = await ServiceHandler.getImageSAFUri();
+                    needToWriteMascot = true;
+                },
+              ),
+              SettingsButton(
+                name: 'Remove Custom Mascot',
+                icon: Icon(Icons.delete_forever),
+                drawTopBorder: true,
+                action: () async{
+                  File file = new File(mascotPathOverride);
+                  if (file.existsSync()){
+                    file.deleteSync();
+                  }
+                  mascotPathOverride = "";
+                },
+              ),
+
 
             ],
           ),

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
@@ -396,6 +397,20 @@ class ImageWriter {
       .replaceAll(windowsReservedRe, replacement)
       .replaceAll(windowsTrailingRe, replacement);
     // TODO truncate to 255 symbols for windows?
+  }
+
+  Future<String> writeMascotImage(String contentUri) async{
+    await setPaths();
+    if (contentUri.isNotEmpty){
+      Uint8List? fileBytes = await ServiceHandler.getSAFFile(contentUri);
+      String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
+        if (fileBytes != null && fileExt.isNotEmpty){
+          String path = await serviceHandler.getConfigDir();
+          new File(path + "mascot." + fileExt).writeAsBytes(fileBytes);
+          return (path + "mascot." + fileExt);
+        }
+    }
+    return "";
   }
 
   Future<bool> setPaths() async {

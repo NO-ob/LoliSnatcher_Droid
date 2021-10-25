@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -63,6 +64,7 @@ class SettingsHandler extends GetxController {
   String galleryBarPosition = 'Top';
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = "";
+  String drawerMascotPathOverride = "";
   String zoomButtonPosition = "Right";
   String lastSyncIp = '';
   String lastSyncPort = '';
@@ -112,7 +114,7 @@ class SettingsHandler extends GetxController {
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
-
+  bool enableDrawerMascot = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -143,7 +145,9 @@ class SettingsHandler extends GetxController {
     'theme', 'themeMode', 'isAmoled',
     'customPrimaryColor', 'customAccentColor',
     'version', 'SDK', 'disableImageScaling',
-    'cacheDuration', 'cacheSize'
+    'cacheDuration', 'cacheSize', 'enableDrawerMascot',
+    'drawerMascotPathOverride',
+
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -206,6 +210,10 @@ class SettingsHandler extends GetxController {
       "default": "",
     },
     "extPathOverride": {
+      "type": "string",
+      "default": "",
+    },
+    "drawerMascotPathOverride": {
       "type": "string",
       "default": "",
     },
@@ -324,6 +332,10 @@ class SettingsHandler extends GetxController {
       "default": false,
     },
     "disableVideo": {
+      "type": "bool",
+      "default": false,
+    },
+    "enableDrawerMascot": {
       "type": "bool",
       "default": false,
     },
@@ -534,7 +546,7 @@ class SettingsHandler extends GetxController {
       }
     } catch(err) {
       // return default value on exceptions
-      print('SettingsHandler value validation error: $err');
+      Logger.Inst().log('value validation error: $err',"SettingsHandler","validateValue",LogTypes.settingsError);
       return settingParams["default"];
     }
   }
@@ -784,7 +796,10 @@ class SettingsHandler extends GetxController {
         return appMode;
       case 'extPathOverride':
         return extPathOverride;
-
+      case 'drawerMascotPathOverride':
+        return drawerMascotPathOverride;
+      case 'enableDrawerMascot':
+        return enableDrawerMascot;
       case 'lastSyncIp':
         return lastSyncIp;
       case 'lastSyncPort':
@@ -913,7 +928,6 @@ class SettingsHandler extends GetxController {
       case 'cacheSize':
         cacheSize = validatedValue;
         break;
-
       case 'prefBooru':
         prefBooru = validatedValue;
         break;
@@ -923,7 +937,6 @@ class SettingsHandler extends GetxController {
       case 'extPathOverride':
         extPathOverride = validatedValue;
         break;
-      
       case 'lastSyncIp':
         lastSyncIp = validatedValue;
         break;
@@ -947,7 +960,12 @@ class SettingsHandler extends GetxController {
       case 'customAccentColor':
         customAccentColor.value = validatedValue;
         break;
-
+      case 'drawerMascotPathOverride':
+        drawerMascotPathOverride = validatedValue;
+        break;
+      case 'enableDrawerMascot':
+        enableDrawerMascot = validatedValue;
+        break;
       default:
         break;
     }
@@ -996,13 +1014,14 @@ class SettingsHandler extends GetxController {
       "prefBooru": validateValue("prefBooru", null, toJSON: true),
       "appMode": validateValue("appMode", null, toJSON: true),
       "extPathOverride": validateValue("extPathOverride", null, toJSON: true),
-
       "lastSyncIp": validateValue("lastSyncIp", null, toJSON: true),
       "lastSyncPort": validateValue("lastSyncPort", null, toJSON: true),
 
       "theme": validateValue("theme", null, toJSON: true),
       "themeMode": validateValue("themeMode", null, toJSON: true),
       "isAmoled": validateValue("isAmoled", null, toJSON: true),
+      "enableDrawerMascot" : validateValue("enableDrawerMascot", null, toJSON: true),
+      "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
       "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
@@ -564,7 +565,7 @@ class _HomeState extends State<Home> {
                       icon: Icon(Icons.settings),
                       page: () => SettingsPage(),
                     ),
-                    if(settingsHandler.updateInfo != null)
+                    if(false)
                       SettingsButton(
                         name: 'Update Available!',
                         icon: Stack(
@@ -589,6 +590,30 @@ class _HomeState extends State<Home> {
                           settingsHandler.showUpdate();
                         },
                       ),
+                   if(settingsHandler.enableDrawerMascot)
+                     Container(
+                       child: Align(
+                         alignment: FractionalOffset.bottomCenter,
+                         child: Container(
+                           child: SizedBox(
+                             height: (MediaQuery.of(context).size.height * 0.35),
+                             child: DrawerHeader(
+                               margin: EdgeInsets.zero,
+                               decoration: BoxDecoration(
+                                 color: Get.theme.colorScheme.primary,
+                                 image: DecorationImage(
+                                     fit: BoxFit.cover,
+                                     image: settingsHandler.drawerMascotPathOverride.isEmpty ? AssetImage(
+                                         'assets/images/drawer_icon.png') :
+                                         FileImage(new File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
+                                 ),
+                               ),
+                               child: null,
+                             ),
+                           ),
+                         ),
+                       ),
+                     ),
                   ],
                 ),
               )
