@@ -565,7 +565,7 @@ class _HomeState extends State<Home> {
                       icon: Icon(Icons.settings),
                       page: () => SettingsPage(),
                     ),
-                    if(false)
+                    if(settingsHandler.updateInfo != null)
                       SettingsButton(
                         name: 'Update Available!',
                         icon: Stack(
