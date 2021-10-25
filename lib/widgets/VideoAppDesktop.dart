@@ -359,13 +359,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       media = Media.file(_video!);
     } else {
       // Otherwise load from network
-      // print('uri: ${widget.booruItem.fileURL}');
+      //print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true)
       );
     }
     _videoController = Player(id: widget.index);
+    _videoController?.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
     _videoController!.open(
       media!,
       autoStart: true,
