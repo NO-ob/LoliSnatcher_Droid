@@ -50,7 +50,7 @@ class _TabBoxState extends State<TabBox> {
 
       return Container(
         // constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
-        padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 8, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
+        padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
         child: GestureDetector(
           onTap: openItemsList,
           child: DropdownButtonFormField<SearchGlobal>(

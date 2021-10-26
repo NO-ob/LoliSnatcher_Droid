@@ -112,7 +112,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.cacheDuration = cacheDuration;
     settingsHandler.cacheSize = int.parse(cacheSizeController.text);
     settingsHandler.extPathOverride = extPathOverride;
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 

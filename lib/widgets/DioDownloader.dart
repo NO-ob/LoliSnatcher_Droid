@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
@@ -41,6 +42,14 @@ class DioLoader {
 
   static Dio get _httpClient {
     Dio client = Dio();
+    // TODO bad certificate ignore, FIX AND REMOVE LATER
+    // https://stackoverflow.com/questions/54285172/how-to-solve-flutter-certificate-verify-failed-error-while-performing-a-post-req
+    (client.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+    (HttpClient client) {
+      client.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+      return client;
+    };
     return client;
   }
 

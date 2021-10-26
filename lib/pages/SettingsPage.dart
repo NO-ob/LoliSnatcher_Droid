@@ -26,7 +26,7 @@ class SettingsPage extends StatelessWidget {
   int debugTaps = 0;
 
   Future<bool> _onWillPop() async {
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     await settingsHandler.loadSettings();
     // await settingsHandler.getBooru();
     return result;

@@ -220,7 +220,7 @@ class _WaterfallState extends State<WaterfallView> {
           pageBuilder: (context, anim1, anim2) => 
             // Opacity(opacity: 0.5, child: ViewerPage(index)),
             ViewerPage(index),
-          fullscreenDialog: true,
+          fullscreenDialog: false,
           opaque: false,
           transitionDuration: Duration(milliseconds: 300),
           barrierColor: Colors.black26,

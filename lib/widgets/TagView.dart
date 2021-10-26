@@ -1,4 +1,3 @@
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:intl/intl.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -12,6 +11,8 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class TagView extends StatefulWidget {
   BooruItem booruItem;
@@ -29,7 +30,12 @@ class _TagViewState extends State<TagView> {
   @override
   void initState() {
     super.initState();
+    parseTags();
+  }
+
+  void parseTags() {
     hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: false);
+    setState(() { });
   }
 
   Widget infoBuild() {
@@ -142,6 +148,95 @@ class _TagViewState extends State<TagView> {
     }
   }
 
+  void tagDialog({
+    required String tag,
+    required bool isHated,
+    required bool isLoved
+  }) {
+    Get.dialog(
+      SettingsDialog(
+        contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+        contentItems: [
+          Container(
+            height: 60,
+            width: Get.mediaQuery.size.width,
+            child: ListTile(
+              title: MarqueeText(
+                text: tag,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                startPadding: 0,
+                isExpanded: false,
+              )
+            )
+          ),
+          ListTile(
+            leading: Icon(Icons.copy),
+            title: Text("Copy"),
+            onTap: () {
+              Clipboard.setData(ClipboardData(text: tag));
+              FlashElements.showSnackbar(
+                context: context,
+                duration: Duration(seconds: 2),
+                title: Text(
+                  "Copied to clipboard!",
+                  style: TextStyle(fontSize: 20)
+                ),
+                content: Text(
+                  tag,
+                  style: TextStyle(fontSize: 16)
+                ),
+                leadingIcon: Icons.copy,
+                sideColor: Colors.green,
+              );
+              Navigator.of(context).pop(true);
+            },
+          ),
+          if(!isHated && !isLoved)
+            ListTile(
+              leading: Icon(Icons.star, color: Colors.yellow),
+              title: Text("Add to Loved"),
+              onTap: () {
+                settingsHandler.addTagToList('loved', tag);
+                parseTags();
+                Navigator.of(context).pop(true);
+              },
+            ),
+          if(!isHated && !isLoved)
+            ListTile(
+              leading: Icon(CupertinoIcons.eye_slash, color: Colors.red),
+              title: Text("Add to Hated"),
+              onTap: () {
+                settingsHandler.addTagToList('hated', tag);
+                parseTags();
+                Navigator.of(context).pop(true);
+              },
+            ),
+          if(isLoved)
+            ListTile(
+              leading: Icon(Icons.star),
+              title: Text("Remove from Loved"),
+              onTap: () {
+                settingsHandler.removeTagFromList('loved', tag);
+                parseTags();
+                Navigator.of(context).pop(true);
+              },
+            ),
+          if(isHated)
+            ListTile(
+              leading: Icon(CupertinoIcons.eye_slash),
+              title: Text("Remove from Hated"),
+              onTap: () {
+                settingsHandler.removeTagFromList('hated', tag);
+                parseTags();
+                Navigator.of(context).pop(true);
+              },
+            ),
+        ]
+      ),
+    );
+  }
+
   Widget tagsBuild() {
     return ListView.builder(
       physics: NeverScrollableScrollPhysics(), // required to allow singlechildscrollview to take control of scrolling
@@ -162,22 +257,11 @@ class _TagViewState extends State<TagView> {
         if (currentTag != '') {
           return Column(children: <Widget>[
             ListTile(
-              onTap: () {},
-              onLongPress: () {
-                Clipboard.setData(ClipboardData(text: currentTag));
-                FlashElements.showSnackbar(
-                  context: context,
-                  duration: Duration(seconds: 2),
-                  title: Text(
-                    "Copied to clipboard!",
-                    style: TextStyle(fontSize: 20)
-                  ),
-                  content: Text(
-                    currentTag,
-                    style: TextStyle(fontSize: 16)
-                  ),
-                  leadingIcon: Icons.copy,
-                  sideColor: Colors.green,
+              onTap: () {
+                tagDialog(
+                  tag: currentTag,
+                  isHated: isHated,
+                  isLoved: isLoved
                 );
               },
               title: Row(children: [

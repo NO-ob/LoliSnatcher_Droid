@@ -64,7 +64,7 @@ class _ThemePageState extends State<ThemePage> {
       }
     }
     Get.find<SearchHandler>().rootRestate();
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 
@@ -313,6 +313,7 @@ class _ThemePageState extends State<ThemePage> {
                   },
                 ),
 
+              SettingsButton(name: '', enabled: false),
               SettingsToggle(
                 value: enableMascot,
                 onChanged: (bool newValue) {

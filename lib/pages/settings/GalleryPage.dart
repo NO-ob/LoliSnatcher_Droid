@@ -70,7 +70,7 @@ class _GalleryPageState extends State<GalleryPage> {
     }
     settingsHandler.preloadCount = int.parse(preloadController.text);
     // Set settingshandler values here
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 

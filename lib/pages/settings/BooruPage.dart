@@ -55,7 +55,7 @@ class _BooruPageState extends State<BooruPage> {
       settingsHandler.prefBooru = selectedBooru?.name ?? '';
     }
     settingsHandler.limit = int.parse(limitController.text);
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     settingsHandler.sortBooruList();
     return result;
   }

@@ -35,7 +35,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   Future<bool> _onWillPop() async {
     settingsHandler.lastSyncIp = ipController.text;
     settingsHandler.lastSyncPort = portController.text;
-    settingsHandler.saveSettings();
+    settingsHandler.saveSettings(restate: false);
     return true;
   }
 

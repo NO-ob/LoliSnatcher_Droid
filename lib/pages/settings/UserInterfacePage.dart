@@ -41,7 +41,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     }
     settingsHandler.landscapeColumns = int.parse(columnsLandscapeController.text);
     settingsHandler.portraitColumns = int.parse(columnsPortraitController.text);
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
@@ -19,21 +21,27 @@ class DatabasePage extends StatefulWidget {
 class _DatabasePageState extends State<DatabasePage> {
   final SettingsHandler settingsHandler = Get.find();
   final ServiceHandler serviceHandler = ServiceHandler();
-  bool dbEnabled = true, searchHistoryEnabled = true;
+
+  bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
+  int updatingFailed = 0, updatingDone = 0;
+  List<BooruItem> updatingItems = [];
+
   @override
   void initState(){
     dbEnabled = settingsHandler.dbEnabled;
     searchHistoryEnabled = settingsHandler.searchHistoryEnabled;
     super.initState();
   }
+
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     // Set settingshandler values here
     settingsHandler.dbEnabled = dbEnabled;
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
+
   Booru? getSankakuBooru(){
     for (int i = 0; i < settingsHandler.booruList.length; i++){
       if (settingsHandler.booruList[i].baseURL == "https://capi-v2.sankakucomplex.com"){
@@ -42,59 +50,91 @@ class _DatabasePageState extends State<DatabasePage> {
     }
     return null;
   }
-  Future<bool> updateSankakuItems() async{
+
+  Future<bool> updateSankakuItems() async {
     FlashElements.showSnackbar(
-      context: Get.context,
+      duration: Duration(seconds: 6),
       title: Text(
-          'Sancucku Url Update Started!',
+          'Sankaku Favourites Update Started!',
           style: TextStyle(fontSize: 20)
       ),
-      content: Text(
-          'New image urls will be fetched for Sancucku items in your favourites',
+      content: Column(children: [
+        Text(
+          "New image urls will be fetched for Sankaku items in your favourites",
           style: TextStyle(fontSize: 16)
-      ),
+        ),
+        Text(
+          "Don't leave this page until the process is complete or stopped",
+          style: TextStyle(fontSize: 14)
+        ),
+      ]),
       leadingIcon: Icons.info_outline,
       leadingIconColor: Colors.green,
       sideColor: Colors.green,
     );
-    print("something went wrong updating favourites");
-    List<BooruItem> items = await settingsHandler.dbHandler.getSankakuItems();
+    setState(() {
+      updatingItems = [];
+      updatingFailed = 0;
+      updatingDone = 0;
+      isUpdating = true;
+    });
+    updatingItems = await settingsHandler.dbHandler.getSankakuItems();
     Booru? sankakuBooru = getSankakuBooru();
-    SankakuHandler sankakuHandler = new SankakuHandler(sankakuBooru!, 10);
-    List result = await sankakuHandler.updateFavourites(items);
-    if (result[1] == false){
+    if(sankakuBooru == null) {
       FlashElements.showSnackbar(
-        context: Get.context,
         title: Text(
-            'Sancucku Url Update Failed!',
-            style: TextStyle(fontSize: 20)
-        ),
-        content: Text(
-            'Something went wrong when requesting new urls from the api',
-            style: TextStyle(fontSize: 16)
+          'No Sankaku config found!',
+          style: TextStyle(fontSize: 20)
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
       );
-      print("something went wrong updating favourites");
-    } else {
-      items = result[0];
-      for(int i = 0; i < items.length; i++){
-        print("Updating $i");
-        settingsHandler.dbHandler.updateBooruItem(items[i], "urlUpdate");
+      setState(() {
+        updatingFailed = 0;
+        updatingDone = 0;
+        isUpdating = false;
+      });
+      return true;
+    }
+
+    SankakuHandler sankakuHandler = new SankakuHandler(sankakuBooru, 10);
+    for(BooruItem item in updatingItems) {
+      if(isUpdating) {
+        await Future.delayed(Duration(milliseconds: 100));
+        List result = await sankakuHandler.updateFavourite(item);
+        if (result[1] == false) {
+          setState(() {
+            updatingFailed += 1;
+          });
+          print("something went wrong updating favourites: ${result[2]}");
+        } else {
+          item = result[0];
+          settingsHandler.dbHandler.updateBooruItem(item, "urlUpdate");
+          setState(() {
+            updatingDone += 1;
+          });
+        }
       }
+    }
+
+    if(isUpdating) {
       FlashElements.showSnackbar(
-        context: Get.context,
         title: Text(
-            'Sancucku Url Update Complete!',
-            style: TextStyle(fontSize: 20)
+          'Sankaku Favourites Update Complete!',
+          style: TextStyle(fontSize: 20)
         ),
         leadingIcon: Icons.check,
         leadingIconColor: Colors.green,
         sideColor: Colors.green,
       );
     }
+    setState(() {
+      updatingFailed = 0;
+      updatingDone = 0;
+      isUpdating = false;
+    });
+
     return true;
   }
 
@@ -329,13 +369,42 @@ class _DatabasePageState extends State<DatabasePage> {
                     );
                 }
               ),
+
+              SettingsButton(name: '', enabled: false),
               SettingsButton(
                   name: 'Update Sankaku URLs',
                   trailingIcon: Icon(Icons.image),
                   action: () {
-                    updateSankakuItems();
+                    if(!isUpdating) {
+                      updateSankakuItems();
+                    }
                   }
               ),
+              if(isUpdating)
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Updating ${updatingItems.length == 0 ? '...' : updatingItems.length} items:'),
+                      Text('Left: ${max(updatingItems.length - updatingDone - updatingFailed, 0)}'),
+                      Text('Done: $updatingDone'),
+                      Text('Failed: $updatingFailed'),
+                      Text(''),
+                      Text( "Stop and try again later if you start seeing 'Failed' number constantly growing, you could have reached rate limit and/or Sankaku blocks requests from your IP."),
+                    ]
+                  )
+                ),
+              if(isUpdating)
+                SettingsButton(
+                  name: 'Press here to stop',
+                  drawTopBorder: true,
+                  action: () {
+                    setState(() {
+                      isUpdating = false;
+                    });
+                  },
+                ),
             ],
           ),
         ),

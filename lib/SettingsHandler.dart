@@ -555,7 +555,7 @@ class SettingsHandler extends GetxController {
     if(await checkForLegacySettings()) {
       await loadLegacySettings();
     }
-    await saveSettings();
+    await saveSettings(restate: true);
 
     return true;
   }
@@ -570,7 +570,7 @@ class SettingsHandler extends GetxController {
     } else if(await checkForLegacySettings()) {
       await loadLegacySettings();
     } else {
-      await saveSettings();
+      await saveSettings(restate: true);
     }
 
     if (dbEnabled) {
@@ -1107,7 +1107,7 @@ class SettingsHandler extends GetxController {
     return true;
   }
 
-  Future<bool> saveSettings() async {
+  Future<bool> saveSettings({required bool restate}) async {
     await getPerms();
     if (path == "") await setConfigDir();
     await Directory(path).create(recursive:true);
@@ -1117,7 +1117,7 @@ class SettingsHandler extends GetxController {
     writer.write(jsonEncode(toJSON()));
     writer.close();
 
-    Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
+    if(restate) Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
     return true;
   }
 
@@ -1317,7 +1317,7 @@ class SettingsHandler extends GetxController {
     booruFile.deleteSync();
     if (prefBooru == booru.name){
       prefBooru = "";
-      saveSettings();
+      saveSettings(restate: true);
     }
     booruList.remove(booru);
     sortBooruList();
@@ -1341,6 +1341,40 @@ class SettingsHandler extends GetxController {
     }
 
     return [hatedInItem, lovedInItem, soundInItem];
+  }
+
+  void addTagToList(String type, String tag) {
+    switch (type) {
+      case 'hated':
+        if (!hatedTags.contains(tag)) {
+          hatedTags.add(tag);
+        }
+        break;
+      case 'loved':
+        if (!lovedTags.contains(tag)) {
+          lovedTags.add(tag);
+        }
+        break;
+      default: break;
+    }
+    saveSettings(restate: false);
+  }
+
+  void removeTagFromList(String type, String tag) {
+    switch (type) {
+      case 'hated':
+        if (hatedTags.contains(tag)) {
+          hatedTags.remove(tag);
+        }
+        break;
+      case 'loved':
+        if (lovedTags.contains(tag)) {
+          lovedTags.remove(tag);
+        }
+        break;
+      default: break;
+    }
+    saveSettings(restate: false);
   }
 
   List<String> cleanTagsList(List<String> tags) {

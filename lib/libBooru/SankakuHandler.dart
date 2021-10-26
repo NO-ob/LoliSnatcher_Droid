@@ -89,25 +89,28 @@ class SankakuHandler extends BooruHandler{
       }
     }
   }
-  Future<List> updateFavourites(List<BooruItem> booruItems) async {
-    if(authToken == "" && booru.userID != "" && booru.apiKey != "") {
-      authToken = await getAuthToken();
-    }
-    for (int x = 0; x < booruItems.length; x ++){
-      http.Response response = await http.get(Uri.parse(makeApiPostURL(booruItems[x].postURL.split("/").last)), headers: getHeaders());
-      if (response.statusCode != 200){
-        return [booruItems,false];
+
+  Future<List> updateFavourite(BooruItem booruItem) async {
+    try {
+      if(authToken == "" && booru.userID != "" && booru.apiKey != "") {
+        authToken = await getAuthToken();
+      }
+      http.Response response = await http.get(Uri.parse(makeApiPostURL(booruItem.postURL.split("/").last)), headers: getHeaders());
+      if (response.statusCode != 200) {
+        return [booruItem, false, 'Invalid status code ${response.statusCode}'];
       } else {
         var current = jsonDecode(response.body);
-        Logger.Inst().log(current.toString(), "SankakuHandler", "updateFavourites", LogTypes.booruHandlerRawFetched);
+        Logger.Inst().log(current.toString(), "SankakuHandler", "updateFavourite", LogTypes.booruHandlerRawFetched);
         if (current["file_url"] != null) {
-          booruItems[x].fileURL = current["file_url"];
-          booruItems[x].sampleURL = current["sample_url"];
-          booruItems[x].thumbnailURL = current["preview_url"];
+          booruItem.fileURL = current["file_url"];
+          booruItem.sampleURL = current["sample_url"];
+          booruItem.thumbnailURL = current["preview_url"];
         }
       }
+    } catch (e) {
+      return [booruItem, false, e.toString()];
     }
-    return [booruItems,true];
+    return [booruItem, true, null];
   }
 
 
@@ -131,7 +134,7 @@ class SankakuHandler extends BooruHandler{
   }
   // This will create a url for the http request
   String makeURL(String tags){
-    return "${booru.baseURL}/posts?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
+    return "${booru.baseURL}/posts?tags=${tags.trim()}&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
   //Makes a url for a single post from the api
   String makeApiPostURL(String id){

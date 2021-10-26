@@ -354,16 +354,18 @@ class SettingsTextInput extends StatelessWidget {
 class SettingsDialog extends StatelessWidget {
   const SettingsDialog({
     Key? key,
-    required this.title,
+    this.title,
     this.content,
     this.contentItems,
-    this.actionButtons
+    this.actionButtons,
+    this.contentPadding
   }) : super(key: key);
 
-  final Widget title;
+  final Widget? title;
   final Widget? content;
   final List<Widget>? contentItems;
   final List<Widget>? actionButtons;
+  final EdgeInsets? contentPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +375,8 @@ class SettingsDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: contentItems ?? [],
       ),
-      actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : null,
+      actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
+      contentPadding: contentPadding ?? const EdgeInsets.fromLTRB(24, 20, 24, 24),
       scrollable: true,
     );
   }

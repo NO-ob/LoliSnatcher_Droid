@@ -1,4 +1,3 @@
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -16,6 +15,8 @@ import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 
 class DesktopHome extends StatefulWidget {
   @override
@@ -42,17 +43,8 @@ class _DesktopHomeState extends State<DesktopHome> {
                 children: <Widget>[
                   const SizedBox(width: 15),
                   TagSearchBox(),
-                  const SizedBox(width: 15),
+                  TagSearchButton(),
                   Expanded(child: BooruSelectorMain(true)),
-                  IconButton(
-                    padding: const EdgeInsets.all(5),
-                    icon: Icon(Icons.search),
-                    onPressed: () {
-                      searchHandler.searchTextController.clearComposing();
-                      searchHandler.searchBoxFocus.unfocus();
-                      searchHandler.searchAction(searchHandler.searchTextController.text, null);
-                    },
-                  ),
                   Expanded(child: TabBox()),
                   Expanded(child: TabBoxButtons(false, MainAxisAlignment.start)),
                 ],

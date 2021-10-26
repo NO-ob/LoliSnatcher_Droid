@@ -15,26 +15,36 @@ class FiltersEdit extends StatefulWidget {
   _FiltersEditState createState() => _FiltersEditState();
 }
 
-class _FiltersEditState extends State<FiltersEdit> {
+class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStateMixin {
   final SettingsHandler settingsHandler = Get.find();
-  TextEditingController newTagController = TextEditingController();
+  final TextEditingController newTagController = TextEditingController();
+  late TabController tabController;
+
   List<String> hatedList = [];
   List<String> lovedList = [];
   bool filterHated = false;
 
   @override
   void initState() {
+    super.initState();
     hatedList = settingsHandler.hatedTags;
     lovedList = settingsHandler.lovedTags;
     filterHated = settingsHandler.filterHated;
-    super.initState();
+
+    tabController = TabController(vsync: this, length: 2);
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose();
+    super.dispose();
   }
 
   Future<bool> _onWillPop() async {
     settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
-    bool result = await settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 
@@ -45,15 +55,28 @@ class _FiltersEditState extends State<FiltersEdit> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-            title: Text("Filters Editor"),
-          actions: [
-          ],
+          title: Text("Filters Editor"),
+          bottom: TabBar(
+            controller: tabController,
+            indicatorColor: Get.theme.colorScheme.secondary,
+            tabs: [
+              Tab(text: 'Hated', icon: Icon(CupertinoIcons.eye_slash, color: Colors.red)),
+              Tab(text: 'Loved', icon: Icon(Icons.star, color: Colors.yellow)),
+            ],
+          ),
         ),
-        body: Center(
-          child: ListView(
-            children: <Widget>[
-              editableTagsList('Hated'),
-
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Widget entryRow = getEntryRow('[Add new ${tabController.index == 0 ? 'Hated' : 'Loved'}]', Icon(Icons.add));
+            newTagController.text = '';
+            showFilterEntryActions(entryRow, '', -1, tabController.index == 0 ? 'Hated' : 'Loved');
+          },
+          child: Icon(Icons.add),
+        ),
+        body: TabBarView(
+          controller: tabController,
+          children: [
+            ListView(children: [
               SettingsToggle(
                 title: "Remove Items with Hated Tags",
                 value: filterHated,
@@ -63,67 +86,66 @@ class _FiltersEditState extends State<FiltersEdit> {
                   });
                 },
               ),
-
-              editableTagsList('Loved'),
-            ],
-          ),
+              editableTagsList('Hated'),
+            ]),
+            ListView(children: [
+              editableTagsList('Loved')
+            ]),
+          ],
         ),
       )
     );
   }
 
-
+  Widget getEntryRow(String text, Widget icon) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(5),
+          side: BorderSide(color: Get.theme.colorScheme.secondary),
+        ),
+        onTap: null,
+        leading: icon,
+        title: MarqueeText(
+          text: text,
+          fontSize: 16,
+          startPadding: 0,
+          isExpanded: false,
+        ),
+      )
+    );
+  }
 
   Widget editableTagsList(type) {
     List<String> tagsList = getTagsList(type);
 
+    if(tagsList.isEmpty) {
+      return const SizedBox();
+    }
+
     return Column(children: [
       const SizedBox(height: 10),
-      ListTile(
-        onTap: null,
-        leading: Icon(type == 'Hated' ? CupertinoIcons.eye_slash : Icons.star, color: type == 'Hated' ? Colors.red : Colors.yellow),
-        title: Text('$type Tags:', style: TextStyle(fontSize: 22)),
-      ),
       ClipRRect(
         borderRadius: BorderRadius.circular(5),
         child: Container(
-          height: 200,
           child: Material(
             color: Get.theme.dialogBackgroundColor.withOpacity(0.5),
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               shrinkWrap: true,
-              itemCount: tagsList.length + 1,
+              itemCount: tagsList.length,
               scrollDirection: Axis.vertical,
+              physics: NeverScrollableScrollPhysics(),
               itemBuilder: (BuildContext context, int index) {
-                bool isAddButton = index == 0;
-                String currentEntry = isAddButton ? '[Add]' : tagsList[index - 1];
-
-                Widget entryRow = Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                  child: ListTile(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(color: Get.theme.colorScheme.secondary),
-                    ),
-                    onTap: null,
-                    leading: isAddButton ? Icon(Icons.add) : Icon(CupertinoIcons.tag),
-                    // label: Expanded(child: ScrollingText(currentEntry, 25, "infiniteWithPause", Colors.white)),
-                    title: MarqueeText(
-                      text: currentEntry,
-                      fontSize: 16,
-                      startPadding: 0,
-                      isExpanded: false,
-                    ),
-                  )
-                );
+                String currentEntry = tagsList[index];
+                Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));
 
                 return Row(children: <Widget>[
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        if(!isAddButton) newTagController.text = currentEntry;
-                        else newTagController.text = '';
+                        newTagController.text = currentEntry;
                         showFilterEntryActions(entryRow, currentEntry, index, type);
                       },
                       child: entryRow
@@ -182,13 +204,12 @@ class _FiltersEditState extends State<FiltersEdit> {
   void showFilterEntryActions(Widget row, String tag, int index, String type) {
     showDialog(context: context, builder: (context) {
       List<String> tagsList = getTagsList(type);
-      bool isAddButton = index == 0;
+      bool isAddButton = index == -1;
       return StatefulBuilder(builder: (context, setDialogState) {
         return InfoDialog(
           null,
           [
             AbsorbPointer(absorbing: true, child: row),
-            const SizedBox(height: 20),
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               width: double.infinity,
@@ -205,7 +226,7 @@ class _FiltersEditState extends State<FiltersEdit> {
                           if(text.trim() != '') {
                             isAddButton
                               ? addTag(text.trim().toLowerCase(), type)
-                              : editTag(text.trim().toLowerCase(), index - 1, type);
+                              : editTag(text.trim().toLowerCase(), index, type);
                             newTagController.text = '';
                             Navigator.of(context).pop(true);
                           } else {
@@ -235,55 +256,60 @@ class _FiltersEditState extends State<FiltersEdit> {
                 ],
               ),
             ),
-            ListTile(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
-              onTap: () async {
-                String text = newTagController.text;
-                if(text.trim() != '') {
-                  isAddButton
-                    ? addTag(text.trim().toLowerCase(), type)
-                    : editTag(text.trim().toLowerCase(), index - 1, type);
-                  newTagController.text = '';
-                  Navigator.of(context).pop(true);
-                } else {
-                  FlashElements.showSnackbar(
-                    context: context,
-                    title: Text(
-                      "Empty input!",
-                      style: TextStyle(fontSize: 20)
-                    ),
-                    leadingIcon: Icons.warning_amber,
-                    leadingIconColor: Colors.red,
-                    sideColor: Colors.red,
-                  );
-                }
-              },
-              leading: Icon(Icons.save),
-              title: Text('Save'),
-            ),
-            if(!isAddButton)
-              ListTile(
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+              child: ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
                   side: BorderSide(color: Get.theme.colorScheme.secondary),
                 ),
                 onTap: () async {
-                  setState(() {
-                    if(type == 'Hated') {
-                      hatedList = tagsList.where((t) => t != tag).toList();
-                    } else if(type == 'Loved') {
-                      lovedList = tagsList.where((t) => t != tag).toList();
-                    }
-                  });
-                  Navigator.of(context).pop(true);
+                  String text = newTagController.text;
+                  if(text.trim() != '') {
+                    isAddButton
+                      ? addTag(text.trim().toLowerCase(), type)
+                      : editTag(text.trim().toLowerCase(), index, type);
+                    newTagController.text = '';
+                    Navigator.of(context).pop(true);
+                  } else {
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Empty input!",
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      leadingIcon: Icons.warning_amber,
+                      leadingIconColor: Colors.red,
+                      sideColor: Colors.red,
+                    );
+                  }
                 },
-                leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
-                title: Text('Delete', style: TextStyle(color: Get.theme.errorColor)),
+                leading: Icon(Icons.save),
+                title: Text('Save'),
+              )
+            ),
+            if(!isAddButton)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                child: ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    side: BorderSide(color: Get.theme.colorScheme.secondary),
+                  ),
+                  onTap: () async {
+                    setState(() {
+                      if(type == 'Hated') {
+                        hatedList = tagsList.where((t) => t != tag).toList();
+                      } else if(type == 'Loved') {
+                        lovedList = tagsList.where((t) => t != tag).toList();
+                      }
+                    });
+                    Navigator.of(context).pop(true);
+                  },
+                  leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+                  title: Text('Delete', style: TextStyle(color: Get.theme.errorColor)),
+                )
               ),
-            const SizedBox(height: 5),
           ],
           CrossAxisAlignment.center
         );
