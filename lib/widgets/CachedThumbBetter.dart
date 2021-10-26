@@ -442,6 +442,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             image: mainProvider ?? MemoryImage(kTransparentImage),
             fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
             isAntiAlias: true,
+            filterQuality: FilterQuality.medium,
             width: double.infinity,
             height: double.infinity,
             key: ValueKey<bool>(mainProvider != null),

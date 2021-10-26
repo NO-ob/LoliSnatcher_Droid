@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
 import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
 import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
@@ -189,7 +191,9 @@ class SettingsPage extends StatelessWidget {
                           color: Get.theme.colorScheme.primary,
                           image: DecorationImage(
                             fit: BoxFit.cover,
-                            image: AssetImage('assets/images/drawer_icon.png')
+                            image: settingsHandler.drawerMascotPathOverride.isEmpty
+                              ? AssetImage('assets/images/drawer_icon.png')
+                              : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
                           ),
                         ),
                         child: null,
