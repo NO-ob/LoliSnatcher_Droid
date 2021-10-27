@@ -221,7 +221,7 @@ class SettingsDropdown extends StatelessWidget {
                     : null,
                   child: Row(
                     children: [
-                      childBuilder?.call(value) ?? Text(value)
+                      childBuilder?.call(value) ?? Text(value, style: TextStyle(color: Get.theme.colorScheme.onSurface))
                     ]
                   ),
                 ),
@@ -344,7 +344,7 @@ class SettingsBooruDropdown extends StatelessWidget {
                           ? Icon(Icons.favorite, color: Colors.red, size: 18)
                           : CachedFavicon(value.faviconURL!)
                       ),
-                      Text(" ${value.name!}"),
+                      Text(" ${value.name!}", style: TextStyle(color: Get.theme.colorScheme.onSurface)),
                     ],
                   ),
                 ),

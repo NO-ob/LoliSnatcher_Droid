@@ -24,11 +24,11 @@ import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
@@ -584,76 +584,79 @@ class _ViewerPageState extends State<ViewerPage> {
 
   void showShareDialog({bool showTip = true}) {
     // TODO change layout so the buttons set their width automatically, without padding stuff
-    Get.dialog(
-      InfoDialog('What to share',
-        [
-          const SizedBox(height: 15),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SettingsDialog(
+          title: Text('What you want to Share?'),
+          contentItems: <Widget>[
+            const SizedBox(height: 15),
           Column(
             children: [
               if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '')
-              ListTile(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Get.theme.colorScheme.secondary),
-                  ),
-                onTap: (){
-                  Navigator.of(context).pop();
-                  shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
-                },
-                leading: Icon(CupertinoIcons.link),
-                title: Text('Post URL'),
-              ),
-
-              const SizedBox(height: 15),
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: Get.theme.colorScheme.secondary),
-                ),
-                onTap: (){
-                  Navigator.of(context).pop();
-                  shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
-                },
-                leading: Icon(CupertinoIcons.link),
-                title: Text('File URL'),
-              ),
-
-              const SizedBox(height: 15),
-              ListTile(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(color: Get.theme.colorScheme.secondary),
-                ),
-                onTap: (){
-                  Navigator.of(context).pop();
-                  shareFileAction();
-                },
-                leading: Icon(Icons.file_present),
-                title: Text('File'),                  
-              ),
-
-              const SizedBox(height: 15),
-              settingsHandler.hasHydrus && searchHandler.currentTab.selectedBooru.value.type != "Hydrus"
-                ? ListTile(
+                ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(color: Get.theme.colorScheme.secondary),
                     ),
-                    onTap: (){
-                      Navigator.of(context).pop();
-                      shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
-                    },
-                    leading: Icon(Icons.file_present),
-                    title: Text('Hydrus'),
-                  )
-                : Container()
-            ]
-          ),
-          const SizedBox(height: 15),
-          Text(showTip ? '[Tip]: You can set default action in settings' : '')
-        ],
-        CrossAxisAlignment.center,
-      )
+                  onTap: (){
+                    Navigator.of(context).pop();
+                    shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
+                  },
+                  leading: Icon(CupertinoIcons.link),
+                  title: Text('Post URL'),
+                ),
+
+                const SizedBox(height: 15),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Get.theme.colorScheme.secondary),
+                  ),
+                  onTap: (){
+                    Navigator.of(context).pop();
+                    shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
+                  },
+                  leading: Icon(CupertinoIcons.link),
+                  title: Text('File URL'),
+                ),
+
+                const SizedBox(height: 15),
+                ListTile(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(color: Get.theme.colorScheme.secondary),
+                  ),
+                  onTap: (){
+                    Navigator.of(context).pop();
+                    shareFileAction();
+                  },
+                  leading: Icon(Icons.file_present),
+                  title: Text('File'),
+                ),
+
+                const SizedBox(height: 15),
+                settingsHandler.hasHydrus && searchHandler.currentTab.selectedBooru.value.type != "Hydrus"
+                  ? ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Get.theme.colorScheme.secondary),
+                      ),
+                      onTap: (){
+                        Navigator.of(context).pop();
+                        shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
+                      },
+                      leading: Icon(Icons.file_present),
+                      title: Text('Hydrus'),
+                    )
+                  : Container()
+              ]
+            ),
+            const SizedBox(height: 15),
+            Text(showTip ? '[Tip]: You can set default action in settings' : ''),
+          ],
+        );
+      }
     );
   }
 

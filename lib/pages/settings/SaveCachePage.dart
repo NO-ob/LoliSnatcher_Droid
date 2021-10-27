@@ -25,11 +25,10 @@ class SaveCachePage extends StatefulWidget {
 
 class _SaveCachePageState extends State<SaveCachePage> {
   final SettingsHandler settingsHandler = Get.find();
-  late String videoCacheMode;
+  late String videoCacheMode, extPathOverride;
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
   final ServiceHandler serviceHandler = ServiceHandler();
-  String extPathOverride = "";
   bool jsonWrite = false, thumbnailCache = true, mediaCache = false;
 
   final ImageWriter imageWriter = ImageWriter();
@@ -54,6 +53,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     thumbnailCache = settingsHandler.thumbnailCache;
     mediaCache = settingsHandler.mediaCache;
     videoCacheMode = settingsHandler.videoCacheMode;
+    extPathOverride = settingsHandler.extPathOverride;
     jsonWrite = settingsHandler.jsonWrite;
     cacheDuration = settingsHandler.cacheDuration;
     cacheDurationSelected = settingsHandler.map['cacheDuration']?['options'].firstWhere((dur) {
@@ -168,13 +168,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
               SettingsButton(
                 name: 'Set Storage Directory',
-                subtitle: Text(extPathOverride.isEmpty ? '...' : extPathOverride),
+                subtitle: Text(extPathOverride.isEmpty ? '...' : 'Current: $extPathOverride'),
                 icon: Icon(Icons.folder_outlined),
                 action: () async {
                   //String url = await ServiceHandler.setExtDir();
 
                   if (Platform.isAndroid) {
-                    extPathOverride = await ServiceHandler.setExtDir();
+                    final String newPath = await ServiceHandler.setExtDir();
+                    extPathOverride = newPath;
+                    setState(() { });
                     // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
                   } else {
                     // TODO need to update dir picker to work on desktop
@@ -208,6 +210,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
               if(extPathOverride.isNotEmpty)
                 SettingsButton(
                   name: 'Reset Storage Directory',
+                  icon: Icon(Icons.refresh),
                   action: () {
                     setState(() {
                       extPathOverride = '';

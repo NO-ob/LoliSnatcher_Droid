@@ -57,7 +57,7 @@ class _ThemePageState extends State<ThemePage> {
     //This needs to be done here because if its done in the buttons onclick
     //and you back out too fast the image path will not be returned in time to save it to settings
     if (needToWriteMascot){
-      if (mascotPathOverride.isNotEmpty){
+      if (mascotPathOverride.isNotEmpty) {
         mascotPathOverride = await new ImageWriter().writeMascotImage(mascotPathOverride);
         settingsHandler.drawerMascotPathOverride = mascotPathOverride;
         needToWriteMascot = false;
@@ -324,26 +324,28 @@ class _ThemePageState extends State<ThemePage> {
               ),
               SettingsButton(
                 name: 'Set Custom Mascot',
+                subtitle: Text(mascotPathOverride.isEmpty ? '...' : 'Current: $mascotPathOverride'),
                 icon: Icon(Icons.image_search_outlined),
                 drawTopBorder: true,
                 action: () async{
                     mascotPathOverride = await ServiceHandler.getImageSAFUri();
                     needToWriteMascot = true;
+                    setState(() { });
                 },
               ),
-              SettingsButton(
-                name: 'Remove Custom Mascot',
-                icon: Icon(Icons.delete_forever),
-                drawTopBorder: true,
-                action: () async{
-                  File file = new File(mascotPathOverride);
-                  if (file.existsSync()){
-                    file.deleteSync();
-                  }
-                  mascotPathOverride = "";
-                },
-              ),
-
+              if(mascotPathOverride.isNotEmpty)
+                SettingsButton(
+                  name: 'Remove Custom Mascot',
+                  icon: Icon(Icons.delete_forever),
+                  drawTopBorder: true,
+                  action: () async{
+                    File file = new File(mascotPathOverride);
+                    if (file.existsSync()) {
+                      file.deleteSync();
+                    }
+                    mascotPathOverride = "";
+                  },
+                ),
 
             ],
           ),
