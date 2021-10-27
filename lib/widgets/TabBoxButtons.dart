@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/HistoryList.dart';
 
 class TabBoxButtons extends StatefulWidget {
@@ -21,17 +20,12 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   void showHistory() async {
-    showDialog(context: context, builder: (context) {
-      return StatefulBuilder(builder: (context, setDialogState) {
-        return InfoDialog(
-          null,
-          [
-            HistoryList()
-          ],
-          CrossAxisAlignment.start
-        );
-      });
-    });
+    showDialog(
+      context: context,
+      builder: (context) {
+        return HistoryList();
+      }
+    );
   }
 
   @override

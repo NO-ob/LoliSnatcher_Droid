@@ -1,14 +1,13 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../SettingsHandler.dart';
-import 'BooruEditPage.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 // ignore: must_be_immutable
 class BooruPage extends StatefulWidget {
@@ -115,14 +114,18 @@ class _BooruPageState extends State<BooruPage> {
                   trailingIcon: IconButton(
                     icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                     onPressed: () {
-                      Get.dialog(
-                          InfoDialog("Booru",
-                            [
-                              Text("The booru selected here will be set as default after saving"),
-                              Text("The default booru will be first to appear in the dropdown boxes"),
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SettingsDialog(
+                            title: Text('Booru'),
+                            contentItems: <Widget>[
+                              Text("The Booru selected here will be set as default after saving."),
+                              Text(''),
+                              Text("The default Booru will be first to appear in the dropdown boxes."),
                             ],
-                            CrossAxisAlignment.start,
-                          )
+                          );
+                        }
                       );
                     },
                   ),

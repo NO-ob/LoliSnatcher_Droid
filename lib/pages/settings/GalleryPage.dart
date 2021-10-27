@@ -1,5 +1,4 @@
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -123,15 +122,19 @@ class _GalleryPageState extends State<GalleryPage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                      InfoDialog("Gallery Quality",
-                        [
-                          Text("The gallery quality changes the resolution of images in the gallery viewer"),
-                          Text(" - Sample - Medium resolution"),
-                          Text(" - Full Res - Full resolution"),
-                        ],
-                        CrossAxisAlignment.start,
-                      )
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Gallery Quality'),
+                          contentItems: <Widget>[
+                            Text("The gallery quality changes the resolution of images in the gallery viewer."),
+                            Text(''),
+                            Text(" - Sample - Medium resolution"),
+                            Text(" - Full Res - Full resolution"),
+                          ],
+                        );
+                      }
                     );
                   },
                 ),
@@ -158,20 +161,24 @@ class _GalleryPageState extends State<GalleryPage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                        InfoDialog("Share Actions",
-                          [
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Share Actions'),
+                          contentItems: <Widget>[
                             Text("- Ask - always ask what to share"),
                             Text("- Post URL"),
                             Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
                             Text("- File - shares viewed file itself"),
                             Text("- Hydrus - sends the post url to Hydrus for import"),
-                            const SizedBox(height: 10),
+                            Text(''),
                             Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
-                            Text("[Tip]: You can open Share Actions Menu by long pressing Share button")
+                            Text(''),
+                            Text("[Tip]: You can open Share Actions Menu by long pressing Share button.")
                           ],
-                          CrossAxisAlignment.start,
-                        )
+                        );
+                      }
                     );
                   },
                 ),
@@ -218,15 +225,18 @@ class _GalleryPageState extends State<GalleryPage> {
                           trailingIcon: IconButton(
                             icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                             onPressed: () {
-                              Get.dialog(
-                                  InfoDialog("Buttons Order",
-                                    [
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return SettingsDialog(
+                                    title: Text('Buttons Order'),
+                                    contentItems: <Widget>[
                                       Text("Long press to change item order."),
                                       Text("First 4 buttons from this list will be always visible on Toolbar."),
                                       Text("Other buttons will be in overflow (three dots) menu."),
                                     ],
-                                    CrossAxisAlignment.start,
-                                  )
+                                  );
+                                }
                               );
                             },
                         )
@@ -283,14 +293,17 @@ class _GalleryPageState extends State<GalleryPage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                        InfoDialog("Disable Video",
-                          [
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Disable Video'),
+                          contentItems: <Widget>[
                             Text("Useful on low end devices that crash when trying to load videos."),
-                            Text("Replaces video with some text that says Video disabled"),
+                            Text("Replaces video with text that says 'Video disabled'."),
                           ],
-                          CrossAxisAlignment.start,
-                        )
+                        );
+                      }
                     );
                   },
                 ),
@@ -334,18 +347,22 @@ class _GalleryPageState extends State<GalleryPage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                        InfoDialog("Low Performance Mode",
-                          [
-                            Text(" - Recommended for old devices and devices with RAM < 2GB"),
-                            Text(" - Disables loading progress information"),
-                            Text(" - Sets optimal settings for:"),
-                            Text("    - Gallery Quality"),
-                            Text("    - Gallery Preload"),
-                            Text("    - Video Auto Play"),
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Low Performance Mode'),
+                          contentItems: <Widget>[
+                            Text("Recommended for old devices and devices with RAM < 2GB."),
+                            Text(''),
+                            Text("- Disables loading progress information"),
+                            Text("- Sets optimal settings for:"),
+                            Text("   - Gallery Quality"),
+                            Text("   - Gallery Preload"),
+                            Text("   - Video Auto Play"),
                           ],
-                          CrossAxisAlignment.start,
-                        )
+                        );
+                      }
                     );
                   },
                 ),
@@ -364,18 +381,23 @@ class _GalleryPageState extends State<GalleryPage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                        InfoDialog("Volume Buttons Scrolling",
-                          [
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Volume Buttons Scrolling'),
+                          contentItems: <Widget>[
+                            Text("Allows to scroll through previews grid and gallery items using volume buttons"),
+                            Text(''),
                             Text(" - Volume Down - next item"),
                             Text(" - Volume Up - previous item"),
-                            const SizedBox(height: 10),
+                            Text(''),
                             Text("On videos:"),
                             Text(" - App Bar visible - controls volume"),
                             Text(" - App Bar hidden - controls scrolling"),
                           ],
-                          CrossAxisAlignment.start,
-                        )
+                        );
+                      }
                     );
                   },
                 ),
@@ -402,9 +424,9 @@ class _GalleryPageState extends State<GalleryPage> {
                 }
               ),
               SettingsTextInput(
-                controller: scrollSpeedController,
-                title: 'Auto Scroll Timeout (ms)',
-                hintText: "Auto Scroll Timeout",
+                controller: galleryAutoScrollController,
+                title: 'AutoScroll Timeout (in ms)',
+                hintText: "AutoScroll Timeout (in ms)",
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
@@ -422,13 +444,16 @@ class _GalleryPageState extends State<GalleryPage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                        InfoDialog("AutoScroll / Slideshow",
-                          [
-                            Text("[WIP] Videos and gifs must be scrolled manually for now"),
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('AutoScroll / Slideshow'),
+                          contentItems: <Widget>[
+                            Text("[WIP] Videos and gifs must be scrolled manually for now."),
                           ],
-                          CrossAxisAlignment.start,
-                        )
+                        );
+                      }
                     );
                   },
                 ),

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class FiltersEdit extends StatefulWidget {
@@ -201,61 +200,51 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     return tagsList;
   }
 
-  void showFilterEntryActions(Widget row, String tag, int index, String type) {
-    showDialog(context: context, builder: (context) {
-      List<String> tagsList = getTagsList(type);
-      bool isAddButton = index == -1;
-      return StatefulBuilder(builder: (context, setDialogState) {
-        return InfoDialog(
-          null,
-          [
-            AbsorbPointer(absorbing: true, child: row),
+  void showFilterEntryActions(Widget entryRow, String tag, int index, String type) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        List<String> tagsList = getTagsList(type);
+        bool isAddButton = index == -1;
+
+        return SettingsDialog(
+          contentItems: <Widget>[
             Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              width: double.infinity,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(10,0,0,0),
-                      child: TextField(
-                        autofocus: isAddButton ? true : false,
-                        controller: newTagController,
-                        onSubmitted: (String text) {
-                          if(text.trim() != '') {
-                            isAddButton
-                              ? addTag(text.trim().toLowerCase(), type)
-                              : editTag(text.trim().toLowerCase(), index, type);
-                            newTagController.text = '';
-                            Navigator.of(context).pop(true);
-                          } else {
-                            FlashElements.showSnackbar(
-                              context: context,
-                              title: Text(
-                                "Empty input!",
-                                style: TextStyle(fontSize: 20)
-                              ),
-                              leadingIcon: Icons.warning_amber,
-                              leadingIconColor: Colors.red,
-                              sideColor: Colors.red,
-                            );
-                          }
-                        },
-                        decoration: InputDecoration(
-                          hintText: isAddButton ? "New $type Tag" : "Edit Tag",
-                          contentPadding: EdgeInsets.fromLTRB(15,0,15,0), // left,right,top,bottom
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(50),
-                            gapPadding: 0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              width: double.maxFinite,
+              child: AbsorbPointer(absorbing: true, child: entryRow)
             ),
+
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 20),
+              child: SettingsTextInput(
+                title: isAddButton ? "New $type Tag" : "Edit Tag",
+                hintText: isAddButton ? "New $type Tag" : "Edit Tag",
+                onlyInput: true,
+                controller: newTagController,
+                autofocus: isAddButton ? true : false,
+                onSubmitted: (String text) {
+                  if(text.trim() != '') {
+                    isAddButton
+                      ? addTag(text.trim().toLowerCase(), type)
+                      : editTag(text.trim().toLowerCase(), index, type);
+                    newTagController.text = '';
+                    Navigator.of(context).pop(true);
+                  } else {
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Empty input!",
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      leadingIcon: Icons.warning_amber,
+                      leadingIconColor: Colors.red,
+                      sideColor: Colors.red,
+                    );
+                  }
+                },
+              )
+            ),
+
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
               child: ListTile(
@@ -288,6 +277,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 title: Text('Save'),
               )
             ),
+
             if(!isAddButton)
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
@@ -311,9 +301,9 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 )
               ),
           ],
-          CrossAxisAlignment.center
+          actionButtons: <Widget>[ ],
         );
-      });
-    });
+      },
+    );
   }
 }

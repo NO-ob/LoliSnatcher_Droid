@@ -128,7 +128,7 @@ class SettingsToggle extends StatelessWidget {
 }
 
 class SettingsDropdown extends StatelessWidget {
-  const SettingsDropdown({
+  SettingsDropdown({
     Key? key,
     required this.selected,
     required this.values,
@@ -149,42 +149,86 @@ class SettingsDropdown extends StatelessWidget {
   final Widget trailingIcon;
   final Widget Function(String)? childBuilder;
 
+  final GlobalKey dropdownKey = GlobalKey();
+  GestureDetector? detector;
+  // TODO fix this
+  // dropdownbutton small clickable zone workaround when using inputdecoration
+  // code from: https://github.com/flutter/flutter/issues/53634
+  void openItemsList() {
+    void search(BuildContext? context) {
+      context?.visitChildElements((element) {
+        if (detector != null) return;
+        if (element.widget != null && element.widget is GestureDetector)
+          detector = element.widget as GestureDetector;
+        else
+          search(element);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: MarqueeText(
-        text: title,
-        fontSize: 16,
-        isExpanded: false,
-      ),
-      subtitle: DropdownButton<String>(
-        value: selected,
-        icon: Icon(Icons.arrow_downward),
-        onChanged: onChanged,
-        menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-        isExpanded: true,
-        underline: const SizedBox(),
-        items: values.map<DropdownMenuItem<String>>((String value) {
-          bool isCurrent = value == selected;
-
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: isCurrent
-                ? BoxDecoration(
-                  border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                  borderRadius: BorderRadius.circular(5),
-                )
-                : null,
-              child: Row(
-                children: [
-                  childBuilder?.call(value) ?? Text(value)
-                ]
+      title: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        child: GestureDetector(
+          onTap: openItemsList,
+          child: DropdownButtonFormField<String>(
+            key: dropdownKey,
+            value: selected,
+            icon: Icon(Icons.arrow_drop_down),
+            onChanged: onChanged,
+            menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: title,
+              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
+              contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+              ),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
             ),
-          );
-        }).toList(),
+            dropdownColor: Get.theme.colorScheme.surface,
+            selectedItemBuilder: (BuildContext context) {
+              return values.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Container(
+                    child: Row(
+                      children: <Widget>[
+                        childBuilder?.call(value) ?? Text(value)
+                      ],
+                    )
+                  ),
+                );
+              }).toList();
+            },
+            items: values.map<DropdownMenuItem<String>>((String value) {
+              bool isCurrent = value == selected;
+
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: isCurrent
+                    ? BoxDecoration(
+                        border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                        borderRadius: BorderRadius.circular(5),
+                      )
+                    : null,
+                  child: Row(
+                    children: [
+                      childBuilder?.call(value) ?? Text(value)
+                    ]
+                  ),
+                ),
+              );
+            }).toList(),
+          )
+        )
       ),
       trailing: trailingIcon,
       dense: false,
@@ -199,7 +243,7 @@ class SettingsDropdown extends StatelessWidget {
 }
 
 class SettingsBooruDropdown extends StatelessWidget {
-  const SettingsBooruDropdown({
+  SettingsBooruDropdown({
     Key? key,
     required this.selected,
     required this.onChanged,
@@ -216,47 +260,99 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool drawBottomBorder;
   final Widget trailingIcon;
 
+  final GlobalKey dropdownKey = GlobalKey();
+  GestureDetector? detector;
+  // TODO fix this
+  // dropdownbutton small clickable zone workaround when using inputdecoration
+  // code from: https://github.com/flutter/flutter/issues/53634
+  void openItemsList() {
+    void search(BuildContext? context) {
+      context?.visitChildElements((element) {
+        if (detector != null) return;
+        if (element.widget != null && element.widget is GestureDetector)
+          detector = element.widget as GestureDetector;
+        else
+          search(element);
+      });
+    }
+
+    search(dropdownKey.currentContext);
+    if (detector != null) detector!.onTap?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
+    List<Booru> boorus = Get.find<SettingsHandler>().booruList;
     return ListTile(
-      title: MarqueeText(
-        text: title,
-        fontSize: 16,
-        isExpanded: false,
-      ),
-      subtitle: Obx(() => DropdownButton<Booru>(
-        value: selected,
-        icon: Icon(Icons.arrow_downward),
-        onChanged: onChanged,
-        menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-        isExpanded: true,
-        underline: const SizedBox(),
-        items: Get.find<SettingsHandler>().booruList.map<DropdownMenuItem<Booru>>((Booru value){
-          bool isCurrent = value == selected;
-
-          return DropdownMenuItem<Booru>(
-            value: value,
-            child: Container(
-              padding: EdgeInsets.all(8),
-              decoration: isCurrent
-              ? BoxDecoration(
-                border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                borderRadius: BorderRadius.circular(5),
-              )
-              : null,
-              child: Row(
-                children: <Widget>[
-                  (value.type == "Favourites"
-                      ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                      : CachedFavicon(value.faviconURL!)
-                  ),
-                  Text(" ${value.name!}"),
-                ],
+      title: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        child: Obx(() => GestureDetector(
+          onTap: openItemsList,
+          child: DropdownButtonFormField<Booru>(
+            key: dropdownKey,
+            value: selected,
+            icon: Icon(Icons.arrow_drop_down),
+            onChanged: onChanged,
+            menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: title,
+              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
+              contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+              ),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
             ),
-          );
-        }).toList(),
-      )),
+            dropdownColor: Get.theme.colorScheme.surface,
+            selectedItemBuilder: (BuildContext context) {
+                return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
+                  return DropdownMenuItem<Booru>(
+                    value: value,
+                    child: Container(
+                      child: Row(
+                        children: <Widget>[
+                          (value.type == "Favourites"
+                              ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                              : CachedFavicon(value.faviconURL!)
+                          ),
+                          Text(" ${value.name!}"),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList();
+              },
+            items: boorus.map<DropdownMenuItem<Booru>>((Booru value){
+              bool isCurrent = value == selected;
+
+              return DropdownMenuItem<Booru>(
+                value: value,
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: isCurrent
+                  ? BoxDecoration(
+                    border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                    borderRadius: BorderRadius.circular(5),
+                  )
+                  : null,
+                  child: Row(
+                    children: <Widget>[
+                      (value.type == "Favourites"
+                          ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                          : CachedFavicon(value.faviconURL!)
+                      ),
+                      Text(" ${value.name!}"),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          )
+        ))
+      ),
       trailing: trailingIcon,
       dense: false,
       shape: Border(
@@ -278,6 +374,8 @@ class SettingsTextInput extends StatelessWidget {
     this.validator,
     required this.title,
     this.hintText = '',
+    this.autofocus = false,
+    this.onSubmitted,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon = const SizedBox(),
@@ -290,6 +388,8 @@ class SettingsTextInput extends StatelessWidget {
   final String? Function(String?)? validator;
   final String title;
   final String hintText;
+  final bool autofocus;
+  final void Function(String)? onSubmitted;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget trailingIcon;
@@ -298,31 +398,39 @@ class SettingsTextInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget field = Container(
-      margin: EdgeInsets.only(top: 10),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: TextFormField(
         controller: controller,
+        autofocus: autofocus,
         keyboardType: inputType,
         inputFormatters: inputFormatters,
+        onFieldSubmitted: onSubmitted,
         decoration: InputDecoration(
           fillColor: Get.theme.colorScheme.surface,
           filled: true,
+          labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
+          labelText: title,
           hintText: hintText,
           errorText: validator?.call(controller.text),
-          contentPadding: EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
+          contentPadding: EdgeInsets.fromLTRB(25, 0, 15, 0),
+          suffixIcon: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Icon(Icons.edit, color: Get.theme.colorScheme.onSurface)
+          ),
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             borderRadius: BorderRadius.circular(50),
-            gapPadding: 0,
+            gapPadding: 2,
           ),
           errorBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Get.theme.errorColor),
             borderRadius: BorderRadius.circular(50),
-            gapPadding: 0,
+            gapPadding: 2,
           ),
           border: OutlineInputBorder(
             borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             borderRadius: BorderRadius.circular(50),
-            gapPadding: 0,
+            gapPadding: 2,
           ),
         ),
       )
@@ -333,12 +441,13 @@ class SettingsTextInput extends StatelessWidget {
     }
 
     return ListTile(
-      title: MarqueeText(
-        text: title,
-        fontSize: 16,
-        isExpanded: false,
-      ),
-      subtitle: field,
+      // title: MarqueeText(
+      //   text: title,
+      //   fontSize: 16,
+      //   isExpanded: false,
+      // ),
+      title: field,
+      // subtitle: field,
       trailing: trailingIcon,
       dense: false,
       shape: Border(
@@ -371,10 +480,12 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
-      content: content ?? Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: contentItems ?? [],
+      content: content ?? SingleChildScrollView(
+        child: ListBody(
+          children: contentItems ?? [],
+        )
       ),
+      backgroundColor: Get.theme.colorScheme.surface,
       actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
       contentPadding: contentPadding ?? const EdgeInsets.fromLTRB(24, 20, 24, 24),
       scrollable: true,

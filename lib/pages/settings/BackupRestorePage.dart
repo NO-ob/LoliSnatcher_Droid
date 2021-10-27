@@ -54,6 +54,29 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
 
   @override
   Widget build(BuildContext context) {
+    if(!Platform.isAndroid) {
+      return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: Text("Backup & Restore"),
+        ),
+        body: Center(
+          child: ListView(
+            children: [
+              Container(
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                width: double.infinity,
+                child: Text("This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system"),
+              )
+            ]
+          )
+        )
+      )
+      );
+    }
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(

@@ -69,6 +69,7 @@ class _BooruEditState extends State<BooruEdit> {
 
   @override
   Widget build(BuildContext context) {
+    String? description = selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler([Booru('', selectedBooruType, '', '', '')], 1)[0].getDescription() : null;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -121,11 +122,14 @@ class _BooruEditState extends State<BooruEdit> {
               width: double.infinity,
               child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-              width: double.infinity,
-              child: SelectableText(selectedBooruType != "AutoDetect" ? BooruHandlerFactory().getBooruHandler([Booru('', selectedBooruType, '', '', '')], 1)[0].getDescription() : ""),
-            ),
+
+            if(description != null && description.isNotEmpty)
+              Container(
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                width: double.infinity,
+                child: SelectableText(description),
+              ),
+
             Container(
                 child: Column(
                     children: selectedBooruType == 'Hydrus'

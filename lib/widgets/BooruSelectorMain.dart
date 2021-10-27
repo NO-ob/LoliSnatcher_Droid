@@ -179,10 +179,9 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           isExpanded: true,
           value: widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0],
           icon: Icon(Icons.arrow_drop_down),
-          // underline: const SizedBox(),
           decoration: InputDecoration(
             labelText: 'Booru',
-            labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground),
+            labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
             // contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
             contentPadding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.symmetric(horizontal: 12, vertical: 2) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             enabledBorder: OutlineInputBorder(
@@ -192,7 +191,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
             ),
           ),
-          dropdownColor: Get.theme.cardColor,
+          dropdownColor: Get.theme.colorScheme.surface,
           onChanged: (Booru? newValue) {
             if((widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0]) != newValue) { // if not already selected
               if(widget.isPrimary) {

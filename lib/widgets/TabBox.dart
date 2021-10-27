@@ -60,7 +60,7 @@ class _TabBoxState extends State<TabBox> {
             icon: Icon(Icons.arrow_drop_down),
             decoration: InputDecoration(
               labelText: 'Tab',
-              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground),
+              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
               // contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
               contentPadding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.symmetric(horizontal: 12, vertical: 2) : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               enabledBorder: OutlineInputBorder(
@@ -70,8 +70,7 @@ class _TabBoxState extends State<TabBox> {
                 borderSide: BorderSide(color: Get.theme.colorScheme.secondary)
               ),
             ),
-            // underline: const SizedBox(),
-            dropdownColor: Get.theme.cardColor,
+            dropdownColor: Get.theme.colorScheme.surface,
             onChanged: (SearchGlobal? newValue) {
               searchHandler.searchTextController.text = newValue?.tags ?? ''; // set search box text anyway
               if (newValue != null && list.indexOf(newValue) != index){

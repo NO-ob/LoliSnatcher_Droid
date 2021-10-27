@@ -1,5 +1,3 @@
-import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,8 +6,10 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 class HistoryList extends StatefulWidget {
   HistoryList();
@@ -78,16 +78,28 @@ class _HistoryListState extends State<HistoryList> {
   
 
   void showHistoryEntryActions(Widget row, List<String> data) {
-    Duration timeZone = DateTime.now().timeZoneOffset;
-    DateTime searchDate = DateTime.parse(data[5]).add(timeZone);
-    String searchDateStr = "${searchDate.day.toString().padLeft(2,'0')}.${searchDate.month.toString().padLeft(2,'0')}.${searchDate.year.toString().substring(2)} ${searchDate.hour.toString().padLeft(2,'0')}:${searchDate.minute.toString().padLeft(2,'0')}:${searchDate.second.toString().padLeft(2,'0')}";
-    showDialog(context: context, builder: (context) {
-      return StatefulBuilder(builder: (context, setDialogState) {
-        return InfoDialog(
-          null,
-          [
-            AbsorbPointer(absorbing: true, child: row),
-            Text("Last searched on: $searchDateStr"),
+    final Duration timeZone = DateTime.now().timeZoneOffset;
+    final DateTime searchDate = DateTime.parse(data[5]).add(timeZone);
+
+    final String dayStr = searchDate.day.toString().padLeft(2, '0');
+    final String monthStr = searchDate.month.toString().padLeft(2, '0');
+    final String yearStr = searchDate.year.toString().substring(2);
+    final String hourStr = searchDate.hour.toString().padLeft(2, '0');
+    final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
+    final String secondStr = searchDate.second.toString().padLeft(2, '0');
+    final String searchDateStr = "$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr";
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SettingsDialog(
+          contentItems: <Widget>[
+            Container(
+              width: double.maxFinite,
+              child: AbsorbPointer(absorbing: true, child: row)
+            ),
+
+            Text("Last searched on: $searchDateStr", textAlign: TextAlign.center),
             const SizedBox(height: 20),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -103,7 +115,7 @@ class _HistoryListState extends State<HistoryList> {
               leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
               title: Text('Delete', style: TextStyle(color: Get.theme.errorColor)),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
@@ -125,7 +137,7 @@ class _HistoryListState extends State<HistoryList> {
               leading: Icon(data[4] == '1' ? Icons.favorite_border : Icons.favorite, color: data[4] == '1' ? Colors.grey : Colors.red),
               title: Text(data[4] == '1' ? 'Remove from Favourites' : 'Set as Favourite'),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
@@ -152,25 +164,24 @@ class _HistoryListState extends State<HistoryList> {
               leading: Icon(Icons.copy),
               title: Text('Copy'),
             ),
-            
           ],
-          CrossAxisAlignment.center
         );
-      });
-    });
+      }
+    );
   }
 
   Widget listBuild() {
     MediaQueryData mediaQuery = MediaQuery.of(context);
-    BoxConstraints limits = mediaQuery.orientation == Orientation.landscape
-        ? BoxConstraints(maxHeight: mediaQuery.size.height / 1.7)
-        : BoxConstraints(maxHeight: mediaQuery.size.height / 1.35);
+    double maxHeight = mediaQuery.size.height / (mediaQuery.orientation == Orientation.landscape ? 1.7 : 1.35);
+    // BoxConstraints limits = BoxConstraints(maxHeight: maxHeight);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
         child: Container(
-          constraints: limits,
+          // constraints: limits,
+          width: double.minPositive,
+          height: maxHeight,
           child: Scrollbar(
             controller: scrollController,
             interactive: true,
@@ -180,6 +191,7 @@ class _HistoryListState extends State<HistoryList> {
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               controller: scrollController,
+              // physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               itemCount: filteredHistory.length,
               scrollDirection: Axis.vertical,
@@ -259,23 +271,24 @@ class _HistoryListState extends State<HistoryList> {
 
   Widget filterBuild() {
     return Container(
-      margin: EdgeInsets.fromLTRB(10,10,10,10),
+      margin: EdgeInsets.fromLTRB(10, 2, 10, 10),
       width: double.infinity,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(
             child: Container(
-              height: 35,
-              margin: EdgeInsets.fromLTRB(0,0,0,0),
+              height: 45,
               child: Row(
                 children: <Widget>[
                   Expanded(child: TextField(
                     controller: filterSearchController,
-                    onChanged: (String input) {filterHistory();},
+                    onChanged: (String input) {
+                      filterHistory();
+                    },
                     decoration: InputDecoration(
                       hintText: "Filter Search History (${history.length})",
-                      contentPadding: EdgeInsets.fromLTRB(15,0,15,0),
+                      contentPadding: EdgeInsets.fromLTRB(15, 0, 15, 0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                         gapPadding: 0,
@@ -286,14 +299,14 @@ class _HistoryListState extends State<HistoryList> {
                     children: <Widget>[
                       Center(
                         child: IconButton(
-                          padding: const EdgeInsets.fromLTRB(0,0,0,15),
+                          padding: const EdgeInsets.fromLTRB(0, 2, 0, 15),
                           icon: Icon(Icons.favorite, size: 40, color: Colors.red),
                           onPressed: () { },
                         )
                       ),
                       Center(
                         child: IconButton(
-                          padding: const EdgeInsets.all(5),
+                          padding: const EdgeInsets.fromLTRB(0, 7, 0, 15),
                           icon: Icon(showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash, color: showFavourites ? Colors.white : Colors.white60),
                           onPressed: () {
                             showFavourites = !showFavourites;
@@ -342,12 +355,15 @@ class _HistoryListState extends State<HistoryList> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        errorsBuild(),
-        filterBuild(),
-        listBuild(),
-      ]
+    return SettingsDialog(
+      title: Column(
+        children: [
+          errorsBuild(),
+          filterBuild(),
+        ]
+      ),
+      content: listBuild(),
+      contentPadding: const EdgeInsets.all(6),
     );
   }
 }

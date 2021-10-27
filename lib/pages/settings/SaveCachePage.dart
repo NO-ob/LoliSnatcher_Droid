@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:LoliSnatcher/ImageWriterIsolate.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,11 +10,12 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
+import 'package:LoliSnatcher/ImageWriterIsolate.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 class SaveCachePage extends StatefulWidget {
   SaveCachePage();
@@ -168,6 +168,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
               SettingsButton(
                 name: 'Set Storage Directory',
+                subtitle: Text(extPathOverride.isEmpty ? '...' : extPathOverride),
                 icon: Icon(Icons.folder_outlined),
                 action: () async {
                   //String url = await ServiceHandler.setExtDir();
@@ -204,6 +205,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   }
                 },
               ),
+              if(extPathOverride.isNotEmpty)
+                SettingsButton(
+                  name: 'Reset Storage Directory',
+                  action: () {
+                    setState(() {
+                      extPathOverride = '';
+                    });
+                  },
+                ),
               SettingsButton(name: '', enabled: false),
 
               SettingsToggle(
@@ -236,17 +246,22 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 trailingIcon: IconButton(
                   icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
-                    Get.dialog(
-                        InfoDialog("Video Cache Modes",
-                          [
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Video Cache Modes'),
+                          contentItems: <Widget>[
                             Text("- Stream - Don't cache, start playing as soon as possible"),
-                            Text("- Cache - Saves to device storage, plays only when download is complete"),
+                            Text("- Cache - Saves the file to device storage, plays only when download is complete"),
                             Text("- Stream+Cache - Mix of both, but currently leads to double download"),
-                            const SizedBox(height: 10),
-                            Text("[Note]: Videos will cache only if Media Cache is enabled")
+                            Text(''),
+                            Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
+                            Text(''),
+                            Text("[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.")
                           ],
-                          CrossAxisAlignment.start,
-                        )
+                        );
+                      }
                     );
                   },
                 ),
@@ -270,7 +285,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
               SettingsTextInput(
                 controller: cacheSizeController,
-                title: 'Cache Size Limit (GB)',
+                title: 'Cache Size Limit (in GB)',
                 hintText: "Maximum Total Cache Size",
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[

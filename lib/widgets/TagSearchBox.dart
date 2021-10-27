@@ -285,7 +285,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     splitInput = input.split(" ");
     // Get last tag in the input and remove minus (exclude symbol)
     // TODO /bug?: use the tag behind the current cursor position, not the last tag
-    lastTag = splitInput[splitInput.length - 1].replaceAll(RegExp(r'^-'), '');
+    lastTag = splitInput.last.replaceAll(RegExp(r'^-'), '');
     setState(() { });
   }
 
@@ -440,7 +440,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         onTap: () {
                           // widget.searchBoxFocus.unfocus();
                           // Keep minus if its in the beggining of current (last) tag
-                          bool isExclude = RegExp(r'^-').hasMatch(splitInput[splitInput.length - 1]);
+                          bool isExclude = RegExp(r'^-').hasMatch(splitInput.last);
                           String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
                           searchHandler.searchTextController.text = newInput;
 
