@@ -59,8 +59,14 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
             controller: tabController,
             indicatorColor: Get.theme.colorScheme.secondary,
             tabs: [
-              Tab(text: 'Hated', icon: Icon(CupertinoIcons.eye_slash, color: Colors.red)),
-              Tab(text: 'Loved', icon: Icon(Icons.star, color: Colors.yellow)),
+              Tab(
+                text: 'Hated ${hatedList.isNotEmpty ? '(${hatedList.length})' : ''}'.trim(),
+                icon: Icon(CupertinoIcons.eye_slash, color: Colors.red),
+              ),
+              Tab(
+                text: 'Loved ${lovedList.isNotEmpty ? '(${lovedList.length})' : ''}'.trim(),
+                icon: Icon(Icons.star, color: Colors.yellow),
+              ),
             ],
           ),
         ),

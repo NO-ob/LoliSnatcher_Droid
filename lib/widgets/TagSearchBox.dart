@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -167,6 +168,29 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     ),
                   ),
                   const Spacer(),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        height: 40,
+                        color: Get.theme.colorScheme.secondary,
+                        child: TextButton(
+                          onPressed: () async {
+                            ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
+                            String copied = cdata?.text ?? '';
+                            if(copied.isNotEmpty) {
+                              searchHandler.searchTextController.text += ' $copied ';
+                              searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                              animateTransition();
+                              createOverlay();
+                            }
+                          },
+                          child: Icon(Icons.paste, color: Get.theme.colorScheme.onSecondary),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   Center(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
