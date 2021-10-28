@@ -9,6 +9,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:label="LoliSnatcher"
+        android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         <activity
