@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 class Logger {
   static Logger? _loggerInstance;
   // Needs to be moved to settings at some point
-  List<LogTypes> ignoreLogTypes = [LogTypes.booruHandlerInfo, LogTypes.booruHandlerRawFetched,LogTypes.settingsLoad,LogTypes.booruItemLoad];
-  //List<LogTypes> ignoreLogTypes = [];
+  //List<LogTypes> ignoreLogTypes = [LogTypes.booruHandlerInfo, LogTypes.booruHandlerRawFetched,LogTypes.settingsLoad,LogTypes.booruItemLoad];
+  List<LogTypes> ignoreLogTypes = [];
   static Logger Inst(){
     if (_loggerInstance == null){
       _loggerInstance = Logger();

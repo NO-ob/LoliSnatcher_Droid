@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,15 +20,22 @@ class DebugPage extends StatefulWidget {
 class _DebugPageState extends State<DebugPage> {
   final SettingsHandler settingsHandler = Get.find();
   ServiceHandler serviceHandler = ServiceHandler();
-
+  bool allowSelfSignedCerts = false;
   @override
   void initState() {
     super.initState();
+    allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
+    settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     bool result = await settingsHandler.saveSettings(restate: true);
+    if (allowSelfSignedCerts){
+      HttpOverrides.global = MyHttpOverrides();
+    } else {
+      HttpOverrides.global = null;
+    }
     return result;
   }
 
@@ -120,6 +129,15 @@ class _DebugPageState extends State<DebugPage> {
 
               SettingsButton(name: 'Res: ${Get.mediaQuery.size.width.toPrecision(4)}x${Get.mediaQuery.size.height.toPrecision(4)}'),
               SettingsButton(name: 'Pixel Ratio: ${Get.mediaQuery.devicePixelRatio.toPrecision(4)}'),
+              SettingsToggle(
+                  value: allowSelfSignedCerts,
+                  onChanged: (newValue) {
+                    setState(() {
+                      allowSelfSignedCerts = newValue;
+                    });
+                  },
+                  title: 'Enable Self Signed SSL Certificates'
+              ),
             ],
           ),
         ),

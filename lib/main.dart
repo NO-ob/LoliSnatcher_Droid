@@ -278,7 +278,7 @@ class _HomeState extends State<Home> {
 
     // force cache clear every minute + perform tabs backup
     cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
-      // TODO we don't need to clear cache so much, since all images are aleared on dispose
+      // TODO we don't need to clear cache so much, since all images are cleared on dispose
       // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
       backupTabs();

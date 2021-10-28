@@ -306,7 +306,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void tagStuff() {
     input = searchHandler.searchTextController.text;
-    splitInput = input.split(" ");
+    if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
+      splitInput = input.split(",");
+    } else {
+      splitInput = input.split(" ");
+    }
     // Get last tag in the input and remove minus (exclude symbol)
     // TODO /bug?: use the tag behind the current cursor position, not the last tag
     lastTag = splitInput.last.replaceAll(RegExp(r'^-'), '');
@@ -465,7 +469,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           // widget.searchBoxFocus.unfocus();
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(splitInput.last);
-                          String newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
+                          String newInput = "";
+
+                          if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
+                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + (isExclude ? '-' : '') + item[0].replaceAll("_", " ") + ",";
+                          } else {
+                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
+                          }
+
                           searchHandler.searchTextController.text = newInput;
 
                           // Set the cursor to the end of the search and reset the overlay data

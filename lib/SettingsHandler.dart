@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -115,6 +116,7 @@ class SettingsHandler extends GetxController {
   bool shitDevice = false;
   bool disableVideo = false;
   bool enableDrawerMascot = false;
+  bool allowSelfSignedCerts = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -146,8 +148,7 @@ class SettingsHandler extends GetxController {
     'customPrimaryColor', 'customAccentColor',
     'version', 'SDK', 'disableImageScaling',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
-    'drawerMascotPathOverride',
-
+    'drawerMascotPathOverride', 'allowSelfSignedCerts'
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -337,6 +338,10 @@ class SettingsHandler extends GetxController {
     },
     "enableDrawerMascot": {
       "type": "bool",
+      "default": false,
+    },
+    "allowSelfSignedCerts":{
+      "type" : "bool",
       "default": false,
     },
     "disableImageScaling": {
@@ -789,6 +794,8 @@ class SettingsHandler extends GetxController {
         return cacheDuration;
       case 'cacheSize':
         return cacheSize;
+      case 'allowSelfSignedCerts':
+        return allowSelfSignedCerts;
 
       case 'prefBooru':
         return prefBooru;
@@ -943,7 +950,9 @@ class SettingsHandler extends GetxController {
       case 'lastSyncPort':
         lastSyncPort = validatedValue;
         break;
-
+      case 'allowSelfSignedCerts':
+        allowSelfSignedCerts = validatedValue;
+        break;
       // theme stuff
       case 'theme':
         theme.value = validatedValue;
@@ -1005,6 +1014,7 @@ class SettingsHandler extends GetxController {
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
+      "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
@@ -1499,11 +1509,16 @@ class SettingsHandler extends GetxController {
     return;
   }
 
+
   Future<void> initialize() async{
     await getPerms();
     await loadSettings();
+
     if (booruList.isEmpty){
       await loadBoorus();
+    }
+    if (allowSelfSignedCerts){
+      HttpOverrides.global = MyHttpOverrides();
     }
     checkUpdate(withMessage: false);
 
@@ -1517,7 +1532,6 @@ class SettingsHandler extends GetxController {
     return;
   }
 }
-
 
 
 class UpdateInfo {
