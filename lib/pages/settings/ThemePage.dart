@@ -62,6 +62,8 @@ class _ThemePageState extends State<ThemePage> {
         settingsHandler.drawerMascotPathOverride = mascotPathOverride;
         needToWriteMascot = false;
       }
+    } else {
+      settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
     Get.find<SearchHandler>().rootRestate();
     bool result = await settingsHandler.saveSettings(restate: true);
@@ -344,6 +346,7 @@ class _ThemePageState extends State<ThemePage> {
                       file.deleteSync();
                     }
                     mascotPathOverride = "";
+                    setState(() { });
                   },
                 ),
 
