@@ -373,13 +373,19 @@ class ImageWriter {
   }
 
   String parseThumbUrlToName(String thumbURL) {
-    int queryLastIndex = thumbURL.lastIndexOf("?"); // Sankaku fix
-    int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
-    String result = thumbURL.substring(thumbURL.lastIndexOf("/") + 1, lastIndex);
-    if(result.startsWith('thumb.')) { //Paheal/shimmie(?) fix
-      String unthumbedURL = thumbURL.replaceAll('/thumb', '');
-      result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+    String result = "";
+    if (thumbURL.contains("Hydrus-Client")){
+      result = "hydrusThumb_${thumbURL.split("&")[0].split("=")[1]}";
+    } else {
+      int queryLastIndex = thumbURL.lastIndexOf("?"); // Sankaku fix
+      int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
+      result = thumbURL.substring(thumbURL.lastIndexOf("/") + 1, lastIndex);
+      if(result.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+        String unthumbedURL = thumbURL.replaceAll('/thumb', '');
+        result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
+      }
     }
+
     return result;
   }
 
