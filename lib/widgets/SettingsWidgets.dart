@@ -467,7 +467,8 @@ class SettingsDialog extends StatelessWidget {
     this.content,
     this.contentItems,
     this.actionButtons,
-    this.contentPadding
+    this.contentPadding,
+    this.titlePadding
   }) : super(key: key);
 
   final Widget? title;
@@ -475,11 +476,13 @@ class SettingsDialog extends StatelessWidget {
   final List<Widget>? contentItems;
   final List<Widget>? actionButtons;
   final EdgeInsets? contentPadding;
+  final EdgeInsets? titlePadding;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
+      titlePadding: titlePadding ?? null,
       content: content ?? SingleChildScrollView(
         child: ListBody(
           children: contentItems ?? [],

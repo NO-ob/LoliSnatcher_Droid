@@ -180,7 +180,7 @@ class _HistoryListState extends State<HistoryList> {
       child: Material(
         child: Container(
           // constraints: limits,
-          width: double.minPositive,
+          width: double.maxFinite,
           height: maxHeight,
           child: Scrollbar(
             controller: scrollController,
@@ -364,6 +364,7 @@ class _HistoryListState extends State<HistoryList> {
       ),
       content: listBuild(),
       contentPadding: const EdgeInsets.all(6),
+      titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
     );
   }
 }
