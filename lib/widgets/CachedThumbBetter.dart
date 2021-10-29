@@ -220,7 +220,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
     _startedAt = DateTime.now().millisecondsSinceEpoch;
 
-    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || ((widget.booruItem.mediaType == 'animation' && !settingsHandler.disableImageScaling.value) || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
+    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || ((widget.booruItem.mediaType == 'animation' && !settingsHandler.disableImageScaling.value && !widget.booruItem.isHated.value) || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
     thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
 
@@ -269,7 +269,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     _received = 0;
     _startedAt = 0;
 
-    isFromCache = false;
+    isFromCache = null;
 
     hateListener?.cancel();
 
@@ -355,9 +355,9 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     int? totalBytes = (hasProgressData ? (isProgressFromCaching ? _total : loadingProgress!.expectedTotalBytes) : null);
 
     double? percentDone = (hasProgressData ? expectedBytes! / totalBytes! : null);
-    String? percentDoneText = hasProgressData
-        ? ((percentDone ?? 0) == 1 ? null : '${(percentDone! * 100).toStringAsFixed(2)}%')
-        : (isFromCache == true ? '...' : null);
+    // String? percentDoneText = hasProgressData
+    //     ? ((percentDone ?? 0) == 1 ? null : '${(percentDone! * 100).toStringAsFixed(2)}%')
+    //     : (isFromCache == true ? '...' : null);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -369,9 +369,10 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                  backgroundColor: Colors.transparent,
-                  value: percentDone),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+                backgroundColor: Colors.transparent,
+                value: percentDone
+              ),
             ),
           ),
 
@@ -380,9 +381,10 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: RotatedBox(
               quarterTurns: -1,
               child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                  backgroundColor: Colors.transparent,
-                  value: percentDone),
+                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+                backgroundColor: Colors.transparent,
+                value: percentDone
+              ),
             ),
           ),
           // SizedBox(

@@ -246,10 +246,10 @@ class _HistoryListState extends State<HistoryList> {
             )
           : Icon(CupertinoIcons.question, size: 18),
         title: MarqueeText(
+          key: ValueKey(currentEntry[1]),
           text: currentEntry[1],
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: FontWeight.bold,
-          startPadding: 0,
           isExpanded: false,
         ),
       )

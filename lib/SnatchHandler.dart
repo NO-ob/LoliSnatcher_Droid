@@ -62,6 +62,7 @@ class SnatchHandler extends GetxController {
             "Added to snatch queue",
             style: TextStyle(fontSize: 20)
           ),
+          position: Positions.top,
           duration: Duration(seconds: 2),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,6 +80,7 @@ class SnatchHandler extends GetxController {
             "Added to snatch queue",
             style: TextStyle(fontSize: 20)
           ),
+          position: Positions.top,
           duration: Duration(seconds: 2),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,6 +116,7 @@ class SnatchHandler extends GetxController {
         "Snatching Images",
         style: TextStyle(fontSize: 20)
       ),
+      position: Positions.top,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -11,18 +11,20 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 
 class DioLoader {
   DioLoader(
-    this.url, {
-    this.headers = const <String, dynamic>{},
-    this.cancelToken,
-    this.onProgress,
-    this.onEvent,
-    this.onError,
-    this.onDone,
-    this.onDoneFile,
-    required this.cacheEnabled,
-    required this.cacheFolder,
-    this.timeoutTime,
-  });
+    this.url,
+    {
+      this.headers = const <String, dynamic>{},
+      this.cancelToken,
+      this.onProgress,
+      this.onEvent,
+      this.onError,
+      this.onDone,
+      this.onDoneFile,
+      required this.cacheEnabled,
+      required this.cacheFolder,
+      this.timeoutTime,
+    }
+  );
 
   final String url;
   final Map<String, dynamic>? headers;
@@ -44,12 +46,12 @@ class DioLoader {
     Dio client = Dio();
     // TODO bad certificate ignore, FIX AND REMOVE LATER
     // https://stackoverflow.com/questions/54285172/how-to-solve-flutter-certificate-verify-failed-error-while-performing-a-post-req
-    (client.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-    (HttpClient client) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
-    };
+    // (client.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+    // (HttpClient client) {
+    //   client.badCertificateCallback =
+    //       (X509Certificate cert, String host, int port) => true;
+    //   return client;
+    // };
     return client;
   }
 

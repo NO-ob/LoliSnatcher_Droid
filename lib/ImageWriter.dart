@@ -130,6 +130,7 @@ class ImageWriter {
 
     FlashElements.showSnackbar(
       duration: Duration(seconds: 2),
+      position: Positions.top,
       title: Text(
         "Snatching Complete",
         style: TextStyle(fontSize: 20)

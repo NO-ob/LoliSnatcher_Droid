@@ -201,7 +201,7 @@ class _BooruPageState extends State<BooruPage> {
                             onPressed: () {
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Cancel')
+                            child: Text('Cancel', style: TextStyle(color: Get.theme.colorScheme.onSurface))
                           ),
                           TextButton(
                             onPressed: () {
@@ -255,7 +255,7 @@ class _BooruPageState extends State<BooruPage> {
                               setState(() { });
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Delete Booru', style: TextStyle(color: Get.theme.errorColor))
+                            child: Text('Delete Booru', style: TextStyle(color: Get.theme.colorScheme.error))
                           ),
                         ]
                       ),

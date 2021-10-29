@@ -38,20 +38,51 @@ class _TabBoxState extends State<TabBox> {
     if (detector != null) detector!.onTap?.call();
   }
 
+  Widget buildRow(SearchGlobal tab) {
+    bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
+
+    // print(value.tags);
+    int? totalCount = tab.booruHandler.totalCount.value;
+    String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
+    String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
+
+    return Container(
+      width: double.maxFinite,
+      height: 30,
+      child: Row(
+      children: [
+        isNotEmptyBooru
+          ? (tab.selectedBooru.value.type == "Favourites"
+            ? Icon(Icons.favorite, color: Colors.red, size: 18)
+            : CachedFavicon(tab.selectedBooru.value.faviconURL!)
+          )
+          : Icon(CupertinoIcons.question, size: 18),
+        const SizedBox(width: 3),
+        MarqueeText(
+          key: ValueKey(tagText),
+          text: tagText,
+          fontSize: 16,
+          color: tab.tags == "" ? Colors.grey : null,
+        ),
+      ]
+    )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      List<SearchGlobal> list = searchHandler.list;
-      int index = searchHandler.index.value;
+    return Container(
+      // constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
+      padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
+      child: Obx(() {
+        List<SearchGlobal> list = searchHandler.list;
+        int index = searchHandler.index.value;
 
-      if(list.length == 0) {
-        return const SizedBox();
-      }
+        if(list.length == 0) {
+          return const SizedBox();
+        }
 
-      return Container(
-        // constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
-        padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
-        child: GestureDetector(
+        return GestureDetector(
           onTap: openItemsList,
           child: DropdownButtonFormField<SearchGlobal>(
             key: dropdownKey,
@@ -78,51 +109,18 @@ class _TabBoxState extends State<TabBox> {
                 searchHandler.changeTabIndex(list.indexOf(newValue));
               }
             },
-            onTap: () {
-              // setState(() { });
-            },
             selectedItemBuilder: (BuildContext context) {
               return list.map<DropdownMenuItem<SearchGlobal>>((SearchGlobal value) {
-              bool isNotEmptyBooru = value.selectedBooru.value.faviconURL != null;
-
-              // print(value.tags);
-              int? totalCount = value.booruHandler.totalCount.value;
-              String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
-              String tagText = "${value.tags == "" ? "[No Tags]" : value.tags}$totalCountText";
-
-              return DropdownMenuItem<SearchGlobal>(
-                value: value,
-                child: Container(
-                  child: Row(
-                    children: [
-                      isNotEmptyBooru
-                        ? (value.selectedBooru.value.type == "Favourites"
-                          ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                          : CachedFavicon(value.selectedBooru.value.faviconURL!)
-                        )
-                        : Icon(CupertinoIcons.question, size: 18),
-                      const SizedBox(width: 3),
-                      // Expanded(child: ScrollingText(tagText, 22, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
-                      MarqueeText(
-                        text: tagText,
-                        fontSize: 16,
-                        color: value.tags == "" ? Colors.grey : null,
-                        startPadding: 5,
-                      ),
-                    ]
-                  )
-                ),
-              );
-            }).toList();
+                return DropdownMenuItem<SearchGlobal>(
+                  value: value,
+                  child: Container(
+                    child: buildRow(value),
+                  ),
+                );
+              }).toList();
             },
             items: list.map<DropdownMenuItem<SearchGlobal>>((SearchGlobal value) {
               bool isCurrent = list.indexOf(value) == index;
-              bool isNotEmptyBooru = value.selectedBooru.value.faviconURL != null;
-
-              // print(value.tags);
-              int? totalCount = value.booruHandler.totalCount.value;
-              String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
-              String tagText = "${value.tags == "" ? "[No Tags]" : value.tags}$totalCountText";
 
               return DropdownMenuItem<SearchGlobal>(
                 value: value,
@@ -134,30 +132,13 @@ class _TabBoxState extends State<TabBox> {
                     borderRadius: BorderRadius.circular(5),
                   )
                   : null,
-                  child: Row(
-                    children: [
-                      isNotEmptyBooru
-                        ? (value.selectedBooru.value.type == "Favourites"
-                          ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                          : CachedFavicon(value.selectedBooru.value.faviconURL!)
-                        )
-                        : Icon(CupertinoIcons.question, size: 18),
-                      const SizedBox(width: 3),
-                      // Expanded(child: ScrollingText(tagText, 22, "infiniteWithPause", value.tags == "" ? Colors.grey : Colors.white)),
-                      MarqueeText(
-                        text: tagText,
-                        fontSize: 16,
-                        color: value.tags == "" ? Colors.grey : null,
-                        startPadding: 5,
-                      ),
-                    ]
-                  )
+                  child: buildRow(value),
                 ),
               );
             }).toList(),
           )
-        ),
-      );
-    });
+        );
+      }),
+    );
   }
 }

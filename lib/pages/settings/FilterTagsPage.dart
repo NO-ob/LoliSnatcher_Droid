@@ -115,7 +115,6 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
         title: MarqueeText(
           text: text,
           fontSize: 16,
-          startPadding: 0,
           isExpanded: false,
         ),
       )

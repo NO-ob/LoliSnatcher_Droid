@@ -1,12 +1,13 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
-
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
+import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class BooruSelectorMain extends StatefulWidget {
   final bool isPrimary;
@@ -59,6 +60,30 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
     }
   }
 
+  Widget buildRow (Booru? value) {
+    if(value == null) {
+      return const Text('???');
+    }
+
+    String name = " ${value.name}";
+
+    return Row(
+      children: <Widget>[
+        //Booru Icon
+        value.type == "Favourites"
+          ? Icon(Icons.favorite,color: Colors.red, size: 18)
+          : CachedFavicon(value.faviconURL!),
+        //Booru name
+        MarqueeText(
+          key: ValueKey(name),
+          text: name,
+          fontSize: 16,
+        ),
+        // Text(name),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('BooruSelector:');
@@ -104,16 +129,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           popupItemBuilder: (BuildContext context, Booru? value, bool isSelected) {
             return Padding(
               padding: const EdgeInsets.all(12),
-              child: Row(
-                children: <Widget>[
-                  //Booru Icon
-                  value?.type == "Favourites"
-                    ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                    : CachedFavicon(value!.faviconURL!),
-                  //Booru name
-                  Text(" ${value?.name}"),
-                ],
-              )
+              child: buildRow(value),
             );
           },
           popupSelectionWidget: (BuildContext context, Booru item, bool isSelected) {
@@ -151,16 +167,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               children: selectedItems.map((value) {
                 return Padding(
                   padding: const EdgeInsets.all(4),
-                  child: Row(
-                    children: <Widget>[
-                      //Booru Icon
-                      value.type == "Favourites"
-                        ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                        : CachedFavicon(value.faviconURL!),
-                      //Booru name
-                      Text(" ${value.name}"),
-                    ],
-                  )
+                  child: buildRow(value),
                 );
               }).toList(),
             );
@@ -177,7 +184,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         child: DropdownButtonFormField<Booru>(
           key: dropdownKey,
           isExpanded: true,
-          value: widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0],
+          value: searchHandler.currentTab.selectedBooru.value,
           icon: Icon(Icons.arrow_drop_down),
           decoration: InputDecoration(
             labelText: 'Booru',
@@ -193,12 +200,8 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           ),
           dropdownColor: Get.theme.colorScheme.surface,
           onChanged: (Booru? newValue) {
-            if((widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0]) != newValue) { // if not already selected
-              if(widget.isPrimary) {
-                searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
-              } else {
-                searchHandler.mergeAction([newValue!]);
-              }
+            if(searchHandler.currentTab.selectedBooru.value != newValue) { // if not already selected
+              searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
             }
           },
           selectedItemBuilder: (BuildContext context) {
@@ -206,29 +209,12 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               return DropdownMenuItem<Booru>(
                 value: value,
                 child: Container(
-                  // padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(5) : EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  child: Row(
-                    children: <Widget>[
-                      //Booru Icon
-                      value.type == "Favourites"
-                        ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                        : CachedFavicon(value.faviconURL!),
-                      //Booru name
-                      Text(" ${value.name}"),
-                    ],
-                  )
+                  child: buildRow(value),
                 ),
               );
             }).toList();
           },
-          items: settingsHandler.booruList.where((Booru booru) {
-            if(widget.isPrimary) {
-              return true;
-            } else {
-              bool isCurrent = isItemSelected(booru, true);
-              return !isCurrent;
-            }
-          }).map<DropdownMenuItem<Booru>>((Booru value) {
+          items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
             bool isCurrent = isItemSelected(value, widget.isPrimary);
             // Return a dropdown item
             return DropdownMenuItem<Booru>(
@@ -241,16 +227,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                   borderRadius: BorderRadius.circular(5),
                 )
                 : null,
-                child: Row(
-                  children: <Widget>[
-                    //Booru Icon
-                    value.type == "Favourites"
-                      ? Icon(Icons.favorite,color: Colors.red, size: 18)
-                      : CachedFavicon(value.faviconURL!),
-                    //Booru name
-                    Text(" ${value.name}"),
-                  ],
-                )
+                child: buildRow(value),
               ),
             );
           }).toList(),

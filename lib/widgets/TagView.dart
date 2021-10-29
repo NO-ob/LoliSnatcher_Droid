@@ -162,10 +162,10 @@ class _TagViewState extends State<TagView> {
             width: Get.mediaQuery.size.width,
             child: ListTile(
               title: MarqueeText(
+                key: ValueKey(tag),
                 text: tag,
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                startPadding: 0,
                 isExpanded: false,
               )
             )
@@ -271,10 +271,10 @@ class _TagViewState extends State<TagView> {
                     const SizedBox(width: 5),
                   ],
                 MarqueeText(
+                  key: ValueKey(currentTag),
                   text: currentTag,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  startPadding: 0,
                   isExpanded: true,
                 ),
                 IconButton(

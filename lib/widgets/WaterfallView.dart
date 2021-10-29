@@ -757,6 +757,9 @@ class _WaterfallState extends State<WaterfallView> {
                       valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                     ),
                   ),
+                  action: () {
+                    retryLastPage();
+                  },
                   drawBottomBorder: false,
                 );
               } else {

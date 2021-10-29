@@ -1469,7 +1469,7 @@ class SettingsHandler extends GetxController {
               onPressed: () {
                 Navigator.of(Get.context!).pop(true);
               },
-              child: Text('Later', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              child: Text('Later', style: TextStyle(color: Get.theme.colorScheme.onSurface))
             ),
             if(isFromStore && updateInfo!.isInStore)
               TextButton.icon(
@@ -1482,8 +1482,8 @@ class SettingsHandler extends GetxController {
                   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo!.storePackage);
                   Navigator.of(Get.context!).pop(true);
                 },
-                icon: Icon(Icons.play_arrow, color: Get.theme.colorScheme.onBackground),
-                label: Text('Visit Play Store', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+                icon: Icon(Icons.play_arrow, color: Get.theme.colorScheme.onSurface),
+                label: Text('Visit Play Store', style: TextStyle(color: Get.theme.colorScheme.onSurface))
               )
             else
               TextButton.icon(
@@ -1491,8 +1491,8 @@ class SettingsHandler extends GetxController {
                   ServiceHandler.launchURL(updateInfo!.githubURL);
                   Navigator.of(Get.context!).pop(true);
                 },
-                icon: Icon(Icons.exit_to_app, color: Get.theme.colorScheme.onBackground),
-                label: Text('Visit Releases', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+                icon: Icon(Icons.exit_to_app, color: Get.theme.colorScheme.onSurface),
+                label: Text('Visit Releases', style: TextStyle(color: Get.theme.colorScheme.onSurface))
               ),
           ],
         ),

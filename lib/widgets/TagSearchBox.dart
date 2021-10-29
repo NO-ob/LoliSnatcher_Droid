@@ -5,11 +5,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:keyboard_actions/keyboard_actions.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:keyboard_actions/keyboard_actions.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
@@ -413,7 +413,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 title: MarqueeText(
                   text: 'No Suggestions!',
                   fontSize: 16,
-                  startPadding: 0,
                   isExpanded: false,
                 ),
                 onTap: () {
@@ -436,7 +435,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                   itemCount: items.length,
                   itemBuilder: (BuildContext context, int index) {
                     final List<String> item = items[index];
-                    if (item[0].isNotEmpty) {
+                    final String tag = item[0];
+                    if (tag.isNotEmpty) {
                       Widget? itemIcon;
                       switch (item[1]) {
                         case 'history':
@@ -460,9 +460,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         minVerticalPadding: 0,
                         leading: itemIcon,
                         title: MarqueeText(
-                          text: item[0],
+                          key: ValueKey(tag),
+                          text: tag,
                           fontSize: 16,
-                          startPadding: 0,
                           isExpanded: false,
                         ),
                         onTap: () {
@@ -472,9 +472,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           String newInput = "";
 
                           if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
-                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + (isExclude ? '-' : '') + item[0].replaceAll("_", " ") + ",";
+                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + (isExclude ? '-' : '') + tag.replaceAll("_", " ") + ",";
                           } else {
-                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + item[0] + " ";
+                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + tag + " ";
                           }
 
                           searchHandler.searchTextController.text = newInput;

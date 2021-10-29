@@ -1,8 +1,16 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'dart:io';
+
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+
+enum Positions {
+  bottom,
+  top
+}
 
 class FlashElements {
   static showSnackbar({
@@ -18,11 +26,21 @@ class FlashElements {
     bool tapToClose = true, // close the tip by tapping anywhere on it
     bool shouldLeadingPulse = true, // should icon widget play pulse animation
     bool allowInViewer = true, // should tip open when user is in viewer
-    FlashPosition position = FlashPosition.bottom,
+    Positions position = Positions.bottom,
   }) {
-    if(!allowInViewer && Get.find<SearchHandler>().inViewer.value) {
+    bool inViewer = Get.find<SearchHandler>().inViewer.value;
+    if(!allowInViewer && inViewer) {
       return;
     }
+
+    if(context == null && Get.context == null) {
+      return;
+    }
+
+    bool isDesktop = Get.find<SettingsHandler>().appMode == 'Desktop' || Platform.isWindows || Platform.isLinux;
+    bool isDark = Get.theme.brightness == Brightness.dark;
+
+    FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
 
     showFlash(
       context: context ?? Get.context!,
@@ -30,21 +48,24 @@ class FlashElements {
       builder: (_, controller) {
         return Flash(
           controller: controller,
-          margin: (Get.find<SettingsHandler>().appMode == 'Desktop' && Get.mediaQuery.size.width > 500)
-            ? EdgeInsets.symmetric(horizontal: Get.mediaQuery.size.width / 4)
-            : EdgeInsets.zero,
-          behavior: FlashBehavior.fixed,
-          position: position,
+          margin: (isDesktop && Get.mediaQuery.size.width > 500)
+            ? EdgeInsets.symmetric(horizontal: Get.mediaQuery.size.width / 4, vertical: 0)
+            : EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
+          behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
+          position: flashPosition,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12)
+            topLeft: Radius.circular(8),
+            topRight: Radius.circular(8),
+            bottomLeft: !isDesktop ? Radius.circular(8) : Radius.zero,
+            bottomRight: !isDesktop ? Radius.circular(8) : Radius.zero,
           ),
-          borderColor: Colors.transparent,
+          borderColor: isDark ? Colors.grey[800] : Colors.grey[300],
           boxShadows: kElevationToShadow[8],
           backgroundColor: Get.theme.colorScheme.background,
           onTap: tapToClose ? () => controller.dismiss() : null,
           forwardAnimationCurve: Curves.linearToEaseOut,
           reverseAnimationCurve: Curves.easeOutCirc,
+          horizontalDismissDirection: HorizontalDismissDirection.horizontal,
           child: DefaultTextStyle(
             style: TextStyle(color: Get.theme.colorScheme.onBackground),
             child: FlashBar(
@@ -66,11 +87,13 @@ class FlashElements {
               ),
               // actions: <Widget>[
               //   TextButton(
-              //       onPressed: () => controller.dismiss('Yes, I do!'),
-              //       child: Text('YES', style: TextStyle(color: Get.theme.colorScheme.onBackground))),
+              //     onPressed: () => controller.dismiss('Yes'),
+              //     child: Text(inViewer.toString(), style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              //   ),
               //   TextButton(
-              //       onPressed: () => controller.dismiss('No, I do not!'),
-              //       child: Text('NO', style: TextStyle(color: Get.theme.colorScheme.onBackground))),
+              //     onPressed: () => controller.dismiss('No'),
+              //     child: Text('NO', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              //   ),
               // ],
             ),
           ),

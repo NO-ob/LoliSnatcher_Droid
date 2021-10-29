@@ -32,6 +32,9 @@ dependencies:
   flash: ^2.0.3
   dropdown_search: ^1.0.4
   marquee: ^2.2.0
+  fast_marquee:
+    git:
+      url: "https://github.com/hacker1024/fast_marquee.git"
   auto_size_text: ^3.0.0-nullsafety.0
   statsfl: ^2.0.1+1
   vibration: ^1.7.4-nullsafety.0

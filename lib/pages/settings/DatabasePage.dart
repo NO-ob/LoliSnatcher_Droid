@@ -144,7 +144,7 @@ class _DatabasePageState extends State<DatabasePage> {
       onPressed: () {
         Navigator.of(context).pop(true);
       },
-      child: Text('Cancel')
+      child: Text('Cancel', style: TextStyle(color: Get.theme.colorScheme.onSurface))
     );
 
     return WillPopScope(
@@ -238,7 +238,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             );
                             Navigator.of(context).pop(true);
                           },
-                          child: Text('Delete', style: TextStyle(color: Get.theme.errorColor))
+                          child: Text('Delete', style: TextStyle(color: Get.theme.colorScheme.error))
                         ),
                       ]
                     ),
@@ -280,7 +280,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               }
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Clear', style: TextStyle(color: Get.theme.errorColor))
+                            child: Text('Clear', style: TextStyle(color: Get.theme.colorScheme.error))
                           ),
                         ]
                       ),
@@ -321,7 +321,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               }
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Clear', style: TextStyle(color: Get.theme.errorColor))
+                            child: Text('Clear', style: TextStyle(color: Get.theme.colorScheme.error))
                           ),
                         ]
                       ),
@@ -362,7 +362,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               }
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Clear', style: TextStyle(color: Get.theme.errorColor))
+                            child: Text('Clear', style: TextStyle(color: Get.theme.colorScheme.error))
                           ),
                         ]
                       ),
