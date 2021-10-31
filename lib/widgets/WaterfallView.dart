@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
@@ -17,6 +16,8 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
@@ -30,8 +31,9 @@ class WaterfallView extends StatefulWidget {
 }
 
 class _WaterfallState extends State<WaterfallView> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   Timer? loadingDelay, _checkInterval;
   FocusNode kbFocusNode = FocusNode();
@@ -65,7 +67,7 @@ class _WaterfallState extends State<WaterfallView> {
     // reset bools
     searchHandler.isLastPage(false);
     searchHandler.isLoading(true);
-    searchHandler.inViewer(false);
+    viewerHandler.inViewer(false);
 
     updateState();
 
@@ -105,7 +107,7 @@ class _WaterfallState extends State<WaterfallView> {
   void setVolumeListener() {
     volumeListener?.cancel();
     volumeListener = searchHandler.volumeStream?.stream.listen((event) {
-      if(!searchHandler.inViewer.value) {
+      if(!viewerHandler.inViewer.value) {
         int dir = 0;
         if (event == 'up') {
           dir = -1;
@@ -202,7 +204,7 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   void viewerCallback() {
-    searchHandler.inViewer(false);
+    viewerHandler.dropCurrent();
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     kbFocusNode.requestFocus();
   }
@@ -211,7 +213,7 @@ class _WaterfallState extends State<WaterfallView> {
     // Load the image viewer
     kbFocusNode.unfocus();
     if (settingsHandler.appMode == "Mobile") {
-      searchHandler.inViewer(true);
+      viewerHandler.inViewer(true);
       // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
       await Navigator.push(
@@ -338,12 +340,12 @@ class _WaterfallState extends State<WaterfallView> {
     bool isHated = parsedTags[0].length > 0;
     bool isLoved = parsedTags[1].length > 0;
     bool isSound = parsedTags[2].length > 0;
+    
+    // reset the isHated value since we already check for it on every render
+    item.isHated.value = isHated;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(3),
-      // decoration: BoxDecoration(
-      //   borderRadius: BorderRadius.circular(3),
-      // ),
       child: Stack(
         alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
         children: [
@@ -565,26 +567,37 @@ class _WaterfallState extends State<WaterfallView> {
       autofocus: false,
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event){
+        BooruItem? item;
         if (event.runtimeType == RawKeyDownEvent) {
           if(event.isKeyPressed(LogicalKeyboardKey.arrowDown) || event.isKeyPressed(LogicalKeyboardKey.keyK) || event.isKeyPressed(LogicalKeyboardKey.keyS)) {
             searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+
           } else if(event.isKeyPressed(LogicalKeyboardKey.arrowUp) || event.isKeyPressed(LogicalKeyboardKey.keyJ) || event.isKeyPressed(LogicalKeyboardKey.keyW)) {
             searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset - 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+
           } else if(event.isKeyPressed(LogicalKeyboardKey.keyD)) {
             final oldIndex = widget.tab.booruHandler.filteredFetched.indexWhere((el) => el == widget.tab.currentItem.value);
             if((oldIndex + 1) < widget.tab.booruHandler.filteredFetched.length) {
-              widget.tab.currentItem.value = widget.tab.booruHandler.filteredFetched[oldIndex + 1];
+              item = widget.tab.booruHandler.filteredFetched[oldIndex + 1];
+              viewerHandler.setCurrent(item.key);
+              widget.tab.currentItem.value = item;
               widget.tab.viewedIndex.value = oldIndex + 1;
             }
+
           } else if(event.isKeyPressed(LogicalKeyboardKey.keyA)) {
             final oldIndex = widget.tab.booruHandler.filteredFetched.indexWhere((el) => el == widget.tab.currentItem.value);
             if((oldIndex - 1) > -1) {
-              widget.tab.currentItem.value = widget.tab.booruHandler.filteredFetched[oldIndex - 1];
+              item = widget.tab.booruHandler.filteredFetched[oldIndex - 1];
+              viewerHandler.setCurrent(item.key);
+              widget.tab.currentItem.value = item;
               widget.tab.viewedIndex.value = oldIndex - 1;
             }
+
           } else if(event.isKeyPressed(LogicalKeyboardKey.escape)) {
+            viewerHandler.dropCurrent();
             widget.tab.currentItem.value = BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
             // widget.tab.viewedIndex.value = 0;
+
           }
         }
       },

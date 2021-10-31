@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/progress_bar.dart';
@@ -21,7 +21,7 @@ class LoliControls extends StatefulWidget {
 
 class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
 
-  final SettingsHandler settingsHandler = Get.find();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   late VideoPlayerValue _latestValue;
   bool _hideStuff = true;
@@ -447,7 +447,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   GestureDetector _buildMuteButton(VideoPlayerController controller) {
-    bool isGlobalMute = settingsHandler.videoAutoMute;
+    bool isGlobalMute = viewerHandler.videoAutoMute;
 
     return GestureDetector(
       onTap: () {
@@ -459,10 +459,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
       },
       onLongPress: () {
-        settingsHandler.videoAutoMute = !settingsHandler.videoAutoMute;
-        if (settingsHandler.videoAutoMute && _latestValue.volume != 0) {
+        viewerHandler.videoAutoMute = !viewerHandler.videoAutoMute;
+        if (viewerHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);
-        } else if (!settingsHandler.videoAutoMute && _latestValue.volume == 0){
+        } else if (!viewerHandler.videoAutoMute && _latestValue.volume == 0){
           controller.setVolume(1);
         }
       },

@@ -3,10 +3,6 @@ import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/ViewUtils.dart';
-import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
-import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
-import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +12,13 @@ import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/widgets/BorderedText.dart';
+import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
+import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
+import 'package:LoliSnatcher/widgets/DioDownloader.dart';
+import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 
 class MediaViewerBetter extends StatefulWidget {
   final BooruItem booruItem;
@@ -33,15 +33,13 @@ class MediaViewerBetter extends StatefulWidget {
 class _MediaViewerBetterState extends State<MediaViewerBetter> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  StreamSubscription<bool>? appbarListener;
 
-  int _total = 0, _received = 0;
-  int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
-  Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false, isZoomed = false, isZoomButtonVisible = true;
+  RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  bool isStopped = false, isFromCache = false, isZoomed = false;
   List<String> stopReason = [];
 
   ImageProvider? mainProvider;
@@ -73,7 +71,6 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       onError: _onError,
       onDone: (Uint8List bytes, String url) {
         mainProvider = getImageProvider(bytes, url);
-        _checkInterval?.cancel();
         updateState();
       },
       cacheEnabled: settingsHandler.mediaCache,
@@ -85,21 +82,12 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   void _onBytesAdded(int received, int total) {
-    // always save incoming bytes, but restate only after [debounceDelay]MS
-    const int debounceDelay = 100;
-    bool isActive = _debounceBytes?.isActive ?? false;
-
-    _received = received;
-    _total = total;
+    _received.value = received;
+    _total.value = total;
     if (total > 0 && widget.booruItem.fileSize == null) {
       // set item file size if it wasn't received from api
       widget.booruItem.fileSize = total;
-      updateState();
-    }
-
-    if (!isActive) {
-      updateState();
-      _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
+      // updateState();
     }
   }
 
@@ -132,13 +120,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   @override
   void initState() {
     super.initState();
-    isZoomButtonVisible = settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop";
-    appbarListener = searchHandler.displayAppbar.listen((bool value) {
-      if(settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop") {
-        isZoomButtonVisible = value;
-      }
-      updateState();
-    });
+    viewerHandler.addViewed(widget.key);
     initViewer(false);
   }
 
@@ -169,14 +151,9 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     // viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
-      // force restate every second to refresh all timers/indicators, even when loading has stopped
-      updateState();
-    });
-
     isStopped = false;
-    _startedAt = DateTime.now().millisecondsSinceEpoch;
+
+    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     updateState();
 
@@ -198,13 +175,10 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   void killLoading(List<String> reason) {
     disposables();
 
-    _total = 0;
-    _received = 0;
+    _total.value = 0;
+    _received.value = 0;
 
-    _prevReceivedAmount = 0;
-    _lastReceivedAmount = 0;
-    _lastReceivedTime = 0;
-    _startedAt = 0;
+    _startedAt.value = 0;
 
     isFromCache = false;
     isStopped = true;
@@ -218,6 +192,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   @override
   void dispose() {
     disposables();
+    viewerHandler.removeViewed(widget.key);
     super.dispose();
   }
 
@@ -243,11 +218,6 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     //   }
     // });
 
-    _debounceBytes?.cancel();
-    _checkInterval?.cancel();
-
-    appbarListener?.cancel();
-
     noScaleListener?.cancel();
 
     if (!(_dioCancelToken.isCancelled)){
@@ -262,15 +232,16 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
     // manual zoom || double tap || double tap AFTER double tap
     isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
-    updateState();
+    viewerHandler.setZoomed(widget.key, isZoomed);
   }
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
   }
 
   void resetZoom() {
+    // Don't zoom until image is loaded
+    if(mainProvider == null) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
-    updateState();
   }
 
   void scrollZoomImage(double value) {
@@ -290,247 +261,23 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   void doubleTapZoom() {
+    if(mainProvider == null) return;
     scaleController.scaleState = PhotoViewScaleState.covering;
-    updateState();
-  }
-
-  Widget zoomButtonBuild() {
-    if(isZoomButtonVisible && mainProvider != null) {
-      return Positioned(
-        bottom: 180,
-        right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
-        left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: Get.theme.colorScheme.secondary.withOpacity(0.33),
-            minimumSize: Size(28, 28),
-            padding: EdgeInsets.all(3),
-          ),
-          child: Icon(
-            isZoomed ? Icons.zoom_out : Icons.zoom_in,
-            size: 28,
-            color: Get.theme.colorScheme.onSecondary
-          ),
-          onPressed: isZoomed ? resetZoom : doubleTapZoom,
-        )
-      );
-    } else {
-      return const SizedBox();
-    }
-  }
-
-  Widget loadingElementBuilder(BuildContext ctx, ImageChunkEvent? loadingProgress) {
-    if(settingsHandler.shitDevice) {
-      if(settingsHandler.loadingGif) {
-        return Center(child: Image(image: AssetImage('assets/images/loading.gif')));
-      } else {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-          )
-        );
-      }
-    }
-
-
-    bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (_total > 0);
-    int expectedBytes = hasProgressData
-        ? _received
-        : 0;
-    int totalBytes = hasProgressData
-        ? _total
-        : 0;
-
-    double speedCheckInterval = 1000 / 4;
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    if((nowMils - _lastReceivedTime) > speedCheckInterval && hasProgressData) {
-      _prevReceivedAmount = _lastReceivedAmount;
-      _lastReceivedAmount = expectedBytes;
-
-      _lastReceivedTime = nowMils;
-    }
-
-    double? percentDone = hasProgressData ? (expectedBytes / totalBytes) : null;
-    String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
-    String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
-
-    int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
-    String expectedSpeedText = (hasProgressData && percentDone! < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
-    double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone! < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
-    int sinceStart = Duration(milliseconds: nowMils - _startedAt).inSeconds;
-    String sinceStartText = 'Started ${sinceStart.toString()} second${sinceStart == 1 ? '' : 's'} ago';
-
-    String percentDoneText = hasProgressData
-        ? ((percentDone == 1 || mainProvider != null) ? '${isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...' : '${(percentDone! * 100).toStringAsFixed(2)}%')
-        : 'Loading${isFromCache ? ' from cache' : ''}...';
-    String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
-
-    bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.booruItem.isHated.value;
-
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: 6,
-            child: RotatedBox(
-              quarterTurns: -1,
-              child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                backgroundColor: Colors.transparent,
-                value: percentDone
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(padding: EdgeInsets.fromLTRB(10, 10, 10, 30), child: Column(
-              // move loading info lower if preview is of sample quality (except when item is hated)
-              mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
-              children: isStopped
-                ? [
-                    ...stopReason.map((reason){
-                      return BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          reason,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        )
-                      );
-                    }),
-                    TextButton.icon(
-                      icon: Icon(Icons.play_arrow, size: 44, color: Colors.blue),
-                      label: BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          widget.booruItem.isHated.value ? 'Load Anyway' : 'Restart Loading',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                          ),
-                        )
-                      ),
-                      onPressed: () {
-                        initViewer(true);
-                      },
-                    ),
-                    if(isMovedBelow) const SizedBox(height: 60),
-                  ]
-                : (settingsHandler.loadingGif
-                  ? [
-                    Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
-                    const SizedBox(height: 30),
-                  ]
-                  : [
-                    if(percentDoneText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          percentDoneText,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(filesizeText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          filesizeText,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(expectedSpeedText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          expectedSpeedText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(expectedTimeText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          expectedTimeText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(sinceStartText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          sinceStartText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    const SizedBox(height: 10),
-                    TextButton.icon(
-                      icon: Icon(Icons.stop, size: 44, color: Colors.red),
-                      label: BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          'Stop Loading',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.red,
-                          ),
-                        )
-                      ),
-                      onPressed: () {
-                        killLoading(['Stopped by User']);
-                      },
-                    ),
-                    if(isMovedBelow) const SizedBox(height: 60),
-                  ]
-                )
-            ))
-          ),
-          SizedBox(
-            width: 6,
-            child: RotatedBox(
-              quarterTurns: percentDone != null ? -1 : 1,
-              child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                backgroundColor: Colors.transparent,
-                value: percentDone
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget build(BuildContext context) {
     final bool isViewed = settingsHandler.appMode == 'Mobile'
       ? widget.searchGlobal.viewedIndex.value == widget.index
       : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
+
     if (!isViewed) {
       // reset zoom if not viewed
       resetZoom();
+    } else {
+      viewerHandler.setCurrent(widget.key);
     }
 
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    int sinceStart = nowMils - _startedAt;
-    bool showLoading = isViewed && sinceStart > 500;
-    // delay showing loading info a bit, so we don't clutter interface for fast loading files
+    // print('!!! Build media !!!');
 
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
@@ -540,11 +287,23 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
           alignment: Alignment.center,
           children: [
             CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-            AnimatedOpacity(
-              duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300),
-              curve: Curves.linear,
-              opacity: showLoading ? 1 : 0,
-              child: loadingElementBuilder(context, null),
+            LoadingElement(
+              item: widget.booruItem,
+              hasProgress: true,
+              isFromCache: isFromCache,
+              isDone: mainProvider != null,
+              isStopped: isStopped,
+              stopReasons: stopReason,
+              isViewed: isViewed,
+              total: _total,
+              received: _received,
+              startedAt: _startedAt,
+              startAction: () {
+                initViewer(true);
+              },
+              stopAction: () {
+                killLoading(['Stopped by User']);
+              },
             ),
             AnimatedSwitcher(
               child: mainProvider != null
@@ -566,16 +325,12 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                       basePosition: Alignment.center,
                       controller: viewController,
                       // tightMode: true,
-                      // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.viewedIndex == widget.index ? '' : 'ignore') + widget.index.toString()),
                       scaleStateController: scaleController,
-                      // loadingBuilder: loadingElementBuilder,
                     )
                   )
                 : null,
               duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300)
             ),
-
-            zoomButtonBuild(),
           ]
         )
       )

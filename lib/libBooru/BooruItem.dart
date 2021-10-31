@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:LoliSnatcher/Tools.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class BooruItem{
+  late Key key;
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
   String? mediaType;
@@ -39,6 +41,9 @@ class BooruItem{
     this.postDate,
     this.postDateFormat,
   }){
+    // Create a unique key for every loaded item, to later use them to read the state of their viewer
+    key = GlobalKey();
+
     if (this.sampleURL.isEmpty || this.sampleURL == "null"){
       this.sampleURL = this.thumbnailURL;
     }

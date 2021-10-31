@@ -2,8 +2,6 @@ import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
-import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:get/get.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter/widgets.dart';
@@ -11,11 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
+import 'package:LoliSnatcher/widgets/DioDownloader.dart';
+import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 
 
 class CachedThumbBetter extends StatefulWidget {
@@ -33,11 +34,12 @@ class CachedThumbBetter extends StatefulWidget {
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
   final SettingsHandler settingsHandler = Get.find();
 
-  int _total = 0, _received = 0, _restartedCount = 0, _startedAt = 0;
+  RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  int _restartedCount = 0;
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isForVideo = false;
-  Timer? _debounceBytes, _restartDelay, _debounceStart;
+  Timer? _restartDelay, _debounceStart;
   CancelToken _dioCancelToken = CancelToken();
   DioLoader? client, extraClient;
 
@@ -155,15 +157,8 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   }
 
   void _onBytesAdded(int received, int total) {
-    // always save incoming bytes, but restate only after [debounceDelay]MS
-    const int debounceDelay = 250;
-    bool isActive = _debounceBytes?.isActive ?? false;
-    _received = received;
-    _total = total;
-    if (!isActive) {
-      updateState();
-      _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
-    }
+    _received.value = received;
+    _total.value = total;
   }
 
   void _onEvent(String event) {
@@ -218,7 +213,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     //   downloadThumb();
     // }
 
-    _startedAt = DateTime.now().millisecondsSinceEpoch;
+    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     isThumbQuality = settingsHandler.previewMode == "Thumbnail" || ((widget.booruItem.mediaType == 'animation' && !settingsHandler.disableImageScaling.value && !widget.booruItem.isHated.value) || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
     thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
@@ -233,16 +228,16 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
     // delay loading a little to improve performance when scrolling fast
     if(widget.isStandalone) {
-    _debounceStart = Timer(Duration(milliseconds: 200), () {
-      if(isThumbQuality == false && !widget.booruItem.isHated.value) {
-        Future.wait([
-          downloadThumb(false),
-          downloadThumb(true)
-        ]);
-      } else {
-        downloadThumb(true);
-      }
-    });
+      _debounceStart = Timer(Duration(milliseconds: 200), () {
+        if(isThumbQuality == false && !widget.booruItem.isHated.value) {
+          Future.wait([
+            downloadThumb(false),
+            downloadThumb(true)
+          ]);
+        } else {
+          downloadThumb(true);
+        }
+      });
     } else {
       if(isThumbQuality == false && !widget.booruItem.isHated.value) {
         Future.wait([
@@ -265,9 +260,9 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   void restartLoading() {
     disposables();
 
-    _total = 0;
-    _received = 0;
-    _startedAt = 0;
+    _total.value = 0;
+    _received.value = 0;
+    _startedAt.value = 0;
 
     isFromCache = null;
 
@@ -314,7 +309,6 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     extraProvider = null;
 
     _restartDelay?.cancel();
-    _debounceBytes?.cancel();
     _debounceStart?.cancel();
 
     if (!(_dioCancelToken.isCancelled)){
@@ -323,101 +317,9 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     disposeClients(null);
   }
 
-  Widget loadingElementBuilder(BuildContext ctx, Widget? child, ImageChunkEvent? loadingProgress) {
-    // if (loadingProgress == null && !settingsHandler.thumbnailCache) {
-    //   // Resulting image for network loaded thumbnail
-    //   return child;
-    // }
-
-    if (isFailed) {
-      return Center(
-        child: InkWell(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.broken_image),
-              Text("ERROR"),
-              Text("Tap to retry!"),
-            ]
-          ),
-          onTap: () => setState(() {
-            _restartedCount = 0;
-            isFailed = false;
-            restartLoading();
-          }),
-        )
-      );
-    }
-
-    bool hasProgressData = (loadingProgress != null && loadingProgress.expectedTotalBytes != null) || (_total > 0);
-    bool isProgressFromCaching = hasProgressData && _total > 0;
-    int? expectedBytes = (hasProgressData ? (isProgressFromCaching ? _received : loadingProgress!.cumulativeBytesLoaded) : null);
-    int? totalBytes = (hasProgressData ? (isProgressFromCaching ? _total : loadingProgress!.expectedTotalBytes) : null);
-
-    double? percentDone = (hasProgressData ? expectedBytes! / totalBytes! : null);
-    // String? percentDoneText = hasProgressData
-    //     ? ((percentDone ?? 0) == 1 ? null : '${(percentDone! * 100).toStringAsFixed(2)}%')
-    //     : (isFromCache == true ? '...' : null);
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: isFromCache == false
-        ? [
-          SizedBox(
-            width: 2,
-            child: RotatedBox(
-              quarterTurns: -1,
-              child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                backgroundColor: Colors.transparent,
-                value: percentDone
-              ),
-            ),
-          ),
-
-          SizedBox(
-            width: 2,
-            child: RotatedBox(
-              quarterTurns: -1,
-              child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                backgroundColor: Colors.transparent,
-                value: percentDone
-              ),
-            ),
-          ),
-          // SizedBox(
-          //   height: 100 / widget.columnCount,
-          //   width: 100 / widget.columnCount,
-          //   child: CircularProgressIndicator(
-          //     strokeWidth: 14 / widget.columnCount,
-          //     valueColor: AlwaysStoppedAnimation<Color>(GET.Get.theme.colorScheme.secondary),
-          //     value: percentDone,
-          //   ),
-          // ),
-          // if(widget.columnCount < 5 && percentDoneText != null) // Text element overflows if too many thumbnails are shown
-          //   ...[
-          //     Padding(padding: EdgeInsets.only(bottom: 10)),
-          //     Text(
-          //       percentDoneText,
-          //       style: TextStyle(
-          //         fontSize: 12,
-          //       ),
-          //     ),
-          //   ],
-        ]
-        : [],
-    );
-  }
-
   Widget renderImages(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double iconSize = (screenWidth / widget.columnCount) * 0.55;
-
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    int sinceStart = nowMils - _startedAt;
-    bool showLoading = sinceStart > 500;
 
     return Obx(() => Stack(
       alignment: Alignment.center,
@@ -455,12 +357,21 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
           )
         ),
 
-        if(mainProvider == null && widget.isStandalone)
-          AnimatedOpacity(
-            duration: Duration(milliseconds: 200),
-            curve: Curves.linear,
-            opacity: showLoading ? 1 : 0,
-            child: loadingElementBuilder(context, null, null),
+        if(widget.isStandalone)
+          ThumbnailLoadingElement(
+            item: widget.booruItem,
+            hasProgress: true,
+            isFromCache: isFromCache,
+            isDone: mainProvider != null,
+            isFailed: isFailed,
+            total: _total,
+            received: _received,
+            startedAt: _startedAt,
+            restartAction: () {
+              _restartedCount = 0;
+              isFailed = false;
+              restartLoading();
+            },
           ),
 
         if(widget.booruItem.isHated.value)

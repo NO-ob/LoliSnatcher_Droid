@@ -4,7 +4,7 @@ import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
 enum Positions {
@@ -28,7 +28,7 @@ class FlashElements {
     bool allowInViewer = true, // should tip open when user is in viewer
     Positions position = Positions.bottom,
   }) {
-    bool inViewer = Get.find<SearchHandler>().inViewer.value;
+    bool inViewer = Get.find<ViewerHandler>().inViewer.value;
     if(!allowInViewer && inViewer) {
       return;
     }

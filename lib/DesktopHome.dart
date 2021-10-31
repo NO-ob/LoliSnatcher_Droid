@@ -36,36 +36,51 @@ class _DesktopHomeState extends State<DesktopHome> {
       appBar: AppBar(
         toolbarHeight: 60,
         actions: <Widget>[
-          if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
-            Expanded(
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  const SizedBox(width: 15),
-                  TagSearchBox(),
-                  TagSearchButton(),
-                  Expanded(child: BooruSelectorMain(true)),
-                  Expanded(child: TabBox()),
-                  Expanded(child: TabBoxButtons(false, MainAxisAlignment.start)),
-                ],
-              ),
-            ),
+          Obx(() {
+            if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+              return Expanded(
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    const SizedBox(width: 15),
+                    TagSearchBox(),
+                    TagSearchButton(),
+                    Expanded(child: BooruSelectorMain(true)),
+                    Expanded(child: TabBox()),
+                    Expanded(child: TabBoxButtons(false, MainAxisAlignment.start)),
+                  ],
+                ),
+              );
+            } else {
+              return const SizedBox();
+            }
+          }),
 
-          if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
-            IconButton(
-              icon: Icon(Icons.download),
-              onPressed: (){
-                Get.dialog(Dialog(
-                  child: Container(
-                    width: 500,
-                    child: SnatcherPage(),
-                  ),
-                ));
-              },
-            ),
+          Obx(() {
+            if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+              return IconButton(
+                icon: Icon(Icons.download),
+                onPressed: (){
+                  Get.dialog(Dialog(
+                    child: Container(
+                      width: 500,
+                      child: SnatcherPage(),
+                    ),
+                  ));
+                },
+              );
+            } else {
+              return const SizedBox();
+            }
+          }),
 
-          if (settingsHandler.booruList.isEmpty || searchHandler.list.isEmpty)
-            Center(child: Text('Add Boorus in Settings')),
+          Obx(() {
+            if (settingsHandler.booruList.isEmpty || searchHandler.list.isEmpty) {
+              return Center(child: Text('Add Boorus in Settings'));
+            } else {
+              return const SizedBox();
+            }
+          }),
 
           IconButton(
             icon: Icon(Icons.settings),
@@ -79,43 +94,41 @@ class _DesktopHomeState extends State<DesktopHome> {
             },
           ),
 
-          if(searchHandler.list.isNotEmpty)
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.save),
-                  onPressed: () {
-                    getPerms();
-                    // call a function to save the currently viewed image when the save button is pressed
-                    if (searchHandler.currentTab.selected.length > 0){
-                      snatchHandler.queue(
-                        searchHandler.currentTab.getSelected(),
-                        searchHandler.currentTab.selectedBooru.value,
-                        settingsHandler.snatchCooldown
-                      );
-                      searchHandler.currentTab.selected.value = [];
-                    } else {
-                      FlashElements.showSnackbar(
-                        context: context,
-                        title: Text(
-                          "No items selected",
-                          style: TextStyle(fontSize: 20)
-                        ),
-                        overrideLeadingIconWidget: Text(
-                          " (」°ロ°)」 ",
-                          style: TextStyle(fontSize: 18)
-                        ),
-                      );
-                    }
-                  },
-                ),
+          Obx(() {
+            if(searchHandler.list.isNotEmpty) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.save),
+                    onPressed: () {
+                      getPerms();
+                      // call a function to save the currently viewed image when the save button is pressed
+                      if (searchHandler.currentTab.selected.length > 0){
+                        snatchHandler.queue(
+                          searchHandler.currentTab.getSelected(),
+                          searchHandler.currentTab.selectedBooru.value,
+                          settingsHandler.snatchCooldown
+                        );
+                        searchHandler.currentTab.selected.value = [];
+                      } else {
+                        FlashElements.showSnackbar(
+                          context: context,
+                          title: Text(
+                            "No items selected",
+                            style: TextStyle(fontSize: 20)
+                          ),
+                          overrideLeadingIconWidget: Text(
+                            " (」°ロ°)」 ",
+                            style: TextStyle(fontSize: 18)
+                          ),
+                        );
+                      }
+                    },
+                  ),
 
-                Obx(() {
-                  if(searchHandler.currentTab.selected.isEmpty) {
-                    return const SizedBox();
-                  } else {
-                    return Positioned(
+                  if(searchHandler.currentTab.selected.isNotEmpty)
+                    Positioned(
                       child: Container(
                         width: 20,
                         height: 20,
@@ -135,11 +148,13 @@ class _DesktopHomeState extends State<DesktopHome> {
                       ),
                       right: 2,
                       bottom: 5,
-                    );
-                  }
-                })
-              ]
-            ),
+                    )
+                ]
+              );
+            } else {
+              return const SizedBox();
+            }
+          }),
 
         ],
       ),
@@ -156,21 +171,14 @@ class _DesktopHomeState extends State<DesktopHome> {
                   ),
                   Expanded(
                     flex: 1,
-                    child: Obx(() => searchHandler.list.length == 0
-                      ? Center(
-                          child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-                          )
-                        )
-                      : DesktopTagListener(searchHandler.currentTab)
-                    )
+                    child: DesktopTagListener(),
                   ),
                 ],
               ),
             ),
             Expanded(
               flex: 2,
-              child: DesktopImageListener(),
+              child: Obx(() => searchHandler.list.isEmpty ? const SizedBox() : DesktopImageListener(searchHandler.currentTab)),
             ),
           ]
         )
@@ -181,8 +189,7 @@ class _DesktopHomeState extends State<DesktopHome> {
 
 
 class DesktopTagListener extends StatefulWidget {
-  SearchGlobal searchGlobal;
-  DesktopTagListener(this.searchGlobal);
+  DesktopTagListener();
   @override
   _DesktopTagListenerState createState() => _DesktopTagListenerState();
 }
@@ -193,14 +200,22 @@ class _DesktopTagListenerState extends State<DesktopTagListener> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      if(searchHandler.list.isEmpty) {
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+          )
+        );
+      }
+
       BooruItem item = searchHandler.currentTab.currentItem.value;
 
       return Container(
-          child: TagView(item),
-          padding: EdgeInsets.all(5),
-          decoration: BoxDecoration(
-              border: Border.all(color: Get.theme.colorScheme.secondary,width: 2),
-          ),
+        child: TagView(item),
+        padding: EdgeInsets.all(5),
+        decoration: BoxDecoration(
+            border: Border.all(color: Get.theme.colorScheme.secondary,width: 2),
+        ),
       );
     });
   }

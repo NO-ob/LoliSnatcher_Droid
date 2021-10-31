@@ -134,13 +134,9 @@ class DBHandler{
     List<String> tags;
     var result;
     List<BooruItem> fetched = [];
-    String questionMarks = "?";
-    Logger.Inst().log("Searching DB for tags ${tagString}", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
+    Logger.Inst().log("Searching DB for tags $tagString", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
     if (tagString.isNotEmpty){
       tags = tagString.split(" ");
-      for (int i = 1; i < tags.length; i++){
-        questionMarks += ",?";
-      }
       /*
       var metaData = await db?.rawQuery("SELECT BooruItem.id as dbid, thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
         "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
@@ -151,7 +147,7 @@ class DBHandler{
           "SELECT BooruItem.id as dbid FROM BooruItem "
               "LEFT JOIN ImageTag on dbid = ImageTag.booruItemID "
               "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY dbid "
+              "WHERE Tag.name IN (${List.generate(tags.length, (_) => '?').join(',')}) AND isFavourite = 1 GROUP BY dbid "
               "HAVING COUNT(*) = ${tags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", tags);
     } else {
       result = await db?.rawQuery(
@@ -164,7 +160,6 @@ class DBHandler{
         return r["dbid"];
       })), mode);
       fetched.addAll(booruItems);
-
     }
     return fetched;
   }
@@ -173,12 +168,8 @@ class DBHandler{
     List<String> tags;
     var result;
     int count = 0;
-    String questionMarks = "?";
     if (tagString.isNotEmpty){
       tags = tagString.split(" ");
-      for (int i = 1; i < tags.length; i++){
-        questionMarks += ",?";
-      }
 
 
       /*
@@ -192,7 +183,7 @@ class DBHandler{
           "SELECT COUNT(*) as count FROM BooruItem "
               "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
               "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY BooruItem.id "
+              "WHERE Tag.name IN (${List.generate(tags.length, (_) => '?').join(',')}) AND isFavourite = 1 GROUP BY BooruItem.id "
               "HAVING COUNT(*) = ${tags.length}", tags);
     } else {
       result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
@@ -488,10 +479,7 @@ class DBHandler{
   //Deletes a BooruItem and its tags from the database
   void deleteItem(List<String> itemIDs) async {
     Logger.Inst().log("DBHandler deleting: $itemIDs", "DBHandler", "deleteItem", LogTypes.booruHandlerInfo);
-    String questionMarks = "?";
-    for (int i = 1; i < itemIDs.length; i++){
-      questionMarks += ",?";
-    }
+    String questionMarks = List.generate(itemIDs.length, (_) => '?').join(',');
     await db?.rawDelete("DELETE FROM BooruItem WHERE id IN ($questionMarks)", itemIDs);
     await db?.rawDelete("DELETE FROM ImageTag WHERE booruItemID IN ($questionMarks)", itemIDs);
   }

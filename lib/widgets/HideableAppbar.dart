@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
 
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 
 // import 'package:flutter/services.dart';
 
@@ -22,14 +23,15 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+
   late StreamSubscription<bool> appbarListener;
 
   @override
   void initState() {
     super.initState();
-    searchHandler.displayAppbar.value = !widget.autoHide;
-    appbarListener = searchHandler.displayAppbar.listen((bool value) {
+    viewerHandler.displayAppbar.value = !widget.autoHide;
+    appbarListener = viewerHandler.displayAppbar.listen((bool value) {
       setState(() {});
     });
   }
@@ -47,7 +49,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         duration: Duration(milliseconds: 200),
         curve: Curves.linear,
         color: Colors.transparent,
-        height: searchHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
+        height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
         child: AppBar(
           // toolbarHeight: widget.defaultHeight,
           elevation: 1, // set to zero to disable a shadow behind

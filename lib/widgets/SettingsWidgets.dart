@@ -42,12 +42,7 @@ class SettingsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: icon,
-      title: Row(children: [
-        MarqueeText(
-          text: name,
-          fontSize: 16,
-        ),
-      ]),
+      title: Text(name),
       subtitle: subtitle,
       trailing: trailingIcon,
       enabled: enabled,

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 import 'dart:async';
+
 
 import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
@@ -18,10 +18,10 @@ import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 import 'package:LoliSnatcher/widgets/LoliControls.dart';
-import 'package:LoliSnatcher/widgets/BorderedText.dart';
 
 class VideoApp extends StatefulWidget {
   final BooruItem booruItem;
@@ -36,19 +36,17 @@ class VideoApp extends StatefulWidget {
 class _VideoAppState extends State<VideoApp> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
   VideoPlayerController? _videoController;
   ChewieController? _chewieController;
 
-  StreamSubscription<bool>? appbarListener;
-
   // VideoPlayerValue _latestValue;
-  int _total = 0, _received = 0, _lastViewedIndex = -1;
-  int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0, _startedAt = 0;
-  Timer? _checkInterval, _debounceBytes;
-  bool isFromCache = false, isStopped = false, isZoomed = false, isZoomButtonVisible = true;
+  RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  int _lastViewedIndex = -1;
+  bool isFromCache = false, isStopped = false, isZoomed = false;
   List<String> stopReason = [];
 
   CancelToken? _dioCancelToken;
@@ -67,13 +65,8 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   Future<void> _downloadVideo() async {
-    _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
-      // force restate every second to refresh all timers/indicators, even when loading has stopped
-      updateState();
-    });
     isStopped = false;
-    _startedAt = DateTime.now().millisecondsSinceEpoch;
+    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     if(!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
@@ -109,7 +102,7 @@ class _VideoAppState extends State<VideoApp> {
       onDoneFile: (File file, String url) {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if(!(_videoController?.value.isInitialized ?? false)) {
+        if(!isVideoInit()) {
           initPlayer();
           updateState();
         }
@@ -123,22 +116,14 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void _onBytesAdded(int received, int total) {
-    // always save incoming bytes, but restate only after [debounceDelay]MS
-    const int debounceDelay = 50;
-    bool isActive = _debounceBytes?.isActive ?? false;
-    bool isAllowedToRestate = settingsHandler.videoCacheMode == 'Cache' || !(_videoController != null && _videoController!.value.isInitialized);
+    // bool isAllowedToRestate = settingsHandler.videoCacheMode == 'Cache' || !(_videoController != null && _videoController!.value.isInitialized);
 
-    _received = received;
-    _total = total;
+    _received.value = received;
+    _total.value = total;
     if (total > 0 && widget.booruItem.fileSize == null) {
       // set item file size if it wasn't received from api
       widget.booruItem.fileSize = total;
-      if(isAllowedToRestate) updateState();
-    }
-
-    if (!isActive) {
-      if(isAllowedToRestate) updateState();
-      _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
+      // if(isAllowedToRestate) updateState();
     }
   }
 
@@ -171,13 +156,7 @@ class _VideoAppState extends State<VideoApp> {
   @override
   void initState() {
     super.initState();
-    isZoomButtonVisible = settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop";
-    appbarListener = searchHandler.displayAppbar.listen((bool value) {
-      if (settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop") {
-        isZoomButtonVisible = value;
-      }
-      updateState();
-    });
+    viewerHandler.addViewed(widget.key);
     initVideo(false);
   }
 
@@ -202,13 +181,9 @@ class _VideoAppState extends State<VideoApp> {
   void killLoading(List<String> reason) {
     disposables();
 
-    _total = 0;
-    _received = 0;
-
-    _prevReceivedAmount = 0;
-    _lastReceivedAmount = 0;
-    _lastReceivedTime = 0;
-    _startedAt = 0;
+    _total.value = 0;
+    _received.value = 0;
+    _startedAt.value = 0;
 
     isFromCache = false;
     isStopped = true;
@@ -224,6 +199,7 @@ class _VideoAppState extends State<VideoApp> {
   @override
   void dispose() {
     disposables();
+    viewerHandler.removeViewed(widget.key);
     super.dispose();
   }
 
@@ -233,15 +209,10 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void disposables() {
-    _debounceBytes?.cancel();
-    _checkInterval?.cancel();
-
     _videoController?.setVolume(0);
     _videoController?.pause();
     _videoController?.dispose();
     _chewieController?.dispose();
-
-    appbarListener?.cancel();
 
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
@@ -255,7 +226,7 @@ class _VideoAppState extends State<VideoApp> {
     // print(scaleState);
 
     isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
-    updateState();
+    viewerHandler.setZoomed(widget.key, isZoomed);
   }
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
@@ -263,8 +234,8 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void resetZoom() {
+    if(!isVideoInit()) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
-    updateState();
   }
 
   void scrollZoomImage(double value) {
@@ -284,51 +255,31 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void doubleTapZoom() {
+    if(!isVideoInit()) return;
     viewController.scale = 2;
     // scaleController.scaleState = PhotoViewScaleState.originalSize;
-    updateState();
   }
 
-  Widget zoomButtonBuild() {
-    if(isZoomButtonVisible && (_videoController != null && _videoController!.value.isInitialized)) {
-      return Positioned(
-        bottom: 180,
-        right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
-        left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: Get.theme.colorScheme.secondary.withOpacity(0.33),
-            minimumSize: Size(28, 28),
-            padding: EdgeInsets.all(3),
-          ),
-          child: Icon(
-            isZoomed ? Icons.zoom_out : Icons.zoom_in,
-            size: 28,
-            color: Get.theme.colorScheme.onSecondary
-          ),
-          onPressed: isZoomed ? resetZoom : doubleTapZoom,
-        )
-      );
-    } else {
-      return const SizedBox();
-    }
-  }
-
-  void _updateState() {
+  void _updateVideoState() {
     // print(_videoController?.value);
     // setState(() {
     //   _latestValue = _videoController?.value;
     // });
+
     if(_chewieController == null) return;
 
-    searchHandler.isFullscreen.value = _chewieController!.isFullScreen;
+    viewerHandler.isFullscreen.value = _chewieController!.isFullScreen;
     if(widget.searchGlobal.viewedIndex.value == widget.index) {
       if(_chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
       } else {
-        ServiceHandler.setVolumeButtons(searchHandler.displayAppbar.value); // same as app bar value
+        ServiceHandler.setVolumeButtons(viewerHandler.displayAppbar.value); // same as app bar value
       }
     }
+  }
+
+  bool isVideoInit() {
+    return _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
   }
 
 
@@ -349,10 +300,7 @@ class _VideoAppState extends State<VideoApp> {
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
     await Future.wait([_videoController!.initialize()]);
-    _videoController?.addListener(_updateState);
-
-    // Stop force restating loading indicators when video is initialized
-    _checkInterval?.cancel();
+    _videoController?.addListener(_updateVideoState);
 
     // Player wrapper to allow controls, looping...
     _chewieController = ChewieController(
@@ -363,7 +311,7 @@ class _VideoAppState extends State<VideoApp> {
       looping: true,
       allowFullScreen: widget.enableFullscreen,
       showControls: true,
-      showControlsOnInitialize: searchHandler.displayAppbar.value,
+      showControlsOnInitialize: viewerHandler.displayAppbar.value,
       customControls: SafeArea(child: LoliControls()),
       // TODO safe area replaces hideable padding?
         // settingsHandler.galleryBarPosition == 'Bottom'
@@ -405,209 +353,13 @@ class _VideoAppState extends State<VideoApp> {
     updateState();
   }
 
-  /// Author: [Nani-Sore] ///
-  Widget loadingElementBuilder() {
-    if(settingsHandler.shitDevice) {
-      if(settingsHandler.loadingGif) {
-        return Center(child: Image(image: AssetImage('assets/images/loading.gif')));
-      } else {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-          )
-        );
-      }
-    }
-
-
-    bool hasProgressData = settingsHandler.mediaCache && _total > 0;
-    int expectedBytes = hasProgressData ? _received : 0;
-    int totalBytes = hasProgressData ? _total : 0;
-
-    double speedCheckInterval = 1000 / 4;
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    if((nowMils - _lastReceivedTime) > speedCheckInterval && hasProgressData) {
-      _prevReceivedAmount = _lastReceivedAmount;
-      _lastReceivedAmount = expectedBytes;
-
-      _lastReceivedTime = nowMils;
-    }
-
-    double? percentDone = hasProgressData ? (expectedBytes / totalBytes) : null;
-    String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
-    String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
-
-    int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
-    String expectedSpeedText = (hasProgressData && percentDone! < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
-    double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone! < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
-    int sinceStart = Duration(milliseconds: nowMils - _startedAt).inSeconds;
-    String sinceStartText = "Started " + sinceStart.toString() + " second${sinceStart == 1 ? '' : 's'} ago";
-
-    String percentDoneText = hasProgressData
-        ? (percentDone == 1 ? 'Rendering...' : '${(percentDone! * 100).toStringAsFixed(2)}%')
-        : '${isFromCache ? 'Loading from cache' : 'Buffering'}...';
-    String filesizeText = hasProgressData ? ('$loadedSize / $expectedSize') : '';
-
-    bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.booruItem.isHated.value;
-
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            width: 6,
-            child: RotatedBox(
-              quarterTurns: -1,
-              child: LinearProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                backgroundColor: Colors.transparent,
-                value: percentDone
-              ),
-            ),
-          ),
-          Expanded(
-            child: Padding(padding: EdgeInsets.fromLTRB(10, 10, 10, 30), child: Column(
-              // move loading info lower if preview is of sample quality (except when item is hated)
-              mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
-              children: isStopped
-                ? [
-                    ...stopReason.map((reason){
-                      return BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          reason,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        )
-                      );
-                    }),
-                    TextButton.icon(
-                      icon: Icon(Icons.play_arrow, size: 44, color: Colors.blue),
-                      label: BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          widget.booruItem.isHated.value ? 'Load Anyway' : 'Restart Loading',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                          ),
-                        )
-                      ),
-                      onPressed: () {
-                        initVideo(true);
-                        updateState();
-                      },
-                    ),
-                    if(isMovedBelow) const SizedBox(height: 60),
-                  ]
-                : (settingsHandler.loadingGif
-                  ? [
-                    Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
-                    const SizedBox(height: 30),
-                  ]
-                  : [
-                    if(percentDoneText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          percentDoneText,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(filesizeText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          filesizeText,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(expectedSpeedText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          expectedSpeedText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(expectedTimeText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          expectedTimeText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    if(sinceStartText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          sinceStartText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-                    const SizedBox(height: 10),
-                    TextButton.icon(
-                      icon: Icon(Icons.stop, size: 44, color: Colors.red),
-                      label: BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          'Stop Loading',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.red,
-                          ),
-                        )
-                      ),
-                      onPressed: () {
-                        killLoading(['Stopped by User']);
-                      },
-                    ),
-                    if(isMovedBelow) const SizedBox(height: 60),
-                  ]
-                )
-            ))
-          ),
-          SizedBox(
-            width: 6,
-            child: RotatedBox(
-              quarterTurns: percentDone != null ? -1 : 1,
-              child: LinearProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
-                  backgroundColor: Colors.transparent,
-                  value: percentDone),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     int viewedIndex = widget.searchGlobal.viewedIndex.value;
     final bool isViewed = settingsHandler.appMode == 'Mobile'
       ? widget.searchGlobal.viewedIndex.value == widget.index
       : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
-    bool initialized = _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
+    bool initialized = isVideoInit();
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     bool needsRestart = _lastViewedIndex != viewedIndex;
@@ -615,6 +367,8 @@ class _VideoAppState extends State<VideoApp> {
     if (!isViewed) {
       // reset zoom if not viewed
       resetZoom();
+    } else {
+      viewerHandler.setCurrent(widget.key);
     }
 
     if (initialized) {
@@ -627,7 +381,7 @@ class _VideoAppState extends State<VideoApp> {
           // autoplay if viewed and setting is enabled
           _videoController!.play();
         }
-        if (settingsHandler.videoAutoMute){
+        if (viewerHandler.videoAutoMute){
           _videoController!.setVolume(0);
         }
       } else {
@@ -639,50 +393,53 @@ class _VideoAppState extends State<VideoApp> {
       _lastViewedIndex = viewedIndex;
     }
 
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    int sinceStart = nowMils - _startedAt;
-    bool showLoading = isViewed && sinceStart > 500;
-    // delay showing loading info a bit, so we don't clutter interface for fast loading files
+    // print('!!! Build video mobile !!!');
 
     // TODO move controls outside of chewie, to exclude them from zoom
 
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
       child: Material(
-        child: Stack(
-          children: [
-            Listener(
-              onPointerSignal: (pointerSignal) {
-                if(pointerSignal is PointerScrollEvent) {
-                  scrollZoomImage(pointerSignal.scrollDelta.dy);
-                }
-              },
-              child: PhotoView.customChild(
-                child: initialized
-                  ? Chewie(controller: _chewieController!)
-                  : Stack(children: [
-                      CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-                      AnimatedOpacity(
-                        duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300),
-                        curve: Curves.linear,
-                        opacity: showLoading ? 1 : 0,
-                        child: loadingElementBuilder(),
-                      ),
-                    ]),
-                minScale: PhotoViewComputedScale.contained,
-                maxScale: PhotoViewComputedScale.covered * 8,
-                initialScale: PhotoViewComputedScale.contained,
-                enableRotation: false,
-                basePosition: Alignment.center,
-                controller: viewController,
-                // tightMode: true,
-                // heroAttributes: PhotoViewHeroAttributes(tag: 'imageHero' + (widget.searchGlobal.viewedIndex.value == widget.index ? '' : 'ignore') + widget.index.toString()),
-                scaleStateController: scaleController,
-              )
-            ),
-
-            zoomButtonBuild(),
-          ]
+        child: Listener(
+          onPointerSignal: (pointerSignal) {
+            if(pointerSignal is PointerScrollEvent) {
+              scrollZoomImage(pointerSignal.scrollDelta.dy);
+            }
+          },
+          child: PhotoView.customChild(
+            child: initialized
+              ? Chewie(controller: _chewieController!)
+              : Stack(children: [
+                  CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+                  LoadingElement(
+                    item: widget.booruItem,
+                    hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
+                    isFromCache: isFromCache,
+                    isDone: initialized,
+                    isStopped: isStopped,
+                    stopReasons: stopReason,
+                    isViewed: isViewed,
+                    total: _total,
+                    received: _received,
+                    startedAt: _startedAt,
+                    startAction: () {
+                      initVideo(true);
+                      updateState();
+                    },
+                    stopAction: () {
+                      killLoading(['Stopped by User']);
+                    },
+                  ),
+                ]),
+            minScale: PhotoViewComputedScale.contained,
+            maxScale: PhotoViewComputedScale.covered * 8,
+            initialScale: PhotoViewComputedScale.contained,
+            enableRotation: false,
+            basePosition: Alignment.center,
+            controller: viewController,
+            // tightMode: true,
+            scaleStateController: scaleController,
+          )
         )
       )
     );

@@ -15,6 +15,7 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/TimedProgressController.dart';
@@ -29,6 +30,7 @@ import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/widgets/ZoomButton.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
@@ -48,9 +50,10 @@ class ViewerPage extends StatefulWidget {
 }
 
 class _ViewerPageState extends State<ViewerPage> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   // PreloadPageView.PageController? controller;
   bool autoScroll = false;
@@ -78,6 +81,7 @@ class _ViewerPageState extends State<ViewerPage> {
     setState(() {
       // print("widget index: ${widget.index}");
       // print("searchglobals index: ${searchHandler.currentTab.viewedIndex.value}");
+      searchHandler.currentTab.currentItem.value = getFetched()[widget.index];
       searchHandler.currentTab.viewedIndex.value = widget.index;
     });
 
@@ -93,7 +97,7 @@ class _ViewerPageState extends State<ViewerPage> {
     BooruItem item = getFetched()[widget.index];
     bool isVideo = item.isVideo();
     bool isHated = item.isHated.value;
-    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && searchHandler.displayAppbar.value);
+    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     setVolumeListener();
   }
@@ -206,170 +210,176 @@ class _ViewerPageState extends State<ViewerPage> {
           }
         }
       },
-      child: PreloadPageView.builder( // PreloadPageView.PageView.builder(
-        preloadPagesCount: settingsHandler.preloadCount,
-        // allowImplicitScrolling: true,
-        scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
-        physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-        itemBuilder: (context, index) {
-          // String fileURL = getFetched()[index].fileURL;
-          bool isVideo = getFetched()[index].isVideo();
-          int preloadCount = settingsHandler.preloadCount;
-          bool isViewed = searchHandler.currentTab.viewedIndex.value == index;
-          bool isNear = (searchHandler.currentTab.viewedIndex.value - index).abs() <= preloadCount;
-          // print(fileURL);
-          // print('isVideo: '+isVideo.toString());
-          // Render only if viewed or in preloadCount range
+      child: Stack(children: [
+        PreloadPageView.builder( // PreloadPageView.PageView.builder(
+          preloadPagesCount: settingsHandler.preloadCount,
+          // allowImplicitScrolling: true,
+          scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
+          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+          itemBuilder: (context, index) {
+            BooruItem item = getFetched()[index];
+            // String fileURL = item.fileURL;
+            bool isVideo = item.isVideo();
+            int preloadCount = settingsHandler.preloadCount;
+            bool isViewed = searchHandler.currentTab.viewedIndex.value == index;
+            bool isNear = (searchHandler.currentTab.viewedIndex.value - index).abs() <= preloadCount;
+            // print(fileURL);
+            // print('isVideo: '+isVideo.toString());
+            // Render only if viewed or in preloadCount range
 
-          late Widget itemWidget;
-          if(isVideo) {
-            if(settingsHandler.disableVideo) {
-              itemWidget = Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
+            late Widget itemWidget;
+            if(isVideo) {
+              if(settingsHandler.disableVideo) {
+                itemWidget = Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
+              } else {
+                if(Platform.isAndroid || Platform.isIOS) {
+                  itemWidget = VideoApp(
+                    item.key,
+                    item,
+                    index,
+                    searchHandler.currentTab,
+                    true
+                  );
+                } else if(Platform.isWindows) {
+                  itemWidget = VideoAppDesktop(item.key, item, 1, searchHandler.currentTab);
+                } else { // Linux
+                  itemWidget = VideoAppPlaceholder(item: item, index: index);
+                }
+              }
             } else {
-              if(Platform.isAndroid || Platform.isIOS) {
-                itemWidget = VideoApp(
-                  null,
-                  getFetched()[index],
-                  index,
-                  searchHandler.currentTab,
-                  true
-                );
-              } else if(Platform.isWindows) {
-                itemWidget = VideoAppDesktop(null, getFetched()[index], 1, searchHandler.currentTab);
-              } else { // Linux
-                itemWidget = VideoAppPlaceholder(item: getFetched()[index], index: index);
+              itemWidget = MediaViewerBetter(
+                item.key,
+                item,
+                index,
+                searchHandler.currentTab
+              );
+            }
+
+            if (isViewed || isNear) {
+              // Cut to the size of the container, prevents overlapping
+              return ClipRect(
+                //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+                child: Stack(children: [
+                  GestureDetector(
+                    // onTapUp: (TapUpDetails tapInfo) {
+                    //   if(isVideo) return;
+                    //   // TODO WIP
+                    //   // change page if tapped on 20% of any side of the screen AND not a video
+                    //   double tapPosX = tapInfo.localPosition.dx;
+                    //   double screenWidth = MediaQuery.of(context).size.width;
+                    //   double sideThreshold = screenWidth / 5;
+
+                    //   if(tapPosX > (screenWidth - sideThreshold)) {
+                    //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                    //   } else if(tapPosX < sideThreshold) {
+                    //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                    //   }
+                    // },
+                    onLongPress: () async {
+                      print('longpress');
+                      bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
+                      viewerHandler.displayAppbar.value = newAppbarVisibility;
+
+                      if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
+                        Vibration.vibrate(duration: 10);
+                      }
+
+                      // enable volume buttons if current page is a video AND appbar is set to visible
+                      bool isVideo = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo();
+                      bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+                      ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                    },
+                    child: itemWidget,
+                  ),
+
+                  if(!(Platform.isAndroid || Platform.isIOS) && viewerHandler.displayAppbar.value)
+                    Container(
+                      alignment: Alignment.bottomRight,
+                      margin: EdgeInsets.all(60),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            width: 35,
+                            height: 35,
+                            margin: EdgeInsets.all(10),
+                            child: FloatingActionButton(
+                              heroTag: 'prevArrow-$index',
+                              onPressed: () {
+                                if((index - 1) >= 0) {
+                                  controller!.animateToPage(
+                                      controller!.page!.toInt() - 1,
+                                      duration: Duration(milliseconds: 400),
+                                      curve: Curves.linear
+                                  );
+                                }
+                              },
+                              child: Icon(Icons.arrow_left),
+                              backgroundColor: Get.context!.theme.colorScheme.secondary,
+                            ),
+                          ),
+                          Container(
+                            width: 35,
+                            height: 35,
+                            margin: EdgeInsets.all(10),
+                            child: FloatingActionButton(
+                              heroTag: 'nextArrow-$index',
+                              onPressed: () {
+                                if((index + 1) < getFetched().length) {
+                                  controller!.animateToPage(
+                                      controller!.page!.toInt() + 1,
+                                      duration: Duration(milliseconds: 400),
+                                      curve: Curves.linear
+                                  );
+                                }
+                              },
+                              child: Icon(Icons.arrow_right),
+                              backgroundColor: Get.context!.theme.colorScheme.secondary,
+                            ),
+                          ),
+                        ],
+                      )
+                    ),
+                ])
+              );
+            } else {
+              return Container(
+                color: Colors.black,
+              );
+            }
+          },
+          controller: controller,
+          onPageChanged: (int index) {
+            // rehide system ui on every page change
+            ServiceHandler.disableSleep();
+            if(settingsHandler.hideSystemUIinViewer.value) SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+
+            setState(() {
+              searchHandler.currentTab.currentItem.value = getFetched()[index];
+              searchHandler.currentTab.viewedIndex.value = index;
+              kbFocusNode.requestFocus();
+            });
+
+            if(autoScroll) {
+              if((autoScrollTimer?.isActive == true)) {
+                // reset slideshow timer if user scrolled earlier
+                // TODO bug: progress animation lags for a few frames when scroll is automatic
+                unsetScrollTimer();
+                setScrollTimer();
               }
             }
-          } else {
-            itemWidget = MediaViewerBetter(
-              null,
-              getFetched()[index],
-              index,
-              searchHandler.currentTab
-            );
-          }
 
-          if (isViewed || isNear) {
-            // Cut to the size of the container, prevents overlapping
-            return ClipRect(
-              //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
-              child: Stack(children: [
-                GestureDetector(
-                  // onTapUp: (TapUpDetails tapInfo) {
-                  //   if(isVideo) return;
-                  //   // TODO WIP
-                  //   // change page if tapped on 20% of any side of the screen AND not a video
-                  //   double tapPosX = tapInfo.localPosition.dx;
-                  //   double screenWidth = MediaQuery.of(context).size.width;
-                  //   double sideThreshold = screenWidth / 5;
+            // enable volume buttons if new page is a video AND appbar is visible
+            bool isVideo = getFetched()[index].isVideo();
+            bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
+            ServiceHandler.setVolumeButtons(isVolumeAllowed);
+            // print('Page changed ' + index.toString());
+          },
+          itemCount: getFetched().length,
+        ),
 
-                  //   if(tapPosX > (screenWidth - sideThreshold)) {
-                  //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                  //   } else if(tapPosX < sideThreshold) {
-                  //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                  //   }
-                  // },
-                  onLongPress: () async {
-                    print('longpress');
-                    bool newAppbarVisibility = !searchHandler.displayAppbar.value;
-                    searchHandler.displayAppbar.value = newAppbarVisibility;
-
-                    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-                      Vibration.vibrate(duration: 10);
-                    }
-
-                    // enable volume buttons if current page is a video AND appbar is set to visible
-                    bool isVideo = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo();
-                    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-                    ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                  },
-                  child: itemWidget,
-                ),
-
-                if(!(Platform.isAndroid || Platform.isIOS) && searchHandler.displayAppbar.value)
-                  Container(
-                    alignment: Alignment.bottomRight,
-                    margin: EdgeInsets.all(60),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          width: 35,
-                          height: 35,
-                          margin: EdgeInsets.all(10),
-                          child: FloatingActionButton(
-                            heroTag: 'prevArrow-$index',
-                            onPressed: () {
-                              if((index - 1) >= 0) {
-                                controller!.animateToPage(
-                                    controller!.page!.toInt() - 1,
-                                    duration: Duration(milliseconds: 400),
-                                    curve: Curves.linear
-                                );
-                              }
-                            },
-                            child: Icon(Icons.arrow_left),
-                            backgroundColor: Get.context!.theme.colorScheme.secondary,
-                          ),
-                        ),
-                        Container(
-                          width: 35,
-                          height: 35,
-                          margin: EdgeInsets.all(10),
-                          child: FloatingActionButton(
-                            heroTag: 'nextArrow-$index',
-                            onPressed: () {
-                              if((index + 1) < getFetched().length) {
-                                controller!.animateToPage(
-                                    controller!.page!.toInt() + 1,
-                                    duration: Duration(milliseconds: 400),
-                                    curve: Curves.linear
-                                );
-                              }
-                            },
-                            child: Icon(Icons.arrow_right),
-                            backgroundColor: Get.context!.theme.colorScheme.secondary,
-                          ),
-                        ),
-                      ],
-                    )
-                  ),
-              ])
-            );
-          } else {
-            return Container(
-              color: Colors.black,
-            );
-          }
-        },
-        controller: controller,
-        onPageChanged: (int index) {
-          // rehide system ui on every page change
-          ServiceHandler.disableSleep();
-          if(settingsHandler.hideSystemUIinViewer.value) SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-
-          setState(() {
-            searchHandler.currentTab.viewedIndex.value = index;
-            kbFocusNode.requestFocus();
-          });
-
-          if(autoScroll) {
-            if((autoScrollTimer?.isActive == true)) {
-              // reset slideshow timer if user scrolled earlier
-              // TODO bug: progress animation lags for a few frames when scroll is automatic
-              unsetScrollTimer();
-              setScrollTimer();
-            }
-          }
-
-          // enable volume buttons if new page is a video AND appbar is visible
-          bool isVideo = getFetched()[index].isVideo();
-          bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && searchHandler.displayAppbar.value);
-          ServiceHandler.setVolumeButtons(isVolumeAllowed);
-          // print('Page changed ' + index.toString());
-        },
-        itemCount: getFetched().length,
-      ),
+        ZoomButton(),
+      ])
     );
   }
 
@@ -681,51 +691,59 @@ class _ViewerPageState extends State<ViewerPage> {
     buttonList.forEach((value) {
       actions.add(buildIconButton(value[0], true));
     });
+    // TODO zoom button for testing, but maybe make it a real option?
+    // actions.add(Obx(() => IconButton(
+    //   icon: Icon(Get.find<ViewerHandler>().isZoomed.value ? Icons.zoom_out : Icons.zoom_in),
+    //   color: Colors.white,
+    //   onPressed: () {
+    //     Get.find<ViewerHandler>().toggleZoom();
+    //   },
+    // )));
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
 
       actions.add(PopupMenuButton(
-          icon: Stack(
-            alignment: Alignment.center,
-            children: [
-              if(autoScroll && isAutoscrollOverflowed)
-                RestartableProgressIndicator(
-                  controller: autoScrollProgressController!,
-                ),
-
-              Icon(
-                Icons.more_vert,
-                color: Colors.white,
+        icon: Stack(
+          alignment: Alignment.center,
+          children: [
+            if(autoScroll && isAutoscrollOverflowed)
+              RestartableProgressIndicator(
+                controller: autoScrollProgressController!,
               ),
-            ]
-          ),
-          itemBuilder: (BuildContext itemBuilder) =>
-              overFlowList.map((value) =>
-                  PopupMenuItem(
-                      padding: EdgeInsets.all(0), // remove empty space around the button
-                      child: SizedBox(
-                          width: double.infinity, // force button to take full width
-                          child: ListTile(
-                              onLongPress: () {
-                                buttonHold(value[0]);
-                              },
-                              onTap: () {
-                                Navigator.of(context).pop(); // remove overflow menu
-                                buttonClick(value[0]);
-                              },
-                              // style: ButtonStyle(
-                              //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
-                              //     alignment: Alignment.centerLeft,
-                              //     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
-                              // ),
-                              leading: buildIconButton(value[0], false),
-                              title: Text(buttonText(value))
-                          )
-                      ),
-                      value: value[0]
-                  )
-              ).toList()
+
+            Icon(
+              Icons.more_vert,
+              color: Colors.white,
+            ),
+          ]
+        ),
+        itemBuilder: (BuildContext itemBuilder) =>
+          overFlowList.map((value) =>
+            PopupMenuItem(
+              padding: EdgeInsets.all(0), // remove empty space around the button
+              child: SizedBox(
+                width: double.infinity, // force button to take full width
+                child: ListTile(
+                  onLongPress: () {
+                    buttonHold(value[0]);
+                  },
+                  onTap: () {
+                    Navigator.of(context).pop(); // remove overflow menu
+                    buttonClick(value[0]);
+                  },
+                  // style: ButtonStyle(
+                  //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
+                  //     alignment: Alignment.centerLeft,
+                  //     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
+                  // ),
+                  leading: buildIconButton(value[0], false),
+                  title: Text(buttonText(value))
+                )
+              ),
+              value: value[0]
+            )
+          ).toList()
       ));
     }
     return actions;

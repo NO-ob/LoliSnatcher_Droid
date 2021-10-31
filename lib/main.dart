@@ -15,12 +15,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/DesktopHome.dart';
 import 'package:LoliSnatcher/MobileHome.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 
 
@@ -44,6 +43,7 @@ class _MainAppState extends State<MainApp> {
   late final SettingsHandler settingsHandler;
   late final SearchHandler searchHandler;
   late final SnatchHandler snatchHandler;
+  late final ViewerHandler viewerHandler;
   int maxFps = 60;
 
   @override
@@ -53,6 +53,7 @@ class _MainAppState extends State<MainApp> {
     settingsHandler.initialize();
     searchHandler = Get.put(SearchHandler(updateState));
     snatchHandler = Get.put(SnatchHandler());
+    viewerHandler = Get.put(ViewerHandler());
 
     if(Platform.isAndroid || Platform.isIOS) {
       var window = WidgetsBinding.instance!.window;
@@ -274,14 +275,14 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    restoreTabs();
+    searchHandler.restoreTabs();
 
     // force cache clear every minute + perform tabs backup
     cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
       // TODO we don't need to clear cache so much, since all images are cleared on dispose
       // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
-      backupTabs();
+      searchHandler.backupTabs();
     });
 
     imageWriter.clearStaleCache();
@@ -319,110 +320,6 @@ class _HomeState extends State<Home> {
     cacheStaleTimer?.cancel();
     memeTimer?.cancel();
     super.dispose();
-  }
-
-  // special strings used to separate parts of tab backup string
-  // tab - separates info parts about tab itself, list - separates tabs list entries
-  final String tabDivider = '|||', listDivider = '~~~';
-
-  // Restores tabs from a string saved in DB
-  void restoreTabs() async {
-    List<String> result = await settingsHandler.dbHandler.getTabRestore();
-    List<SearchGlobal> restoredGlobals = [];
-
-    bool foundBrokenItem = false;
-    int newIndex = 0;
-    if(result.length == 2) {
-      // split list into tabs
-      List<String> splitInput = result[1].split(listDivider);
-      splitInput.asMap().forEach((int index, String str){
-        // split tab into booru name and tags
-        List<String> booruAndTags = str.split(tabDivider);
-        // check for parsing errors
-        bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
-        if(isEntryValid) {
-          // find booru by name and create searchglobal with given tags
-          Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
-          if(findBooru.name != null) {
-            restoredGlobals.add(SearchGlobal(findBooru.obs, null, booruAndTags[1]));
-          } else {
-            foundBrokenItem = true;
-            restoredGlobals.add(SearchGlobal(settingsHandler.booruList[0].obs, null, booruAndTags[1]));
-          }
-
-          // check if tab was marked as selected and set current selected index accordingly 
-          if(booruAndTags.length == 3 && booruAndTags[2] == 'selected') { // if split has third item (selected) - set as current tab
-            newIndex = index;
-          }
-        } else {
-          foundBrokenItem = true;
-        }
-      });
-    }
-
-    searchHandler.isRestored.value = true;
-
-    // set parsed tabs OR set first default tab if nothing to restore
-    if(restoredGlobals.length > 0) {
-      FlashElements.showSnackbar(
-        context: context,
-        title: Text(
-          "Tabs restored",
-          style: TextStyle(fontSize: 20)
-        ),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Restored ${restoredGlobals.length} tab${restoredGlobals.length == 1 ? '' : 's'} from previous session!'),
-
-            if(foundBrokenItem)
-              // notify user if there was unknown booru or invalid entry in the list
-              ...[
-                Text('Some restored tabs had unknown boorus or broken characters.'),
-                Text('They were set to default or ignored.')
-              ],
-          ],
-        ),
-        sideColor: foundBrokenItem ? Colors.yellow : Colors.green,
-        leadingIcon: foundBrokenItem ? Icons.warning_amber: Icons.settings_backup_restore,
-      );
-
-      searchHandler.list.value = restoredGlobals;
-      searchHandler.changeTabIndex(newIndex);
-    } else {
-      Booru defaultBooru = Booru(null, null, null, null, null);
-      // settingsHandler.getBooru();
-      // Set the default booru and tags at the start
-      print('BOORULIST ${settingsHandler.booruList.isNotEmpty}');
-      if (settingsHandler.booruList.isNotEmpty) {
-        defaultBooru = settingsHandler.booruList[0];
-      }
-      if(defaultBooru.type != null) searchHandler.list.add(SearchGlobal(defaultBooru.obs, null, settingsHandler.defTags));
-      searchHandler.searchTextController.text = settingsHandler.defTags;
-    }
-    setState(() { });
-  }
-
-  // Saves current tabs list to DB
-  void backupTabs() {
-    // if there are only one tab - check that its not with default booru and tags
-    // if there are more than 1 tab or check return false - start backup
-    List<SearchGlobal> tabList = searchHandler.list;
-    int tabIndex = searchHandler.index.value;
-    bool onlyDefaultTab = tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
-    if(!onlyDefaultTab && settingsHandler.booruList.isNotEmpty) {
-      final List<String> dump = tabList.map((tab) {
-        String booruName = tab.selectedBooru.value.name ?? 'unknown';
-        String tabTags = tab.tags;
-        String selected = tab == tabList[tabIndex] ? 'selected' : 'tab'; // 'tab' to always have controlled end of the string, to avoid broken strings (see kaguya anime full name as example)
-        return '$booruName$tabDivider$tabTags$tabDivider$selected'; // booruName|searchTags|selected (last only if its the current tab)
-      }).toList();
-      // TODO small indicator somewhere when tabs are saved?
-      final String restoreString = dump.join(listDivider);
-      settingsHandler.dbHandler.addTabRestore(restoreString);
-    } else {
-      settingsHandler.dbHandler.clearTabRestore();
-    }
   }
 
   @override

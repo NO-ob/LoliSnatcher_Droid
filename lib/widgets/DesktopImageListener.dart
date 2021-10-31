@@ -1,8 +1,6 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
-import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
-import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -11,8 +9,12 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
+import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
+import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
+import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 
 /** This class will listen for the value of currentItem in searchGlobals
  * It will return an empty container if that item has no file URL.
@@ -20,31 +22,35 @@ import 'package:LoliSnatcher/widgets/VideoApp.dart';
  *
  */
 class DesktopImageListener extends StatefulWidget {
-  DesktopImageListener();
+  final SearchGlobal searchGlobal;
+  DesktopImageListener(this.searchGlobal);
   @override
   _DesktopImageListenerState createState() => _DesktopImageListenerState();
 }
 
 class _DesktopImageListenerState extends State<DesktopImageListener> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
-  bool isFullScreen = false;
+  late BooruItem currentItem;
+  StreamSubscription? itemListener;
 
-  // TODO fix duplicate exception
-  GlobalKey mediaStateKey = GlobalKey();
-  GlobalKey videoStateKey = GlobalKey();
+  Timer? itemDelay;
+  bool isDelayed = false;
+
+  // TODO fix key duplicate exception when entering exiting fullscreen
 
   //This function decides what media widget to return
-  Widget getImageWidget(BooruItem value){
+  Widget getImageWidget(BooruItem value) {
     if (!value.isVideo()) {
-      return MediaViewerBetter(mediaStateKey, value, 1, searchHandler.currentTab);
+      return MediaViewerBetter(value.key, value, 1, searchHandler.currentTab);
     } else {
       if (Platform.isAndroid || Platform.isIOS) {
-        return VideoApp(videoStateKey, value, 1, searchHandler.currentTab, true);
-      } else if(Platform.isWindows) {
-        return VideoAppDesktop(videoStateKey, value, 1, searchHandler.currentTab);
+        return VideoApp(value.key, value, 1, searchHandler.currentTab, true);
+      } else if(Platform.isWindows || Platform.isLinux) {
+        return VideoAppDesktop(value.key, value, 1, searchHandler.currentTab);
       } else {
         return VideoAppPlaceholder(item: value, index: 1);
       }
@@ -52,24 +58,66 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    updateListener();
+  }
+
+  @override
+  void didUpdateWidget(DesktopImageListener oldWidget) {
+    // force redraw on tab change
+    if(oldWidget.searchGlobal != widget.searchGlobal) {
+      updateListener();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void updateListener() {
+    // listen to changes of selected item
+    itemListener?.cancel();
+    currentItem = widget.searchGlobal.currentItem.value;
+    itemListener = widget.searchGlobal.currentItem.listen((BooruItem newItem) {
+      // because all items have unique globalkey, we need to force full recreation of widget by adding a small delay between builds
+      isDelayed = true;
+      updateState();
+      currentItem = newItem;
+      itemDelay = Timer(Duration(milliseconds: 50), () {
+        isDelayed = false;
+        updateState();
+      });
+    });
+  }
+
+  void updateState() {
+    if(this.mounted) {
+      setState(() { });
+    }
+  }
+
+  @override
+  void dispose() {
+    itemDelay?.cancel();
+    itemListener?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      // while restoring tabs
-      // if(searchHandler.list.isEmpty && !searchHandler.isRestored.value) {
-      if(searchHandler.list.isEmpty) {
-        return const SizedBox();
-      }
+    if(searchHandler.list.isEmpty) {
+      return const SizedBox();
+    }
 
-      BooruItem item = searchHandler.currentTab.currentItem.value;
+    if (currentItem.fileURL == "") {
+      return const SizedBox();
+    }
 
-      if (item.fileURL == "") {
-        return const SizedBox();
-      }
+    Widget itemWidget = isDelayed ? const SizedBox() : getImageWidget(currentItem);
 
-      Widget itemWidget = getImageWidget(item);
+    return Stack(
+      children: [
+        if(!viewerHandler.isDesktopFullscreen.value)
+          itemWidget,
 
-      return Stack(children: [
-        Container(child: isFullScreen ? const SizedBox() : itemWidget),
         Container(
           alignment: Alignment.topRight,
           child:Column(
@@ -81,7 +129,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                 child: FloatingActionButton(
                   onPressed: () {
                     snatchHandler.queue(
-                      [item],
+                      [currentItem],
                       searchHandler.currentTab.selectedBooru.value,
                       0
                     );
@@ -96,14 +144,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                 margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: FloatingActionButton(
                   onPressed: () {
-                    if(item.isFavourite.value != null) {
+                    if(currentItem.isFavourite.value != null) {
                       setState(() {
-                        item.isFavourite.toggle();
-                        settingsHandler.dbHandler.updateBooruItem(item, "local");
+                        currentItem.isFavourite.toggle();
+                        settingsHandler.dbHandler.updateBooruItem(currentItem, "local");
                       });
                     }
                   },
-                  child: Obx(() => Icon(item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
+                  child: Obx(() => Icon(currentItem.isFavourite.value == true ? Icons.favorite : (currentItem.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
                   backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
@@ -112,12 +160,12 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                 height: 30,
                 child: FloatingActionButton(
                   onPressed: () async {
-                    isFullScreen = true;
+                    viewerHandler.isDesktopFullscreen.value = true;
                     setState(() { });
                     await Get.dialog(
                       Stack(
                         children: [
-                          isFullScreen ? itemWidget : const SizedBox(),
+                          Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox()),
                           Container(
                               padding: EdgeInsets.all(10),
                               alignment: Alignment.topRight,
@@ -138,7 +186,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       transitionDuration: Duration(milliseconds: 200),
                       barrierColor: Colors.black,
                     );
-                    isFullScreen = false;
+                    viewerHandler.isDesktopFullscreen.value = false;
                     setState(() { });
                   },
                   child: Icon(Icons.fullscreen),
@@ -148,8 +196,8 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
             ],
           ),
         )
-      ]);
-    });
+      ]
+    );
   }
 
 }

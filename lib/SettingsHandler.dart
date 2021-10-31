@@ -36,12 +36,9 @@ class SettingsHandler extends GetxController {
   UpdateInfo? updateInfo;
   ////////////////////////////////////////////////////
 
-  // TODO move these to separate controller?
   // runtime settings vars
   bool hasHydrus = false;
   bool mergeEnabled = false;
-  bool videoAutoMute = false;
-  double videoVolume = 1;
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
