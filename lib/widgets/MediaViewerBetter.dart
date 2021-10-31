@@ -113,7 +113,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       // print('Canceled by user: $imageURL | $error');
     } else {
       killLoading(['Loading Error: $error']);
-      print('Dio request cancelled: $error');
+      // print('Dio request cancelled: $error');
     }
   }
 

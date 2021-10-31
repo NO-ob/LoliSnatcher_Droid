@@ -149,7 +149,7 @@ class _VideoAppState extends State<VideoApp> {
       // print('Canceled by user: $imageURL | $error');
     } else {
       killLoading(['Loading Error: $error']);
-      print('Dio request cancelled: $error');
+      // print('Dio request cancelled: $error');
     }
   }
 
@@ -357,7 +357,7 @@ class _VideoAppState extends State<VideoApp> {
   Widget build(BuildContext context) {
     int viewedIndex = widget.searchGlobal.viewedIndex.value;
     final bool isViewed = settingsHandler.appMode == 'Mobile'
-      ? widget.searchGlobal.viewedIndex.value == widget.index
+      ? viewedIndex == widget.index
       : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
     bool initialized = isVideoInit();
 

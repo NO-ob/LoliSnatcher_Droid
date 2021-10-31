@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -39,11 +38,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   Player? _videoController;
   Media? media;
 
-  Timer? _firstViewFixDelay;
-
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _lastViewedIndex = -1;
-  bool isFromCache = false, isStopped = false, firstViewFix = false, isZoomed = false;
+  bool isFromCache = false, isStopped = false, firstViewFix = false, isZoomed = false, isLoaded = false;
   List<String> stopReason = [];
 
   CancelToken? _dioCancelToken;
@@ -116,15 +113,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       onDoneFile: (File file, String url) {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if(_videoController == null) {
-          _firstViewFixDelay?.cancel();
-          _firstViewFixDelay = Timer(
-            Duration(milliseconds: 300),
-            () {
-              initPlayer();
-              updateState();
-            }
-          );
+        if(_videoController == null && !isLoaded) {
+          initPlayer();
+          updateState();
         }
       },
       cacheEnabled: settingsHandler.mediaCache,
@@ -169,7 +160,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // print('Canceled by user: $imageURL | $error');
     } else {
       killLoading(['Loading Error: $error']);
-      print('Dio request cancelled: $error');
+      // print('Dio request cancelled: $error');
     }
   }
 
@@ -201,8 +192,6 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   void killLoading(List<String> reason) {
     disposables();
 
-    _videoController?.pause();
-    _videoController?.dispose();
     _video = null;
     media = null;
 
@@ -210,6 +199,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     _received.value = 0;
     _startedAt.value = 0;
 
+    isLoaded = false;
     isFromCache = false;
     isStopped = true;
     stopReason = reason;
@@ -234,8 +224,6 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   void disposables() {
-    _firstViewFixDelay?.cancel();
-
     // _videoController?.setVolume(0);
     _videoController?.pause();
     _videoController?.dispose();
@@ -290,7 +278,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // Start from cache if was already cached or only caching is allowed
       media = Media.file(
         _video!,
-        startTime: Duration(milliseconds: 100),
+        startTime: Duration(milliseconds: 50),
       );
     } else {
       // Otherwise load from network
@@ -298,9 +286,11 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       media = Media.network(
         widget.booruItem.fileURL,
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
-        startTime: Duration(milliseconds: 100),
+        startTime: Duration(milliseconds: 50),
       );
     }
+    isLoaded = true;
+
     _videoController!.open(
       media!,
       autoStart: settingsHandler.autoPlayEnabled,
@@ -312,30 +302,36 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // Start from cache if was already cached or only caching is allowed
       media = Media.file(
         _video!,
-        startTime: Duration(milliseconds: 100),
+        // move start a bit forward to help avoid playback start issues
+        startTime: Duration(milliseconds: 50),
       );
     } else {
       // Otherwise load from network
-      //print('uri: ${widget.booruItem.fileURL}');
+      // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
-        startTime: Duration(milliseconds: 100),
+        startTime: Duration(milliseconds: 50),
       );
     }
+    isLoaded = true;
+
     _videoController = Player(id: widget.index);
     _videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
     _videoController!.setVolume(viewerHandler.videoVolume);
-    _videoController!.open(
-      media!,
-      autoStart: settingsHandler.autoPlayEnabled,
-    );
+    // _videoController!.open(
+    //   media!,
+    //   autoStart: settingsHandler.autoPlayEnabled,
+    // );
 
     _videoController!.playbackStream.listen((PlaybackState state) {
       // dart_vlc has loop logic integrated into playlists, but it is not working?
       // this will force restart videos on completion
-      if(state.isCompleted && state.isPlaying) {
-        _videoController!.play();
+
+      if(state.isPlaying) {
+        if(state.isCompleted) {
+          _videoController!.play();
+        }
       }
     });
 
@@ -352,9 +348,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   Widget build(BuildContext context) {
     int viewedIndex = widget.searchGlobal.viewedIndex.value;
     final bool isViewed = settingsHandler.appMode == 'Mobile'
-      ? widget.searchGlobal.viewedIndex.value == widget.index
+      ? viewedIndex == widget.index
       : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
-    bool initialized = _videoController != null;
+    bool initialized = isLoaded; // _videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     bool needsRestart = _lastViewedIndex != viewedIndex;
@@ -373,33 +369,27 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
           _videoController!.seek(Duration.zero);
         }
 
-        // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
-        // if (settingsHandler.autoPlayEnabled) {
-        //   // autoplay if viewed and setting is enabled
-        //   // if(!firstViewFix) {
-        //   //   // crutch to fix video feed not working after changing videos
-        //   //   _firstViewFixDelay?.cancel();
-        //   //   _firstViewFixDelay = Timer(
-        //   //     Duration(milliseconds: 400),
-        //   //     () {
-        //   //       print('first view fix ${widget.booruItem.fileURL}');
-        //   //       _videoController!.seek(Duration(milliseconds: 100));
-        //   //       _videoController!.play();
-        //   //       firstViewFix = true;
-        //   //     }
-        //   //   );
-        //   // } else {
-        //     _videoController!.play();
-        //   // }
-        // } else {
-        //   _videoController!.pause();
-        // }
+        if(!firstViewFix) {
+          _videoController!.open(
+            media!,
+            autoStart: settingsHandler.autoPlayEnabled,
+          );
+          firstViewFix = true;
+        }
 
-        // if (viewerHandler.videoAutoMute){
-        //   _videoController!.setVolume(0);
-        // }
+        // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
+        if (settingsHandler.autoPlayEnabled) {
+          // autoplay if viewed and setting is enabled
+            _videoController!.play();
+        } else {
+          _videoController!.pause();
+        }
+
+        if (viewerHandler.videoAutoMute) {
+          _videoController!.setVolume(0);
+        }
       } else {
-        // _videoController!.pause();
+        _videoController!.pause();
       }
     }
 
@@ -421,8 +411,30 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             }
           },
           child: PhotoView.customChild(
-            child: initialized
-              ? Video(
+            child: Stack(children: [
+              CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+              LoadingElement(
+                item: widget.booruItem,
+                hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
+                isFromCache: isFromCache,
+                isDone: initialized && firstViewFix,
+                isStopped: isStopped,
+                stopReasons: stopReason,
+                isViewed: isViewed,
+                total: _total,
+                received: _received,
+                startedAt: _startedAt,
+                startAction: () {
+                  initVideo(true);
+                  updateState();
+                },
+                stopAction: () {
+                  killLoading(['Stopped by User']);
+                },
+              ),
+
+              if(isViewed && initialized)
+                Video(
                   player: _videoController,
                   scale: 1.0,
                   showControls: true,
@@ -431,29 +443,8 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
                   progressBarThumbColor: Get.theme.colorScheme.secondary,
                   volumeThumbColor: Get.theme.colorScheme.secondary,
                   volumeActiveColor: Get.theme.colorScheme.secondary,
-                )
-              : Stack(children: [
-                  CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-                  LoadingElement(
-                    item: widget.booruItem,
-                    hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
-                    isFromCache: isFromCache,
-                    isDone: initialized,
-                    isStopped: isStopped,
-                    stopReasons: stopReason,
-                    isViewed: isViewed,
-                    total: _total,
-                    received: _received,
-                    startedAt: _startedAt,
-                    startAction: () {
-                      initVideo(true);
-                      updateState();
-                    },
-                    stopAction: () {
-                      killLoading(['Stopped by User']);
-                    },
-                  ),
-                ]),
+                ),
+            ]),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,
