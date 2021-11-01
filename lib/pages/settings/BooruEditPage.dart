@@ -210,17 +210,18 @@ class _BooruEditState extends State<BooruEdit> {
             ),
 
             SettingsTextInput(
-              controller: booruAPIKeyController,
-              title: getApiKeyTitle(),
-              hintText: "(Can be blank)",
-              inputType: TextInputType.text,
-            ),
-            SettingsTextInput(
               controller: booruUserIDController,
               title: getUserIDTitle(),
               hintText: "(Can be blank)",
               inputType: TextInputType.text,
             ),
+            SettingsTextInput(
+              controller: booruAPIKeyController,
+              title: getApiKeyTitle(),
+              hintText: "(Can be blank)",
+              inputType: TextInputType.text,
+            ),
+            
           ],
         ),
       ),
@@ -230,7 +231,7 @@ class _BooruEditState extends State<BooruEdit> {
   String getApiKeyTitle() {
     switch (selectedBooruType) {
       case 'Sankaku':
-        return 'Login';
+        return 'Password';
       default:
         return 'API Key';
     }
@@ -239,7 +240,7 @@ class _BooruEditState extends State<BooruEdit> {
   String getUserIDTitle() {
     switch (selectedBooruType) {
       case 'Sankaku':
-        return 'Password';
+        return 'Login';
       default:
         return 'User ID';
     }

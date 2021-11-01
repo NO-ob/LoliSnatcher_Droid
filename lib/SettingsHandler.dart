@@ -1045,12 +1045,12 @@ class SettingsHandler extends GetxController {
 
     var tempBtnOrder = json["buttonOrder"];
     if(tempBtnOrder is List) {
-      print('btnorder is a list');
+      // print('btnorder is a list');
     } else if(tempBtnOrder is String) {
-      print('btnorder is a string');
+      // print('btnorder is a string');
       tempBtnOrder = tempBtnOrder.split(',');
     } else {
-      print('btnorder is a ${tempBtnOrder.runtimeType} type');
+      // print('btnorder is a ${tempBtnOrder.runtimeType} type');
       tempBtnOrder = [];
     }
     List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
@@ -1062,12 +1062,12 @@ class SettingsHandler extends GetxController {
 
     var tempHatedTags = json["hatedTags"];
     if(tempHatedTags is List) {
-      print('hatedTags is a list');
+      // print('hatedTags is a list');
     } else if(tempHatedTags is String) {
-      print('hatedTags is a string');
+      // print('hatedTags is a string');
       tempHatedTags = tempHatedTags.split(',');
     } else {
-      print('hatedTags is a ${tempHatedTags.runtimeType} type');
+      // print('hatedTags is a ${tempHatedTags.runtimeType} type');
       tempHatedTags = [];
     }
     List<String> hateTags = List<String>.from(tempHatedTags);
@@ -1079,12 +1079,12 @@ class SettingsHandler extends GetxController {
 
     var tempLovedTags = json["lovedTags"];
     if(tempLovedTags is List) {
-      print('lovedTags is a list');
+      // print('lovedTags is a list');
     } else if(tempLovedTags is String) {
-      print('lovedTags is a string');
+      // print('lovedTags is a string');
       tempLovedTags = tempLovedTags.split(',');
     } else {
-      print('lovedTags is a ${tempLovedTags.runtimeType} type');
+      // print('lovedTags is a ${tempLovedTags.runtimeType} type');
       tempLovedTags = [];
     }
     List<String> loveTags = List<String>.from(tempLovedTags);

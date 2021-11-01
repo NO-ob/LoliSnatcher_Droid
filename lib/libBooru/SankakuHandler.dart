@@ -56,7 +56,7 @@ class SankakuHandler extends BooruHandler{
     // Create a BooruItem for each post in the list
     for (int i = 0; i < parsedResponse.length; i++){
       var current = parsedResponse[i];
-      Logger.Inst().log(current.toString(), "SankakuHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
+      // Logger.Inst().log(current.toString(), "SankakuHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       List<String> tags = [];
       for (int x=0; x < current["tags"].length; x++) {
         tags.add(current["tags"][x]["name"].toString());
@@ -147,7 +147,10 @@ class SankakuHandler extends BooruHandler{
     final response = await http.post(
       uri,
       headers: {"Content-Type": "application/json", "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"},
-      body: jsonEncode({"login": booru.userID, "password": booru.apiKey}),
+      body: jsonEncode({
+        "login": booru.userID,
+        "password": booru.apiKey
+      }),
       encoding: Encoding.getByName("utf-8"),
     );
 
@@ -159,8 +162,7 @@ class SankakuHandler extends BooruHandler{
       }
     }
     if(token == "") {
-      Logger.Inst().log("Sankaku auth error", "SankakuHandler","getAuthToken", LogTypes.booruHandlerInfo);
-      Logger.Inst().log(response.statusCode.toString(), "SankakuHandler","getAuthToken", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("Sankaku auth error ${response.statusCode.toString()}", "SankakuHandler","getAuthToken", LogTypes.booruHandlerInfo);
     }
 
     return token;
