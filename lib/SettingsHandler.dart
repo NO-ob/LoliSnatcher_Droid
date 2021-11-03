@@ -39,7 +39,7 @@ class SettingsHandler extends GetxController {
   // runtime settings vars
   bool hasHydrus = false;
   bool mergeEnabled = false;
-
+  List<LogTypes> ignoreLogTypes = [];
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
   RxBool showFPS = false.obs;
@@ -580,7 +580,7 @@ class SettingsHandler extends GetxController {
     } else {
       dbHandler = DBHandler();
     }
-
+    ignoreLogTypes.addAll(LogTypes.values);
     return true;
   }
 

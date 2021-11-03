@@ -168,21 +168,14 @@ class _MobileHomeState extends State<MobileHome> {
                        child: Align(
                          alignment: FractionalOffset.bottomCenter,
                          child: Container(
-                           child: SizedBox(
-                             height: (MediaQuery.of(context).size.height * 0.35),
-                             child: DrawerHeader(
-                               margin: EdgeInsets.zero,
-                               decoration: BoxDecoration(
-                                 color: Get.theme.colorScheme.primary,
-                                 image: DecorationImage(
-                                     fit: BoxFit.cover,
-                                     image: settingsHandler.drawerMascotPathOverride.isEmpty
-                                      ? AssetImage('assets/images/drawer_icon.png')
-                                      : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
-                                 ),
-                               ),
-                               child: null,
-                             ),
+                           decoration: BoxDecoration(
+                             color: Get.theme.colorScheme.primary,
+                           ),
+                           child: Image(
+                             fit: BoxFit.contain,
+                             image: settingsHandler.drawerMascotPathOverride.isEmpty
+                                 ? AssetImage('assets/images/drawer_icon.png')
+                                 : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
                            ),
                          ),
                        ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:LoliSnatcher/pages/settings/LoggerPage.dart';
 import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
@@ -137,6 +138,11 @@ class _DebugPageState extends State<DebugPage> {
                     });
                   },
                   title: 'Enable Self Signed SSL Certificates'
+              ),
+              SettingsButton(
+                name: 'Logger',
+                icon: Icon(Icons.print),
+                page: () => LoggerPage(),
               ),
             ],
           ),
