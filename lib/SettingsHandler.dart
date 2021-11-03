@@ -42,7 +42,7 @@ class SettingsHandler extends GetxController {
   bool mergeEnabled = false;
   bool videoAutoMute = false;
   double videoVolume = 1;
-
+  List<LogTypes> ignoreLogTypes = [];
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
   RxBool showFPS = false.obs;
@@ -583,7 +583,7 @@ class SettingsHandler extends GetxController {
     } else {
       dbHandler = DBHandler();
     }
-
+    ignoreLogTypes.addAll(LogTypes.values);
     return true;
   }
 

@@ -85,7 +85,11 @@ class HydrusHandler extends BooruHandler{
             for (int i = 0; i < parsedResponse['metadata'].length; i++){
                 List<String> tagList = [];
                 var responseTags;
-                if (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags'] != null){
+                //@seniorm0ment
+                if (parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags'] != null) {
+                  responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags']['0'];
+                }
+                if(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags'] != null && responseTags == null){
                   responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'];
                 }
                 if (responseTags != null){
