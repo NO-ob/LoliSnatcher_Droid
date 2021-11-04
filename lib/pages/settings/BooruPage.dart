@@ -197,13 +197,13 @@ class _BooruPageState extends State<BooruPage> {
                           Text("Delete Booru: ${selectedBooru?.name}?"),
                         ],
                         actionButtons: [
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Cancel', style: TextStyle(color: Get.theme.colorScheme.onSurface))
+                            child: Text('Cancel')
                           ),
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () {
                               // save current and select next available booru to avoid exception after deletion
                               Booru tempSelected = selectedBooru!;

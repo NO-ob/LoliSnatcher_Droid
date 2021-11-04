@@ -5,6 +5,7 @@ import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
 import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -145,7 +146,7 @@ class SettingsPage extends StatelessWidget {
               }),
 
               SettingsButton(
-                name: "Version: ${settingsHandler.verStr}",
+                name: "Version: ${settingsHandler.verStr}+${settingsHandler.buildNumber}${kDebugMode ? '+Debug' : ''}",
                 icon: Icon(null), // to align with other items
                 action: () {
                   if(settingsHandler.isDebug.value) {

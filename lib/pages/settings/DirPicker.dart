@@ -36,14 +36,14 @@ class _DirPickerState extends State<DirPicker> {
             title: Text('Are you sure?'),
             contentItems: <Widget>[Text('Do you want to close the picker without choosing a directory?')],
             actionButtons: <Widget>[
-              TextButton(
-                child: Text('Yes', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+              ElevatedButton(
+                child: Text('Yes'),
                 onPressed: () {
                   Get.back(result: true);
                 },
               ),
-              TextButton(
-                child: Text('No', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+              ElevatedButton(
+                child: Text('No'),
                 onPressed: () {
                   Get.back(result: false);
                 },
@@ -231,14 +231,14 @@ class _DirPickerState extends State<DirPicker> {
                     ],
                   ),
                   actionButtons: <Widget>[
-                    TextButton(
-                      child: Text('Cancel', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+                    ElevatedButton(
+                      child: Text('Cancel'),
                       onPressed: () {
                         Get.back();
                       },
                     ),
-                    TextButton(
-                      child: Text('Create', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+                    ElevatedButton(
+                      child: Text('Create'),
                       onPressed: () {
                         mkdir();
                         Get.back();

@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -17,6 +16,8 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 
 /**
  * This class is used loading from and writing settings to files
@@ -31,23 +32,29 @@ class SettingsHandler extends GetxController {
   String path = "";
   String boorusPath = "";
   int SDKVer = 0;
-  String verStr = "1.8.3";
-  int verCode = 1803;
+
+  // TODO don't forget to update these on every new release
+  // version vars
+  String appName = "LoliSnatcher";
+  String verStr = "1.8.6";
+  int buildNumber = 162;
   UpdateInfo? updateInfo;
+
   ////////////////////////////////////////////////////
 
   // runtime settings vars
   bool hasHydrus = false;
   bool mergeEnabled = false;
   List<LogTypes> ignoreLogTypes = [];
+
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
   RxBool showFPS = false.obs;
   RxBool showImageStats = false.obs;
   RxBool isMemeTheme = false.obs;
-  RxBool showURLOnThumb = false.obs;
-  RxBool disableImageScaling = false.obs;
-  RxBool hideSystemUIinViewer = false.obs;
+  bool showURLOnThumb = false;
+  bool disableImageScaling = false;
+
   ////////////////////////////////////////////////////
 
   // saveable settings vars
@@ -114,6 +121,8 @@ class SettingsHandler extends GetxController {
   bool disableVideo = false;
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
+  bool showStatusBar = true;
+
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -145,7 +154,8 @@ class SettingsHandler extends GetxController {
     'customPrimaryColor', 'customAccentColor',
     'version', 'SDK', 'disableImageScaling',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
-    'drawerMascotPathOverride', 'allowSelfSignedCerts'
+    'drawerMascotPathOverride', 'allowSelfSignedCerts',
+    'showStatusBar'
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -341,9 +351,13 @@ class SettingsHandler extends GetxController {
       "type" : "bool",
       "default": false,
     },
+    "showStatusBar": {
+      "type": "bool",
+      "default": true,
+    },
     "disableImageScaling": {
-      "type": "rxbool",
-      "default": false.obs,
+      "type": "bool",
+      "default": false,
     },
 
 
@@ -1389,16 +1403,16 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
-    // String fakeUpdate = '{"version_code": 9999, "version_name": "9.9.9", "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}';
-    // String fakeUpdate = '123';
+    // String fakeUpdate = '{"version_name": "2.0.0", "build_number": 999, "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}'; // fake update json for tests
+    // String fakeUpdate = '123'; // broken string
     try {
       final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/update.json'));
       final json = jsonDecode(response.body);
       // final json = jsonDecode(fakeUpdate);
 
       updateInfo = UpdateInfo(
-        versionCode: json["version_code"] ?? 0,
         versionName: json["version_name"] ?? '0.0.0',
+        buildNumber: json["build_number"] ?? 0,
         title: json["title"] ?? '...',
         changelog: json["changelog"] ?? '...',
         isInStore: json["is_in_store"] ?? false,
@@ -1407,7 +1421,7 @@ class SettingsHandler extends GetxController {
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
 
-      if(verCode < (updateInfo?.versionCode ?? 0)) {
+      if(buildNumber < (updateInfo?.buildNumber ?? 0)) {
         if((withMessage || updateInfo!.isImportant)) {
           showUpdate();
         }
@@ -1450,9 +1464,9 @@ class SettingsHandler extends GetxController {
 
       Get.dialog(
         SettingsDialog(
-          title: Text('Update Available: ${updateInfo!.versionName}'),
+          title: Text('Update Available: ${updateInfo!.versionName}+${updateInfo!.buildNumber}'),
           contentItems: [
-            Text('Currently Installed: $verStr'),
+            Text('Currently Installed: $verStr+$buildNumber'),
             Text(''),
             Text('${updateInfo!.title}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
@@ -1462,14 +1476,14 @@ class SettingsHandler extends GetxController {
             // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
           ],
           actionButtons: [
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(Get.context!).pop(true);
               },
-              child: Text('Later', style: TextStyle(color: Get.theme.colorScheme.onSurface))
+              child: Text('Later')
             ),
             if(isFromStore && updateInfo!.isInStore)
-              TextButton.icon(
+              ElevatedButton.icon(
                 onPressed: () async {
                   // try {
                   //   ServiceHandler.launchURL("market://details?id=" + updateInfo!.storePackage);
@@ -1479,17 +1493,17 @@ class SettingsHandler extends GetxController {
                   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo!.storePackage);
                   Navigator.of(Get.context!).pop(true);
                 },
-                icon: Icon(Icons.play_arrow, color: Get.theme.colorScheme.onSurface),
-                label: Text('Visit Play Store', style: TextStyle(color: Get.theme.colorScheme.onSurface))
+                icon: Icon(Icons.play_arrow),
+                label: Text('Visit Play Store')
               )
             else
-              TextButton.icon(
+              ElevatedButton.icon(
                 onPressed: () {
                   ServiceHandler.launchURL(updateInfo!.githubURL);
                   Navigator.of(Get.context!).pop(true);
                 },
-                icon: Icon(Icons.exit_to_app, color: Get.theme.colorScheme.onSurface),
-                label: Text('Visit Releases', style: TextStyle(color: Get.theme.colorScheme.onSurface))
+                icon: Icon(Icons.exit_to_app),
+                label: Text('Visit Releases')
               ),
           ],
         ),
@@ -1517,7 +1531,17 @@ class SettingsHandler extends GetxController {
     if (allowSelfSignedCerts){
       HttpOverrides.global = MyHttpOverrides();
     }
-    checkUpdate(withMessage: false);
+
+    // if(Platform.isAndroid || Platform.isIOS) {
+    //   // TODO on desktop flutter doesnt't use version data from pubspec
+    //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    //   appName = packageInfo.appName;
+    //   verStr = packageInfo.version;
+
+    //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
+    //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
+    //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
+    // }
 
     print('isFromStore: ${EnvironmentConfig.isFromStore}');
 
@@ -1525,6 +1549,7 @@ class SettingsHandler extends GetxController {
     // print(toJSON());
     // print(jsonEncode(toJSON()));
 
+    checkUpdate(withMessage: false);
     isInit.value = true;
     return;
   }
@@ -1532,8 +1557,8 @@ class SettingsHandler extends GetxController {
 
 
 class UpdateInfo {
-  int versionCode;
   String versionName;
+  int buildNumber;
   String title;
   String changelog;
   bool isInStore;
@@ -1542,8 +1567,8 @@ class UpdateInfo {
   String githubURL;
 
   UpdateInfo({
-    required this.versionCode,
     required this.versionName,
+    required this.buildNumber,
     required this.title,
     required this.changelog,
     required this.isInStore,

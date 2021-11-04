@@ -44,15 +44,15 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
           title: Text('Are you sure?'),
           contentItems: <Widget>[Text('Do you want to stop syncing?')],
           actionButtons: <Widget>[
-            TextButton(
-              child: Text('Yes', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+            ElevatedButton(
+              child: Text('Yes'),
               onPressed: () {
                 loliSync.killSync();
                 Navigator.of(context).pop(true);
               },
             ),
-            TextButton(
-              child: Text('No', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+            ElevatedButton(
+              child: Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },

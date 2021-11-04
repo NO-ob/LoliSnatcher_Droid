@@ -75,7 +75,6 @@ class _ImagePreviewsState extends State<ImagePreviews> {
 
       // render thumbnails grid
       return Obx(() => SafeArea(
-        bottom: false,
         child: WaterfallView(
           searchHandler.currentTab,
           searchHandler.index.value

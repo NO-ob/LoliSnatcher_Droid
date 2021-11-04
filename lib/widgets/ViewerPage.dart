@@ -86,7 +86,6 @@ class _ViewerPageState extends State<ViewerPage> {
     });
 
     ServiceHandler.disableSleep();
-    if(settingsHandler.hideSystemUIinViewer.value) SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
     kbFocusNode.requestFocus();
 
     autoScrollProgressController = TimedProgressController(
@@ -180,7 +179,6 @@ class _ViewerPageState extends State<ViewerPage> {
     ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
     kbFocusNode.dispose();
     ServiceHandler.enableSleep();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     super.dispose();
   }
 
@@ -352,7 +350,6 @@ class _ViewerPageState extends State<ViewerPage> {
           onPageChanged: (int index) {
             // rehide system ui on every page change
             ServiceHandler.disableSleep();
-            if(settingsHandler.hideSystemUIinViewer.value) SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
             setState(() {
               searchHandler.currentTab.currentItem.value = getFetched()[index];

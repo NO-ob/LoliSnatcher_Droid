@@ -1,10 +1,10 @@
 {
-    "version_code": 2000,
     "version_name": "2.0.0",
+    "build_number": 163,
     "title": "Test Title",
     "changelog": "Test Changelog\r\n- Test Changelog\r\n-- Test Changelog\r\n",
-    "is_in_store": true,
+    "is_in_store": false,
     "is_important": false,
-    "store_package": "com.android.chrome",
+    "store_package": "com.noaisu.loliSnatcher",
     "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
 }

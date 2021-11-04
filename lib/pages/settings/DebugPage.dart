@@ -71,31 +71,22 @@ class _DebugPageState extends State<DebugPage> {
                 title: 'Show Image Stats'
               ),
               SettingsToggle(
-                value: settingsHandler.disableImageScaling.value,
+                value: settingsHandler.disableImageScaling,
                 onChanged: (newValue) {
                   setState(() {
-                    settingsHandler.disableImageScaling.value = newValue;
+                    settingsHandler.disableImageScaling = newValue;
                   });
                 },
                 title: "Don't scale images"
               ),
               SettingsToggle(
-                value: settingsHandler.showURLOnThumb.value,
+                value: settingsHandler.showURLOnThumb,
                 onChanged: (newValue) {
                   setState(() {
-                    settingsHandler.showURLOnThumb.value = newValue;
+                    settingsHandler.showURLOnThumb = newValue;
                   });
                 },
                 title: 'Show URL on thumb'
-              ),
-              SettingsToggle(
-                value: settingsHandler.hideSystemUIinViewer.value,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.hideSystemUIinViewer.value = newValue;
-                  });
-                },
-                title: 'Hide System UI in Viewer'
               ),
               // SettingsToggle(
               //   value: settingsHandler.isMemeTheme.value,

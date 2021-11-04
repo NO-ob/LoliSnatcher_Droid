@@ -27,6 +27,7 @@ dependencies:
   xml: ^5.3.1
   intl: ^0.17.0
   uuid: ^3.0.5
+  package_info_plus: ^1.3.0
   path_provider: ^2.0.5
   flex_color_picker: ^2.1.2
   flash: ^2.0.3

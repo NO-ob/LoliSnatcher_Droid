@@ -264,8 +264,11 @@ class _LoadingElementState extends State<LoadingElement> {
                         )
                       );
                     }),
-                    TextButton.icon(
+                    ElevatedButton.icon(
                       icon: Icon(Icons.play_arrow, size: 44, color: Colors.blue),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(Colors.black54),
+                      ),
                       label: BorderedText(
                         strokeWidth: 3,
                         child: Text(
@@ -361,11 +364,14 @@ class _LoadingElementState extends State<LoadingElement> {
 
                     const SizedBox(height: 10),
                     if(percentDone < 1)
-                      TextButton.icon(
+                      ElevatedButton.icon(
                         icon: Icon(
                           Icons.stop,
                           size: 44,
                           color: Get.theme.colorScheme.error,
+                        ),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(Colors.black54),
                         ),
                         label: BorderedText(
                           strokeWidth: 3,

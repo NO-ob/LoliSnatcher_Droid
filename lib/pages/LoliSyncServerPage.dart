@@ -21,15 +21,15 @@ class LoliSyncServerPage extends StatelessWidget {
           title: Text('Are you sure?'),
           contentItems: <Widget>[Text('Do you want to stop the server?')],
           actionButtons: <Widget>[
-            TextButton(
-              child: Text('Yes', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+            ElevatedButton(
+              child: Text('Yes'),
               onPressed: () {
                 loliSync.killServer();
                 Navigator.of(context).pop(true);
               },
             ),
-            TextButton(
-              child: Text('No', style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+            ElevatedButton(
+              child: Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },

@@ -222,7 +222,15 @@ class Preloader extends StatelessWidget {
     return Obx(() {
       if(settingsHandler.isInit.value) {        
         if(Platform.isAndroid || Platform.isIOS) {
-          // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+          // set system ui mode
+          if(settingsHandler.showStatusBar) {
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+          } else {
+            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+          }
+
           // force landscape orientation if enabled desktop mode on mobile device
           if(settingsHandler.appMode != "Mobile") {
             SystemChrome.setPreferredOrientations([

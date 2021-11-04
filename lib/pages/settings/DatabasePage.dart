@@ -140,11 +140,11 @@ class _DatabasePageState extends State<DatabasePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget cancelButton = TextButton(
+    Widget cancelButton = ElevatedButton(
       onPressed: () {
         Navigator.of(context).pop(true);
       },
-      child: Text('Cancel', style: TextStyle(color: Get.theme.colorScheme.onSurface))
+      child: Text('Cancel')
     );
 
     return WillPopScope(
@@ -218,7 +218,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       ],
                       actionButtons: [
                         cancelButton,
-                        TextButton(
+                        ElevatedButton(
                           onPressed: () {
                             serviceHandler.deleteDB(settingsHandler);
 
@@ -258,7 +258,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         ],
                         actionButtons: [
                           cancelButton,
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.clearSnatched();
@@ -300,7 +300,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         ],
                         actionButtons: [
                           cancelButton,
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.clearFavourites();
@@ -341,7 +341,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         ],
                         actionButtons: [
                           cancelButton,
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.deleteFromSearchHistory(null);

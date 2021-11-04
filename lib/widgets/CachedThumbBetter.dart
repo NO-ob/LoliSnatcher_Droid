@@ -99,7 +99,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
       return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
     }
 
-    if(settingsHandler.disableImageScaling.value) {
+    if(settingsHandler.disableImageScaling) {
       // if resizing is disabled => huge memory usage
       return MemoryImageTest(bytes, imageUrl: url);
     }
@@ -216,7 +216,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
-    final bool isGifSampleNotAllowed = widget.booruItem.mediaType == 'animation' && (settingsHandler.disableImageScaling.value ? widget.booruItem.isHated.value : true);
+    final bool isGifSampleNotAllowed = widget.booruItem.mediaType == 'animation' && (settingsHandler.disableImageScaling ? widget.booruItem.isHated.value : true);
 
     isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (isGifSampleNotAllowed || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
     thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
@@ -389,7 +389,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: Icon(CupertinoIcons.eye_slash, color: Colors.white)
           ),
 
-        if (settingsHandler.showURLOnThumb.value)
+        if (settingsHandler.showURLOnThumb)
           Container(
             color: Colors.black,
             child: Text(thumbURL),
