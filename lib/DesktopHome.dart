@@ -8,6 +8,7 @@ import 'package:LoliSnatcher/widgets/TagView.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/pages/SettingsPage.dart';
@@ -58,16 +59,11 @@ class _DesktopHomeState extends State<DesktopHome> {
 
           Obx(() {
             if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
-              return IconButton(
+              return SettingsButton(
+                name: 'Snatcher',
                 icon: Icon(Icons.download),
-                onPressed: (){
-                  Get.dialog(Dialog(
-                    child: Container(
-                      width: 500,
-                      child: SnatcherPage(),
-                    ),
-                  ));
-                },
+                iconOnly: true,
+                page: () => SnatcherPage(),
               );
             } else {
               return const SizedBox();
@@ -82,16 +78,11 @@ class _DesktopHomeState extends State<DesktopHome> {
             }
           }),
 
-          IconButton(
+          SettingsButton(
+            name: 'Settings',
             icon: Icon(Icons.settings),
-            onPressed: (){
-              Get.dialog(Dialog(
-                child: Container(
-                  width: 500,
-                  child: SettingsPage(),
-                ),
-              ));
-            },
+            iconOnly: true,
+            page: () => SettingsPage(),
           ),
 
           Obx(() {
@@ -99,9 +90,11 @@ class _DesktopHomeState extends State<DesktopHome> {
               return Stack(
                 alignment: Alignment.center,
                 children: [
-                  IconButton(
+                  SettingsButton(
+                    name: 'Save',
                     icon: Icon(Icons.save),
-                    onPressed: () {
+                    iconOnly: true,
+                    action: () {
                       getPerms();
                       // call a function to save the currently viewed image when the save button is pressed
                       if (searchHandler.currentTab.selected.length > 0){

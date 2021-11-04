@@ -215,7 +215,10 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
     _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || ((widget.booruItem.mediaType == 'animation' && !settingsHandler.disableImageScaling.value && !widget.booruItem.isHated.value) || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
+    // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
+    final bool isGifSampleNotAllowed = widget.booruItem.mediaType == 'animation' && (settingsHandler.disableImageScaling.value ? widget.booruItem.isHated.value : true);
+
+    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (isGifSampleNotAllowed || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
     thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
 

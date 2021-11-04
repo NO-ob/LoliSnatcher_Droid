@@ -148,7 +148,7 @@ class _LoadingElementState extends State<LoadingElement> {
     // return buildElement(context);
 
     return AnimatedOpacity(
-      duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300),
+      duration: Duration(milliseconds: 300), // settingsHandler.appMode == 'Desktop' ? 50 : 300),
       curve: Curves.linear,
       opacity: showLoading ? 1 : 0,
       onEnd: () {
@@ -527,7 +527,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
     // return buildElement(context);
 
     return AnimatedOpacity(
-      duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300),
+      duration: Duration(milliseconds: 300), // settingsHandler.appMode == 'Desktop' ? 50 : 300),
       curve: Curves.linear,
       opacity: showLoading ? 1 : 0,
       onEnd: () {

@@ -92,7 +92,7 @@ class _BooruEditState extends State<BooruEdit> {
               controller: booruURLController,
               title: 'URL',
               hintText: "Enter Booru URL",
-              inputType: TextInputType.text,
+              inputType: TextInputType.url,
             ),
             SettingsDropdown(
               selected: selectedBooruType,
@@ -108,7 +108,7 @@ class _BooruEditState extends State<BooruEdit> {
               controller: booruFaviconController,
               title: 'Favicon',
               hintText: "(Autofills if blank)",
-              inputType: TextInputType.text,
+              inputType: TextInputType.url,
             ),
             SettingsTextInput(
               controller: booruDefTagsController,

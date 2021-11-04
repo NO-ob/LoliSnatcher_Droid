@@ -117,6 +117,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               ),
               SettingsButton(
                 name: 'Restore Settings',
+                subtitle: Text('settings.json'),
                 action: () async {
                   Directory? dlDir = (await getExternalStorageDirectories())?.first;
                   if(dlDir != null) {
@@ -159,6 +160,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               ),
               SettingsButton(
                 name: 'Restore Database',
+                subtitle: Text('store.db'),
                 action: () async {
                   Directory? dlDir = (await getExternalStorageDirectories())?.first;
                   if(dlDir != null) {
@@ -214,6 +216,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               ),
               SettingsButton(
                 name: 'Restore Boorus',
+                subtitle: Text('/boorus/[Booru Name].json'),
                 action: () async {
                   Directory? dlDir = (await getExternalStorageDirectories())?.first;
                   if(dlDir != null) {

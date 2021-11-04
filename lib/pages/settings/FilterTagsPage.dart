@@ -227,6 +227,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 onlyInput: true,
                 controller: newTagController,
                 autofocus: isAddButton ? true : false,
+                inputType: TextInputType.text,
                 onSubmitted: (String text) {
                   if(text.trim() != '') {
                     isAddButton

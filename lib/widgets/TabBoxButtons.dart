@@ -39,6 +39,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
       mainAxisSize: MainAxisSize.max,
       children: [
         const SizedBox(width: 25),
+
         if(widget.withSecondary)
           IconButton(
             icon: Icon(Icons.arrow_upward, color: Get.theme.colorScheme.secondary),
@@ -51,6 +52,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
               }
             },
           ),
+
         IconButton(
           icon: Icon(Icons.remove_circle_outline, color: Get.theme.colorScheme.secondary),
           onPressed: () {
@@ -58,12 +60,14 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
             searchHandler.removeAt();
           },
         ),
+
         IconButton(
           icon: Icon(Icons.history, color: Get.theme.colorScheme.secondary),
           onPressed: () async {
             showHistory();
           },
         ),
+
         IconButton(
           icon: Icon(Icons.add_circle_outline, color: Get.theme.colorScheme.secondary),
           onPressed: () {
@@ -75,6 +79,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
             // searchHandler.addTabByString(settingsHandler.defTags);
           },
         ),
+
         if(widget.withSecondary)
           IconButton(
             icon: Icon(Icons.arrow_downward, color: Get.theme.colorScheme.secondary),
@@ -87,6 +92,7 @@ class _TabBoxButtonsState extends State<TabBoxButtons> {
               }
             },
           ),
+
         const SizedBox(width: 25),
       ]
     );

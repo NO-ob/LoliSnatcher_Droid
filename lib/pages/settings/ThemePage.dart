@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,10 +30,12 @@ class _ThemePageState extends State<ThemePage> {
   late Color? primaryPickerColor; // Color for picker shown in Card on the screen.
   late Color? accentPickerColor; // Color for picker in dialog using onChanged
   bool needToWriteMascot = false;
+
+  Timer? debounceThemeChange;
+
   @override
   void initState() {
     super.initState();
-    print('init-----');
     theme = settingsHandler.theme.value;
     themeMode = settingsHandler.themeMode.value;
     isAmoled = settingsHandler.isAmoled.value;
@@ -43,6 +45,12 @@ class _ThemePageState extends State<ThemePage> {
     accentPickerColor = settingsHandler.customAccentColor.value;
   }
 
+  @override
+  void dispose() {
+    debounceThemeChange?.cancel();
+    super.dispose();
+  }
+
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     settingsHandler.theme.value = theme;
@@ -50,13 +58,13 @@ class _ThemePageState extends State<ThemePage> {
     settingsHandler.isAmoled.value = isAmoled;
     settingsHandler.enableDrawerMascot = enableMascot;
 
-    print('onPrimary: ${ThemeData.estimateBrightnessForColor(primaryPickerColor!) == Brightness.dark}');
-    print('onAccent: ${ThemeData.estimateBrightnessForColor(accentPickerColor!) == Brightness.dark}');
+    // print('onPrimary: ${ThemeData.estimateBrightnessForColor(primaryPickerColor!) == Brightness.dark}');
+    // print('onAccent: ${ThemeData.estimateBrightnessForColor(accentPickerColor!) == Brightness.dark}');
     settingsHandler.customPrimaryColor.value = primaryPickerColor;
     settingsHandler.customAccentColor.value = accentPickerColor;
     //This needs to be done here because if its done in the buttons onclick
     //and you back out too fast the image path will not be returned in time to save it to settings
-    if (needToWriteMascot){
+    if (needToWriteMascot) {
       if (mascotPathOverride.isNotEmpty) {
         mascotPathOverride = await new ImageWriter().writeMascotImage(mascotPathOverride);
         settingsHandler.drawerMascotPathOverride = mascotPathOverride;
@@ -65,19 +73,27 @@ class _ThemePageState extends State<ThemePage> {
     } else {
       settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
-    Get.find<SearchHandler>().rootRestate();
     bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 
   void updateTheme() async {
-    _onWillPop();
-    Timer(Duration(milliseconds: 200), () {
-      // trigger second time to force dropdowns to rerender completely
+    // instantly do local restate
+    setState(() { });
+
+    // TODO fix theme not updating update on desktop pages, there settings pages use dialogs, which don't change with the global state
+
+    // set global restate to happen only after X ms after last update happens
+    debounceThemeChange?.cancel();
+    debounceThemeChange = Timer(Duration(milliseconds: 500), () {
       _onWillPop();
       setState(() { });
+      // Timer(Duration(milliseconds: 500), () {
+      //   // trigger second time to force dropdowns to rerender completely
+      //   _onWillPop();
+      //   setState(() { });
+      // });
     });
-    setState(() { });
   }
 
   Future<bool> colorPickerDialog(Color startColor, void Function(Color) onChange) async {
@@ -122,14 +138,22 @@ class _ThemePageState extends State<ThemePage> {
         ColorPickerType.wheel: true,
       },
       actionButtons: ColorPickerActionButtons(
+        // okButton: true,
         okIcon: Icons.save,
+        dialogOkButtonType: ColorPickerActionButtonType.elevated,
+        // closeButton: true,
         closeIcon: Icons.cancel,
+        dialogCancelButtonType: ColorPickerActionButtonType.elevated,
         dialogActionIcons: true,
+        dialogActionButtons: true,
       ),
     ).showPickerDialog(
       context,
-      constraints:
-          const BoxConstraints(minHeight: 480, minWidth: 300, maxWidth: 320),
+      constraints: BoxConstraints(
+        minHeight: 480,
+        minWidth: 300,
+        maxWidth: min(Get.mediaQuery.size.width * 0.9, 400)
+      ),
     );
   }
 

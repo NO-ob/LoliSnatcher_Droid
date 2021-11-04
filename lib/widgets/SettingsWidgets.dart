@@ -26,6 +26,7 @@ class SettingsButton extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.enabled = true, // disable button interaction (will also change text color to grey)
+    this.iconOnly = false,
   }) : super(key: key);
 
   final String name;
@@ -37,9 +38,43 @@ class SettingsButton extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final bool enabled;
+  final bool iconOnly;
+
+  void onTapAction(BuildContext context) {
+    if(action != null) {
+      action?.call();
+    } else {
+      SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+      if(page != null) {
+        if(settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
+          Get.dialog(Dialog(
+            child: Container(
+              width: 500,
+              child: page!.call(),
+            ),
+          ));
+        } else {
+          Navigator.push(context, CupertinoPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page!.call()));
+          // Get.to(
+          //   page,
+          //   // duration: Duration(milliseconds: 500)
+          // );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if(iconOnly) {
+      return IconButton(
+        icon: icon ?? Icon(null),
+        onPressed: (){
+          onTapAction(context);
+        },
+      );
+    }
+
     return ListTile(
       leading: icon,
       title: Text(name),
@@ -48,28 +83,8 @@ class SettingsButton extends StatelessWidget {
       enabled: enabled,
       dense: false,
       onTap: () {
-        if(action != null) {
-          action?.call();
-        } else {
-          if(page != null) {
-            if(Get.find<SettingsHandler>().appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
-              Get.dialog(Dialog(
-                child: Container(
-                  width: 500,
-                  child: page?.call(),
-                ),
-              ));
-            } else {
-              Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => page!.call()));
-              // Get.to(
-              //   page,
-              //   // duration: Duration(milliseconds: 500)
-              // );
-            }
-          }
-        }
+        onTapAction(context);
       },
-
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
         top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
@@ -403,6 +418,7 @@ class SettingsTextInput extends StatelessWidget {
         controller: controller,
         autofocus: autofocus,
         keyboardType: inputType,
+        enableInteractiveSelection: true,
         inputFormatters: inputFormatters,
         onFieldSubmitted: onSubmitted,
         decoration: InputDecoration(
@@ -414,7 +430,7 @@ class SettingsTextInput extends StatelessWidget {
           errorText: validator?.call(controller.text),
           contentPadding: EdgeInsets.fromLTRB(25, 0, 15, 0),
           suffixIcon: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
+            padding: const EdgeInsets.only(left: 2, right: 18),
             child: Icon(Icons.edit, color: Get.theme.colorScheme.onSurface)
           ),
           focusedBorder: OutlineInputBorder(

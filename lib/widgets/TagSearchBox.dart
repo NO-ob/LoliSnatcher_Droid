@@ -521,6 +521,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             scrollController: searchScrollController,
             textInputAction: TextInputAction.search,
             focusNode: searchHandler.searchBoxFocus,
+            enableInteractiveSelection: true,
             onChanged: (text) {
               createOverlay();
             },

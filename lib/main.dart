@@ -117,7 +117,7 @@ class _MainAppState extends State<MainApp> {
         selectionHandleColor: theme.accent,
       );
 
-      print('isDark $isDark');
+      // print('isDark $isDark');
 
       final ColorScheme alternateColorScheme = ColorScheme(
         primary: theme.primary!,

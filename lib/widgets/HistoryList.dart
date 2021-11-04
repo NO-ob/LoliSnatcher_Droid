@@ -286,6 +286,7 @@ class _HistoryListState extends State<HistoryList> {
                     onChanged: (String input) {
                       filterHistory();
                     },
+                    enableInteractiveSelection: true,
                     decoration: InputDecoration(
                       hintText: "Filter Search History (${history.length})",
                       contentPadding: EdgeInsets.fromLTRB(15, 0, 15, 0),
