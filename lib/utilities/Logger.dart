@@ -13,15 +13,12 @@ class Logger {
     return _loggerInstance!;
   }
   void log(var logStr, String callerClass, String callerFunction, LogTypes logType){
-    // Only log on debug builds
-    if (kDebugMode) {
       //Using != val was still printing for some reason so else is used
       if (settingsHandler.ignoreLogTypes.any((val) => logType == val)){
 
       } else {
         print("$callerClass::$callerFunction::$logType::$logStr");
       }
-    }
   }
 }
 
