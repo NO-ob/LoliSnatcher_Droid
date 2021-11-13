@@ -238,10 +238,8 @@ class _ViewerPageState extends State<ViewerPage> {
                     searchHandler.currentTab,
                     true
                   );
-                } else if(Platform.isLinux) {
+                } else {
                   itemWidget = VideoAppDesktop(item.key, item, index, searchHandler.currentTab);
-                } else { // Linux
-                  itemWidget = VideoAppPlaceholder(item: item, index: index);
                 }
               }
             } else {
