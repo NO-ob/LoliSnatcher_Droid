@@ -696,6 +696,14 @@ class _ViewerPageState extends State<ViewerPage> {
     //     Get.find<ViewerHandler>().toggleZoom();
     //   },
     // )));
+    // Debug - print current item info
+    // actions.add(IconButton(
+    //   icon: Icon(Icons.developer_board),
+    //   color: Colors.white,
+    //   onPressed: () {
+    //     print(searchHandler.currentTab.currentItem.value.toJSON().toString());
+    //   },
+    // ));
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;

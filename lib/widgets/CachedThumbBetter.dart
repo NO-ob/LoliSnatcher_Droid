@@ -69,7 +69,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
-      onError: _onError,
+      onError: (error) => _onError(error, delayed: false),
       onDone: (Uint8List bytes, String url) {
         if(isMain) {
           mainProvider = getImageProvider(bytes, url);
@@ -177,7 +177,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     updateState();
   }
 
-  void _onError(Exception error) {
+  void _onError(Exception error, {bool delayed = false}) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
@@ -192,7 +192,14 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
       } else {
         //show error
         isFailed = true;
-        updateState();
+        if(delayed) {
+          // _onError can happen while widget restates, which will cause an exception, this will delay the restate until the other one is done
+          WidgetsBinding.instance!.addPostFrameCallback((_) {
+            updateState();
+          });
+        } else {
+          updateState();
+        }
         // this.mounted prevents exceptions when using staggered view
       }
       // print('Dio request cancelled: $thumbURL $error');
@@ -354,7 +361,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             height: double.infinity,
             key: ValueKey<bool>(mainProvider != null),
             errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-              _onError(exception as Exception);
+              _onError(exception as Exception, delayed: true);
               return const Icon(Icons.broken_image, size: 30);
             },
           )
@@ -365,7 +372,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             item: widget.booruItem,
             hasProgress: true,
             isFromCache: isFromCache,
-            isDone: mainProvider != null,
+            isDone: mainProvider != null && !isFailed,
             isFailed: isFailed,
             total: _total,
             received: _received,

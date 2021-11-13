@@ -528,6 +528,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
     int nowMils = DateTime.now().millisecondsSinceEpoch;
     int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
     bool showLoading = !widget.isDone && (widget.isFailed || (sinceStart > 499));
+    // bool showLoading = !widget.isDone || widget.isFailed;
     // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
     // return buildElement(context);
@@ -545,6 +546,10 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
   }
 
   Widget buildElement(BuildContext context) {
+    if(widget.isDone) {
+      return const SizedBox();
+    }
+
     if (widget.isFailed) {
       return Center(
         child: InkWell(

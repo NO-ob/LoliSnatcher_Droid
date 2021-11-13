@@ -268,7 +268,12 @@ class _VideoAppState extends State<VideoApp> {
 
     if(_chewieController == null) return;
 
+    if(viewerHandler.isFullscreen.value != _chewieController!.isFullScreen) {
+      // redisable sleep when changing fullscreen state
+      ServiceHandler.disableSleep();
+    }
     viewerHandler.isFullscreen.value = _chewieController!.isFullScreen;
+
     if(widget.searchGlobal.viewedIndex.value == widget.index) {
       if(_chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled

@@ -243,10 +243,9 @@ class _WaterfallState extends State<WaterfallView> {
         Vibration.vibrate(duration: 10);
       }
 
-      setState(() {
-        item.isFavourite.toggle();
-        settingsHandler.dbHandler.updateBooruItem(item, "local");
-      });
+      item.isFavourite.toggle();
+      settingsHandler.dbHandler.updateBooruItem(item, "local");
+      updateState();
     }
   }
 
@@ -432,6 +431,7 @@ class _WaterfallState extends State<WaterfallView> {
         cacheExtent: 200,
         shrinkWrap: false,
         itemCount: widget.tab.booruHandler.filteredFetched.length,
+        padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnsCount,
           childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9/16
@@ -464,6 +464,7 @@ class _WaterfallState extends State<WaterfallView> {
         addAutomaticKeepAlives: false,
         shrinkWrap: true,
         itemCount: widget.tab.booruHandler.filteredFetched.length,
+        padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
         crossAxisCount: columnsCount,
         itemBuilder: (BuildContext context, int index) {
           double? widthData = widget.tab.booruHandler.filteredFetched[index].fileWidth ?? null;
@@ -507,11 +508,12 @@ class _WaterfallState extends State<WaterfallView> {
       return Obx(() {
         return WaterfallFlow.builder(
           controller: searchHandler.gridScrollController,
-          padding: const EdgeInsets.all(5.0),
           physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
           shrinkWrap: true,
           addAutomaticKeepAlives: false,
           cacheExtent: 200,
+          itemCount: widget.tab.booruHandler.filteredFetched.length,
+          padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
           gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
             crossAxisCount: columnsCount,
             mainAxisSpacing: 4.0,
@@ -540,10 +542,13 @@ class _WaterfallState extends State<WaterfallView> {
               child: cardItemBuild(index, columnsCount),
             );
           },
-          itemCount: widget.tab.booruHandler.filteredFetched.length,
         );
       });
     });
+  }
+
+  Widget wrapButton(Widget child) {
+    return Container(color: Colors.black87, child: child);
   }
 
   @override
@@ -601,82 +606,81 @@ class _WaterfallState extends State<WaterfallView> {
           }
         }
       },
-      child: Column(
+      child: Stack(
+        alignment: Alignment.bottomCenter,
         children: [
           // Obx(() => Center(child: Text('Loaded/Total: ${widget.tab.booruHandler.filteredFetched.length}/${widget.tab.booruHandler.totalCount.value}'))),
 
-          Expanded(
-            child: NotificationListener<ScrollUpdateNotification>(
-              child: Scrollbar(
-                controller: searchHandler.gridScrollController,
-                interactive: true,
-                thickness: 6,
-                radius: Radius.circular(10),
-                isAlwaysShown: true,
-                child: RefreshIndicator(
-                  triggerMode: RefreshIndicatorTriggerMode.anywhere,
-                  displacement: 80,
-                  strokeWidth: 4,
-                  color: Get.theme.colorScheme.secondary,
-                  onRefresh: () async {
-                    searchHandler.searchAction(widget.tab.tags, null);
-                  },
-                  child: ImprovedScrolling(
-                    scrollController: searchHandler.gridScrollController,
-                    // onScroll: (scrollOffset) => debugPrint(
-                    //   'Scroll offset: $scrollOffset',
-                    // ),
-                    // onMMBScrollStateChanged: (scrolling) => debugPrint(
-                    //   'Is scrolling: $scrolling',
-                    // ),
-                    // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
-                    //       'Cursor position: $localCursorOffset\n'
-                    //       'Scroll activity: $scrollActivity',
-                    // ),
-                    enableMMBScrolling: true,
-                    enableKeyboardScrolling: true,
-                    enableCustomMouseWheelScrolling: true,
-                    // mmbScrollConfig: MMBScrollConfig(
-                    //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
-                    // ),
-                    keyboardScrollConfig: KeyboardScrollConfig(
-                      arrowsScrollAmount: 250.0,
-                      homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
-                        return const Duration(milliseconds: 100);
-                      },
-                      endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
-                        return const Duration(milliseconds: 2000);
-                      },
-                    ),
-                    customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
-                      scrollAmountMultiplier: 15.0,
-                    ),
-                    // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
-                    child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData)
-                      ? gridBuilder()
-                      : staggeredBetterBuilder() //staggeredBuilder()
+          NotificationListener<ScrollUpdateNotification>(
+            child: Scrollbar(
+              controller: searchHandler.gridScrollController,
+              interactive: true,
+              thickness: 6,
+              radius: Radius.circular(10),
+              isAlwaysShown: true,
+              child: RefreshIndicator(
+                triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                displacement: 80,
+                strokeWidth: 4,
+                color: Get.theme.colorScheme.secondary,
+                onRefresh: () async {
+                  searchHandler.searchAction(widget.tab.tags, null);
+                },
+                child: ImprovedScrolling(
+                  scrollController: searchHandler.gridScrollController,
+                  // onScroll: (scrollOffset) => debugPrint(
+                  //   'Scroll offset: $scrollOffset',
+                  // ),
+                  // onMMBScrollStateChanged: (scrolling) => debugPrint(
+                  //   'Is scrolling: $scrolling',
+                  // ),
+                  // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
+                  //       'Cursor position: $localCursorOffset\n'
+                  //       'Scroll activity: $scrollActivity',
+                  // ),
+                  enableMMBScrolling: true,
+                  enableKeyboardScrolling: true,
+                  enableCustomMouseWheelScrolling: true,
+                  // mmbScrollConfig: MMBScrollConfig(
+                  //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
+                  // ),
+                  keyboardScrollConfig: KeyboardScrollConfig(
+                    arrowsScrollAmount: 250.0,
+                    homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
+                      return const Duration(milliseconds: 100);
+                    },
+                    endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
+                      return const Duration(milliseconds: 2000);
+                    },
                   ),
+                  customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
+                    scrollAmountMultiplier: 15.0,
+                  ),
+                  // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
+                  child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData)
+                    ? gridBuilder()
+                    : staggeredBetterBuilder() //staggeredBuilder()
                 ),
               ),
-              onNotification: (notif) {
-                widget.tab.scrollPosition = searchHandler.gridScrollController.offset;
+            ),
+            onNotification: (notif) {
+              widget.tab.scrollPosition = searchHandler.gridScrollController.offset;
 
-                //print('SCROLL NOTIFICATION');
-                //print(searchHandler.gridScrollController.position.maxScrollExtent);
-                //print(notif.metrics); // pixels before viewport, in viewport, after viewport
+              //print('SCROLL NOTIFICATION');
+              //print(searchHandler.gridScrollController.position.maxScrollExtent);
+              //print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
-                bool isNotAtStart = notif.metrics.pixels > 0;
-                bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
-                bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
+              bool isNotAtStart = notif.metrics.pixels > 0;
+              bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
+              bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
 
-                if(!searchHandler.isLoading.value) {
-                  if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
-                    filteredSearch();
-                  }
+              if(!searchHandler.isLoading.value) {
+                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+                  filteredSearch();
                 }
-                return true;
-              },
-            )
+              }
+              return true;
+            },
           ),
 
           // error buttons testing
@@ -731,32 +735,34 @@ class _WaterfallState extends State<WaterfallView> {
               // if last page...
               if(widget.tab.booruHandler.filteredFetched.length == 0) {
                 // ... and no items loaded
-                return SettingsButton(
+                return wrapButton(SettingsButton(
                   name: 'No Data Loaded',
                   subtitle: Text('$clickName Here to Reload'),
                   icon: Icon(Icons.refresh),
+                  dense: true,
                   action: () {
                     retryLastPage();
                   },
                   drawBottomBorder: false,
-                );
+                ));
               } else { //if(widget.tab.booruHandler.filteredFetched.length > 0) {
                 // .. has items loaded
-                return SettingsButton(
+                return wrapButton(SettingsButton(
                   name: 'You Reached the End (${widget.tab.booruHandler.pageNum} ${widget.tab.booruHandler.pageNum.value == 1 ? 'page' : 'pages'})',
                   subtitle: Text('$clickName Here to Reload Last Page'),
                   icon: Icon(Icons.refresh),
+                  dense: true,
                   action: () {
                     retryLastPage();
                   },
                   drawBottomBorder: false,
-                );
+                ));
               }
             } else {
               // if not last page...
               if(searchHandler.isLoading.value) {
                 // ... and is currently loading
-                return SettingsButton(
+                return wrapButton(SettingsButton(
                   name: 'Loading Page #${widget.tab.booruHandler.pageNum}',
                   subtitle: AnimatedOpacity(
                     opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
@@ -770,36 +776,42 @@ class _WaterfallState extends State<WaterfallView> {
                       valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                     ),
                   ),
+                  dense: true,
                   action: () {
                     retryLastPage();
                   },
                   drawBottomBorder: false,
-                );
+                ));
               } else {
                 if (widget.tab.booruHandler.errorString.isNotEmpty) {
                   // ... if error happened
-                  return SettingsButton(
+                  return wrapButton(SettingsButton(
                     name: 'Error happened when Loading Page #${widget.tab.booruHandler.pageNum}:${errorFormatted}',
                     subtitle: Text('$clickName Here to Retry'),
                     icon: Icon(Icons.refresh),
+                    dense: true,
                     action: () {
                       retryLastPage();
                     },
                     drawBottomBorder: false,
-                  );
+                  ));
                 } else if(widget.tab.booruHandler.filteredFetched.length == 0) {
                   // ... no items loaded
-                  return SettingsButton(
+                  return wrapButton(SettingsButton(
                     name: 'Error, no data loaded:',
                     subtitle: Text('$clickName Here to Retry'),
                     icon: Icon(Icons.refresh),
+                    dense: true,
                     action: () {
                       retryLastPage();
                     },
                     drawBottomBorder: false,
-                  );
+                  ));
                 } else {
-                  return const SizedBox();
+                  // return const SizedBox.shrink();
+
+                  // add a small container to avoid scrolling when swiping from the bottom of the screen (navigation gestures)
+                  return Container(height: 10, color: Colors.transparent);
                 }
               }
             }

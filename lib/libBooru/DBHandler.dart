@@ -93,7 +93,7 @@ class DBHandler{
     var result;
     /* I dont think this if will be needed with post url
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (postURL.contains("s.sankakucomplex.com") || postURL.contains("rule34.xxx") || postURL.contains("paheal.net")){
+    if (postURL.contains("sankakucomplex.com") || postURL.contains("rule34.xxx") || postURL.contains("paheal.net")){
       result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL LIKE (?)", ["%" + Tools.getFileName(postURL) + "%"]);
     } else {
       result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL IN (?)", [postURL]);
@@ -420,7 +420,7 @@ class DBHandler{
     List<bool> values = [false,false];
     var result;
     // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (fileURL.contains("s.sankakucomplex.com") || fileURL.contains("rule34.xxx") || fileURL.contains("paheal.net")){
+    if (fileURL.contains("sankakucomplex.com") || fileURL.contains("rule34.xxx") || fileURL.contains("paheal.net")){
       result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
     } else {
       result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
@@ -442,7 +442,7 @@ class DBHandler{
     List<String> queryArgs = [];
     fileURLs.forEach((url) {
       // search filename, not full url (for example: r34xxx changes urls based on country)
-      if (url.contains("s.sankakucomplex.com") || url.contains("rule34.xxx") || url.contains("paheal.net")) {
+      if (url.contains("sankakucomplex.com") || url.contains("rule34.xxx") || url.contains("paheal.net")) {
         queryParts.add("fileURL LIKE (?)");
         queryArgs.add('%${Tools.getFileName(url)}%');
       } else {
