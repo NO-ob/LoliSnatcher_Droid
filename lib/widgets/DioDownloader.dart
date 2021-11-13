@@ -198,7 +198,7 @@ class DioLoader {
           }
           start(response.data, writeToCache, (dynamic data) {
             if(data != null) {
-              onEvent?.call('isFromCache');
+              // onEvent?.call('isFromCache');
               onEvent?.call('loaded');
               onDoneFile?.call(data, url);
             }
@@ -272,7 +272,7 @@ class DioLoader {
         if (cacheEnabled) {
           tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
           if(tempFile != null) {
-            onEvent?.call('isFromCache');
+            // onEvent?.call('isFromCache');
           }
         }
 

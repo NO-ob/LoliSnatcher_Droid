@@ -27,6 +27,7 @@ class SettingsButton extends StatelessWidget {
     this.drawBottomBorder = true,
     this.enabled = true, // disable button interaction (will also change text color to grey)
     this.iconOnly = false,
+    this.dense = false,
   }) : super(key: key);
 
   final String name;
@@ -39,6 +40,7 @@ class SettingsButton extends StatelessWidget {
   final bool drawBottomBorder;
   final bool enabled;
   final bool iconOnly;
+  final bool dense;
 
   void onTapAction(BuildContext context) {
     if(action != null) {
@@ -81,7 +83,7 @@ class SettingsButton extends StatelessWidget {
       subtitle: subtitle,
       trailing: trailingIcon,
       enabled: enabled,
-      dense: false,
+      dense: dense,
       onTap: () {
         onTapAction(context);
       },

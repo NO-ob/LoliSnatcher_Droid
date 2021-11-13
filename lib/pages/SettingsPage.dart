@@ -1,9 +1,3 @@
-import 'dart:io';
-
-import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
-import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
-import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +14,11 @@ import 'package:LoliSnatcher/pages/settings/GalleryPage.dart';
 import 'package:LoliSnatcher/pages/settings/UserInterfacePage.dart';
 import 'package:LoliSnatcher/pages/settings/FilterTagsPage.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
+import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
+import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/MascotImage.dart';
 
 /**
  * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
@@ -180,29 +179,7 @@ class SettingsPage extends StatelessWidget {
                 drawBottomBorder: false
               ),
 
-              Container(
-                child: Align(
-                  alignment: FractionalOffset.bottomCenter,
-                  child: Container(
-                    child: SizedBox(
-                      height: (MediaQuery.of(context).size.height * 0.35),
-                      child: DrawerHeader(
-                        margin: EdgeInsets.zero,
-                        decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.primary,
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: settingsHandler.drawerMascotPathOverride.isEmpty
-                              ? AssetImage('assets/images/drawer_icon.png')
-                              : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
-                          ),
-                        ),
-                        child: null,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              MascotImage(),
             ],
           ),
         ),

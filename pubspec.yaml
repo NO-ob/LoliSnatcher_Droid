@@ -52,6 +52,10 @@ dependencies:
       url: "https://github.com/bladeofgod/flutter_staggered_grid_view.git"
   waterfall_flow: ^3.0.1
   scroll_to_index: ^2.1.0
+  flutter_inner_drawer:
+    git:
+      url: https://github.com/kenjishiromajp/flutter_inner_drawer
+      ref: kenjishiromajp-update-for-2.12-null-safety-casting
   transparent_image: ^2.0.0
   video_player: ^2.2.5
   dart_vlc: ^0.1.8
