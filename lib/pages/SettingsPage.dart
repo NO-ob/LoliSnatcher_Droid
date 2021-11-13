@@ -145,7 +145,7 @@ class SettingsPage extends StatelessWidget {
               }),
 
               SettingsButton(
-                name: "Version: ${settingsHandler.verStr}+${settingsHandler.buildNumber}${kDebugMode ? '+Debug' : ''}",
+                name: "Version: ${settingsHandler.verStr}+${settingsHandler.buildNumber}${kDebugMode ? '+Debug' : ''}${EnvironmentConfig.isFromStore ? '+Play' : ''}",
                 icon: Icon(null), // to align with other items
                 action: () {
                   if(settingsHandler.isDebug.value) {

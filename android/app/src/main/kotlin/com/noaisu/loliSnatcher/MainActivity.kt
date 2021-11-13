@@ -258,7 +258,7 @@ class MainActivity: FlutterActivity() {
 
     private fun getImageAccess(){
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-        val mimeTypes = arrayOf("image/png", "image/jpeg","image/jpg")
+        val mimeTypes = arrayOf("image/png", "image/jpeg","image/jpg","image/gif")
         intent.type = "*/*"
         intent.putExtra("pickerMode","image")
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);

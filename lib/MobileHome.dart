@@ -29,7 +29,6 @@ class _MobileHomeState extends State<MobileHome> {
   final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
-
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();  
 

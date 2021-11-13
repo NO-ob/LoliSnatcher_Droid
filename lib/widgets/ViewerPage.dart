@@ -238,7 +238,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     searchHandler.currentTab,
                     true
                   );
-                } else if(Platform.isWindows) {
+                } else if(Platform.isLinux) {
                   itemWidget = VideoAppDesktop(item.key, item, index, searchHandler.currentTab);
                 } else { // Linux
                   itemWidget = VideoAppPlaceholder(item: item, index: index);

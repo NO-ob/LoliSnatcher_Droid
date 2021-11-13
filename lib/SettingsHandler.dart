@@ -36,8 +36,8 @@ class SettingsHandler extends GetxController {
   // TODO don't forget to update these on every new release
   // version vars
   String appName = "LoliSnatcher";
-  String verStr = "1.8.6";
-  int buildNumber = 162;
+  String verStr = "2.0.0";
+  int buildNumber = 163;
   UpdateInfo? updateInfo;
 
   ////////////////////////////////////////////////////
