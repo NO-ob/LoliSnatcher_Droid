@@ -38,7 +38,7 @@ class SettingsHandler extends GetxController {
   String appName = "LoliSnatcher";
   String verStr = "2.0.0";
   int buildNumber = 163;
-  UpdateInfo? updateInfo;
+  Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
 
@@ -1410,7 +1410,7 @@ class SettingsHandler extends GetxController {
       final json = jsonDecode(response.body);
       // final json = jsonDecode(fakeUpdate);
 
-      updateInfo = UpdateInfo(
+      updateInfo.value = UpdateInfo(
         versionName: json["version_name"] ?? '0.0.0',
         buildNumber: json["build_number"] ?? 0,
         title: json["title"] ?? '...',
@@ -1421,8 +1421,8 @@ class SettingsHandler extends GetxController {
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
 
-      if(buildNumber < (updateInfo?.buildNumber ?? 0)) {
-        if((withMessage || updateInfo!.isImportant)) {
+      if(buildNumber < (updateInfo.value?.buildNumber ?? 0)) {
+        if((withMessage || updateInfo.value!.isImportant)) {
           showUpdate();
         }
       } else {
@@ -1437,7 +1437,7 @@ class SettingsHandler extends GetxController {
             leadingIconColor: Colors.green,
           );
         }
-        updateInfo = null;
+        updateInfo.value = null;
       }
     } catch (e) {
       if(withMessage) {
@@ -1458,21 +1458,21 @@ class SettingsHandler extends GetxController {
   }
 
   void showUpdate() {
-    if(updateInfo != null) {
+    if(updateInfo.value != null) {
       // TODO get from some external variable when building
       bool isFromStore = EnvironmentConfig.isFromStore;
 
       Get.dialog(
         SettingsDialog(
-          title: Text('Update Available: ${updateInfo!.versionName}+${updateInfo!.buildNumber}'),
+          title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
           contentItems: [
             Text('Currently Installed: $verStr+$buildNumber'),
             Text(''),
-            Text('${updateInfo!.title}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('${updateInfo.value!.title}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
             Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
-            Text(updateInfo!.changelog),
+            Text(updateInfo.value!.changelog),
             // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
           ],
           actionButtons: [
@@ -1482,15 +1482,15 @@ class SettingsHandler extends GetxController {
               },
               child: Text('Later')
             ),
-            if(isFromStore && updateInfo!.isInStore)
+            if(isFromStore && updateInfo.value!.isInStore)
               ElevatedButton.icon(
                 onPressed: () async {
                   // try {
-                  //   ServiceHandler.launchURL("market://details?id=" + updateInfo!.storePackage);
+                  //   ServiceHandler.launchURL("market://details?id=" + updateInfo.value!.storePackage);
                   // } on PlatformException catch(e) {
-                  //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo!.storePackage);
+                  //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
                   // }
-                  ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo!.storePackage);
+                  ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
                   Navigator.of(Get.context!).pop(true);
                 },
                 icon: Icon(Icons.play_arrow),
@@ -1499,7 +1499,7 @@ class SettingsHandler extends GetxController {
             else
               ElevatedButton.icon(
                 onPressed: () {
-                  ServiceHandler.launchURL(updateInfo!.githubURL);
+                  ServiceHandler.launchURL(updateInfo.value!.githubURL);
                   Navigator.of(Get.context!).pop(true);
                 },
                 icon: Icon(Icons.exit_to_app),

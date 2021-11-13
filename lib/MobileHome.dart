@@ -251,19 +251,24 @@ class _MainDrawerState extends State<MainDrawer> {
       child: Drawer(
         child: Column(
           children: <Widget>[
-            if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
-              Container(
-                margin: EdgeInsets.fromLTRB(5, 30, 5, 15),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    //Tags/Search field
-                    TagSearchBox(),
-                    TagSearchButton(),
-                  ],
-                ),
-              ),
+            Obx(() {
+              if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                return Container(
+                  margin: EdgeInsets.fromLTRB(5, 30, 5, 15),
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      //Tags/Search field
+                      TagSearchBox(),
+                      TagSearchButton(),
+                    ],
+                  ),
+                );
+              } else {
+                return const SizedBox.shrink();
+              }
+            }),
 
             Expanded(
               child: Listener(
@@ -312,13 +317,18 @@ class _MainDrawerState extends State<MainDrawer> {
                     if(settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled)
                       BooruSelectorMain(false),
 
-                    if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
-                      SettingsButton(
-                        name: "Snatcher",
-                        icon: Icon(Icons.download_sharp),
-                        page: () => SnatcherPage(),
-                        drawTopBorder: true,
-                      ),
+                    Obx(() {
+                      if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                        return SettingsButton(
+                          name: "Snatcher",
+                          icon: Icon(Icons.download_sharp),
+                          page: () => SnatcherPage(),
+                          drawTopBorder: true,
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
 
                     SettingsButton(
                       name: "Settings",
@@ -326,34 +336,39 @@ class _MainDrawerState extends State<MainDrawer> {
                       page: () => SettingsPage(),
                     ),
 
-                    if(settingsHandler.updateInfo != null)
-                      SettingsButton(
-                        name: 'Update Available!',
-                        icon: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Icon(Icons.update),
-                            Positioned(
-                              top: 1,
-                              left: 1,
-                              child: Center(child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ))
-                            ),
-                          ]
-                        ),
-                        action: () async {
-                          settingsHandler.showUpdate();
-                        },
-                      ),
+                    Obx(() {
+                      if(settingsHandler.updateInfo.value != null) {
+                        return SettingsButton(
+                          name: 'Update Available!',
+                          icon: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Icon(Icons.update),
+                              Positioned(
+                                top: 1,
+                                left: 1,
+                                child: Center(child: Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ))
+                              ),
+                            ]
+                          ),
+                          action: () async {
+                            settingsHandler.showUpdate();
+                          },
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    }),
 
-                   if(settingsHandler.enableDrawerMascot)
-                     MascotImage(),
+                    if(settingsHandler.enableDrawerMascot)
+                      MascotImage(),
 
                   ],
                 ),
