@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:LoliSnatcher/TimedProgressController.dart';
+import 'package:get/get.dart';
 
 // code from https://stackoverflow.com/questions/56853554/show-timer-progress-on-a-circularprogressindicator-in-flutter
 
@@ -40,6 +41,7 @@ class _RestartableProgressIndicatorState extends State<RestartableProgressIndica
   Widget build(BuildContext context) {
     return CircularProgressIndicator(
       value: controller.progress,
+      valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
     );
   }
 

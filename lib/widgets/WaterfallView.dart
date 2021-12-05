@@ -2,96 +2,113 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-
-import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
-
-var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
-
+import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class WaterfallView extends StatefulWidget {
-  final SearchGlobals searchGlobals;
-  final SettingsHandler settingsHandler;
-  final SnatchHandler snatchHandler;
-  final Function searchAction;
-  WaterfallView(this.settingsHandler, this.searchGlobals, this.snatchHandler, this.searchAction);
+  final SearchGlobal tab;
+  final int globalIndex;
+  WaterfallView(this.tab, this.globalIndex);
   @override
   _WaterfallState createState() => _WaterfallState();
 }
 
 class _WaterfallState extends State<WaterfallView> {
-  // ScrollController gridController = ScrollController();
-  AutoScrollController gridController = AutoScrollController();
-  bool isLastPage = false, isLoading = true, inViewer = false;
-  Timer? loadingDelay;
-  List<BooruItem> fetched = [];
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+
+  Timer? loadingDelay, checkInterval;
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
+  StreamSubscription? viewedListener;
 
-  void setBooruHandler() {
-    List temp = BooruHandlerFactory().getBooruHandler(widget.searchGlobals.selectedBooru!, widget.settingsHandler.limit, widget.settingsHandler.dbHandler);
-    widget.searchGlobals.booruHandler = temp[0];
-    widget.searchGlobals.pageNum = temp[1];
-  }
+  int _startedAt = 0;
 
   @override
   void initState() {
     super.initState();
-    // get booru handler
-    if (widget.searchGlobals.booruHandler == null) {
-      setBooruHandler();
+    initView();
+    // TODO move all load logic to SearchHandler
+    searchHandler.filteredSearch = filteredSearch;
+  }
+
+  @override
+  void didUpdateWidget(WaterfallView oldWidget) {
+    bool isTabChanged = widget.tab.id != oldWidget.tab.id;
+    if(isTabChanged) {
+      initView();
     }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void updateState() {
+    if(this.mounted) {
+      setState(() {});
+    }
+  }
+
+  void initView() {
+    // reset bools
+    searchHandler.isLastPage(false);
+    searchHandler.isLoading(true);
+    viewerHandler.inViewer(false);
+
+    updateState();
 
     // restore scroll position on tab change
-    if (gridController.hasClients) {
-      gridController.jumpTo(widget.searchGlobals.scrollPosition);
-    } else if (widget.searchGlobals.scrollPosition != 0) {
-      setState(() {
-        // gridController = ScrollController(initialScrollOffset: widget.searchGlobals.scrollPosition);
-        gridController = AutoScrollController(initialScrollOffset: widget.searchGlobals.scrollPosition);
-      });
+    if (searchHandler.gridScrollController.hasClients) {
+      searchHandler.gridScrollController.jumpTo(widget.tab.scrollPosition);
+    } else { // if (widget.tab.scrollPosition != 0) {
+      searchHandler.gridScrollController = AutoScrollController(initialScrollOffset: widget.tab.scrollPosition);
     }
 
-    // trigger first load OR get old fetched list
-    bool isNewSearch = widget.searchGlobals.booruHandler!.fetched.length == 0;
-    if(isNewSearch) { // don't trigger search if there are items inside booruhandler
-      setSearchCount();
-      filteredSearch();
-    } else {
-      isLoading = false;
-      fetched = widget.searchGlobals.booruHandler!.fetched;
-      filterFetched();
-    }
+    viewedListener = widget.tab.viewedIndex.listen((int newValue) {
+      jumpTo();
+    });
+    ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
+    setVolumeListener();
 
     // restore isLastPage state
-    if(widget.searchGlobals.booruHandler!.locked) {
-      isLastPage = true;
+    if(widget.tab.booruHandler.locked.value) {
+      searchHandler.isLastPage(true);
     }
 
-    // Stops previous pages being forgotten when switching tabs
-    widget.searchGlobals.viewedIndex.addListener(jumpTo);
-    ServiceHandler.setVolumeButtons(!widget.settingsHandler.useVolumeButtonsForScroll);
-    setVolumeListener();
+    // trigger first load OR get old filteredFetched list
+    bool isNewSearch = widget.tab.booruHandler.filteredFetched.length == 0;
+    // print('isNEW: $isNewSearch ${widget.globalIndex} ${widget.tab.id}');
+    if(isNewSearch) { // don't trigger search if there are items inside booruHandler
+      filteredSearch();
+      // searchHandler.searchAction(widget.tab.tags, null);
+    } else {
+      searchHandler.isLoading(false);
+    }
+
+    updateState();
+
+    // print('GRID INIT');
   }
 
   void setVolumeListener() {
     volumeListener?.cancel();
-    volumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
-      // print('in grid $event $inViewer');
-      if(!inViewer){
+    volumeListener = searchHandler.volumeStream?.stream.listen((event) {
+      if(!viewerHandler.inViewer.value) {
         int dir = 0;
         if (event == 'up') {
           dir = -1;
@@ -99,240 +116,438 @@ class _WaterfallState extends State<WaterfallView> {
           dir = 1;
         }
 
-        final double offset = max(gridController.offset + (widget.settingsHandler.volumeButtonsScrollSpeed * dir), -20);
-        gridController.animateTo(offset, duration: Duration(milliseconds: 200), curve: Curves.linear);
+        final double offset = max(searchHandler.gridScrollController.offset + (settingsHandler.volumeButtonsScrollSpeed * dir), -20);
+        searchHandler.gridScrollController.animateTo(offset, duration: Duration(milliseconds: 200), curve: Curves.linear);
       }
     });
   }
 
   @override
   void dispose() {
-    widget.searchGlobals.viewedIndex.removeListener(jumpTo);
+    viewedListener?.cancel();
     kbFocusNode.dispose();
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
     loadingDelay?.cancel();
+    checkInterval?.cancel();
     super.dispose();
   }
 
-  void jumpTo(){
-    // ViewUtils.jumpToItem(widget.searchGlobals.viewedIndex.value, widget.searchGlobals, gridController, widget.settingsHandler, context);
-    gridController.scrollToIndex(
-      widget.searchGlobals.viewedIndex.value,
-      duration: Duration(milliseconds: 10),
+  void jumpTo() {
+    // ViewUtils.jumpToItem(searchHandler.viewedIndex.value, searchHandler, searchHandler.gridScrollController, context);
+    searchHandler.gridScrollController.scrollToIndex(
+      widget.tab.viewedIndex.value,
+      duration: Duration(milliseconds: 50),
       preferPosition: AutoScrollPosition.begin
     );
   }
 
-  void setSearchCount() {
-    widget.searchGlobals.booruHandler!.searchCount(widget.searchGlobals.tags);
-  }
+  Future<void> filteredSearch() async {
+    // do nothing if reached the end or detected an error
+    if(searchHandler.isLastPage.value) return;
+    if(widget.tab.booruHandler.errorString.isNotEmpty) return;
 
-  void filteredSearch() async {
-    if(isLastPage) return;
-
-    if (!widget.searchGlobals.booruHandler!.locked) {
-      isLoading = true;
-      widget.searchGlobals.pageNum++;
-    }
-    if(this.mounted) setState(() { });
-
-    // fetch new items, but get results from booruhandler and not search itself
-    // TODO is having a second copy of the list okay?
-    await widget.searchGlobals.booruHandler!.Search(widget.searchGlobals.tags, widget.searchGlobals.pageNum);
-    fetched = widget.searchGlobals.booruHandler!.fetched;
-
-    // filter out items with hated images
-    filterFetched();
-
-    // lock new loads if handler detected last page (previous fetched length == current length)
-    if (widget.searchGlobals.booruHandler!.locked && !isLastPage) {
-      isLastPage = true;
-    }
-    
-    // delay every new page load after fetching 100+ images
-    if(fetched.length > 100) {
-      loadingDelay = Timer(Duration(milliseconds: 200), () {
-        isLoading = false;
-        if(this.mounted) setState(() { });
-      });
-    } else {
-      isLoading = false;
+    // request total image count if not already loaded
+    if(widget.tab.booruHandler.totalCount.value == 0) {
+      widget.tab.booruHandler.searchCount(widget.tab.tags);
     }
 
-    // desktop view first load setter?
-    if (fetched.length > 0){
-      if(widget.searchGlobals.currentItem.value.fileURL.isEmpty){
-        print("setting booruItem value");
-        widget.searchGlobals.currentItem.value = fetched[0];
+    // if not last page - set loading state and increment page
+    if (!widget.tab.booruHandler.locked.value) {
+      searchHandler.isLoading(true);
+      widget.tab.booruHandler.pageNum++;
+    }
+    updateState();
+
+    // fetch new items, but get results from booruHandler and not search itself
+    _startedAt = DateTime.now().millisecondsSinceEpoch;
+    checkInterval?.cancel();
+    checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
+      // force restate every second to refresh all timers/indicators, even when loading has stopped
+      updateState();
+    });
+    await widget.tab.booruHandler.Search(widget.tab.tags, null);
+    checkInterval?.cancel();
+    _startedAt = 0;
+    // print('FINISHED SEARCH: ${temp.length}');
+
+    // lock new loads if handler detected last page (previous filteredFetched length == current length)
+    if (widget.tab.booruHandler.locked.value && !searchHandler.isLastPage.value) {
+      searchHandler.isLastPage(true);
+    }
+
+    // desktop view first load setter
+    if (widget.tab.booruHandler.filteredFetched.length > 0) {
+      if(widget.tab.currentItem.value.fileURL.isEmpty){
+        // print("setting booruItem value");
+        widget.tab.currentItem.value = widget.tab.booruHandler.filteredFetched[0];
+        widget.tab.viewedIndex.value = 0;
       }
     }
+    
+    // delay every new page load
+    loadingDelay = Timer(Duration(milliseconds: 200), () {
+      searchHandler.isLoading(false);
+      updateState();
+    });
 
-    if(this.mounted) setState(() { });
+    updateState();
     // this.mounted prevents an exception on first load
+
+    return;
   }
 
-  void filterFetched() {
-    if(widget.settingsHandler.filterHated) {
-      fetched = fetched.where((item) => widget.settingsHandler.parseTagsList(item.tagsList)[0].length == 0).toList();
-    }
-  }
-
-  void retryLastPage() {
-    widget.searchGlobals.booruHandler!.locked = false;
-    isLastPage = false;
-    widget.searchGlobals.pageNum--;
-    setState(() { });
-    filteredSearch();
+  void retryLastPage() async {
+    widget.tab.booruHandler.errorString.value = '';
+    widget.tab.booruHandler.locked.value = false;
+    searchHandler.isLastPage(false);
+    widget.tab.booruHandler.pageNum--;
+    updateState();
+    await filteredSearch();
   }
 
   void viewerCallback() {
-    //SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    viewerHandler.dropCurrent();
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     kbFocusNode.requestFocus();
-    inViewer = false;
-    setVolumeListener();
   }
 
-  void onThumbTap(int index) {
+  void onThumbTap(int index) async {
     // Load the image viewer
     kbFocusNode.unfocus();
-    if (widget.settingsHandler.appMode == "Mobile"){
-      inViewer = true;
-      volumeListener?.cancel();
+    if (settingsHandler.appMode == "Mobile") {
+      viewerHandler.inViewer(true);
+      // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
 
-      Navigator.push(
+      await Navigator.push(
         context,
         PageRouteBuilder(
           pageBuilder: (context, anim1, anim2) => 
-            // Opacity(opacity: 0.5, child: ViewerPage(fetched, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler, viewerCallback)),
-            ViewerPage(fetched, index, widget.searchGlobals, widget.settingsHandler, widget.snatchHandler, viewerCallback),
-          fullscreenDialog: true,
+            // Opacity(opacity: 0.5, child: ViewerPage(index)),
+            ViewerPage(index),
+          fullscreenDialog: false,
           opaque: false,
           transitionDuration: Duration(milliseconds: 300),
           barrierColor: Colors.black26,
         ),
       );
-      // .whenComplete(() { }); // doesn't work - fires immediately, NOT after route closing
+
+      viewerCallback();
     } else {
-      widget.searchGlobals.currentItem.value = fetched[index];
+      widget.tab.currentItem.value = widget.tab.booruHandler.filteredFetched[index];
+      widget.tab.viewedIndex.value = index;
     }
   }
 
-  void onThumbLongPress(int index) {
-    if (widget.searchGlobals.selected.contains(index)) {
-      widget.searchGlobals.selected.remove(index);
-    } else {
-      widget.searchGlobals.selected.add(index);
+  void onThumbDoubleTap(int index) async {
+    BooruItem item = widget.tab.booruHandler.filteredFetched[index];
+    if(item.isFavourite.value != null) {
+      ServiceHandler.vibrate();
+
+      item.isFavourite.toggle();
+      settingsHandler.dbHandler.updateBooruItem(item, "local");
+      updateState();
     }
-    setState(() { });
+  }
+
+  void onThumbLongPress(int index) async {
+    ServiceHandler.vibrate(duration: 5);
+
+    if (widget.tab.selected.contains(index)) {
+      widget.tab.selected.remove(index);
+    } else {
+      widget.tab.selected.add(index);
+    }
+    updateState();
+  }
+
+  void onThumbSecondaryTap(int index) {
+    BooruItem item = widget.tab.booruHandler.filteredFetched[index];
+    Clipboard.setData(ClipboardData(text: item.fileURL));
+    FlashElements.showSnackbar(
+      context: context,
+      duration: Duration(seconds: 2),
+      title: Text(
+        "Copied File URL to clipboard!",
+        style: TextStyle(fontSize: 20)
+      ),
+      content: Text(
+        item.fileURL,
+        style: TextStyle(fontSize: 16)
+      ),
+      leadingIcon: Icons.copy,
+      sideColor: Colors.green,
+    );
   }
 
   Widget cardItemBuild(int index, int columnsCount) {
-    bool isSelected = widget.searchGlobals.selected.contains(index);
-
-    return AutoScrollTag(
-      highlightColor: Colors.red,
-      key: ValueKey(index),
-      controller: gridController,
-      index: index,
-      child: Material(
-        borderOnForeground: true,
-        child: Ink(
-          decoration: isSelected
-            ? BoxDecoration(
-              border: Border.all(
-                color: Get.context!.theme.accentColor,
-                width: 4.0
+    return Obx(() {
+      bool isSelected = widget.tab.selected.contains(index);
+      bool isCurrent = settingsHandler.appMode == 'Desktop' && (widget.tab.viewedIndex.value == index);
+      return AutoScrollTag(
+        highlightColor: Colors.red,
+        key: ValueKey(index),
+        controller: searchHandler.gridScrollController,
+        index: index,
+        child: Material(
+          borderOnForeground: true,
+          child: Ink(
+            decoration: (isCurrent || isSelected)
+              ? BoxDecoration(
+                border: Border.all(
+                  color: isCurrent ? Colors.red : Get.theme.colorScheme.secondary,
+                  width: 2.0,
+                ),
+              )
+              : null,
+            child: GestureDetector(
+              onSecondaryTap: () {
+                onThumbSecondaryTap(index);
+              },
+              child: InkResponse(
+                enableFeedback: true,
+                highlightShape: BoxShape.rectangle,
+                containedInkWell: false,
+                highlightColor: Get.theme.colorScheme.secondary,
+                child: sampleorThumb(index, columnsCount, widget.tab),
+                onTap: () {
+                  onThumbTap(index);
+                },
+                onDoubleTap: () {
+                  onThumbDoubleTap(index);
+                },
+                onLongPress: () {
+                  onThumbLongPress(index);
+                },
               ),
-            )
-            : null,
-          child: InkResponse(
-            enableFeedback: true,
-            highlightShape: BoxShape.rectangle,
-            containedInkWell: true,
-            highlightColor: Get.context!.theme.accentColor,
-            child: ViewUtils.sampleorThumb(fetched[index], index, columnsCount, widget.settingsHandler, widget.searchGlobals),
-            onTap: () {
-              onThumbTap(index);
-            },
-            onLongPress: () {
-              onThumbLongPress(index);
-            },
+            ),
           ),
-        ),
+        )
+      );
+    });
+  }
+
+  /* This will return an Image from the booruItem and will use either the sample url
+  * or the thumbnail url depending on the users settings (sampleURL is much higher quality)
+  */
+  Widget sampleorThumb(int index, int columnCount, SearchGlobal searchGlobal) {
+    BooruItem item = searchGlobal.booruHandler.filteredFetched[index];
+    IconData itemIcon = ViewUtils.getFileIcon(item.mediaType);
+
+    List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
+    bool isHated = parsedTags[0].length > 0;
+    bool isLoved = parsedTags[1].length > 0;
+    bool isSound = parsedTags[2].length > 0;
+    
+    // reset the isHated value since we already check for it on every render
+    item.isHated.value = isHated;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(3),
+      child: Stack(
+        alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
+        children: [
+          CachedThumbBetter(item, index, searchGlobal, columnCount, true),
+          Container(
+            alignment: Alignment.bottomCenter,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // reserved for elements on the left side
+                const SizedBox(),
+
+                Container(
+                  padding: EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.66),
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5))
+                  ),
+                  child: Obx(() =>  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
+
+                      if(item.isFavourite.value == null)
+                        Text('.'),
+
+                      AnimatedCrossFade(
+                        duration: Duration(milliseconds: 200),
+                        crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                        firstChild: AnimatedSwitcher(
+                          duration: Duration(milliseconds: 200),
+                          child: Icon(
+                            item.isFavourite.value == true ? Icons.favorite : Icons.star,
+                            color: item.isFavourite.value == true ? Colors.red : Colors.grey,
+                            key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
+                            size: 14,
+                          )
+                        ),
+                        secondChild: const SizedBox(),
+                      ),
+
+                      if(item.isSnatched.value == true)
+                        Icon(
+                          Icons.save_alt,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+
+                      if(isSound)
+                        Icon(
+                          Icons.volume_up_rounded,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+
+                      Icon(
+                        itemIcon,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ],
+                  )),
+                ),
+              ]
+            )
+          )
+        ]
       )
     );
   }
 
   Widget gridBuilder() {
-    int columnsCount =
+    return Obx(() {
+      int columnsCount =
         (MediaQuery.of(context).orientation == Orientation.portrait)
-            ? widget.settingsHandler.portraitColumns
-            : widget.settingsHandler.landscapeColumns;
+            ? settingsHandler.portraitColumns
+            : settingsHandler.landscapeColumns;
 
-    return GridView.builder(
-      controller: gridController,
-      physics: BouncingScrollPhysics(),
-      addAutomaticKeepAlives: true,
-      cacheExtent: 100,
-      itemCount: fetched.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: columnsCount,
-        childAspectRatio: widget.settingsHandler.previewDisplay == 'Waterfall' ? 1 : 9/16
-      ),
-      itemBuilder: (BuildContext context, int index) {
-        return Card(
-          margin: EdgeInsets.all(2),
-          child: GridTile(
-            child: cardItemBuild(index, columnsCount),
-          ),
-        );
-      },
-    );
+      return GridView.builder(
+        controller: searchHandler.gridScrollController,
+        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+        addAutomaticKeepAlives: false,
+        cacheExtent: 200,
+        shrinkWrap: false,
+        itemCount: widget.tab.booruHandler.filteredFetched.length,
+        padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columnsCount,
+          childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9/16
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+            margin: EdgeInsets.all(2),
+            child: GridTile(
+              child: cardItemBuild(index, columnsCount),
+            ),
+          );
+        },
+      );
+    });
   }
 
   Widget staggeredBuilder() {
-    int columnsCount =
-        (MediaQuery.of(context).orientation == Orientation.portrait)
-            ? widget.settingsHandler.portraitColumns
-            : widget.settingsHandler.landscapeColumns;
-    double itemMaxWidth = MediaQuery.of(context).size.width / columnsCount;
-    double itemMaxHeight = MediaQuery.of(context).size.height * 0.6;
-
     // TODO flutter upgrade to 2.0.6 seems to prevent memory overflow and stutter on new images a little, but it still won't unload things that are not in view
-    return StaggeredGridView.countBuilder(
-      controller: gridController,
-      physics: BouncingScrollPhysics(),
-      addAutomaticKeepAlives: true,
-      itemCount: fetched.length,
-      crossAxisCount: columnsCount,
-      itemBuilder: (BuildContext context, int index) {
-        double? widthData = fetched[index].fileWidth ?? null;
-        double? heightData = fetched[index].fileHeight ?? null;
-        
-        double possibleWidth = itemMaxWidth;
-        double possibleHeight = itemMaxWidth;
-        bool hasSizeData = heightData != null && widthData != null;
-        if(hasSizeData) {
-          double aspectRatio = widthData / heightData;
-          possibleHeight = possibleWidth / aspectRatio;
-        }
-        // force to use minimum 100 px and max 60% of screen height
-        possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
-        
-        return Container(
-          height: possibleHeight,
-          width: possibleWidth,
-          // constraints: hasSizeData
-          //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
-          //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
-          child: cardItemBuild(index, columnsCount),
+    return Obx(() {
+      int columnsCount =
+        (MediaQuery.of(context).orientation == Orientation.portrait)
+            ? settingsHandler.portraitColumns
+            : settingsHandler.landscapeColumns;
+      double itemMaxWidth = MediaQuery.of(context).size.width / columnsCount;
+      double itemMaxHeight = MediaQuery.of(context).size.height * 0.6;
+
+      return StaggeredGridView.countBuilder(
+        controller: searchHandler.gridScrollController,
+        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+        addAutomaticKeepAlives: false,
+        shrinkWrap: false,
+        itemCount: widget.tab.booruHandler.filteredFetched.length,
+        padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
+        crossAxisCount: columnsCount,
+        itemBuilder: (BuildContext context, int index) {
+          double? widthData = widget.tab.booruHandler.filteredFetched[index].fileWidth ?? null;
+          double? heightData = widget.tab.booruHandler.filteredFetched[index].fileHeight ?? null;
+          
+          double possibleWidth = itemMaxWidth;
+          double possibleHeight = itemMaxWidth;
+          bool hasSizeData = heightData != null && widthData != null;
+          if(hasSizeData) {
+            double aspectRatio = widthData / heightData;
+            possibleHeight = possibleWidth / aspectRatio;
+          }
+          // force to use minimum 100 px and max 60% of screen height
+          possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
+          
+          return Container(
+            height: possibleHeight,
+            width: possibleWidth,
+            // constraints: hasSizeData
+            //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
+            //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
+            child: cardItemBuild(index, columnsCount),
+          );
+        },
+        staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
+        mainAxisSpacing: 4.0,
+        crossAxisSpacing: 4.0,
+      );
+    });
+  }
+
+  Widget staggeredBetterBuilder() {
+    int columnsCount =
+      (MediaQuery.of(context).orientation == Orientation.portrait)
+          ? settingsHandler.portraitColumns
+          : settingsHandler.landscapeColumns;
+      
+    return LayoutBuilder(builder: (ctx, constraints) {
+      double itemMaxWidth = constraints.maxWidth / columnsCount; //MediaQuery.of(context).size.width / columnsCount;
+      double itemMaxHeight = itemMaxWidth * (16 / 9); //MediaQuery.of(context).size.height * 0.6;
+      return Obx(() {
+        return WaterfallFlow.builder(
+          controller: searchHandler.gridScrollController,
+          physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+          shrinkWrap: false,
+          addAutomaticKeepAlives: false,
+          cacheExtent: 200,
+          itemCount: widget.tab.booruHandler.filteredFetched.length,
+          padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
+          gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columnsCount,
+            mainAxisSpacing: 4.0,
+            crossAxisSpacing: 4.0,
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            double? widthData = widget.tab.booruHandler.filteredFetched[index].fileWidth ?? null;
+            double? heightData = widget.tab.booruHandler.filteredFetched[index].fileHeight ?? null;
+            
+            double possibleWidth = itemMaxWidth;
+            double possibleHeight = itemMaxWidth;
+            bool hasSizeData = heightData != null && widthData != null;
+            if(hasSizeData) {
+              double aspectRatio = widthData / heightData;
+              possibleHeight = possibleWidth / aspectRatio;
+            }
+            // force to use minimum 100 px and max 60% of screen height
+            possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
+            
+            return Container(
+              height: possibleHeight,
+              width: possibleWidth,
+              // constraints: hasSizeData
+              //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
+              //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
+              child: cardItemBuild(index, columnsCount),
+            );
+          },
         );
-      },
-      staggeredTileBuilder: (int index) => StaggeredTile.fit(1),
-      mainAxisSpacing: 4.0,
-      crossAxisSpacing: 4.0,
-    );
+      });
+    });
+  }
+
+  Widget wrapButton(Widget child) {
+    return Container(color: Get.theme.colorScheme.background.withOpacity(0.66), child: child);
   }
 
   @override
@@ -341,87 +556,265 @@ class _WaterfallState extends State<WaterfallView> {
 
     if (FocusScope.of(context).focusedChild == null){
       print("kb focus node requesting focus");
-      //kbFocusNode.requestFocus();
+      kbFocusNode.requestFocus();
     }
+
+    // print('BUILD CALL: ${widget.tab.booruHandler.filteredFetched.length}');
+
+    final String errorFormatted = widget.tab.booruHandler.errorString.isNotEmpty ? '\n${widget.tab.booruHandler.errorString}' : '';
+    final String clickName = (Platform.isWindows || Platform.isLinux) ? 'Click' : 'Tap';
+    int nowMils = DateTime.now().millisecondsSinceEpoch;
+    int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
+    String sinceStartText = sinceStart > 0 ? 'Started ${sinceStart.toString()} second${sinceStart == 1 ? '' : 's'} ago' : '';
 
     return RawKeyboardListener(
       autofocus: false,
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event){
-        if (event.runtimeType == RawKeyDownEvent){
-          if(event.isKeyPressed(LogicalKeyboardKey.arrowDown) || event.isKeyPressed(LogicalKeyboardKey.keyJ)){
-            gridController.animateTo(gridController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
-          } else if(event.isKeyPressed(LogicalKeyboardKey.arrowUp) || event.isKeyPressed(LogicalKeyboardKey.keyK)){
-            gridController.animateTo(gridController.offset - 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+        BooruItem? item;
+        if (event.runtimeType == RawKeyDownEvent) {
+          if(event.isKeyPressed(LogicalKeyboardKey.arrowDown) || event.isKeyPressed(LogicalKeyboardKey.keyK) || event.isKeyPressed(LogicalKeyboardKey.keyS)) {
+            searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+
+          } else if(event.isKeyPressed(LogicalKeyboardKey.arrowUp) || event.isKeyPressed(LogicalKeyboardKey.keyJ) || event.isKeyPressed(LogicalKeyboardKey.keyW)) {
+            searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset - 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
+
+          } else if(event.isKeyPressed(LogicalKeyboardKey.keyD)) {
+            final oldIndex = widget.tab.booruHandler.filteredFetched.indexWhere((el) => el == widget.tab.currentItem.value);
+            if((oldIndex + 1) < widget.tab.booruHandler.filteredFetched.length) {
+              item = widget.tab.booruHandler.filteredFetched[oldIndex + 1];
+              viewerHandler.setCurrent(item.key);
+              widget.tab.currentItem.value = item;
+              widget.tab.viewedIndex.value = oldIndex + 1;
+            }
+
+          } else if(event.isKeyPressed(LogicalKeyboardKey.keyA)) {
+            final oldIndex = widget.tab.booruHandler.filteredFetched.indexWhere((el) => el == widget.tab.currentItem.value);
+            if((oldIndex - 1) > -1) {
+              item = widget.tab.booruHandler.filteredFetched[oldIndex - 1];
+              viewerHandler.setCurrent(item.key);
+              widget.tab.currentItem.value = item;
+              widget.tab.viewedIndex.value = oldIndex - 1;
+            }
+
+          } else if(event.isKeyPressed(LogicalKeyboardKey.escape)) {
+            viewerHandler.dropCurrent();
+            widget.tab.currentItem.value = BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
+            // widget.tab.viewedIndex.value = 0;
+
           }
         }
       },
-      child: Column(
+      child: Stack(
+        alignment: Alignment.bottomCenter,
         children: [
-          if(fetched.length == 0 && !isLastPage)
-            Expanded(child: Center(child: CircularProgressIndicator())),
+          // Obx(() => Center(child: Text('Loaded/Total: ${widget.tab.booruHandler.filteredFetched.length}/${widget.tab.booruHandler.totalCount.value}'))),
 
-          Expanded(
-            child: NotificationListener<ScrollUpdateNotification>(
-              child: Scrollbar(
-                controller: gridController,
-                interactive: true,
-                thickness: 6,
-                radius: Radius.circular(10),
-                isAlwaysShown: true,
-                child: RefreshIndicator(
-                  displacement: 80,
-                  strokeWidth: 4,
-                  color: Get.context!.theme.accentColor,
-                  onRefresh: () async {
-                    widget.searchAction(widget.searchGlobals.tags);
-                  },
+          NotificationListener<ScrollUpdateNotification>(
+            child: Scrollbar(
+              controller: searchHandler.gridScrollController,
+              interactive: true,
+              thickness: 6,
+              radius: Radius.circular(10),
+              isAlwaysShown: true,
+              child: RefreshIndicator(
+                triggerMode: RefreshIndicatorTriggerMode.anywhere,
+                displacement: 80,
+                strokeWidth: 4,
+                color: Get.theme.colorScheme.secondary,
+                onRefresh: () async {
+                  searchHandler.searchAction(widget.tab.tags, null);
+                },
+                child: ImprovedScrolling(
+                  scrollController: searchHandler.gridScrollController,
+                  // onScroll: (scrollOffset) => debugPrint(
+                  //   'Scroll offset: $scrollOffset',
+                  // ),
+                  // onMMBScrollStateChanged: (scrolling) => debugPrint(
+                  //   'Is scrolling: $scrolling',
+                  // ),
+                  // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
+                  //       'Cursor position: $localCursorOffset\n'
+                  //       'Scroll activity: $scrollActivity',
+                  // ),
+                  enableMMBScrolling: true,
+                  enableKeyboardScrolling: true,
+                  enableCustomMouseWheelScrolling: true,
+                  // mmbScrollConfig: MMBScrollConfig(
+                  //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
+                  // ),
+                  keyboardScrollConfig: KeyboardScrollConfig(
+                    arrowsScrollAmount: 250.0,
+                    homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
+                      return const Duration(milliseconds: 100);
+                    },
+                    endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
+                      return const Duration(milliseconds: 2000);
+                    },
+                  ),
+                  customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
+                    scrollAmountMultiplier: 15.0,
+                  ),
                   // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
-                  child: (widget.settingsHandler.previewDisplay != 'Staggered' || !widget.searchGlobals.booruHandler!.hasSizeData) ? gridBuilder() : staggeredBuilder(),
+                  child: (settingsHandler.previewDisplay != 'Staggered' || !widget.tab.booruHandler.hasSizeData)
+                    ? gridBuilder()
+                    : staggeredBetterBuilder() //staggeredBuilder()
                 ),
               ),
-              onNotification: (notif) {
-                widget.searchGlobals.scrollPosition = gridController.offset;
+            ),
+            onNotification: (notif) {
+              widget.tab.scrollPosition = searchHandler.gridScrollController.offset;
 
-                //print('SCROLL NOTIFICATION');
-                //print(gridController.position.maxScrollExtent);
-                //print(notif.metrics); // pixels before viewport, in viewport, after viewport
+              //print('SCROLL NOTIFICATION');
+              //print(searchHandler.gridScrollController.position.maxScrollExtent);
+              //print(notif.metrics); // pixels before viewport, in viewport, after viewport
 
-                bool isNotAtStart = notif.metrics.pixels > 0;
-                bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
-                bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
-                if(!isLoading) {
-                  if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
-                    filteredSearch();
-                  }
+              bool isNotAtStart = notif.metrics.pixels > 0;
+              bool isAtOrNearEdge = notif.metrics.atEdge || notif.metrics.pixels > (notif.metrics.maxScrollExtent - (notif.metrics.extentInside * 2)); // trigger new page when at edge or scroll position is less than 2 viewports
+              bool isScreenFilled = notif.metrics.extentBefore != 0 || notif.metrics.extentAfter != 0; // for cases when first page doesn't fill the screen
+
+              if(!searchHandler.isLoading.value) {
+                if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
+                  filteredSearch();
                 }
-                return true;
-              },
-            )
+              }
+              return true;
+            },
           ),
 
-          if(isLoading && !isLastPage)
-            Container(
-              padding: EdgeInsets.only(top: 5, bottom: 5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  const SizedBox(width: 15),
-                  Text('Loading page #${widget.searchGlobals.pageNum.toString()}')
-                ]
-              )
-            ),
+          // error buttons testing
+          // Column(children: [
+          //   SettingsButton(
+          //     name: 'No Data Loaded',
+          //     subtitle: Text('$clickName Here to Reload'),
+          //     icon: Icon(Icons.refresh),
+          //     action: () {
+          //       retryLastPage();
+          //     },
+          //   ),
+          //   SettingsButton(
+          //     name: 'You Reached the End (${widget.tab.booruHandler.pageNum} ${widget.tab.booruHandler.pageNum.value == 1 ? 'page' : 'pages'})',
+          //     subtitle: Text('$clickName Here to Reload Last Page'),
+          //     icon: Icon(Icons.refresh),
+          //     action: () {
+          //       retryLastPage();
+          //     },
+          //   ),
+          //   SettingsButton(
+          //     name: 'Loading Page #${widget.tab.booruHandler.pageNum}',
+          //     subtitle: Text(sinceStartText),
+          //     icon: SizedBox(
+          //       width: 30,
+          //       height: 30,
+          //       child: CircularProgressIndicator(
+          //         valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+          //       ),
+          //     ),
+          //   ),
+          //   SettingsButton(
+          //     name: 'Error happened when Loading Page #${widget.tab.booruHandler.pageNum}:$errorFormatted',
+          //     subtitle: Text('$clickName Here to Retry'),
+          //     icon: Icon(Icons.refresh),
+          //     action: () {
+          //       retryLastPage();
+          //     },
+          //   ),
+          //   SettingsButton(
+          //     name: 'Error, no data loaded:',
+          //     subtitle: Text('$clickName Here to Retry'),
+          //     icon: Icon(Icons.refresh),
+          //     action: () {
+          //       retryLastPage();
+          //     },
+          //   ),
+          // ]),
 
-          if(isLastPage && fetched.length > 0) 
-            Center(
-              child: GestureDetector(
-                onTap: retryLastPage,
-                child: Text('You Reached the End (${widget.searchGlobals.pageNum.toString()} pages)')
-              )
-            ),
-          if(isLastPage && fetched.length == 0)
-            Expanded(child:Center(child: Text('No Data Loaded'))),
+          Obx(() {
+            if(searchHandler.isLastPage.value) {
+              // if last page...
+              if(widget.tab.booruHandler.filteredFetched.length == 0) {
+                // ... and no items loaded
+                return wrapButton(SettingsButton(
+                  name: 'No Data Loaded',
+                  subtitle: Text('$clickName Here to Reload'),
+                  icon: Icon(Icons.refresh),
+                  dense: true,
+                  action: () {
+                    retryLastPage();
+                  },
+                  drawBottomBorder: false,
+                ));
+              } else { //if(widget.tab.booruHandler.filteredFetched.length > 0) {
+                // .. has items loaded
+                return wrapButton(SettingsButton(
+                  name: 'You Reached the End (${widget.tab.booruHandler.pageNum} ${widget.tab.booruHandler.pageNum.value == 1 ? 'page' : 'pages'})',
+                  subtitle: Text('$clickName Here to Reload Last Page'),
+                  icon: Icon(Icons.refresh),
+                  dense: true,
+                  action: () {
+                    retryLastPage();
+                  },
+                  drawBottomBorder: false,
+                ));
+              }
+            } else {
+              // if not last page...
+              if(searchHandler.isLoading.value) {
+                // ... and is currently loading
+                return wrapButton(SettingsButton(
+                  name: 'Loading Page #${widget.tab.booruHandler.pageNum}',
+                  subtitle: AnimatedOpacity(
+                    opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 200),
+                    child: Text(sinceStartText),
+                  ),
+                  icon: SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+                    ),
+                  ),
+                  dense: true,
+                  action: () {
+                    retryLastPage();
+                  },
+                  drawBottomBorder: false,
+                ));
+              } else {
+                if (widget.tab.booruHandler.errorString.isNotEmpty) {
+                  // ... if error happened
+                  return wrapButton(SettingsButton(
+                    name: 'Error happened when Loading Page #${widget.tab.booruHandler.pageNum}:${errorFormatted}',
+                    subtitle: Text('$clickName Here to Retry'),
+                    icon: Icon(Icons.refresh),
+                    dense: true,
+                    action: () {
+                      retryLastPage();
+                    },
+                    drawBottomBorder: false,
+                  ));
+                } else if(widget.tab.booruHandler.filteredFetched.length == 0) {
+                  // ... no items loaded
+                  return wrapButton(SettingsButton(
+                    name: 'Error, no data loaded:',
+                    subtitle: Text('$clickName Here to Retry'),
+                    icon: Icon(Icons.refresh),
+                    dense: true,
+                    action: () {
+                      retryLastPage();
+                    },
+                    drawBottomBorder: false,
+                  ));
+                } else {
+                  // return const SizedBox.shrink();
+
+                  // add a small container to avoid scrolling when swiping from the bottom of the screen (navigation gestures)
+                  return Container(height: 10, color: Colors.transparent);
+                }
+              }
+            }
+          }),
         ],
       )
     );

@@ -1,229 +1,202 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'dart:core';
+import 'dart:io';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:core';
 import 'package:get/get.dart';
 
-import '../ServiceHandler.dart';
-import 'LoliSyncSendPage.dart';
-import 'LoliSyncServerPage.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'package:LoliSnatcher/pages/LoliSyncSendPage.dart';
+import 'package:LoliSnatcher/pages/LoliSyncServerPage.dart';
 
 class LoliSyncPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  LoliSyncPage(this.settingsHandler);
+  LoliSyncPage();
   @override
   _LoliSyncPageState createState() => _LoliSyncPageState();
 }
-
 class _LoliSyncPageState extends State<LoliSyncPage> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final ipController = TextEditingController();
   final portController = TextEditingController();
   bool favourites = false, settings = false, booru = false;
-  LoliSync loliSync = new LoliSync();
-  @override
-  // These lines are done in init state as they only need to be run once when the widget is first loaded
-  void initState() {
-    super.initState();
-  }
+  final LoliSync loliSync = LoliSync();
+  List<NetworkInterface> ipList = [];
+  List<String> ipListNames = ['Auto', 'Localhost'];
+  String selectedInterface = 'Auto';
+  String? selectedAddress;
+
+  final startPortController = TextEditingController();
+  String startPort = '';
+
   Future<bool> _onWillPop() async {
+    settingsHandler.lastSyncIp = ipController.text;
+    settingsHandler.lastSyncPort = portController.text;
+    settingsHandler.saveSettings(restate: false);
     return true;
   }
+
+  @override
+  void initState() {
+    super.initState();
+    ipController.text = settingsHandler.lastSyncIp;
+    portController.text = settingsHandler.lastSyncPort;
+    getIPList();
+  }
+
+  void getIPList() async {
+    List<NetworkInterface> temp = await ServiceHandler.getIPList();
+    ipList.addAll(temp);
+    ipListNames.addAll(temp.map((e) => e.name).toList());
+    setState(() { });
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Loli Sync"),
-          leading: new IconButton(
-              icon: new Icon(Icons.arrow_back),
-              onPressed: () async{
+          title: Text("LoliSync"),
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () async {
                 Get.back();
-              }
-          ),
+              }),
         ),
-        body:Center(
+        body: Center(
           child: ListView(
             children: <Widget>[
               Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: Text("Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("IP Addr:"),
-                    Container(width: 10),
-                    new Expanded(
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10,0,0,0),
-                        child: TextField(
-                          controller: ipController,
-                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp('[0-9.]'))
-                          ],
-                          decoration: InputDecoration(
-                            hintText: "Host IP Address",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                              gapPadding: 0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Port:"),
-                    Container(width: 10),
-                    new Expanded(
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10,0,0,0),
-                        child: TextField(
-                          controller: portController,
-                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          decoration: InputDecoration(
-                            hintText: "Host Port",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                              gapPadding: 0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
                 margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child:
-                Row(children: [
-                    Text("Send Favourites: "),
-                    Checkbox(
-                    value: favourites,
-                    onChanged: (newValue) {
-                      setState(() {
-                        favourites = newValue!;
-                      });
-                    },
-                   activeColor: Get.context!.theme.primaryColor,
-                  ),
-                  ]
+                child: Text(
+                  "Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
                 ),
+              SettingsTextInput(
+                controller: ipController,
+                title: 'IP Address',
+                hintText: "Host IP Address (i.e. 192.168.1.1)",
+                inputType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child:
-                Row(children: [
-                  Text("Send settings: "),
-                  Checkbox(
-                    value: settings,
-                    onChanged: (newValue) {
-                      setState(() {
-                        settings = newValue!;
-                      });
-                    },
-                    activeColor: Get.context!.theme.primaryColor,
-                  ),
-                ]
-                ),
+              SettingsTextInput(
+                controller: portController,
+                title: 'Port',
+                hintText: "Host Port (i.e. 7777)",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child:
-                Row(children: [
-                  Text("Send Booru Configs: "),
-                  Checkbox(
-                    value: booru,
-                    onChanged: (newValue) {
-                      setState(() {
-                        booru = newValue!;
-                      });
-                    },
-                    activeColor: Get.context!.theme.primaryColor,
-                  ),
-                ]
-                ),
+              SettingsToggle(
+                value: favourites,
+                onChanged: (newValue) {
+                  setState(() {
+                    favourites = newValue;
+                  });
+                },
+                title: 'Send Favourites',
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: () async{
-                    if (ipController.text == "" && portController.text == ""){
-                      ServiceHandler.displayToast("The port and ip fields must be filled");
-                    } else if(!favourites && !settings && !booru){
-                      ServiceHandler.displayToast("You haven't selected anything to sync");
-                    } else {
-                      if(widget.settingsHandler.appMode == "Desktop"){
-                        Get.dialog(Dialog(
-                          child: Container(
-                            width: 500,
-                            child: LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text, settings, favourites, booru),
-                          ),
-                        ));
-                      } else {
-                        Get.to(() => LoliSyncSendPage(widget.settingsHandler,ipController.text,portController.text, settings, favourites, booru));
-                      }
+              SettingsToggle(
+                value: settings,
+                onChanged: (newValue) {
+                  setState(() {
+                    settings = newValue;
+                  });
+                },
+                title: 'Send Settings',
+              ),
+              SettingsToggle(
+                value: booru,
+                onChanged: (newValue) {
+                  setState(() {
+                    booru = newValue;
+                  });
+                },
+                title: 'Send Booru Configs',
+              ),
+
+              SettingsButton(name: '', enabled: false),
+              SettingsButton(
+                name: 'Start Sync',
+                icon: Icon(Icons.send_to_mobile),
+                action: () {
+                  bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
+                  bool isAnySyncSelected = favourites || settings || booru;
+                  bool syncAllowed = isAddressEntered && isAnySyncSelected;
+
+                  if(syncAllowed) {
+                    var page = () => LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru);
+                    SettingsPageOpen(context: context, page: page);
+                  } else {
+                    String errorString = '???';
+                    if (!isAddressEntered) {
+                      errorString = 'The Port and IP fields cannot be empty!';
+                    } else if (!isAnySyncSelected) {
+                      errorString = "You haven't selected anything to sync!";
                     }
-                  },
-                  child: Text("Start Sync", style: TextStyle(color: Colors.white)),
-                ),
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Error!",
+                        style: TextStyle(fontSize: 20)
+                      ),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(errorString),
+                        ],
+                      ),
+                      sideColor: Colors.red,
+                      leadingIcon: Icons.error,
+                      leadingIconColor: Colors.red,
+                    );
+                  }
+                },
               ),
+
+              SettingsButton(name: '', enabled: false),
               Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 child: Text("Start the server if you want your device to recieve data from another, do not use this on public wifi as you might get pozzed"),
               ),
+              SettingsDropdown(
+                selected: selectedInterface,
+                values: ipListNames,
+                onChanged: (String? newValue) {
+                  selectedInterface = newValue!;
+                  NetworkInterface? findInterface;
+                  try {
+                     findInterface = ipList.firstWhere((el) => el.name == newValue);
+                  } catch (e) {
+                    
+                  }
+                  if(newValue == 'Localhost') {
+                    selectedAddress = '127.0.0.1';
+                  } else {
+                    selectedAddress = findInterface?.addresses[0].address;
+                  }
+                  setState(() { });
+                },
+                title: 'Available Network Interfaces'
+              ),
               Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: LoliSyncServerPage(widget.settingsHandler),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => LoliSyncServerPage(widget.settingsHandler));
-                    }
-                  },
-                  child: Text("Start Server", style: TextStyle(color: Colors.white)),
-                ),
+                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: Text('Selected Interface IP: ${selectedAddress ?? 'none'}'),
+              ),
+              SettingsTextInput(
+                controller: startPortController,
+                title: 'Start Server at Port',
+                hintText: "Server Port (will default to '1234' if empty)",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+              ),
+              SettingsButton(
+                name: 'Start Receiver Server',
+                icon: Icon(Icons.dns_outlined),
+                page: () => LoliSyncServerPage(selectedAddress, startPortController.text.isEmpty ? '1234' : startPortController.text),
               ),
             ],
           ),
@@ -232,4 +205,3 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     );
   }
 }
-

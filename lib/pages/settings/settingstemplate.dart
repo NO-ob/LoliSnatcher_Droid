@@ -1,19 +1,18 @@
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../SettingsHandler.dart';
 
 class SettingsTemplate extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  SettingsTemplate(this.settingsHandler);
+  SettingsTemplate();
   @override
   _SettingsTemplateState createState() => _SettingsTemplateState();
 }
 
 class _SettingsTemplateState extends State<SettingsTemplate> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+
   @override
   void initState(){
     super.initState();
@@ -21,7 +20,7 @@ class _SettingsTemplateState extends State<SettingsTemplate> {
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     // Set settingshandler values here
-    bool result = await widget.settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 

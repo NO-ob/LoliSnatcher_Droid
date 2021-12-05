@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'dart:core';
+
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:get/get.dart';
 
-import '../ServiceHandler.dart';
+import '../SettingsHandler.dart';
 
 class AboutPage extends StatelessWidget {
+  final String email = 'no.aisu@protonmail.com';
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,88 +22,72 @@ class AboutPage extends StatelessWidget {
           children: <Widget>[
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
-              child: Text("Loli Snatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo."),
+              child: Text("LoliSnatcher is open source and licensed under GPLv3 the source code is available on github. Please report any issues or feature requests in the issues section of the repo."),
             ),
-            Container(
-              margin: EdgeInsets.fromLTRB(10,10,10,10),
-              child: Row(
-                children: <Widget>[
-                  Text("Contact: "),
-                  SelectableText("no.aisu@protonmail.com"),
-                ],
-              ),
+            SettingsButton(
+              name: 'Contact: $email',
+              icon: Icon(Icons.email),
+              trailingIcon: Icon(Icons.exit_to_app),
+              action: () {
+                ServiceHandler.launchURL("mailto:$email");
+                // Clipboard.setData(ClipboardData(text: email));
+                // ServiceHandler.displayToast('Email copied to clipboard!');
+              }
             ),
-            Container(
-              alignment: Alignment.center,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                ),
-                onPressed: (){
-                  ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
-                },
-                child: Text('GitHub', style: TextStyle(color: Colors.white))
-              ),
+            SettingsButton(
+              name: 'Github',
+              icon: Icon(Icons.public),
+              trailingIcon: Icon(Icons.exit_to_app),
+              action: () {
+                ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid");
+              }
             ),
+
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Text("A big thanks to Showers-U for letting me use their artwork for the app logo please check them out on pixiv"),
             ),
-            Container(
-              alignment: Alignment.center,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                ),
-                onPressed: (){
-                  ServiceHandler.launchURL("https://www.pixiv.net/en/users/28366691");
-                },
-                child: Text("Showers-U - Pixiv", style: TextStyle(color: Colors.white)),
-              ),
+
+            EnvironmentConfig.isFromStore ? Container() : SettingsButton(
+              name: 'Showers-U - Pixiv',
+              icon: Icon(Icons.public),
+              trailingIcon: Icon(Icons.exit_to_app),
+              action: () {
+                ServiceHandler.launchURL("https://www.pixiv.net/en/users/28366691");
+              }
             ),
+
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Text("A big thanks to NANI-SORE for fixing a bunch of bugs and adding some needed features"),
             ),
-            Container(
-              alignment: Alignment.center,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                ),
-                onPressed: (){
-                  ServiceHandler.launchURL("https://github.com/NANI-SORE");
-                },
-                child: Text("NANI-SORE - Github", style: TextStyle(color: Colors.white)),
-              ),
+            SettingsButton(
+              name: 'NANI-SORE - Github',
+              icon: Icon(Icons.public),
+              trailingIcon: Icon(Icons.exit_to_app),
+              action: () {
+                ServiceHandler.launchURL("https://github.com/NANI-SORE");
+              }
             ),
+
             Container(
               margin: EdgeInsets.fromLTRB(10,10,10,10),
               child: Text("Latest version and full changelogs can be found at the Github Releases page:"),
             ),
-            Container(
-              alignment: Alignment.center,
-              child: TextButton(
-                style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                ),
-                onPressed: (){
-                  ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/releases");
-                },
-                child: Text("Releases", style: TextStyle(color: Colors.white)),
-              ),
+            SettingsButton(
+              name: 'Releases',
+              icon: Icon(Icons.public),
+              trailingIcon: Icon(Icons.exit_to_app),
+              action: () {
+                ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/releases");
+              }
+            ),
+            SettingsButton(
+              name: 'Licenses',
+              icon: Icon(Icons.document_scanner),
+              action: () {
+                showLicensePage(context: context, applicationName: 'LoliSnatcher');
+              }
             ),
           ],
         ),

@@ -4,89 +4,100 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
 import 'package:LoliSnatcher/widgets/HistoryList.dart';
 
 class TabBoxButtons extends StatefulWidget {
-  List<SearchGlobals> searchGlobals;
-  int globalsIndex;
-  TextEditingController searchTagsController;
-  SettingsHandler settingsHandler;
-  final Function setParentGlobalsIndex;
-  TabBoxButtons(this.searchGlobals,this.globalsIndex,this.searchTagsController,this.settingsHandler,this.setParentGlobalsIndex);
+  final bool withSecondary;
+  final MainAxisAlignment? alignment;
+  TabBoxButtons(this.withSecondary, this.alignment);
+
   @override
   _TabBoxButtonsState createState() => _TabBoxButtonsState();
 }
 
 class _TabBoxButtonsState extends State<TabBoxButtons> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   void showHistory() async {
-    showDialog(context: context, builder: (context) {
-      return StatefulBuilder(builder: (context, setDialogState) {
-        return InfoDialog(
-          null,
-          [
-            HistoryList(widget.searchGlobals, widget.globalsIndex, widget.searchTagsController, widget.settingsHandler, widget.setParentGlobalsIndex)
-          ],
-          CrossAxisAlignment.start
-        );
-      });
-    });
+    showDialog(
+      context: context,
+      builder: (context) {
+        return HistoryList();
+      }
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Obx(() {
+      // no tabs
+      if(searchHandler.list.length == 0) {
+        return const SizedBox();
+      }
+
+      return Row(
+        mainAxisAlignment: widget.alignment ?? MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const SizedBox(width: 30),
-                IconButton(
-                  icon: Icon(Icons.remove_circle_outline, color: Get.context!.theme.accentColor),
-                  onPressed: () {
-                    // Remove selected searchglobal from list and apply nearest to search bar
-                    setState((){
-                      widget.searchGlobals[widget.globalsIndex].removeTab.value = "remove";
-                    });
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.history, color: Get.context!.theme.accentColor),
-                  onPressed: () async {
-                    showHistory();
-                  },
-                ),
-                GestureDetector(
-                  onLongPress: () {
-                    widget.searchTagsController.text = widget.settingsHandler.defTags;
-                    widget.searchGlobals[widget.globalsIndex].newTab.value = widget.settingsHandler.defTags;
-                    widget.setParentGlobalsIndex(widget.searchGlobals.length - 1, null); // set last tab
-                  },
-                  child: IconButton(
-                    icon: Icon(Icons.add_circle_outline, color: Get.context!.theme.accentColor),
-                    onPressed: () {
-                      // add a new search global to the list
-                      widget.searchGlobals[widget.globalsIndex].newTab.value = widget.settingsHandler.defTags;
-                      widget.setParentGlobalsIndex(widget.globalsIndex, null);
-                      // setState((){
-                        // widget.searchGlobals.add(new SearchGlobals(widget.searchGlobals[widget.globalsIndex].selectedBooru, widget.settingsHandler.defTags)); // Set selected booru
-                        // searchGlobals.add(new SearchGlobals(null, widget.settingsHandler.defTags)); // Set empty booru
-                      // });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 30),
-              ]
-            )
-          )
-        ],
-      )
-    );
+        children: [
+          const SizedBox(width: 25),
+
+          if(widget.withSecondary)
+            IconButton(
+              icon: Icon(Icons.arrow_upward, color: Get.theme.colorScheme.secondary),
+              onPressed: () {
+                // switch to the prev tab, loop if reached the first
+                if((searchHandler.index.value - 1) < 0) {
+                  searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                } else {
+                  searchHandler.changeTabIndex(searchHandler.index.value - 1);
+                }
+              },
+            ),
+
+          IconButton(
+            icon: Icon(Icons.remove_circle_outline, color: Get.theme.colorScheme.secondary),
+            onPressed: () {
+              // Remove selected searchglobal from list and apply nearest to search bar
+              searchHandler.removeAt();
+            },
+          ),
+
+          IconButton(
+            icon: Icon(Icons.history, color: Get.theme.colorScheme.secondary),
+            onPressed: () async {
+              showHistory();
+            },
+          ),
+
+          IconButton(
+            icon: Icon(Icons.add_circle_outline, color: Get.theme.colorScheme.secondary),
+            onPressed: () {
+              // add new tab and switch to it
+              searchHandler.searchTextController.text = settingsHandler.defTags;
+              searchHandler.addTabByString(settingsHandler.defTags, switchToNew: true);
+
+              // add new tab to the list end
+              // searchHandler.addTabByString(settingsHandler.defTags);
+            },
+          ),
+
+          if(widget.withSecondary)
+            IconButton(
+              icon: Icon(Icons.arrow_downward, color: Get.theme.colorScheme.secondary),
+              onPressed: () {
+                // switch to the next tab, loop if reached the last
+                if((searchHandler.index.value + 1) > (searchHandler.list.length - 1)) {
+                  searchHandler.changeTabIndex(0);
+                } else {
+                  searchHandler.changeTabIndex(searchHandler.index.value + 1);
+                }
+              },
+            ),
+
+          const SizedBox(width: 25),
+        ]
+      );
+    });
   }
 }

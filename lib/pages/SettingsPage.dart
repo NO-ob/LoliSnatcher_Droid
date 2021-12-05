@@ -1,39 +1,39 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/pages/settings/BehaviourPage.dart';
+import 'package:LoliSnatcher/pages/AboutPage.dart';
+import 'package:LoliSnatcher/pages/settings/SaveCachePage.dart';
 import 'package:LoliSnatcher/pages/settings/BooruPage.dart';
 import 'package:LoliSnatcher/pages/settings/DatabasePage.dart';
+import 'package:LoliSnatcher/pages/settings/DebugPage.dart';
 import 'package:LoliSnatcher/pages/settings/GalleryPage.dart';
 import 'package:LoliSnatcher/pages/settings/UserInterfacePage.dart';
 import 'package:LoliSnatcher/pages/settings/FilterTagsPage.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import '../SettingsHandler.dart';
-import 'package:get/get.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/pages/LoliSyncPage.dart';
+import 'package:LoliSnatcher/pages/settings/BackupRestorePage.dart';
+import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/MascotImage.dart';
 
-import 'AboutPage.dart';
-import 'help/BooruHelpPage.dart';
 /**
  * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
  */
-class SettingsPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  SettingsPage(this.settingsHandler);
-  @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
+class SettingsPage extends StatelessWidget {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  int debugTaps = 0;
 
-class _SettingsPageState extends State<SettingsPage> {
-  @override
-  // These lines are done in init state as they only need to be run once when the widget is first loaded
-  void initState() {
-    super.initState();
-  }
   Future<bool> _onWillPop() async {
-    bool result = await widget.settingsHandler.saveSettings();
-    await widget.settingsHandler.loadSettings();
-    await widget.settingsHandler.getBooru();
+    bool result = await settingsHandler.saveSettings(restate: true);
+    await settingsHandler.loadSettings();
+    // await settingsHandler.getBooru();
     return result;
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -42,10 +42,9 @@ class _SettingsPageState extends State<SettingsPage> {
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
           title: Text("Settings"),
-          leading: new IconButton(
-              icon: new Icon(Icons.arrow_back),
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back),
               onPressed: () async{
-                await widget.settingsHandler.getBooru();
                 Get.back();
               }
           ),
@@ -53,203 +52,134 @@ class _SettingsPageState extends State<SettingsPage> {
         body:Center(
           child: ListView(
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: Text(
-                    "Settings are now saved when closing the settings pages"
-                ),
+              SettingsButton(
+                name: 'Boorus & Search',
+                icon: Icon(Icons.image_search),
+                page: () => BooruPage()
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
+              SettingsButton(
+                name: 'Interface',
+                icon: Icon(Icons.grid_on),
+                page: () => UserInterfacePage()
+              ),
+              SettingsButton(
+                name: 'Themes',
+                icon: Icon(Icons.palette),
+                page: () => ThemePage()
+              ),
+              SettingsButton(
+                name: 'Gallery',
+                icon: Icon(Icons.view_carousel),
+                page: () => GalleryPage()
+              ),
+              SettingsButton(
+                name: 'Snatching & Caching',
+                icon: Icon(Icons.settings),
+                page: () => SaveCachePage()
+              ),
+              SettingsButton(
+                name: 'Tag Filters',
+                icon: Icon(CupertinoIcons.tag),
+                page: () => FiltersEdit()
+              ),
+              SettingsButton(
+                name: 'Database',
+                icon: Icon(Icons.list_alt),
+                page: () => DatabasePage()
+              ),
+              SettingsButton(
+                name: 'Backup & Restore [Beta]',
+                icon: Icon(Icons.restore_page),
+                page: () => BackupRestorePage(),
+              ),
+              SettingsButton(
+                name: 'LoliSync',
+                icon: Icon(Icons.sync),
+                action: settingsHandler.dbEnabled ? null : () {
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: Text(
+                      "Error!",
+                      style: TextStyle(fontSize: 20)
                     ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: BooruPage(widget.settingsHandler),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => BooruPage(widget.settingsHandler));
-                    }
+                    content: Text("Database must be enabled to use LoliSync"),
+                    leadingIcon: Icons.error_outline,
+                    leadingIconColor: Colors.red,
+                    sideColor: Colors.red,
+                  );
+                },
+                page: settingsHandler.dbEnabled ? () => LoliSyncPage() : null,
+              ),
 
-                  },
-                  child: Text("Booru/Search", style: TextStyle(color: Colors.white)),
-                ),
+              SettingsButton(
+                name: 'About',
+                icon: Icon(Icons.info_outline),
+                page: () => AboutPage()
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: UserInterfacePage(widget.settingsHandler),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => UserInterfacePage(widget.settingsHandler));
-                    }
+              SettingsButton(
+                name: 'Check for Updates',
+                icon: Icon(Icons.update),
+                action: () {
+                  settingsHandler.checkUpdate(withMessage: true);
+                },
+              ),
+              SettingsButton(
+                name: 'Help',
+                icon: Icon(Icons.help_center_outlined),
+                action: () {
+                  ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
+                },
+                trailingIcon: Icon(Icons.exit_to_app)
+              ),
 
-                  },
-                  child: Text("User Interface", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: GalleryPage(widget.settingsHandler),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => GalleryPage(widget.settingsHandler));
-                    }
-                  },
-                  child: Text("Gallery/Viewer", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child:BehaviourPage(widget.settingsHandler),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => BehaviourPage(widget.settingsHandler));
-                    }
-                  },
-                  child: Text("Behaviour", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child:FiltersEdit(widget.settingsHandler),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => FiltersEdit(widget.settingsHandler));
-                    }
+              Obx(() {
+                if(settingsHandler.isDebug.value) {
+                  return SettingsButton(
+                    name: 'Debug',
+                    icon: Icon(Icons.developer_mode),
+                    page: () => DebugPage()
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              }),
 
-                  },
-                  child: Text("Tag Filters", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child:DatabasePage(widget.settingsHandler),
+              SettingsButton(
+                name: "Version: ${settingsHandler.verStr}+${settingsHandler.buildNumber}${kDebugMode ? '+Debug' : ''}${EnvironmentConfig.isFromStore ? '+Play' : ''}",
+                icon: Icon(null), // to align with other items
+                action: () {
+                  if(settingsHandler.isDebug.value) {
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text(
+                        "Debug mode is already enabled!",
+                        style: TextStyle(fontSize: 18)
+                      ),
+                      leadingIcon: Icons.warning_amber,
+                      leadingIconColor: Colors.yellow,
+                      sideColor: Colors.yellow,
+                    );
+                  } else {
+                    debugTaps++;
+                    if(debugTaps > 5) {
+                      settingsHandler.isDebug.value = true;
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          "Debug mode is enabled!",
+                          style: TextStyle(fontSize: 18)
                         ),
-                      ));
-                    } else {
-                      Get.to(() => DatabasePage(widget.settingsHandler));
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.green,
+                        sideColor: Colors.green,
+                      );
                     }
+                  }
+                },
+                drawBottomBorder: false
+              ),
 
-                  },
-                  child: Text("Database", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    if(widget.settingsHandler.appMode == "Desktop"){
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child:AboutPage(),
-                        ),
-                      ));
-                    } else {
-                      Get.to(() => AboutPage());
-                    }
-                  },
-                  child: Text("About", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20),
-                      side: BorderSide(color: Get.context!.theme.accentColor),
-                    ),
-                  ),
-                  onPressed: (){
-                    ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
-                  },
-                  child: Text("Help/Wiki", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                child: Text("Version: ${widget.settingsHandler.verStr}" ),
-              )
+              MascotImage(),
             ],
           ),
         ),
@@ -257,5 +187,3 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-
-

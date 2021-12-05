@@ -1,28 +1,26 @@
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:core';
 import 'package:get/get.dart';
 
-import '../ServiceHandler.dart';
-
 class LoliSyncSendPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
   String ip = "";
   String port = "";
   bool favourites = false, settings = false, booru = false;
-  LoliSyncSendPage(this.settingsHandler, this.ip, this.port, this.settings, this.favourites,this.booru);
+  LoliSyncSendPage(this.ip, this.port, this.settings, this.favourites, this.booru);
   @override
   _LoliSyncSendPageState createState() => _LoliSyncSendPageState();
 }
 
 class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
-  LoliSync loliSync = new LoliSync();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  LoliSync loliSync = LoliSync();
   List<String> toSync = [];
   bool serverStarted = false;
+
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
   void initState() {
@@ -37,23 +35,24 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     }
     super.initState();
   }
+
   Future<bool> _onWillPop() async {
     final shouldPop = await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
+        return SettingsDialog(
           title: Text('Are you sure?'),
-          content: Text('Do you want to stop syncing?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Yes', style: TextStyle(color: Colors.white)),
+          contentItems: <Widget>[Text('Do you want to stop syncing?')],
+          actionButtons: <Widget>[
+            ElevatedButton(
+              child: Text('Yes'),
               onPressed: () {
                 loliSync.killSync();
                 Navigator.of(context).pop(true);
               },
             ),
-            TextButton(
-              child: Text('No', style: TextStyle(color: Colors.white)),
+            ElevatedButton(
+              child: Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
@@ -64,6 +63,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     );
     return shouldPop;
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -71,9 +71,9 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Loli Sync"),
-          leading: new IconButton(
-              icon: new Icon(Icons.arrow_back),
+          title: Text("LoliSync"),
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back),
               onPressed: () async{
                 if (await _onWillPop()){
                   Get.back();
@@ -83,7 +83,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startSync(widget.settingsHandler, widget.ip, widget.port, toSync),
+              stream: loliSync.startSync(settingsHandler, widget.ip, widget.port, toSync),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {

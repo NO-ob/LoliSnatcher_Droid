@@ -7,8 +7,8 @@ import 'dart:io' show Platform;
  * The dialog will not show if the user has already accepted perms
  */
 Future getPerms() async{
-  if (Platform.isAndroid){
+  if (Platform.isAndroid || Platform.isIOS){
     return await Permission.storage.request().isGranted;
   }
-  print(Platform.environment['HOME']);
+  // print(Platform.environment['HOME']);
 }

@@ -2,10 +2,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
-import 'libBooru/DBHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:vibration/vibration.dart';
 
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
@@ -19,11 +20,44 @@ class ServiceHandler{
       print(e);
     }
   }
-  // Calls androids native  get storage dir function
+
+  Future<int> getSDKVersion() async {
+    if (Platform.isAndroid) {
+      return getAndroidSDKVersion();
+    } else if (Platform.isLinux) {
+      return 1;
+    } else if (Platform.isWindows) {
+      return 2;
+    } else if(Platform.isIOS) {
+      return 9999;
+    } else {
+      return -1;
+    }
+  }
+
+  Future<int> getAndroidSDKVersion() async{
+    int result = 0;
+    try{
+      result = await platform.invokeMethod("getSdkVersion");
+    } catch(e){
+      print(e);
+    }
+    return result;
+  }
+
+  // Gets main storage dir
   Future<String> getExtDir() async{
     String result = "";
     try{
-      result = await platform.invokeMethod("getExtPath");
+      if(Platform.isAndroid) {
+        result = await platform.invokeMethod("getExtPath");
+      } else if(Platform.isLinux) {
+        result = Platform.environment['HOME']!;
+      } else if(Platform.isWindows) {
+        result = Platform.environment['LOCALAPPDATA']!;
+      } else if(Platform.isIOS) {
+        result = (await getApplicationDocumentsDirectory()).path;
+      }
     } catch(e){
       print(e);
     }
@@ -34,21 +68,75 @@ class ServiceHandler{
     String result = "";
     try {
       result = await platform.invokeMethod("setExtPath");
+      print("Service handler got uri back: $result");
+    } catch (e) {
+      print(e);
+    }
+    //new File(result+"/test.txt").create(recursive: true);
+    return result;
+  }
+  static Future<String> getImageSAFUri() async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("selectImage");
+      print("Service handler got uri back: $result");
+    } catch (e) {
+      print(e);
+    }
+    //new File(result+"/test.txt").create(recursive: true);
+    return result;
+  }
+  static Future<Uint8List?> getSAFFile(String contentUri) async {
+    Uint8List? result;
+    try {
+      result = await platform.invokeMethod("getFileBytes",{"uri":contentUri});
+      print("Got file back");
+    } catch (e) {
+      print(e);
+    }
+    //new File(result+"/test.txt").create(recursive: true);
+    return result;
+  }
+  static Future<String> getSAFFileExtension(String contentUri) async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("getFileExtension",{"uri":contentUri});
+      print("Got file ext back");
       print(result);
     } catch (e) {
       print(e);
     }
+    //new File(result+"/test.txt").create(recursive: true);
     return result;
   }
-  Future<int> getSDKVersion() async{
-    int result = 0;
-    try{
-      result = await platform.invokeMethod("getSdkVersion");
-    } catch(e){
-      print(e);
+
+  Future<String> getConfigDir() async {
+    String result = '';
+    if (Platform.isAndroid){
+      result = "${await getExtDir()}/LoliSnatcher/config/"; // await platform.invokeMethod("getDocumentsPath"); ?
+    } else if (Platform.isLinux){
+      result = "${await getExtDir()}/.loliSnatcher/config/";
+    } else if (Platform.isWindows) {
+      result = "${await getExtDir()}/LoliSnatcher/config/";
+    } else if(Platform.isIOS) {
+      result = "${await getExtDir()}/LoliSnatcher/config/";
     }
     return result;
   }
+  static Future<String> testSAFPersistence() async {
+    print("test saf persistence");
+    String result = "";
+    String safuri = "content://com.android.externalstorage.documents/tree/1206-2917%3ALolisnatcher";
+    try {
+      result = await platform.invokeMethod("testSAF",{"uri" : safuri});
+      print("got saf result" + result);
+    } catch (e) {
+      print(e);
+    }
+    Directory dir = Directory(result);
+    return result;
+  }
+
   Future<String> getDocumentsDir() async{
     String result = "";
     try{
@@ -58,30 +146,43 @@ class ServiceHandler{
     }
     return result;
   }
+
   Future<String> getPicturesDir() async{
     String result = "";
     try{
-      result = await platform.invokeMethod("getPicturesPath");
+      if (Platform.isAndroid){
+        result = "${await platform.invokeMethod("getPicturesPath")}/LoliSnatcher/"; // "${await getExtDir()}/Pictures/LoliSnatcher/";
+      } else if (Platform.isLinux){
+        result = "${await getExtDir()}/Pictures/LoliSnatcher/";
+      } else if (Platform.isWindows){
+        result = "${await getExtDir()}/LoliSnatcher/Pictures/";
+      } else if(Platform.isIOS) {
+        result = "${await getExtDir()}/LoliSnatcher/Pictures/";
+      }
     } catch(e){
       print(e);
     }
     return result;
   }
+
   Future<String> getCacheDir() async{
     String result = "";
     try{
       if (Platform.isAndroid){
         result = await platform.invokeMethod("getCachePath") + "/";
       } else if (Platform.isLinux){
-        result = Platform.environment['HOME']! + "/.loliSnatcher/cache/";
+        result = '${await getExtDir()}/.loliSnatcher/cache/';
       } else if (Platform.isWindows){
-        result = Platform.environment['LOCALAPPDATA']! + "/LoliSnatcher/cache/";
-      } 
+        result = '${await getExtDir()}/LoliSnatcher/cache/';
+      } else if(Platform.isIOS) {
+        result = "${await getExtDir()}/LoliSnatcher/cache/";
+      }
     } catch(e){
       print(e);
     }
     return result;
   }
+
   Future<void> loadShareTextIntent(String text) async{
     try{
       await platform.invokeMethod("shareText",{"text": text});
@@ -91,6 +192,7 @@ class ServiceHandler{
       return;
     }
   }
+
   Future<void> loadShareFileIntent(String filePath, String mimeType) async{
     try{
       await platform.invokeMethod("shareFile", {"path": filePath, "mimeType": mimeType});
@@ -101,77 +203,96 @@ class ServiceHandler{
       return;
     }
   }
+
   static void displayToast (String str){
     if (Platform.isAndroid){
       platform.invokeMethod("toast",{"toastStr" : str});
     }
   }
+
   static void disableSleep (){
     if (Platform.isAndroid){
       platform.invokeMethod("disableSleep");
     }
   }
+
   static void enableSleep (){
     if (Platform.isAndroid){
       platform.invokeMethod("enableSleep");
     }
   }
-  void emptyCache() async{
-    try{
+
+  Future<void> emptyCache() async {
+    try {
       if (Platform.isAndroid){
         await platform.invokeMethod("emptyCache");
+      } else if(Platform.isIOS) {
+        // ???
       } else if (Platform.isLinux || Platform.isWindows){
         String cacheD = await getCacheDir();
-        File cacheDir = new File(cacheD);
-        cacheDir.delete(recursive: true);
+        File cacheDir = File(cacheD);
+        // TODO parse through possible folder list and don't do recursive to exclude wrong path problems
+        await cacheDir.delete(recursive: true);
       }
 
     } catch(e){
       print(e);
     }
+    return;
   }
+
   void deleteDB(SettingsHandler settingsHandler) async{
     if (Platform.isAndroid){
-      File dbFile = new File(settingsHandler.path + "store.db");
+      File dbFile = File(settingsHandler.path + "store.db");
       print(settingsHandler.path);
       await dbFile.delete();
     }
   }
+
   static void makeImmersive(){
     if (Platform.isAndroid){
       platform.invokeMethod("systemUIMode",{"mode":"immersive"});
     }
   }
+
   static void makeNormal(){
     if (Platform.isAndroid){
       platform.invokeMethod("systemUIMode",{"mode":"normal"});
     }
   }
+
   static void setBrightness(double brightness) {
     // TODO WIP
     if (Platform.isAndroid){
       platform.invokeMethod("setBrightness",{"brightness": brightness});
     }
   }
-  static Future<String> getIP() async{
+
+  static Future<String> getIP() async {
     String ip = "";
     // TODO WIP
     if (Platform.isAndroid){
       ip = await platform.invokeMethod("getIP");
     } else {
-      var interface = await NetworkInterface.list();
-      if (interface.isNotEmpty){
-        ip = interface[0].addresses[0].address;
+      var interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
+      if (interfaces.isNotEmpty) {
+        ip = interfaces[0].addresses[0].address;
       }
     }
     return ip;
   }
+
+  static Future<List<NetworkInterface>> getIPList() async {
+    return await NetworkInterface.list(type: InternetAddressType.IPv4);
+  }
+
   static void setVolume(int volume, int showSystemUI) {
     // TODO WIP
     if (Platform.isAndroid){
       platform.invokeMethod("setVolume",{"volume": volume, "showUI": showSystemUI});
     }
   }
+
   static void setVolumeButtons(bool setActive) {
     if (Platform.isAndroid){
       platform.invokeMethod("setVolumeButtons",{"setActive": setActive});
@@ -181,12 +302,15 @@ class ServiceHandler{
   static void launchURL(String url){
     if(Platform.isAndroid){
       platform.invokeMethod("launchURL", {"url":"$url"});
+    } else if(Platform.isIOS) {
+      // ???
     } else if (Platform.isLinux) {
       Process.run('xdg-open', [url]);
     } else if (Platform.isWindows) {
-      Process.run('open', [url]);
+      Process.run('start', [url], runInShell: true);
     }
   }
+
   Future<Uint8List?> makeVidThumb(String videoURL) async {
     Uint8List? thumbnail;
     if (Platform.isAndroid){
@@ -194,13 +318,31 @@ class ServiceHandler{
     }
     return thumbnail;
   }
-  Future<String?> writeImage(var imageData, fileName, mediaType, fileExt) async{
+
+  Future<String?> writeImage(var imageData, fileName, mediaType, fileExt, extPathOverride) async{
     String? result;
     try{
-      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt});
+      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt,"extPathOverride":extPathOverride});
     } catch(e){
       print(e);
     }
     return result;
   }
+
+  static void vibrate({
+    bool flutterWay = false,
+    int duration = 10,
+    int amplitude = -1,
+  }) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      if(flutterWay) {
+        HapticFeedback.vibrate();
+      } else {
+        if (await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(duration: duration, amplitude: amplitude);
+        }
+      }
+    }
+  }
+
 }

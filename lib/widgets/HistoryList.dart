@@ -5,23 +5,22 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 class HistoryList extends StatefulWidget {
-  List<SearchGlobals> searchGlobals;
-  int globalsIndex;
-  TextEditingController searchTagsController;
-  SettingsHandler settingsHandler;
-  final Function setParentGlobalsIndex;
-  HistoryList(this.searchGlobals, this.globalsIndex, this.searchTagsController, this.settingsHandler, this.setParentGlobalsIndex);
+  HistoryList();
   @override
   _HistoryListState createState() => _HistoryListState();
 }
 
 class _HistoryListState extends State<HistoryList> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+
   List<List<String>> history = [], filteredHistory = [];
   ScrollController scrollController = ScrollController();
   TextEditingController filterSearchController = TextEditingController();
@@ -34,8 +33,8 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   void getHistory() async {
-    history = (widget.settingsHandler.dbEnabled && widget.settingsHandler.searchHistoryEnabled)
-      ? await widget.settingsHandler.dbHandler.getSearchHistory()
+    history = (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled)
+      ? await settingsHandler.dbHandler.getSearchHistory()
       : [];
     history.sort(compareFavourites);
     filteredHistory = history;
@@ -79,42 +78,50 @@ class _HistoryListState extends State<HistoryList> {
   
 
   void showHistoryEntryActions(Widget row, List<String> data) {
-    Duration timeZone = DateTime.now().timeZoneOffset;
-    DateTime searchDate = DateTime.parse(data[5]).add(timeZone);
-    String searchDateStr = "${searchDate.day.toString().padLeft(2,'0')}.${searchDate.month.toString().padLeft(2,'0')}.${searchDate.year.toString().substring(2)} ${searchDate.hour.toString().padLeft(2,'0')}:${searchDate.minute.toString().padLeft(2,'0')}:${searchDate.second.toString().padLeft(2,'0')}";
-    showDialog(context: context, builder: (context) {
-      return StatefulBuilder(builder: (context, setDialogState) {
-        return InfoDialog(
-          null,
-          [
-            AbsorbPointer(absorbing: true, child: row),
-            Text("Last searched on: ${searchDateStr}"),
+    final Duration timeZone = DateTime.now().timeZoneOffset;
+    final DateTime searchDate = DateTime.parse(data[5]).add(timeZone);
+
+    final String dayStr = searchDate.day.toString().padLeft(2, '0');
+    final String monthStr = searchDate.month.toString().padLeft(2, '0');
+    final String yearStr = searchDate.year.toString().substring(2);
+    final String hourStr = searchDate.hour.toString().padLeft(2, '0');
+    final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
+    final String secondStr = searchDate.second.toString().padLeft(2, '0');
+    final String searchDateStr = "$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr";
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return SettingsDialog(
+          contentItems: <Widget>[
+            Container(
+              width: double.maxFinite,
+              child: AbsorbPointer(absorbing: true, child: row)
+            ),
+
+            Text("Last searched on: $searchDateStr", textAlign: TextAlign.center),
             const SizedBox(height: 20),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
-                ),
+            ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
-              onPressed: () async {
-                await widget.settingsHandler.dbHandler.deleteFromSearchHistory(data[0]);
+              onTap: () async {
+                await settingsHandler.dbHandler.deleteFromSearchHistory(data[0]);
                 history = history.where((el) => el[0] != data[0]).toList();
                 filterHistory();
                 Navigator.of(context).pop(true);
               },
-              icon: Icon(Icons.delete_forever, color: Get.context!.theme.errorColor),
-              label: Expanded(child: Text('Delete', style: TextStyle(color: Get.context!.theme.errorColor))),
+              leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+              title: Text('Delete', style: TextStyle(color: Get.theme.errorColor)),
             ),
-            const SizedBox(height: 5),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
-                ),
+            const SizedBox(height: 10),
+            ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
-              onPressed: () {
+              onTap: () {
                 int indexWhere = history.indexWhere((el) => el[0] == data[0]);
                 bool newFavourite = data[4] == '1' ? false : true;
                 data[4] = data[4] == '1' ? '0' : '1';
@@ -123,48 +130,52 @@ class _HistoryListState extends State<HistoryList> {
                 history.sort(compareFavourites);
                 filterHistory();
 
-                widget.settingsHandler.dbHandler.setFavouriteSearchHistory(data[0], newFavourite);
+                settingsHandler.dbHandler.setFavouriteSearchHistory(data[0], newFavourite);
                 
                 Navigator.of(context).pop(true);
               },
-              icon: Icon(data[4] == '1' ? Icons.favorite_border : Icons.favorite, color: data[4] == '1' ? Colors.grey : Colors.red),
-              label: Expanded(child: Text(data[4] == '1' ? 'Remove from Favourites' : 'Set as Favourite', style: TextStyle(color: Colors.white))),
+              leading: Icon(data[4] == '1' ? Icons.favorite_border : Icons.favorite, color: data[4] == '1' ? Colors.grey : Colors.red),
+              title: Text(data[4] == '1' ? 'Remove from Favourites' : 'Set as Favourite'),
             ),
-            const SizedBox(height: 5),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.context!.theme.accentColor),
-                ),
+            const SizedBox(height: 10),
+            ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Get.theme.colorScheme.secondary),
               ),
-              onPressed: () async {
+              onTap: () async {
                 Clipboard.setData(ClipboardData(text: data[1]));
-                ServiceHandler.displayToast('Text copied to clipboard!');
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: Duration(seconds: 2),
+                  title: Text(
+                    "Copied to clipboard!",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  content: Text(
+                    data[1],
+                    style: TextStyle(fontSize: 16)
+                  ),
+                  leadingIcon: Icons.copy,
+                  sideColor: Colors.green,
+                );
                 Navigator.of(context).pop(true);
               },
-              icon: Icon(Icons.copy),
-              label: Expanded(child: Text('Copy', style: TextStyle(color: Colors.white))),
+              leading: Icon(Icons.copy),
+              title: Text('Copy'),
             ),
-            
           ],
-          CrossAxisAlignment.center
         );
-      });
-    });
+      }
+    );
   }
 
   Widget listBuild() {
-    MediaQueryData mediaQuery = MediaQuery.of(context);
-    BoxConstraints limits = mediaQuery.orientation == Orientation.landscape
-        ? BoxConstraints(maxHeight: mediaQuery.size.height / 1.7)
-        : BoxConstraints(maxHeight: mediaQuery.size.height / 1.35);
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
         child: Container(
-          constraints: limits,
+          width: double.maxFinite,
           child: Scrollbar(
             controller: scrollController,
             interactive: true,
@@ -174,7 +185,8 @@ class _HistoryListState extends State<HistoryList> {
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               controller: scrollController,
-              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+              shrinkWrap: false,
               itemCount: filteredHistory.length,
               scrollDirection: Axis.vertical,
               itemBuilder: listEntryBuild,
@@ -188,55 +200,61 @@ class _HistoryListState extends State<HistoryList> {
   Widget listEntryBuild(BuildContext context, int index) {
     List<String> currentEntry = filteredHistory[index]; //0-id, 1-text, 2-booru type, 3-booru name, 4-isFavourite, 5-timestamp
     Booru booru = Booru(null, null, null, null, null);
-    if (widget.settingsHandler.booruList.isNotEmpty) {
-      booru = widget.settingsHandler.booruList.firstWhere(
+    if (settingsHandler.booruList.isNotEmpty) {
+      booru = settingsHandler.booruList.firstWhere(
         (b) => b.type == currentEntry[2] && b.name == currentEntry[3],
         orElse: () => Booru(null, null, null, null, null)
       );
     }
 
-    Widget entryRow = TextButton.icon(
-      style: TextButton.styleFrom(
+    Widget entryRow = Container(
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      child: ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
-          side: BorderSide(color: Get.context!.theme.accentColor),
+          side: BorderSide(color: Get.theme.colorScheme.secondary),
         ),
-      ),
-      onPressed: () {
-        if (booru.type != null) {
-          widget.searchTagsController.text = currentEntry[1];
-          setState(() {
-            widget.searchGlobals[widget.globalsIndex].tags = currentEntry[1];
-            widget.searchGlobals[widget.globalsIndex].selectedBooru = booru;
-          });
-          Navigator.of(context).pop(true);
-          widget.setParentGlobalsIndex(widget.globalsIndex, currentEntry[1]);
-        } else {
-          ServiceHandler.displayToast('Unknown booru type');
-        }
-      },
-      icon: booru.faviconURL != null
-        ? (booru.type == "Favourites"
-          ? Icon(Icons.favorite, color: Colors.red, size: 18)
-          : Image.network(booru.faviconURL!,
-              width: 16,
-              errorBuilder: (_, __, ___) {
-                return Icon(Icons.broken_image, size: 18);
-              }
+        onTap: () {
+          if (booru.type != null) {
+            searchHandler.searchTextController.text = currentEntry[1];
+            Navigator.of(context).pop(true);
+            searchHandler.searchAction(currentEntry[1], booru);
+          } else {
+            FlashElements.showSnackbar(
+              context: context,
+              title: Text(
+                "Unknown Booru type!",
+                style: TextStyle(fontSize: 20)
+              ),
+              leadingIcon: Icons.warning_amber,
+              leadingIconColor: Colors.red,
+              sideColor: Colors.red,
+            );
+          }
+        },
+        minLeadingWidth: 20,
+        leading: booru.faviconURL != null
+          ? (booru.type == "Favourites"
+              ? Icon(Icons.favorite, color: Colors.red, size: 18)
+              : CachedFavicon(booru.faviconURL!)
             )
-          )
-        : Icon(CupertinoIcons.question, size: 18),
-      label: MarqueeText(
-        text: currentEntry[1],
-        fontSize: 16,
-        startPadding: 0,
-      ),
+          : Icon(CupertinoIcons.question, size: 18),
+        title: MarqueeText(
+          key: ValueKey(currentEntry[1]),
+          text: currentEntry[1],
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          isExpanded: false,
+        ),
+      )
     );
 
     return Row(children: <Widget>[
       Expanded(
         child: GestureDetector(
-          onLongPress: () {showHistoryEntryActions(entryRow, currentEntry);},
+          onLongPress: () {
+            showHistoryEntryActions(entryRow, currentEntry);
+          },
           child: entryRow
         )
       ),
@@ -247,23 +265,25 @@ class _HistoryListState extends State<HistoryList> {
 
   Widget filterBuild() {
     return Container(
-      margin: EdgeInsets.fromLTRB(10,10,10,10),
+      margin: EdgeInsets.fromLTRB(10, 2, 10, 10),
       width: double.infinity,
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(
             child: Container(
-              height: 35,
-              margin: EdgeInsets.fromLTRB(0,0,0,0),
+              height: 45,
               child: Row(
                 children: <Widget>[
                   Expanded(child: TextField(
                     controller: filterSearchController,
-                    onChanged: (String input) {filterHistory();},
+                    onChanged: (String input) {
+                      filterHistory();
+                    },
+                    enableInteractiveSelection: true,
                     decoration: InputDecoration(
                       hintText: "Filter Search History (${history.length})",
-                      contentPadding: EdgeInsets.fromLTRB(15,0,15,0),
+                      contentPadding: EdgeInsets.fromLTRB(15, 0, 15, 0),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50),
                         gapPadding: 0,
@@ -274,14 +294,14 @@ class _HistoryListState extends State<HistoryList> {
                     children: <Widget>[
                       Center(
                         child: IconButton(
-                          padding: const EdgeInsets.fromLTRB(0,0,0,15),
+                          padding: const EdgeInsets.fromLTRB(0, 2, 0, 15),
                           icon: Icon(Icons.favorite, size: 40, color: Colors.red),
                           onPressed: () { },
                         )
                       ),
                       Center(
                         child: IconButton(
-                          padding: const EdgeInsets.all(5),
+                          padding: const EdgeInsets.fromLTRB(0, 7, 0, 15),
                           icon: Icon(showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash, color: showFavourites ? Colors.white : Colors.white60),
                           onPressed: () {
                             showFavourites = !showFavourites;
@@ -303,21 +323,23 @@ class _HistoryListState extends State<HistoryList> {
   Widget errorsBuild() {
     bool areThereErrors = isLoading ||
         (history.length == 0) || (filteredHistory.length == 0) ||
-        (!widget.settingsHandler.searchHistoryEnabled) || (!widget.settingsHandler.dbEnabled);
+        (!settingsHandler.searchHistoryEnabled) || (!settingsHandler.dbEnabled);
     if(areThereErrors) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if(isLoading)
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+            )
           else if (history.length == 0)
             Text('Search History is empty')
           else if (filteredHistory.length == 0)
             Text('Nothing found'),
 
-          if(!widget.settingsHandler.searchHistoryEnabled)
+          if(!settingsHandler.searchHistoryEnabled)
             Text('Search History is disabled.'),
-          if(!widget.settingsHandler.dbEnabled)
+          if(!settingsHandler.dbEnabled)
             Text('Search History requires enabling Database in settings.'),
         ]
       );
@@ -328,12 +350,17 @@ class _HistoryListState extends State<HistoryList> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        errorsBuild(),
-        filterBuild(),
-        listBuild(),
-      ]
+    return SettingsDialog(
+      title: Column(
+        children: [
+          errorsBuild(),
+          filterBuild(),
+        ]
+      ),
+      content: listBuild(),
+      contentPadding: const EdgeInsets.all(6),
+      titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
+      scrollable: false,
     );
   }
 }

@@ -1,16 +1,19 @@
+import 'dart:async';
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-// import 'package:LoliSnatcher/ServiceHandler.dart';
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/ViewerHandler.dart';
+
+// import 'package:flutter/services.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
-  String title;
-  List<Widget> actions;
-  SearchGlobals searchGlobals;
-  bool autoHide;
-  HideableAppBar(this.title, this.actions, this.searchGlobals, this.autoHide);
+  final Widget title;
+  final List<Widget> actions;
+  final bool autoHide;
+  HideableAppBar(this.title, this.actions, this.autoHide);
 
   final double defaultHeight = kToolbarHeight; //56.0
   @override
@@ -20,43 +23,36 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+
+  late StreamSubscription<bool> appbarListener;
+
   @override
   void initState() {
     super.initState();
-    widget.searchGlobals.displayAppbar.value = !widget.autoHide;
-    widget.searchGlobals.displayAppbar.addListener(setSt);
+    viewerHandler.displayAppbar.value = !widget.autoHide;
+    appbarListener = viewerHandler.displayAppbar.listen((bool value) {
+      setState(() {});
+    });
+  }
 
-    // Hide system ui on first render
-    // SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.bottom]);
-    // ServiceHandler.makeImmersive();
-  }
-  void setSt(){
-    setState(() {});
-  }
   @override
   void dispose() {
-    widget.searchGlobals.displayAppbar.removeListener(setSt);
-
-    // Return system ui after closing viewer
-    // ServiceHandler.makeNormal();
+    appbarListener.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    //Hide status bar and bottom navbar
-    // Bug: triggers restate => forces video restart, animation lags
-    // !widget.searchGlobals.displayAppbar.value ? SystemChrome.setEnabledSystemUIOverlays([]) : SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-
     return SafeArea( // to fix height bug when bar on top
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         curve: Curves.linear,
         color: Colors.transparent,
-        height: widget.searchGlobals.displayAppbar.value ? widget.defaultHeight : 0.0,
+        height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
         child: AppBar(
           // toolbarHeight: widget.defaultHeight,
-          // elevation: 0, // set to zero to disable a shadow behind
+          elevation: 1, // set to zero to disable a shadow behind
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           leading: IconButton(
@@ -66,7 +62,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           ),
           title: FittedBox(
             fit: BoxFit.fitWidth,
-            child: Text(widget.title, style: TextStyle(color: Colors.white)),
+            child: widget.title,
           ),
           actions: widget.actions,
         ),

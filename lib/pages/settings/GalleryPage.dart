@@ -1,5 +1,5 @@
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/widgets/InfoDialog.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,251 +8,257 @@ import 'package:get/get.dart';
 import '../../SettingsHandler.dart';
 
 class GalleryPage extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  GalleryPage(this.settingsHandler);
+  GalleryPage();
   @override
   _GalleryPageState createState() => _GalleryPageState();
 }
 
 class _GalleryPageState extends State<GalleryPage> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
-  String? galleryMode, galleryBarPosition, galleryScrollDirection;
+  late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition;
   List<List<String>>? buttonOrder;
-  TextEditingController preloadController = new TextEditingController();
+  TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
-  TextEditingController galleryAutoScrollController = new TextEditingController();
+  TextEditingController galleryAutoScrollController = TextEditingController();
+
   @override
   void initState(){
-    autoHideImageBar = widget.settingsHandler.autoHideImageBar;
-    galleryMode = widget.settingsHandler.galleryMode;
-    galleryBarPosition = widget.settingsHandler.galleryBarPosition;
-    buttonOrder = widget.settingsHandler.buttonOrder;
-    galleryScrollDirection = widget.settingsHandler.galleryScrollDirection;
-    autoPlay = widget.settingsHandler.autoPlayEnabled;
-    useVolumeButtonsForScroll = widget.settingsHandler.useVolumeButtonsForScroll;
-    scrollSpeedController.text = widget.settingsHandler.volumeButtonsScrollSpeed.toString();
-    galleryAutoScrollController.text = widget.settingsHandler.galleryAutoScrollTime.toString();
-    preloadController.text = widget.settingsHandler.preloadCount.toString();
-    shitDevice = widget.settingsHandler.shitDevice;
-    disableVideo = widget.settingsHandler.disableVideo;
-    loadingGif = widget.settingsHandler.loadingGif;
+    autoHideImageBar = settingsHandler.autoHideImageBar;
+    galleryMode = settingsHandler.galleryMode;
+    galleryBarPosition = settingsHandler.galleryBarPosition;
+    buttonOrder = settingsHandler.buttonOrder;
+    galleryScrollDirection = settingsHandler.galleryScrollDirection;
+    shareAction = settingsHandler.shareAction;
+    zoomButtonPosition = settingsHandler.zoomButtonPosition;
+    autoPlay = settingsHandler.autoPlayEnabled;
+    useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
+    scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
+    galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
+    preloadController.text = settingsHandler.preloadCount.toString();
+    shitDevice = settingsHandler.shitDevice;
+    disableVideo = settingsHandler.disableVideo;
+    loadingGif = settingsHandler.loadingGif;
     super.initState();
   }
+
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
-    widget.settingsHandler.autoHideImageBar = autoHideImageBar;
-    widget.settingsHandler.galleryMode = galleryMode!;
-    widget.settingsHandler.galleryBarPosition = galleryBarPosition!;
-    widget.settingsHandler.buttonOrder = buttonOrder!;
-    widget.settingsHandler.galleryScrollDirection = galleryScrollDirection!;
-    widget.settingsHandler.autoPlayEnabled = autoPlay;
-    widget.settingsHandler.loadingGif = loadingGif;
-    widget.settingsHandler.shitDevice = shitDevice;
-    widget.settingsHandler.disableVideo = disableVideo;
-    widget.settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
+    settingsHandler.autoHideImageBar = autoHideImageBar;
+    settingsHandler.galleryMode = galleryMode;
+    settingsHandler.galleryBarPosition = galleryBarPosition;
+    settingsHandler.buttonOrder = buttonOrder!;
+    settingsHandler.galleryScrollDirection = galleryScrollDirection;
+    settingsHandler.shareAction = shareAction;
+    settingsHandler.zoomButtonPosition = zoomButtonPosition;
+    settingsHandler.autoPlayEnabled = autoPlay;
+    settingsHandler.loadingGif = loadingGif;
+    settingsHandler.shitDevice = shitDevice;
+    settingsHandler.disableVideo = disableVideo;
+    settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     if (int.parse(scrollSpeedController.text) < 100){
       scrollSpeedController.text = "100";
     }
     if (int.parse(galleryAutoScrollController.text) < 800){
       galleryAutoScrollController.text = "800";
     }
-    widget.settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
-    widget.settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
+    settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
+    settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
     if (int.parse(preloadController.text) < 0){
       preloadController.text = 0.toString();
     }
-    widget.settingsHandler.preloadCount = int.parse(preloadController.text);
+    settingsHandler.preloadCount = int.parse(preloadController.text);
     // Set settingshandler values here
-    bool result = await widget.settingsHandler.saveSettings();
+    bool result = await settingsHandler.saveSettings(restate: true);
     return result;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
-    final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
+    final ThemeData theme = Theme.of(context);
+    final Color oddItemColor = theme.colorScheme.secondary.withOpacity(0.25);
+    final Color evenItemColor = theme.colorScheme.secondary.withOpacity(0.15);
 
     return WillPopScope(
       onWillPop: _onWillPop,
-      child:Scaffold(
-        resizeToAvoidBottomInset: false,
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: Text("Gallery"),
         ),
         body: Center(
           child: ListView(
             children: [
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Gallery View Preload :            "),
-                    new Expanded(
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10,0,0,0),
-                        child: TextField(
-                          controller: preloadController,
-                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
+              SettingsTextInput(
+                controller: preloadController,
+                title: 'Gallery View Preload',
+                hintText: "Images to preload",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                validator: (String? value) {
+                  int? parse = int.tryParse(value ?? '');
+                  if(value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if(parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if(parse > 4) {
+                    return 'Please enter a value less than 5';
+                  } else {
+                    return null;
+                  }
+                }
+              ),
+              SettingsDropdown(
+                selected: galleryMode,
+                values: settingsHandler.map['galleryMode']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    galleryMode = newValue ?? settingsHandler.map['galleryMode']?['default'];
+                  });
+                },
+                title: 'Gallery Quality',
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Gallery Quality'),
+                          contentItems: <Widget>[
+                            Text("The gallery quality changes the resolution of images in the gallery viewer."),
+                            Text(''),
+                            Text(" - Sample - Medium resolution"),
+                            Text(" - Full Res - Full resolution"),
                           ],
-                          decoration: InputDecoration(
-                            hintText: "Images to preload",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                              gapPadding: 0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                        );
+                      }
+                    );
+                  },
                 ),
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                // This dropdown is used to change the quality of the images displayed on the home page
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Gallery Quality :     "),
-                    DropdownButton<String>(
-                      value: galleryMode,
-                      icon: Icon(Icons.arrow_downward),
-                      onChanged: (String? newValue){
-                        setState((){
-                          galleryMode = newValue;
-                        });
-                      },
-                      items: <String>["Sample","Full Res"].map<DropdownMenuItem<String>>((String value){
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
+              SettingsDropdown(
+                selected: galleryScrollDirection,
+                values: settingsHandler.map['galleryScrollDirection']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']?['default'];
+                  });
+                },
+                title: 'Gallery Scroll Direction',
+              ),
+              SettingsDropdown(
+                selected: shareAction,
+                values: settingsHandler.map['shareAction']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    shareAction = newValue ?? settingsHandler.map['shareAction']?['default'];
+                  });
+                },
+                title: 'Default Share Action',
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Share Actions'),
+                          contentItems: <Widget>[
+                            Text("- Ask - always ask what to share"),
+                            Text("- Post URL"),
+                            Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
+                            Text("- File - shares viewed file itself"),
+                            Text("- Hydrus - sends the post url to Hydrus for import"),
+                            Text(''),
+                            Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
+                            Text(''),
+                            Text("[Tip]: You can open Share Actions Menu by long pressing Share button.")
+                          ],
                         );
-                      }).toList(),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
-                      onPressed: () {
-                        Get.dialog(
-                            InfoDialog("Gallery Quality",
-                              [
-                                Text("The gallery quality changes the resolution of images in the gallery viewer"),
-                                Text(" - Sample - Medium resolution"),
-                                Text(" - Full Res - Full resolution"),
-                              ],
-                              CrossAxisAlignment.start,
-                            )
-                        );
-                      },
-                    ),
-                  ],
+                      }
+                    );
+                  },
                 ),
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Gallery Scroll Direction :     "),
-                    DropdownButton<String>(
-                      value: galleryScrollDirection,
-                      icon: Icon(Icons.arrow_downward),
-                      onChanged: (String? newValue){
-                        setState((){
-                          galleryScrollDirection = newValue;
-                        });
-                      },
-                      items: <String>["Horizontal", "Vertical"].map<DropdownMenuItem<String>>((String value){
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+              SettingsDropdown(
+                selected: galleryBarPosition,
+                values: settingsHandler.map['galleryBarPosition']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']?['default'];
+                  });
+                },
+                title: 'Gallery Bar Position',
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Gallery Bar Position :     "),
-                    DropdownButton<String>(
-                      value: galleryBarPosition,
-                      icon: Icon(Icons.arrow_downward),
-                      onChanged: (String? newValue){
-                        setState((){
-                          galleryBarPosition = newValue;
-                        });
-                      },
-                      items: <String>["Top", "Bottom"].map<DropdownMenuItem<String>>((String value){
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                ),
+              SettingsDropdown(
+                selected: zoomButtonPosition,
+                values: settingsHandler.map['zoomButtonPosition']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']?['default'];
+                  });
+                },
+                title: 'Zoom Button Position',
               ),
+              SettingsToggle(
+                value: autoHideImageBar,
+                onChanged: (newValue) {
+                  setState(() {
+                    autoHideImageBar = newValue;
+                  });
+                },
+                title: 'Auto Hide Gallery Bar',
+              ),
+
+
+
               Container(
                   margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(children: [
-                    Text("Auto Hide Gallery Bar: "),
-                    Checkbox(
-                      value: autoHideImageBar,
-                      onChanged: (newValue) {
-                        setState(() {
-                          autoHideImageBar = newValue!;
-                        });
-                      },
-                      activeColor: Get.context!.theme.primaryColor,
-                    )
-                  ],)
-              ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  decoration: BoxDecoration(
-                    border: Border.symmetric(vertical: BorderSide.none, horizontal: BorderSide(color: Get.context!.theme.focusColor, width: 3)),
-                  ),
                   child: Column(
                     children: [
-                      Row(children: [
-                        Text('Toolbar Buttons Order'),
-                        IconButton(
-                          icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
-                          onPressed: () {
-                            Get.dialog(
-                                InfoDialog("Buttons Order",
-                                  [
-                                    Text("Long press to change item order."),
-                                    Text("First 4 buttons from this list will be always visible on Toolbar."),
-                                    Text("Other buttons will be in overflow (three dots) menu."),
-                                  ],
-                                  CrossAxisAlignment.start,
-                                )
-                            );
-                          },
-                        ),
-                      ]),
+                        SettingsButton(
+                          name: 'Toolbar Buttons Order',
+                          drawBottomBorder: false,
+                          trailingIcon: IconButton(
+                            icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return SettingsDialog(
+                                    title: Text('Buttons Order'),
+                                    contentItems: <Widget>[
+                                      Text("Long press to change item order."),
+                                      Text("First 4 buttons from this list will be always visible on Toolbar."),
+                                      Text("Other buttons will be in overflow (three dots) menu."),
+                                    ],
+                                  );
+                                }
+                              );
+                            },
+                        )
+                      ),
                       ReorderableListView(
-                        padding: EdgeInsets.fromLTRB(5, 5, 150, 5),
+                        padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
                         shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
                         children: [
                           for (int index = 0; index < buttonOrder!.length; index++)
                             ListTile(
                               onTap: () {
-                                ServiceHandler.displayToast('Long Press to move items');
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  title: Text(
+                                    "Long Press to move items",
+                                    style: TextStyle(fontSize: 20)
+                                  ),
+                                  leadingIcon: Icons.warning_amber,
+                                  leadingIconColor: Colors.yellow,
+                                  sideColor: Colors.yellow,
+                                );
                               },
                               key: Key('$index'),
                               tileColor: index.isOdd ? oddItemColor : evenItemColor,
@@ -273,211 +279,183 @@ class _GalleryPageState extends State<GalleryPage> {
                     ]
                   )
               ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(children: [
-                    Text("Disable Video: "),
-                    Checkbox(
-                      value: disableVideo,
-                      onChanged: (newValue) {
-                        setState(() {
-                          disableVideo = newValue!;
-                        });
-                      },
-                      activeColor: Get.context!.theme.primaryColor,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
-                      onPressed: () {
-                        Get.dialog(
-                            InfoDialog("Disable Video",
-                              [
-                                Text("Useful on low end devices that crash when trying to load videos."),
-                                Text("Replaces video with some text that says Video disabled"),
-                              ],
-                              CrossAxisAlignment.start,
-                            )
-                        );
-                      },
-                    ),
-                  ],)
-              ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(children: [
-                    Text("Video Auto Play: "),
-                    Checkbox(
-                      value: autoPlay,
-                      onChanged: (newValue) {
-                        setState(() {
-                          autoPlay = newValue!;
-                        });
-                      },
-                      activeColor: Get.context!.theme.primaryColor,
-                    )
-                  ],)
-              ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(children: [
-                    Text("Kanna loading Gif: "),
-                    Checkbox(
-                      value: loadingGif,
-                      onChanged: (newValue) {
-                        setState(() {
-                          loadingGif = newValue!;
-                        });
-                      },
-                      activeColor: Get.context!.theme.primaryColor,
-                    )
-                  ],)
-              ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(children: [
-                    Text("My device is shit: "),
-                    Checkbox(
-                      value: shitDevice,
-                      onChanged: (newValue) {
-                        setState(() {
-                          shitDevice = newValue!;
-                          if (shitDevice){
-                            preloadController.text = "0";
-                            galleryMode = "Sample";
-                            autoPlay = false;
-                          }
-                        });
-                      },
-                      activeColor: Get.context!.theme.primaryColor,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
-                      onPressed: () {
-                        Get.dialog(
-                            InfoDialog("My device is shit",
-                              [
-                                Text(" - Disables loading progress information"),
-                                Text(" - Sets optimal settings for:"),
-                                Text("    - Gallery Quality"),
-                                Text("    - Gallery Preload"),
-                                Text("    - Video Auto Play"),
-                              ],
-                              CrossAxisAlignment.start,
-                            )
-                        );
-                      },
-                    ),
-                  ],)
-              ),
-              Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Text("Use Volume Buttons for Scrolling: "),
-                      Checkbox(
-                        value: useVolumeButtonsForScroll,
-                        onChanged: (newValue) {
-                          setState(() {
-                            useVolumeButtonsForScroll = newValue!;
-                          });
-                        },
-                        activeColor: Get.context!.theme.primaryColor,
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
-                        onPressed: () {
-                          Get.dialog(
-                              InfoDialog("Volume Buttons Scrolling",
-                                [
-                                  Text(" - Volume Down - next item"),
-                                  Text(" - Volume Up - previous item"),
-                                  const SizedBox(height: 10),
-                                  Text("On videos:"),
-                                  Text(" - App Bar visible - controls volume"),
-                                  Text(" - App Bar hidden - controls scrolling"),
-                                ],
-                                CrossAxisAlignment.start,
-                              )
-                          );
-                        },
-                      ),
-                    ],
-                  )
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Buttons Scroll Speed :            "),
-                    new Expanded(
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10,0,0,0),
-                        child: TextField(
-                          controller: scrollSpeedController,
-                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
+
+
+              SettingsToggle(
+                value: disableVideo,
+                onChanged: (newValue) {
+                  setState(() {
+                    disableVideo = newValue;
+                  });
+                },
+                title: 'Disable Video',
+                drawTopBorder: true, // instead of border in reorder list
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Disable Video'),
+                          contentItems: <Widget>[
+                            Text("Useful on low end devices that crash when trying to load videos."),
+                            Text("Replaces video with text that says 'Video disabled'."),
                           ],
-                          decoration: InputDecoration(
-                            hintText: "Scroll Speed",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                              gapPadding: 0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                        );
+                      }
+                    );
+                  },
                 ),
               ),
-              Container(
-                margin: EdgeInsets.fromLTRB(10,10,10,10),
-                width: double.infinity,
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Text("Auto Scroll Timeout (MS) :            "),
-                    IconButton(
-                      icon: Icon(Icons.info, color: Get.context!.theme.accentColor),
-                      onPressed: () {
-                        Get.dialog(
-                            InfoDialog("AutoScroll / Slideshow",
-                              [
-                                Text("[WIP] Videos and gifs must be scrolled manually for now"),
-                              ],
-                              CrossAxisAlignment.start,
-                            )
-                        );
-                      },
-                    ),
-                    new Expanded(
-                      child: Container(
-                        margin: EdgeInsets.fromLTRB(10,0,0,0),
-                        child: TextField(
-                          controller: galleryAutoScrollController,
-                          //The keyboard type and input formatter are used to make sure the user can only input a numerical value
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly
+              SettingsToggle(
+                value: autoPlay,
+                onChanged: (newValue) {
+                  setState(() {
+                    autoPlay = newValue;
+                  });
+                },
+                title: 'Video Auto Play',
+              ),
+
+
+              // TODO rework into loading element variant (small, verbose, gif...)
+              // TODO ...or remove completely, this gif is like 20% of the app's size
+              SettingsToggle(
+                value: loadingGif,
+                onChanged: (newValue) {
+                  setState(() {
+                    loadingGif = newValue;
+                  });
+                },
+                title: 'Kanna loading Gif',
+              ),
+              SettingsToggle(
+                value: shitDevice,
+                onChanged: (newValue) {
+                  setState(() {
+                    shitDevice = newValue;
+                    if (shitDevice){
+                      preloadController.text = "0";
+                      galleryMode = "Sample";
+                      autoPlay = false;
+                      // TODO set thumbnails quality to low?
+                    }
+                  });
+                },
+                title: 'Low Performance Mode',
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Low Performance Mode'),
+                          contentItems: <Widget>[
+                            Text("Recommended for old devices and devices with RAM < 2GB."),
+                            Text(''),
+                            Text("- Disables loading progress information"),
+                            Text("- Sets optimal settings for:"),
+                            Text("   - Gallery Quality"),
+                            Text("   - Gallery Preload"),
+                            Text("   - Video Auto Play"),
                           ],
-                          decoration: InputDecoration(
-                            hintText: "Auto Scroll Timeout",
-                            contentPadding: new EdgeInsets.fromLTRB(15,0,0,0), // left,right,top,bottom
-                            border: new OutlineInputBorder(
-                              borderRadius: new BorderRadius.circular(50),
-                              gapPadding: 0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                        );
+                      }
+                    );
+                  },
+                ),
+              ),
+              //////////////////////////////////////////
+
+
+              SettingsToggle(
+                value: useVolumeButtonsForScroll,
+                onChanged: (newValue) {
+                  setState(() {
+                    useVolumeButtonsForScroll = newValue;
+                  });
+                },
+                title: 'Use Volume Buttons for Scrolling',
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('Volume Buttons Scrolling'),
+                          contentItems: <Widget>[
+                            Text("Allows to scroll through previews grid and gallery items using volume buttons"),
+                            Text(''),
+                            Text(" - Volume Down - next item"),
+                            Text(" - Volume Up - previous item"),
+                            Text(''),
+                            Text("On videos:"),
+                            Text(" - App Bar visible - controls volume"),
+                            Text(" - App Bar hidden - controls scrolling"),
+                          ],
+                        );
+                      }
+                    );
+                  },
+                ),
+              ),
+              SettingsTextInput(
+                controller: scrollSpeedController,
+                title: 'Buttons Scroll Speed',
+                hintText: "Scroll Speed",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                validator: (String? value) {
+                  int? parse = int.tryParse(value ?? '');
+                  if(value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if(parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if(parse < 100) {
+                    return 'Please enter a value bigger than 100';
+                  } else {
+                    return null;
+                  }
+                }
+              ),
+              SettingsTextInput(
+                controller: galleryAutoScrollController,
+                title: 'AutoScroll Timeout (in ms)',
+                hintText: "AutoScroll Timeout (in ms)",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                validator: (String? value) {
+                  int? parse = int.tryParse(value ?? '');
+                  if(value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if(parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else {
+                    return null;
+                  }
+                },
+                trailingIcon: IconButton(
+                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: Text('AutoScroll / Slideshow'),
+                          contentItems: <Widget>[
+                            Text("[WIP] Videos and gifs must be scrolled manually for now."),
+                          ],
+                        );
+                      }
+                    );
+                  },
                 ),
               ),
             ],

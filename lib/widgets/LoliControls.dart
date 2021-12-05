@@ -2,17 +2,17 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/progress_bar.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 class LoliControls extends StatefulWidget {
-  SettingsHandler settingsHandler;
-  LoliControls({Key? key, required this.settingsHandler}) : super(key: key);
+  LoliControls({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -20,8 +20,10 @@ class LoliControls extends StatefulWidget {
   }
 }
 
-class _LoliControlsState extends State<LoliControls>
-    with SingleTickerProviderStateMixin {
+class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
+
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+
   late VideoPlayerValue _latestValue;
   bool _hideStuff = true;
   Timer? _hideTimer;
@@ -129,27 +131,28 @@ class _LoliControlsState extends State<LoliControls>
   ) {
     final iconColor = Theme.of(context).textTheme.button!.color;
 
+    // Don't draw progress bar if shorter than 2 seconds, moves too fast on short durations
+    bool isTooShort = controller.value.duration.inSeconds <= 2;
+    bool drawProgressBar = !(chewieController.isLive || isTooShort);
+
     return AnimatedOpacity(
       opacity: _hideStuff ? 0.0 : 1.0,
       duration: const Duration(milliseconds: 300),
       child: Column(
         children: <Widget>[
-          Container(
-            height: barHeight / 1.5,
-            color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-            child: Row(
-              children: <Widget>[
-                if (chewieController.isLive)
-                  const SizedBox()
-                else
-                  ...[
-                    const SizedBox(width: 10),
-                    _buildProgressBar(),
-                    const SizedBox(width: 10),
-                  ]
-              ],
+          if(drawProgressBar)
+            Container(
+              height: barHeight / 1.5,
+              color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
+              child: Row(
+                children: <Widget>[
+                  const SizedBox(width: 10),
+                  _buildProgressBar(),
+                  const SizedBox(width: 10),
+                ],
+              ),
             ),
-          ),
+
           Container(
             height: barHeight,
             color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
@@ -167,7 +170,7 @@ class _LoliControlsState extends State<LoliControls>
                         width: 130,
                         alignment: Alignment.center,
                         child: chewieController.isLive
-                          ? Expanded(child: const Text('LIVE'))
+                          ? Expanded(child: const Text('LIVE', style: TextStyle(color: Colors.white)))
                           : _buildPosition(iconColor),
                       ),
                     ]
@@ -262,7 +265,7 @@ class _LoliControlsState extends State<LoliControls>
                       bottom: 8,
                     ),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: TextStyle(fontSize: 20))
+                    child: Text(msgText, style: TextStyle(fontSize: 20, color: Colors.white))
                   )
                 )
               else
@@ -281,7 +284,7 @@ class _LoliControlsState extends State<LoliControls>
                       bottom: 8,
                     ),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: TextStyle(fontSize: 20))
+                    child: Text(msgText, style: TextStyle(fontSize: 20, color: Colors.white))
                   )
                 )
               else
@@ -311,6 +314,7 @@ class _LoliControlsState extends State<LoliControls>
                 chewieController.isFullScreen
                     ? Icons.fullscreen_exit
                     : Icons.fullscreen,
+                color: Colors.white,
               ),
             ),
           ),
@@ -363,10 +367,11 @@ class _LoliControlsState extends State<LoliControls>
                         padding: const EdgeInsets.all(12.0),
                         child: IconButton(
                           icon: isFinished
-                              ? const Icon(Icons.replay, size: 32.0)
+                              ? const Icon(Icons.replay, size: 32.0, color: Colors.white)
                               : AnimatedIcon(
                                   icon: AnimatedIcons.play_pause,
                                   progress: playPauseIconAnimationController,
+                                  color: Colors.white,
                                   size: 32.0,
                                 ),
                           onPressed: () {
@@ -382,7 +387,10 @@ class _LoliControlsState extends State<LoliControls>
                     child: Center(
                       widthFactor: 3,
                       heightFactor: 3,
-                      child: CircularProgressIndicator(strokeWidth: 5),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
+                        strokeWidth: 5,
+                      ),
                     ),
                   ),
               ]
@@ -432,7 +440,7 @@ class _LoliControlsState extends State<LoliControls>
             child: Icon(Icons.speed,
                 color: _latestValue.playbackSpeed == 1.0
                     ? Colors.white
-                    : Theme.of(context).colorScheme.primary),
+                    : Theme.of(context).colorScheme.secondary),
           ),
         ),
       ),
@@ -440,7 +448,7 @@ class _LoliControlsState extends State<LoliControls>
   }
 
   GestureDetector _buildMuteButton(VideoPlayerController controller) {
-    bool isGlobalMute = widget.settingsHandler.videoAutoMute;
+    bool isGlobalMute = viewerHandler.videoAutoMute;
 
     return GestureDetector(
       onTap: () {
@@ -451,11 +459,13 @@ class _LoliControlsState extends State<LoliControls>
           controller.setVolume(0);
         }
       },
-      onLongPress: (){
-        widget.settingsHandler.videoAutoMute = !widget.settingsHandler.videoAutoMute;
-        if (widget.settingsHandler.videoAutoMute && _latestValue.volume != 0) {
+      onLongPress: () {
+        ServiceHandler.vibrate();
+
+        viewerHandler.videoAutoMute = !viewerHandler.videoAutoMute;
+        if (viewerHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);
-        } else if (!widget.settingsHandler.videoAutoMute && _latestValue.volume == 0){
+        } else if (!viewerHandler.videoAutoMute && _latestValue.volume == 0){
           controller.setVolume(1);
         }
       },
@@ -470,7 +480,12 @@ class _LoliControlsState extends State<LoliControls>
               right: 8.0,
             ),
             child: Icon(
-              _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
+              _latestValue.volume > 0
+                ? Icons.volume_up
+                : (isGlobalMute
+                    ? Icons.volume_off
+                    : Icons.volume_mute),
+              color: Colors.white,
             ),
           ),
         ),
@@ -489,7 +504,10 @@ class _LoliControlsState extends State<LoliControls>
           right: 12.0,
         ),
         child: Icon(
-          controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          controller.value.isPlaying
+            ? Icons.pause
+            : Icons.play_arrow,
+          color: Colors.white,
         ),
       ),
     );
@@ -503,6 +521,7 @@ class _LoliControlsState extends State<LoliControls>
       //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
       style: const TextStyle(
         fontSize: 14.0,
+        color: Colors.white,
       ),
     );
   }
@@ -600,7 +619,7 @@ class _LoliControlsState extends State<LoliControls>
           });
         } else {
           if (isFinished) {
-            controller.seekTo(const Duration());
+            controller.seekTo(Duration.zero);
           }
           playPauseIconAnimationController.forward();
           controller.play();
@@ -679,7 +698,7 @@ class _LoliControlsState extends State<LoliControls>
           videoDurationMillisecs);
       // print(newTime);
       // Skip set amount of seconds if we tapped on left/right third of the screen or play/pause if in the middle
-      controller.seekTo(new Duration(milliseconds: newTime));
+      controller.seekTo(Duration(milliseconds: newTime));
 
       setState(() {
         _doubleTapHideTimer?.cancel();
@@ -730,8 +749,8 @@ class _LoliControlsState extends State<LoliControls>
         drawShadow: true,
         colors: chewieController.materialProgressColors ??
             ChewieProgressColors(
-              playedColor: Theme.of(context).accentColor,
-              handleColor: Theme.of(context).accentColor,
+              playedColor: Theme.of(context).colorScheme.secondary,
+              handleColor: Theme.of(context).colorScheme.secondary,
               bufferedColor: Theme.of(context).backgroundColor,
               backgroundColor: Theme.of(context).disabledColor,
             ),
@@ -754,7 +773,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color selectedColor = Theme.of(context).colorScheme.primary;
+    final Color selectedColor = Theme.of(context).colorScheme.secondary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -764,7 +783,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
           child: Row(
             children: [
               const SizedBox(width: 16.0),
-              Text('Select Video Speed:'),
+              Text('Select Video Speed:', style: TextStyle(color: Colors.white)),
             ]
           )
         ),
@@ -786,7 +805,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
                   else
                     Container(width: 20.0),
                   const SizedBox(width: 16.0),
-                  Text(_speed.toString()),
+                  Text(_speed.toString(), style: TextStyle(color: Colors.white)),
                 ],
               ),
               selected: _speed == _selected,

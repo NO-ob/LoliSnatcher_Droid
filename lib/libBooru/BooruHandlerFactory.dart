@@ -1,12 +1,9 @@
-import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
-import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 
 import 'Booru.dart';
-import 'BooruItem.dart';
 import 'BooruOnRailsHandler.dart';
-import 'DBHandler.dart';
 import 'DanbooruHandler.dart';
+import 'EmptyHandler.dart';
 import 'GelbooruHandler.dart';
 import 'GelbooruV1Handler.dart';
 import 'HydrusHandler.dart';
@@ -19,72 +16,103 @@ import 'e621Handler.dart';
 import 'WorldHandler.dart';
 import 'R34HentaiHandler.dart';
 import 'IdolSankakuHandler.dart';
+import 'AGNPHHandler.dart';
+import 'BooruHandler.dart';
+import 'FavouritesHandler.dart';
+import 'InkBunnyHandler.dart';
+import 'MergebooruHandler.dart';
+import 'NyanPalsHandler.dart';
+import 'RainbooruHandler.dart';
+import 'package:get/get.dart';
 
-class BooruHandlerFactory{
+
+class BooruHandlerFactory {
   BooruHandler? booruHandler;
   int pageNum = -1;
-  List getBooruHandler(Booru booru, int limit, DBHandler? dbHandler){
-    switch (booru.type) {
-      case("Moebooru"):
-        pageNum = 0;
-        booruHandler = new MoebooruHandler(booru, limit);
-        break;
-      case("Gelbooru"):
-        booruHandler = new GelbooruHandler(booru, limit);
-        break;
-      case("Danbooru"):
-        pageNum = 0;
-        booruHandler = new DanbooruHandler(booru, limit);
-        break;
-      case("e621"):
-        pageNum = 0;
-        booruHandler = new e621Handler(booru, limit);
-        break;
-      case("Shimmie"):
-        pageNum = 0;
-        booruHandler = new ShimmieHandler(booru, limit);
-        break;
-      case("Philomena"):
-        pageNum = 0;
-        booruHandler = new PhilomenaHandler(booru, limit);
-        break;
-      case("Szurubooru"):
-        booruHandler = new SzurubooruHandler(booru, limit);
-        break;
-      case("Sankaku"):
-        pageNum = 0;
-        booruHandler = new SankakuHandler(booru, limit);
-        break;
-      case("Hydrus"):
-        booruHandler = new HydrusHandler(booru, limit);
-        break;
-      case("GelbooruV1"):
-        booruHandler = new GelbooruV1Handler(booru, limit);
-        break;
-      case("BooruOnRails"):
-        pageNum = 0;
-        booruHandler = new BooruOnRailsHandler(booru, limit);
-        break;
-      case("Favourites"):
-        booruHandler = new FavouritesHandler(booru, limit);
-        break;
-      case("Rainbooru"):
-        pageNum = 0;
-        booruHandler = new RainbooruHandler(booru, limit);
-        break;
-      case("R34Hentai"):
-        pageNum = 0;
-        booruHandler = new R34HentaiHandler(booru, limit);
-        break;
-      case("World"):
-        booruHandler = new WorldHandler(booru, limit);
-        break;
-      case("IdolSankaku"):
-        pageNum = 0;
-        booruHandler = new IdolSankakuHandler(booru, limit);
-        break;
+
+  List getBooruHandler(List<Booru> boorus, int? customLimit) {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final int limit = customLimit == null ? settingsHandler.limit : customLimit;
+    if (boorus.length == 1) {
+      switch (boorus[0].type) {
+        case("Moebooru"):
+          pageNum = 0;
+          booruHandler = MoebooruHandler(boorus[0], limit);
+          break;
+        case("Gelbooru"):
+          booruHandler = GelbooruHandler(boorus[0], limit);
+          break;
+        case("Danbooru"):
+          pageNum = 0;
+          booruHandler = DanbooruHandler(boorus[0], limit);
+          break;
+        case("e621"):
+          pageNum = 0;
+          booruHandler = e621Handler(boorus[0], limit);
+          break;
+        case("Shimmie"):
+          pageNum = 0;
+          booruHandler = ShimmieHandler(boorus[0], limit);
+          break;
+        case("Philomena"):
+          pageNum = 0;
+          booruHandler = PhilomenaHandler(boorus[0], limit);
+          break;
+        case("Szurubooru"):
+          booruHandler = SzurubooruHandler(boorus[0], limit);
+          break;
+        case("Sankaku"):
+          pageNum = 0;
+          booruHandler = SankakuHandler(boorus[0], limit);
+          break;
+        case("Hydrus"):
+          booruHandler = HydrusHandler(boorus[0], limit);
+          break;
+        case("GelbooruV1"):
+          booruHandler = GelbooruV1Handler(boorus[0], limit);
+          break;
+        case("BooruOnRails"):
+          pageNum = 0;
+          booruHandler = BooruOnRailsHandler(boorus[0], limit);
+          break;
+        case("Favourites"):
+          booruHandler = FavouritesHandler(boorus[0], limit);
+          break;
+        case("Rainbooru"):
+          pageNum = 0;
+          booruHandler = RainbooruHandler(boorus[0], limit);
+          break;
+        case("R34Hentai"):
+          pageNum = 0;
+          booruHandler = R34HentaiHandler(boorus[0], limit);
+          break;
+        case("World"):
+          booruHandler = WorldHandler(boorus[0], limit);
+          break;
+        case("IdolSankaku"):
+          pageNum = 0;
+          booruHandler = IdolSankakuHandler(boorus[0], limit);
+          break;
+        case("InkBunny"):
+          pageNum = 0;
+          booruHandler = InkBunnyHandler(boorus[0], limit);
+          break;
+        case("AGNPH"):
+          pageNum = 0;
+          booruHandler = new AGNPHHandler(boorus[0], limit);
+          break;
+        case("NyanPals"):
+          pageNum = -1;
+          booruHandler = new NyanPalsHandler(boorus[0], limit);
+          break;
+        default:
+          booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);
+          break;
+      }
+    } else {
+      booruHandler = MergebooruHandler(Booru("Merge", "Merge", "", "", ""), limit);
+      booruHandler!.setupMerge(boorus);
     }
-    booruHandler!.dbHandler = dbHandler;
     return [booruHandler, pageNum];
   }
 }

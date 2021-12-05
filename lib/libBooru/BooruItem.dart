@@ -1,15 +1,19 @@
 import 'dart:convert';
 import 'package:LoliSnatcher/Tools.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class BooruItem{
+  late Key key;
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
   String? mediaType;
-  bool isSnatched = false, isFavourite = false;
+  RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
+  RxBool isHated = false.obs, isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
   List<String>? sources;
-  bool? hasNotes;
+  bool? hasNotes, hasComments;
   double? fileWidth, fileHeight, sampleWidth, sampleHeight, previewWidth, previewHeight;
   int? fileSize;
   BooruItem({
@@ -29,6 +33,7 @@ class BooruItem{
     this.previewHeight,
 
     this.hasNotes,
+    this.hasComments,
     this.serverId,
     this.rating, // safe, explicit...
     this.score,
@@ -37,6 +42,9 @@ class BooruItem{
     this.postDate,
     this.postDateFormat,
   }){
+    // Create a unique key for every loaded item, to later use them to read the state of their viewer
+    key = GlobalKey();
+
     if (this.sampleURL.isEmpty || this.sampleURL == "null"){
       this.sampleURL = this.thumbnailURL;
     }
@@ -58,7 +66,16 @@ class BooruItem{
     return (this.mediaType == "video");
   }
   Map toJSON() {
-    return {"postURL": "$postURL","fileURL": "$fileURL", "sampleURL": "$sampleURL", "thumbnailURL": "$thumbnailURL", "tags": tagsList, "fileExt": fileExt, "isFavourite": "${isFavourite.toString()}","isSnatched" : "${isSnatched.toString()}"};
+    return {
+      "postURL": postURL,
+      "fileURL": fileURL,
+      "sampleURL": sampleURL,
+      "thumbnailURL": thumbnailURL,
+      "tags": tagsList,
+      "fileExt": fileExt,
+      "isFavourite": isFavourite.value,
+      "isSnatched" : isSnatched.value,
+    };
   }
   static BooruItem fromJSON(String jsonString){
     Map<String, dynamic> json = jsonDecode(jsonString);
@@ -68,7 +85,7 @@ class BooruItem{
       tags.add(tagz[i].toString());
     }
     //BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt
-    BooruItem item = new BooruItem(
+    BooruItem item = BooruItem(
       fileURL: json["fileURL"].toString(),
       sampleURL: json["sampleURL"].toString(),
       thumbnailURL: json["thumbnailURL"].toString(),
@@ -76,8 +93,8 @@ class BooruItem{
       postURL: json["postURL"].toString()
       // TODO stringify other options here
     );
-    item.isFavourite = json["isFavourite"].toString() == "true" ? true : false;
-    item.isSnatched = json["isSnatched"].toString() == "true"? true : false;
+    item.isFavourite.value = json["isFavourite"].toString() == "true" ? true : false;
+    item.isSnatched.value = json["isSnatched"].toString() == "true"? true : false;
     return item;
   }
 }
