@@ -11,18 +11,32 @@ class DBHandler{
   DBHandler();
 
   //Connects to the database file and create the database if the tables dont exist
-  Future<bool> dbConnect(String path)async{
+  Future<bool> dbConnect(String path) async {
+    // await Sqflite.devSetDebugModeOn(true);
     if(Platform.isAndroid || Platform.isIOS){
-      db = await openDatabase(path + "store.db", version: 1);
+      db = await openDatabase(path + "store.db", version: 1, singleInstance: false);
     } else {
       sqfliteFfiInit();
       var databaseFactory = databaseFactoryFfi;
       db = await databaseFactory.openDatabase(path + "store.db");
     }
     await updateTable();
+    await createIndexes();
     await deleteUntracked();
     return true;
   }
+
+  Future<bool> dbConnectReadOnly(String path) async {
+    if(Platform.isAndroid || Platform.isIOS){
+      db = await openDatabase(path + "store.db", version: 1, singleInstance: false);
+    } else {
+      sqfliteFfiInit();
+      var databaseFactory = databaseFactoryFfi;
+      db = await databaseFactory.openDatabase(path + "store.db");
+    }
+    return true;
+  }
+
   Future<bool> updateTable() async{
     await db?.execute("CREATE TABLE IF NOT EXISTS BooruItem"
         "(id INTEGER PRIMARY KEY,"
@@ -63,6 +77,33 @@ class DBHandler{
     return true;
   }
 
+  Future<bool> createIndexes() async {
+    // TODO Indexes dont seem to help that much? + they double the size of the db
+    // await db?.execute("CREATE INDEX IF NOT EXISTS ImageTag_tagID_index ON ImageTag (tagID);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS ImageTag_booruItemID_index ON ImageTag (booruItemID);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_isSnatched_index ON BooruItem (isSnatched);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_isFavourite_index ON BooruItem (isFavourite);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_fileURL_index ON BooruItem (fileURL);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_id_index ON BooruItem (id);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_fileURL_isFavourite_isSnatched_index ON BooruItem (fileURL, isFavourite, isSnatched);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS Tag_name_index ON Tag (name);");
+    // await db?.execute("CREATE INDEX IF NOT EXISTS Tag_id_index ON Tag (id);");
+    return true;
+  }
+
+  Future<bool> dropIndexes() async {
+    await db?.execute("DROP INDEX IF EXISTS ImageTag_tagID_index;");
+    await db?.execute("DROP INDEX IF EXISTS ImageTag_booruItemID_index;");
+    await db?.execute("DROP INDEX IF EXISTS BooruItem_isSnatched_index;");
+    await db?.execute("DROP INDEX IF EXISTS BooruItem_isFavourite_index;");
+    await db?.execute("DROP INDEX IF EXISTS BooruItem_fileURL_index;");
+    await db?.execute("DROP INDEX IF EXISTS BooruItem_id_index;");
+    await db?.execute("DROP INDEX IF EXISTS BooruItem_fileURL_isFavourite_isSnatched_index;");
+    await db?.execute("DROP INDEX IF EXISTS Tag_name_index;");
+    await db?.execute("DROP INDEX IF EXISTS Tag_id_index;");
+    return true;
+  }
+
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   Future<String?> updateBooruItem(BooruItem item, String mode) async{
     Logger.Inst().log("updateBooruItem called fileURL is:" + item.fileURL, "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
@@ -91,14 +132,7 @@ class DBHandler{
   //Gets a BooruItem id from the database based on a fileurl
   Future<String?> getItemID(String postURL) async{
     var result;
-    /* I dont think this if will be needed with post url
-    // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (postURL.contains("sankakucomplex.com") || postURL.contains("rule34.xxx") || postURL.contains("paheal.net")){
-      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL LIKE (?)", ["%" + Tools.getFileName(postURL) + "%"]);
-    } else {
-      result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL IN (?)", [postURL]);
-    }*/
-    result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL IN (?)", [postURL]);
+    result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL = ?", [postURL]);
     if (result != null && result.isNotEmpty){
       return result.first["id"].toString();
     } else {
@@ -131,6 +165,8 @@ class DBHandler{
   }
   //Gets a list of BooruItem from the database
   Future<List<BooruItem>> searchDB(String tagString, String offset, String limit, String order, String mode) async {
+    // TODO rework to use only one query
+    // TODO multiple tags in search can lead to wrong results
     List<String> tags;
     var result;
     List<BooruItem> fetched = [];
@@ -155,7 +191,7 @@ class DBHandler{
     }
     Logger.Inst().log("got results from db", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
     Logger.Inst().log(result, "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
-    if (result != null && result.isNotEmpty){
+    if (result != null && result.isNotEmpty) {
       List<BooruItem> booruItems = await getBooruItems(List<int>.from(result.map((r) {
         return r["dbid"];
       })), mode);
@@ -416,17 +452,20 @@ class DBHandler{
   }
 
   //Return a list of boolean for isSnatched and isFavourite
-  Future<List<bool>> getTrackedValues(String fileURL) async {
+  Future<List<bool>> getTrackedValues(BooruItem item) async {
     List<bool> values = [false,false];
-    var result;
-    // search filename, not full url (for example: r34xxx changes urls based on country)
-    if (fileURL.contains("sankakucomplex.com") || fileURL.contains("rule34.xxx") || fileURL.contains("paheal.net")){
-      result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL LIKE (?)", ["%" + Tools.getFileName(fileURL) + "%"]);
+    List? result;
+
+    // DateTime startTime = DateTime.now();
+    if (item.fileURL.contains("sankakucomplex.com") || item.fileURL.contains("rule34.xxx") || item.fileURL.contains("paheal.net")){
+      // compare by post url, not file url (for example: r34xxx changes urls based on country)
+      result = await db?.rawQuery("SELECT isFavourite, isSnatched FROM BooruItem WHERE postURL = ?", [item.postURL]);
     } else {
-      result = await db?.rawQuery("SELECT isFavourite,isSnatched FROM BooruItem WHERE fileURL IN (?)", [fileURL]);
+      result = await db?.rawQuery("SELECT isFavourite, isSnatched FROM BooruItem WHERE fileURL = ?", [item.fileURL]);
     }
+    // print("getTrackedValues: ${DateTime.now().difference(startTime).inMilliseconds}ms"); // performance test
     if (result != null && result.isNotEmpty){
-      Logger.Inst().log("file url is: $fileURL", "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("file url is: ${item.fileURL}", "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
       Logger.Inst().log(result.toString(), "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
       values[0] = Tools.intToBool(result.first["isSnatched"]);
       values[1] = Tools.intToBool(result.first["isFavourite"]);
@@ -435,34 +474,50 @@ class DBHandler{
   }
 
   // FAILED EXPERIMENT: Return a list of lists of boolean for isSnatched and isFavourite, attempt to make a bulk fetcher
-  Future<List<List<bool>>> getMultipleTrackedValues(List<String> fileURLs) async {
+  Future<List<List<bool>>> getMultipleTrackedValues(List<BooruItem> items) async {
     List<List<bool>> values = [];
 
     List<String> queryParts = [];
     List<String> queryArgs = [];
-    fileURLs.forEach((url) {
-      // search filename, not full url (for example: r34xxx changes urls based on country)
-      if (url.contains("sankakucomplex.com") || url.contains("rule34.xxx") || url.contains("paheal.net")) {
-        queryParts.add("fileURL LIKE (?)");
-        queryArgs.add('%${Tools.getFileName(url)}%');
+    for (BooruItem item in items) {
+      if (item.fileURL.contains("sankakucomplex.com") || item.fileURL.contains("rule34.xxx") || item.fileURL.contains("paheal.net")) {
+        // compare by post url, not file url (for example: r34xxx changes urls based on country)
+        // TODO merge them by type? i.e. - (postURL in [] OR fileURL in [])
+        queryParts.add("postURL = ?");
+        queryArgs.add(item.postURL);
       } else {
-        queryParts.add('fileURL = (?)');
-        queryArgs.add(url);
+        queryParts.add('fileURL = ?');
+        queryArgs.add(item.fileURL);
       }
-    });
+    }
 
-    List? result = await db?.rawQuery("SELECT fileURL, isFavourite, isSnatched FROM BooruItem WHERE ${queryParts.join(' OR ')};", queryArgs);
+    // DEBUG output query string
+    // String query = "SELECT fileURL, postURL, isFavourite, isSnatched FROM BooruItem WHERE ";
+    // for (int i = 0; i < queryParts.length; i++) {
+    //   query += queryParts[i].replaceFirst('?', "'${queryArgs[i]}'");
+    //   if (i < queryParts.length - 1) {
+    //     query += " OR ";
+    //   }
+    // }
+    // // split string into chunks of 1000, otherwise console could slice off the last part
+    // for(int i = 0; i < (query.length / 1000).ceil(); i++) {
+    //   print(query.substring(i * 1000, min(query.length, (i + 1) * 1000)));
+    // }
 
-    if (result != null && result.isNotEmpty) {
-      fileURLs.asMap().forEach((index, url) {
-        final res = result.firstWhere((el) => el["fileURL"].toString() == url, orElse: () => {"isSnatched": 0, "isFavourite": 0});
+    // DateTime startTime = DateTime.now();
+    List? result = await db?.rawQuery("SELECT fileURL, postURL, isFavourite, isSnatched FROM BooruItem WHERE ${queryParts.join(' OR ')};", queryArgs);
+    // print("Query took ${DateTime.now().difference(startTime).inMilliseconds}ms"); // performance test
+
+    if (result != null) {
+      for (BooruItem item in items) {
+        final res = result.firstWhere((el) => el["postURL"].toString() == item.postURL, orElse: () => {"isSnatched": 0, "isFavourite": 0});
         // Logger.Inst().log("file url is: $fileURL", "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
         Logger.Inst().log(res.toString(), "DBHandler", "getTrackedValues", LogTypes.booruHandlerInfo);
         values.add([
           Tools.intToBool(res["isSnatched"]),
           Tools.intToBool(res["isFavourite"])
         ]);
-      });
+      }
     }
     return values;
   }

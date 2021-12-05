@@ -21,7 +21,7 @@ class BackupRestorePage extends StatefulWidget {
 }
 
 class _BackupRestorePageState extends State<BackupRestorePage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   ServiceHandler serviceHandler = ServiceHandler();
 
   @override
@@ -90,7 +90,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               Container(
                 margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
-                child: Text('Files backup to "/storage/Android/data/com.noaisu.loliSnatcher/files".'),
+                child: Text('Files backup to "/storage/Android/data/${settingsHandler.packageName}/files".'),
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(10, 10, 10, 10),

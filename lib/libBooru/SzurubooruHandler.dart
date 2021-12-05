@@ -1,15 +1,16 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
+
+import 'package:http/http.dart' as http;
+
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class SzurubooruHandler extends BooruHandler{
   SzurubooruHandler(Booru booru,int limit) : super(booru,limit);
+
   bool tagSearchEnabled = false;
 
   @override
@@ -20,28 +21,33 @@ class SzurubooruHandler extends BooruHandler{
       return tags;
     }
   }
+
   void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
      * all the data needed about each image
      */
+
     // Create a BooruItem for each post in the list
-    for (int i =0; i < parsedResponse['results'].length; i++){
+    List<BooruItem> newItems = [];
+    for (int i =0; i < parsedResponse['results'].length; i++) {
       var current = parsedResponse['results'][i];
       Logger.Inst().log(current.toString(), "SzurubooruHandler", "parseRespnose", LogTypes.booruHandlerRawFetched);
+
       List<String> tags = [];
       for (int x=0; x < current['tags'].length; x++) {
         String currentTags = current['tags'][x]['names'].toString().replaceAll(r":", r"\:");
         currentTags = currentTags.substring(1,currentTags.length - 1);
-        if (currentTags.contains(",")){
+        if (currentTags.contains(",")) {
           tags.addAll(currentTags.split(", "));
         } else {
           tags.add(currentTags);
         }
       }
-      if(current['contentUrl'] != null){
-        fetched.add(BooruItem(
+
+      if(current['contentUrl'] != null) {
+        BooruItem item = BooruItem(
           fileURL: "${booru.baseURL}/"+current['contentUrl'],
           fileWidth: current['canvasWidth'].toDouble(),
           fileHeight: current['canvasHeight'].toDouble(),
@@ -54,11 +60,17 @@ class SzurubooruHandler extends BooruHandler{
           rating: current['safety'],
           postDate: current['creationTime'].substring(0,22),
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS",
-        ));
-        setTrackedValues(fetched.length - 1);
+        );
+
+        newItems.add(item);
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   @override
   Map<String,String> getHeaders() {
     if(booru.apiKey!.isNotEmpty){
@@ -72,14 +84,16 @@ class SzurubooruHandler extends BooruHandler{
   String makePostURL(String id){
     return "${booru.baseURL}/post/$id";
   }
+
   // This will create a url for the http request
   String makeURL(String tags){
     return "${booru.baseURL}/api/posts/?offset=${pageNum.value*limit}&limit=${limit.toString()}&query=$tags";
-    }
+  }
 
   String makeTagURL(String input){
     return "${booru.baseURL}/api/tags/?offset=0&limit=10&query=$input*";
   }
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];
@@ -102,6 +116,4 @@ class SzurubooruHandler extends BooruHandler{
     }
     return searchTags;
   }
-  }
-
-
+}

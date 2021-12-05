@@ -39,8 +39,10 @@ class R34HentaiHandler extends BooruHandler{
   void parseResponse(response) {
     List<dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse; // Limit doesn't work with this api
+
     // Create a BooruItem for each post in the list
-    for (int i = 0; i < posts.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i = 0; i < posts.length; i++) {
       /**
        * Parse Data Object and Add a new BooruItem to the list
        */
@@ -50,21 +52,27 @@ class R34HentaiHandler extends BooruHandler{
       String sampleUrl = current['sample_url'];
       String thumbnailUrl = current['preview_url'];
 
-      fetched.add(BooruItem(
+      BooruItem item = BooruItem(
         fileURL: imageUrl,
         sampleURL: sampleUrl,
         thumbnailURL: thumbnailUrl,
         tagsList: current['tags'].split(' '),
         postURL: makePostURL(current['id'].toString()),
-      ));
-      setTrackedValues(fetched.length - 1);
+      );
+
+      newItems.add(item);
     }
-    return;
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/post/view/$id";
   }
+
   // This will create a url for the http request
   String makeURL(String tags){
     return "${booru.baseURL}/post/index.json?limit=$limit&page=$pageNum&tags=$tags";
@@ -78,6 +86,7 @@ class R34HentaiHandler extends BooruHandler{
   String makeTagURL(String input){
     return "${booru.baseURL}/api/tag/Find";
   }
+
   //No api documentation on finding tags
   @override
   Future tagSearch(String input) async {

@@ -1,21 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:flutter/services.dart';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
-import 'package:LoliSnatcher/Tools.dart';
 
 
 //Slow piece of shit
 class RainbooruHandler extends BooruHandler {
+  RainbooruHandler(Booru booru,int limit) : super(booru,limit);
+
   bool tagSearchEnabled = true;
 
-  RainbooruHandler(Booru booru,int limit) : super(booru,limit);
   @override
   Future Search(String tags, int? pageNumCustom) async{
     int length = fetched.length;
@@ -32,14 +30,16 @@ class RainbooruHandler extends BooruHandler {
       // 200 is the success http response code
       if (response.statusCode == 200) {
         await parseResponse(response);
-        } else {
+      } else {
         Logger.Inst().log("rainbooru status is" + response.statusCode.toString(), "RainbooruHandler","parseResponse", LogTypes.booruHandlerInfo);
+        errorString.value = response.statusCode.toString();
       }
-        prevTags = tags;
-        if (fetched.length == length){locked.value = true;}
-        return fetched;
+      prevTags = tags;
+      if (fetched.length == length){locked.value = true;}
+      return fetched;
     } catch(e) {
       Logger.Inst().log(e.toString(), "RainbooruHandler","parseResponse", LogTypes.exception);
+      errorString.value = e.toString();
       return fetched;
     }
   }
@@ -48,15 +48,17 @@ class RainbooruHandler extends BooruHandler {
   Future<void> parseResponse(response) async {
     var document = parse(response.body);
     var posts = document.getElementsByClassName("thumbnail");
+
     // Create a BooruItem for each post in the list
-    for (int i =0; i < posts.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i =0; i < posts.length; i++) {
       String thumbURL = "";
       var urlElem = posts.elementAt(i).firstChild!;
       thumbURL += urlElem.firstChild!.attributes["src"]!;
       String url = makePostURL(urlElem.attributes["href"]!.split("img/")[1]);
       Uri uri = Uri.parse(url);
       final responseInner = await http.get(uri,headers: getHeaders());
-      if (responseInner.statusCode == 200){
+      if (responseInner.statusCode == 200) {
         document = parse(responseInner.body);
         var post = document.getElementById("immainpage");
         if (post != null){
@@ -68,41 +70,45 @@ class RainbooruHandler extends BooruHandler {
           for (int x = 0; x < tags.length; x++) {
             currentTags.add(tags[x].innerHtml.replaceAll(" ", "+"));
           }
-          fetched.add(BooruItem(
+
+          BooruItem item = BooruItem(
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: thumbURL,
             tagsList: currentTags,
             postURL: url,
-          ));
-          setTrackedValues(fetched.length - 1);
+          );
+
+          newItems.add(item);
         }
-      } else {
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/img/$id";
   }
 
 
-
   // This will create a url for the http request
   String makeURL(String tags){
     //https://www.rainbooru.org/search?search=safe,solo&page=0
-      if (tags != "*"){
-        return "${booru.baseURL}/search?filters=&search="+tags.replaceAll(" ", ",")+"&page=${pageNum.toString()}";
-      } else {
-        return "${booru.baseURL}/?search=&page=${pageNum.toString()}";
-      }
-
-
+    if (tags != "*") {
+      return "${booru.baseURL}/search?filters=&search="+tags.replaceAll(" ", ",")+"&page=${pageNum.toString()}";
+    } else {
+      return "${booru.baseURL}/?search=&page=${pageNum.toString()}";
+    }
   }
 
   String makeTagURL(String input){
     return "https://twibooru.org/tags.json?tq=*$input*";
   }
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];

@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:vibration/vibration.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
@@ -28,7 +27,6 @@ import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/ZoomButton.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
@@ -67,6 +65,64 @@ class _ViewerPageState extends State<ViewerPage> {
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
+  ///////////////////// TODO Experiment with new gesture - tap on the sides to change pages
+  ///////////////////// Didn't work since it felt unstable and conflicted with other gestures (video double tap, zoom...)
+  /// Wrap androidBuilder with this
+  // Listener(
+  //       onPointerDown: (opm) {
+  //         savePointerPosition(opm.pointer, opm.position);
+  //       },
+  //       // onPointerMove: (opm) {
+  //       //   savePointerPosition(opm.pointer, opm.position);
+  //       // },
+  //       onPointerCancel: (opc) {
+  //         clearPointerPosition(opc.pointer, opc.position);
+  //       },
+  //       onPointerUp: (opc) {
+  //         clearPointerPosition(opc.pointer, opc.position);
+  //       },
+  // );
+  // Map<int, Offset> touchPositions = <int, Offset>{};
+
+  // void savePointerPosition(int index, Offset position) {
+  //   touchPositions[index] = position;
+  // }
+
+  // void clearPointerPosition(int index, Offset position) {
+  //   Map<int, Offset> before = new Map.from(touchPositions);
+  //   touchPositions.remove(index);
+  //   actionCheck(before, index, position);
+  // }
+
+  // void actionCheck(Map<int, Offset> before, int cancelIndex, Offset cancelOffset) async {
+  //   if(touchPositions.length == 0) { // no active pointers
+  //     if(!viewerHandler.isZoomed.value) { // image is not zoomed
+  //       if(before.length == 2) { // two fingers were down
+  //         // if two fingers were down TODO: how to detect when tapped with two fingers? check with delay?
+  //         // viewerScaffoldKey.currentState?.openEndDrawer();
+  //       } else if(before.length == 1) { // only one finger was down
+  //         Offset position = before.values.first;
+
+  //         if(before.keys.first != cancelIndex || (position.dx - cancelOffset.dx).abs() > 30 || (position.dy - cancelOffset.dy).abs() > 30) {
+  //           return;
+  //         }
+
+  //         double zoomButtonBottom = Get.height - kToolbarHeight * 3 - 6;
+  //         double zoomButtonTop = zoomButtonBottom - 42;
+  //         bool isNotInLeftZoomButtonRange = settingsHandler.zoomButtonPosition == 'Left' ? position.dy < zoomButtonTop || position.dy > zoomButtonBottom : true;
+  //         bool isNotInRightZoomButtonRange = settingsHandler.zoomButtonPosition == 'Right' ? position.dy < zoomButtonTop || position.dy > zoomButtonBottom : true;
+
+  //         if (position.dx < (Get.width * 0.10) && isNotInLeftZoomButtonRange) {
+  //           // next page if tapped on dx less than 10% of width
+  //           await controller?.previousPage(duration: Duration(milliseconds: 10), curve: Curves.easeInOut);
+  //         } else if (position.dx > (Get.width * 0.90) && isNotInRightZoomButtonRange) {
+  //           // next page if tapped on dx more than 90% of width
+  //           await controller?.nextPage(duration: Duration(milliseconds: 10), curve: Curves.easeInOut);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   @override
   void initState() {
@@ -145,8 +201,7 @@ class _ViewerPageState extends State<ViewerPage> {
       endDrawerEnableOpenDragGesture: false,
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Colors.black.withOpacity(0.66), // copy existing main app theme, but make background semitransparent
-          textTheme: Typography.material2018().white,
+          canvasColor: Get.theme.colorScheme.background.withOpacity(0.5), // copy existing main app theme, but make background semitransparent
         ),
         child: renderDrawer(),
       )
@@ -276,9 +331,7 @@ class _ViewerPageState extends State<ViewerPage> {
                       bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
                       viewerHandler.displayAppbar.value = newAppbarVisibility;
 
-                      if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-                        Vibration.vibrate(duration: 10);
-                      }
+                      ServiceHandler.vibrate();
 
                       // enable volume buttons if current page is a video AND appbar is set to visible
                       bool isVideo = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo();
@@ -374,7 +427,7 @@ class _ViewerPageState extends State<ViewerPage> {
         ),
 
         ZoomButton(),
-      ])
+      ]),
     );
   }
 
@@ -666,10 +719,16 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   List<Widget> appBarActions() {
-    // remove reload without scaling button on videos (possibly more filters for the future actions?)
-    List<List<String>> filteredButtonOrder = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo()
-      ? settingsHandler.buttonOrder.where((btn) => btn[0] != 'reloadnoscale').toList()
-      : settingsHandler.buttonOrder;
+    List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
+      bool isVideoItem = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo();
+      bool isScaleButton = btn[0] == 'reloadnoscale';
+      bool isScaleAllowed = isScaleButton ? (!isVideoItem || !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video, or scaling is not disabled
+
+      bool isFavButton = btn[0] == 'favourite';
+      bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db isenabled
+      
+      return isScaleAllowed && isFavAllowed;
+    }).toList();
 
     List<Widget> actions = [];
     List<List<String>> overFlowList = [];
@@ -686,6 +745,7 @@ class _ViewerPageState extends State<ViewerPage> {
     buttonList.forEach((value) {
       actions.add(buildIconButton(value[0], true));
     });
+
     // TODO zoom button for testing, but maybe make it a real option?
     // actions.add(Obx(() => IconButton(
     //   icon: Icon(Get.find<ViewerHandler>().isZoomed.value ? Icons.zoom_out : Icons.zoom_in),
@@ -694,6 +754,7 @@ class _ViewerPageState extends State<ViewerPage> {
     //     Get.find<ViewerHandler>().toggleZoom();
     //   },
     // )));
+
     // Debug - print current item info
     // actions.add(IconButton(
     //   icon: Icon(Icons.developer_board),
@@ -702,6 +763,7 @@ class _ViewerPageState extends State<ViewerPage> {
     //     print(searchHandler.currentTab.currentItem.value.toJSON().toString());
     //   },
     // ));
+
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
@@ -831,11 +893,11 @@ class _ViewerPageState extends State<ViewerPage> {
           if(!isSnatched) {
             return const SizedBox();
           } else {
-          return Positioned(
-            child: Icon(Icons.save_alt, size: Get.theme.buttonTheme.height / 2.1),
-            right: 2,
-            bottom: 5,
-          );
+            return Positioned(
+              child: Icon(Icons.save_alt, size: Get.theme.buttonTheme.height / 2.1),
+              right: 2,
+              bottom: 5,
+            );
           }
         });
         
@@ -889,9 +951,7 @@ class _ViewerPageState extends State<ViewerPage> {
         break;
       case("favourite"):
         if(getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value != null) {
-          if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-            Vibration.vibrate(duration: 10);
-          }
+          ServiceHandler.vibrate();
 
           setState(() {
             getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
@@ -955,9 +1015,7 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
   void onShareHold() async {
-    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-      Vibration.vibrate(duration: 10);
-    }
+    ServiceHandler.vibrate();
     // Ignore share setting on long press
     showShareDialog(showTip: false);
   }

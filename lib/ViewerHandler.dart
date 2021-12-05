@@ -71,7 +71,7 @@ class ViewerHandler extends GetxController {
           break;
         case VideoApp:
           isZoomed.value = state?.isZoomed ?? false;
-          isFullscreen.value = state?._chewieController?.isFullScreen ?? false;
+          isFullscreen.value = state?.chewieController?.isFullScreen ?? false;
           break;
         case VideoAppDesktop:
           isZoomed.value = state?.isZoomed ?? false;

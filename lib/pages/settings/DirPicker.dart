@@ -19,7 +19,7 @@ class DirPicker extends StatefulWidget {
 // Might also use a grid and add folder icons isntead of listing text
 // Need to make a dialog to create a new folder
 class _DirPickerState extends State<DirPicker> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final newDirNameController = TextEditingController();
   String path = "";
   @override

@@ -32,7 +32,7 @@ class CachedThumbBetter extends StatefulWidget {
 }
 
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _restartedCount = 0;
@@ -49,6 +49,9 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
   ImageProvider? mainProvider;
   ImageProvider? extraProvider;
+
+  // required for scrollawareimageprovider
+  DisposableBuildContext? disposableBuildContext;
 
   StreamSubscription? hateListener;
 
@@ -85,7 +88,12 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     );
     if(isMain) {
       client = newClient;
-      client!.runRequestIsolate();
+
+      if(settingsHandler.disableImageIsolates) {
+        client!.runRequest();
+      } else {
+        client!.runRequestIsolate();
+      }
     } else {
       extraClient = newClient;
       extraClient!.runRequest();
@@ -209,6 +217,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   @override
   void initState() {
     super.initState();
+    disposableBuildContext = DisposableBuildContext(this);
     selectThumbProvider();
   }
 
@@ -307,6 +316,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   @override
   void dispose() {
     disposables();
+    disposableBuildContext?.dispose();
     super.dispose();
   }
 
@@ -338,7 +348,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
           AnimatedSwitcher( // fade in image
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),
             child: Image(
-              image: extraProvider ?? MemoryImage(kTransparentImage),
+              image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: extraProvider ?? MemoryImage(kTransparentImage)),
               fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
               isAntiAlias: true,
               width: double.infinity, // widget.isStandalone ? double.infinity : null,
@@ -353,7 +363,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
         AnimatedSwitcher( // fade in image
           duration: Duration(milliseconds: widget.isStandalone ? 300 : 10),
           child: Image(
-            image: mainProvider ?? MemoryImage(kTransparentImage),
+            image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: mainProvider ?? MemoryImage(kTransparentImage)),
             fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
             isAntiAlias: true,
             filterQuality: FilterQuality.medium,

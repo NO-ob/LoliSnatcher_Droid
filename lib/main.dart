@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
@@ -11,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:app_links/app_links.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
@@ -21,6 +26,7 @@ import 'package:LoliSnatcher/MobileHome.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
+// import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 
 void main() {
@@ -62,18 +68,32 @@ class _MainAppState extends State<MainApp> {
         // This allows to not use darkTheme to avoid coloring bugs on AppBars
         updateState();
       };
-
-      // enable higher fps
-      // TODO make this a setting?
-      FlutterDisplayMode.setHighRefreshRate();
-      getMaxFPS();
     }
+
+    setMaxFPS();
   }
 
-  void getMaxFPS() async {
-    print('display mode ${await FlutterDisplayMode.supported}');
-  }
+  void setMaxFPS() async {
+    // enable higher refresh rate
+    // TODO make this a setting?
+    // TODO make it work on ios, desktop?
+    // Currently there is no official support on these platforms, see:
+    // https://github.com/flutter/flutter/issues/49757
+    // https://github.com/flutter/flutter/issues/90675
 
+    if(Platform.isAndroid) {
+      await FlutterDisplayMode.setHighRefreshRate();
+      DisplayMode currentMode = await FlutterDisplayMode.active;
+      
+      if(currentMode.refreshRate > maxFps) {
+        maxFps = currentMode.refreshRate.round();
+        updateState();
+      }
+      debugPrint('LoliSnatcher: Set Max FPS $maxFps');
+      // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
+    }
+  }  
+    
   @override
   void dispose() {
     // TODO
@@ -214,8 +234,8 @@ class _MainAppState extends State<MainApp> {
 
 // Added a preloader to load booruconfigs and settings other wise the booruselector misbehaves
 class Preloader extends StatelessWidget {
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +247,7 @@ class Preloader extends StatelessWidget {
             SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
             // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
           } else {
-            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
             SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
           }
 
@@ -244,8 +264,6 @@ class Preloader extends StatelessWidget {
 
         return Home();
       } else {
-        // settingsHandler.initialize();
-
         // no custom theme data here yet, fallback to black bg + pink loading spinner
         return Container(
           color: Colors.black,
@@ -268,9 +286,9 @@ class Home extends StatefulWidget {
 
 
 class _HomeState extends State<Home> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   Timer? cacheClearTimer;
   Timer? cacheStaleTimer;
@@ -280,9 +298,14 @@ class _HomeState extends State<Home> {
   Timer? memeTimer;
   ThemeItem? selectedTheme;
 
+  late AppLinks appLinks;
+
   @override
   void initState() {
     super.initState();
+
+    initDeepLinks();
+
     searchHandler.restoreTabs();
 
     // force cache clear every minute + perform tabs backup
@@ -320,6 +343,38 @@ class _HomeState extends State<Home> {
     //     }
     //   }
     // });
+  }
+
+  void initDeepLinks() async {
+    if(Platform.isAndroid || Platform.isIOS) {
+      appLinks = AppLinks(
+        onAppLink: (Uri uri, String stringUri) {
+          openAppLink(stringUri);
+        },
+      );
+
+      // check if there is a link on start
+      final appLink = await appLinks.getInitialAppLink();
+      if (appLink != null) {
+        openAppLink(appLink.toString());
+      }
+    }
+  }
+
+  void openAppLink(String url) async {
+    Logger.Inst().log(url, "AppLinks", "openAppLink", LogTypes.settingsLoad);
+    // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
+
+    if(url.contains('loli.snatcher')) {
+      Booru booru = Booru.fromLink(url);
+      if(booru.name != null && booru.name!.isNotEmpty) {
+        if(settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
+          // Rename config if its already in the list
+          booru.name = booru.name! + ' (duplicate)';
+        }
+        SettingsPageOpen(context: context, page: () => BooruEdit(booru));
+      }
+    }
   }
 
   @override

@@ -14,7 +14,7 @@ class GalleryPage extends StatefulWidget {
 }
 
 class _GalleryPageState extends State<GalleryPage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition;
   List<List<String>>? buttonOrder;

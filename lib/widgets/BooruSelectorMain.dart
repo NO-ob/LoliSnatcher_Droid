@@ -17,8 +17,8 @@ class BooruSelectorMain extends StatefulWidget {
 }
 
 class _BooruSelectorMainState extends State<BooruSelectorMain> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   final GlobalKey dropdownKey = GlobalKey();
   GestureDetector? detector;
@@ -120,8 +120,16 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             mode: Mode.MENU,
             // showSearchBox: true,
             items: settingsHandler.booruList.where((b) => b != searchHandler.currentTab.selectedBooru.value).toList(),
-            onChange: (List<Booru> newList) {
-              searchHandler.mergeAction(newList);
+            onChanged: (List<Booru> newList) {
+              if(newList.isNotEmpty) {
+                searchHandler.mergeAction(newList);
+              } else {
+                // if no secondary boorus selected, disable merge mode
+                settingsHandler.mergeEnabled = false;
+                searchHandler.mergeAction(null);
+                // TODO add .drawerRestate()
+                searchHandler.rootRestate();
+              }
             },
             popupItemBuilder: (BuildContext context, Booru? value, bool isSelected) {
               return Padding(

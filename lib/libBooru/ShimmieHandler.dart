@@ -5,14 +5,16 @@ import 'dart:async';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
-import 'package:LoliSnatcher/Tools.dart';
+
 /**
  * Booru Handler for the Shimmie engine
  */
 class ShimmieHandler extends BooruHandler{
-  bool tagSearchEnabled = false;
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
+
+  bool tagSearchEnabled = false;
+
   @override
   bool hasSizeData = true;
 
@@ -24,6 +26,7 @@ class ShimmieHandler extends BooruHandler{
       return tags;
     }
   }
+
   @override
   void parseResponse(response){
     var parsedResponse = xml.parse(response.body);
@@ -35,14 +38,16 @@ class ShimmieHandler extends BooruHandler{
     if (posts.length < 1){
       posts = parsedResponse.findAllElements('tag');
     }
+
     // Create a BooruItem for each post in the list
-    for (int i =0; i < posts.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i =0; i < posts.length; i++) {
       var current = posts.elementAt(i);
       Logger.Inst().log(current.toXmlString(), "ShimmieHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
-      if (current.getAttribute("file_url") != null){
+      if (current.getAttribute("file_url") != null) {
         String preURL = '';
         if (booru.baseURL!.contains("https://whyneko.com/booru")){
           // special case for whyneko
@@ -50,7 +55,7 @@ class ShimmieHandler extends BooruHandler{
         }
 
         String dateString = current.getAttribute("date").toString();
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
             fileURL: preURL + current.getAttribute("file_url")!,
             sampleURL: preURL + current.getAttribute("file_url")!,
             thumbnailURL: preURL + current.getAttribute("preview_url")!,
@@ -66,15 +71,22 @@ class ShimmieHandler extends BooruHandler{
             md5String: current.getAttribute("md5"),
             postDate: dateString.substring(0, dateString.length-3), // 2021-06-18 04:37:31.471007 // microseconds?
             postDateFormat: 'yyyy-MM-dd HH:mm:ss.SSSSSS'
-        ));
+        );
+
+        newItems.add(item);
       }
-      setTrackedValues(fetched.length - 1);
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/post/view/$id";
   }
+
   // This will create a url for the http request
   String makeURL(String tags){
     return "${booru.baseURL}/api/danbooru/find_posts/index.xml?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";

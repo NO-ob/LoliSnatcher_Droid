@@ -24,7 +24,7 @@ class SaveCachePage extends StatefulWidget {
 }
 
 class _SaveCachePageState extends State<SaveCachePage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   late String videoCacheMode, extPathOverride;
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();

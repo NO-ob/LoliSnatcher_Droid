@@ -23,13 +23,13 @@ class WorldHandler extends BooruHandler{
   void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse['items'];
+
     // Create a BooruItem for each post in the list
-    for (int i = 0; i < posts.length; i++){
-      /**
-       * Parse Data Object and Add a new BooruItem to the list
-       */
+    List<BooruItem> newItems = [];
+    for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
-      // Logger.Inst().log(current.toString(), "WorldHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(current.toString(), "WorldHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
+
       List<dynamic> imageLinks = current['imageLinks'];
       bool isVideo = current['type'] == 1; //type 1 - video, type 0 - image
       String bestFile = imageLinks.where((f) => f["type"] == (isVideo ? 10 : 2)).toList()[0]["url"];
@@ -50,22 +50,28 @@ class WorldHandler extends BooruHandler{
       List<String> originalTags = current['tags'] != null ? [...current['tags']] : [];
       var fixedTags = originalTags.map((tag) => tag.replaceAll(RegExp(r' '), '_')).toList();
 
-      String dateString = current['created'].split('.')[0]; //split off microseconds // use posted or created?
-      fetched.add(BooruItem(
-          fileURL: bestFile,
-          sampleURL: sampleImage,
-          thumbnailURL: thumbImage,
-          tagsList: fixedTags,
-          postURL: makePostURL(current['id'].toString()),
-          serverId: current['id'].toString(),
-          score: current['views'].toString(), // use views as score, people don't rate stuff here often
-          sources: List<String>.from(current['sources'] ?? []),
-          postDate: dateString, // 2021-06-18T06:09:02.63366 // microseconds?
-          postDateFormat: "yyyy-MM-dd'T'hh:mm:ss"
-      ));
-      setTrackedValues(fetched.length - 1);
+      String dateString = current['created'].split('.')[0]; // split off microseconds // use posted or created?
+      BooruItem item = BooruItem(
+        fileURL: bestFile,
+        sampleURL: sampleImage,
+        thumbnailURL: thumbImage,
+        tagsList: fixedTags,
+        postURL: makePostURL(current['id'].toString()),
+        serverId: current['id'].toString(),
+        score: current['views'].toString(), // use views as score, people don't rate stuff here often
+        sources: List<String>.from(current['sources'] ?? []),
+        postDate: dateString, // 2021-06-18T06:09:02.63366 // microseconds?
+        postDateFormat: "yyyy-MM-dd'T'hh:mm:ss"
+      );
+
+      newItems.add(item);
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/post/$id";

@@ -77,7 +77,11 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       cacheFolder: imageFolder,
     );
     // client.runRequest();
-    client!.runRequestIsolate();
+    if(settingsHandler.disableImageIsolates) {
+      client!.runRequest();
+    } else {
+      client!.runRequestIsolate();
+    }
     return;
   }
 

@@ -22,9 +22,9 @@ class SnatcherPage extends StatefulWidget {
 }
 
 class _SnatcherPageState extends State<SnatcherPage> {
-  final SearchHandler searchHandler = Get.find();
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   final snatcherTagsController = TextEditingController();
   final snatcherAmountController = TextEditingController();

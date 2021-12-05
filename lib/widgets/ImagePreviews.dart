@@ -18,8 +18,8 @@ class ImagePreviews extends StatefulWidget {
 }
 
 class _ImagePreviewsState extends State<ImagePreviews> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   @override
   Widget build(BuildContext context) {
@@ -54,22 +54,17 @@ class _ImagePreviewsState extends State<ImagePreviews> {
       }
 
       // temp message while restoring tabs (or for some reason initial tab was not created)
-      if(searchHandler.list.isEmpty && !searchHandler.isRestored.value) {
+      if(searchHandler.list.isEmpty) {
         return Center(
           child: Column(
             children: [
               CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
               ),
-              Text('Restoring previous session...')
-            ]
+              if(!searchHandler.isRestored.value)
+                Text('Restoring previous session...'),
+            ],
           )
-        );
-      }
-
-      if(searchHandler.list.isEmpty) {
-        return Center(
-          child: Text('No Tabs???')
         );
       }
 

@@ -13,7 +13,7 @@ class UserInterfacePage extends StatefulWidget {
 }
 
 class _UserInterfacePageState extends State<UserInterfacePage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final TextEditingController columnsLandscapeController = TextEditingController();
   final TextEditingController columnsPortraitController = TextEditingController();
   late String appMode, previewMode, previewDisplay;
@@ -169,7 +169,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
                     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
                   } else {
-                    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+                    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
                     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
                   }
                   setState((){ });

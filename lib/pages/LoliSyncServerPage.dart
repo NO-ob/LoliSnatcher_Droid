@@ -10,7 +10,7 @@ class LoliSyncServerPage extends StatelessWidget {
   final String customPort;
   LoliSyncServerPage(this.selectedIP, this.customPort);
 
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final LoliSync loliSync = LoliSync();
 
   Future<bool> _onWillPop(BuildContext context) async {

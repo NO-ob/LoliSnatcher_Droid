@@ -67,6 +67,29 @@ class Booru {
     this.userID = json["userID"].toString();
   }
 
+  String toLink(bool withSensitiveData) {
+    Map json = this.toJSON();
+    if(withSensitiveData == false) {
+      json.remove("apiKey");
+      json.remove("userID");
+    }
+    String jsonString = jsonEncode(json);
+    print(jsonString);
+    return 'https://www.loli.snatcher?' + base64UrlEncode(jsonString.codeUnits);
+  }
+
+  Booru.fromLink(String link) {
+    String jsonString = String.fromCharCodes(base64Decode(link.split("?")[1]));
+    Map<String, dynamic> json = jsonDecode(jsonString);
+    this.name = json["name"].toString();
+    this.type = json["type"].toString();
+    this.faviconURL = json["faviconURL"].toString();
+    this.baseURL = json["baseURL"].toString();
+    this.defTags = json["defTags"].toString();
+    this.apiKey = json["apiKey"].toString();
+    this.userID = json["userID"].toString();
+  }
+
   @override
   String toString() {
     return ("Name: $name, Type: $type, BaseURL: $baseURL, FaviconURL: $faviconURL, APIKey: $apiKey, UserID: $userID");

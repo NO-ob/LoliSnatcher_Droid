@@ -50,7 +50,7 @@ class ViewUtils {
   }
 
   static void jumpToItem(int item, SearchGlobal searchGlobal, ScrollController gridController, BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find();
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     
     int? totalItems = searchGlobal.booruHandler.filteredFetched.length;
     // print("jump to item called index is: $item");

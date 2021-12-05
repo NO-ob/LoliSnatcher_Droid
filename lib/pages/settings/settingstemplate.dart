@@ -11,7 +11,7 @@ class SettingsTemplate extends StatefulWidget {
 }
 
 class _SettingsTemplateState extends State<SettingsTemplate> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   @override
   void initState(){

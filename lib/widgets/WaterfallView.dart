@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
 import 'package:get/get.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:vibration/vibration.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -35,17 +34,19 @@ class _WaterfallState extends State<WaterfallView> {
   final SearchHandler searchHandler = Get.find<SearchHandler>();
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
-  Timer? loadingDelay, _checkInterval;
+  Timer? loadingDelay, checkInterval;
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   StreamSubscription? viewedListener;
 
-   int _startedAt = 0;
+  int _startedAt = 0;
 
   @override
   void initState() {
     super.initState();
     initView();
+    // TODO move all load logic to SearchHandler
+    searchHandler.filteredSearch = filteredSearch;
   }
 
   @override
@@ -128,7 +129,7 @@ class _WaterfallState extends State<WaterfallView> {
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
     loadingDelay?.cancel();
-    _checkInterval?.cancel();
+    checkInterval?.cancel();
     super.dispose();
   }
 
@@ -141,7 +142,7 @@ class _WaterfallState extends State<WaterfallView> {
     );
   }
 
-  void filteredSearch() async {
+  Future<void> filteredSearch() async {
     // do nothing if reached the end or detected an error
     if(searchHandler.isLastPage.value) return;
     if(widget.tab.booruHandler.errorString.isNotEmpty) return;
@@ -160,13 +161,13 @@ class _WaterfallState extends State<WaterfallView> {
 
     // fetch new items, but get results from booruHandler and not search itself
     _startedAt = DateTime.now().millisecondsSinceEpoch;
-    _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
+    checkInterval?.cancel();
+    checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
       // force restate every second to refresh all timers/indicators, even when loading has stopped
       updateState();
     });
     await widget.tab.booruHandler.Search(widget.tab.tags, null);
-    _checkInterval?.cancel();
+    checkInterval?.cancel();
     _startedAt = 0;
     // print('FINISHED SEARCH: ${temp.length}');
 
@@ -192,15 +193,17 @@ class _WaterfallState extends State<WaterfallView> {
 
     updateState();
     // this.mounted prevents an exception on first load
+
+    return;
   }
 
-  void retryLastPage() {
+  void retryLastPage() async {
     widget.tab.booruHandler.errorString.value = '';
     widget.tab.booruHandler.locked.value = false;
     searchHandler.isLastPage(false);
     widget.tab.booruHandler.pageNum--;
     updateState();
-    filteredSearch();
+    await filteredSearch();
   }
 
   void viewerCallback() {
@@ -239,9 +242,7 @@ class _WaterfallState extends State<WaterfallView> {
   void onThumbDoubleTap(int index) async {
     BooruItem item = widget.tab.booruHandler.filteredFetched[index];
     if(item.isFavourite.value != null) {
-      if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-        Vibration.vibrate(duration: 10);
-      }
+      ServiceHandler.vibrate();
 
       item.isFavourite.toggle();
       settingsHandler.dbHandler.updateBooruItem(item, "local");
@@ -250,9 +251,7 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   void onThumbLongPress(int index) async {
-    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-      Vibration.vibrate(duration: 5);
-    }
+    ServiceHandler.vibrate(duration: 5);
 
     if (widget.tab.selected.contains(index)) {
       widget.tab.selected.remove(index);
@@ -426,7 +425,7 @@ class _WaterfallState extends State<WaterfallView> {
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
         addAutomaticKeepAlives: false,
         cacheExtent: 200,
         shrinkWrap: false,
@@ -460,9 +459,9 @@ class _WaterfallState extends State<WaterfallView> {
 
       return StaggeredGridView.countBuilder(
         controller: searchHandler.gridScrollController,
-        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
         addAutomaticKeepAlives: false,
-        shrinkWrap: true,
+        shrinkWrap: false,
         itemCount: widget.tab.booruHandler.filteredFetched.length,
         padding: const EdgeInsets.fromLTRB(2, 2, 2, 80),
         crossAxisCount: columnsCount,
@@ -502,14 +501,14 @@ class _WaterfallState extends State<WaterfallView> {
           ? settingsHandler.portraitColumns
           : settingsHandler.landscapeColumns;
       
-    return LayoutBuilder(builder: (ctx, constraints) { 
+    return LayoutBuilder(builder: (ctx, constraints) {
       double itemMaxWidth = constraints.maxWidth / columnsCount; //MediaQuery.of(context).size.width / columnsCount;
       double itemMaxHeight = itemMaxWidth * (16 / 9); //MediaQuery.of(context).size.height * 0.6;
       return Obx(() {
         return WaterfallFlow.builder(
           controller: searchHandler.gridScrollController,
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+          shrinkWrap: false,
           addAutomaticKeepAlives: false,
           cacheExtent: 200,
           itemCount: widget.tab.booruHandler.filteredFetched.length,
@@ -548,7 +547,7 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   Widget wrapButton(Widget child) {
-    return Container(color: Colors.black87, child: child);
+    return Container(color: Get.theme.colorScheme.background.withOpacity(0.66), child: child);
   }
 
   @override

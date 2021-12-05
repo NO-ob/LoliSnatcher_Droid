@@ -1,3 +1,9 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
@@ -6,13 +12,6 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../../ServiceHandler.dart';
-import '../../SettingsHandler.dart';
-import '../../getPerms.dart';
 
 /**
  * This is the booru editor page.
@@ -328,7 +327,9 @@ class _BooruEditState extends State<BooruEdit> {
         }
         isTesting = true;
         setState(() { });
-        String booruType = await booruTest(testBooru, selectedBooruType);
+        List<String> testResults = await booruTest(testBooru, selectedBooruType);
+        String booruType = testResults[0];
+        String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : "";
 
         // If a booru type is returned set the widget state
         if(booruType != ""){
@@ -357,7 +358,7 @@ class _BooruEditState extends State<BooruEdit> {
               style: TextStyle(fontSize: 20)
             ),
             content: Text(
-              "Entered Information may be incorrect, booru doesn't allow api access or there was a network error",
+              "Entered Information may be incorrect, booru doesn't allow api access or there was a network error. $errorString",
               style: TextStyle(fontSize: 16)
             ),
             leadingIcon: Icons.warning_amber,
@@ -459,7 +460,7 @@ class _BooruEditState extends State<BooruEdit> {
           searchHandler.rootRestate();
           if(searchHandler.list.isEmpty) {
             // force first tab creation after creating first booru
-            searchHandler.list.add(SearchGlobal(newBooru.obs, null, settingsHandler.defTags));
+            searchHandler.addTabByString(settingsHandler.defTags, customBooru: newBooru);
           }
           Navigator.of(context).pop(true);
         }
@@ -473,16 +474,16 @@ class _BooruEditState extends State<BooruEdit> {
    * if the searches return null each time it tries the search it uses a different
    * type of BooruHandler
    */
-  Future<String> booruTest(Booru booru, String userBooruType) async {
-    String booruType = "";
+  Future<List<String>> booruTest(Booru booru, String userBooruType) async {
+    String booruType = "", errorString = "";
     BooruHandler test;
     List<BooruItem> testFetched = [];
     booru.type = userBooruType;
 
-    if (userBooruType == "AutoDetect"){
+    if (userBooruType == "AutoDetect") {
       for(int i = 1; i < booruTypes.length; i++){
         if (booruType == ""){
-          booruType = await booruTest(booru, booruTypes.elementAt(i));
+          booruType = (await booruTest(booru, booruTypes.elementAt(i)))[0];
         }
       }
     } else {
@@ -490,24 +491,22 @@ class _BooruEditState extends State<BooruEdit> {
       test = temp[0];
       test.pageNum.value = temp[1];
       test.pageNum.value ++;
-      // TODO ???
-      // if (booru.type == "Hydrus"){
-      //   testFetched = await test.Search(" ", 0);
-      // } else {
-      //   testFetched = await test.Search(" ", 1);
-      // }
       
       testFetched = (await test.Search(" ", null)) ?? [];
+
+      if(test.errorString.value.isNotEmpty) {
+        errorString = test.errorString.value;
+      }
     }
 
     if (booruType == "") {
       if (testFetched.isNotEmpty) {
         booruType = userBooruType;
         print("Found Results as $userBooruType");
-        return booruType;
+        return [booruType, ''];
       }
     }
 
-    return booruType;
+    return [booruType, errorString];
   }
 }

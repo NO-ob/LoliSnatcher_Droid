@@ -16,7 +16,7 @@ class LoliSyncSendPage extends StatefulWidget {
 }
 
 class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   LoliSync loliSync = LoliSync();
   List<String> toSync = [];
   bool serverStarted = false;

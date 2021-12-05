@@ -21,6 +21,7 @@ class e621Handler extends BooruHandler{
      */
     var posts = parsedResponse['posts'];
     // Create a BooruItem for each post in the list
+    List<BooruItem> newItems = [];
     for (int i = 0; i < posts.length; i++){
       var current = posts[i];
       Logger.Inst().log(current.toString(), "e621Handler", "parseResponse", LogTypes.booruHandlerRawFetched);
@@ -45,7 +46,7 @@ class e621Handler extends BooruHandler{
           sampleURL = current['sample']['url'];
           thumbURL = current['preview']['url'];
         }
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: thumbURL,
@@ -74,10 +75,15 @@ class e621Handler extends BooruHandler{
           md5String: current['file']['md5'],
           postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-        ));
-        setTrackedValues(fetched.length - 1);
+        );
+
+        newItems.add(item);
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
   // This will create a url to goto the images page in the browser

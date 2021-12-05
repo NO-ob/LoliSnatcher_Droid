@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:math';
-
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 import 'dart:async';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'Booru.dart';
+
+import 'package:http/http.dart' as http;
+import 'package:xml/xml.dart';
+
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**
  * Booru Handler for the gelbooru engine
@@ -15,24 +17,30 @@ import 'Booru.dart';
 class GelbooruHandler extends BooruHandler {
   // Dart constructors are weird so it has to call super with the args
   GelbooruHandler(Booru booru, int limit): super(booru,limit);
+
   @override
   bool hasSizeData = true;
+
+  @override
+  bool hasCommentsSupport = true;
+
   @override
   void parseResponse(response) {
-    var parsedResponse = xml.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
      * all the data needed about each image
      */
     var posts = parsedResponse.findAllElements('post');
     // Create a BooruItem for each post in the list
-    for (int i = 0; i < posts.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
       // Logger.Inst().log("dbhandler dbLocked", "GelbooruHandler", "search", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
-      if(current.getAttribute("file_url") != null){
+      if(current.getAttribute("file_url") != null) {
         // Fix for bleachbooru
         String fileURL = "", sampleURL = "", previewURL = "";
         fileURL += current.getAttribute("file_url")!.toString();
@@ -43,7 +51,7 @@ class GelbooruHandler extends BooruHandler {
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
         }
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: previewURL,
@@ -56,6 +64,8 @@ class GelbooruHandler extends BooruHandler {
           previewWidth: double.tryParse(current.getAttribute('preview_width') ?? '') ?? null,
           previewHeight: double.tryParse(current.getAttribute('preview_height') ?? '') ?? null,
           hasNotes: current.getAttribute("has_notes") != null && current.getAttribute("has_notes") == 'true',
+          // TODO rule34xxx api bug? sometimes (mostly when there is only one comment) api returns empty array
+          hasComments: current.getAttribute("has_comments") != null && current.getAttribute("has_comments") == 'true',
           serverId: current.getAttribute("id"),
           rating: current.getAttribute("rating"),
           score: current.getAttribute("score"),
@@ -63,14 +73,25 @@ class GelbooruHandler extends BooruHandler {
           md5String: current.getAttribute("md5"),
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
           postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
-        ));
-        setTrackedValues(fetched.length - 1);
+        );
+
+        // New way - in batches
+        newItems.add(item);
+
+        // Old way - one by one
+        // fetched.add(item);
+        // setTrackedValues(fetched.length - 1);
       }
     }
+
+    // write to fetched and get items fav data in bulk
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
   // This will create a url to goto the images page in the browser
-  String makePostURL(String id){
+  String makePostURL(String id) {
     return "${booru.baseURL}/index.php?page=post&s=view&id=$id";
   }
 
@@ -115,7 +136,7 @@ class GelbooruHandler extends BooruHandler {
         final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr"});
         // 200 is the success http response code
         if (response.statusCode == 200) {
-          var parsedResponse = xml.parse(response.body);
+          var parsedResponse = XmlDocument.parse(response.body);
           var tags = parsedResponse.findAllElements("tag");
           if (tags.length > 0){
             for (int i=0; i < tags.length; i++){
@@ -138,7 +159,7 @@ class GelbooruHandler extends BooruHandler {
       final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        var parsedResponse = xml.parse(response.body);
+        var parsedResponse = XmlDocument.parse(response.body);
         var root = parsedResponse.findAllElements('posts').toList();
         if(root.length == 1) {
           result = int.parse(root[0].getAttribute('count') ?? '0');
@@ -150,4 +171,40 @@ class GelbooruHandler extends BooruHandler {
     totalCount.value = result;
     return;
   }
+
+  @override
+  Future<List<CommentItem>> fetchComments(String postID, int pageNum) async {
+    List<CommentItem> comments = [];
+    String url = "${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID";
+
+    try {
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = XmlDocument.parse(response.body);
+        var commentsXML = parsedResponse.findAllElements("comment");
+        if (commentsXML.length > 0){
+          for (int i=0; i < commentsXML.length; i++){
+            var current = commentsXML.elementAt(i);
+            comments.add(CommentItem(
+              id: current.getAttribute("id"),
+              title: current.getAttribute("id"),
+              content: current.getAttribute("body"),
+              authorID: current.getAttribute("creator_id"),
+              authorName: current.getAttribute("creator"),
+              postID: current.getAttribute("post_id"),
+              // TODO broken on rule34xxx? returns current time
+              createDate: current.getAttribute("created_at"), // 2021-11-15 12:09
+              createDateFormat: "yyyy-MM-dd HH:mm",
+            ));
+          }
+        }
+      }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), "GelbooruHandler", "fetchComments", LogTypes.exception);
+    }
+    return comments;
+  }
+
 }

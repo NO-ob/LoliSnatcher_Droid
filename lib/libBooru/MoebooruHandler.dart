@@ -4,11 +4,13 @@ import 'package:xml/xml.dart' as xml;
 import 'BooruItem.dart';
 import 'GelbooruHandler.dart';
 import 'Booru.dart';
+
 /**
  * Booru Handler for the gelbooru engine only difference do gelbooru is the search/api url all the returned data is the same
  */
 class MoebooruHandler extends GelbooruHandler{
   MoebooruHandler(Booru booru,int limit) : super(booru,limit);
+
   @override
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
@@ -23,8 +25,10 @@ class MoebooruHandler extends GelbooruHandler{
      * all the data needed about each image
      */
     var posts = parsedResponse.findAllElements('post');
+
     // Create a BooruItem for each post in the list
-    for (int i = 0; i < posts.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
       Logger.Inst().log(current.toString(), "MoebooruHandler","parseResponse", LogTypes.booruHandlerRawFetched);
       /**
@@ -41,7 +45,7 @@ class MoebooruHandler extends GelbooruHandler{
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
         }
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: previewURL,
@@ -60,12 +64,17 @@ class MoebooruHandler extends GelbooruHandler{
           md5String: current.getAttribute("md5"),
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
           postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
-        ));
+        );
         
-        setTrackedValues(fetched.length - 1);
+        newItems.add(item);
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   @override
   // This will create a url for the http request
   String makeURL(String tags){
@@ -76,9 +85,9 @@ class MoebooruHandler extends GelbooruHandler{
       return "${booru.baseURL}/post.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
     }
   }
+
   @override
   String makeTagURL(String input){
       return "${booru.baseURL}/tag.xml?limit=10&name=$input*";
   }
-
 }

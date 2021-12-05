@@ -23,7 +23,7 @@ import 'libBooru/Booru.dart';
 // }
 
 class ImageWriter {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   String? path = "";
   String? cacheRootPath = "";
   ServiceHandler serviceHandler = ServiceHandler();

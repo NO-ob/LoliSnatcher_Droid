@@ -20,7 +20,7 @@ class ThemePage extends StatefulWidget {
 }
 
 class _ThemePageState extends State<ThemePage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   ServiceHandler serviceHandler = ServiceHandler();
   late ThemeItem theme;
   late ThemeMode themeMode;

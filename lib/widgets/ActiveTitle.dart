@@ -12,7 +12,7 @@ class ActiveTitle extends StatefulWidget {
 }
 
 class _ActiveTitleState extends State<ActiveTitle> {
-  final SnatchHandler snatchHandler = Get.find();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   @override
   Widget build(BuildContext context) {

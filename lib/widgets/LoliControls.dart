@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
@@ -459,6 +460,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
       },
       onLongPress: () {
+        ServiceHandler.vibrate();
+
         viewerHandler.videoAutoMute = !viewerHandler.videoAutoMute;
         if (viewerHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);

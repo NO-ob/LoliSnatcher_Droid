@@ -4,6 +4,7 @@
     "title": "Test Title",
     "changelog": "Test Changelog\r\n- Test Changelog\r\n-- Test Changelog\r\n",
     "is_in_store": true,
+    "is_update_in_store": false,
     "is_important": false,
     "store_package": "com.noaisu.play.loliSnatcher",
     "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"

@@ -10,6 +10,7 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
@@ -23,8 +24,8 @@ class TagSearchBox extends StatefulWidget {
 }
 
 class _TagSearchBoxState extends State<TagSearchBox> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   ScrollController suggestionsScrollController = ScrollController();
   ScrollController searchScrollController = ScrollController();
@@ -36,7 +37,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   String input = "";
   String lastTag = "";
   List<String> splitInput = [];
-  RxList<String> inputTags = RxList([]);
 
   RxList<List<String>> booruResults = RxList([]);
   RxList<List<String>> historyResults = RxList([]);
@@ -96,6 +96,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     if (this._overlayEntry != null) {
       if (this._overlayEntry!.mounted) {
         this._overlayEntry!.remove();
+        this._overlayEntry = null; // remove and destroy overlay object from memory
       }
     }
   }
@@ -156,10 +157,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         color: Get.theme.colorScheme.secondary,
                         child: TextButton(
                           onPressed: () {
-                            searchHandler.searchTextController.text += '_';
+                            // Add '_' at current cursor position
+                            final String beforeSelection = searchHandler.searchTextController.selection.textBefore(searchHandler.searchTextController.text);
+                            // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
+                            final String afterSelection = searchHandler.searchTextController.selection.textAfter(searchHandler.searchTextController.text);
+                            searchHandler.searchTextController.text = '${beforeSelection}_$afterSelection';
                             // set cursor to the end when tapped unfocused
-                            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
-                            animateTransition();
+                            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: beforeSelection.length + 1));
+                            // animateTransition();
                             createOverlay();
                           },
                           child: Text('__', style: TextStyle(fontSize: 20, color: Get.theme.colorScheme.onSecondary)),
@@ -220,6 +225,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             searchHandler.searchAction(searchHandler.searchTextController.text, null);
                           },
                           onLongPress: () {
+                            ServiceHandler.vibrate();
                             searchHandler.searchTextController.clearComposing();
                             searchHandler.searchBoxFocus.unfocus();
                             searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
@@ -385,7 +391,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   OverlayEntry? _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    // searchHandler.currentTab.booruHandler.limit = 20;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
 
@@ -431,7 +436,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 child: ListView.builder(
                   controller: suggestionsScrollController,
                   padding: EdgeInsets.zero,
-                  shrinkWrap: true,
+                  shrinkWrap: false,
                   itemCount: items.length,
                   itemBuilder: (BuildContext context, int index) {
                     final List<String> item = items[index];
@@ -577,7 +582,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         child: SingleChildScrollView(
                           controller: tagsScrollController,
                           scrollDirection: Axis.horizontal,
-                          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                          physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,

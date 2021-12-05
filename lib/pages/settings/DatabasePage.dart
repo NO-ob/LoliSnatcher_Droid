@@ -19,7 +19,7 @@ class DatabasePage extends StatefulWidget {
 }
 
 class _DatabasePageState extends State<DatabasePage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final ServiceHandler serviceHandler = ServiceHandler();
 
   bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
@@ -369,6 +369,29 @@ class _DatabasePageState extends State<DatabasePage> {
                     );
                 }
               ),
+
+              // SettingsButton(name: '', enabled: false),
+              // SettingsButton(
+              //     name: 'Drop Indexes',
+              //     trailingIcon: Icon(Icons.image),
+              //     action: () async {
+              //       await settingsHandler.dbHandler.dropIndexes();
+              //       FlashElements.showSnackbar(
+              //         context: context,
+              //         title: Text(
+              //           "Indexes dropped!",
+              //           style: TextStyle(fontSize: 20)
+              //         ),
+              //         content: Text(
+              //           "An app restart may be required!",
+              //           style: TextStyle(fontSize: 16)
+              //         ),
+              //         leadingIcon: Icons.delete_forever,
+              //         leadingIconColor: Colors.red,
+              //         sideColor: Colors.yellow,
+              //       );
+              //     }
+              // ),
 
               SettingsButton(name: '', enabled: false),
               SettingsButton(

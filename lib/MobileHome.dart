@@ -18,6 +18,8 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/MascotImage.dart';
+import 'package:LoliSnatcher/widgets/PageNumberDialog.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 
 class MobileHome extends StatefulWidget {
   @override
@@ -29,8 +31,9 @@ class _MobileHomeState extends State<MobileHome> {
   final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
+
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();  
+  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
 
   void _toggleDrawer(InnerDrawerDirection direction) {
     mainDrawerKey.currentState?.toggle(
@@ -68,6 +71,41 @@ class _MobileHomeState extends State<MobileHome> {
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
 
+  Widget pageNumberButton() {
+    return IconButton(
+      icon: Icon(Icons.format_list_numbered),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return PageNumberDialog();
+          }
+        );
+      },
+    );
+  }
+
+  Widget menuButton(InnerDrawerDirection direction) {
+    return GestureDetector(
+      onLongPress: () {
+        ServiceHandler.vibrate();
+        // scroll to start on long press of menu buttons
+        searchHandler.gridScrollController.jumpTo(0);
+      },
+      child: IconButton(
+        icon: Icon(Icons.menu),
+        onPressed: () {
+          _toggleDrawer(direction);
+
+          // if(mainScaffoldKey.currentState?.isEndDrawerOpen == true) {
+          // } else {
+          //   mainScaffoldKey.currentState?.openEndDrawer();
+          // }
+        }
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('!!! main build !!!');
@@ -78,13 +116,11 @@ class _MobileHomeState extends State<MobileHome> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: ActiveTitle(),
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            _toggleDrawer(InnerDrawerDirection.start);
-          }
-        ),
+        leading: menuButton(InnerDrawerDirection.start),
         actions: <Widget>[
+          // TODO needs more work and polish
+          // pageNumberButton(),
+
           Obx(() {
             if(searchHandler.list.isNotEmpty) {
               return Stack(
@@ -147,16 +183,7 @@ class _MobileHomeState extends State<MobileHome> {
             }
           }),
 
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              // if(mainScaffoldKey.currentState?.isEndDrawerOpen == true) {
-              // } else {
-              //   mainScaffoldKey.currentState?.openEndDrawer();
-              // }
-              _toggleDrawer(InnerDrawerDirection.end);
-            },
-          )
+          menuButton(InnerDrawerDirection.end),
         ],
       ),
       body: WillPopScope(
@@ -171,62 +198,52 @@ class _MobileHomeState extends State<MobileHome> {
       // drawerEdgeDragWidth: MediaQuery.of(context).size.width / 2, // allows to detect horizontal swipes on the whole screen => open drawer by swiping right-to-left
     );
 
-    return NotificationListener(
-      onNotification: (SizeChangedLayoutNotification notification) {
-        // WidgetsBinding.instance!.addPostFrameCallback((_) {
-        //   // Do something when screen size changes
-        //   setState(() { });
-        //   searchHandler.rootRestate();
-        // });
-        
-        return true;
-      },
-      child: OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
-          return InnerDrawer(
-            key: mainDrawerKey,
-            onTapClose: true,
-            swipe: true,
-            swipeChild: true,
-            
-            //When setting the vertical offset, be sure to use only top or bottom
-            offset: IDOffset.only(
-              bottom: 0.0,
-              right: orientation == Orientation.landscape ? 0 : 0.5,
-              left: orientation == Orientation.landscape ? 0 : 0.5
-            ),
-            scale: IDOffset.horizontal(1),
-            
-            proportionalChildArea: true,
-            borderRadius: 10,
-            leftAnimationType: InnerDrawerAnimation.quadratic,
-            rightAnimationType: InnerDrawerAnimation.quadratic,
-            backgroundDecoration: BoxDecoration(color: Get.theme.colorScheme.background),
-            
-            //when a pointer that is in contact with the screen and moves to the right or left
-            onDragUpdate: (double val, InnerDrawerDirection? direction) {
-                // return values between 1 and 0
-                // print(val);
-                // check if the swipe is to the right or to the left
-                // print(direction==InnerDrawerDirection.start);
-            },
+    return OrientationBuilder(
+      builder: (BuildContext context, Orientation orientation) {
+        return InnerDrawer(
+          key: mainDrawerKey,
+          onTapClose: true,
+          swipe: true,
+          swipeChild: true,
+          
+          //When setting the vertical offset, be sure to use only top or bottom
+          offset: IDOffset.only(
+            bottom: 0.0,
+            right: orientation == Orientation.landscape ? 0 : 0.5,
+            left: orientation == Orientation.landscape ? 0 : 0.5,
+          ),
+          scale: IDOffset.horizontal(1),
+          
+          proportionalChildArea: true,
+          borderRadius: 10,
+          leftAnimationType: InnerDrawerAnimation.quadratic,
+          rightAnimationType: InnerDrawerAnimation.quadratic,
+          backgroundDecoration: BoxDecoration(color: Get.theme.colorScheme.background),
+          
+          //when a pointer that is in contact with the screen and moves to the right or left
+          onDragUpdate: (double val, InnerDrawerDirection? direction) {
+              // return values between 1 and 0
+              // print(val);
+              // check if the swipe is to the right or to the left
+              // print(direction==InnerDrawerDirection.start);
+          },
 
-            innerDrawerCallback: (isOpen) {
-              if(!isOpen) {
-                if(searchHandler.searchBoxFocus.hasFocus) {
-                  searchHandler.searchBoxFocus.unfocus();
-                }
+          innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
+            // print('$isOpen $direction');
+            if(!isOpen) {
+              if(searchHandler.searchBoxFocus.hasFocus) {
+                searchHandler.searchBoxFocus.unfocus();
               }
-            }, // return  true (open) or false (close)
+            }
+          }, // return  true (open) or false (close)
 
-            leftChild: MainDrawer(),
-            rightChild: MainDrawer(),
-            
-            // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
-            scaffold: scaff,
-          );
-        }
-      )
+          leftChild: MainDrawer(),
+          rightChild: MainDrawer(),
+          
+          // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
+          scaffold: scaff,
+        );
+      }
     );
   }
 }
@@ -376,7 +393,7 @@ class _MainDrawerState extends State<MainDrawer> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }

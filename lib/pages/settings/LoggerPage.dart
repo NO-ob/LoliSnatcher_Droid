@@ -1,22 +1,12 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:isolate';
 
-
-import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
-import 'package:LoliSnatcher/ImageWriterIsolate.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class LoggerPage extends StatefulWidget {
   LoggerPage();
@@ -25,7 +15,7 @@ class LoggerPage extends StatefulWidget {
 }
 
 class _LoggerPageState extends State<LoggerPage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   List<LogTypes> ignoreLogTypes = [];
 
   @override

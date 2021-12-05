@@ -25,6 +25,7 @@ import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 class SettingsHandler extends GetxController {
   ServiceHandler serviceHandler = ServiceHandler();
   DBHandler dbHandler = DBHandler();
+  DBHandler favDbHandler = DBHandler();
 
   // service vars
   RxBool isInit = false.obs;
@@ -36,6 +37,7 @@ class SettingsHandler extends GetxController {
   // TODO don't forget to update these on every new release
   // version vars
   String appName = "LoliSnatcher";
+  String packageName = "com.noaisu.loliSnatcher";
   String verStr = "2.0.0";
   int buildNumber = 163;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
@@ -54,6 +56,8 @@ class SettingsHandler extends GetxController {
   RxBool isMemeTheme = false.obs;
   bool showURLOnThumb = false;
   bool disableImageScaling = false;
+  // disable isolates on debug builds, because they cause lags in emulator
+  bool disableImageIsolates = kDebugMode || false;
 
   ////////////////////////////////////////////////////
 
@@ -591,8 +595,10 @@ class SettingsHandler extends GetxController {
 
     if (dbEnabled) {
       await dbHandler.dbConnect(path);
+      await favDbHandler.dbConnectReadOnly(path);
     } else {
       dbHandler = DBHandler();
+      favDbHandler = DBHandler();
     }
     ignoreLogTypes.addAll(LogTypes.values);
     return true;
@@ -1403,7 +1409,7 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
-    // String fakeUpdate = '{"version_name": "2.0.0", "build_number": 999, "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}'; // fake update json for tests
+    // String fakeUpdate = '{"version_name": "2.0.0", "build_number": 999, "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_update_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}'; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
     try {
       final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/update.json'));
@@ -1416,27 +1422,33 @@ class SettingsHandler extends GetxController {
         title: json["title"] ?? '...',
         changelog: json["changelog"] ?? '...',
         isInStore: json["is_in_store"] ?? false,
+        isUpdateInStore: json["is_update_in_store"] ?? false,
         isImportant: json["is_important"] ?? false,
         storePackage: json["store_package"] ?? '',
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
 
-      if(buildNumber < (updateInfo.value?.buildNumber ?? 0)) {
+      // if current build number is less than update build number in json
+      if(buildNumber < (updateInfo.value!.buildNumber)) {
+        // is allowed to open update dialog (either after user pressed a button or update is considered important)
         if((withMessage || updateInfo.value!.isImportant)) {
-          showUpdate();
+          // if app is from store and app is still in store
+          if(EnvironmentConfig.isFromStore && updateInfo.value!.isInStore) {
+            // if update is available in store
+            if(updateInfo.value!.isUpdateInStore) {
+              showUpdate();
+            } else {
+              // otherwise show latest version message
+              showLastVersionMessage(withMessage);
+            }
+          } else {
+            // otherwise always show dialog with a link to github
+            showUpdate();
+          }
         }
       } else {
-        if(withMessage) {
-          FlashElements.showSnackbar(
-            title: Text(
-              "You already have the latest version!",
-              style: TextStyle(fontSize: 20)
-            ),
-            sideColor: Colors.green,
-            leadingIcon: Icons.update,
-            leadingIconColor: Colors.green,
-          );
-        }
+        // otherwise show latest version message
+        showLastVersionMessage(withMessage);
         updateInfo.value = null;
       }
     } catch (e) {
@@ -1454,6 +1466,20 @@ class SettingsHandler extends GetxController {
           leadingIconColor: Colors.red,
         );
       }
+    }
+  }
+
+  void showLastVersionMessage(bool withMessage) {
+    if(withMessage) {
+      FlashElements.showSnackbar(
+        title: Text(
+          "You already have the latest version!",
+          style: TextStyle(fontSize: 20)
+        ),
+        sideColor: Colors.green,
+        leadingIcon: Icons.update,
+        leadingIconColor: Colors.green,
+      );
     }
   }
 
@@ -1532,6 +1558,11 @@ class SettingsHandler extends GetxController {
       HttpOverrides.global = MyHttpOverrides();
     }
 
+    if(Platform.isAndroid || Platform.isIOS) {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      packageName = packageInfo.packageName;
+    }
+
     // if(Platform.isAndroid || Platform.isIOS) {
     //   // TODO on desktop flutter doesnt't use version data from pubspec
     //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -1562,6 +1593,7 @@ class UpdateInfo {
   String title;
   String changelog;
   bool isInStore;
+  bool isUpdateInStore;
   bool isImportant;
   String storePackage;
   String githubURL;
@@ -1572,6 +1604,7 @@ class UpdateInfo {
     required this.title,
     required this.changelog,
     required this.isInStore,
+    required this.isUpdateInStore,
     required this.isImportant,
     required this.storePackage,
     required this.githubURL,

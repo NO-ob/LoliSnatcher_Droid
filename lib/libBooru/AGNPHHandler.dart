@@ -44,9 +44,11 @@ class AGNPHHandler extends BooruHandler{
       } else {
         Logger.Inst().log("AGNPHHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("AGNPHHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        errorString.value = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "AGNPHHandler", "Search", LogTypes.exception);
+      errorString.value = e.toString();
       return fetched;
     }
   }
@@ -115,7 +117,7 @@ class AGNPHHandler extends BooruHandler{
       }
       String postID = posts.elementAt(i).getElement("id")?.innerText ?? "";
       if (postID.isNotEmpty){
-        BooruItem item = new BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: thumbnailURL,

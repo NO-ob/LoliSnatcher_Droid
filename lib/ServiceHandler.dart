@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:vibration/vibration.dart';
 
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
@@ -326,6 +327,22 @@ class ServiceHandler{
       print(e);
     }
     return result;
+  }
+
+  static void vibrate({
+    bool flutterWay = false,
+    int duration = 10,
+    int amplitude = -1,
+  }) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      if(flutterWay) {
+        HapticFeedback.vibrate();
+      } else {
+        if (await Vibration.hasVibrator() ?? false) {
+          Vibration.vibrate(duration: duration, amplitude: amplitude);
+        }
+      }
+    }
   }
 
 }

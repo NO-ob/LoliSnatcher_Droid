@@ -19,7 +19,7 @@ class LoliSyncPage extends StatefulWidget {
   _LoliSyncPageState createState() => _LoliSyncPageState();
 }
 class _LoliSyncPageState extends State<LoliSyncPage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final ipController = TextEditingController();
   final portController = TextEditingController();
   bool favourites = false, settings = false, booru = false;
@@ -129,17 +129,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
                   if(syncAllowed) {
                     var page = () => LoliSyncSendPage(ipController.text, portController.text, settings, favourites, booru);
-                    // TODO move the desktop check and dialog build to separate unified function
-                    if(Get.find<SettingsHandler>().appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: page.call(),
-                        ),
-                      ));
-                    } else {
-                      Navigator.push(context, CupertinoPageRoute(builder: (BuildContext context) => page.call()));
-                    }
+                    SettingsPageOpen(context: context, page: page);
                   } else {
                     String errorString = '???';
                     if (!isAddressEntered) {

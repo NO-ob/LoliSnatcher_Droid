@@ -35,7 +35,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  Player? _videoController;
+  Player? videoController;
   Media? media;
 
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
@@ -113,7 +113,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       onDoneFile: (File file, String url) {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if(_videoController == null && !isLoaded) {
+        if(videoController == null && !isLoaded) {
           initPlayer();
           updateState();
         }
@@ -122,7 +122,11 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       cacheFolder: 'media',
     );
     // client!.runRequest();
-    client!.runRequestIsolate();
+    if(settingsHandler.disableImageIsolates) {
+      client!.runRequest();
+    } else {
+      client!.runRequestIsolate();
+    }
     return;
   }
 
@@ -224,10 +228,10 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   void disposables() {
-    // _videoController?.setVolume(0);
-    _videoController?.pause();
-    _videoController?.dispose();
-    _videoController = null;
+    // videoController?.setVolume(0);
+    videoController?.pause();
+    videoController?.dispose();
+    videoController = null;
 
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
@@ -291,7 +295,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
     isLoaded = true;
 
-    _videoController!.open(
+    videoController!.open(
       media!,
       autoStart: settingsHandler.autoPlayEnabled,
     );
@@ -316,27 +320,27 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
     isLoaded = true;
 
-    _videoController = Player(id: widget.index);
-    _videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
-    _videoController!.setVolume(viewerHandler.videoVolume);
-    // _videoController!.open(
+    videoController = Player(id: widget.index);
+    videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
+    videoController!.setVolume(viewerHandler.videoVolume);
+    // videoController!.open(
     //   media!,
     //   autoStart: settingsHandler.autoPlayEnabled,
     // );
 
-    _videoController!.playbackStream.listen((PlaybackState state) {
+    videoController!.playbackStream.listen((PlaybackState state) {
       // dart_vlc has loop logic integrated into playlists, but it is not working?
       // this will force restart videos on completion
 
       if(state.isPlaying) {
         if(state.isCompleted) {
-          _videoController!.play();
+          videoController!.play();
         }
       }
     });
 
     
-    _videoController!.generalStream.listen((GeneralState state) {
+    videoController!.generalStream.listen((GeneralState state) {
       viewerHandler.videoVolume = state.volume;
     });
 
@@ -350,7 +354,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     final bool isViewed = settingsHandler.appMode == 'Mobile'
       ? viewedIndex == widget.index
       : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
-    bool initialized = isLoaded; // _videoController != null;
+    bool initialized = isLoaded; // videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     bool needsRestart = _lastViewedIndex != viewedIndex;
@@ -366,11 +370,11 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          _videoController!.seek(Duration.zero);
+          videoController!.seek(Duration.zero);
         }
 
         if(!firstViewFix) {
-          _videoController!.open(
+          videoController!.open(
             media!,
             autoStart: settingsHandler.autoPlayEnabled,
           );
@@ -380,16 +384,16 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
         // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-            _videoController!.play();
+            videoController!.play();
         } else {
-          _videoController!.pause();
+          videoController!.pause();
         }
 
         if (viewerHandler.videoAutoMute) {
-          _videoController!.setVolume(0);
+          videoController!.setVolume(0);
         }
       } else {
-        _videoController!.pause();
+        videoController!.pause();
       }
     }
 
@@ -435,7 +439,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
               if(isViewed && initialized)
                 Video(
-                  player: _videoController,
+                  player: videoController,
                   scale: 1.0,
                   showControls: true,
                   progressBarInactiveColor: Colors.grey,

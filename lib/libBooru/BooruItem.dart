@@ -13,7 +13,7 @@ class BooruItem{
 
   String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
   List<String>? sources;
-  bool? hasNotes;
+  bool? hasNotes, hasComments;
   double? fileWidth, fileHeight, sampleWidth, sampleHeight, previewWidth, previewHeight;
   int? fileSize;
   BooruItem({
@@ -33,6 +33,7 @@ class BooruItem{
     this.previewHeight,
 
     this.hasNotes,
+    this.hasComments,
     this.serverId,
     this.rating, // safe, explicit...
     this.score,

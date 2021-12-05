@@ -46,22 +46,8 @@ class SettingsButton extends StatelessWidget {
     if(action != null) {
       action?.call();
     } else {
-      SettingsHandler settingsHandler = Get.find<SettingsHandler>();
       if(page != null) {
-        if(settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
-          Get.dialog(Dialog(
-            child: Container(
-              width: 500,
-              child: page!.call(),
-            ),
-          ));
-        } else {
-          Navigator.push(context, CupertinoPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page!.call()));
-          // Get.to(
-          //   page,
-          //   // duration: Duration(milliseconds: 500)
-          // );
-        }
+        SettingsPageOpen(context: context, page: page!);
       }
     }
   }
@@ -95,6 +81,29 @@ class SettingsButton extends StatelessWidget {
       )
     );
   }
+}
+
+// class used to unify the opening of settings pages logic
+class SettingsPageOpen {
+  SettingsPageOpen({
+    required this.page,
+    required this.context,
+  }) {
+    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    if(settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
+      Get.dialog(Dialog(
+        child: Container(
+          width: 500,
+          child: page(),
+        ),
+      ));
+    } else {
+      Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page()));
+    }
+  }
+
+  final Widget Function() page;
+  final BuildContext context;
 }
 
 
@@ -481,7 +490,9 @@ class SettingsDialog extends StatelessWidget {
     this.contentItems,
     this.actionButtons,
     this.contentPadding,
-    this.titlePadding
+    this.titlePadding,
+    this.insetPadding,
+    this.scrollable = true,
   }) : super(key: key);
 
   final Widget? title;
@@ -490,6 +501,8 @@ class SettingsDialog extends StatelessWidget {
   final List<Widget>? actionButtons;
   final EdgeInsets? contentPadding;
   final EdgeInsets? titlePadding;
+  final EdgeInsets? insetPadding;
+  final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
@@ -504,7 +517,8 @@ class SettingsDialog extends StatelessWidget {
       backgroundColor: Get.theme.colorScheme.surface,
       actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
       contentPadding: contentPadding ?? const EdgeInsets.fromLTRB(24, 20, 24, 24),
-      scrollable: true,
+      insetPadding: insetPadding ?? const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+      scrollable: scrollable,
     );
   }
 }

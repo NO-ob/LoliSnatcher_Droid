@@ -1,12 +1,4 @@
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/AGNPHHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
-import 'package:LoliSnatcher/libBooru/InkBunnyHandler.dart';
-import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/NyanPalsHandler.dart';
-import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
-import 'package:get/get.dart';
 
 import 'Booru.dart';
 import 'BooruOnRailsHandler.dart';
@@ -24,13 +16,22 @@ import 'e621Handler.dart';
 import 'WorldHandler.dart';
 import 'R34HentaiHandler.dart';
 import 'IdolSankakuHandler.dart';
+import 'AGNPHHandler.dart';
+import 'BooruHandler.dart';
+import 'FavouritesHandler.dart';
+import 'InkBunnyHandler.dart';
+import 'MergebooruHandler.dart';
+import 'NyanPalsHandler.dart';
+import 'RainbooruHandler.dart';
+import 'package:get/get.dart';
 
 
-class BooruHandlerFactory{
+class BooruHandlerFactory {
   BooruHandler? booruHandler;
   int pageNum = -1;
-  List getBooruHandler(List<Booru> boorus, int? customLimit){
-    final SettingsHandler settingsHandler = Get.find();
+
+  List getBooruHandler(List<Booru> boorus, int? customLimit) {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     final int limit = customLimit == null ? settingsHandler.limit : customLimit;
     if (boorus.length == 1) {
       switch (boorus[0].type) {
@@ -107,7 +108,6 @@ class BooruHandlerFactory{
         default:
           booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);
           break;
-      
       }
     } else {
       booruHandler = MergebooruHandler(Booru("Merge", "Merge", "", "", ""), limit);

@@ -82,7 +82,9 @@ class HydrusHandler extends BooruHandler{
           if (response.statusCode == 200) {
             var parsedResponse = jsonDecode(response.body);
             Logger.Inst().log(response.body, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
-            for (int i = 0; i < parsedResponse['metadata'].length; i++){
+
+            List<BooruItem> newItems = [];
+            for (int i = 0; i < parsedResponse['metadata'].length; i++) {
                 List<String> tagList = [];
                 var responseTags;
                 //@seniorm0ment
@@ -105,7 +107,7 @@ class HydrusHandler extends BooruHandler{
                       knownUrls.add(element.toString());
                     });
                   }
-                  fetched.add(BooruItem(
+                  BooruItem item = BooruItem(
                     fileURL: "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                     sampleURL: "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                     thumbnailURL: "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
@@ -116,10 +118,15 @@ class HydrusHandler extends BooruHandler{
                     fileHeight: parsedResponse['metadata'][i]['height'].toDouble(),
                     md5String: parsedResponse['metadata'][i]['hash'],
                     sources: knownUrls,
-                  ));
-                  setTrackedValues(fetched.length - 1);
+                  );
+
+                  newItems.add(item);
                 }
             }
+
+            int lengthBefore = fetched.length;
+            fetched.addAll(newItems);
+            setMultipleTrackedValues(lengthBefore, fetched.length);
             return fetched;
           } else {
             Logger.Inst().log("Getting metadata failed", "HydrusHandler", "getResultsPage", LogTypes.booruHandlerInfo);
