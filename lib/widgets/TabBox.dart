@@ -7,13 +7,7 @@ import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 
-class TabBox extends StatefulWidget {
-  TabBox();
-  @override
-  _TabBoxState createState() => _TabBoxState();
-}
-
-class _TabBoxState extends State<TabBox> {
+class TabBox extends StatelessWidget {
   final SearchHandler searchHandler = Get.find<SearchHandler>();
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
@@ -50,22 +44,22 @@ class _TabBoxState extends State<TabBox> {
       width: double.maxFinite,
       height: 30,
       child: Row(
-      children: [
-        isNotEmptyBooru
-          ? (tab.selectedBooru.value.type == "Favourites"
-            ? Icon(Icons.favorite, color: Colors.red, size: 18)
-            : CachedFavicon(tab.selectedBooru.value.faviconURL!)
-          )
-          : Icon(CupertinoIcons.question, size: 18),
-        const SizedBox(width: 3),
-        MarqueeText(
-          key: ValueKey(tagText),
-          text: tagText,
-          fontSize: 16,
-          color: tab.tags == "" ? Colors.grey : null,
-        ),
-      ]
-    )
+        children: [
+          isNotEmptyBooru
+            ? (tab.selectedBooru.value.type == "Favourites"
+              ? Icon(Icons.favorite, color: Colors.red, size: 18)
+              : CachedFavicon(tab.selectedBooru.value.faviconURL!)
+            )
+            : Icon(CupertinoIcons.question, size: 18),
+          const SizedBox(width: 3),
+          MarqueeText(
+            key: ValueKey(tagText),
+            text: tagText,
+            fontSize: 16,
+            color: tab.tags == "" ? Colors.grey : null,
+          ),
+        ]
+      )
     );
   }
 
@@ -76,7 +70,7 @@ class _TabBoxState extends State<TabBox> {
       padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
       child: Obx(() {
         List<SearchGlobal> list = searchHandler.list;
-        int index = searchHandler.index.value;
+        int index = searchHandler.currentIndex;
 
         if(list.length == 0) {
           return const SizedBox();
@@ -89,6 +83,7 @@ class _TabBoxState extends State<TabBox> {
             isExpanded: true,
             value: list[index],
             icon: Icon(Icons.arrow_drop_down),
+            itemHeight: kMinInteractiveDimension,
             decoration: InputDecoration(
               labelText: 'Tab',
               labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),

@@ -8,26 +8,23 @@ class FavouritesHandler extends BooruHandler{
   FavouritesHandler(Booru booru,int limit): super(booru,limit);
 
   @override
-  Future Search(String tags, int? pageNumCustom) async{
+  Future Search(String tags, int? pageNumCustom) async {
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
     int length = fetched.length;
-    if (prevTags != tags){
+    if (prevTags != tags) {
       fetched.value = [];
     }
 
     fetched.addAll(await settingsHandler.dbHandler.searchDB(tags, fetched.length.toString(), limit.toString(), "DESC", "Favourites"));
-    print("dbhandler fetched length is $length");
+    print("dbhandler fetched length is ${fetched.length}");
     prevTags = tags;
-    if (fetched.isEmpty){
+
+    if (fetched.isEmpty || fetched.length == length) {
       Logger.Inst().log("dbhandler dbLocked", "FavouritesHandler", "search", LogTypes.booruHandlerInfo);
       locked.value = true;
-    } else {
-      if (fetched.length == length){
-        Logger.Inst().log("dbhandler dbLocked", "FavouritesHandler", "search", LogTypes.booruHandlerInfo);
-        locked.value = true;
-      }
     }
+
     return fetched;
   }
 

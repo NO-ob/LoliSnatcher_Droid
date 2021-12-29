@@ -1,5 +1,3 @@
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -85,7 +83,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     isLoading = true;
     if (widget.item.serverId != null) {
       setState(() {}); // set state to update the loading indicator
-      var fetched = await searchHandler.currentTab.booruHandler.fetchComments(widget.item.serverId!, 0);
+      var fetched = await searchHandler.currentBooruHandler.fetchComments(widget.item.serverId!, 0);
       comments = fetched;
     } else {
       notSupported = true;

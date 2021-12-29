@@ -1,9 +1,11 @@
 // TODO media actions, video pause/mute... global controller
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:photo_view/photo_view.dart';
+
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ViewerHandler extends GetxController {
   // Keys to get states of all currently built viewers
@@ -44,15 +46,21 @@ class ViewerHandler extends GetxController {
   RxBool inViewer = false.obs; // is in viewerpage
   RxBool displayAppbar = true.obs; // is gallery toolbar visible
   RxBool isZoomed = false.obs; // is current item zoomed in
+  RxBool isLoaded = false.obs; // is current item loaded
+  Rx<PhotoViewControllerValue> viewState = Rx(PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null)); // current view state
   RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoApp)
   RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
+
+  RxBool showNotes = true.obs;
 
   void resetState() {
     inViewer.value = false;
     displayAppbar.value = true;
     isZoomed.value = false;
+    isLoaded.value = false;
     isFullscreen.value = false;
     isDesktopFullscreen.value = false;
+    viewState.value = PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null);
   }
 
   // Get zoom state of new current item
@@ -67,15 +75,21 @@ class ViewerHandler extends GetxController {
       switch (widget.runtimeType) {
         case MediaViewerBetter:
           isZoomed.value = state?.isZoomed ?? false;
+          isLoaded.value = state?.mainProvider != null;
           isFullscreen.value = false;
+          viewState.value = state?.viewController.value;
           break;
         case VideoApp:
           isZoomed.value = state?.isZoomed ?? false;
+          isLoaded.value = true;
           isFullscreen.value = state?.chewieController?.isFullScreen ?? false;
+          viewState.value = state?.viewController.value;
           break;
         case VideoAppDesktop:
           isZoomed.value = state?.isZoomed ?? false;
+          isLoaded.value = true;
           isFullscreen.value = false;
+          viewState.value = state?.viewController.value;
           break;
         default: break;
       }
@@ -94,15 +108,25 @@ class ViewerHandler extends GetxController {
   }
   void resetZoom() {
     dynamic state = currentKey.value?.currentState;
-    if(state != null) {
-      state.resetZoom?.call();
-    }
+    state?.resetZoom?.call();
   }
   void doubleTapZoom() {
     dynamic state = currentKey.value?.currentState;
-    if(state != null) {
-      state.doubleTapZoom?.call();
-    }
+    state?.doubleTapZoom?.call();
+  }
+
+  void setViewState(Key? key, PhotoViewControllerValue value) {
+    if(key == null) return;
+    if(currentKey.value != key) return;
+
+    viewState.value = value;
+  }
+
+  void setLoaded(Key? key, bool value) {
+    if(key == null) return;
+    if(currentKey.value != key) return;
+
+    isLoaded.value = value;
   }
 
 

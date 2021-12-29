@@ -9,11 +9,10 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
-
 abstract class BooruHandler {
   // pagenum = -1 as "didn't load anything yet" state
   // gets set to higher number for special cases in handler factory
-  RxInt pageNum = (-1).obs; 
+  RxInt pageNum = (-1).obs;
   int limit = 20;
   String prevTags = "";
   RxBool locked = false.obs;
@@ -26,18 +25,18 @@ abstract class BooruHandler {
 
   bool tagSearchEnabled = true;
   bool hasSizeData = false;
-  BooruHandler(this.booru,this.limit);
+  BooruHandler(this.booru, this.limit);
 
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
   Future Search(String tags, int? pageNumCustom) async {
-    if(pageNumCustom != null) {
+    if (pageNumCustom != null) {
       pageNum.value = pageNumCustom;
     }
     tags = validateTags(tags);
-    if (prevTags != tags){
+    if (prevTags != tags) {
       fetched.value = [];
     }
 
@@ -46,36 +45,54 @@ abstract class BooruHandler {
     try {
       int length = fetched.length;
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: getHeaders());
+      final response = await http.get(uri, headers: getHeaders());
       if (response.statusCode == 200) {
         parseResponse(response);
         prevTags = tags;
-        if (fetched.length == length){locked.value = true;}
+        if (fetched.length == length) {
+          locked.value = true;
+        }
       } else {
         Logger.Inst().log("BooruHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("BooruHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("BooruHandler url response is: ${response.body}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         errorString.value = response.statusCode.toString();
       }
-    } catch(e) {
+    } catch (e) {
       Logger.Inst().log(e.toString(), "BooruHandler", "Search", LogTypes.exception);
       errorString.value = e.toString();
-      // return fetched;
     }
 
     // print('Fetched: ${filteredFetched.length}');
     return fetched;
   }
 
-  void parseResponse(response){return;}
-  String validateTags(String tags){return tags;}
-  String? makePostURL(String id){}
-  String? makeURL(String tags){}
-  String? makeTagURL(String input){}
+  void parseResponse(response) {
+    return;
+  }
+
+  String validateTags(String tags) {
+    return tags;
+  }
+
+  String? makePostURL(String id) {}
+  String? makeURL(String tags) {}
+  String? makeTagURL(String input) {}
   tagSearch(String input) {}
 
   bool hasCommentsSupport = false;
-  fetchComments(String postID, int pageNum) {return [];}
+  fetchComments(String postID, int pageNum) {
+    return [];
+  }
+
+  // TODO
+  bool hasUpdateItemSupport = false;
+  updateItem(BooruItem item) {}
+
+  bool hasNotesSupport = false;
+  fetchNotes(String postID) {
+    return [];
+  }
 
   RxInt totalCount = 0.obs;
   Future<void> searchCount(String input) async {
@@ -83,12 +100,13 @@ abstract class BooruHandler {
     return;
   }
 
-  Map<String,String> getWebHeaders() {
-      return {"Accept": "text/html,application/xml,application/json", "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"};
+  Map<String, String> getHeaders() {
+    return {
+      "Accept": "text/html,application/xml,application/json",
+      "user-agent": "LoliSnatcher_Droid/$verStr"
+    };
   }
-  Map<String,String> getHeaders(){
-    return {"Accept": "text/html,application/xml,application/json", "user-agent":"LoliSnatcher_Droid/$verStr"};
-  }
+
   String getDescription() {
     return '';
   }
@@ -97,7 +115,7 @@ abstract class BooruHandler {
     return [];
   }
 
-  void setupMerge(List<Booru> boorus){}
+  void setupMerge(List<Booru> boorus) {}
 
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future<void> setTrackedValues(int fetchedIndex) async {
@@ -123,7 +141,7 @@ abstract class BooruHandler {
     // we need +1 to make sure we don't miss the last item, because sublist doesn't include the item with the end index
     // so this way we exceed the possible length of fetched to get it
 
-    if(diff == 0) {
+    if (diff == 0) {
       // do nothing if nothing was added
       return;
     }
@@ -133,9 +151,9 @@ abstract class BooruHandler {
 
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     if (settingsHandler.favDbHandler.db != null && diff > 0) {
-      List<List<bool>> valuesList = await settingsHandler.favDbHandler.getMultipleTrackedValues(
-        fetched.sublist(fetchedIndexes.first, fetchedIndexes.last) //.map((e) => e.fileURL).toList()
-      );
+      List<List<bool>> valuesList = await settingsHandler.favDbHandler
+          .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last) //.map((e) => e.fileURL).toList()
+              );
 
       valuesList.asMap().forEach((index, values) {
         fetched[fetchedIndexes[index]].isSnatched.value = values[0];
@@ -147,8 +165,6 @@ abstract class BooruHandler {
         // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
       });
     }
-
-
 
     return;
   }

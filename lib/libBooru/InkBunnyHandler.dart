@@ -68,7 +68,7 @@ class InkBunnyHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
-  Future Search(String tags, int? pageNumCustom) async{
+  Future Search(String tags, int? pageNumCustom) async {
     if (sessionToken.isEmpty){
       bool gotToken = await setSessionToken();
       if (!gotToken){
@@ -95,7 +95,6 @@ class InkBunnyHandler extends BooruHandler{
           prevTags = tags;
         }
         if (fetched.length == length){locked.value = true;}
-        return fetched;
       } else {
         Logger.Inst().log("InkBunnyHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("InkBunnyHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
@@ -104,8 +103,9 @@ class InkBunnyHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "InkBunnyHandler", "Search", LogTypes.exception);
       errorString.value = e.toString();
-      return fetched;
     }
+
+    return fetched;
   }
 
   Future getSubmissionResponse(response) async{

@@ -1,10 +1,11 @@
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../SettingsHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class UserInterfacePage extends StatefulWidget {
   UserInterfacePage();
@@ -41,7 +42,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     }
     settingsHandler.landscapeColumns = int.parse(columnsLandscapeController.text);
     settingsHandler.portraitColumns = int.parse(columnsPortraitController.text);
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -67,7 +68,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'App UI Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(
@@ -93,12 +94,22 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                onChanged: (String? text) {
+                  setState(() { });
+                },
+                resetText: () => settingsHandler.map['portraitColumns']?['default']?.toString() ?? "2",
+                numberButtons: true,
+                numberStep: 1,
+                numberMin: 1,
+                numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
                   if(value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if(parse == null) {
                     return 'Please enter a valid numeric value';
+                  } else if(parse > 3 && (Platform.isAndroid || Platform.isIOS)) {
+                    return 'More than 3 columns could affect performance';
                   } else {
                     return null;
                   }
@@ -112,6 +123,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                resetText: () => settingsHandler.map['landscapeColumns']?['default']?.toString() ?? "4",
+                numberButtons: true,
+                numberStep: 1,
+                numberMin: 1,
+                numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
                   if(value == null || value.isEmpty) {
@@ -133,7 +149,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Preview Quality',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(

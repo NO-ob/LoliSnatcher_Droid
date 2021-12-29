@@ -2,14 +2,9 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class TagSearchButton extends StatefulWidget {
+class TagSearchButton extends StatelessWidget {
   TagSearchButton({Key? key}) : super(key: key);
 
-  @override
-  _TagSearchButtonState createState() => _TagSearchButtonState();
-}
-
-class _TagSearchButtonState extends State<TagSearchButton> {
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   @override
@@ -27,13 +22,13 @@ class _TagSearchButtonState extends State<TagSearchButton> {
       },
       child: IconButton(
         iconSize: 30,
-        icon: Icon(Icons.search),
+        icon: Icon(Icons.search, color: Get.theme.colorScheme.onSurface),
         onPressed: () {
-        searchHandler.searchTextController.clearComposing();
-        searchHandler.searchBoxFocus.unfocus();
-        searchHandler.searchAction(searchHandler.searchTextController.text, null);
-      },
-      )
+          searchHandler.searchTextController.clearComposing();
+          searchHandler.searchBoxFocus.unfocus();
+          searchHandler.searchAction(searchHandler.searchTextController.text, null);
+        },
+      ),
     );
   }
 }

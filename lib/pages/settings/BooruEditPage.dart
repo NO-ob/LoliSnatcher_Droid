@@ -86,12 +86,14 @@ class _BooruEditState extends State<BooruEdit> {
               title: 'Name',
               hintText: "Enter Booru Name",
               inputType: TextInputType.text,
+              clearable: true,
             ),
             SettingsTextInput(
               controller: booruURLController,
               title: 'URL',
               hintText: "Enter Booru URL",
               inputType: TextInputType.url,
+              clearable: true,
             ),
             SettingsDropdown(
               selected: selectedBooruType,
@@ -108,12 +110,14 @@ class _BooruEditState extends State<BooruEdit> {
               title: 'Favicon',
               hintText: "(Autofills if blank)",
               inputType: TextInputType.url,
+              clearable: true,
             ),
             SettingsTextInput(
               controller: booruDefTagsController,
               title: 'Default Tags',
               hintText: "Default search for booru",
               inputType: TextInputType.text,
+              clearable: true,
             ),
 
             Container(
@@ -213,12 +217,14 @@ class _BooruEditState extends State<BooruEdit> {
               title: getUserIDTitle(),
               hintText: "(Can be blank)",
               inputType: TextInputType.text,
+              clearable: true,
             ),
             SettingsTextInput(
               controller: booruAPIKeyController,
               title: getApiKeyTitle(),
               hintText: "(Can be blank)",
               inputType: TextInputType.text,
+              clearable: true,
             ),
             
           ],

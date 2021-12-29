@@ -50,7 +50,7 @@ class NyanPalsHandler extends BooruHandler{
       );
 
       thumbURL = booru.baseURL! + "/img/pettankontent/";
-      if (item.mediaType == "video"){
+      if (item.mediaType == "video") {
         thumbURL = thumbURL + item.md5String! + ".mp4";
       } else if (item.mediaType == "animation") {
         thumbURL = thumbURL + "_" + item.md5String! + ".gif";
@@ -60,7 +60,7 @@ class NyanPalsHandler extends BooruHandler{
       item.thumbnailURL = thumbURL;
 
       // video player cant do vp9 and dies
-      if (item.mediaType != "video"){
+      if (item.mediaType != "video") {
         newItems.add(item);
       }
     }

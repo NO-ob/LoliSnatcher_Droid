@@ -1,15 +1,14 @@
 import 'dart:math';
-import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
+import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
@@ -39,7 +38,8 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   PhotoViewController viewController = PhotoViewController();
 
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
-  bool isStopped = false, isFromCache = false, isZoomed = false;
+  bool isStopped = false, isFromCache = false, isViewed = false, isZoomed = false;
+  int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   List<String> stopReason = [];
 
   ImageProvider? mainProvider;
@@ -49,6 +49,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   DioLoader? client;
 
   StreamSubscription? noScaleListener;
+  StreamSubscription? indexListener;
 
   @override
   void didUpdateWidget(MediaViewerBetter oldWidget) {
@@ -71,6 +72,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       onError: _onError,
       onDone: (Uint8List bytes, String url) {
         mainProvider = getImageProvider(bytes, url);
+        viewerHandler.setLoaded(widget.key, true);
         updateState();
       },
       cacheEnabled: settingsHandler.mediaCache,
@@ -85,20 +87,38 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     return;
   }
 
-  void _onBytesAdded(int received, int total) {
-    _received.value = received;
-    _total.value = total;
-    if (total > 0 && widget.booruItem.fileSize == null) {
+  void onSize(int size) {
+    // TODO find a way to stop loading based on size when caching is enabled
+    final int maxSize = 1024 * 1024 * 200;
+    // print('onSize: $size $maxSize ${size > maxSize}');
+    if(size == 0) {
+      killLoading(['File is zero bytes']);
+    } else if ((size > maxSize) && isTooBig != 2) {
+      // TODO add check if resolution is too big
+      isTooBig = 1;
+      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+    }
+
+    if (size > 0 && widget.booruItem.fileSize == null) {
       // set item file size if it wasn't received from api
-      widget.booruItem.fileSize = total;
+      widget.booruItem.fileSize = size;
       // updateState();
     }
   }
 
-  void _onEvent(String event) {
+  void _onBytesAdded(int received, int total) {
+    _received.value = received;
+    _total.value = total;
+    onSize(total);
+  }
+
+  void _onEvent(String event, dynamic data) {
     switch (event) {
       case 'loaded':
         // 
+        break;
+      case 'size':
+        onSize(data);
         break;
       case 'isFromCache':
         isFromCache = true;
@@ -119,12 +139,36 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       killLoading(['Loading Error: $error']);
       // print('Dio request cancelled: $error');
     }
+    viewerHandler.setLoaded(widget.key, false);
   }
 
   @override
   void initState() {
     super.initState();
     viewerHandler.addViewed(widget.key);
+
+    isViewed = settingsHandler.appMode == 'Mobile'
+      ? searchHandler.viewedIndex.value == widget.index
+      : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    indexListener = searchHandler.viewedIndex.listen((int value) {
+      final bool prevViewed = isViewed;
+      final bool isCurrentIndex = value == widget.index;
+      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+      if (settingsHandler.appMode == 'Mobile' ? isCurrentIndex : isCurrentItem) {
+        isViewed = true;
+      } else {
+        isViewed = false;
+      }
+
+      if (prevViewed != isViewed) {
+        if (!isViewed) {
+          // reset zoom if not viewed
+          resetZoom();
+        }
+        updateState();
+      }
+    });
+
     initViewer(false);
   }
 
@@ -152,7 +196,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     }
 
     // debug output
-    // viewController..outputStateStream.listen(onViewStateChanged);
+    viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     isStopped = false;
@@ -196,6 +240,10 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   @override
   void dispose() {
     disposables();
+
+    indexListener?.cancel();
+    indexListener = null;
+
     viewerHandler.removeViewed(widget.key);
     super.dispose();
   }
@@ -223,6 +271,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     // });
 
     noScaleListener?.cancel();
+    noScaleListener = null;
 
     if (!(_dioCancelToken.isCancelled)){
       _dioCancelToken.cancel();
@@ -240,6 +289,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
+    viewerHandler.setViewState(widget.key, viewState);
   }
 
   void resetZoom() {
@@ -270,18 +320,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   Widget build(BuildContext context) {
-    final bool isViewed = settingsHandler.appMode == 'Mobile'
-      ? widget.searchGlobal.viewedIndex.value == widget.index
-      : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
-
-    if (!isViewed) {
-      // reset zoom if not viewed
-      resetZoom();
-    } else {
-      viewerHandler.setCurrent(widget.key);
-    }
-
-    // print('!!! Build media !!!');
+    // print('!!! Build media ${widget.index} $isViewed !!!');
 
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
@@ -296,6 +335,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
               hasProgress: true,
               isFromCache: isFromCache,
               isDone: mainProvider != null,
+              isTooBig: isTooBig > 0,
               isStopped: isStopped,
               stopReasons: stopReason,
               isViewed: isViewed,
@@ -303,6 +343,9 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
               received: _received,
               startedAt: _startedAt,
               startAction: () {
+                if(isTooBig == 1) {
+                  isTooBig = 2;
+                }
                 initViewer(true);
               },
               stopAction: () {

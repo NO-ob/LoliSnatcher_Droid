@@ -2,14 +2,11 @@ import 'dart:async';
 import 'dart:ui';
 import 'dart:io';
 
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:get/get.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +23,10 @@ import 'package:LoliSnatcher/MobileHome.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 // import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 
@@ -34,6 +35,10 @@ void main() {
 
   if(Platform.isWindows || Platform.isLinux) {
     DartVLC.initialize();
+
+    // Init db stuff
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
   }
 
   runApp(MainApp());
@@ -179,7 +184,7 @@ class _MainAppState extends State<MainApp> {
           child: GetMaterialApp(
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
-            showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showFPS.value,
+            showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
             scrollBehavior: CustomScrollBehavior(),
             theme: ThemeData(
               scaffoldBackgroundColor: (isDark && isAmoled) ? Colors.black : null,

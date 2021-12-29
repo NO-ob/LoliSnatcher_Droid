@@ -7,6 +7,8 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
 
+// TODO no setTrackedValues?
+
 /**
  * Booru Handler for the gelbooru engine
  */
@@ -21,7 +23,7 @@ class AGNPHHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
-  Future Search(String tags, int? pageNumCustom) async{
+  Future Search(String tags, int? pageNumCustom) async {
     tags = validateTags(tags);
     if (prevTags != tags){
       fetched.value = [];
@@ -40,7 +42,6 @@ class AGNPHHandler extends BooruHandler{
           locked.value = true;
         }
         prevTags = tags;
-        return fetched;
       } else {
         Logger.Inst().log("AGNPHHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("AGNPHHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
@@ -49,8 +50,9 @@ class AGNPHHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "AGNPHHandler", "Search", LogTypes.exception);
       errorString.value = e.toString();
-      return fetched;
     }
+
+    return fetched;
   }
 
   // Slow af I have emailed the site admin to ask them to change their api.
@@ -76,7 +78,7 @@ class AGNPHHandler extends BooruHandler{
           if (sampleURL.isEmpty){
             sampleURL = fileURL;
           }
-          BooruItem result = new BooruItem(
+          BooruItem result = BooruItem(
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: thumbnailURL,

@@ -83,11 +83,11 @@ class Booru {
     Map<String, dynamic> json = jsonDecode(jsonString);
     this.name = json["name"].toString();
     this.type = json["type"].toString();
-    this.faviconURL = json["faviconURL"].toString();
+    this.faviconURL = json["faviconURL"]?.toString() ?? "";
     this.baseURL = json["baseURL"].toString();
-    this.defTags = json["defTags"].toString();
-    this.apiKey = json["apiKey"].toString();
-    this.userID = json["userID"].toString();
+    this.defTags = json["defTags"]?.toString() ?? "";
+    this.apiKey = json["apiKey"]?.toString() ?? "";
+    this.userID = json["userID"]?.toString() ?? "";
   }
 
   @override

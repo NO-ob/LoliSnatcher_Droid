@@ -7,7 +7,8 @@ import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'CommentItem.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'NoteItem.dart';
+import '../utilities/Logger.dart';
 
 
 final String className = 'SankakuHandler';
@@ -23,6 +24,9 @@ class SankakuHandler extends BooruHandler{
   @override
   bool hasCommentsSupport = true;
 
+  @override
+  bool hasItemUpdateSupport = true;
+
   /**
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
@@ -30,7 +34,7 @@ class SankakuHandler extends BooruHandler{
 
   //Tried stripping further but it breaks auth. Putting the auth stuff into the getHeaders function and overriding doesn't work
   // Overriding search having just the auth stuff then calling super.search also doesn't work
-  Future Search(String tags, int? pageNumCustom) async{
+  Future Search(String tags, int? pageNumCustom) async {
     int length = fetched.length;
     if (prevTags != tags){
       fetched.value = [];
@@ -49,7 +53,6 @@ class SankakuHandler extends BooruHandler{
         prevTags = tags;
         parseResponse(response);
         if (fetched.length == length){locked.value = true;}
-        return fetched;
       } else {
         Logger.Inst().log("Sankaku load fail ${response.statusCode}", className,"Search", LogTypes.booruHandlerInfo);
         Logger.Inst().log(response.body, className,"Search", LogTypes.booruHandlerInfo);
@@ -58,8 +61,9 @@ class SankakuHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), className,"Search", LogTypes.exception);
       errorString.value = e.toString();
-      return fetched;
     }
+
+    return fetched;
   }
 
   @override
@@ -111,7 +115,7 @@ class SankakuHandler extends BooruHandler{
     setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
-  Future<List> updateFavourite(BooruItem booruItem) async {
+  Future<List> updateItem(BooruItem booruItem) async {
     try {
       if(authToken == "" && booru.userID != "" && booru.apiKey != "") {
         authToken = await getAuthToken();
@@ -255,6 +259,42 @@ class SankakuHandler extends BooruHandler{
       Logger.Inst().log(e.toString(), className, "fetchComments", LogTypes.exception);
     }
     return comments;
+  }
+
+  @override
+  bool hasNotesSupport = true;
+  
+  @override
+  Future<List<NoteItem>> fetchNotes(String postID) async {
+    List<NoteItem> notes = [];
+    String url = "${booru.baseURL}/posts/$postID/notes";
+
+    try {
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = jsonDecode(response.body);
+        var notesJson = parsedResponse;
+        if (notesJson.length > 0) {
+          for (int i=0; i < notesJson.length; i++){
+            var current = notesJson.elementAt(i);
+            notes.add(NoteItem(
+              id: current["id"].toString(),
+              postID: current["post_id"].toString(),
+              content: current["body"].toString(),
+              posX: current["x"] ?? 0,
+              posY: current["y"] ?? 0,
+              width: current["width"] ?? 0,
+              height: current["height"] ?? 0,
+            ));
+          }
+        }
+      }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), className, "fetchNotes", LogTypes.exception);
+    }
+    return notes;
   }
 }
 

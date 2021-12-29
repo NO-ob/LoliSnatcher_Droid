@@ -72,7 +72,7 @@ class ServiceHandler{
     } catch (e) {
       print(e);
     }
-    //new File(result+"/test.txt").create(recursive: true);
+    // File(result+"/test.txt").create(recursive: true);
     return result;
   }
   static Future<String> getImageSAFUri() async {
@@ -83,7 +83,7 @@ class ServiceHandler{
     } catch (e) {
       print(e);
     }
-    //new File(result+"/test.txt").create(recursive: true);
+    // File(result+"/test.txt").create(recursive: true);
     return result;
   }
   static Future<Uint8List?> getSAFFile(String contentUri) async {
@@ -94,7 +94,7 @@ class ServiceHandler{
     } catch (e) {
       print(e);
     }
-    //new File(result+"/test.txt").create(recursive: true);
+    // File(result+"/test.txt").create(recursive: true);
     return result;
   }
   static Future<String> getSAFFileExtension(String contentUri) async {
@@ -106,7 +106,7 @@ class ServiceHandler{
     } catch (e) {
       print(e);
     }
-    //new File(result+"/test.txt").create(recursive: true);
+    // File(result+"/test.txt").create(recursive: true);
     return result;
   }
 

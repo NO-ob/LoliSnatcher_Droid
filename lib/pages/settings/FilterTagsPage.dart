@@ -50,7 +50,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -239,6 +239,8 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 controller: newTagController,
                 autofocus: isAddButton ? true : false,
                 inputType: TextInputType.text,
+                clearable: true,
+                resetText: isAddButton ? null : () => tag,
                 onSubmitted: (String text) {
                   if(text.trim() != '') {
                     isAddButton

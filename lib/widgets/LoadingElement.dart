@@ -15,6 +15,7 @@ class LoadingElement extends StatefulWidget {
   final bool isFromCache;
   final bool isDone;
 
+  final bool isTooBig;
   final bool isStopped;
   final List<String> stopReasons;
   final bool isViewed;
@@ -34,6 +35,7 @@ class LoadingElement extends StatefulWidget {
     required this.isFromCache,
     required this.isDone,
 
+    this.isTooBig = false,
     required this.isStopped,
     this.stopReasons = const [],
     required this.isViewed,
@@ -272,7 +274,7 @@ class _LoadingElementState extends State<LoadingElement> {
                       label: BorderedText(
                         strokeWidth: 3,
                         child: Text(
-                          widget.item.isHated.value ? 'Load Anyway' : 'Restart Loading',
+                          (widget.isTooBig || widget.item.isHated.value) ? 'Load Anyway' : 'Restart Loading',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.blue,

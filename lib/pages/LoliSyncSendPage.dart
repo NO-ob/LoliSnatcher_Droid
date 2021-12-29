@@ -1,25 +1,49 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'dart:core';
+
+import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+
 import 'package:LoliSnatcher/libBooru/LoliSync.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'dart:core';
-import 'package:get/get.dart';
 
 class LoliSyncSendPage extends StatefulWidget {
-  String ip = "";
-  String port = "";
-  bool favourites = false, settings = false, booru = false;
-  LoliSyncSendPage(this.ip, this.port, this.settings, this.favourites, this.booru);
+  final String ip, port, tabsMode;
+  final bool favourites, settings, booru, tabs;
+  final int favSkip;
+
+  LoliSyncSendPage({
+    required this.ip,
+    required this.port,
+    required this.settings,
+    required this.favourites,
+    required this.booru,
+    required this.favSkip,
+    required this.tabs,
+    required this.tabsMode,
+  });
+
   @override
   _LoliSyncSendPageState createState() => _LoliSyncSendPageState();
 }
 
 class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  LoliSync loliSync = LoliSync();
+  final LoliSync loliSync = LoliSync();
   List<String> toSync = [];
   bool serverStarted = false;
+
+  List<String> messagesHistory = [];
+  int maxHistoryLength = 10;
+
+  void addMessage(String message) {
+    // add new message to history but limit it to 10 items
+    if(message.startsWith('Server active at') && messagesHistory.indexWhere((msg) => msg.startsWith('Server active at')) != -1) {
+      return;
+    }
+    messagesHistory.insert(0, message);
+    if (messagesHistory.length > maxHistoryLength) {
+      messagesHistory.removeLast();
+    }
+  }
 
   @override
   // These lines are done in init state as they only need to be run once when the widget is first loaded
@@ -32,6 +56,9 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
     }
     if(widget.booru){
       toSync.add("Booru");
+    }
+    if(widget.tabs){
+      toSync.add("Tabs");
     }
     super.initState();
   }
@@ -83,11 +110,11 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startSync(settingsHandler, widget.ip, widget.port, toSync),
+              stream: loliSync.startSync(widget.ip, widget.port, toSync, widget.favSkip, widget.tabsMode),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {
-                  status = "Error";
+                  status = "Error ${snapshot.error}";
                 } else {
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
@@ -97,6 +124,7 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
                     case ConnectionState.active:
                     case ConnectionState.done:
                       status = "${snapshot.data}";
+                      addMessage(status);
                       break;
                   }
                 }
@@ -106,7 +134,34 @@ class _LoliSyncSendPageState extends State<LoliSyncSendPage> {
                       const SizedBox(height: 10),
                       Icon(Icons.sync, size: 250),
                       const SizedBox(height: 10),
-                      Text(status,style: TextStyle(fontSize: 18)),
+                      ElevatedButton(
+                        onPressed: () {
+                          loliSync.sendTest();
+                        },
+                        child: Text('Send test'),
+                      ),
+                      const SizedBox(height: 10),
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Text(status, style: TextStyle(fontSize: 18)),
+                      ),
+                      // show history of messages with last items fading away in color
+                      if(messagesHistory.length > 1)
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: messagesHistory.length - 1,
+                            itemBuilder: (BuildContext context, int index) {
+                              final int indexWoutStart = index + 1;
+                              return Opacity(
+                                opacity: 1 - (indexWoutStart / maxHistoryLength),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Center(child: Text(messagesHistory[indexWoutStart], style: TextStyle(fontSize: 18))),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                     ],
                   ),
                 );

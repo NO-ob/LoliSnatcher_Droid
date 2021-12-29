@@ -44,8 +44,10 @@ class SettingsPage extends StatelessWidget {
           title: Text("Settings"),
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: () async{
-                Get.back();
+              onPressed: () async {
+                if (await _onWillPop()) {
+                  Get.back();
+                }
               }
           ),
         ),
