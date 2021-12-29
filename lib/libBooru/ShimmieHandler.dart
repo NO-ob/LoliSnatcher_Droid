@@ -28,6 +28,14 @@ class ShimmieHandler extends BooruHandler{
   }
 
   @override
+  Map<String,String> getHeaders() {
+    return {
+      "Accept": "text/html,application/xml,application/json",
+      "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:83.0) Gecko/20100101 Firefox/83.0"
+    };
+  }
+
+  @override
   void parseResponse(response){
     var parsedResponse = xml.parse(response.body);
     /**
@@ -109,7 +117,7 @@ class ShimmieHandler extends BooruHandler{
     Logger.Inst().log("shimmie tag search $input $url", "ShimmieHandler", "tagSearch", LogTypes.booruHandlerInfo);
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: getWebHeaders());
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
@@ -126,7 +134,7 @@ class ShimmieHandler extends BooruHandler{
       String url = makeURL(input);
       try {
         Uri uri = Uri.parse(url);
-        final response = await http.get(uri, headers: getWebHeaders());
+        final response = await http.get(uri, headers: getHeaders());
         // 200 is the success http response code
         if (response.statusCode == 200) {
           var parsedResponse = xml.parse(response.body);

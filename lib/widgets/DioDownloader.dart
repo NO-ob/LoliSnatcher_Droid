@@ -20,8 +20,8 @@ class DioLoader {
       this.onError,
       this.onDone,
       this.onDoneFile,
-      required this.cacheEnabled,
-      required this.cacheFolder,
+      this.cacheEnabled = false,
+      this.cacheFolder = 'other',
       this.timeoutTime,
     }
   );
@@ -30,7 +30,7 @@ class DioLoader {
   final Map<String, dynamic>? headers;
   final CancelToken? cancelToken;
   final void Function(int, int)? onProgress;
-  final void Function(String)? onEvent;
+  final void Function(String, dynamic?)? onEvent;
   final void Function(Exception)? onError;
   final void Function(Uint8List, String)? onDone;
   final void Function(File, String)? onDoneFile;
@@ -146,13 +146,13 @@ class DioLoader {
         // read from cache
         final File file = File(filePath);
         final FileStat fileStat = await file.stat();
-        onEvent?.call('isFromCache');
+        onEvent?.call('isFromCache', null);
         onProgress?.call(fileStat.size, fileStat.size);
 
         if(onDoneFile != null) {
           start(null, readFileFromCache, (dynamic file) async {
             if(file != null) {
-              onEvent?.call('loaded');
+              onEvent?.call('loaded', null);
               onDoneFile?.call(file, url);
             }
             dispose();
@@ -160,7 +160,7 @@ class DioLoader {
         } else if (onDone != null) {
           start(null, readBytesFromCache, (dynamic bytes) async {
             if(bytes != null) {
-              onEvent?.call('loaded');
+              onEvent?.call('loaded', null);
               onDone?.call(bytes, url);
             }
             dispose();
@@ -168,8 +168,8 @@ class DioLoader {
         }
         return;
       } else {
-        onEvent?.call('isFromNetwork');
         // load from network and cache if enabled
+        onEvent?.call('isFromNetwork', null);
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
@@ -193,19 +193,19 @@ class DioLoader {
         if (cacheEnabled) {
           if(onDoneFile == null && onDone != null) {
             // return bytes if file is not requested
-            onEvent?.call('loaded');
+            onEvent?.call('loaded', null);
             onDone?.call(response.data, url);
           }
           start(response.data, writeToCache, (dynamic data) {
             if(data != null) {
               // onEvent?.call('isFromCache');
-              onEvent?.call('loaded');
+              onEvent?.call('loaded', null);
               onDoneFile?.call(data, url);
             }
             dispose();
           });
         } else {
-          onEvent?.call('loaded');
+          onEvent?.call('loaded', null);
           onDone?.call(response.data, url);
           dispose();
         }
@@ -217,6 +217,7 @@ class DioLoader {
       } else {
         print('Exception: $e');
       }
+      dispose();
     }
   }
 
@@ -232,22 +233,21 @@ class DioLoader {
         // read from cache
         final File file = File(filePath);
         final FileStat fileStat = await file.stat();
-        onEvent?.call('isFromCache');
+        onEvent?.call('isFromCache', null);
         onProgress?.call(fileStat.size, fileStat.size);
-        onEvent?.call('loaded');
+        onEvent?.call('loaded', null);
 
         if (onDoneFile != null) {
           await file.readAsBytes();
           onDoneFile?.call(file, url);
-          dispose();
         } else if(onDone != null) {
           onDone?.call(await file.readAsBytes(), url);
-          dispose();
         }
+        dispose();
         return;
       } else {
-        onEvent?.call('isFromNetwork');
         // load from network and cache if enabled
+        onEvent?.call('isFromNetwork', null);
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
@@ -276,14 +276,13 @@ class DioLoader {
           }
         }
 
-        onEvent?.call('loaded');
+        onEvent?.call('loaded', null);
         if (onDoneFile != null && tempFile != null) {
           onDoneFile?.call(tempFile, url);
-          dispose();
         } else if(onDone != null) {
           onDone?.call(response.data, url);
-          dispose();
         }
+        dispose();
         return;
       }
     } catch (e) {
@@ -292,6 +291,42 @@ class DioLoader {
       } else {
         print('Exception: $e');
       }
+      dispose();
+    }
+  }
+
+
+  // get only the file size
+  Future<void> runRequestSize() async {
+    try {
+      final String resolved = Uri.base.resolve(url).toString();
+
+      currentClient = _httpClient;
+      final Response response = await currentClient!.head(
+        resolved.toString(),
+        options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        cancelToken: cancelToken,
+      );
+
+      // print('response size: ${response.headers['content-length']}');
+
+      if(response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
+        throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
+      }
+
+      if (response.statusCode != HttpStatus.ok) {
+        throw DioLoadException(url: resolved, statusCode: response.statusCode);
+      }
+
+      onEvent?.call('size', int.tryParse(response.headers['content-length']?.first ?? '') ?? 0);
+      return;
+    } catch (e) {
+      if(e is Exception) {
+        onError?.call(e);
+      } else {
+        print('Exception: $e');
+      }
+      dispose();
     }
   }
 }

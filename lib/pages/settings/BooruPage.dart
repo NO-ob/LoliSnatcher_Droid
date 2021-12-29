@@ -79,7 +79,7 @@ class _BooruPageState extends State<BooruPage> {
       settingsHandler.prefBooru = selectedBooru?.name ?? '';
     }
     settingsHandler.limit = int.parse(limitController.text);
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     settingsHandler.sortBooruList();
     return result;
   }
@@ -101,6 +101,8 @@ class _BooruPageState extends State<BooruPage> {
                   title: 'Default Tags',
                   hintText: "Tags searched when app opens",
                   inputType: TextInputType.text,
+                  clearable: true,
+                  resetText: () => 'rating:safe',
                 ),
                 SettingsTextInput(
                   controller: limitController,
@@ -110,6 +112,11 @@ class _BooruPageState extends State<BooruPage> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly
                   ],
+                  resetText: () => settingsHandler.map['limit']?['default']?.toString() ?? '10',
+                  numberButtons: true,
+                  numberStep: 10,
+                  numberMin: 10,
+                  numberMax: 100,
                   validator: (String? value) {
                     int? parse = int.tryParse(value ?? '');
                     if(value == null || value.isEmpty) {
@@ -136,7 +143,7 @@ class _BooruPageState extends State<BooruPage> {
                   },
                   title: 'Booru',
                   trailingIcon: IconButton(
-                    icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                    icon: Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,

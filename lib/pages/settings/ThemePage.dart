@@ -66,14 +66,14 @@ class _ThemePageState extends State<ThemePage> {
     //and you back out too fast the image path will not be returned in time to save it to settings
     if (needToWriteMascot) {
       if (mascotPathOverride.isNotEmpty) {
-        mascotPathOverride = await new ImageWriter().writeMascotImage(mascotPathOverride);
+        mascotPathOverride = await ImageWriter().writeMascotImage(mascotPathOverride);
         settingsHandler.drawerMascotPathOverride = mascotPathOverride;
         needToWriteMascot = false;
       }
     } else {
       settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -365,7 +365,7 @@ class _ThemePageState extends State<ThemePage> {
                   icon: Icon(Icons.delete_forever),
                   drawTopBorder: true,
                   action: () async{
-                    File file = new File(mascotPathOverride);
+                    File file = File(mascotPathOverride);
                     if (file.existsSync()) {
                       file.deleteSync();
                     }

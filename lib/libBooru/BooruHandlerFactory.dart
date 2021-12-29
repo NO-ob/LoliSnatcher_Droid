@@ -99,11 +99,11 @@ class BooruHandlerFactory {
           break;
         case("AGNPH"):
           pageNum = 0;
-          booruHandler = new AGNPHHandler(boorus[0], limit);
+          booruHandler = AGNPHHandler(boorus[0], limit);
           break;
         case("NyanPals"):
           pageNum = -1;
-          booruHandler = new NyanPalsHandler(boorus[0], limit);
+          booruHandler = NyanPalsHandler(boorus[0], limit);
           break;
         default:
           booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -325,7 +324,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void searchBooru(String input) async {
     booruResults.value = [[' ', 'loading']];
-    List<String?>? getFromBooru = await searchHandler.currentTab.booruHandler.tagSearch(lastTag);
+    List<String?>? getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
     booruResults.value = getFromBooru?.map((tag){
       final String tagTemp = tag != null ? tag : '';
       return [tagTemp, 'booru'];
@@ -359,7 +358,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   Future<List<List<String>?>> combinedSearchOld(String input) async {
-    List<String?>? getFromBooru = await searchHandler.currentTab.booruHandler.tagSearch(lastTag);
+    List<String?>? getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
     final List<List<String>> booruResults = getFromBooru?.map((tag){
       final String tagTemp = tag != null ? tag : '';
       return [tagTemp, 'booru'];
@@ -558,6 +557,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     padding: const EdgeInsets.all(5),
                     onPressed: () {
                       searchHandler.searchTextController.clear();
+                      tagStuff();
                       setState(() {});
                     },
                     icon: Icon(Icons.clear, color: Get.theme.colorScheme.onBackground),
@@ -596,7 +596,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       ),
                     )
                   ),
-              contentPadding: EdgeInsets.fromLTRB(15, 0, 10, 0), // left,top,right,bottom
+              contentPadding: EdgeInsets.fromLTRB(15, 0, 5, 0), // left,top,right,bottom
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
                 borderRadius: BorderRadius.circular(50),

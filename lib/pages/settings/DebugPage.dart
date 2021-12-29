@@ -36,7 +36,7 @@ class _DebugPageState extends State<DebugPage> {
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     if (allowSelfSignedCerts){
       HttpOverrides.global = MyHttpOverrides();
     } else {
@@ -58,13 +58,22 @@ class _DebugPageState extends State<DebugPage> {
           child: ListView(
             children: [
               SettingsToggle(
+                value: settingsHandler.showPerf.value,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.showPerf.value = newValue;
+                  });
+                },
+                title: 'Show Performance graph'
+              ),
+              SettingsToggle(
                 value: settingsHandler.showFPS.value,
                 onChanged: (newValue) {
                   setState(() {
                     settingsHandler.showFPS.value = newValue;
                   });
                 },
-                title: 'Show FPS Info'
+                title: 'Show FPS graph'
               ),
               SettingsToggle(
                 value: settingsHandler.showImageStats.value,
@@ -131,7 +140,7 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Animation speed ($timeDilation)',
                 icon: Icon(Icons.timelapse),
                 action: () {
-                  const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4];
+                  const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20];
                   int currentIndex = speeds.indexOf(timeDilation);
                   int newIndex = 0;
                   if((currentIndex + 1) <= (speeds.length - 1)) {

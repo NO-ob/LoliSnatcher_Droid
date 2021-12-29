@@ -1,12 +1,8 @@
-
-import 'dart:math';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 class ViewUtils {
 
@@ -46,42 +42,6 @@ class ViewUtils {
         return Icons.play_disabled;
       default:
         return CupertinoIcons.question;
-    }
-  }
-
-  static void jumpToItem(int item, SearchGlobal searchGlobal, ScrollController gridController, BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    
-    int? totalItems = searchGlobal.booruHandler.filteredFetched.length;
-    // print("jump to item called index is: $item");
-    if (totalItems > 0) {
-      double viewportHeight = gridController.position.viewportDimension;
-      double totalHeight = gridController.position.maxScrollExtent + viewportHeight;
-      int columnsCount = (MediaQuery.of(context).orientation == Orientation.portrait)
-          ? settingsHandler.portraitColumns
-          : settingsHandler.landscapeColumns;
-      int rowCount = (totalItems / columnsCount).ceil();
-      double rowHeight = totalHeight / rowCount;
-      double rowsPerViewport = viewportHeight / rowHeight;
-
-      int currentRow = (item / columnsCount).floor();
-      // scroll to the row of the current item
-      // but if we can't scroll to the top of this row (rows left < rowsPerViewport) - scroll to the max and trigger page load
-      bool isCloseToEdge = (rowCount - currentRow) <= rowsPerViewport;
-      double scrollToValue =
-      isCloseToEdge ? totalHeight : max((rowHeight * currentRow), 0.0);
-
-      // print('SCROLL CONTROLLER');
-      // print(widget.gridController.position);
-      // print(newValue);
-
-      //gridController.jumpTo(scrollToValue);
-      // gridController.animateTo(scrollToValue, duration: Duration(milliseconds: 300), curve: Curves.linear);
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
-        if(gridController.hasClients){
-          gridController.animateTo(scrollToValue, duration: Duration(milliseconds: 300), curve: Curves.linear);
-        }
-      });
     }
   }
 }

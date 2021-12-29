@@ -1,10 +1,18 @@
 import 'dart:io';
 
+import 'package:sqflite/sqflite.dart';
+
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:LoliSnatcher/Tools.dart';
+
+
+///////////////////////////////////////////////////////////////
+/// WARNING:
+/// On desktop releases you need to add sqlite3.dll for windows and ??? for linux(?)
+/// https://www.sqlite.org/download.html
+/// https://pub.dev/packages/sqflite_common_ffi
+///////////////////////////////////////////////////////////////
 
 class DBHandler{
   Database? db;
@@ -15,9 +23,7 @@ class DBHandler{
     // await Sqflite.devSetDebugModeOn(true);
     if(Platform.isAndroid || Platform.isIOS){
       db = await openDatabase(path + "store.db", version: 1, singleInstance: false);
-    } else {
-      sqfliteFfiInit();
-      var databaseFactory = databaseFactoryFfi;
+    } else if(Platform.isWindows || Platform.isLinux) {
       db = await databaseFactory.openDatabase(path + "store.db");
     }
     await updateTable();
@@ -29,9 +35,7 @@ class DBHandler{
   Future<bool> dbConnectReadOnly(String path) async {
     if(Platform.isAndroid || Platform.isIOS){
       db = await openDatabase(path + "store.db", version: 1, singleInstance: false);
-    } else {
-      sqfliteFfiInit();
-      var databaseFactory = databaseFactoryFfi;
+    } else if(Platform.isWindows || Platform.isLinux) {
       db = await databaseFactory.openDatabase(path + "store.db");
     }
     return true;
@@ -105,12 +109,12 @@ class DBHandler{
   }
 
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
-  Future<String?> updateBooruItem(BooruItem item, String mode) async{
+  Future<String?> updateBooruItem(BooruItem item, String mode) async {
     Logger.Inst().log("updateBooruItem called fileURL is:" + item.fileURL, "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
     String? itemID = await getItemID(item.postURL);
     String resultStr = "";
     if (itemID == null || itemID.isEmpty) {
-      var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite) VALUES(?,?,?,?,?,?,?)",
+      var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)",
           [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true)]);
       itemID = result?.toString();
       updateTags(item.tagsList, itemID);
@@ -130,10 +134,11 @@ class DBHandler{
 
 
   //Gets a BooruItem id from the database based on a fileurl
-  Future<String?> getItemID(String postURL) async{
-    var result;
+  Future<String?> getItemID(String postURL) async {
+    List? result;
     result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL = ?", [postURL]);
-    if (result != null && result.isNotEmpty){
+
+    if (result != null && result.isNotEmpty) {
       return result.first["id"].toString();
     } else {
       return null;
@@ -141,12 +146,12 @@ class DBHandler{
   }
 
   Future<List<BooruItem>> getSankakuItems() async {
-    var metaData = await db?.rawQuery(
+    List? result = await db?.rawQuery(
         "SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite FROM BooruItem WHERE postURL like '%chan.sankakucomplex%'");
     List<BooruItem> items = [];
-    if (metaData != null && metaData.isNotEmpty){
-      for(int i=0; i < metaData.length; i++){
-        var currentItem = metaData[i];
+    if (result != null && result.isNotEmpty) {
+      for(int i=0; i < result.length; i++){
+        var currentItem = result[i];
         if(currentItem != null && currentItem.isNotEmpty) {
           BooruItem bItem = BooruItem(
             fileURL: currentItem["fileURL"].toString(),
@@ -155,157 +160,129 @@ class DBHandler{
             tagsList: [],
             postURL: currentItem["postURL"].toString(),
           );
-          bItem.isSnatched.value = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
-          bItem.isFavourite.value = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
+          bItem.isSnatched.value = Tools.intToBool(currentItem["isSnatched"]);
+          bItem.isFavourite.value = Tools.intToBool(currentItem["isFavourite"]);
           items.add(bItem);
         }
       }
     }
     return items;
   }
+
   //Gets a list of BooruItem from the database
-  Future<List<BooruItem>> searchDB(String tagString, String offset, String limit, String order, String mode) async {
-    // TODO rework to use only one query
+  Future<List<BooruItem>> searchDB(String searchTagsString, String offset, String limit, String order, String mode) async {
     // TODO multiple tags in search can lead to wrong results
-    List<String> tags;
-    var result;
-    List<BooruItem> fetched = [];
-    Logger.Inst().log("Searching DB for tags $tagString", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
-    if (tagString.isNotEmpty){
-      tags = tagString.split(" ");
-      /*
-      var metaData = await db?.rawQuery("SELECT BooruItem.id as dbid, thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
-        "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
-        "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-        "WHERE dbid IN (?) AND isFavourite = 1 GROUP BY dbid",[itemID]);
-       */
+    List<String> searchTags;
+    List? result;
+
+    Logger.Inst().log("Searching DB for tags $searchTagsString", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
+
+    searchTagsString = searchTagsString.trim();
+    searchTags = searchTagsString.split(" ").where((tag) => tag.isNotEmpty).toList();
+
+    // this adds support of filtering by posturls which have site:*some text* as their substring
+    String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:'), orElse: () => "");
+    String siteQuery = "";
+    if (siteSearch.isNotEmpty) {
+      searchTags.remove(siteSearch);
+      siteSearch = siteSearch.replaceAll("site:", "");
+      siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
+    }
+
+    if (searchTags.isNotEmpty) {
+      // TODO find a way to do this without fetching tags twice
       result = await db?.rawQuery(
-          "SELECT BooruItem.id as dbid FROM BooruItem "
-              "LEFT JOIN ImageTag on dbid = ImageTag.booruItemID "
-              "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN (${List.generate(tags.length, (_) => '?').join(',')}) AND isFavourite = 1 GROUP BY dbid "
-              "HAVING COUNT(*) = ${tags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", tags);
+          "SELECT BooruItem.id as dbid, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag2.name, '@@@') as tags FROM BooruItem "
+              "INNER JOIN ImageTag on dbid = ImageTag.booruItemID "
+              "INNER JOIN Tag on ImageTag.tagID = Tag.id AND Tag.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+
+              "INNER JOIN ImageTag ImageTag2 on dbid = ImageTag2.booruItemID " // required to get all tags of the item
+              "INNER JOIN Tag Tag2 on ImageTag2.tagID = Tag2.id "
+              "WHERE $siteQuery isFavourite = 1 GROUP BY dbid "
+              "HAVING COUNT(DISTINCT Tag.name) = ${searchTags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", searchTags);
     } else {
       result = await db?.rawQuery(
-          "SELECT id as dbid FROM BooruItem WHERE isFavourite = 1 ORDER BY id $order LIMIT $limit OFFSET $offset");
+          "SELECT BooruItem.id as dbid, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag.name, '@@@') as tags FROM BooruItem "
+            "INNER JOIN ImageTag on dbid = ImageTag.booruItemID "
+            "INNER JOIN Tag on ImageTag.tagID = Tag.id "
+            "WHERE $siteQuery isFavourite = 1 GROUP BY dbid ORDER BY dbid $order LIMIT $limit OFFSET $offset");
     }
+
     Logger.Inst().log("got results from db", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
     Logger.Inst().log(result, "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
+
     if (result != null && result.isNotEmpty) {
-      List<BooruItem> booruItems = await getBooruItems(List<int>.from(result.map((r) {
-        return r["dbid"];
-      })), mode);
-      fetched.addAll(booruItems);
+      return result.map((r) {
+        BooruItem item = BooruItem.fromDBRow(r);
+        if (mode == "loliSyncFav") {
+          item.isSnatched.value = false;
+        }
+        return item;
+      }).toList();
+    } else {
+      return [];
     }
-    return fetched;
   }
+
   //Gets amount of BooruItems from the database
-  Future<int> searchDBCount(String tagString) async {
-    List<String> tags;
-    var result;
-    int count = 0;
-    if (tagString.isNotEmpty){
-      tags = tagString.split(" ");
+  Future<int> searchDBCount(String searchTagsString) async {
+    List<String> searchTags = [];
+    List? result;
 
+    searchTagsString = searchTagsString.trim();
+    searchTags = searchTagsString.split(" ").where((tag) => tag.isNotEmpty).toList();
 
-      /*
-      * "SELECT BooruItem.id as dbid, isFavourite FROM BooruItem "
-              "LEFT JOIN ImageTag on dbid = ImageTag.booruItemID "
-              "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN ($questionMarks) AND isFavourite = 1 GROUP BY dbid "
-              "HAVING COUNT(*) = ${tags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", tags);
-      * */
+    // this adds support of filtering by posturls which have site:*some text* as their substring
+    String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:'), orElse: () => "");
+    String siteQuery = "";
+    if (siteSearch.isNotEmpty) {
+      searchTags.remove(siteSearch);
+      siteSearch = siteSearch.replaceAll("site:", "");
+      siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
+    }
+
+    if (searchTags.isNotEmpty){
       result = await db?.rawQuery(
           "SELECT COUNT(*) as count FROM BooruItem "
               "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
               "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE Tag.name IN (${List.generate(tags.length, (_) => '?').join(',')}) AND isFavourite = 1 GROUP BY BooruItem.id "
-              "HAVING COUNT(*) = ${tags.length}", tags);
+              "WHERE $siteQuery Tag.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) AND isFavourite = 1 GROUP BY BooruItem.id "
+              "HAVING COUNT(DISTINCT Tag.name) = ${searchTags.length}", searchTags);
     } else {
-      result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
+      result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE $siteQuery isFavourite = 1");
     }
+
     Logger.Inst().log("got results from db", "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
     Logger.Inst().log(result, "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
-    if (result != null && result.isNotEmpty){
+
+    if (result != null && result.isNotEmpty) {
       if(result.length > 1) {
-        count = result.length;
+        return result.length;
       } else if(result.length == 1) {
-        count = result[0]["count"];
+        return result[0]["count"];
+      } else {
+        return 0;
       }
+    } else {
+      return 0;
     }
-    return count;
   }
+
   //Gets the favourites count from db
   Future<int> getFavouritesCount() async {
-    var result;
+    List? result;
     result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
+
     Logger.Inst().log("got results from db", "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
     Logger.Inst().log(result, "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
+
     if (result != null) {
       return result.first["count"];
-    }
-    return 0;
-  }
-
-  //Creates a BooruItem from a BooruItem id
-  Future<BooruItem?> getBooruItem(int itemID, String mode) async{
-    var metaData = await db?.rawQuery("SELECT BooruItem.id as dbid, thumbnailURL,sampleURL,fileURL,postURL,mediaType,isSnatched,isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
-        "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
-        "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-        "WHERE dbid IN (?) GROUP BY dbid",[itemID]);
-    BooruItem item;
-    if (metaData != null && metaData.isNotEmpty){
-      item = BooruItem(
-        fileURL: metaData.first["fileURL"].toString(),
-        sampleURL: metaData.first["fileURL"].toString(),
-        thumbnailURL: metaData.first["thumbnailURL"].toString(),
-        tagsList: metaData.first["tags"].toString().split(","),
-        postURL: metaData.first["postURL"].toString(),
-      );
-      //var tags = await db?.rawQuery("SELECT name FROM ImageTag INNER JOIN Tag on ImageTag.tagID = Tag.ID WHERE booruItemID in (?)", [itemID]);
-      //tags?.forEach((tag) {tagsList.add(tag["name"].toString());});
-      if (mode == "loliSyncFav"){
-        item.isSnatched.value = false;
-      } else {
-        item.isSnatched.value = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
-      }
-      item.isFavourite.value = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
-      //item.tagsList = tagsList;
-      return item;
     } else {
-      return null;
+      return 0;
     }
   }
-  Future<List<BooruItem>> getBooruItems(List<int> itemIDs, String mode) async{
-    var metaData = await db?.rawQuery("SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag.name,',') as tags FROM BooruItem "
-        "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
-        "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-        "WHERE ItemID IN (${itemIDs.join(',')}) GROUP BY ItemID ORDER BY ItemID DESC");
 
-    List<BooruItem> items = [];
-    if (metaData != null && metaData.isNotEmpty){
-      for(int i=0; i < metaData.length; i++){
-        var currentItem = metaData[i];
-        if(currentItem != null && currentItem.isNotEmpty) {
-          BooruItem bItem = BooruItem(
-            fileURL: currentItem["fileURL"].toString(),
-            sampleURL: currentItem["sampleURL"].toString(),
-            thumbnailURL: currentItem["thumbnailURL"].toString(),
-            tagsList: currentItem["tags"].toString().split(","),
-            postURL: currentItem["postURL"].toString(),
-          );
-          if (mode == "loliSyncFav"){
-            bItem.isSnatched.value = false;
-          } else {
-            bItem.isSnatched.value = Tools.intToBool(int.parse(metaData.first["isSnatched"].toString()));
-          }
-          bItem.isFavourite.value = Tools.intToBool(int.parse(metaData.first["isFavourite"].toString()));
-          items.add(bItem);
-        }
-      }
-    }
-    return items;
-  }
 
   void clearSnatched() async{
     await db?.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
@@ -315,13 +292,14 @@ class DBHandler{
     await db?.rawUpdate("UPDATE BooruItem SET isFavourite = 0");
     deleteUntracked();
   }
+
   //Adds tags for a BooruItem to the database
   void updateTags(List tags, String? itemID) async{
     if(itemID == null) return;
     String? id = "";
-    tags.forEach((tag) async{
+    tags.forEach((tag) async {
       id = await getTagID(tag);
-      if (id != null && id!.isEmpty){
+      if (id != null && id!.isEmpty) {
         var result = await db?.rawInsert("INSERT INTO Tag(name) VALUES(?)", [tag]);
         id = result?.toString();
       }
@@ -360,6 +338,7 @@ class DBHandler{
       // or add new if no entries
       await db?.rawInsert("INSERT INTO TabRestore(restore) VALUES(?);", [restore]);
     }
+
     // clear all then add a new one
     // await clearTabRestore();
     // await db?.rawInsert("INSERT INTO TabRestore(restore) VALUES(?);", [restore]);

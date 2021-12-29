@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
-import 'package:LoliSnatcher/widgets/MarqueeText.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
+import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 const double borderWidth = 1;
 
@@ -21,6 +23,7 @@ class SettingsButton extends StatelessWidget {
     this.page, // which page to open after button was pressed (needs to be wrapped in anonymous function, i.e.: () => Page)
     // OR
     this.action, // function to execute on button press
+    this.onLongPress,
 
     this.trailingIcon, // icon at the end (i.e. if action is a link which will open a browser)
     this.drawTopBorder = false,
@@ -35,6 +38,7 @@ class SettingsButton extends StatelessWidget {
   final Widget? subtitle;
   final Widget Function()? page;
   final void Function()? action;
+  final void Function()? onLongPress;
   final Widget? trailingIcon;
   final bool drawTopBorder;
   final bool drawBottomBorder;
@@ -55,11 +59,16 @@ class SettingsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if(iconOnly) {
-      return IconButton(
-        icon: icon ?? Icon(null),
-        onPressed: (){
-          onTapAction(context);
+      return GestureDetector(
+        onLongPress: () => {
+          onLongPress?.call()
         },
+        child: IconButton(
+          icon: icon ?? Icon(null),
+          onPressed: (){
+            onTapAction(context);
+          },
+        ),
       );
     }
 
@@ -72,6 +81,9 @@ class SettingsButton extends StatelessWidget {
       dense: dense,
       onTap: () {
         onTapAction(context);
+      },
+      onLongPress: () {
+        onLongPress?.call();
       },
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
@@ -88,9 +100,13 @@ class SettingsPageOpen {
   SettingsPageOpen({
     required this.page,
     required this.context,
+    this.condition = true,
   }) {
+    if(!condition) return;
+
     SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    if(settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux) {
+    bool isTooNarrow = MediaQuery.of(context).size.width < 550;
+    if(!isTooNarrow && (settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux)) {
       Get.dialog(Dialog(
         child: Container(
           width: 500,
@@ -104,6 +120,7 @@ class SettingsPageOpen {
 
   final Widget Function() page;
   final BuildContext context;
+  final bool condition;
 }
 
 
@@ -391,7 +408,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   }
 }
 
-class SettingsTextInput extends StatelessWidget {
+class SettingsTextInput extends StatefulWidget {
   const SettingsTextInput({
     Key? key,
     required this.controller,
@@ -401,9 +418,16 @@ class SettingsTextInput extends StatelessWidget {
     required this.title,
     this.hintText = '',
     this.autofocus = false,
+    this.onChanged,
     this.onSubmitted,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
+    this.clearable = false,
+    this.resetText,
+    this.numberButtons = false,
+    this.numberStep = 1,
+    this.numberMin = 0,
+    this.numberMax = 100,
     this.trailingIcon = const SizedBox(),
     this.onlyInput = false,
   }) : super(key: key);
@@ -415,34 +439,175 @@ class SettingsTextInput extends StatelessWidget {
   final String title;
   final String hintText;
   final bool autofocus;
+  final void Function(String?)? onChanged;
   final void Function(String)? onSubmitted;
   final bool drawTopBorder;
   final bool drawBottomBorder;
+  final bool clearable;
+  final String Function()? resetText;
+  final bool numberButtons;
+  final double numberStep;
+  final double numberMin;
+  final double numberMax;
   final Widget trailingIcon;
-  final bool onlyInput; // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
+  final bool onlyInput; 
+  @override
+  State<SettingsTextInput> createState() => _SettingsTextInputState();
+}
+
+class _SettingsTextInputState extends State<SettingsTextInput> {
+  bool isFocused = false;
+  FocusNode _focusNode = FocusNode();
+
+  Timer? _longPressRepeatTimer;
+  int repeatCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      isFocused = _focusNode.hasFocus;
+      setState(() { });
+    });
+  }
+
+  void stepNumberDown() {
+    if (widget.numberButtons) {
+      if(repeatCount > 0) {
+        ServiceHandler.vibrate(duration: 2);
+      }
+      double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) - widget.numberStep;
+      double newValue = valueWithStep >= widget.numberMin ? valueWithStep : widget.numberMin;
+      widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
+      widget.onChanged?.call(widget.controller.text);
+    }
+  }
+
+  void stepNumberUp() {
+    if(widget.numberButtons) {
+      if(repeatCount > 0) {
+        ServiceHandler.vibrate(duration: 2);
+      }
+      double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) + widget.numberStep;
+      double newValue = valueWithStep <= widget.numberMax ? valueWithStep : widget.numberMax;
+      widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
+      widget.onChanged?.call(widget.controller.text);
+    }
+  }
+
+  Widget buildNumberButton(void Function() stepFunc, IconData icon) {
+    final int fasterAfter = 20;
+    return GestureDetector(
+      onLongPressStart: (details) {
+        // repeat every 100ms if the user holds down the button
+        if(_longPressRepeatTimer != null) return; 
+        _longPressRepeatTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+          stepFunc();
+          repeatCount++;
+
+          // repeat faster after a certain amount of times
+          if(repeatCount > fasterAfter) {
+            _longPressRepeatTimer?.cancel();
+            _longPressRepeatTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+              stepFunc();
+              repeatCount++;
+            });
+          }
+
+        });
+      },
+      onLongPressEnd: (details) {
+        // stop repeating if the user releases the button
+        _longPressRepeatTimer?.cancel();
+        _longPressRepeatTimer = null;
+        repeatCount = 0;
+      },
+      onLongPressCancel: () {
+        print('cancelled');
+        // stop repeating if the user moves the finger/mouse away
+        _longPressRepeatTimer?.cancel();
+        _longPressRepeatTimer = null;
+        repeatCount = 0;
+      },
+      child: IconButton(
+        icon: Icon(icon, color: Get.theme.colorScheme.onSurface),
+        onPressed: () {
+          stepFunc();
+        },
+      ),
+    );
+  }
+
+
+
+  Widget buildSuffixIcons() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        if(widget.numberButtons && isFocused)
+          buildNumberButton(stepNumberDown, Icons.remove),
+        if(widget.numberButtons && isFocused)
+          buildNumberButton(stepNumberUp, Icons.add),
+
+        if(widget.clearable && isFocused)
+          IconButton(
+            icon: Icon(Icons.clear, color: Get.theme.colorScheme.onSurface),
+            onPressed: () {
+              widget.controller.clear();
+            },
+          ),
+
+        if(widget.resetText != null)
+          IconButton(
+            icon: Icon(Icons.refresh, color: Get.theme.colorScheme.onSurface),
+            onPressed: () {
+              widget.controller.text = widget.resetText!();
+            },
+          ),
+
+        isFocused
+          ? IconButton(
+              icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Get.theme.colorScheme.onSurface),
+              onPressed: () {
+                if(widget.onSubmitted != null) widget.onSubmitted!(widget.controller.text);
+                _focusNode.unfocus();
+              },
+            )
+          : IconButton(
+              icon: Icon(Icons.edit, color: Get.theme.colorScheme.onSurface),
+              onPressed: () {
+                _focusNode.requestFocus();
+              },
+            ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     final Widget field = Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: TextFormField(
-        controller: controller,
-        autofocus: autofocus,
-        keyboardType: inputType,
+        focusNode: _focusNode,
+        controller: widget.controller,
+        autofocus: widget.autofocus,
+        keyboardType: widget.inputType,
         enableInteractiveSelection: true,
-        inputFormatters: inputFormatters,
-        onFieldSubmitted: onSubmitted,
+        inputFormatters: widget.inputFormatters,
+        onChanged: widget.onChanged,
+        onFieldSubmitted: widget.onSubmitted,
         decoration: InputDecoration(
           fillColor: Get.theme.colorScheme.surface,
           filled: true,
           labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
-          labelText: title,
-          hintText: hintText,
-          errorText: validator?.call(controller.text),
+          labelText: widget.title,
+          hintText: widget.hintText,
+          errorText: widget.validator?.call(widget.controller.text),
           contentPadding: EdgeInsets.fromLTRB(25, 0, 15, 0),
           suffixIcon: Padding(
-            padding: const EdgeInsets.only(left: 2, right: 18),
-            child: Icon(Icons.edit, color: Get.theme.colorScheme.onSurface)
+            padding: const EdgeInsets.only(left: 2, right: 10),
+            child: buildSuffixIcons(),
           ),
           focusedBorder: OutlineInputBorder(
             borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
@@ -463,20 +628,20 @@ class SettingsTextInput extends StatelessWidget {
       )
     );
 
-    if(onlyInput) {
+    if(widget.onlyInput) {
       return field;
     }
 
     return ListTile(
       title: field,
       // subtitle: field,
-      trailing: trailingIcon,
+      trailing: widget.trailingIcon,
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        top: widget.drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        bottom: widget.drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -489,9 +654,11 @@ class SettingsDialog extends StatelessWidget {
     this.content,
     this.contentItems,
     this.actionButtons,
-    this.contentPadding,
     this.titlePadding,
-    this.insetPadding,
+    this.contentPadding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    this.buttonPadding,
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+    this.borderRadius,
     this.scrollable = true,
   }) : super(key: key);
 
@@ -499,16 +666,18 @@ class SettingsDialog extends StatelessWidget {
   final Widget? content;
   final List<Widget>? contentItems;
   final List<Widget>? actionButtons;
-  final EdgeInsets? contentPadding;
   final EdgeInsets? titlePadding;
-  final EdgeInsets? insetPadding;
+  final EdgeInsets contentPadding;
+  final EdgeInsets? buttonPadding;
+  final EdgeInsets insetPadding;
+  final BorderRadius? borderRadius;
   final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
-      titlePadding: titlePadding ?? null,
+      
       content: content ?? SingleChildScrollView(
         child: ListBody(
           children: contentItems ?? [],
@@ -516,8 +685,12 @@ class SettingsDialog extends StatelessWidget {
       ),
       backgroundColor: Get.theme.colorScheme.surface,
       actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
-      contentPadding: contentPadding ?? const EdgeInsets.fromLTRB(24, 20, 24, 24),
-      insetPadding: insetPadding ?? const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+
+      titlePadding: titlePadding,
+      contentPadding: contentPadding,
+      buttonPadding: buttonPadding,
+      insetPadding: insetPadding,
+      shape: RoundedRectangleBorder(borderRadius: borderRadius ?? BorderRadius.circular(4)),
       scrollable: scrollable,
     );
   }

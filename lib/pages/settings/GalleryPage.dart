@@ -1,11 +1,10 @@
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../SettingsHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class GalleryPage extends StatefulWidget {
   GalleryPage();
@@ -16,7 +15,7 @@ class GalleryPage extends StatefulWidget {
 class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
-  late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition;
+  late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
   List<List<String>>? buttonOrder;
   TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
@@ -31,6 +30,7 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
     shareAction = settingsHandler.shareAction;
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
+    changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
     autoPlay = settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
@@ -51,6 +51,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.galleryScrollDirection = galleryScrollDirection;
     settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
+    settingsHandler.changePageButtonsPosition = changePageButtonsPosition;
     settingsHandler.autoPlayEnabled = autoPlay;
     settingsHandler.loadingGif = loadingGif;
     settingsHandler.shitDevice = shitDevice;
@@ -69,7 +70,7 @@ class _GalleryPageState extends State<GalleryPage> {
     }
     settingsHandler.preloadCount = int.parse(preloadController.text);
     // Set settingshandler values here
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -97,6 +98,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                resetText: () => settingsHandler.map['preloadCount']?['default']?.toString() ?? "1",
+                numberButtons: true,
+                numberStep: 1,
+                numberMin: 0,
+                numberMax: 5,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
                   if(value == null || value.isEmpty) {
@@ -120,7 +126,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Gallery Quality',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -159,7 +165,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Default Share Action',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -203,6 +209,16 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Zoom Button Position',
               ),
+              SettingsDropdown(
+                selected: changePageButtonsPosition,
+                values: settingsHandler.map['changePageButtonsPosition']?['options'],
+                onChanged: (String? newValue){
+                  setState((){
+                    changePageButtonsPosition = newValue ?? settingsHandler.map['changePageButtonsPosition']?['default'];
+                  });
+                },
+                title: 'Change Page Buttons Position',
+              ),
               SettingsToggle(
                 value: autoHideImageBar,
                 onChanged: (newValue) {
@@ -223,7 +239,7 @@ class _GalleryPageState extends State<GalleryPage> {
                           name: 'Toolbar Buttons Order',
                           drawBottomBorder: false,
                           trailingIcon: IconButton(
-                            icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                            icon: Icon(Icons.help_outline),
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -291,7 +307,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Disable Video',
                 drawTopBorder: true, // instead of border in reorder list
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -345,7 +361,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Low Performance Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -379,7 +395,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Use Volume Buttons for Scrolling',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -410,6 +426,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']?['default']?.toString() ?? "200",
+                numberButtons: true,
+                numberStep: 100,
+                numberMin: 100,
+                numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
                   if(value == null || value.isEmpty) {
@@ -431,6 +452,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                resetText: () => settingsHandler.map['galleryAutoScrollTime']?['default']?.toString() ?? "4000",
+                numberButtons: true,
+                numberStep: 100,
+                numberMin: 100,
+                numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
                   if(value == null || value.isEmpty) {
@@ -442,7 +468,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   }
                 },
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,

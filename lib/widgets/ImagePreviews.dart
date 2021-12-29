@@ -1,6 +1,3 @@
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,15 +6,10 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/widgets/WaterfallView.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
-class ImagePreviews extends StatefulWidget {
-  ImagePreviews();
-
-  @override
-  _ImagePreviewsState createState() => _ImagePreviewsState();
-}
-
-class _ImagePreviewsState extends State<ImagePreviews> {
+class ImagePreviews extends StatelessWidget {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
@@ -38,7 +30,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
               SettingsButton(
                 name: 'Add New Booru',
                 icon: Icon(Icons.settings),
-                page: () => BooruEdit(Booru("New","","","",""))
+                page: () => BooruEdit(Booru("New", "", "", "", "")),
               ),
               SettingsButton(
                 name: 'Help',
@@ -46,37 +38,29 @@ class _ImagePreviewsState extends State<ImagePreviews> {
                 action: () {
                   ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
                 },
-                trailingIcon: Icon(Icons.exit_to_app)
+                trailingIcon: Icon(Icons.exit_to_app),
               ),
-            ]
-          )
+            ],
+          ),
         );
       }
 
       // temp message while restoring tabs (or for some reason initial tab was not created)
-      if(searchHandler.list.isEmpty) {
+      if (searchHandler.list.isEmpty) {
         return Center(
           child: Column(
             children: [
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+                valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
               ),
-              if(!searchHandler.isRestored.value)
-                Text('Restoring previous session...'),
+              if (!searchHandler.isRestored.value) Text('Restoring previous session...'),
             ],
-          )
+          ),
         );
       }
 
       // render thumbnails grid
-      return Obx(() => SafeArea(
-        child: WaterfallView(
-          searchHandler.currentTab,
-          searchHandler.index.value
-        )
-      ));
-
+      return WaterfallView(searchHandler.currentTab);
     });
-
-    }
+  }
 }

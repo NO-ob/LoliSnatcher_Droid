@@ -1,25 +1,30 @@
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
-
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 
+class SnatchItem {
+  final List<BooruItem> booruItems;
+  final int cooldown;
+  final Booru booru;
 
+  SnatchItem(this.booruItems, this.cooldown, this.booru);
+}
 
 class SnatchHandler extends GetxController {
   RxBool snatchActive = false.obs;
   RxString snatchStatus = "".obs;
-  RxList<List<BooruItem>> queuedList = RxList<List<BooruItem>>([]);
-  RxList<int> cooldownList = RxList<int>([]);
-  RxList<Booru> booruList = RxList<Booru>([]);
+  RxInt snatchProgress = 0.obs;
 
-  SnatchHandler(){
-    queuedList.listen((List<List<BooruItem>> list) {
+  RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
+
+  SnatchHandler() {
+    queuedList.listen((List<SnatchItem> list) {
       // print("queuedList updated");
       // print(list);
       // print(list.length);
@@ -27,48 +32,100 @@ class SnatchHandler extends GetxController {
     });
   }
 
-  Future snatch(List<BooruItem> booruItems, Booru booru, int cooldown) async {
+  Stream<Map<String, int>> writeMultipleFake(List<BooruItem> items, Booru booru, int cooldown) async* {
+    int snatchedCounter = 0;
+    for (int i = 0; i < items.length; i++) {
+      await Future.delayed(Duration(milliseconds: 2000), () async {});
+      snatchedCounter++;
+      yield {
+        "snatched": snatchedCounter,
+      };
+    }
+
+    yield {
+      "snatched": snatchedCounter,
+      "exists": 0,
+      "failed": 0,
+    };
+  }
+
+  Future snatch(SnatchItem item) async {
     // print("snatching");
-    if (!snatchActive.value){
-      snatchActive.value = true;
-      ImageWriter writer = ImageWriter();
-      writer.writeMultiple(booruItems, booru, cooldown).listen(
-        (data) {
-          snatchStatus.value = "$data / ${booruItems.length}";
-        },
-        onDone: () {
+    snatchActive.value = true;
+    snatchStatus.value = queuedList.isNotEmpty ? "0/${item.booruItems.length}/${queuedList.length}" : "0/${item.booruItems.length}";
+
+    ImageWriter().writeMultiple(item.booruItems, item.booru, item.cooldown).listen(
+    // writeMultipleFake(item.booruItems, item.booru, item.cooldown).listen(
+      (Map<String, int> data) {
+        final int snatched = data["snatched"]!;
+        final int? exists = data["exists"];
+        final int? failed = data["failed"];
+
+        snatchStatus.value = queuedList.isNotEmpty ? "$snatched/${item.booruItems.length}/${queuedList.length}" : "$snatched/${item.booruItems.length}";
+
+        if(exists == null && failed == null) {
+          // record progress only when snatched changes
+          snatchProgress.value = snatchProgress.value + 1;
+        }
+
+        if (exists != null && failed != null && queuedList.length == 0) {
+          // last yield in stream will send exists and failed counts
+          // but show this message only when queue is empty => snatching is complete
+          FlashElements.showSnackbar(
+            duration: Duration(seconds: 2),
+            position: Positions.top,
+            title: Text("Snatching Complete", style: TextStyle(fontSize: 20)),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Snatched: ${snatchProgress.value} item${snatchProgress.value == 1 ? "" : "s"}"),
+                if (exists > 0) Text('$exists file${exists == 1 ? ' was' : 's were'} already snatched'),
+                if (failed > 0) Text('Failed to snatch $failed file${failed == 1 ? '' : 's'}'),
+              ],
+            ),
+            leadingIcon: Icons.done_all,
+            sideColor: (exists > 0 || failed > 0) ? Colors.yellow : Colors.green,
+            //TODO restart/retry buttons for failed items?
+          );
+        }
+      },
+      onDone: () {
+        if (queuedList.length > 0) {
+          snatch(queuedList.removeLast());
+        } else {
           snatchActive.value = false;
           snatchStatus.value = "";
-          trySnatch();
-        },
-      );
-    }
+          snatchProgress.value = 0;
+        }
+      },
+    );
   }
 
   void trySnatch() {
-    if (!snatchActive.value && queuedList.length > 0 && booruList.length > 0 && cooldownList.length > 0) {
-      snatch(queuedList.removeLast(), booruList.removeLast(), cooldownList.removeLast());
+    if (!snatchActive.value) {
+      if (queuedList.length > 0) {
+        snatch(queuedList.removeLast());
+      } else if (queuedList.length == 0) {
+        //
+      }
     }
   }
 
   void queue(List<BooruItem> booruItems, Booru booru, int cooldown) {
     if (booruItems.isNotEmpty) {
-      cooldownList.add(cooldown);
-      booruList.add(booru);
-      queuedList.add(booruItems); // change this last because it triggers a listener
-      if (booruItems.length > 1){
+      SnatchItem item = SnatchItem(booruItems, cooldown, booru);
+      queuedList.add(item);
+
+      if (booruItems.length > 1) {
         FlashElements.showSnackbar(
-          title: Text(
-            "Added to snatch queue",
-            style: TextStyle(fontSize: 20)
-          ),
+          title: Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
           position: Positions.top,
           duration: Duration(seconds: 2),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Text('Amount: ${booruItems.length}'),
-                Text('Position: ${queuedList.length}'),
+              Text('Amount: ${booruItems.length}'),
+              Text('Position: ${queuedList.length}'),
             ],
           ),
           leadingIcon: Icons.info_outline,
@@ -76,16 +133,13 @@ class SnatchHandler extends GetxController {
         );
       } else {
         FlashElements.showSnackbar(
-          title: Text(
-            "Added to snatch queue",
-            style: TextStyle(fontSize: 20)
-          ),
+          title: Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
           position: Positions.top,
           duration: Duration(seconds: 2),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                Text('Position: ${queuedList.length}'),
+              Text('Position: ${queuedList.length}'),
             ],
           ),
           leadingIcon: Icons.info_outline,
@@ -95,12 +149,12 @@ class SnatchHandler extends GetxController {
     }
   }
 
-  Future searchSnatch(String tags, String amount, int cooldown, Booru booru) async{
+  Future searchSnatch(String tags, String amount, int cooldown, Booru booru) async {
     int count = 0, limit;
     BooruHandler booruHandler;
     var booruItems;
 
-    if (int.parse(amount) <= 100){
+    if (int.parse(amount) <= 100) {
       limit = int.parse(amount);
     } else {
       limit = 100;
@@ -109,18 +163,15 @@ class SnatchHandler extends GetxController {
     List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
     booruHandler = temp[0];
     booruHandler.pageNum.value = temp[1];
-    booruHandler.pageNum ++;
+    booruHandler.pageNum++;
 
     FlashElements.showSnackbar(
-      title: Text(
-        "Snatching Images",
-        style: TextStyle(fontSize: 20)
-      ),
+      title: Text("Snatching Images", style: TextStyle(fontSize: 20)),
       position: Positions.top,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-            Text('Do not close the app!'),
+          Text('Do not close the app!'),
         ],
       ),
       leadingIcon: Icons.warning_amber,
@@ -128,16 +179,13 @@ class SnatchHandler extends GetxController {
       sideColor: Colors.yellow,
     );
 
-    while (count < int.parse(amount) && !booruHandler.locked.value){
+    while (count < int.parse(amount) && !booruHandler.locked.value) {
       booruItems = (await booruHandler.Search(tags, null)) ?? [];
-      booruHandler.pageNum ++;
+      booruHandler.pageNum++;
       count = booruItems.length;
       print(count);
       // TODO error handling?
     }
     queue(booruItems, booru, cooldown);
-    //Get.snackbar("Snatching Complete","¡¡¡( •̀ ᴗ •́ )و!!!",snackPosition: SnackPosition.TOP,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.theme.primaryColor);
   }
 }
-
-

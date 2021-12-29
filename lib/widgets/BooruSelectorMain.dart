@@ -1,5 +1,4 @@
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -192,6 +191,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             isExpanded: true,
             value: searchHandler.currentTab.selectedBooru.value,
             icon: Icon(Icons.arrow_drop_down),
+            itemHeight: kMinInteractiveDimension,
             decoration: InputDecoration(
               labelText: 'Booru',
               labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),

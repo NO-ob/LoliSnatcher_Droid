@@ -6,7 +6,7 @@ import 'BooruItem.dart';
 import 'Booru.dart';
 import 'dart:convert';
 
-class WorldHandler extends BooruHandler{
+class WorldHandler extends BooruHandler {
   // Dart constructors are weird so it has to call super with the args
   WorldHandler(Booru booru,int limit) : super(booru,limit);
 
@@ -17,6 +17,15 @@ class WorldHandler extends BooruHandler{
     } else {
       return tags;
     }
+  }
+
+  @override
+  Map<String, String> getHeaders() {
+    return {
+      "Accept": "text/html,application/xml,application/json",
+      "Content-Type": "application/json",
+      "User-Agent": "LoliSnatcher_Droid/$verStr"
+    };
   }
 
   @override
@@ -98,32 +107,31 @@ class WorldHandler extends BooruHandler{
     List<String> searchTags = [];
     String url = makeTagURL('');
 
-    // Don't search until at least 2 symbols are entered
-    if(input.length > 1) {
-      try {
-        String requestBody = jsonEncode({
-          "searchText": input.replaceAll(RegExp(r'^-'), ''),
-          "skip": 0,
-          "take": 10, //limit
-        });
-        Uri uri = Uri.parse(url);
-        final response = await http.post(uri, headers: getHeaders(), body: requestBody, encoding: Encoding.getByName("utf-8"));
-        // 200 is the success http response code
-        if (response.statusCode == 200) {
-          List<dynamic> parsedResponse = jsonDecode(response.body)["items"];
-          if (parsedResponse.length > 0) {
-            for (int i=0; i < parsedResponse.length; i++){
-              Map<String,dynamic> current = parsedResponse.elementAt(i);
-              searchTags.add(current['value'].replaceAll(RegExp(r' '), '_'));
-            }
+    try {
+      String requestBody = jsonEncode({
+        "searchText": input.replaceAll(RegExp(r'^-'), ''),
+        "skip": 0,
+        "take": 10,
+      });
+
+      Uri uri = Uri.parse(url);
+      final response = await http.post(uri, headers: getHeaders(), body: requestBody);
+
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        List<dynamic> parsedResponse = jsonDecode(response.body)["items"];
+        if (parsedResponse.length > 0) {
+          for (int i=0; i < parsedResponse.length; i++){
+            Map<String,dynamic> current = parsedResponse.elementAt(i);
+            searchTags.add(current['value'].replaceAll(RegExp(r' '), '_'));
           }
-        } else {
-          Logger.Inst().log('Tag search error:' + response.statusCode.toString(), "WorldHandler", "tagSearch", LogTypes.booruHandlerInfo);
         }
-      } catch(e) {
-        Logger.Inst().log(e.toString(), "WorldHandler", "tagSearch", LogTypes.exception);
-        return [];
+      } else {
+        Logger.Inst().log('Tag search error:' + response.statusCode.toString(), "WorldHandler", "tagSearch", LogTypes.booruHandlerInfo);
       }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), "WorldHandler", "tagSearch", LogTypes.exception);
+      return [];
     }
     return searchTags;
   }

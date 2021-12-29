@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:LoliSnatcher/TimedProgressController.dart';
 import 'package:get/get.dart';
 
@@ -13,8 +12,7 @@ class RestartableProgressIndicator extends StatefulWidget {
   RestartableProgressIndicator({
     Key? key,
     required this.controller,
-  }) : assert(controller != null),
-        super(key: key);
+  }) : super(key: key);
 
   @override
   _RestartableProgressIndicatorState createState() => _RestartableProgressIndicatorState();

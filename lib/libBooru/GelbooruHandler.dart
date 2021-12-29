@@ -9,6 +9,7 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**
@@ -23,6 +24,15 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   bool hasCommentsSupport = true;
+
+  @override
+  Map<String,String> getHeaders(){
+    return {
+      "Accept": "text/html,application/xml,application/json",
+      "user-agent": "LoliSnatcher_Droid/$verStr",
+      "Cookie": "fringeBenefits=yup;" // unlocks restricted content (but it's probably not necessary)
+    };
+  }
 
   @override
   void parseResponse(response) {
@@ -205,6 +215,42 @@ class GelbooruHandler extends BooruHandler {
       Logger.Inst().log(e.toString(), "GelbooruHandler", "fetchComments", LogTypes.exception);
     }
     return comments;
+  }
+
+  @override
+  bool hasNotesSupport = true;
+
+  @override
+  Future<List<NoteItem>> fetchNotes(String postID) async {
+    List<NoteItem> notes = [];
+    String url = "${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID";
+
+    try {
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = XmlDocument.parse(response.body);
+        var notesXML = parsedResponse.findAllElements("note");
+        if (notesXML.length > 0){
+          for (int i=0; i < notesXML.length; i++){
+            var current = notesXML.elementAt(i);
+            notes.add(NoteItem(
+              id: current.getAttribute("id"),
+              postID: current.getAttribute("post_id"),
+              content: current.getAttribute("body"),
+              posX: int.tryParse(current.getAttribute("x") ?? '0') ?? 0,
+              posY: int.tryParse(current.getAttribute("y") ?? '0') ?? 0,
+              width: int.tryParse(current.getAttribute("width") ?? '0') ?? 0,
+              height: int.tryParse(current.getAttribute("height") ?? '0') ?? 0,
+            ));
+          }
+        }
+      }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), "GelbooruHandler", "fetchNotes", LogTypes.exception);
+    }
+    return notes;
   }
 
 }

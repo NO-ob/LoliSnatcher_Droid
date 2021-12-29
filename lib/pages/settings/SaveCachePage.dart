@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -112,7 +110,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.cacheDuration = cacheDuration;
     settingsHandler.cacheSize = int.parse(cacheSizeController.text);
     settingsHandler.extPathOverride = extPathOverride;
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -143,6 +141,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                resetText: () => settingsHandler.map['snatchCooldown']?['default']?.toString() ?? "250",
+                numberButtons: true,
+                numberStep: 50,
+                numberMin: 0,
+                numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
                   if(value == null || value.isEmpty) {
@@ -247,7 +250,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 title: 'Video Cache Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
@@ -294,6 +297,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
+                resetText: () => settingsHandler.map['cacheSize']?['default']?.toString() ?? "3",
+                numberButtons: true,
+                numberStep: 1,
+                numberMin: 0,
+                numberMax: double.infinity,
               ),
 
               SettingsButton(name: '', enabled: false),

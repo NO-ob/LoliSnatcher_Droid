@@ -52,6 +52,7 @@ class SettingsHandler extends GetxController {
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
   RxBool showFPS = false.obs;
+  RxBool showPerf = false.obs;
   RxBool showImageStats = false.obs;
   RxBool isMemeTheme = false.obs;
   bool showURLOnThumb = false;
@@ -75,6 +76,7 @@ class SettingsHandler extends GetxController {
   String extPathOverride = "";
   String drawerMascotPathOverride = "";
   String zoomButtonPosition = "Right";
+  String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? "Right" : "Disabled";
   String lastSyncIp = '';
   String lastSyncPort = '';
 
@@ -211,6 +213,11 @@ class SettingsHandler extends GetxController {
       "default": "Right",
       "options": <String>["Disabled", "Left", "Right"],
     },
+    "changePageButtonsPosition": {
+      "type": "stringFromList",
+      "default": "Disabled",
+      "options": <String>["Disabled", "Left", "Right"],
+    },
 
     // string
     "deftags": {
@@ -297,6 +304,8 @@ class SettingsHandler extends GetxController {
       "upperLimit": 10,
       "lowerLimit": 0,
     },
+
+    // double
 
     // bool
     "jsonWrite": {
@@ -805,6 +814,8 @@ class SettingsHandler extends GetxController {
         return jsonWrite;
       case 'zoomButtonPosition':
         return zoomButtonPosition;
+      case 'changePageButtonsPosition':
+        return changePageButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
       case 'cacheDuration':
@@ -943,6 +954,9 @@ class SettingsHandler extends GetxController {
       case 'zoomButtonPosition':
         zoomButtonPosition = validatedValue;
         break;
+      case 'changePageButtonsPosition':
+        changePageButtonsPosition = validatedValue;
+        break;
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
@@ -1028,6 +1042,7 @@ class SettingsHandler extends GetxController {
       "shitDevice" : validateValue("shitDevice", null, toJSON: true),
       "galleryAutoScrollTime" : validateValue("galleryAutoScrollTime", null, toJSON: true),
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
+      "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
@@ -1547,41 +1562,57 @@ class SettingsHandler extends GetxController {
   }
 
 
-  Future<void> initialize() async{
-    await getPerms();
-    await loadSettings();
+  Future<void> initialize() async {
+    try {
+      await getPerms();
+      await loadSettings();
 
-    if (booruList.isEmpty){
-      await loadBoorus();
+      if (booruList.isEmpty){
+        await loadBoorus();
+      }
+      if (allowSelfSignedCerts){
+        HttpOverrides.global = MyHttpOverrides();
+      }
+
+      if(Platform.isAndroid || Platform.isIOS) {
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        packageName = packageInfo.packageName;
+      }
+
+      // if(Platform.isAndroid || Platform.isIOS) {
+      //   // TODO on desktop flutter doesnt't use version data from pubspec
+      //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      //   appName = packageInfo.appName;
+      //   verStr = packageInfo.version;
+
+      //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
+      //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
+      //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
+      // }
+
+      print('isFromStore: ${EnvironmentConfig.isFromStore}');
+
+      // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
+      // print(toJSON());
+      // print(jsonEncode(toJSON()));
+
+      checkUpdate(withMessage: false);
+      isInit.value = true;
+    } catch (e) {
+      print(e);
+      FlashElements.showSnackbar(
+        title: Text(
+          "Initialization Error!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          e.toString()
+        ),
+        sideColor: Colors.red,
+        leadingIcon: Icons.error,
+        leadingIconColor: Colors.red,
+      );
     }
-    if (allowSelfSignedCerts){
-      HttpOverrides.global = MyHttpOverrides();
-    }
-
-    if(Platform.isAndroid || Platform.isIOS) {
-      PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      packageName = packageInfo.packageName;
-    }
-
-    // if(Platform.isAndroid || Platform.isIOS) {
-    //   // TODO on desktop flutter doesnt't use version data from pubspec
-    //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    //   appName = packageInfo.appName;
-    //   verStr = packageInfo.version;
-
-    //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
-    //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
-    //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
-    // }
-
-    print('isFromStore: ${EnvironmentConfig.isFromStore}');
-
-    // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
-    // print(toJSON());
-    // print(jsonEncode(toJSON()));
-
-    checkUpdate(withMessage: false);
-    isInit.value = true;
     return;
   }
 }
