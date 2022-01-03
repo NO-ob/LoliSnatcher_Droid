@@ -38,7 +38,7 @@ class GelbooruHandler extends BooruHandler {
   @override
   void parseResponse(response) {
     var parsedResponse = jsonDecode(response.body);
-    var posts = response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse; // gelbooru: { post: [...] }, others [post, ...]
+    var posts = (response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse) ?? []; // gelbooru: { post: [...] }, others [post, ...]
     List<BooruItem> newItems = [];
 
     for (int i = 0; i < posts.length; i++) {
@@ -164,16 +164,23 @@ class GelbooruHandler extends BooruHandler {
   @override
   Future<void> searchCount(String input) async {
     int result = 0;
-    String url = makeURL(input);
+    // gelbooru json has count in @attributes, but there is no count data on r34xxx json, so we switch back to xml
+    String url = booru.baseURL!.contains('gelbooru.com') ? makeURL(input) : makeURL(input).replaceFirst('json=1', 'json=0'); 
+
     try {
       Uri uri = Uri.parse(url);
       final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        var parsedResponse = XmlDocument.parse(response.body);
-        var root = parsedResponse.findAllElements('posts').toList();
-        if (root.length == 1) {
-          result = int.parse(root[0].getAttribute('count') ?? '0');
+        if(response.body.contains("@attributes")) {
+          var parsedResponse = jsonDecode(response.body);
+          result = parsedResponse["@attributes"]["count"];
+        } else {
+          var parsedResponse = XmlDocument.parse(response.body);
+          var root = parsedResponse.findAllElements('posts').toList();
+          if (root.length == 1) {
+            result = int.parse(root[0].getAttribute('count') ?? '0');
+          }
         }
       }
     } catch (e) {
