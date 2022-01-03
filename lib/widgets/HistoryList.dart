@@ -18,8 +18,8 @@ class HistoryList extends StatefulWidget {
 }
 
 class _HistoryListState extends State<HistoryList> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   List<List<String>> history = [], filteredHistory = [];
   ScrollController scrollController = ScrollController();
@@ -171,17 +171,11 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   Widget listBuild() {
-    MediaQueryData mediaQuery = MediaQuery.of(context);
-    double maxHeight = mediaQuery.size.height / (mediaQuery.orientation == Orientation.landscape ? 1.7 : 1.35);
-    // BoxConstraints limits = BoxConstraints(maxHeight: maxHeight);
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
         child: Container(
-          // constraints: limits,
           width: double.maxFinite,
-          height: maxHeight,
           child: Scrollbar(
             controller: scrollController,
             interactive: true,
@@ -191,8 +185,8 @@ class _HistoryListState extends State<HistoryList> {
             child: ListView.builder(
               padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
               controller: scrollController,
-              // physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+              shrinkWrap: false,
               itemCount: filteredHistory.length,
               scrollDirection: Axis.vertical,
               itemBuilder: listEntryBuild,
@@ -366,6 +360,7 @@ class _HistoryListState extends State<HistoryList> {
       content: listBuild(),
       contentPadding: const EdgeInsets.all(6),
       titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
+      scrollable: false,
     );
   }
 }

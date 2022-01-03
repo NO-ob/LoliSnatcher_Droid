@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
 
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
+import 'package:http/http.dart' as http;
 
 /**
  * Booru Handler for the Danbooru engine
@@ -17,10 +17,15 @@ class IdolSankakuHandler extends SankakuHandler{
   bool hasSizeData = true;
 
   @override
+  bool hasCommentsSupport = true;
+
+  @override
   void parseResponse(response) {
     List<dynamic> parsedResponse = jsonDecode(response.body);
+
     // Create a BooruItem for each post in the list
-    for (int i = 0; i < parsedResponse.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i = 0; i < parsedResponse.length; i++) {
       var current = parsedResponse[i];
       Logger.Inst().log(current.toString(), "IdolSankakuHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       List<String> tags = [];
@@ -29,7 +34,7 @@ class IdolSankakuHandler extends SankakuHandler{
       }
       if (current['file_url'] != null) {
         String protocol = 'https:';
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
           fileURL: protocol + current['file_url'],
           sampleURL: protocol + current['sample_url'],
           thumbnailURL: protocol + current['preview_url'],
@@ -43,6 +48,7 @@ class IdolSankakuHandler extends SankakuHandler{
           previewWidth: current['preview_width'].toDouble(),
           previewHeight: current['preview_height'].toDouble(),
           hasNotes: current['has_notes'],
+          hasComments: current["has_comments"],
           serverId: current['id'].toString(),
           rating: current['rating'],
           score: current['total_score'].toString(),
@@ -50,11 +56,17 @@ class IdolSankakuHandler extends SankakuHandler{
           md5String: current['md5'],
           postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
           postDateFormat: "unix",
-        ));
-        setTrackedValues(fetched.length - 1);
+        );
+
+        newItems.add(item);
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "https://idol.sankakucomplex.com/post/show/$id";
@@ -66,5 +78,42 @@ class IdolSankakuHandler extends SankakuHandler{
 
   String makeTagURL(String input){
     return "${booru.baseURL}/tag/index.json?name=$input*&limit=10";
+  }
+
+  // Example: https://iapi.sankakucomplex.com/comment/index.json?post_id=$post_id
+  @override
+  Future<List<CommentItem>> fetchComments(String postID, int pageNum) async {
+    List<CommentItem> comments = [];
+    String url = "${booru.baseURL}/comment/index.json?post_id=$postID";
+
+    try {
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: getHeaders());
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = jsonDecode(response.body);
+        var commentsJson = parsedResponse;
+        if (commentsJson.length > 0){
+          for (int i=0; i < commentsJson.length; i++){
+            var current = commentsJson.elementAt(i);
+            comments.add(CommentItem(
+              id: current["id"].toString(),
+              title: current["post_id"].toString(),
+              content: current["body"].toString(),
+              authorID: current["creator_id"].toString(),
+              authorName: current["creator"].toString(),
+              avatarUrl: current["creator_avatar"]?.toString().replaceFirst('//', 'https://'),
+              score: current["score"],
+              postID: current["post_id"].toString(),
+              createDate: current['created_at'].toString(), // 2021-11-15 12:09
+              createDateFormat: "yyyy-MM-dd HH:mm",
+            ));
+          }
+        }
+      }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), "IdolSankakuHandler", "fetchComments", LogTypes.exception);
+    }
+    return comments;
   }
 }

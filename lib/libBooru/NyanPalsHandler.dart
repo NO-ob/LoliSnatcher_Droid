@@ -21,7 +21,9 @@ class NyanPalsHandler extends BooruHandler{
   void parseResponse(response){
     var parsedResponse = jsonDecode(response.body);
     totalCount.value = parsedResponse["total"]!;
-    for (int i =0; i < parsedResponse['rows'].length; i++){
+
+    List<BooruItem> newItems = [];
+    for (int i =0; i < parsedResponse['rows'].length; i++) {
       var current = parsedResponse['rows'][i];
 
       Logger.Inst().log(current.toString(), "NyanPalsHandler","parseResponse", LogTypes.booruHandlerRawFetched);
@@ -37,7 +39,8 @@ class NyanPalsHandler extends BooruHandler{
           currentTags[x] = currentTags[x].replaceAll(" ", "_");
         }
       }
-      BooruItem item = new BooruItem(
+
+      BooruItem item = BooruItem(
         fileURL: fileURL,
         sampleURL: fileURL,
         thumbnailURL: "",
@@ -47,7 +50,7 @@ class NyanPalsHandler extends BooruHandler{
       );
 
       thumbURL = booru.baseURL! + "/img/pettankontent/";
-      if (item.mediaType == "video"){
+      if (item.mediaType == "video") {
         thumbURL = thumbURL + item.md5String! + ".mp4";
       } else if (item.mediaType == "animation") {
         thumbURL = thumbURL + "_" + item.md5String! + ".gif";
@@ -57,13 +60,14 @@ class NyanPalsHandler extends BooruHandler{
       item.thumbnailURL = thumbURL;
 
       // video player cant do vp9 and dies
-      if (item.mediaType != "video"){
-        fetched.add(item);
+      if (item.mediaType != "video") {
+        newItems.add(item);
       }
-
-      setTrackedValues(fetched.length - 1);
     }
 
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
   // This will create a url to goto the images page in the browser

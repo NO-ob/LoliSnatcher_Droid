@@ -43,11 +43,12 @@ import java.net.NetworkInterface
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.noaisu.loliSnatcher/services"
     private val VOLUME_CHANNEL = "com.noaisu.loliSnatcher/volume"
-    private var sink: EventChannel.EventSink? = null
+    private var volumeSink: EventChannel.EventSink? = null
     private var isSinkingVolume: Boolean = false
     private var audioManager: AudioManager? = null
     private var SAFUri: String? = "";
     private var methodResult: MethodChannel.Result? = null
+
     @SuppressLint("WrongThread")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -239,7 +240,7 @@ class MainActivity: FlutterActivity() {
 
         EventChannel(flutterEngine.dartExecutor, VOLUME_CHANNEL).setStreamHandler(object : EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, eventSink: EventChannel.EventSink?) {
-                sink = eventSink;
+                volumeSink = eventSink;
             }
 
             override fun onCancel(arguments: Any?) {
@@ -256,7 +257,7 @@ class MainActivity: FlutterActivity() {
             //return intent.data.toString();
     }
 
-    private fun getImageAccess(){
+    private fun getImageAccess() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         val mimeTypes = arrayOf("image/png", "image/jpeg","image/jpg","image/gif")
         intent.type = "*/*"
@@ -324,7 +325,7 @@ class MainActivity: FlutterActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) && isSinkingVolume)
         {
-            sink?.success(if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) "down" else "up")
+            volumeSink?.success(if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) "down" else "up")
             return true;
         }
 
@@ -349,7 +350,7 @@ class MainActivity: FlutterActivity() {
     }
 
     @Throws(IOException::class)
-    private fun writeImage(fileBytes: ByteArray, name: String, mediaType: String, fileExt: String,extPathOverride: String?) {
+    private fun writeImage(fileBytes: ByteArray, name: String, mediaType: String, fileExt: String, extPathOverride: String?) {
         val fos: OutputStream?
         val resolver = contentResolver
         val contentValues = ContentValues()

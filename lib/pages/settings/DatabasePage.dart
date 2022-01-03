@@ -5,7 +5,6 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,7 +18,7 @@ class DatabasePage extends StatefulWidget {
 }
 
 class _DatabasePageState extends State<DatabasePage> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final ServiceHandler serviceHandler = ServiceHandler();
 
   bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
@@ -38,7 +37,7 @@ class _DatabasePageState extends State<DatabasePage> {
     // Set settingshandler values here
     settingsHandler.dbEnabled = dbEnabled;
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -72,12 +71,14 @@ class _DatabasePageState extends State<DatabasePage> {
       leadingIconColor: Colors.green,
       sideColor: Colors.green,
     );
+
     setState(() {
       updatingItems = [];
       updatingFailed = 0;
       updatingDone = 0;
       isUpdating = true;
     });
+
     updatingItems = await settingsHandler.dbHandler.getSankakuItems();
     Booru? sankakuBooru = getSankakuBooru();
     if(sankakuBooru == null) {
@@ -90,6 +91,7 @@ class _DatabasePageState extends State<DatabasePage> {
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
       );
+
       setState(() {
         updatingFailed = 0;
         updatingDone = 0;
@@ -98,11 +100,11 @@ class _DatabasePageState extends State<DatabasePage> {
       return true;
     }
 
-    SankakuHandler sankakuHandler = new SankakuHandler(sankakuBooru, 10);
+    SankakuHandler sankakuHandler = SankakuHandler(sankakuBooru, 10);
     for(BooruItem item in updatingItems) {
       if(isUpdating) {
         await Future.delayed(Duration(milliseconds: 100));
-        List result = await sankakuHandler.updateFavourite(item);
+        List result = await sankakuHandler.updateItem(item);
         if (result[1] == false) {
           setState(() {
             updatingFailed += 1;
@@ -166,7 +168,7 @@ class _DatabasePageState extends State<DatabasePage> {
                 },
                 title: 'Enable Database',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(
@@ -189,7 +191,7 @@ class _DatabasePageState extends State<DatabasePage> {
                 },
                 title: 'Enable Search History',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.help_outline),
                   onPressed: () {
                     Get.dialog(
                       SettingsDialog(
@@ -369,6 +371,29 @@ class _DatabasePageState extends State<DatabasePage> {
                     );
                 }
               ),
+
+              // SettingsButton(name: '', enabled: false),
+              // SettingsButton(
+              //     name: 'Drop Indexes',
+              //     trailingIcon: Icon(Icons.image),
+              //     action: () async {
+              //       await settingsHandler.dbHandler.dropIndexes();
+              //       FlashElements.showSnackbar(
+              //         context: context,
+              //         title: Text(
+              //           "Indexes dropped!",
+              //           style: TextStyle(fontSize: 20)
+              //         ),
+              //         content: Text(
+              //           "An app restart may be required!",
+              //           style: TextStyle(fontSize: 16)
+              //         ),
+              //         leadingIcon: Icons.delete_forever,
+              //         leadingIconColor: Colors.red,
+              //         sideColor: Colors.yellow,
+              //       );
+              //     }
+              // ),
 
               SettingsButton(name: '', enabled: false),
               SettingsButton(

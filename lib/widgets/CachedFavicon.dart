@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart' as GET;
+import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
@@ -22,12 +20,14 @@ class CachedFavicon extends StatefulWidget {
 }
 
 class _CachedFaviconState extends State<CachedFavicon> {
-  final SettingsHandler settingsHandler = GET.Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   bool isFailed = false;
   CancelToken? _dioCancelToken;
   DioLoader? client;
   ImageProvider? faviconProvider;
+
+  DisposableBuildContext? disposableBuildContext;
 
   @override
   void didUpdateWidget(CachedFavicon oldWidget) {
@@ -77,6 +77,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
   @override
   void initState() {
     super.initState();
+    disposableBuildContext = DisposableBuildContext(this);
     downloadFavicon();
   }
 
@@ -102,6 +103,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
   @override
   void dispose() {
     disposables();
+    disposableBuildContext?.dispose();
     super.dispose();
   }
 
@@ -158,7 +160,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
             duration: Duration(milliseconds: 300),
             child: faviconProvider != null
               ? Image(
-                  image: faviconProvider!,
+                  image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: faviconProvider!),
                   width: iconSize,
                   height: iconSize,
                   errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {

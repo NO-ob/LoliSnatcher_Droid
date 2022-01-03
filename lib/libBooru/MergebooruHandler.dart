@@ -102,7 +102,7 @@ class MergebooruHandler extends BooruHandler{
   void setupMerge(List<Booru> boorus){
     innerLimit = (this.limit / boorus.length).ceil();
     booruList.addAll(boorus);
-    booruList.forEach((element) {
+    for (var element in booruList) {
       List factoryResults = BooruHandlerFactory().getBooruHandler([element], innerLimit);
       booruHandlers.add(factoryResults[0]);
       booruHandlerPageNums.add(factoryResults[1] + 1);
@@ -110,7 +110,7 @@ class MergebooruHandler extends BooruHandler{
       if (element.type == "GelbooruV1"){
         hasGelbooruV1 = true;
       }
-    });
+    }
   }
 
   @override

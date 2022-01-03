@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'dart:ui';
-
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ViewerHandler.dart';
-
-// import 'package:flutter/services.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget title;
@@ -16,6 +12,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   HideableAppBar(this.title, this.actions, this.autoHide);
 
   final double defaultHeight = kToolbarHeight; //56.0
+
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
   @override

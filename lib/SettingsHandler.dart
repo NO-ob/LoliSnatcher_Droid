@@ -25,6 +25,7 @@ import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 class SettingsHandler extends GetxController {
   ServiceHandler serviceHandler = ServiceHandler();
   DBHandler dbHandler = DBHandler();
+  DBHandler favDbHandler = DBHandler();
 
   // service vars
   RxBool isInit = false.obs;
@@ -36,6 +37,7 @@ class SettingsHandler extends GetxController {
   // TODO don't forget to update these on every new release
   // version vars
   String appName = "LoliSnatcher";
+  String packageName = "com.noaisu.loliSnatcher";
   String verStr = "2.0.0";
   int buildNumber = 163;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
@@ -45,15 +47,18 @@ class SettingsHandler extends GetxController {
   // runtime settings vars
   bool hasHydrus = false;
   bool mergeEnabled = false;
-  List<LogTypes> ignoreLogTypes = [];
+  List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
   RxBool showFPS = false.obs;
+  RxBool showPerf = false.obs;
   RxBool showImageStats = false.obs;
   RxBool isMemeTheme = false.obs;
   bool showURLOnThumb = false;
   bool disableImageScaling = false;
+  // disable isolates on debug builds, because they cause lags in emulator
+  bool disableImageIsolates = kDebugMode || false;
 
   ////////////////////////////////////////////////////
 
@@ -71,6 +76,7 @@ class SettingsHandler extends GetxController {
   String extPathOverride = "";
   String drawerMascotPathOverride = "";
   String zoomButtonPosition = "Right";
+  String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? "Right" : "Disabled";
   String lastSyncIp = '';
   String lastSyncPort = '';
 
@@ -207,6 +213,11 @@ class SettingsHandler extends GetxController {
       "default": "Right",
       "options": <String>["Disabled", "Left", "Right"],
     },
+    "changePageButtonsPosition": {
+      "type": "stringFromList",
+      "default": "Disabled",
+      "options": <String>["Disabled", "Left", "Right"],
+    },
 
     // string
     "deftags": {
@@ -293,6 +304,8 @@ class SettingsHandler extends GetxController {
       "upperLimit": 10,
       "lowerLimit": 0,
     },
+
+    // double
 
     // bool
     "jsonWrite": {
@@ -562,7 +575,7 @@ class SettingsHandler extends GetxController {
       }
     } catch(err) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err',"SettingsHandler","validateValue",LogTypes.settingsError);
+      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", LogTypes.settingsError);
       return settingParams["default"];
     }
   }
@@ -591,10 +604,11 @@ class SettingsHandler extends GetxController {
 
     if (dbEnabled) {
       await dbHandler.dbConnect(path);
+      await favDbHandler.dbConnectReadOnly(path);
     } else {
       dbHandler = DBHandler();
+      favDbHandler = DBHandler();
     }
-    ignoreLogTypes.addAll(LogTypes.values);
     return true;
   }
 
@@ -799,6 +813,8 @@ class SettingsHandler extends GetxController {
         return jsonWrite;
       case 'zoomButtonPosition':
         return zoomButtonPosition;
+      case 'changePageButtonsPosition':
+        return changePageButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
       case 'cacheDuration':
@@ -937,6 +953,9 @@ class SettingsHandler extends GetxController {
       case 'zoomButtonPosition':
         zoomButtonPosition = validatedValue;
         break;
+      case 'changePageButtonsPosition':
+        changePageButtonsPosition = validatedValue;
+        break;
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
@@ -1022,6 +1041,7 @@ class SettingsHandler extends GetxController {
       "shitDevice" : validateValue("shitDevice", null, toJSON: true),
       "galleryAutoScrollTime" : validateValue("galleryAutoScrollTime", null, toJSON: true),
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
+      "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
@@ -1403,12 +1423,26 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
-    // String fakeUpdate = '{"version_name": "2.0.0", "build_number": 999, "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}'; // fake update json for tests
+    const String changelog = r"""Changelog text here""";
+    Map<String, dynamic> fakeUpdate = {
+      "version_name": "2.1.0",
+      "build_number": 164,
+      "title": "Comments, Notes and Fixes",
+      "changelog": changelog,
+      "is_in_store": true, // is app still in store
+      "is_update_in_store": false, // is update approved in store
+      "is_important": false, // is update important => force open dialog on start
+      "store_package": "com.noaisu.play.loliSnatcher", // custom app package name, to allow to redirect store users to new app if it will be needed
+      "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
+    }; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
     try {
       final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/update.json'));
       final json = jsonDecode(response.body);
-      // final json = jsonDecode(fakeUpdate);
+      // final json = jsonDecode(jsonEncode(fakeUpdate));
+
+      // use this and fakeUpdate to generate json file
+      Logger.Inst().log(jsonEncode(json), 'SettingsHandler', 'checkUpdate', LogTypes.settingsError);
 
       updateInfo.value = UpdateInfo(
         versionName: json["version_name"] ?? '0.0.0',
@@ -1416,29 +1450,33 @@ class SettingsHandler extends GetxController {
         title: json["title"] ?? '...',
         changelog: json["changelog"] ?? '...',
         isInStore: json["is_in_store"] ?? false,
+        isUpdateInStore: json["is_update_in_store"] ?? false,
         isImportant: json["is_important"] ?? false,
         storePackage: json["store_package"] ?? '',
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
 
-      if(buildNumber < (updateInfo.value?.buildNumber ?? 0)) {
-        if((withMessage || updateInfo.value!.isImportant)) {
-          showUpdate();
+      if(buildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
+        if(EnvironmentConfig.isFromStore) { // installed from store
+          if(updateInfo.value!.isInStore) { // app is still in store
+            if(updateInfo.value!.isUpdateInStore) { // update is in store
+              showUpdate(withMessage || updateInfo.value!.isImportant);
+            } else { // update is not in store yet, show latest version message
+              showLastVersionMessage(withMessage);
+              updateInfo.value = null;
+            }
+          } else { // app was removed from store
+            // then always notify user so they can move to github version and get news about removal
+            showUpdate(true);
+          }
+        } else { // installed from github
+          showUpdate(withMessage || updateInfo.value!.isImportant);
         }
-      } else {
-        if(withMessage) {
-          FlashElements.showSnackbar(
-            title: Text(
-              "You already have the latest version!",
-              style: TextStyle(fontSize: 20)
-            ),
-            sideColor: Colors.green,
-            leadingIcon: Icons.update,
-            leadingIconColor: Colors.green,
-          );
-        }
+      } else { // otherwise show latest version message
+        showLastVersionMessage(withMessage);
         updateInfo.value = null;
       }
+
     } catch (e) {
       if(withMessage) {
         FlashElements.showSnackbar(
@@ -1457,8 +1495,22 @@ class SettingsHandler extends GetxController {
     }
   }
 
-  void showUpdate() {
-    if(updateInfo.value != null) {
+  void showLastVersionMessage(bool withMessage) {
+    if(withMessage) {
+      FlashElements.showSnackbar(
+        title: Text(
+          "You already have the latest version!",
+          style: TextStyle(fontSize: 20)
+        ),
+        sideColor: Colors.green,
+        leadingIcon: Icons.update,
+        leadingIconColor: Colors.green,
+      );
+    }
+  }
+
+  void showUpdate(bool withMessage) {
+    if(withMessage && updateInfo.value != null) {
       // TODO get from some external variable when building
       bool isFromStore = EnvironmentConfig.isFromStore;
 
@@ -1468,7 +1520,7 @@ class SettingsHandler extends GetxController {
           contentItems: [
             Text('Currently Installed: $verStr+$buildNumber'),
             Text(''),
-            Text('${updateInfo.value!.title}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(updateInfo.value!.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
             Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
@@ -1521,36 +1573,57 @@ class SettingsHandler extends GetxController {
   }
 
 
-  Future<void> initialize() async{
-    await getPerms();
-    await loadSettings();
+  Future<void> initialize() async {
+    try {
+      await getPerms();
+      await loadSettings();
 
-    if (booruList.isEmpty){
-      await loadBoorus();
+      if (booruList.isEmpty){
+        await loadBoorus();
+      }
+      if (allowSelfSignedCerts){
+        HttpOverrides.global = MyHttpOverrides();
+      }
+
+      if(Platform.isAndroid || Platform.isIOS) {
+        PackageInfo packageInfo = await PackageInfo.fromPlatform();
+        packageName = packageInfo.packageName;
+      }
+
+      // if(Platform.isAndroid || Platform.isIOS) {
+      //   // TODO on desktop flutter doesnt't use version data from pubspec
+      //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      //   appName = packageInfo.appName;
+      //   verStr = packageInfo.version;
+
+      //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
+      //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
+      //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
+      // }
+
+      print('isFromStore: ${EnvironmentConfig.isFromStore}');
+
+      // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
+      // print(toJSON());
+      // print(jsonEncode(toJSON()));
+
+      checkUpdate(withMessage: false);
+      isInit.value = true;
+    } catch (e) {
+      print(e);
+      FlashElements.showSnackbar(
+        title: Text(
+          "Initialization Error!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          e.toString()
+        ),
+        sideColor: Colors.red,
+        leadingIcon: Icons.error,
+        leadingIconColor: Colors.red,
+      );
     }
-    if (allowSelfSignedCerts){
-      HttpOverrides.global = MyHttpOverrides();
-    }
-
-    // if(Platform.isAndroid || Platform.isIOS) {
-    //   // TODO on desktop flutter doesnt't use version data from pubspec
-    //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    //   appName = packageInfo.appName;
-    //   verStr = packageInfo.version;
-
-    //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
-    //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
-    //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
-    // }
-
-    print('isFromStore: ${EnvironmentConfig.isFromStore}');
-
-    // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
-    // print(toJSON());
-    // print(jsonEncode(toJSON()));
-
-    checkUpdate(withMessage: false);
-    isInit.value = true;
     return;
   }
 }
@@ -1562,6 +1635,7 @@ class UpdateInfo {
   String title;
   String changelog;
   bool isInStore;
+  bool isUpdateInStore;
   bool isImportant;
   String storePackage;
   String githubURL;
@@ -1572,6 +1646,7 @@ class UpdateInfo {
     required this.title,
     required this.changelog,
     required this.isInStore,
+    required this.isUpdateInStore,
     required this.isImportant,
     required this.storePackage,
     required this.githubURL,

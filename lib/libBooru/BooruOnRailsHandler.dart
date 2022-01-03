@@ -29,7 +29,8 @@ class BooruOnRailsHandler extends BooruHandler {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     var posts = parsedResponse['search'];
     // Create a BooruItem for each post in the list
-    for (int i =0; i < posts.length; i++){
+    List<BooruItem> newItems = [];
+    for (int i =0; i < posts.length; i++) {
       var current = posts[i];
       Logger.Inst().log(current.toString(), "BooruOnRailsHandler", "parsedResponse", LogTypes.booruHandlerRawFetched);
       List<String> currentTags = current['tags'].split(", ");
@@ -51,7 +52,7 @@ class BooruOnRailsHandler extends BooruHandler {
           thumbURL = booru.baseURL! + thumbURL;
           fileURL = booru.baseURL! + fileURL;
         }
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           fileWidth: current['width'].toDouble(),
           fileHeight: current['height'].toDouble(),
@@ -65,12 +66,17 @@ class BooruOnRailsHandler extends BooruHandler {
           rating: currentTags[0][0],
           postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-        ));
-        setTrackedValues(fetched.length - 1);
+        );
+
+        newItems.add(item);
       } else {
         Logger.Inst().log("post $i skipped", "BooruOnRailsHandler", "parseResponse", LogTypes.booruHandlerInfo);
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
   // This will create a url for the http request

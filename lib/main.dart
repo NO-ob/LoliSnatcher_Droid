@@ -3,14 +3,16 @@ import 'dart:ui';
 import 'dart:io';
 
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:get/get.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:app_links/app_links.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
@@ -21,13 +23,21 @@ import 'package:LoliSnatcher/MobileHome.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
-
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+// import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if(Platform.isWindows || Platform.isLinux) {
+  if (Platform.isWindows || Platform.isLinux) {
     DartVLC.initialize();
+
+    // Init db stuff
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
   }
 
   runApp(MainApp());
@@ -50,28 +60,49 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
     settingsHandler = Get.put(SettingsHandler());
-    settingsHandler.initialize();
+    // settingsHandler.initialize();
     searchHandler = Get.put(SearchHandler(updateState));
     snatchHandler = Get.put(SnatchHandler());
     viewerHandler = Get.put(ViewerHandler());
 
-    if(Platform.isAndroid || Platform.isIOS) {
+    initHandlers();
+
+    if (Platform.isAndroid || Platform.isIOS) {
       var window = WidgetsBinding.instance!.window;
       window.onPlatformBrightnessChanged = () {
         // This callback is called every time the brightness changes and forces the app root to restate.
         // This allows to not use darkTheme to avoid coloring bugs on AppBars
         updateState();
       };
-
-      // enable higher fps
-      // TODO make this a setting?
-      FlutterDisplayMode.setHighRefreshRate();
-      getMaxFPS();
     }
+
+    setMaxFPS();
   }
 
-  void getMaxFPS() async {
-    print('display mode ${await FlutterDisplayMode.supported}');
+  void initHandlers() async {
+    await settingsHandler.initialize();
+    await searchHandler.restoreTabs();
+  }
+
+  void setMaxFPS() async {
+    // enable higher refresh rate
+    // TODO make this a setting?
+    // TODO make it work on ios, desktop?
+    // Currently there is no official support on these platforms, see:
+    // https://github.com/flutter/flutter/issues/49757
+    // https://github.com/flutter/flutter/issues/90675
+
+    if (Platform.isAndroid) {
+      await FlutterDisplayMode.setHighRefreshRate();
+      DisplayMode currentMode = await FlutterDisplayMode.active;
+
+      if (currentMode.refreshRate > maxFps) {
+        maxFps = currentMode.refreshRate.round();
+        updateState();
+      }
+      debugPrint('LoliSnatcher: Set Max FPS $maxFps');
+      // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
+    }
   }
 
   @override
@@ -81,19 +112,15 @@ class _MainAppState extends State<MainApp> {
   }
 
   void updateState() {
-    setState(() { });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
-        ? ThemeItem(
-          name: 'Custom',
-          primary: settingsHandler.customPrimaryColor.value,
-          accent: settingsHandler.customAccentColor.value
-        )
-        : settingsHandler.theme.value;
+          ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
+          : settingsHandler.theme.value;
       ThemeMode themeMode = settingsHandler.themeMode.value;
       Brightness? platformBrightness = SchedulerBinding.instance?.window.platformBrightness;
       bool isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrightness == Brightness.dark);
@@ -159,7 +186,7 @@ class _MainAppState extends State<MainApp> {
           child: GetMaterialApp(
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
-            showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showFPS.value,
+            showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
             scrollBehavior: CustomScrollBehavior(),
             theme: ThemeData(
               scaffoldBackgroundColor: (isDark && isAmoled) ? Colors.black : null,
@@ -205,8 +232,8 @@ class _MainAppState extends State<MainApp> {
             themeMode: themeMode,
             navigatorKey: Get.key,
             home: Preloader(),
-          )
-        )
+          ),
+        ),
       );
     });
   }
@@ -214,25 +241,24 @@ class _MainAppState extends State<MainApp> {
 
 // Added a preloader to load booruconfigs and settings other wise the booruselector misbehaves
 class Preloader extends StatelessWidget {
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if(settingsHandler.isInit.value) {        
-        if(Platform.isAndroid || Platform.isIOS) {
+      if (settingsHandler.isInit.value) {
+        if (Platform.isAndroid || Platform.isIOS) {
           // set system ui mode
-          if(settingsHandler.showStatusBar) {
+          if (settingsHandler.showStatusBar) {
             SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
             // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
           } else {
-            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
             SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
           }
 
           // force landscape orientation if enabled desktop mode on mobile device
-          if(settingsHandler.appMode != "Mobile") {
+          if (settingsHandler.appMode != "Mobile") {
             SystemChrome.setPreferredOrientations([
               DeviceOrientation.landscapeRight,
               DeviceOrientation.landscapeLeft,
@@ -244,16 +270,14 @@ class Preloader extends StatelessWidget {
 
         return Home();
       } else {
-        // settingsHandler.initialize();
-
         // no custom theme data here yet, fallback to black bg + pink loading spinner
         return Container(
           color: Colors.black,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.pink)
-            )
-          )
+              valueColor: AlwaysStoppedAnimation(Colors.pink),
+            ),
+          ),
         );
       }
     });
@@ -266,11 +290,9 @@ class Home extends StatefulWidget {
   Home();
 }
 
-
 class _HomeState extends State<Home> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   Timer? cacheClearTimer;
   Timer? cacheStaleTimer;
@@ -280,10 +302,15 @@ class _HomeState extends State<Home> {
   Timer? memeTimer;
   ThemeItem? selectedTheme;
 
+  late AppLinks appLinks;
+
   @override
   void initState() {
     super.initState();
-    searchHandler.restoreTabs();
+
+    initDeepLinks();
+
+    // searchHandler.restoreTabs();
 
     // force cache clear every minute + perform tabs backup
     cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
@@ -303,7 +330,7 @@ class _HomeState extends State<Home> {
     });
 
     // memeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-    //   if(settingsHandler.isMemeTheme.value) { 
+    //   if(settingsHandler.isMemeTheme.value) {
     //     if(memeCount + 1 < settingsHandler.map['theme']?['options'].length) {
     //       memeCount ++;
     //     } else {
@@ -322,6 +349,38 @@ class _HomeState extends State<Home> {
     // });
   }
 
+  void initDeepLinks() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      appLinks = AppLinks(
+        onAppLink: (Uri uri, String stringUri) {
+          openAppLink(stringUri);
+        },
+      );
+
+      // check if there is a link on start
+      final appLink = await appLinks.getInitialAppLink();
+      if (appLink != null) {
+        openAppLink(appLink.toString());
+      }
+    }
+  }
+
+  void openAppLink(String url) async {
+    Logger.Inst().log(url, "AppLinks", "openAppLink", LogTypes.settingsLoad);
+    // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
+
+    if (url.contains('loli.snatcher')) {
+      Booru booru = Booru.fromLink(url);
+      if (booru.name != null && booru.name!.isNotEmpty) {
+        if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
+          // Rename config if its already in the list
+          booru.name = booru.name! + ' (duplicate)';
+        }
+        SettingsPageOpen(context: context, page: () => BooruEdit(booru));
+      }
+    }
+  }
+
   @override
   void dispose() {
     cacheClearTimer?.cancel();
@@ -332,22 +391,20 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    if(settingsHandler.appMode != "Mobile"){
+    if (settingsHandler.appMode != "Mobile") {
       return DesktopHome();
     } else {
       return MobileHome();
     }
   }
-
 }
-
 
 class CustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
-  Set<PointerDeviceKind> get dragDevices => { 
-    ...PointerDeviceKind.values
-    // PointerDeviceKind.touch,
-    // PointerDeviceKind.mouse,
-  };
+  Set<PointerDeviceKind> get dragDevices => {
+        ...PointerDeviceKind.values
+        // PointerDeviceKind.touch,
+        // PointerDeviceKind.mouse,
+      };
 }

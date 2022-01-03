@@ -22,9 +22,9 @@ class SnatcherPage extends StatefulWidget {
 }
 
 class _SnatcherPageState extends State<SnatcherPage> {
-  final SearchHandler searchHandler = Get.find();
-  final SettingsHandler settingsHandler = Get.find();
-  final SnatchHandler snatchHandler = Get.find();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   final snatcherTagsController = TextEditingController();
   final snatcherAmountController = TextEditingController();
@@ -38,6 +38,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     getPerms();
     //If the user has searched tags on the main window they will be loaded into the tags field
     snatcherTagsController.text = searchHandler.currentTab.tags;
+    snatcherAmountController.text = 10.toString();
     selectedBooru = searchHandler.currentTab.selectedBooru.value;
     snatcherSleepController.text = settingsHandler.snatchCooldown.toString();
   }
@@ -57,6 +58,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
               title: 'Tags',
               hintText: "Enter Tags",
               inputType: TextInputType.text,
+              clearable: true,
             ),
             SettingsTextInput(
               controller: snatcherAmountController,
@@ -66,6 +68,11 @@ class _SnatcherPageState extends State<SnatcherPage> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.digitsOnly
               ],
+              resetText: () => 10.toString(),
+              numberButtons: true,
+              numberStep: 10,
+              numberMin: 10,
+              numberMax: double.infinity,
             ),
             SettingsTextInput(
               controller: snatcherSleepController,
@@ -75,6 +82,11 @@ class _SnatcherPageState extends State<SnatcherPage> {
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.digitsOnly
               ],
+              resetText: () => settingsHandler.snatchCooldown.toString(),
+              numberButtons: true,
+              numberStep: 50,
+              numberMin: 100,
+              numberMax: double.infinity,
             ),
             SettingsBooruDropdown(
               selected: selectedBooru,

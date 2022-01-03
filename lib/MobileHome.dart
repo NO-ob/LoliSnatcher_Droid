@@ -10,27 +10,20 @@ import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/pages/SettingsPage.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/pages/SnatcherPage.dart';
-import 'package:LoliSnatcher/getPerms.dart';
-import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/MascotImage.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/MainAppbar.dart';
 
-class MobileHome extends StatefulWidget {
-  @override
-  _MobileHomeState createState() => _MobileHomeState();
-  MobileHome();
-}
-
-class _MobileHomeState extends State<MobileHome> {
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+class MobileHome extends StatelessWidget {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
+
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();  
+  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
 
   void _toggleDrawer(InnerDrawerDirection direction) {
     mainDrawerKey.currentState?.toggle(
@@ -40,7 +33,7 @@ class _MobileHomeState extends State<MobileHome> {
     );
   }
 
-  Future<bool> _onBackPressed() async {
+  Future<bool> _onBackPressed(BuildContext context) async {
     final shouldPop = await showDialog(
       context: context,
       builder: (context) {
@@ -68,6 +61,27 @@ class _MobileHomeState extends State<MobileHome> {
     return shouldPop ?? false; //shouldPop != null ? true : false;
   }
 
+  Widget menuButton(InnerDrawerDirection direction) {
+    return GestureDetector(
+      onLongPress: () {
+        ServiceHandler.vibrate();
+        // scroll to start on long press of menu buttons
+        searchHandler.gridScrollController.jumpTo(0);
+      },
+      child: IconButton(
+        icon: Icon(Icons.menu),
+        onPressed: () {
+          _toggleDrawer(direction);
+
+          // if(mainScaffoldKey.currentState?.isEndDrawerOpen == true) {
+          // } else {
+          //   mainScaffoldKey.currentState?.openEndDrawer();
+          // }
+        }
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('!!! main build !!!');
@@ -75,93 +89,20 @@ class _MobileHomeState extends State<MobileHome> {
     Widget scaff = Scaffold(
       key: mainScaffoldKey,
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: ActiveTitle(),
-        leading: IconButton(
-          icon: Icon(Icons.menu),
-          onPressed: () {
-            _toggleDrawer(InnerDrawerDirection.start);
-          }
-        ),
-        actions: <Widget>[
-          Obx(() {
-            if(searchHandler.list.isNotEmpty) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.save),
-                    onPressed: () {
-                      getPerms();
-                      // call a function to save the currently viewed image when the save button is pressed
-                      if (searchHandler.currentTab.selected.length > 0){
-                        snatchHandler.queue(
-                          searchHandler.currentTab.getSelected(),
-                          searchHandler.currentTab.selectedBooru.value,
-                          settingsHandler.snatchCooldown
-                        );
-                        searchHandler.currentTab.selected.value = [];
-                      } else {
-                        FlashElements.showSnackbar(
-                          context: context,
-                          title: Text(
-                            "No items selected",
-                            style: TextStyle(fontSize: 20)
-                          ),
-                          overrideLeadingIconWidget: Text(
-                            " (」°ロ°)」 ",
-                            style: TextStyle(fontSize: 18)
-                          ),
-                        );
-                      }
-                    },
-                  ),
-
-                  if(searchHandler.currentTab.selected.isNotEmpty)
-                    Positioned(
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.secondary,
-                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Center(
-                          child: FittedBox(
-                            child: Text(
-                              '${searchHandler.currentTab.selected.length}',
-                              style: TextStyle(color: Get.theme.colorScheme.onSecondary)
-                            ),
-                          )
-                        )
-                      ),
-                      right: 2,
-                      bottom: 5,
-                    ),
-                ]
-              );
-            } else {
-              return const SizedBox.shrink();
-            }
-          }),
-
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              // if(mainScaffoldKey.currentState?.isEndDrawerOpen == true) {
-              // } else {
-              //   mainScaffoldKey.currentState?.openEndDrawer();
-              // }
-              _toggleDrawer(InnerDrawerDirection.end);
-            },
+      // appBar: MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
+      extendBodyBehindAppBar: true,
+      body: SafeArea(
+        child: WillPopScope(
+          onWillPop: () {
+            return _onBackPressed(context);
+          },
+          child: Stack(
+            children: [
+              ImagePreviews(),
+              MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
+            ],
           )
-        ],
-      ),
-      body: WillPopScope(
-        onWillPop: _onBackPressed,
-        child: ImagePreviews(),
+        ),
       ),
       // Old drawer stuff:
       // drawer: MainDrawer(key: mainDrawerKey),
@@ -171,62 +112,52 @@ class _MobileHomeState extends State<MobileHome> {
       // drawerEdgeDragWidth: MediaQuery.of(context).size.width / 2, // allows to detect horizontal swipes on the whole screen => open drawer by swiping right-to-left
     );
 
-    return NotificationListener(
-      onNotification: (SizeChangedLayoutNotification notification) {
-        // WidgetsBinding.instance!.addPostFrameCallback((_) {
-        //   // Do something when screen size changes
-        //   setState(() { });
-        //   searchHandler.rootRestate();
-        // });
-        
-        return true;
-      },
-      child: OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
-          return InnerDrawer(
-            key: mainDrawerKey,
-            onTapClose: true,
-            swipe: true,
-            swipeChild: true,
-            
-            //When setting the vertical offset, be sure to use only top or bottom
-            offset: IDOffset.only(
-              bottom: 0.0,
-              right: orientation == Orientation.landscape ? 0 : 0.5,
-              left: orientation == Orientation.landscape ? 0 : 0.5
-            ),
-            scale: IDOffset.horizontal(1),
-            
-            proportionalChildArea: true,
-            borderRadius: 10,
-            leftAnimationType: InnerDrawerAnimation.quadratic,
-            rightAnimationType: InnerDrawerAnimation.quadratic,
-            backgroundDecoration: BoxDecoration(color: Get.theme.colorScheme.background),
-            
-            //when a pointer that is in contact with the screen and moves to the right or left
-            onDragUpdate: (double val, InnerDrawerDirection? direction) {
-                // return values between 1 and 0
-                // print(val);
-                // check if the swipe is to the right or to the left
-                // print(direction==InnerDrawerDirection.start);
-            },
+    return OrientationBuilder(
+      builder: (BuildContext context, Orientation orientation) {
+        return InnerDrawer(
+          key: mainDrawerKey,
+          onTapClose: true,
+          swipe: true,
+          swipeChild: true,
+          
+          //When setting the vertical offset, be sure to use only top or bottom
+          offset: IDOffset.only(
+            bottom: 0.0,
+            right: orientation == Orientation.landscape ? 0 : 0.5,
+            left: orientation == Orientation.landscape ? 0 : 0.5,
+          ),
+          scale: IDOffset.horizontal(1),
+          
+          proportionalChildArea: true,
+          borderRadius: 10,
+          leftAnimationType: InnerDrawerAnimation.quadratic,
+          rightAnimationType: InnerDrawerAnimation.quadratic,
+          backgroundDecoration: BoxDecoration(color: Get.theme.colorScheme.background),
+          
+          //when a pointer that is in contact with the screen and moves to the right or left
+          onDragUpdate: (double val, InnerDrawerDirection? direction) {
+              // return values between 1 and 0
+              // print(val);
+              // check if the swipe is to the right or to the left
+              // print(direction==InnerDrawerDirection.start);
+          },
 
-            innerDrawerCallback: (isOpen) {
-              if(!isOpen) {
-                if(searchHandler.searchBoxFocus.hasFocus) {
-                  searchHandler.searchBoxFocus.unfocus();
-                }
+          innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
+            // print('$isOpen $direction');
+            if(!isOpen) {
+              if(searchHandler.searchBoxFocus.hasFocus) {
+                searchHandler.searchBoxFocus.unfocus();
               }
-            }, // return  true (open) or false (close)
+            }
+          }, // return  true (open) or false (close)
 
-            leftChild: MainDrawer(),
-            rightChild: MainDrawer(),
-            
-            // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
-            scaffold: scaff,
-          );
-        }
-      )
+          leftChild: MainDrawer(),
+          rightChild: MainDrawer(),
+          
+          // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
+          scaffold: scaff,
+        );
+      }
     );
   }
 }
@@ -254,7 +185,7 @@ class _MainDrawerState extends State<MainDrawer> {
             Obx(() {
               if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                 return Container(
-                  margin: EdgeInsets.fromLTRB(5, 30, 5, 15),
+                  margin: EdgeInsets.fromLTRB(2, 15, 2, 15),
                   width: double.infinity,
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
@@ -279,6 +210,7 @@ class _MainDrawerState extends State<MainDrawer> {
                   }
                 },
                 child: ListView(
+                  controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
                   children: [
                     // TODO tabbox and booruselector cause lag when opening a drawer
                     TabBox(),
@@ -359,7 +291,7 @@ class _MainDrawerState extends State<MainDrawer> {
                             ]
                           ),
                           action: () async {
-                            settingsHandler.showUpdate();
+                            settingsHandler.showUpdate(true);
                           },
                         );
                       } else {
@@ -376,7 +308,7 @@ class _MainDrawerState extends State<MainDrawer> {
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }

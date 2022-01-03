@@ -7,12 +7,16 @@ import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
 
+// TODO no setTrackedValues?
+
 /**
  * Booru Handler for the gelbooru engine
  */
 class AGNPHHandler extends BooruHandler{
   @override
   bool tagSearchEnabled = false;
+
+  @override
   bool hasSizeData = true;
   // Dart constructors are weird so it has to call super with the args
   AGNPHHandler(Booru booru, int limit) : super(booru, limit);
@@ -21,7 +25,8 @@ class AGNPHHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
-  Future Search(String tags, int? pageNumCustom) async{
+  @override
+  Future Search(String tags, int? pageNumCustom) async {
     tags = validateTags(tags);
     if (prevTags != tags){
       fetched.value = [];
@@ -40,15 +45,17 @@ class AGNPHHandler extends BooruHandler{
           locked.value = true;
         }
         prevTags = tags;
-        return fetched;
       } else {
         Logger.Inst().log("AGNPHHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("AGNPHHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        errorString.value = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "AGNPHHandler", "Search", LogTypes.exception);
-      return fetched;
+      errorString.value = e.toString();
     }
+
+    return fetched;
   }
 
   // Slow af I have emailed the site admin to ask them to change their api.
@@ -74,7 +81,7 @@ class AGNPHHandler extends BooruHandler{
           if (sampleURL.isEmpty){
             sampleURL = fileURL;
           }
-          BooruItem result = new BooruItem(
+          BooruItem result = BooruItem(
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: thumbnailURL,
@@ -115,7 +122,7 @@ class AGNPHHandler extends BooruHandler{
       }
       String postID = posts.elementAt(i).getElement("id")?.innerText ?? "";
       if (postID.isNotEmpty){
-        BooruItem item = new BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
           thumbnailURL: thumbnailURL,
@@ -175,11 +182,13 @@ class AGNPHHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/post/show/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     String tagStr = tags.replaceAll("artist:", "").replaceAll(" ", "+");
     //https://agn.ph/gallery/post/?search=sylveon&api=xml
@@ -187,6 +196,7 @@ class AGNPHHandler extends BooruHandler{
 
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/gallery/tags/?sort=name&order=asc&search=$input&api=xml";
   }

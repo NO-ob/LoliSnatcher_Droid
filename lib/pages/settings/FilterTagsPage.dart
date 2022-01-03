@@ -15,7 +15,7 @@ class FiltersEdit extends StatefulWidget {
 }
 
 class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStateMixin {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final TextEditingController newTagController = TextEditingController();
   late TabController tabController;
 
@@ -30,11 +30,18 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     lovedList = settingsHandler.lovedTags;
     filterHated = settingsHandler.filterHated;
 
-    tabController = TabController(vsync: this, length: 2);
+    tabController = TabController(vsync: this, length: 3)..addListener(updateState);
+  }
+
+  void updateState() {
+    if(this.mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    tabController.removeListener(updateState);
     tabController.dispose();
     super.dispose();
   }
@@ -43,7 +50,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -67,39 +74,48 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 text: 'Loved ${lovedList.isNotEmpty ? '(${lovedList.length})' : ''}'.trim(),
                 icon: Icon(Icons.star, color: Colors.yellow),
               ),
+              Tab(
+                text: 'Settings',
+                icon: Icon(Icons.settings),
+              ),
             ],
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Widget entryRow = getEntryRow('[Add new ${tabController.index == 0 ? 'Hated' : 'Loved'}]', Icon(Icons.add));
-            newTagController.text = '';
-            showFilterEntryActions(entryRow, '', -1, tabController.index == 0 ? 'Hated' : 'Loved');
-          },
-          child: Icon(Icons.add),
-        ),
+        floatingActionButton: tabController.index < 2
+          ? FloatingActionButton(
+            onPressed: () {
+              openAddNewDialog();
+            },
+            child: Icon(Icons.add),
+          )
+          : null,
         body: TabBarView(
           controller: tabController,
           children: [
-            ListView(children: [
-              SettingsToggle(
-                title: "Remove Items with Hated Tags",
-                value: filterHated,
-                onChanged: (bool newValue) {
-                  setState(() {
+            editableTagsList('Hated'),
+            editableTagsList('Loved'),
+            ListView(
+              children: [
+                SettingsToggle(
+                  title: "Remove Items with Hated Tags",
+                  value: filterHated,
+                  onChanged: (bool newValue) {
                     filterHated = newValue;
-                  });
-                },
-              ),
-              editableTagsList('Hated'),
-            ]),
-            ListView(children: [
-              editableTagsList('Loved')
-            ]),
+                    updateState();
+                  },
+                ),
+              ]
+            )
           ],
         ),
       )
     );
+  }
+
+  void openAddNewDialog() {
+    Widget entryRow = getEntryRow('[Add new ${tabController.index == 0 ? 'Hated' : 'Loved'}]', Icon(Icons.add));
+    newTagController.text = '';
+    showFilterEntryActions(entryRow, '', -1, tabController.index == 0 ? 'Hated' : 'Loved');
   }
 
   Widget getEntryRow(String text, Widget icon) {
@@ -125,74 +141,69 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     List<String> tagsList = getTagsList(type);
 
     if(tagsList.isEmpty) {
-      return const SizedBox();
+      return SettingsButton(
+        name: 'No items',
+        action: () {
+          openAddNewDialog();
+        }
+      );
     }
 
-    return Column(children: [
-      const SizedBox(height: 10),
-      ClipRRect(
-        borderRadius: BorderRadius.circular(5),
-        child: Container(
-          child: Material(
-            color: Get.theme.dialogBackgroundColor.withOpacity(0.5),
-            child: ListView.builder(
-              padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-              shrinkWrap: true,
-              itemCount: tagsList.length,
-              scrollDirection: Axis.vertical,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) {
-                String currentEntry = tagsList[index];
-                Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(5),
+      child: ListView.builder(
+        padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+        shrinkWrap: false,
+        itemCount: tagsList.length,
+        scrollDirection: Axis.vertical,
+        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+        itemBuilder: (BuildContext context, int index) {
+          String currentEntry = tagsList[index];
+          Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));
 
-                return Row(children: <Widget>[
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        newTagController.text = currentEntry;
-                        showFilterEntryActions(entryRow, currentEntry, index, type);
-                      },
-                      child: entryRow
-                    )
-                  ),
-                ]);
-              }
-            )
-          )
-        )
-      )
-    ]);
+          return Row(children: <Widget>[
+            Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  newTagController.text = currentEntry;
+                  showFilterEntryActions(entryRow, currentEntry, index, type);
+                },
+                child: entryRow
+              )
+            ),
+          ]);
+        }
+      ),
+    );
   }
 
   void addTag(String tag, String type) {
     List<String> changedList = getTagsList(type);
-    setState(() {
-      if(changedList.contains(tag)) {
-        FlashElements.showSnackbar(
-          context: context,
-          title: Text(
-            "Duplicate tag!",
-            style: TextStyle(fontSize: 20)
-          ),
-          content: Text(
-            "'$tag' is already in $type list",
-            style: TextStyle(fontSize: 16)
-          ),
-          leadingIcon: Icons.warning_amber,
-          leadingIconColor: Colors.yellow,
-          sideColor: Colors.yellow,
-        );
-      } else {
-        changedList.add(tag);
-      }
-    });
+    if(changedList.contains(tag)) {
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          "Duplicate tag!",
+          style: TextStyle(fontSize: 20)
+        ),
+        content: Text(
+          "'$tag' is already in $type list",
+          style: TextStyle(fontSize: 16)
+        ),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.yellow,
+        sideColor: Colors.yellow,
+      );
+    } else {
+      changedList.add(tag);
+      updateState();
+    }
   }
 
   void editTag(String newTag, int index, String type) {
     List<String> changedList = getTagsList(type);
-    setState(() {
-      changedList[index] = newTag;
-    });
+    changedList[index] = newTag;
+    updateState();
   }
 
   List<String> getTagsList(type) {
@@ -228,6 +239,8 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 controller: newTagController,
                 autofocus: isAddButton ? true : false,
                 inputType: TextInputType.text,
+                clearable: true,
+                resetText: isAddButton ? null : () => tag,
                 onSubmitted: (String text) {
                   if(text.trim() != '') {
                     isAddButton
@@ -293,13 +306,12 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                     side: BorderSide(color: Get.theme.colorScheme.secondary),
                   ),
                   onTap: () async {
-                    setState(() {
-                      if(type == 'Hated') {
-                        hatedList = tagsList.where((t) => t != tag).toList();
-                      } else if(type == 'Loved') {
-                        lovedList = tagsList.where((t) => t != tag).toList();
-                      }
-                    });
+                    if(type == 'Hated') {
+                      hatedList = tagsList.where((t) => t != tag).toList();
+                    } else if(type == 'Loved') {
+                      lovedList = tagsList.where((t) => t != tag).toList();
+                    }
+                    updateState();
                     Navigator.of(context).pop(true);
                   },
                   leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),

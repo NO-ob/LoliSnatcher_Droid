@@ -5,11 +5,11 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 
+import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
@@ -35,13 +35,16 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  Player? _videoController;
+  Player? videoController;
   Media? media;
 
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _lastViewedIndex = -1;
-  bool isFromCache = false, isStopped = false, firstViewFix = false, isZoomed = false, isLoaded = false;
+  int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
+  bool isFromCache = false, isStopped = false, firstViewFix = false, isViewed = false, isZoomed = false, isLoaded = false;
   List<String> stopReason = [];
+
+  StreamSubscription? indexListener;
 
   CancelToken? _dioCancelToken;
   DioLoader? client;
@@ -82,6 +85,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     if(!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
       initPlayer();
+      getSize();
       return;
     }
     switch (settingsHandler.videoCacheMode) {
@@ -99,6 +103,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       default:
         // Only stream, notice the return
         initPlayer();
+        getSize();
         return;
     }
 
@@ -113,7 +118,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       onDoneFile: (File file, String url) {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if(_videoController == null && !isLoaded) {
+        if(videoController == null && !isLoaded) {
           initPlayer();
           updateState();
         }
@@ -122,8 +127,43 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       cacheFolder: 'media',
     );
     // client!.runRequest();
-    client!.runRequestIsolate();
+    if(settingsHandler.disableImageIsolates) {
+      client!.runRequest();
+    } else {
+      client!.runRequestIsolate();
+    }
     return;
+  }
+
+  Future<void> getSize() async {
+    _dioCancelToken = CancelToken();
+    client = DioLoader(
+      widget.booruItem.fileURL,
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      cancelToken: _dioCancelToken,
+      onEvent: _onEvent,
+    );
+    client!.runRequestSize();
+    return;
+  }
+
+  void onSize(int size) {
+    // TODO find a way to stop loading based on size when caching is enabled
+    final int maxSize = 1024 * 1024 * 200;
+    // print('onSize: $size $maxSize ${size > maxSize}');
+    if(size == 0) {
+      killLoading(['File is zero bytes']);
+    } else if ((size > maxSize) && isTooBig != 2) {
+      // TODO add check if resolution is too big
+      isTooBig = 1;
+      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+    }
+
+    if (size > 0 && widget.booruItem.fileSize == null) {
+      // set item file size if it wasn't received from api
+      widget.booruItem.fileSize = size;
+      // if(isAllowedToRestate) updateState();
+    }
   }
 
   void _onBytesAdded(int received, int total) {
@@ -131,17 +171,16 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
     _received.value = received;
     _total.value = total;
-    if (total > 0 && widget.booruItem.fileSize == null) {
-      // set item file size if it wasn't received from api
-      widget.booruItem.fileSize = total;
-      // if(isAllowedToRestate) updateState();
-    }
+    onSize(total);
   }
 
-  void _onEvent(String event) {
+  void _onEvent(String event, dynamic data) {
     switch (event) {
       case 'loaded':
         // 
+        break;
+      case 'size':
+        onSize(data);
         break;
       case 'isFromCache':
         isFromCache = true;
@@ -168,6 +207,29 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   void initState() {
     super.initState();
     viewerHandler.addViewed(widget.key);
+
+    isViewed = settingsHandler.appMode == 'Mobile'
+      ? searchHandler.viewedIndex.value == widget.index
+      : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    indexListener = searchHandler.viewedIndex.listen((int value) {
+      final bool prevViewed = isViewed;
+      final bool isCurrentIndex = value == widget.index;
+      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+      if (settingsHandler.appMode == 'Mobile' ? isCurrentIndex : isCurrentItem) {
+        isViewed = true;
+      } else {
+        isViewed = false;
+      }
+
+      if (prevViewed != isViewed) {
+        if (!isViewed) {
+          // reset zoom if not viewed
+          resetZoom();
+        }
+        updateState();
+      }
+    });
+
     initVideo(false);
   }
 
@@ -178,7 +240,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   void initVideo(ignoreTagsCheck) {
-    // viewController..outputStateStream.listen(onViewStateChanged);
+    viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
@@ -214,6 +276,10 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   @override
   void dispose() {
     disposables();
+
+    indexListener?.cancel();
+    indexListener = null;
+
     viewerHandler.removeViewed(widget.key);
     super.dispose();
   }
@@ -224,10 +290,10 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   void disposables() {
-    // _videoController?.setVolume(0);
-    _videoController?.pause();
-    _videoController?.dispose();
-    _videoController = null;
+    // videoController?.setVolume(0);
+    videoController?.pause();
+    videoController?.dispose();
+    videoController = null;
 
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
@@ -246,6 +312,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
+    viewerHandler.setViewState(widget.key, viewState);
   }
 
   void resetZoom() {
@@ -291,7 +358,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
     isLoaded = true;
 
-    _videoController!.open(
+    videoController!.open(
       media!,
       autoStart: settingsHandler.autoPlayEnabled,
     );
@@ -316,27 +383,27 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
     isLoaded = true;
 
-    _videoController = Player(id: widget.index);
-    _videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
-    _videoController!.setVolume(viewerHandler.videoVolume);
-    // _videoController!.open(
+    videoController = Player(id: widget.index);
+    videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
+    videoController!.setVolume(viewerHandler.videoVolume);
+    // videoController!.open(
     //   media!,
     //   autoStart: settingsHandler.autoPlayEnabled,
     // );
 
-    _videoController!.playbackStream.listen((PlaybackState state) {
+    videoController!.playbackStream.listen((PlaybackState state) {
       // dart_vlc has loop logic integrated into playlists, but it is not working?
       // this will force restart videos on completion
 
       if(state.isPlaying) {
         if(state.isCompleted) {
-          _videoController!.play();
+          videoController!.play();
         }
       }
     });
 
     
-    _videoController!.generalStream.listen((GeneralState state) {
+    videoController!.generalStream.listen((GeneralState state) {
       viewerHandler.videoVolume = state.volume;
     });
 
@@ -346,31 +413,23 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   @override
   Widget build(BuildContext context) {
-    int viewedIndex = widget.searchGlobal.viewedIndex.value;
-    final bool isViewed = settingsHandler.appMode == 'Mobile'
-      ? viewedIndex == widget.index
-      : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
-    bool initialized = isLoaded; // _videoController != null;
+    // print('!!! Build video desktop ${widget.index}!!!');
+    
+    bool initialized = isLoaded; // videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
+    int viewedIndex = searchHandler.viewedIndex.value;
     bool needsRestart = _lastViewedIndex != viewedIndex;
-
-    if (!isViewed) {
-      // reset zoom if not viewed
-      resetZoom();
-    } else {
-      viewerHandler.setCurrent(widget.key);
-    }
 
     if (initialized) {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          _videoController!.seek(Duration.zero);
+          videoController!.seek(Duration.zero);
         }
 
         if(!firstViewFix) {
-          _videoController!.open(
+          videoController!.open(
             media!,
             autoStart: settingsHandler.autoPlayEnabled,
           );
@@ -380,24 +439,22 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
         // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-            _videoController!.play();
+            videoController!.play();
         } else {
-          _videoController!.pause();
+          videoController!.pause();
         }
 
         if (viewerHandler.videoAutoMute) {
-          _videoController!.setVolume(0);
+          videoController!.setVolume(0);
         }
       } else {
-        _videoController!.pause();
+        videoController!.pause();
       }
     }
 
     if(needsRestart) {
       _lastViewedIndex = viewedIndex;
     }
-
-    // print('!!! Build video desktop !!!');
 
     // TODO move controls outside, to exclude them from zoom
 
@@ -418,6 +475,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
                 hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
                 isFromCache: isFromCache,
                 isDone: initialized && firstViewFix,
+                isTooBig: isTooBig > 0,
                 isStopped: isStopped,
                 stopReasons: stopReason,
                 isViewed: isViewed,
@@ -425,6 +483,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
                 received: _received,
                 startedAt: _startedAt,
                 startAction: () {
+                  if(isTooBig == 1) {
+                    isTooBig = 2;
+                  }
                   initVideo(true);
                   updateState();
                 },
@@ -435,7 +496,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
               if(isViewed && initialized)
                 Video(
-                  player: _videoController,
+                  player: videoController,
                   scale: 1.0,
                   showControls: true,
                   progressBarInactiveColor: Colors.grey,

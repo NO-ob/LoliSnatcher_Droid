@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_flutter LANGUAGES CXX)
+project(lolisnatcher LANGUAGES CXX)
 
-set(BINARY_NAME "test_flutter")
+set(BINARY_NAME "lolisnatcher")
 
 cmake_policy(SET CMP0063 NEW)
 

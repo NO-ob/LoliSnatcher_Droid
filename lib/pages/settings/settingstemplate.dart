@@ -11,7 +11,7 @@ class SettingsTemplate extends StatefulWidget {
 }
 
 class _SettingsTemplateState extends State<SettingsTemplate> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   @override
   void initState(){
@@ -20,7 +20,7 @@ class _SettingsTemplateState extends State<SettingsTemplate> {
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     // Set settingshandler values here
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 

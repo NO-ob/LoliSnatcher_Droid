@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:LoliSnatcher/widgets/ChangePageButtons.dart';
+import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,7 +11,6 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:vibration/vibration.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
@@ -28,9 +29,9 @@ import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
 import 'package:LoliSnatcher/widgets/TagView.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/ZoomButton.dart';
+import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
@@ -60,13 +61,70 @@ class _ViewerPageState extends State<ViewerPage> {
   Timer? autoScrollTimer;
   TimedProgressController? autoScrollProgressController;
 
-  PreloadPageController? controller;
-  PageController? controllerLinux;
+  late PreloadPageController controller;
   ImageWriter imageWriter = ImageWriter();
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
+  ///////////////////// TODO Experiment with new gesture - tap on the sides to change pages
+  ///////////////////// Didn't work since it felt unstable and conflicted with other gestures (video double tap, zoom...)
+  /// Wrap androidBuilder with this
+  // Listener(
+  //       onPointerDown: (opm) {
+  //         savePointerPosition(opm.pointer, opm.position);
+  //       },
+  //       // onPointerMove: (opm) {
+  //       //   savePointerPosition(opm.pointer, opm.position);
+  //       // },
+  //       onPointerCancel: (opc) {
+  //         clearPointerPosition(opc.pointer, opc.position);
+  //       },
+  //       onPointerUp: (opc) {
+  //         clearPointerPosition(opc.pointer, opc.position);
+  //       },
+  // );
+  // Map<int, Offset> touchPositions = <int, Offset>{};
+
+  // void savePointerPosition(int index, Offset position) {
+  //   touchPositions[index] = position;
+  // }
+
+  // void clearPointerPosition(int index, Offset position) {
+  //   Map<int, Offset> before = new Map.from(touchPositions);
+  //   touchPositions.remove(index);
+  //   actionCheck(before, index, position);
+  // }
+
+  // void actionCheck(Map<int, Offset> before, int cancelIndex, Offset cancelOffset) async {
+  //   if(touchPositions.length == 0) { // no active pointers
+  //     if(!viewerHandler.isZoomed.value) { // image is not zoomed
+  //       if(before.length == 2) { // two fingers were down
+  //         // if two fingers were down TODO: how to detect when tapped with two fingers? check with delay?
+  //         // viewerScaffoldKey.currentState?.openEndDrawer();
+  //       } else if(before.length == 1) { // only one finger was down
+  //         Offset position = before.values.first;
+
+  //         if(before.keys.first != cancelIndex || (position.dx - cancelOffset.dx).abs() > 30 || (position.dy - cancelOffset.dy).abs() > 30) {
+  //           return;
+  //         }
+
+  //         double zoomButtonBottom = Get.height - kToolbarHeight * 3 - 6;
+  //         double zoomButtonTop = zoomButtonBottom - 42;
+  //         bool isNotInLeftZoomButtonRange = settingsHandler.zoomButtonPosition == 'Left' ? position.dy < zoomButtonTop || position.dy > zoomButtonBottom : true;
+  //         bool isNotInRightZoomButtonRange = settingsHandler.zoomButtonPosition == 'Right' ? position.dy < zoomButtonTop || position.dy > zoomButtonBottom : true;
+
+  //         if (position.dx < (Get.width * 0.10) && isNotInLeftZoomButtonRange) {
+  //           // next page if tapped on dx less than 10% of width
+  //           await controller.previousPage(duration: Duration(milliseconds: 10), curve: Curves.easeInOut);
+  //         } else if (position.dx > (Get.width * 0.90) && isNotInRightZoomButtonRange) {
+  //           // next page if tapped on dx more than 90% of width
+  //           await controller.nextPage(duration: Duration(milliseconds: 10), curve: Curves.easeInOut);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   @override
   void initState() {
@@ -75,15 +133,9 @@ class _ViewerPageState extends State<ViewerPage> {
     controller = PreloadPageController(
       initialPage: widget.index,
     );
-    controllerLinux = PageController(
-      initialPage: widget.index,
-    );
-    setState(() {
-      // print("widget index: ${widget.index}");
-      // print("searchglobals index: ${searchHandler.currentTab.viewedIndex.value}");
-      searchHandler.currentTab.currentItem.value = getFetched()[widget.index];
-      searchHandler.currentTab.viewedIndex.value = widget.index;
-    });
+
+    // print("widget index: ${widget.index}");
+    // print("searchglobals index: ${searchHandler.viewedIndex.value}");
 
     ServiceHandler.disableSleep();
     kbFocusNode.requestFocus();
@@ -93,7 +145,7 @@ class _ViewerPageState extends State<ViewerPage> {
     );
 
     // enable volume buttons if opened page is a video AND appbar is visible
-    BooruItem item = getFetched()[widget.index];
+    BooruItem item = searchHandler.currentFetched[widget.index];
     bool isVideo = item.isVideo();
     bool isHated = item.isHated.value;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
@@ -101,18 +153,16 @@ class _ViewerPageState extends State<ViewerPage> {
     setVolumeListener();
   }
 
-  List<BooruItem> getFetched() {
-    // TODO this gets called too many times, find a way to call only when needed or once for all cases
-    return searchHandler.currentTab.booruHandler.filteredFetched;
-  }
-
   Widget getTitle() {
-    return Obx(() => Text("${(searchHandler.currentTab.viewedIndex.value + 1).toString()}/${searchHandler.currentTab.booruHandler.filteredFetched.length.toString()}", style: TextStyle(color: Colors.white)),);
+    return Obx(() {
+      final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
+      final String formattedTotal = searchHandler.currentFetched.length.toString(); 
+      return Text("$formattedViewedIndex/$formattedTotal", style: TextStyle(color: Colors.white));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    // String appBarTitle = "${(searchHandler.currentTab.viewedIndex.value + 1).toString()}/${getFetched().length.toString()}";
     //kbFocusNode.requestFocus();
 
     return Scaffold(
@@ -133,20 +183,160 @@ class _ViewerPageState extends State<ViewerPage> {
           dismissThresholds: {DismissDirection.up: 0.2, DismissDirection.down: 0.2, DismissDirection.startToEnd: 0.3, DismissDirection.endToStart: 0.3}, // Amount of swiped away which triggers dismiss
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
-            // child: PhotoViewGestureDetectorScope(
-            //   // horizontal to prevent triggering page change early when panning
-            //   axis: Axis.horizontal,
-              // The pageView builder will created a page for each image in the booruList(fetched)
-              child: androidPageBuilder(),
-            // ),
-          )
-        )
+            child: RawKeyboardListener(
+              autofocus: false,
+              focusNode: kbFocusNode,
+              onKey: (RawKeyEvent event) async {
+                // print('viewer keyboard ${viewerHandler.inViewer.value}');
+
+                // detect only key DOWN events
+                if (event.runtimeType == RawKeyDownEvent) {
+                  if(event.physicalKey == PhysicalKeyboardKey.arrowLeft || event.physicalKey == PhysicalKeyboardKey.keyH) {
+                    // prev page on Left Arrow or H
+                    if(searchHandler.viewedIndex.value > 0) {
+                      controller.jumpToPage(searchHandler.viewedIndex.value - 1);
+                    }
+                  } else if(event.physicalKey == PhysicalKeyboardKey.arrowRight || event.physicalKey == PhysicalKeyboardKey.keyL) {
+                    // next page on Right Arrow or L
+                    if(searchHandler.viewedIndex.value < searchHandler.currentFetched.length - 1) {
+                      controller.jumpToPage(searchHandler.viewedIndex.value + 1);
+                    }
+                  } else if (event.physicalKey == PhysicalKeyboardKey.keyS) {
+                    // save on S
+                    snatchHandler.queue(
+                      [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
+                      searchHandler.currentTab.selectedBooru.value,
+                      settingsHandler.snatchCooldown
+                    );
+                  } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
+                    // favorite on F
+                    if (settingsHandler.dbEnabled) {
+                      if(searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value != null) {
+                        searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.toggle();
+                        settingsHandler.dbHandler.updateBooruItem(searchHandler.currentFetched[searchHandler.viewedIndex.value], "local");
+                      }
+                    }
+                  } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
+                    // exit on escape if in focus
+                    if(kbFocusNode.hasFocus) {
+                      Navigator.of(context).pop();
+                    }
+                  }
+                }
+              },
+              child: Stack(children: [
+                Obx(() => PreloadPageView.builder( // PreloadPageView.PageView.builder(
+                  preloadPagesCount: settingsHandler.preloadCount,
+                  // allowImplicitScrolling: true,
+                  scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
+                  physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                  itemBuilder: (context, index) {
+                    BooruItem item = searchHandler.currentFetched[index];
+                    // String fileURL = item.fileURL;
+                    bool isVideo = item.isVideo();
+                    bool isImage = item.isImage();
+                    // print(fileURL);
+                    // print('isVideo: '+isVideo.toString());
+                    // Render only if viewed or in preloadCount range
+
+                    late Widget itemWidget;
+                    if(isImage) {
+                      itemWidget = MediaViewerBetter(
+                        item.key,
+                        item,
+                        index,
+                        searchHandler.currentTab,
+                      );
+                    } else if(isVideo) {
+                      if(settingsHandler.disableVideo) {
+                        itemWidget = Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
+                      } else {
+                        if(Platform.isAndroid || Platform.isIOS) {
+                          itemWidget = VideoApp(item.key, item, index, searchHandler.currentTab, true);
+                        } else if(Platform.isWindows || Platform.isLinux) {
+                          itemWidget = VideoAppDesktop(item.key, item, index, searchHandler.currentTab);
+                        } else {
+                          return VideoAppPlaceholder(item: item, index: index);
+                        }
+                      }
+                    } else {
+                      itemWidget = UnknownPlaceholder(item: item, index: index);
+                    }
+
+                    // Cut to the size of the container, prevents overlapping
+                    return ClipRect(
+                      //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+                      child: GestureDetector(
+                        // onTapUp: (TapUpDetails tapInfo) {
+                        //   if(isVideo) return;
+                        //   // TODO WIP
+                        //   // change page if tapped on 20% of any side of the screen AND not a video
+                        //   double tapPosX = tapInfo.localPosition.dx;
+                        //   double screenWidth = MediaQuery.of(context).size.width;
+                        //   double sideThreshold = screenWidth / 5;
+
+                        //   if(tapPosX > (screenWidth - sideThreshold)) {
+                        //     controller.animateToPage(searchHandler.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                        //   } else if(tapPosX < sideThreshold) {
+                        //     controller.animateToPage(searchHandler.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                        //   }
+                        // },
+                        onLongPress: () async {
+                          // print('longpress');
+                          bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
+                          viewerHandler.displayAppbar.value = newAppbarVisibility;
+
+                          ServiceHandler.vibrate();
+
+                          // enable volume buttons if current page is a video AND appbar is set to visible
+                          bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
+                          bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+                          ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                        },
+                        child: itemWidget,
+                      ),
+                    );
+                  },
+                  controller: controller,
+                  onPageChanged: (int index) {
+                    // rehide system ui on every page change
+                    ServiceHandler.disableSleep();
+
+                    searchHandler.setViewedItem(index);
+                    kbFocusNode.requestFocus();
+
+                    viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
+
+                    if(autoScroll) {
+                      if((autoScrollTimer?.isActive == true)) {
+                        // reset slideshow timer if user scrolled earlier
+                        // TODO bug: progress animation lags for a few frames when scroll is automatic
+                        unsetScrollTimer();
+                        setScrollTimer();
+                      }
+                    }
+
+                    // enable volume buttons if new page is a video AND appbar is visible
+                    bool isVideo = searchHandler.currentFetched[index].isVideo();
+                    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
+                    ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                    // print('Page changed ' + index.toString());
+                  },
+                  itemCount: searchHandler.currentFetched.length,
+                )),
+
+                NotesRenderer(),
+                ChangePageButtons(controller),
+                ZoomButton(),
+              ]),
+            ),
+          ),
+        ),
       ),
       endDrawerEnableOpenDragGesture: false,
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Colors.black.withOpacity(0.66), // copy existing main app theme, but make background semitransparent
-          textTheme: Typography.material2018().white,
+          canvasColor: Get.theme.colorScheme.background.withOpacity(0.5), // copy existing main app theme, but make background semitransparent
         ),
         child: renderDrawer(),
       )
@@ -155,20 +345,25 @@ class _ViewerPageState extends State<ViewerPage> {
 
   void setVolumeListener() {
     volumeListener?.cancel();
-    volumeListener = searchHandler.volumeStream?.stream.listen((event) {
-      // print('in gallery $event');
-      int dir = 0;
-      if (event == 'up') {
-        dir = -1;
-      } else if (event == 'down') {
-        dir = 1;
-      }
+    volumeListener = searchHandler.volumeStream?.stream.listen(volumeCallback);
+  }
+  void volumeCallback(String event) {
+    // print('in gallery $event');
+    int dir = 0;
+    if (event == 'up') {
+      dir = -1;
+    } else if (event == 'down') {
+      dir = 1;
+    }
 
-      // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, getFetched().length), 0);
-      int toPage = searchHandler.currentTab.viewedIndex.value + dir; // lastScrolledTo; 
-      controller?.animateToPage(toPage, duration: Duration(milliseconds: 30), curve: Curves.easeInOut);
-      // controller?.jumpToPage(toPage);
-    });
+    if(kbFocusNode.hasFocus && dir != 0) { // disable volume scrolling when not in focus
+      // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, searchHandler.currentFetched.length), 0);
+      int toPage = searchHandler.viewedIndex.value + dir; // lastScrolledTo;
+      // controller.animateToPage(toPage, duration: Duration(milliseconds: 30), curve: Curves.easeInOut);
+      if(toPage >= 0 && toPage < searchHandler.currentFetched.length) {
+        controller.jumpToPage(toPage);
+      }
+    }
   }
 
   @override
@@ -182,213 +377,16 @@ class _ViewerPageState extends State<ViewerPage> {
     super.dispose();
   }
 
-  Widget androidPageBuilder() {
-    return RawKeyboardListener(
-      autofocus: true,
-      focusNode: kbFocusNode,
-      onKey: (RawKeyEvent event) {
-        if(event.isKeyPressed(LogicalKeyboardKey.arrowLeft) || event.isKeyPressed(LogicalKeyboardKey.keyH)) {
-          controller?.previousPage(duration: Duration(milliseconds: 10), curve: Curves.linear);
-        } else if(event.isKeyPressed(LogicalKeyboardKey.arrowRight) || event.isKeyPressed(LogicalKeyboardKey.keyL)) {
-          controller?.nextPage(duration: Duration(milliseconds: 10), curve: Curves.linear);
-        } else if (event.isKeyPressed(LogicalKeyboardKey.keyS)) {
-          snatchHandler.queue(
-            [getFetched()[searchHandler.currentTab.viewedIndex.value]],
-            searchHandler.currentTab.selectedBooru.value,
-            settingsHandler.snatchCooldown
-          );
-        } else if (event.isKeyPressed(LogicalKeyboardKey.keyF)) {
-          if (settingsHandler.dbEnabled) {
-            if(getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value != null) {
-              setState(() {
-                getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
-                settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value], "local");
-              });
-            }
-          }
-        }
-      },
-      child: Stack(children: [
-        PreloadPageView.builder( // PreloadPageView.PageView.builder(
-          preloadPagesCount: settingsHandler.preloadCount,
-          // allowImplicitScrolling: true,
-          scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
-          physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-          itemBuilder: (context, index) {
-            BooruItem item = getFetched()[index];
-            // String fileURL = item.fileURL;
-            bool isVideo = item.isVideo();
-            int preloadCount = settingsHandler.preloadCount;
-            bool isViewed = searchHandler.currentTab.viewedIndex.value == index;
-            bool isNear = (searchHandler.currentTab.viewedIndex.value - index).abs() <= preloadCount;
-            // print(fileURL);
-            // print('isVideo: '+isVideo.toString());
-            // Render only if viewed or in preloadCount range
-
-            late Widget itemWidget;
-            if(isVideo) {
-              if(settingsHandler.disableVideo) {
-                itemWidget = Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
-              } else {
-                if(Platform.isAndroid || Platform.isIOS) {
-                  itemWidget = VideoApp(
-                    item.key,
-                    item,
-                    index,
-                    searchHandler.currentTab,
-                    true
-                  );
-                } else {
-                  itemWidget = VideoAppDesktop(item.key, item, index, searchHandler.currentTab);
-                }
-              }
-            } else {
-              itemWidget = MediaViewerBetter(
-                item.key,
-                item,
-                index,
-                searchHandler.currentTab
-              );
-            }
-
-            if (isViewed || isNear) {
-              // Cut to the size of the container, prevents overlapping
-              return ClipRect(
-                //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
-                child: Stack(children: [
-                  GestureDetector(
-                    // onTapUp: (TapUpDetails tapInfo) {
-                    //   if(isVideo) return;
-                    //   // TODO WIP
-                    //   // change page if tapped on 20% of any side of the screen AND not a video
-                    //   double tapPosX = tapInfo.localPosition.dx;
-                    //   double screenWidth = MediaQuery.of(context).size.width;
-                    //   double sideThreshold = screenWidth / 5;
-
-                    //   if(tapPosX > (screenWidth - sideThreshold)) {
-                    //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                    //   } else if(tapPosX < sideThreshold) {
-                    //     controller?.animateToPage(searchHandler.currentTab.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                    //   }
-                    // },
-                    onLongPress: () async {
-                      print('longpress');
-                      bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
-                      viewerHandler.displayAppbar.value = newAppbarVisibility;
-
-                      if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-                        Vibration.vibrate(duration: 10);
-                      }
-
-                      // enable volume buttons if current page is a video AND appbar is set to visible
-                      bool isVideo = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo();
-                      bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-                      ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                    },
-                    child: itemWidget,
-                  ),
-
-                  if(!(Platform.isAndroid || Platform.isIOS) && viewerHandler.displayAppbar.value)
-                    Container(
-                      alignment: Alignment.bottomRight,
-                      margin: EdgeInsets.all(60),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            width: 35,
-                            height: 35,
-                            margin: EdgeInsets.all(10),
-                            child: FloatingActionButton(
-                              heroTag: 'prevArrow-$index',
-                              onPressed: () {
-                                if((index - 1) >= 0) {
-                                  controller!.animateToPage(
-                                      controller!.page!.toInt() - 1,
-                                      duration: Duration(milliseconds: 400),
-                                      curve: Curves.linear
-                                  );
-                                }
-                              },
-                              child: Icon(Icons.arrow_left),
-                              backgroundColor: Get.context!.theme.colorScheme.secondary,
-                            ),
-                          ),
-                          Container(
-                            width: 35,
-                            height: 35,
-                            margin: EdgeInsets.all(10),
-                            child: FloatingActionButton(
-                              heroTag: 'nextArrow-$index',
-                              onPressed: () {
-                                if((index + 1) < getFetched().length) {
-                                  controller!.animateToPage(
-                                      controller!.page!.toInt() + 1,
-                                      duration: Duration(milliseconds: 400),
-                                      curve: Curves.linear
-                                  );
-                                }
-                              },
-                              child: Icon(Icons.arrow_right),
-                              backgroundColor: Get.context!.theme.colorScheme.secondary,
-                            ),
-                          ),
-                        ],
-                      )
-                    ),
-                ])
-              );
-            } else {
-              return Container(
-                color: Colors.black,
-              );
-            }
-          },
-          controller: controller,
-          onPageChanged: (int index) {
-            // rehide system ui on every page change
-            ServiceHandler.disableSleep();
-
-            setState(() {
-              searchHandler.currentTab.currentItem.value = getFetched()[index];
-              searchHandler.currentTab.viewedIndex.value = index;
-              kbFocusNode.requestFocus();
-            });
-
-            if(autoScroll) {
-              if((autoScrollTimer?.isActive == true)) {
-                // reset slideshow timer if user scrolled earlier
-                // TODO bug: progress animation lags for a few frames when scroll is automatic
-                unsetScrollTimer();
-                setScrollTimer();
-              }
-            }
-
-            // enable volume buttons if new page is a video AND appbar is visible
-            bool isVideo = getFetched()[index].isVideo();
-            bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
-            ServiceHandler.setVolumeButtons(isVolumeAllowed);
-            // print('Page changed ' + index.toString());
-          },
-          itemCount: getFetched().length,
-        ),
-
-        ZoomButton(),
-      ])
-    );
-  }
-
   void scrollToNextPage() {
     // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
-    final int viewedIndex = searchHandler.currentTab.viewedIndex.value;
-    final bool isImage = getFetched()[viewedIndex].mediaType == "image";
-    if((viewedIndex + 1) < getFetched().length) {
-      if (viewedIndex == controller!.page!.toInt() && isImage && autoScroll){
+    final int viewedIndex = searchHandler.viewedIndex.value;
+    final bool isImage = searchHandler.currentFetched[viewedIndex].mediaType == "image";
+    // TODO video and gifs support
+    // TODO check if item is loaded
+    if(viewedIndex < (searchHandler.currentFetched.length - 1)) {
+      if (isImage && autoScroll) {
         print("autoscrolling");
-        controller!.animateToPage(controller!.page!.toInt() + 1,
-            duration: Duration(milliseconds: 400),
-            curve: Curves.linear
-        );
+        controller.jumpToPage(viewedIndex + 1);
       }
     } else {
       autoScrollState(false);
@@ -406,7 +404,7 @@ class _ViewerPageState extends State<ViewerPage> {
     autoScrollProgressController?.stop();
   }
   void autoScrollState(bool newState) {
-    bool isNotLastPage = (searchHandler.currentTab.viewedIndex.value + 1) < getFetched().length;
+    bool isNotLastPage = (searchHandler.viewedIndex.value + 1) < searchHandler.currentFetched.length;
     if(autoScroll != newState) {
       if(isNotLastPage) {
         setState(() {
@@ -438,43 +436,6 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
 
-  // Might not be needed anymore prelaodpageview is nw working on flutter linux, might not work with go-flutter though
-  Widget linuxPageBuilder() {
-    return PageView.builder(
-        controller: controllerLinux,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-          String fileURL = getFetched()[index].fileURL;
-          bool isVideo = getFetched()[index].isVideo();
-          if (isVideo) {
-            return Container(
-              child: Column(
-                children: [
-                  Image.network(getFetched()[index].thumbnailURL),
-                  Container(
-                    margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(color: Get.theme.colorScheme.secondary),
-                        ),
-                      ),
-                      onPressed: () {
-                        Process.run('mpv', ["--loop", fileURL]);
-                      },
-                      child: Text("Open in MPV"),
-                    ),
-                  )
-                ],
-              ),
-            );
-          } else {
-            return Image.network(fileURL);
-          }
-        });
-  }
-
   Widget renderDrawer() {
     final MediaQueryData mQuery = MediaQuery.of(context);
     final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.75) : (mQuery.size.height * 0.75);
@@ -483,7 +444,7 @@ class _ViewerPageState extends State<ViewerPage> {
       width: maxWidth,
       child: Drawer(
         child: SafeArea(
-          child: TagView(getFetched()[searchHandler.currentTab.viewedIndex.value])
+          child: TagView(),
         ),
       )
     );
@@ -522,7 +483,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
 
   void shareFileAction() async {
-    BooruItem item = getFetched()[searchHandler.currentTab.viewedIndex.value];
+    BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
     String? path = await imageWriter.getCachePath(item.fileURL, 'media');
     ServiceHandler serviceHandler = ServiceHandler();
 
@@ -598,7 +559,7 @@ class _ViewerPageState extends State<ViewerPage> {
             const SizedBox(height: 15),
           Column(
             children: [
-              if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '')
+              if(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL != '')
                 ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -606,7 +567,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     ),
                   onTap: (){
                     Navigator.of(context).pop();
-                    shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
+                    shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
                   },
                   leading: Icon(CupertinoIcons.link),
                   title: Text('Post URL'),
@@ -620,7 +581,7 @@ class _ViewerPageState extends State<ViewerPage> {
                   ),
                   onTap: (){
                     Navigator.of(context).pop();
-                    shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
+                    shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].fileURL);
                   },
                   leading: Icon(CupertinoIcons.link),
                   title: Text('File URL'),
@@ -649,7 +610,7 @@ class _ViewerPageState extends State<ViewerPage> {
                       ),
                       onTap: (){
                         Navigator.of(context).pop();
-                        shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
+                        shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
                       },
                       leading: Icon(Icons.file_present),
                       title: Text('Hydrus'),
@@ -666,10 +627,16 @@ class _ViewerPageState extends State<ViewerPage> {
   }
 
   List<Widget> appBarActions() {
-    // remove reload without scaling button on videos (possibly more filters for the future actions?)
-    List<List<String>> filteredButtonOrder = getFetched()[searchHandler.currentTab.viewedIndex.value].isVideo()
-      ? settingsHandler.buttonOrder.where((btn) => btn[0] != 'reloadnoscale').toList()
-      : settingsHandler.buttonOrder;
+    List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
+      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage();
+      bool isScaleButton = btn[0] == 'reloadnoscale';
+      bool isScaleAllowed = isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
+
+      bool isFavButton = btn[0] == 'favourite';
+      bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
+      
+      return isScaleAllowed && isFavAllowed;
+    }).toList();
 
     List<Widget> actions = [];
     List<List<String>> overFlowList = [];
@@ -683,9 +650,10 @@ class _ViewerPageState extends State<ViewerPage> {
     } else {
       buttonList = filteredButtonOrder;
     }
-    buttonList.forEach((value) {
+    for (var value in buttonList) {
       actions.add(buildIconButton(value[0], true));
-    });
+    }
+
     // TODO zoom button for testing, but maybe make it a real option?
     // actions.add(Obx(() => IconButton(
     //   icon: Icon(Get.find<ViewerHandler>().isZoomed.value ? Icons.zoom_out : Icons.zoom_in),
@@ -694,14 +662,16 @@ class _ViewerPageState extends State<ViewerPage> {
     //     Get.find<ViewerHandler>().toggleZoom();
     //   },
     // )));
+
     // Debug - print current item info
     // actions.add(IconButton(
     //   icon: Icon(Icons.developer_board),
     //   color: Colors.white,
     //   onPressed: () {
-    //     print(searchHandler.currentTab.currentItem.value.toJSON().toString());
+    //     print(searchHandler.viewedItem.value.toJSON().toString());
     //   },
     // ));
+
     // all buttons after that will be in overflow menu
     if (overFlowList.isNotEmpty) {
       final bool isAutoscrollOverflowed = overFlowList.indexWhere((btn) => btn[0] == 'autoscroll') != -1;
@@ -805,7 +775,7 @@ class _ViewerPageState extends State<ViewerPage> {
         // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
-          final bool? isFav = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value;
+          final bool? isFav = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value;
           return AnimatedCrossFade(
             duration: Duration(milliseconds: 200),
             crossFadeState: isFav == true ? CrossFadeState.showFirst : CrossFadeState.showSecond,
@@ -827,15 +797,15 @@ class _ViewerPageState extends State<ViewerPage> {
     switch (action) {
       case 'snatch':
         return Obx(() {
-          final bool isSnatched = getFetched()[searchHandler.currentTab.viewedIndex.value].isSnatched.value == true;
+          final bool isSnatched = searchHandler.currentFetched[searchHandler.viewedIndex.value].isSnatched.value == true;
           if(!isSnatched) {
             return const SizedBox();
           } else {
-          return Positioned(
-            child: Icon(Icons.save_alt, size: Get.theme.buttonTheme.height / 2.1),
-            right: 2,
-            bottom: 5,
-          );
+            return Positioned(
+              child: Icon(Icons.save_alt, size: Get.theme.buttonTheme.height / 2.1),
+              right: 2,
+              bottom: 5,
+            );
           }
         });
         
@@ -853,10 +823,10 @@ class _ViewerPageState extends State<ViewerPage> {
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
         break;
       case("favourite"):
-        label = getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value == true ? 'Unfavourite' : defaultLabel;
+        label = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value == true ? 'Unfavourite' : defaultLabel;
         break;
       case("reloadnoscale"):
-        label = getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.value ? 'Reload with scaling' : defaultLabel;
+        label = searchHandler.currentFetched[searchHandler.viewedIndex.value].isNoScale.value ? 'Reload with scaling' : defaultLabel;
         break;
       default:
         // use default text
@@ -873,7 +843,9 @@ class _ViewerPageState extends State<ViewerPage> {
         viewerScaffoldKey.currentState?.openEndDrawer();
         break;
       case("open"):
-        ServiceHandler.launchURL(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
+        // url to html encoded
+        final String url = Uri.encodeFull(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
+        ServiceHandler.launchURL(url);
         break;
       case("autoscroll"):
         autoScrollState(!autoScroll);
@@ -882,30 +854,24 @@ class _ViewerPageState extends State<ViewerPage> {
         getPerms();
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
-          [getFetched()[searchHandler.currentTab.viewedIndex.value]],
+          [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
           searchHandler.currentTab.selectedBooru.value,
           settingsHandler.snatchCooldown
         );
         break;
       case("favourite"):
-        if(getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.value != null) {
-          if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-            Vibration.vibrate(duration: 10);
-          }
+        if(searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value != null) {
+          ServiceHandler.vibrate();
 
-          setState(() {
-            getFetched()[searchHandler.currentTab.viewedIndex.value].isFavourite.toggle();
-            settingsHandler.dbHandler.updateBooruItem(getFetched()[searchHandler.currentTab.viewedIndex.value], "local");
-          });
+          searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.toggle();
+          settingsHandler.dbHandler.updateBooruItem(searchHandler.currentFetched[searchHandler.viewedIndex.value], "local");
         }
         break;
       case("share"):
         onShareClick();
         break;
       case("reloadnoscale"):
-        setState(() {
-          getFetched()[searchHandler.currentTab.viewedIndex.value].isNoScale.toggle();
-        });
+        searchHandler.currentFetched[searchHandler.viewedIndex.value].isNoScale.toggle();
         break;
     }
   }
@@ -924,8 +890,8 @@ class _ViewerPageState extends State<ViewerPage> {
     String shareSetting = settingsHandler.shareAction;
     switch(shareSetting) {
       case 'Post URL':
-        if(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL != '') {
-          shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].postURL);
+        if(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL != '') {
+          shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
         } else {
           FlashElements.showSnackbar(
             context: context,
@@ -940,10 +906,10 @@ class _ViewerPageState extends State<ViewerPage> {
         }
         break;
       case 'File URL':
-        shareTextAction(getFetched()[searchHandler.currentTab.viewedIndex.value].fileURL);
+        shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].fileURL);
         break;
       case 'Hydrus':
-        shareHydrusAction(getFetched()[searchHandler.currentTab.viewedIndex.value]);
+        shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
         break;
       case 'File':
         shareFileAction();
@@ -955,9 +921,7 @@ class _ViewerPageState extends State<ViewerPage> {
     }
   }
   void onShareHold() async {
-    if ((Platform.isAndroid || Platform.isIOS) && (await Vibration.hasVibrator() ?? false)) {
-      Vibration.vibrate(duration: 10);
-    }
+    ServiceHandler.vibrate();
     // Ignore share setting on long press
     showShareDialog(showTip: false);
   }

@@ -1,10 +1,8 @@
-import 'dart:ui';
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:get/get.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
@@ -32,7 +30,7 @@ class CachedThumbBetter extends StatefulWidget {
 }
 
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _restartedCount = 0;
@@ -49,6 +47,9 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
 
   ImageProvider? mainProvider;
   ImageProvider? extraProvider;
+
+  // required for scrollawareimageprovider
+  DisposableBuildContext? disposableBuildContext;
 
   StreamSubscription? hateListener;
 
@@ -85,7 +86,12 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     );
     if(isMain) {
       client = newClient;
-      client!.runRequestIsolate();
+
+      if(settingsHandler.disableImageIsolates) {
+        client!.runRequest();
+      } else {
+        client!.runRequestIsolate();
+      }
     } else {
       extraClient = newClient;
       extraClient!.runRequest();
@@ -161,7 +167,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     _total.value = total;
   }
 
-  void _onEvent(String event) {
+  void _onEvent(String event, dynamic value) {
     switch (event) {
       case 'loaded':
         // 
@@ -209,6 +215,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   @override
   void initState() {
     super.initState();
+    disposableBuildContext = DisposableBuildContext(this);
     selectThumbProvider();
   }
 
@@ -232,7 +239,9 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     // restart loading if item was marked as hated
     hateListener = widget.booruItem.isHated.listen((bool value) {
       if(value == true) {
-        restartLoading();
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          restartLoading();
+        });
       }
     });
 
@@ -307,6 +316,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   @override
   void dispose() {
     disposables();
+    disposableBuildContext?.dispose();
     super.dispose();
   }
 
@@ -331,14 +341,14 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     double screenWidth = MediaQuery.of(context).size.width;
     double iconSize = (screenWidth / widget.columnCount) * 0.55;
 
-    return Obx(() => Stack(
+    return Stack(
       alignment: Alignment.center,
       children: [
         if(isThumbQuality == false && !widget.booruItem.isHated.value) // fetch thumbnail from network while loading a sample
           AnimatedSwitcher( // fade in image
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),
             child: Image(
-              image: extraProvider ?? MemoryImage(kTransparentImage),
+              image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: extraProvider ?? MemoryImage(kTransparentImage)),
               fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
               isAntiAlias: true,
               width: double.infinity, // widget.isStandalone ? double.infinity : null,
@@ -353,7 +363,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
         AnimatedSwitcher( // fade in image
           duration: Duration(milliseconds: widget.isStandalone ? 300 : 10),
           child: Image(
-            image: mainProvider ?? MemoryImage(kTransparentImage),
+            image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: mainProvider ?? MemoryImage(kTransparentImage)),
             fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
             isAntiAlias: true,
             filterQuality: FilterQuality.medium,
@@ -402,7 +412,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             child: Text(thumbURL),
           ),
       ]
-    ));
+    );
   }
 
   @override

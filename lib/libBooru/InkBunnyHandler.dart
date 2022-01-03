@@ -68,7 +68,7 @@ class InkBunnyHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
-  Future Search(String tags, int? pageNumCustom) async{
+  Future Search(String tags, int? pageNumCustom) async {
     if (sessionToken.isEmpty){
       bool gotToken = await setSessionToken();
       if (!gotToken){
@@ -95,15 +95,17 @@ class InkBunnyHandler extends BooruHandler{
           prevTags = tags;
         }
         if (fetched.length == length){locked.value = true;}
-        return fetched;
       } else {
         Logger.Inst().log("InkBunnyHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("InkBunnyHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        errorString.value = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "InkBunnyHandler", "Search", LogTypes.exception);
-      return fetched;
+      errorString.value = e.toString();
     }
+
+    return fetched;
   }
 
   Future getSubmissionResponse(response) async{
@@ -140,8 +142,10 @@ class InkBunnyHandler extends BooruHandler{
   void parseResponse(submissionResponse) async{
     if (submissionResponse != null){
       Map<String, dynamic> parsedResponse = jsonDecode(submissionResponse.body);
+
       // Loop backwards because the api order the results the wrong way
-      for (int i = parsedResponse["submissions"].length - 1; i >= 0; i--){
+      List<BooruItem> newItems = [];
+      for (int i = parsedResponse["submissions"].length - 1; i >= 0; i--) {
         var current = parsedResponse["submissions"][i];
         Logger.Inst().log(current.toString(), "InkBunnyHandler","parseResponse", LogTypes.booruHandlerRawFetched);
         List<String> currentTags = [];
@@ -153,7 +157,7 @@ class InkBunnyHandler extends BooruHandler{
 
         // A submission can have multiple files so a booru item must be made for each of them
         var files = current["files"];
-        for (int i = 0; i < files.length; i++){
+        for (int i = 0; i < files.length; i++) {
           String sampleURL = files[i]["file_url_screen"],
               thumbURL = files[i]["file_url_preview"],
               fileURL = files[i]["file_url_full"];
@@ -161,7 +165,7 @@ class InkBunnyHandler extends BooruHandler{
             thumbURL = files[i]["thumbnail_url_huge"];
             sampleURL = thumbURL;
           }
-          fetched.add(BooruItem(
+          BooruItem item = BooruItem(
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: thumbURL,
@@ -179,19 +183,23 @@ class InkBunnyHandler extends BooruHandler{
             postDate: current["create_datetime"].split(".")[0],
             rating: normalizeRating(current["rating_name"]),
             postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
-          ));
+          );
 
-          setTrackedValues(fetched.length - 1);
+          newItems.add(item);
         }
-
-
       }
+
+      int lengthBefore = fetched.length;
+      fetched.addAll(newItems);
+      setMultipleTrackedValues(lengthBefore, fetched.length);
     }
   }
+
   String normalizeRating(String rating){
     //current.getAttribute("rating")
     return "";
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/s/$id";
@@ -220,7 +228,6 @@ class InkBunnyHandler extends BooruHandler{
     } else {
       return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&rid=$resultsID&page=$pageNum";
     }
-
   }
 
   String makeTagURL(String input){

@@ -1,55 +1,82 @@
-import 'package:intl/intl.dart';
+import 'dart:async';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/widgets/CommentsDialog.dart';
+import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 
 class TagView extends StatefulWidget {
-  BooruItem booruItem;
-  TagView(this.booruItem);
+  TagView();
   @override
   _TagViewState createState() => _TagViewState();
 }
 
 class _TagViewState extends State<TagView> {
-  final SettingsHandler settingsHandler = Get.find();
-  final SearchHandler searchHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+
   List<List<String>> hatedAndLovedTags = [];
   ScrollController scrollController = ScrollController();
+
+  late BooruItem item;
+  late StreamSubscription<BooruItem> itemSubscription;
 
   @override
   void initState() {
     super.initState();
+    searchHandler.searchTextController.addListener(onTextChanged);
+
+    item = searchHandler.viewedItem.value;
     parseTags();
+    itemSubscription = searchHandler.viewedItem.listen((BooruItem item) {
+      // print('item changed to $item');
+      this.item = item;
+      parseTags();
+    });
+  }
+
+  @override
+  void dispose() {
+    searchHandler.searchTextController.removeListener(onTextChanged);
+    itemSubscription.cancel();
+    super.dispose();
   }
 
   void parseTags() {
-    hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: false);
+    hatedAndLovedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
+    setState(() { });
+  }
+
+  void onTextChanged() {
     setState(() { });
   }
 
   Widget infoBuild() {
-    final String fileName = Tools.getFileName(widget.booruItem.fileURL);
-    final String fileRes = (widget.booruItem.fileWidth != null && widget.booruItem.fileHeight != null) ? '${widget.booruItem.fileWidth?.toInt() ?? ''}x${widget.booruItem.fileHeight?.toInt() ?? ''}' : '';
-    final String fileSize = widget.booruItem.fileSize != null ? Tools.formatBytes(widget.booruItem.fileSize!, 2) : '';
-    final String hasNotes = widget.booruItem.hasNotes != null ? widget.booruItem.hasNotes.toString() : '';
-    final String itemId = widget.booruItem.serverId ?? '';
-    final String rating = widget.booruItem.rating ?? '';
-    final String score = widget.booruItem.score ?? '';
-    final List<String> sources = widget.booruItem.sources ?? [];
-    final bool tagsAvailable = widget.booruItem.tagsList.length > 0;
-    String postDate = widget.booruItem.postDate ?? '';
-    final String postDateFormat = widget.booruItem.postDateFormat ?? '';
+    final String fileName = Tools.getFileName(item.fileURL);
+    final String fileRes = (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
+    final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
+    final String hasNotes = item.hasNotes != null ? item.hasNotes.toString() : '';
+    final String itemId = item.serverId ?? '';
+    final String rating = item.rating ?? '';
+    final String score = item.score ?? '';
+    final List<String> sources = item.sources ?? [];
+    final bool tagsAvailable = item.tagsList.length > 0;
+    String postDate = item.postDate ?? '';
+    final String postDateFormat = item.postDateFormat ?? '';
     String formattedDate = '';
     if(postDate.isNotEmpty && postDateFormat.isNotEmpty) {
       try {
@@ -70,22 +97,89 @@ class _TagViewState extends State<TagView> {
       }
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // infoText('Filename', fileName),
-        infoText('ID', itemId),
-        infoText('Rating', rating),
-        infoText('Score', score),
-        infoText('Resolution', fileRes),
-        infoText('Size', fileSize),
-        infoText('Has Notes', hasNotes, canCopy: false),
-        infoText('Posted', formattedDate),
-        sourcesList(sources),
-        if(tagsAvailable) Divider(height: 4, thickness: 2, color: Colors.grey[800]),
-        if(tagsAvailable) infoText('Tags', ' ', canCopy: false),
-      ]
+    return SliverList(
+      delegate: SliverChildListDelegate(
+        [
+          // infoText('Filename', fileName),
+          infoText('ID', itemId),
+          infoText('Rating', rating),
+          infoText('Score', score),
+          infoText('Resolution', fileRes),
+          infoText('Size', fileSize),
+          infoText('Has Notes', hasNotes, canCopy: false),
+          infoText('Posted', formattedDate),
+          commentsButton(),
+          notesButton(),
+          sourcesList(sources),
+          if(tagsAvailable) Divider(height: 2, thickness: 2, color: Colors.grey[800]),
+          if(tagsAvailable) infoText('Tags', ' ', canCopy: false),
+        ],
+        addAutomaticKeepAlives: false,
+      ),
     );
+  }
+
+  Widget commentsButton() {
+    final bool hasSupport = searchHandler.currentBooruHandler.hasCommentsSupport;
+    final bool hasComments = item.hasComments == true;
+    final IconData icon = hasComments ? CupertinoIcons.text_bubble_fill : CupertinoIcons.text_bubble;
+
+    if(!hasSupport || item.fileURL.isEmpty) {
+      return const SizedBox();
+    }
+  
+    return SettingsButton(
+      name: 'Comments',
+      icon: Icon(icon),
+      action: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return CommentsDialog(searchHandler.viewedItem.value);
+          }
+        );
+      },
+      drawBottomBorder: false,
+    );
+  }
+
+  Widget notesButton() {
+    final bool hasSupport = searchHandler.currentBooruHandler.hasNotesSupport;
+    final bool hasNotes = item.hasNotes == true;
+
+    if(!hasSupport || !hasNotes) {
+      return const SizedBox();
+    }
+
+    return Obx(() {
+      if(item.notes.isNotEmpty) {
+        return SettingsButton(
+          name: (viewerHandler.showNotes.value ? 'Hide' : 'Show') + ' Notes (${item.notes.length})',
+          icon: Icon(Icons.note_add),
+          action: () {
+            viewerHandler.showNotes.toggle();
+          },
+          onLongPress: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return NotesDialog(searchHandler.viewedItem.value);
+              }
+            );
+          },
+          drawBottomBorder: false,
+        );
+      } else {
+        return SettingsButton(
+          name: 'Load notes',
+          icon: Icon(Icons.note_add),
+          action: () async {
+            item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!);
+          },
+          drawBottomBorder: false,
+        );
+      }
+    });
   }
 
   Widget sourcesList(List<String> sources) {
@@ -94,10 +188,28 @@ class _TagViewState extends State<TagView> {
       return Container(
         child: Column(
           children: [
-            Divider(height: 4, thickness: 2, color: Colors.grey[800]),
+            Divider(height: 2, thickness: 2, color: Colors.grey[800]),
             infoText(sources.length == 1 ? 'Source' : 'Sources', ' ', canCopy: false),
             Column(children: 
               sources.map((link) => ListTile(
+                onLongPress: () {
+                  ServiceHandler.vibrate();
+                  Clipboard.setData(ClipboardData(text: link));
+                  FlashElements.showSnackbar(
+                    context: context,
+                    duration: Duration(seconds: 2),
+                    title: Text(
+                      "Copied source to clipboard!",
+                      style: TextStyle(fontSize: 20)
+                    ),
+                    content: Text(
+                      link,
+                      style: TextStyle(fontSize: 16)
+                    ),
+                    leadingIcon: Icons.copy,
+                    sideColor: Colors.green,
+                  );
+                },
                 onTap: () {
                   ServiceHandler.launchURL(link);
                 },
@@ -151,7 +263,8 @@ class _TagViewState extends State<TagView> {
   void tagDialog({
     required String tag,
     required bool isHated,
-    required bool isLoved
+    required bool isLoved,
+    required bool isInSearch,
   }) {
     Get.dialog(
       SettingsDialog(
@@ -192,6 +305,65 @@ class _TagViewState extends State<TagView> {
               Navigator.of(context).pop(true);
             },
           ),
+          if(isInSearch)
+            ListTile(
+              leading: Icon(Icons.remove),
+              title: Text("Remove from Search"),
+              onTap: () {
+                searchHandler.removeTagFromSearch(tag);
+                Navigator.of(context).pop(true);
+              },
+            ),
+          if(!isInSearch)
+            ListTile(
+              leading: Icon(Icons.add, color: Colors.green),
+              title: Text("Add to Search"),
+              onTap: () {
+                searchHandler.addTagToSearch(tag);
+
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: Duration(seconds: 2),
+                  title: Text(
+                    "Added to search bar:",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  content: Text(
+                    tag,
+                    style: TextStyle(fontSize: 16)
+                  ),
+                  leadingIcon: Icons.add,
+                  sideColor: Colors.green,
+                );
+
+                Navigator.of(context).pop(true);
+              },
+            ),
+          if(!isInSearch)
+            ListTile(
+              leading: Icon(Icons.add, color: Colors.red),
+              title: Text("Add to Search (Exclude)"),
+              onTap: () {
+                searchHandler.addTagToSearch('-$tag');
+
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: Duration(seconds: 2),
+                  title: Text(
+                    "Added to search bar (Exclude):",
+                    style: TextStyle(fontSize: 20)
+                  ),
+                  content: Text(
+                    tag,
+                    style: TextStyle(fontSize: 16)
+                  ),
+                  leadingIcon: Icons.add,
+                  sideColor: Colors.green,
+                );
+
+                Navigator.of(context).pop(true);
+              },
+            ),
           if(!isHated && !isLoved)
             ListTile(
               leading: Icon(Icons.star, color: Colors.yellow),
@@ -238,107 +410,99 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget tagsBuild() {
-    return ListView.builder(
-      physics: NeverScrollableScrollPhysics(), // required to allow singlechildscrollview to take control of scrolling
-      shrinkWrap: true,
-      itemCount: widget.booruItem.tagsList.length,
-      itemBuilder: (BuildContext context, int index) {
-        String currentTag = widget.booruItem.tagsList[index];
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        tagsItemBuilder,
+        addAutomaticKeepAlives: false,
+        childCount: item.tagsList.length,
+      ),
+    );
+  }
 
-        bool isHated = hatedAndLovedTags[0].contains(currentTag);
-        bool isLoved = hatedAndLovedTags[1].contains(currentTag);
-        bool isSound = hatedAndLovedTags[2].contains(currentTag);
+  Widget tagsItemBuilder(BuildContext context, int index) {
+    String currentTag = item.tagsList[index];
 
-        List<dynamic> tagIconAndColor = [];
-        if (isSound) tagIconAndColor.add([Icons.volume_up_rounded, Colors.white]);
-        if (isHated) tagIconAndColor.add([CupertinoIcons.eye_slash, Colors.red]);
-        if (isLoved) tagIconAndColor.add([Icons.star, Colors.yellow]);
+    bool isHated = hatedAndLovedTags[0].contains(currentTag);
+    bool isLoved = hatedAndLovedTags[1].contains(currentTag);
+    bool isSound = hatedAndLovedTags[2].contains(currentTag);
+    bool isInSearch = searchHandler.searchTextController.text.toLowerCase().split(' ').indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') != -1;
 
-        if (currentTag != '') {
-          return Column(children: <Widget>[
-            ListTile(
-              onTap: () {
-                tagDialog(
-                  tag: currentTag,
-                  isHated: isHated,
-                  isLoved: isLoved
-                );
+    List<dynamic> tagIconAndColor = [];
+    if (isSound) tagIconAndColor.add([Icons.volume_up_rounded, Get.theme.colorScheme.onBackground]);
+    if (isHated) tagIconAndColor.add([CupertinoIcons.eye_slash, Colors.red]);
+    if (isLoved) tagIconAndColor.add([Icons.star, Colors.yellow]);
+    if (isInSearch) tagIconAndColor.add([Icons.search, Get.theme.colorScheme.onBackground]);
+
+    if (currentTag != '') {
+      return Column(children: <Widget>[
+        ListTile(
+          onTap: () {
+            tagDialog(
+              tag: currentTag,
+              isHated: isHated,
+              isLoved: isLoved,
+              isInSearch: isInSearch,
+            );
+          },
+          title: Row(children: [
+            MarqueeText(
+              key: ValueKey(currentTag),
+              text: currentTag,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              isExpanded: true,
+            ),
+
+            if(tagIconAndColor.length > 0)
+              ...[
+                ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
+                const SizedBox(width: 5),
+              ],
+
+            GestureDetector(
+              onLongPress: () {
+                ServiceHandler.vibrate();
+                Navigator.of(context).pop(true); // exit drawer
+                Navigator.of(context).pop(true); // exit viewer
+                searchHandler.addTabByString(currentTag, switchToNew: true);
               },
-              title: Row(children: [
-                if(tagIconAndColor.length > 0)
-                  ...[
-                    ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
-                    const SizedBox(width: 5),
-                  ],
-                MarqueeText(
-                  key: ValueKey(currentTag),
-                  text: currentTag,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  isExpanded: true,
+              child: IconButton(
+                icon: Icon(
+                  Icons.fiber_new,
+                  color: Get.theme.colorScheme.secondary
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.add,
-                    color: Get.theme.colorScheme.secondary,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      searchHandler.addTag(currentTag);
-                    });
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: Duration(seconds: 2),
-                      title: Text(
-                        "Added to search bar:",
-                        style: TextStyle(fontSize: 20)
-                      ),
-                      content: Text(
-                        currentTag,
-                        style: TextStyle(fontSize: 16)
-                      ),
-                      leadingIcon: Icons.add,
-                      sideColor: Colors.green,
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.fiber_new,
-                    color: Get.theme.colorScheme.secondary
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      searchHandler.addTabByString(currentTag);
-                    });
-                    FlashElements.showSnackbar(
-                      context: context,
-                      duration: Duration(seconds: 2),
-                      title: Text(
-                        "Added new tab:",
-                        style: TextStyle(fontSize: 20)
-                      ),
-                      content: Text(
-                        currentTag,
-                        style: TextStyle(fontSize: 16)
-                      ),
-                      leadingIcon: Icons.fiber_new,
-                      sideColor: Colors.green,
-                    );
-                  },
-                ),
-              ])
+                onPressed: () {
+                  searchHandler.addTabByString(currentTag);
+
+                  FlashElements.showSnackbar(
+                    context: context,
+                    duration: Duration(seconds: 2),
+                    title: Text(
+                      "Added new tab:",
+                      style: TextStyle(fontSize: 20)
+                    ),
+                    content: Text(
+                      currentTag,
+                      style: TextStyle(fontSize: 16)
+                    ),
+                    leadingIcon: Icons.fiber_new,
+                    sideColor: Colors.green,
+                  );
+                },
+              ),
             ),
-            Divider(
-              color: Colors.grey[800],
-              height: 2,
-            ),
-          ]);
-        } else {
-          // Render nothing if currentTag is an empty string
-          return const SizedBox();
-        }
-      });
+          ])
+        ),
+        Divider(
+          color: Colors.grey[800],
+          height: 1,
+          thickness: 1,
+        ),
+      ]);
+    } else {
+      // Render nothing if currentTag is an empty string
+      return const SizedBox();
+    }
   }
 
   @override
@@ -347,20 +511,19 @@ class _TagViewState extends State<TagView> {
       padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
       child: Scrollbar(
         controller: scrollController,
-        interactive: false,
+        interactive: true,
         thickness: 4,
         radius: Radius.circular(10),
         isAlwaysShown: true,
-        child: SingleChildScrollView(
+        child: CustomScrollView(
           controller: scrollController,
-          child: Column(
-            children: [
-              infoBuild(),
-              tagsBuild(),
-            ]
-          )
-        )
-      )
+          physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+          slivers: [
+            infoBuild(),
+            tagsBuild(),
+          ],
+        ),
+      ),
     );
   }
 }

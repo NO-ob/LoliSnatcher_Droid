@@ -4,17 +4,15 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-
-import 'libBooru/Booru.dart';
+import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
 // Future<void> writeBytesIsolate(Map<String, dynamic> map) async {
@@ -23,7 +21,7 @@ import 'libBooru/Booru.dart';
 // }
 
 class ImageWriter {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   String? path = "";
   String? cacheRootPath = "";
   ServiceHandler serviceHandler = ServiceHandler();
@@ -32,6 +30,7 @@ class ImageWriter {
   ImageWriter() {
     setPaths();
   }
+
   /**
    * return null - file already exists
    * return String - file saved
@@ -112,44 +111,30 @@ class ImageWriter {
     return (fileName);
   }
 
-  Stream<int> writeMultiple(List<BooruItem> snatched, Booru booru, int cooldown) async* {
+  Stream<Map<String, int>> writeMultiple(List<BooruItem> snatched, Booru booru, int cooldown) async* {
     int snatchedCounter = 1;
     List<String> existsList = [];
     List<String> failedList = [];
     for (int i = 0; i < snatched.length ; i++){
       await Future.delayed(Duration(milliseconds: cooldown), () async{
         var snatchResult = await write(snatched.elementAt(i), booru);
-        if (snatchResult == null){
+        if (snatchResult == null) {
           existsList.add(snatched[i].fileURL);
         } else if (snatchResult is !String) {
           failedList.add(snatched[i].fileURL);
         }
       });
-      yield snatchedCounter++;
+      snatchedCounter++;
+      yield {
+        "snatched": snatchedCounter,
+      };
     }
 
-    FlashElements.showSnackbar(
-      duration: Duration(seconds: 2),
-      position: Positions.top,
-      title: Text(
-        "Snatching Complete",
-        style: TextStyle(fontSize: 20)
-      ),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (existsList.length > 0)
-            Text('${existsList.length} file${existsList.length == 1 ? ' was' : 's were'} already snatched'),
-
-          if (failedList.length > 0)
-            Text('Failed to snatch ${failedList.length} file${failedList.length == 1 ? '' : 's'}'),
-        ],
-      ),
-      leadingIcon: Icons.done_all,
-      sideColor: (existsList.length > 0 || failedList.length > 0) ? Colors.yellow : Colors.green,
-      //TODO restart buttons?
-    );
-    // String toastString = "Snatching Complete ¡¡¡( •̀ ᴗ •́ )و!!! \n";
+    yield {
+      "snatched": snatchedCounter,
+      "exists": existsList.length,
+      "failed": failedList.length
+    };
   }
 
   Future writeCache(String fileURL, String typeFolder) async{
@@ -345,11 +330,11 @@ class ImageWriter {
         final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
         final int overflowSize = currentCacheSize - limitSize;
         if(overflowSize > 0) {
-          List<FileSystemEntity> files = cacheDir.listSync(recursive: true, followLinks: false).where((element) => element is File).toList();
+          List<FileSystemEntity> files = cacheDir.listSync(recursive: true, followLinks: false).whereType<File>().toList();
           files.sort((FileSystemEntity a, FileSystemEntity b) {
             return a.statSync().modified.millisecondsSinceEpoch.compareTo(b.statSync().modified.millisecondsSinceEpoch);
           });
-          files.forEach((FileSystemEntity entity) {
+          for (var entity in files) {
             final bool isNotExcludedExt = Tools.getFileExt(entity.path) != 'ico';
             final FileStat stat = entity.statSync();
             final bool stillOverflows = toDeleteSize < overflowSize;
@@ -357,7 +342,7 @@ class ImageWriter {
               toDelete.add(entity);
               toDeleteSize += stat.size;
             }
-          });
+          }
         }
       }
     } catch (e) {
@@ -367,9 +352,9 @@ class ImageWriter {
 
     // print(toDelete);
     // print(toDeleteSize);
-    toDelete.forEach((file) {
+    for (var file in toDelete) {
       file.delete();
-    });
+    }
     return;
   }
 
@@ -413,7 +398,7 @@ class ImageWriter {
       String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
         if (fileBytes != null && fileExt.isNotEmpty){
           String path = await serviceHandler.getConfigDir();
-          new File(path + "mascot." + fileExt).writeAsBytes(fileBytes);
+          File(path + "mascot." + fileExt).writeAsBytes(fileBytes);
           return (path + "mascot." + fileExt);
         }
     }

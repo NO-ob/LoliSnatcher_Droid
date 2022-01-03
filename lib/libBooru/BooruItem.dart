@@ -1,21 +1,26 @@
 import 'dart:convert';
-import 'package:LoliSnatcher/Tools.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 
 class BooruItem{
   late Key key;
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
-  String? mediaType;
+  late String mediaType;
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
   RxBool isHated = false.obs, isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
   List<String>? sources;
-  bool? hasNotes;
+  RxList<NoteItem> notes = RxList([]);
+  bool? hasNotes, hasComments;
   double? fileWidth, fileHeight, sampleWidth, sampleHeight, previewWidth, previewHeight;
   int? fileSize;
+
   BooruItem({
     required this.fileURL,
     required this.sampleURL,
@@ -33,6 +38,7 @@ class BooruItem{
     this.previewHeight,
 
     this.hasNotes,
+    this.hasComments,
     this.serverId,
     this.rating, // safe, explicit...
     this.score,
@@ -49,21 +55,41 @@ class BooruItem{
     }
     this.fileExt = this.fileExt != null ? this.fileExt : Tools.getFileExt(this.fileURL);
     this.fileExt = this.fileExt!.toLowerCase();
-    if (["jpg", "jpeg", "png", "webp"].any((val) => this.fileExt == val)) {
-      this.mediaType = "image";
-    } else if (["webm", "mp4"].any((val) => this.fileExt == val)) {
-      this.mediaType = "video";
-    } else if (["gif"].any((val) => this.fileExt == val)) {
-      this.mediaType = "animation";
-    } else if (["apng"].any((val) => this.fileExt == val)) {
-      this.mediaType = "not_supported_animation";
-    } else {
-      this.mediaType = "other";
+    switch (this.fileExt) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'webp':
+        this.mediaType = 'image';
+        break;
+
+      case 'mp4':
+      case 'webm':
+        this.mediaType = 'video';
+        break;
+
+      case 'gif':
+        this.mediaType = 'animation';
+        break;
+
+      case 'apng':
+        this.mediaType = 'not_supported_animation';
+        break;
+
+      default:
+        this.mediaType = 'unknown';
+        break;
     }
   }
+
   bool isVideo() {
-    return (this.mediaType == "video");
+    return this.mediaType == "video";
   }
+
+  bool isImage() {
+    return this.mediaType == "image" || this.mediaType == "animation" || this.mediaType == "not_supported_animation";
+  }
+
   Map toJSON() {
     return {
       "postURL": postURL,
@@ -74,8 +100,20 @@ class BooruItem{
       "fileExt": fileExt,
       "isFavourite": isFavourite.value,
       "isSnatched" : isSnatched.value,
+      "serverId": serverId,
+      "rating": rating,
+      "score": score,
+      "sources": sources,
+      "md5String": md5String,
+      "postDate": postDate,
+      "postDateFormat": postDateFormat,
     };
   }
+
+  String toString() {
+    return jsonEncode(this.toJSON());
+  }
+
   static BooruItem fromJSON(String jsonString){
     Map<String, dynamic> json = jsonDecode(jsonString);
     List<String> tags = [];
@@ -94,6 +132,20 @@ class BooruItem{
     );
     item.isFavourite.value = json["isFavourite"].toString() == "true" ? true : false;
     item.isSnatched.value = json["isSnatched"].toString() == "true"? true : false;
+    return item;
+  }
+
+  static BooruItem fromDBRow(dynamic row) {
+    BooruItem item = BooruItem(
+      fileURL: row["fileURL"].toString(),
+      sampleURL: row["sampleURL"].toString(),
+      thumbnailURL: row["thumbnailURL"].toString(),
+      // use custom separator to avoid conflicts with tags containing commas
+      tagsList: row["tags"].toString().split("@@@"),
+      postURL: row["postURL"].toString(),
+    );
+    item.isFavourite.value = Tools.intToBool(row["isFavourite"]) ;
+    item.isSnatched.value = Tools.intToBool(row["isSnatched"]);
     return item;
   }
 }

@@ -10,8 +10,22 @@ class LoliSyncServerPage extends StatelessWidget {
   final String customPort;
   LoliSyncServerPage(this.selectedIP, this.customPort);
 
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final LoliSync loliSync = LoliSync();
+
+  List<String> messagesHistory = [];
+  int maxHistoryLength = 10;
+
+  void addMessage(String message) {
+    // add new message to history but limit it to 10 items
+    if(message.startsWith('Server active at') && messagesHistory.indexWhere((msg) => msg.startsWith('Server active at')) != -1) {
+      return;
+    }
+    messagesHistory.insert(0, message);
+    if (messagesHistory.length > maxHistoryLength) {
+      messagesHistory.removeLast();
+    }
+  }
 
   Future<bool> _onWillPop(BuildContext context) async {
     final shouldPop = await showDialog(
@@ -51,8 +65,8 @@ class LoliSyncServerPage extends StatelessWidget {
           title: Text("LoliSync"),
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: () async{
-                if (await _onWillPop(context)){
+              onPressed: () async {
+                if (await _onWillPop(context)) {
                   Get.back();
                 }
               }
@@ -60,11 +74,11 @@ class LoliSyncServerPage extends StatelessWidget {
         ),
         body:Center(
             child: StreamBuilder<String>(
-              stream: loliSync.startServer(settingsHandler, selectedIP, customPort),
+              stream: loliSync.startServer(selectedIP, customPort),
               builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
                 String status = "";
                 if (snapshot.hasError) {
-                  status = "Error";
+                  status = "Error ${snapshot.error}";
                 } else {
                   switch (snapshot.connectionState) {
                     case ConnectionState.none:
@@ -74,6 +88,7 @@ class LoliSyncServerPage extends StatelessWidget {
                     case ConnectionState.active:
                     case ConnectionState.done:
                       status = "${snapshot.data}";
+                      addMessage(status);
                       break;
                   }
                 }
@@ -81,9 +96,29 @@ class LoliSyncServerPage extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 10),
-                      Icon(Icons.electrical_services, size: 250),
+                      Icon(Icons.dns_outlined, size: 250),
                       const SizedBox(height: 10),
-                      Text(status,style: TextStyle(fontSize: 18)),
+                      Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Text(status, style: TextStyle(fontSize: 18)),
+                      ),
+                      // show history of messages with last items fading away in color
+                      if(messagesHistory.length > 1)
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: messagesHistory.length - 1,
+                            itemBuilder: (BuildContext context, int index) {
+                              final int indexWoutStart = index + 1;
+                              return Opacity(
+                                opacity: 1 - (indexWoutStart / maxHistoryLength),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Center(child: Text(messagesHistory[indexWoutStart], style: TextStyle(fontSize: 18))),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                     ],
                   ),
                 );

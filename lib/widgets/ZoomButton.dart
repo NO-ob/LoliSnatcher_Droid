@@ -17,25 +17,25 @@ class _ZoomButtonState extends State<ZoomButton> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
-  bool isZoomButtonVisible = false;
+  bool isVisible = false;
 
   StreamSubscription<bool>? appbarListener;
 
   @override
   void initState() {
     super.initState();
-    isZoomButtonVisible = settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop";
+    isVisible = settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop" && viewerHandler.displayAppbar.value;
     appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      if(settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop") {
-        isZoomButtonVisible = value;
+      if (settingsHandler.zoomButtonPosition != "Disabled" && settingsHandler.appMode != "Desktop") {
+        isVisible = value;
       }
       updateState();
     });
   }
 
   void updateState() {
-    if(this.mounted) {
-      setState(() { });
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -47,27 +47,28 @@ class _ZoomButtonState extends State<ZoomButton> {
 
   @override
   Widget build(BuildContext context) {
-    if(isZoomButtonVisible) {
-      return Obx(() => Positioned(
-        bottom: kToolbarHeight * 3,
-        right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
-        left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: Get.theme.colorScheme.secondary.withOpacity(0.33),
-            minimumSize: Size(28, 28),
-            padding: EdgeInsets.all(3),
-          ),
-          child: Icon(
-            viewerHandler.isZoomed.value ? Icons.zoom_out : Icons.zoom_in,
-            size: 28,
-            color: Get.theme.colorScheme.onSecondary
-          ),
-          onPressed: viewerHandler.toggleZoom,
-        )
-      ));
-    } else {
-      return const SizedBox();
-    }
+    return Positioned(
+      bottom: kToolbarHeight * 3,
+      right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
+      left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 200),
+        child: isVisible
+            ? ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Get.theme.colorScheme.background.withOpacity(0.33),
+                  minimumSize: Size(28, 28),
+                  padding: EdgeInsets.all(3),
+                ),
+                child: Obx(() => Icon(
+                      viewerHandler.isZoomed.value ? Icons.zoom_out : Icons.zoom_in,
+                      size: 28,
+                      color: Get.theme.colorScheme.onBackground.withOpacity(0.5),
+                    )),
+                onPressed: viewerHandler.toggleZoom,
+              )
+            : const SizedBox(),
+      ),
+    );
   }
 }

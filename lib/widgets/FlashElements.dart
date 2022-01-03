@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 enum Positions {
   bottom,
@@ -27,6 +28,7 @@ class FlashElements {
     bool shouldLeadingPulse = true, // should icon widget play pulse animation
     bool allowInViewer = true, // should tip open when user is in viewer
     Positions position = Positions.bottom,
+    bool asDialog = false,
   }) {
     bool inViewer = Get.find<ViewerHandler>().inViewer.value;
     if(!allowInViewer && inViewer) {
@@ -41,6 +43,39 @@ class FlashElements {
     bool isDark = Get.theme.brightness == Brightness.dark;
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
+
+    if(asDialog) {
+      showDialog(context: context ?? Get.context!, builder: (context) {
+        return SettingsDialog(
+          titlePadding: const EdgeInsets.all(0),
+          buttonPadding: const EdgeInsets.all(0),
+          contentPadding: const EdgeInsets.all(0),
+          insetPadding: const EdgeInsets.all(0),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          content: DefaultTextStyle(
+            style: TextStyle(color: Get.theme.colorScheme.onBackground),
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+              child: FlashBar(
+                title: title,
+                content: content,
+                indicatorColor: sideColor,
+                icon: overrideLeadingIconWidget ?? Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    leadingIcon,
+                    color: leadingIconColor ?? Get.theme.colorScheme.onBackground,
+                    size: leadingIconSize,
+                  )
+                ),
+                shouldIconPulse: shouldLeadingPulse,
+              ),
+            ),
+          ),
+        );
+      });
+      return;
+    }
 
     showFlash(
       context: context ?? Get.context!,

@@ -24,7 +24,7 @@ import 'package:LoliSnatcher/widgets/MascotImage.dart';
  * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
  */
 class SettingsPage extends StatelessWidget {
-  final SettingsHandler settingsHandler = Get.find();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   int debugTaps = 0;
 
   Future<bool> _onWillPop() async {
@@ -44,8 +44,10 @@ class SettingsPage extends StatelessWidget {
           title: Text("Settings"),
           leading: IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: () async{
-                Get.back();
+              onPressed: () async {
+                if (await _onWillPop()) {
+                  Get.back();
+                }
               }
           ),
         ),

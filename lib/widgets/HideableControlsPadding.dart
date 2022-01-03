@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ViewerHandler.dart';
@@ -18,7 +17,7 @@ class HideableControlsPadding extends StatefulWidget {
 }
 
 class _HideableControlsPaddingState extends State<HideableControlsPadding> {
-  ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   @override
   Widget build(BuildContext context) {

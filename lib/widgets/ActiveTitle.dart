@@ -1,18 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-import '../SnatchHandler.dart';
+import 'package:LoliSnatcher/SnatchHandler.dart';
 
-class ActiveTitle extends StatefulWidget {
-  ActiveTitle();
-
-  @override
-  _ActiveTitleState createState() => _ActiveTitleState();
-  
-}
-
-class _ActiveTitleState extends State<ActiveTitle> {
-  final SnatchHandler snatchHandler = Get.find();
+class ActiveTitle extends StatelessWidget {
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   @override
   Widget build(BuildContext context) {

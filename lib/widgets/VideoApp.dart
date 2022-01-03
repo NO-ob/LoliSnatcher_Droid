@@ -2,16 +2,15 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:async';
 
-
 import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
 
+import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
@@ -40,14 +39,17 @@ class _VideoAppState extends State<VideoApp> {
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  VideoPlayerController? _videoController;
-  ChewieController? _chewieController;
+  VideoPlayerController? videoController;
+  ChewieController? chewieController;
 
   // VideoPlayerValue _latestValue;
   RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _lastViewedIndex = -1;
-  bool isFromCache = false, isStopped = false, isZoomed = false;
+  int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
+  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false;
   List<String> stopReason = [];
+
+  StreamSubscription? indexListener;
 
   CancelToken? _dioCancelToken;
   DioLoader? client;
@@ -71,6 +73,7 @@ class _VideoAppState extends State<VideoApp> {
     if(!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
       initPlayer();
+      getSize();
       return;
     }
     switch (settingsHandler.videoCacheMode) {
@@ -88,6 +91,7 @@ class _VideoAppState extends State<VideoApp> {
       default:
         // Only stream, notice the return
         initPlayer();
+        getSize();
         return;
     }
 
@@ -111,26 +115,60 @@ class _VideoAppState extends State<VideoApp> {
       cacheFolder: 'media',
     );
     // client!.runRequest();
-    client!.runRequestIsolate();
+    if(settingsHandler.disableImageIsolates) {
+      client!.runRequest();
+    } else {
+      client!.runRequestIsolate();
+    }
     return;
   }
 
-  void _onBytesAdded(int received, int total) {
-    // bool isAllowedToRestate = settingsHandler.videoCacheMode == 'Cache' || !(_videoController != null && _videoController!.value.isInitialized);
+  Future<void> getSize() async {
+    _dioCancelToken = CancelToken();
+    client = DioLoader(
+      widget.booruItem.fileURL,
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      cancelToken: _dioCancelToken,
+      onEvent: _onEvent,
+    );
+    client!.runRequestSize();
+    return;
+  }
 
-    _received.value = received;
-    _total.value = total;
-    if (total > 0 && widget.booruItem.fileSize == null) {
+  void onSize(int size) {
+    // TODO find a way to stop loading based on size when caching is enabled
+    final int maxSize = 1024 * 1024 * 200;
+    // print('onSize: $size $maxSize ${size > maxSize}');
+    if(size == 0) {
+      killLoading(['File is zero bytes']);
+    } else if ((size > maxSize) && isTooBig != 2) {
+      // TODO add check if resolution is too big
+      isTooBig = 1;
+      killLoading(['File is too big', 'File size: ${Tools.formatBytes(size, 2)}', 'Limit: ${Tools.formatBytes(maxSize, 2)}']);
+    }
+
+    if (size > 0 && widget.booruItem.fileSize == null) {
       // set item file size if it wasn't received from api
-      widget.booruItem.fileSize = total;
+      widget.booruItem.fileSize = size;
       // if(isAllowedToRestate) updateState();
     }
   }
 
-  void _onEvent(String event) {
+  void _onBytesAdded(int received, int total) {
+    // bool isAllowedToRestate = settingsHandler.videoCacheMode == 'Cache' || !(videoController != null && videoController!.value.isInitialized);
+
+    _received.value = received;
+    _total.value = total;
+    onSize(total);
+  }
+
+  void _onEvent(String event, dynamic data) {
     switch (event) {
       case 'loaded':
         // 
+        break;
+      case 'size':
+        onSize(data);
         break;
       case 'isFromCache':
         isFromCache = true;
@@ -157,6 +195,29 @@ class _VideoAppState extends State<VideoApp> {
   void initState() {
     super.initState();
     viewerHandler.addViewed(widget.key);
+
+    isViewed = settingsHandler.appMode == 'Mobile'
+      ? searchHandler.viewedIndex.value == widget.index
+      : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    indexListener = searchHandler.viewedIndex.listen((int value) {
+      final bool prevViewed = isViewed;
+      final bool isCurrentIndex = value == widget.index;
+      final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+      if (settingsHandler.appMode == 'Mobile' ? isCurrentIndex : isCurrentItem) {
+        isViewed = true;
+      } else {
+        isViewed = false;
+      }
+
+      if (prevViewed != isViewed) {
+        if (!isViewed) {
+          // reset zoom if not viewed
+          resetZoom();
+        }
+        updateState();
+      }
+    });
+
     initVideo(false);
   }
 
@@ -167,7 +228,7 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void initVideo(ignoreTagsCheck) {
-    // viewController..outputStateStream.listen(onViewStateChanged);
+    viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
@@ -199,6 +260,10 @@ class _VideoAppState extends State<VideoApp> {
   @override
   void dispose() {
     disposables();
+
+    indexListener?.cancel();
+    indexListener = null;
+
     viewerHandler.removeViewed(widget.key);
     super.dispose();
   }
@@ -209,10 +274,10 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void disposables() {
-    _videoController?.setVolume(0);
-    _videoController?.pause();
-    _videoController?.dispose();
-    _chewieController?.dispose();
+    videoController?.setVolume(0);
+    videoController?.pause();
+    videoController?.dispose();
+    chewieController?.dispose();
 
     if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
       _dioCancelToken?.cancel();
@@ -231,6 +296,7 @@ class _VideoAppState extends State<VideoApp> {
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
+    viewerHandler.setViewState(widget.key, viewState);
   }
 
   void resetZoom() {
@@ -256,26 +322,27 @@ class _VideoAppState extends State<VideoApp> {
 
   void doubleTapZoom() {
     if(!isVideoInit()) return;
-    viewController.scale = 2;
+    // viewController.scale = 2;
+    viewController.updateMultiple(scale: 2);
     // scaleController.scaleState = PhotoViewScaleState.originalSize;
   }
 
   void _updateVideoState() {
-    // print(_videoController?.value);
+    // print(videoController?.value);
     // setState(() {
-    //   _latestValue = _videoController?.value;
+    //   _latestValue = videoController?.value;
     // });
 
-    if(_chewieController == null) return;
+    if(chewieController == null) return;
 
-    if(viewerHandler.isFullscreen.value != _chewieController!.isFullScreen) {
+    if(viewerHandler.isFullscreen.value != chewieController!.isFullScreen) {
       // redisable sleep when changing fullscreen state
       ServiceHandler.disableSleep();
     }
-    viewerHandler.isFullscreen.value = _chewieController!.isFullScreen;
+    viewerHandler.isFullscreen.value = chewieController!.isFullScreen;
 
-    if(widget.searchGlobal.viewedIndex.value == widget.index) {
-      if(_chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
+    if(searchHandler.viewedIndex.value == widget.index) {
+      if(chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
       } else {
         ServiceHandler.setVolumeButtons(viewerHandler.displayAppbar.value); // same as app bar value
@@ -284,32 +351,32 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   bool isVideoInit() {
-    return _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized;
+    return chewieController != null && chewieController!.videoPlayerController.value.isInitialized;
   }
 
 
   Future<void> initPlayer() async {
     // Start from cache if was already cached or only caching is allowed
     if(_video != null) { // if (settingsHandler.mediaCache || _video != null) {
-      _videoController = VideoPlayerController.file(
+      videoController = VideoPlayerController.file(
         _video!,
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
       );
     } else {
       // Otherwise load from network
-      _videoController = VideoPlayerController.network(
+      videoController = VideoPlayerController.network(
         widget.booruItem.fileURL,
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
         httpHeaders: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
       );
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
-    await Future.wait([_videoController!.initialize()]);
-    _videoController?.addListener(_updateVideoState);
+    await Future.wait([videoController!.initialize()]);
+    videoController?.addListener(_updateVideoState);
 
     // Player wrapper to allow controls, looping...
-    _chewieController = ChewieController(
-      videoPlayerController: _videoController!,
+    chewieController = ChewieController(
+      videoPlayerController: videoController!,
       // autoplay is disabled here, because videos started playing randomly, but videos will still autoplay when in view (see isViewed check later)
       autoPlay: false,
       allowedScreenSleep: false,
@@ -360,45 +427,35 @@ class _VideoAppState extends State<VideoApp> {
 
   @override
   Widget build(BuildContext context) {
-    int viewedIndex = widget.searchGlobal.viewedIndex.value;
-    final bool isViewed = settingsHandler.appMode == 'Mobile'
-      ? viewedIndex == widget.index
-      : widget.searchGlobal.currentItem.value.fileURL == widget.booruItem.fileURL;
+    // print('!!! Build video mobile ${widget.index}!!!');
+
     bool initialized = isVideoInit();
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
+    int viewedIndex = searchHandler.viewedIndex.value;
     bool needsRestart = _lastViewedIndex != viewedIndex;
-
-    if (!isViewed) {
-      // reset zoom if not viewed
-      resetZoom();
-    } else {
-      viewerHandler.setCurrent(widget.key);
-    }
 
     if (initialized) {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          _videoController!.seekTo(Duration.zero);
+          videoController!.seekTo(Duration.zero);
         }
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-          _videoController!.play();
+          videoController!.play();
         }
         if (viewerHandler.videoAutoMute){
-          _videoController!.setVolume(0);
+          videoController!.setVolume(0);
         }
       } else {
-        _videoController!.pause();
+        videoController!.pause();
       }
     }
 
     if(needsRestart) {
       _lastViewedIndex = viewedIndex;
     }
-
-    // print('!!! Build video mobile !!!');
 
     // TODO move controls outside of chewie, to exclude them from zoom
 
@@ -413,7 +470,7 @@ class _VideoAppState extends State<VideoApp> {
           },
           child: PhotoView.customChild(
             child: initialized
-              ? Chewie(controller: _chewieController!)
+              ? Chewie(controller: chewieController!)
               : Stack(children: [
                   CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
                   LoadingElement(
@@ -421,6 +478,7 @@ class _VideoAppState extends State<VideoApp> {
                     hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
                     isFromCache: isFromCache,
                     isDone: initialized,
+                    isTooBig: isTooBig > 0,
                     isStopped: isStopped,
                     stopReasons: stopReason,
                     isViewed: isViewed,
@@ -428,6 +486,9 @@ class _VideoAppState extends State<VideoApp> {
                     received: _received,
                     startedAt: _startedAt,
                     startAction: () {
+                      if(isTooBig == 1) {
+                        isTooBig = 2;
+                      }
                       initVideo(true);
                       updateState();
                     },

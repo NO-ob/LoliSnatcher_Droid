@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -38,6 +42,27 @@ class _BooruPageState extends State<BooruPage> {
     }
   }
 
+  void copyBooruLink(bool withSensitiveData) {
+    Navigator.of(context).pop(true); // remove dialog
+    String link = selectedBooru?.toLink(withSensitiveData) ?? '';
+    if (Platform.isWindows || Platform.isLinux) {
+      Clipboard.setData(ClipboardData(text: link));
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text(
+          'Booru Config Link Copied!',
+          style: TextStyle(fontSize: 20)
+        ),
+        leadingIcon: Icons.share,
+        leadingIconColor: Colors.green,
+        sideColor: Colors.green,
+      );
+    } else if (Platform.isAndroid) {
+      ServiceHandler serviceHandler = ServiceHandler();
+      serviceHandler.loadShareTextIntent(link);
+    }
+  }
+
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     settingsHandler.defTags = defaultTagsController.text;
@@ -54,14 +79,13 @@ class _BooruPageState extends State<BooruPage> {
       settingsHandler.prefBooru = selectedBooru?.name ?? '';
     }
     settingsHandler.limit = int.parse(limitController.text);
-    bool result = await settingsHandler.saveSettings(restate: true);
+    bool result = await settingsHandler.saveSettings(restate: false);
     settingsHandler.sortBooruList();
     return result;
   }
+
   @override
   Widget build(BuildContext context) {
-
-
     return WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
@@ -77,6 +101,8 @@ class _BooruPageState extends State<BooruPage> {
                   title: 'Default Tags',
                   hintText: "Tags searched when app opens",
                   inputType: TextInputType.text,
+                  clearable: true,
+                  resetText: () => 'rating:safe',
                 ),
                 SettingsTextInput(
                   controller: limitController,
@@ -86,6 +112,11 @@ class _BooruPageState extends State<BooruPage> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly
                   ],
+                  resetText: () => settingsHandler.map['limit']?['default']?.toString() ?? '10',
+                  numberButtons: true,
+                  numberStep: 10,
+                  numberMin: 10,
+                  numberMax: 100,
                   validator: (String? value) {
                     int? parse = int.tryParse(value ?? '');
                     if(value == null || value.isEmpty) {
@@ -105,14 +136,17 @@ class _BooruPageState extends State<BooruPage> {
                 SettingsButton(name: '', enabled: false),
                 SettingsBooruDropdown(
                   selected: selectedBooru,
-                  onChanged: (Booru? newValue){
+                  onChanged: (Booru? newValue) {
+                    final bool isNewValuePresent = settingsHandler.booruList.contains(newValue);
                     setState((){
-                      selectedBooru = newValue;
+                      selectedBooru = isNewValuePresent ? newValue : settingsHandler.booruList[0];
+                      settingsHandler.prefBooru = selectedBooru?.name ?? '';
+                      settingsHandler.sortBooruList();
                     });
                   },
                   title: 'Booru',
                   trailingIcon: IconButton(
-                    icon: Icon(Icons.info, color: Get.theme.colorScheme.secondary),
+                    icon: Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
@@ -130,6 +164,50 @@ class _BooruPageState extends State<BooruPage> {
                     },
                   ),
                 ),
+                if(selectedBooru != null)
+                  SettingsButton(
+                    name: 'Share selected',
+                    icon: Icon(Icons.share),
+                    action: () {
+                      if(selectedBooru?.type == 'Favourites') {
+                        return;
+                      }
+
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SettingsDialog(
+                            title: Text('Share Booru'),
+                            contentItems: <Widget>[
+                              Text("Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}."),
+                              Text(''),
+                              Text("Should login/apikey data be included?"),
+                            ],
+                            actionButtons: [
+                              ElevatedButton(
+                                child: Text('Cancel'),
+                                onPressed: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                              ),
+                              ElevatedButton(
+                                child: Text('Yes'),
+                                onPressed: () {
+                                  copyBooruLink(true);
+                                },
+                              ),
+                              ElevatedButton(
+                                child: Text('No'),
+                                onPressed: () {
+                                  copyBooruLink(false);
+                                },
+                              ),
+                            ],
+                          );
+                        }
+                      );
+                    },
+                  ),
                 SettingsButton(
                   name: 'Edit selected',
                   icon: Icon(Icons.edit),
@@ -267,6 +345,55 @@ class _BooruPageState extends State<BooruPage> {
                   name: 'Add new Booru',
                   icon: Icon(Icons.add),
                   page: () => BooruEdit(Booru("New","","","","")),
+                ),
+
+                SettingsButton(name: '', enabled: false),
+                SettingsButton(
+                  name: 'Add Booru from URL in Clipboard',
+                  icon: Icon(Icons.paste),
+                  action: () async {
+                    // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
+                    ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
+                    String url = cdata?.text ?? '';
+                    Logger.Inst().log(url, "BooruPage", "getBooruFromClipboard", LogTypes.settingsLoad);
+                    if(url.isNotEmpty) {
+                      if(url.contains('loli.snatcher')) {
+                        Booru booru = Booru.fromLink(url);
+                        if(booru.name != null && booru.name!.isNotEmpty) {
+                          if(settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
+                            // Rename config if its already in the list
+                            booru.name = booru.name! + ' (duplicate)';
+                          }
+                          Navigator.of(context).push(MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (BuildContext context) => BooruEdit(booru),
+                          ));
+                        }
+                      } else {
+                        FlashElements.showSnackbar(
+                          context: context,
+                          title: Text(
+                            "Invalid URL!",
+                            style: TextStyle(fontSize: 20)
+                          ),
+                          leadingIcon: Icons.warning_amber,
+                          leadingIconColor: Colors.red,
+                          sideColor: Colors.red,
+                        );
+                      }
+                    } else {
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text(
+                          'No URL in Clipboard!',
+                          style: TextStyle(fontSize: 20)
+                        ),
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.red,
+                        sideColor: Colors.red,
+                      );
+                    }
+                  },
                 ),
               ],
             ),

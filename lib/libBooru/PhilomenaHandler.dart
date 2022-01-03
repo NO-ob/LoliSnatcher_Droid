@@ -5,7 +5,6 @@ import 'dart:async';
 import 'Booru.dart';
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
-import 'package:LoliSnatcher/Tools.dart';
 
 class PhilomenaHandler extends BooruHandler{
   PhilomenaHandler(Booru booru,int limit) : super(booru,limit);
@@ -18,11 +17,14 @@ class PhilomenaHandler extends BooruHandler{
       return tags;
     }
   }
+
   @override
-  void parseResponse(response){
+  void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+
     // Create a BooruItem for each post in the list
-    for (int i =0; i < parsedResponse['images'].length; i++){
+    List<BooruItem> newItems = [];
+    for (int i =0; i < parsedResponse['images'].length; i++) {
       var current = parsedResponse['images'][i];
       Logger.Inst().log(current.toString(), "PhiloMenaHandler","parseResponse", LogTypes.booruHandlerRawFetched);
       if (current['representations']['full'] != null){
@@ -46,7 +48,7 @@ class PhilomenaHandler extends BooruHandler{
             currentTags[x] = currentTags[x].replaceAll(" ", "+");
           }
         }
-        fetched.add(BooruItem(
+        BooruItem item = BooruItem(
           fileURL: fileURL,
           fileWidth: current['width'].toDouble(),
           fileHeight: current['height'].toDouble(),
@@ -59,15 +61,22 @@ class PhilomenaHandler extends BooruHandler{
           sources: [current['source_url'].toString()],
           postDate: current['created_at'],
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
-        ));
-        setTrackedValues(fetched.length - 1);
+        );
+
+        newItems.add(item);
       }
     }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
   }
+
   // This will create a url to goto the images page in the browser
   String makePostURL(String id){
     return "${booru.baseURL}/images/$id";
   }
+
   // This will create a url for the http request
   String makeURL(String tags){
     //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
@@ -86,6 +95,7 @@ class PhilomenaHandler extends BooruHandler{
   String makeTagURL(String input){
     return "${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10";
   }
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];
