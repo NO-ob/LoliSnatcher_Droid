@@ -458,7 +458,29 @@ class _TagViewState extends State<TagView> {
                 ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
                 const SizedBox(width: 5),
               ],
-
+            IconButton(
+              icon: Icon(
+                  Icons.add,
+                  color: Get.theme.colorScheme.secondary
+              ),
+              onPressed: () {
+                searchHandler.addTagToSearch(currentTag);
+                FlashElements.showSnackbar(
+                  context: context,
+                  duration: Duration(seconds: 2),
+                  title: Text(
+                      "Added to current tab:",
+                      style: TextStyle(fontSize: 20)
+                  ),
+                  content: Text(
+                      currentTag,
+                      style: TextStyle(fontSize: 16)
+                  ),
+                  leadingIcon: Icons.add,
+                  sideColor: Colors.green,
+                );
+              },
+            ),
             GestureDetector(
               onLongPress: () {
                 ServiceHandler.vibrate();

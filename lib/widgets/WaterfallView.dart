@@ -58,8 +58,12 @@ class _WaterfallState extends State<WaterfallView> {
     setVolumeListener();
     // reset the volume butons state
     ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
-
-    tabChanged(0);
+    // tabChanged(0);
+    // TODO reset the controller when appMode changes
+    searchHandler.gridScrollController = AutoScrollController(
+      initialScrollOffset: searchHandler.currentTab.scrollPosition,
+      viewportBoundaryGetter: () => Rect.fromLTRB(0, settingsHandler.appMode == 'Desktop' ? 0 : (kToolbarHeight + 2), 0, 0),
+    );
   }
 
   void tabChanged(int newIndex) {
