@@ -1,6 +1,6 @@
 {
-    "version_name": "2.0.0",
-    "build_number": 163,
+    "version_name": "2.1.0",
+    "build_number": 165,
     "title": "Test Title",
     "changelog": "Test Changelog\r\n- Test Changelog\r\n-- Test Changelog\r\n",
     "is_in_store": true,
