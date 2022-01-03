@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
@@ -37,7 +38,7 @@ class GelbooruHandler extends BooruHandler {
   @override
   void parseResponse(response) {
     var parsedResponse = jsonDecode(response.body);
-    var posts = parsedResponse.length != null ? parsedResponse : parsedResponse["post"]; // gelbooru: { post: [...] }, others [post, ...]
+    var posts = response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse; // gelbooru: { post: [...] }, others [post, ...]
     List<BooruItem> newItems = [];
 
     for (int i = 0; i < posts.length; i++) {
