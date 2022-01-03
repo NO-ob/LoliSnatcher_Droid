@@ -47,27 +47,28 @@ class _ZoomButtonState extends State<ZoomButton> {
 
   @override
   Widget build(BuildContext context) {
-    if (isVisible) {
-      return Positioned(
-        bottom: kToolbarHeight * 3,
-        right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
-        left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            primary: Get.theme.colorScheme.background.withOpacity(0.33),
-            minimumSize: Size(28, 28),
-            padding: EdgeInsets.all(3),
-          ),
-          child: Obx(() => Icon(
-                viewerHandler.isZoomed.value ? Icons.zoom_out : Icons.zoom_in,
-                size: 28,
-                color: Get.theme.colorScheme.onBackground.withOpacity(0.5),
-              )),
-          onPressed: viewerHandler.toggleZoom,
-        ),
-      );
-    } else {
-      return const SizedBox();
-    }
+    return Positioned(
+      bottom: kToolbarHeight * 3,
+      right: settingsHandler.zoomButtonPosition == "Right" ? -10 : null,
+      left: settingsHandler.zoomButtonPosition == "Left" ? -10 : null,
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 200),
+        child: isVisible
+            ? ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Get.theme.colorScheme.background.withOpacity(0.33),
+                  minimumSize: Size(28, 28),
+                  padding: EdgeInsets.all(3),
+                ),
+                child: Obx(() => Icon(
+                      viewerHandler.isZoomed.value ? Icons.zoom_out : Icons.zoom_in,
+                      size: 28,
+                      color: Get.theme.colorScheme.onBackground.withOpacity(0.5),
+                    )),
+                onPressed: viewerHandler.toggleZoom,
+              )
+            : const SizedBox(),
+      ),
+    );
   }
 }

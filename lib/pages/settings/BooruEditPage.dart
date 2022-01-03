@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -402,55 +401,79 @@ class _BooruEditState extends State<BooruEdit> {
         }
   
         getPerms();
-        Booru? newBooru;
+        Booru newBooru = (booruAPIKeyController.text == "" && booruUserIDController.text == "")
+          ? Booru(
+              booruNameController.text,
+              widget.booruType,
+              booruFaviconController.text,
+              booruURLController.text,
+              booruDefTagsController.text
+            )
+          : Booru.withKey(
+              booruNameController.text,
+              widget.booruType,
+              booruFaviconController.text,
+              booruURLController.text,
+              booruDefTagsController.text,
+              booruAPIKeyController.text,
+              booruUserIDController.text
+            );
+
         bool booruExists = false;
+        String booruExistsReason = '';
         // Call the saveBooru on the settings handler and parse it a Booru instance with data from the input fields
-        for (int i=0; i < settingsHandler.booruList.length; i++){
+        for (int i=0; i < settingsHandler.booruList.length; i++) {
           if (settingsHandler.booruList[i].baseURL == booruURLController.text) {
-            if (widget.booru.name == "New" && (settingsHandler.booruList.contains(newBooru) || settingsHandler.booruList.where((el) => el.name == booruNameController.text || el.baseURL == booruURLController.text).isNotEmpty)) {
-              booruExists = true;
-              FlashElements.showSnackbar(
-                context: context,
-                title: Text(
-                  'This Config Already Exists',
-                  style: TextStyle(fontSize: 20)
-                ),
-                content: Text(
-                  '...and will not be added',
-                  style: TextStyle(fontSize: 16)
-                ),
-                leadingIcon: Icons.warning_amber,
-                leadingIconColor: Colors.red,
-                sideColor: Colors.red,
-              );
+            final bool alreadyExists = settingsHandler.booruList.contains(newBooru);
+            final bool sameNameExists = settingsHandler.booruList.any((element) => element.name == newBooru.name);
+            final bool sameURLExists = settingsHandler.booruList.any((element) => element.baseURL == newBooru.baseURL);
+
+            if(widget.booru.name == "New") {
+              if(alreadyExists || sameNameExists || sameURLExists) {
+                booruExists = true;
+              }
+
+              if(alreadyExists) {
+                booruExistsReason = 'This Booru Config already exists';
+              } else if(sameNameExists) {
+                booruExistsReason = 'Booru Config with same name already exists';
+              } else if(sameURLExists) {
+                booruExistsReason = 'Booru Config with same URL already exists';
+              }
             } else {
-              settingsHandler.booruList.removeAt(i);
+              if(alreadyExists) {
+                booruExists = true;
+                booruExistsReason = 'This Booru Config already exists';
+              }
+              
+              final bool oldEditBooruExists = (settingsHandler.booruList[i].baseURL == widget.booru.baseURL && settingsHandler.booruList[i].name == widget.booru.name);
+              if(!booruExists && oldEditBooruExists) {
+                // remove the old config (same url and name as the start booru)
+                settingsHandler.booruList.removeAt(i);
+                settingsHandler.deleteBooru(widget.booru);
+              }
             }
           }
         }
 
-        if(booruAPIKeyController.text == ""){
-          newBooru = Booru(
-            booruNameController.text,
-            widget.booruType,
-            booruFaviconController.text,
-            booruURLController.text,
-            booruDefTagsController.text
+        if(booruExists) {
+          FlashElements.showSnackbar(
+            context: context,
+            title: Text(
+              booruExistsReason,
+              style: TextStyle(fontSize: 20)
+            ),
+            content: Text(
+              '...and will not be added',
+              style: TextStyle(fontSize: 16)
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
           );
         } else {
-          newBooru = Booru.withKey(
-            booruNameController.text,
-            widget.booruType,
-            booruFaviconController.text,
-            booruURLController.text,
-            booruDefTagsController.text,
-            booruAPIKeyController.text,
-            booruUserIDController.text
-          );
-        }
-
-        if (!booruExists) {
           await settingsHandler.saveBooru(newBooru);
+
           FlashElements.showSnackbar(
             context: context,
             title: Text(
@@ -462,15 +485,26 @@ class _BooruEditState extends State<BooruEdit> {
             sideColor: Colors.green,
           );
 
-          // force global restate
-          searchHandler.rootRestate();
           if(searchHandler.list.isEmpty) {
             // force first tab creation after creating first booru
             searchHandler.addTabByString(settingsHandler.defTags, customBooru: newBooru);
           }
+
+          if(searchHandler.list.firstWhereOrNull((tab) => tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL) != null) {
+            // if the booru is already selected in any tab, update the booru to a new one
+            // (only if their type and baseurl are the same, otherwise main booru selector will set the value to null and user has to reselect the booru)
+            for (var tab in searchHandler.list) {
+              if(tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL) {
+                tab.selectedBooru.value = newBooru;
+              }
+            }
+          }
+
+          // force global restate
+          searchHandler.rootRestate();
+
           Navigator.of(context).pop(true);
         }
-
       },
     );
   }

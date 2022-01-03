@@ -10,7 +10,6 @@ import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/pages/SettingsPage.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
@@ -20,7 +19,6 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/MainAppbar.dart';
 
 class MobileHome extends StatelessWidget {
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 

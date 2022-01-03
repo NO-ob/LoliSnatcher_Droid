@@ -650,9 +650,9 @@ class _ViewerPageState extends State<ViewerPage> {
     } else {
       buttonList = filteredButtonOrder;
     }
-    buttonList.forEach((value) {
+    for (var value in buttonList) {
       actions.add(buildIconButton(value[0], true));
-    });
+    }
 
     // TODO zoom button for testing, but maybe make it a real option?
     // actions.add(Obx(() => IconButton(
@@ -843,7 +843,9 @@ class _ViewerPageState extends State<ViewerPage> {
         viewerScaffoldKey.currentState?.openEndDrawer();
         break;
       case("open"):
-        ServiceHandler.launchURL(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
+        // url to html encoded
+        final String url = Uri.encodeFull(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
+        ServiceHandler.launchURL(url);
         break;
       case("autoscroll"):
         autoScrollState(!autoScroll);

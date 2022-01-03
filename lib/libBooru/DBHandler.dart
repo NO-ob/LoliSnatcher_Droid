@@ -297,14 +297,14 @@ class DBHandler{
   void updateTags(List tags, String? itemID) async{
     if(itemID == null) return;
     String? id = "";
-    tags.forEach((tag) async {
+    for (var tag in tags) {
       id = await getTagID(tag);
-      if (id != null && id!.isEmpty) {
+      if (id.isEmpty) {
         var result = await db?.rawInsert("INSERT INTO Tag(name) VALUES(?)", [tag]);
         id = result?.toString();
       }
       await db?.rawInsert("INSERT INTO ImageTag(tagID, booruItemID) VALUES(?,?)", [id,itemID]);
-    });
+    }
   }
 
   //Gets a tag id from the database

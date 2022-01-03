@@ -15,6 +15,8 @@ import 'Booru.dart';
 class AGNPHHandler extends BooruHandler{
   @override
   bool tagSearchEnabled = false;
+
+  @override
   bool hasSizeData = true;
   // Dart constructors are weird so it has to call super with the args
   AGNPHHandler(Booru booru, int limit) : super(booru, limit);
@@ -23,6 +25,7 @@ class AGNPHHandler extends BooruHandler{
    * This function will call a http get request using the tags and pagenumber parsed to it
    * it will then create a list of booruItems
    */
+  @override
   Future Search(String tags, int? pageNumCustom) async {
     tags = validateTags(tags);
     if (prevTags != tags){
@@ -179,11 +182,13 @@ class AGNPHHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/post/show/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     String tagStr = tags.replaceAll("artist:", "").replaceAll(" ", "+");
     //https://agn.ph/gallery/post/?search=sylveon&api=xml
@@ -191,6 +196,7 @@ class AGNPHHandler extends BooruHandler{
 
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/gallery/tags/?sort=name&order=asc&search=$input&api=xml";
   }

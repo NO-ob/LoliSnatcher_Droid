@@ -8,7 +8,7 @@ import 'Booru.dart';
 /**
  * Booru Handler for the gelbooru engine only difference do gelbooru is the search/api url all the returned data is the same
  */
-class MoebooruHandler extends GelbooruHandler{
+class MoebooruHandler extends GelbooruHandler {
   MoebooruHandler(Booru booru,int limit) : super(booru,limit);
 
   @override
@@ -17,6 +17,8 @@ class MoebooruHandler extends GelbooruHandler{
     return "${booru.baseURL}/post/show/$id/";
   }
 
+
+  // TODO change to json
   @override
   void parseResponse(response){
     var parsedResponse = xml.parse(response.body);
@@ -90,4 +92,8 @@ class MoebooruHandler extends GelbooruHandler{
   String makeTagURL(String input){
       return "${booru.baseURL}/tag.xml?limit=10&name=$input*";
   }
+
+  // TODO parse comments from html
+  @override
+  bool hasCommentsSupport = false;
 }

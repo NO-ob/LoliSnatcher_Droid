@@ -8,9 +8,7 @@ class Logger {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   static Logger Inst() {
-    if (_loggerInstance == null) {
-      _loggerInstance = Logger();
-    }
+    _loggerInstance ??= Logger();
     return _loggerInstance!;
   }
   void log(var logStr, String callerClass, String callerFunction, LogTypes logType) {

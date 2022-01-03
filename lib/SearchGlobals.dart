@@ -142,8 +142,10 @@ class SearchHandler extends GetxController {
   // switch to tab #index
   void changeTabIndex(int i) {
     // change only if new index != current index
-    if(i != currentIndex) {
-      index.value = i;
+    final int oldIndex = currentIndex;
+    final int newIndex = i;
+    if(newIndex != currentIndex) {
+      index.value = newIndex;
       Tools.forceClearMemoryCache(withLive: true);
     }
     // set search text anyway
@@ -163,6 +165,8 @@ class SearchHandler extends GetxController {
 
     // set current viewed index and item of the tab
     setViewedItem(currentTab.viewedIndex.value);
+
+    // print('changed index from $oldIndex to $newIndex');
   }
 
   // recreate current tab with custom starting page number
@@ -208,6 +212,7 @@ class SearchHandler extends GetxController {
 
   BooruItem setViewedItem(int i) {
     int newIndex = i;
+    int oldIndex = viewedIndex.value;
     BooruItem newItem = newIndex != -1
       ? currentFetched[newIndex]
       : BooruItem(
@@ -223,7 +228,7 @@ class SearchHandler extends GetxController {
     viewedIndex.value = newIndex;
     currentTab.viewedIndex.value = newIndex;
 
-    // print('new index $newIndex \n new item ${newItem.toString()}');
+    // print('old $oldIndex | new $newIndex index \n new item ${newItem.toString()}');
 
     return newItem;
   }
@@ -368,6 +373,8 @@ class SearchHandler extends GetxController {
   // special strings used to separate parts of tab backup string
   // tab - separates info parts about tab itself, list - separates tabs list entries
 
+  Rx<DateTime> lastBackupTime = DateTime.now().obs;
+
   // example of backup string: "booruName1|||tags1|||tab~~~booruName2|||tags2|||selected~~~booruName3|||tags3|||tab"
   final String tabDivider = '|||', listDivider = '~~~';
 
@@ -381,12 +388,13 @@ class SearchHandler extends GetxController {
     }
     return result;
   }
-  void restoreTabs() async {
+  Future<void> restoreTabs() async {
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     List<String> result = await settingsHandler.dbHandler.getTabRestore();
     List<SearchGlobal> restoredGlobals = [];
 
     bool foundBrokenItem = false;
+    List<String> brokenItems = [];
     int newIndex = 0;
     if(result.length == 2) {
       // split list into tabs
@@ -402,6 +410,7 @@ class SearchHandler extends GetxController {
             restoredGlobals.add(newTab);
           } else {
             foundBrokenItem = true;
+            brokenItems.add(booruAndTags[0] + ': ' + booruAndTags[1]);
             SearchGlobal newTab = SearchGlobal(settingsHandler.booruList[0].obs, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
           }
@@ -413,6 +422,7 @@ class SearchHandler extends GetxController {
           }
         } else {
           foundBrokenItem = true;
+          brokenItems.add(booruAndTags[0] + ': ' + booruAndTags[1]);
         }
       }
     }
@@ -435,7 +445,9 @@ class SearchHandler extends GetxController {
               // notify user if there was unknown booru or invalid entry in the list
               ...[
                 Text('Some restored tabs had unknown boorus or broken characters.'),
-                Text('They were set to default or ignored.')
+                Text('They were set to default or ignored.'),
+                Text('List of broken tabs:'),
+                Text(brokenItems.join(', ')),
               ],
           ],
         ),
@@ -461,6 +473,7 @@ class SearchHandler extends GetxController {
       searchTextController.text = settingsHandler.defTags;
     }
     // rootRestate();
+    return;
   }
 
   void mergeTabs(String tabStr) {
@@ -561,6 +574,8 @@ class SearchHandler extends GetxController {
     } else {
       settingsHandler.dbHandler.clearTabRestore();
     }
+
+    lastBackupTime.value = DateTime.now();
   }
 
 }

@@ -26,7 +26,7 @@ class ThumbBuild extends StatelessWidget {
     bool isLoved = parsedTags[1].length > 0;
     bool isSound = parsedTags[2].length > 0;
     bool isNoted = item.hasNotes == true;
-    
+
     // reset the isHated value since we already check for it on every render
     item.isHated.value = isHated;
 
@@ -57,15 +57,14 @@ class ThumbBuild extends StatelessWidget {
                   padding: EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.66),
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5))
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5)),
                   ),
-                  child: Obx(() =>  Row(
+                  child: Obx(() => Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
 
-                      if(item.isFavourite.value == null)
-                        Text('.'),
+                      if (item.isFavourite.value == null) Text('.'),
 
                       AnimatedCrossFade(
                         duration: Duration(milliseconds: 200),
@@ -77,26 +76,26 @@ class ThumbBuild extends StatelessWidget {
                             color: item.isFavourite.value == true ? Colors.red : Colors.grey,
                             key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
                             size: 14,
-                          )
+                          ),
                         ),
                         secondChild: const SizedBox(),
                       ),
 
-                      if(item.isSnatched.value == true)
+                      if (item.isSnatched.value == true)
                         Icon(
                           Icons.save_alt,
                           color: Colors.white,
                           size: 14,
                         ),
 
-                      if(isSound)
+                      if (isSound)
                         Icon(
                           Icons.volume_up_rounded,
                           color: Colors.white,
                           size: 14,
                         ),
 
-                      if(isNoted)
+                      if (isNoted)
                         Icon(
                           Icons.note_add,
                           color: Colors.white,
@@ -111,11 +110,11 @@ class ThumbBuild extends StatelessWidget {
                     ],
                   )),
                 ),
-              ]
-            )
-          )
-        ]
-      )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

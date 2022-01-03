@@ -18,6 +18,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
 
   int _startedAt = 0;
   Timer? checkInterval;
+  bool isVisible = true;
   StreamSubscription<bool>? loadingListener;
 
   @override
@@ -25,7 +26,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
     super.initState();
     startTimer();
     loadingListener = searchHandler.isLoading.listen((bool isLoading) {
-      if(isLoading) {
+      if (isLoading) {
         startTimer();
       } else {
         stopTimer();
@@ -63,23 +64,23 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
     super.dispose();
   }
 
-
   Widget wrapButton(Widget child) {
     return Container(color: Get.theme.colorScheme.background.withOpacity(0.66), child: child);
   }
 
   @override
   Widget build(BuildContext context) {
-    final String errorFormatted = searchHandler.currentBooruHandler.errorString.isNotEmpty ? '\n${searchHandler.currentBooruHandler.errorString}' : '';
+    final String errorFormatted =
+        searchHandler.currentBooruHandler.errorString.isNotEmpty ? '\n${searchHandler.currentBooruHandler.errorString}' : '';
     final String clickName = (Platform.isWindows || Platform.isLinux) ? 'Click' : 'Tap';
     int nowMils = DateTime.now().millisecondsSinceEpoch;
     int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
     String sinceStartText = sinceStart > 0 ? 'Started ${sinceStart.toString()} second${sinceStart == 1 ? '' : 's'} ago' : '';
 
     return Obx(() {
-      if(searchHandler.isLastPage.value) {
+      if (searchHandler.isLastPage.value) {
         // if last page...
-        if(searchHandler.currentFetched.length == 0) {
+        if (searchHandler.currentFetched.length == 0) {
           // ... and no items loaded
           return wrapButton(SettingsButton(
             name: 'No Data Loaded',
@@ -91,22 +92,76 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             },
             drawBottomBorder: false,
           ));
-        } else { //if(searchHandler.currentFetched.length > 0) {
+        } else {
+          //if(searchHandler.currentFetched.length > 0) {
           // .. has items loaded
-          return wrapButton(SettingsButton(
-            name: 'You Reached the End (${searchHandler.currentBooruHandler.pageNum} ${searchHandler.currentBooruHandler.pageNum.value == 1 ? 'page' : 'pages'})',
-            subtitle: Text('$clickName Here to Reload Last Page'),
-            icon: Icon(Icons.refresh),
-            dense: true,
-            action: () {
-              searchHandler.retrySearch();
-            },
-            drawBottomBorder: false,
-          ));
+          if (isVisible) {
+            return wrapButton(SettingsButton(
+              name:
+                  'You Reached the End (${searchHandler.currentBooruHandler.pageNum} ${searchHandler.currentBooruHandler.pageNum.value == 1 ? 'page' : 'pages'})',
+              subtitle: Text('$clickName Here to Reload Last Page'),
+              icon: Icon(Icons.refresh),
+              dense: true,
+              action: () {
+                searchHandler.retrySearch();
+                if (!isVisible) {
+                  isVisible = !isVisible;
+                  updateState();
+                }
+              },
+              trailingIcon: IconButton(
+                onPressed: () {
+                  isVisible = !isVisible;
+                  updateState();
+                },
+                icon: Icon(Icons.arrow_drop_down),
+              ),
+              drawBottomBorder: false,
+            ));
+          } else {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: Get.theme.colorScheme.background.withOpacity(0.66),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      searchHandler.retrySearch();
+                      if (!isVisible) {
+                        isVisible = !isVisible;
+                        updateState();
+                      }
+                    },
+                    iconSize: 28,
+                    icon: Icon(Icons.refresh),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Get.theme.colorScheme.background.withOpacity(0.66),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      isVisible = !isVisible;
+                      updateState();
+                    },
+                    iconSize: 28,
+                    icon: Icon(Icons.arrow_drop_up),
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+            );
+          }
         }
       } else {
         // if not last page...
-        if(searchHandler.isLoading.value) {
+        if (searchHandler.isLoading.value) {
           // ... and is currently loading
           return wrapButton(SettingsButton(
             name: 'Loading Page #${searchHandler.currentBooruHandler.pageNum}',
@@ -118,9 +173,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             icon: SizedBox(
               width: 30,
               height: 30,
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-              ),
+              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)),
             ),
             dense: true,
             action: () {
@@ -141,7 +194,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
               },
               drawBottomBorder: false,
             ));
-          } else if(searchHandler.currentFetched.length == 0) {
+          } else if (searchHandler.currentFetched.length == 0) {
             // ... no items loaded
             return wrapButton(SettingsButton(
               name: 'Error, no data loaded:',

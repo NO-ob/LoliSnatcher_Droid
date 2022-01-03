@@ -145,11 +145,11 @@ InlineSpan _parseParent(
   bool isBordered,
 ) {
   final List<InlineSpan> children = [];
-  node.nodes.forEach((item) {
+  for (var item in node.nodes) {
     // The change of style is applied below
     var span = _parseRecursive(item, style, false, isBordered);
     children.add(span);
-  });
+  }
 
   // Avoid TextSpan with no child
   if (children.length == 0) return TextSpan(text: '');

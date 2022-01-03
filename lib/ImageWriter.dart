@@ -330,11 +330,11 @@ class ImageWriter {
         final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
         final int overflowSize = currentCacheSize - limitSize;
         if(overflowSize > 0) {
-          List<FileSystemEntity> files = cacheDir.listSync(recursive: true, followLinks: false).where((element) => element is File).toList();
+          List<FileSystemEntity> files = cacheDir.listSync(recursive: true, followLinks: false).whereType<File>().toList();
           files.sort((FileSystemEntity a, FileSystemEntity b) {
             return a.statSync().modified.millisecondsSinceEpoch.compareTo(b.statSync().modified.millisecondsSinceEpoch);
           });
-          files.forEach((FileSystemEntity entity) {
+          for (var entity in files) {
             final bool isNotExcludedExt = Tools.getFileExt(entity.path) != 'ico';
             final FileStat stat = entity.statSync();
             final bool stillOverflows = toDeleteSize < overflowSize;
@@ -342,7 +342,7 @@ class ImageWriter {
               toDelete.add(entity);
               toDeleteSize += stat.size;
             }
-          });
+          }
         }
       }
     } catch (e) {
@@ -352,9 +352,9 @@ class ImageWriter {
 
     // print(toDelete);
     // print(toDeleteSize);
-    toDelete.forEach((file) {
+    for (var file in toDelete) {
       file.delete();
-    });
+    }
     return;
   }
 

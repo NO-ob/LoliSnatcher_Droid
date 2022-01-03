@@ -1,10 +1,14 @@
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'dart:async';
+
+import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart' as xml;
-import 'dart:async';
+
 import 'BooruHandler.dart';
 import 'BooruItem.dart';
 import 'Booru.dart';
+import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**
  * Booru Handler for the Shimmie engine
@@ -13,6 +17,7 @@ class ShimmieHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
 
+  @override
   bool tagSearchEnabled = false;
 
   @override
@@ -91,16 +96,18 @@ class ShimmieHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/post/view/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     return "${booru.baseURL}/api/danbooru/find_posts/index.xml?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
 
-
+  @override
   String makeTagURL(String input){
     if (booru.baseURL!.contains("rule34.paheal.net")){
       tagSearchEnabled = true;
@@ -128,6 +135,7 @@ class ShimmieHandler extends BooruHandler{
     return searchTags;
   }
 
+  @override
   Future<void> searchCount(String input) async {
     int result = 0;
     if (booru.baseURL!.contains("rule34.paheal.net") && input != ''){ // paheal limits any search to 500 pages => empty input returns wrong count
@@ -149,5 +157,41 @@ class ShimmieHandler extends BooruHandler{
     }
     totalCount.value = result;
     return;
+  }
+
+  @override
+  bool hasCommentsSupport = true;
+
+  @override
+  Future<List<CommentItem>> fetchComments(String postID, int pageNum) async {
+    List<CommentItem> comments = [];
+    String url = makePostURL(postID);
+
+    try {
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri,headers: getHeaders());
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var document = parse(response.body);
+        var spans = document.querySelectorAll(".comment:not(.comment_add)");
+        if (spans.length > 0) {
+          for (int i=0; i < spans.length; i++){
+            var current = spans.elementAt(i);
+            comments.add(CommentItem(
+              id: current.attributes["id"],
+              title: postID,
+              content: current.nodes[current.nodes.length - 1].text.toString().replaceFirst(': ', '').replaceFirst('\n\t\t\t\t', ''),
+              authorName: current.querySelector('.username')?.text.toString(),
+              postID: postID,
+              createDate: current.querySelector('time')?.attributes["datetime"]?.split('+')[0].toString(), // 2021-12-25t10:02:28+00:00
+              createDateFormat: "yyyy-MM-dd't'HH:mm:ss'Z'",
+            ));
+          }
+        }
+      }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), className, "fetchComments", LogTypes.exception);
+    }
+    return comments;
   }
 }

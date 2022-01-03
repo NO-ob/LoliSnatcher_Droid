@@ -95,6 +95,13 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
+  void sinceLastBackup() {
+    FlashElements.showSnackbar(
+      title: Text('Since last backup: ${searchHandler.lastBackupTime.value.difference(DateTime.now()).inSeconds * -1} seconds'),
+      duration: Duration(seconds: 3),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
@@ -112,6 +119,13 @@ class _MainAppBarState extends State<MainAppBar> {
         actions: [
           // TODO needs more work and polish
           pageNumberButton(),
+
+          // IconButton(
+          //   icon: Icon(Icons.timelapse),
+          //   onPressed: () {
+          //     sinceLastBackup();
+          //   },
+          // ),
 
           Obx(() {
             if (searchHandler.list.isNotEmpty) {

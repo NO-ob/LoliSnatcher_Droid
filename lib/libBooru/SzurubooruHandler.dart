@@ -106,7 +106,7 @@ class SzurubooruHandler extends BooruHandler{
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
         if (parsedResponse.length > 0){
           for (int i=0; i < parsedResponse["results"].length; i++){
-            String tag = parsedResponse["results"][i]['names'][0].toString().replaceAll(r":", r"\:");;
+            String tag = parsedResponse["results"][i]['names'][0].toString().replaceAll(r":", r"\:");
             searchTags.add(tag);
           }
         }

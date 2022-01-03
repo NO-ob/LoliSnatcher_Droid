@@ -29,11 +29,10 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 // import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if(Platform.isWindows || Platform.isLinux) {
+  if (Platform.isWindows || Platform.isLinux) {
     DartVLC.initialize();
 
     // Init db stuff
@@ -61,12 +60,14 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
     settingsHandler = Get.put(SettingsHandler());
-    settingsHandler.initialize();
+    // settingsHandler.initialize();
     searchHandler = Get.put(SearchHandler(updateState));
     snatchHandler = Get.put(SnatchHandler());
     viewerHandler = Get.put(ViewerHandler());
 
-    if(Platform.isAndroid || Platform.isIOS) {
+    initHandlers();
+
+    if (Platform.isAndroid || Platform.isIOS) {
       var window = WidgetsBinding.instance!.window;
       window.onPlatformBrightnessChanged = () {
         // This callback is called every time the brightness changes and forces the app root to restate.
@@ -78,6 +79,11 @@ class _MainAppState extends State<MainApp> {
     setMaxFPS();
   }
 
+  void initHandlers() async {
+    await settingsHandler.initialize();
+    await searchHandler.restoreTabs();
+  }
+
   void setMaxFPS() async {
     // enable higher refresh rate
     // TODO make this a setting?
@@ -86,19 +92,19 @@ class _MainAppState extends State<MainApp> {
     // https://github.com/flutter/flutter/issues/49757
     // https://github.com/flutter/flutter/issues/90675
 
-    if(Platform.isAndroid) {
+    if (Platform.isAndroid) {
       await FlutterDisplayMode.setHighRefreshRate();
       DisplayMode currentMode = await FlutterDisplayMode.active;
-      
-      if(currentMode.refreshRate > maxFps) {
+
+      if (currentMode.refreshRate > maxFps) {
         maxFps = currentMode.refreshRate.round();
         updateState();
       }
       debugPrint('LoliSnatcher: Set Max FPS $maxFps');
       // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
     }
-  }  
-    
+  }
+
   @override
   void dispose() {
     // TODO
@@ -106,19 +112,15 @@ class _MainAppState extends State<MainApp> {
   }
 
   void updateState() {
-    setState(() { });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
-        ? ThemeItem(
-          name: 'Custom',
-          primary: settingsHandler.customPrimaryColor.value,
-          accent: settingsHandler.customAccentColor.value
-        )
-        : settingsHandler.theme.value;
+          ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
+          : settingsHandler.theme.value;
       ThemeMode themeMode = settingsHandler.themeMode.value;
       Brightness? platformBrightness = SchedulerBinding.instance?.window.platformBrightness;
       bool isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrightness == Brightness.dark);
@@ -230,8 +232,8 @@ class _MainAppState extends State<MainApp> {
             themeMode: themeMode,
             navigatorKey: Get.key,
             home: Preloader(),
-          )
-        )
+          ),
+        ),
       );
     });
   }
@@ -240,15 +242,14 @@ class _MainAppState extends State<MainApp> {
 // Added a preloader to load booruconfigs and settings other wise the booruselector misbehaves
 class Preloader extends StatelessWidget {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if(settingsHandler.isInit.value) {        
-        if(Platform.isAndroid || Platform.isIOS) {
+      if (settingsHandler.isInit.value) {
+        if (Platform.isAndroid || Platform.isIOS) {
           // set system ui mode
-          if(settingsHandler.showStatusBar) {
+          if (settingsHandler.showStatusBar) {
             SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
             // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
           } else {
@@ -257,7 +258,7 @@ class Preloader extends StatelessWidget {
           }
 
           // force landscape orientation if enabled desktop mode on mobile device
-          if(settingsHandler.appMode != "Mobile") {
+          if (settingsHandler.appMode != "Mobile") {
             SystemChrome.setPreferredOrientations([
               DeviceOrientation.landscapeRight,
               DeviceOrientation.landscapeLeft,
@@ -274,9 +275,9 @@ class Preloader extends StatelessWidget {
           color: Colors.black,
           child: Center(
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.pink)
-            )
-          )
+              valueColor: AlwaysStoppedAnimation(Colors.pink),
+            ),
+          ),
         );
       }
     });
@@ -289,10 +290,8 @@ class Home extends StatefulWidget {
   Home();
 }
 
-
 class _HomeState extends State<Home> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   Timer? cacheClearTimer;
@@ -311,7 +310,7 @@ class _HomeState extends State<Home> {
 
     initDeepLinks();
 
-    searchHandler.restoreTabs();
+    // searchHandler.restoreTabs();
 
     // force cache clear every minute + perform tabs backup
     cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
@@ -331,7 +330,7 @@ class _HomeState extends State<Home> {
     });
 
     // memeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-    //   if(settingsHandler.isMemeTheme.value) { 
+    //   if(settingsHandler.isMemeTheme.value) {
     //     if(memeCount + 1 < settingsHandler.map['theme']?['options'].length) {
     //       memeCount ++;
     //     } else {
@@ -351,7 +350,7 @@ class _HomeState extends State<Home> {
   }
 
   void initDeepLinks() async {
-    if(Platform.isAndroid || Platform.isIOS) {
+    if (Platform.isAndroid || Platform.isIOS) {
       appLinks = AppLinks(
         onAppLink: (Uri uri, String stringUri) {
           openAppLink(stringUri);
@@ -370,10 +369,10 @@ class _HomeState extends State<Home> {
     Logger.Inst().log(url, "AppLinks", "openAppLink", LogTypes.settingsLoad);
     // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
 
-    if(url.contains('loli.snatcher')) {
+    if (url.contains('loli.snatcher')) {
       Booru booru = Booru.fromLink(url);
-      if(booru.name != null && booru.name!.isNotEmpty) {
-        if(settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
+      if (booru.name != null && booru.name!.isNotEmpty) {
+        if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
           // Rename config if its already in the list
           booru.name = booru.name! + ' (duplicate)';
         }
@@ -392,22 +391,20 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    if(settingsHandler.appMode != "Mobile"){
+    if (settingsHandler.appMode != "Mobile") {
       return DesktopHome();
     } else {
       return MobileHome();
     }
   }
-
 }
-
 
 class CustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
-  Set<PointerDeviceKind> get dragDevices => { 
-    ...PointerDeviceKind.values
-    // PointerDeviceKind.touch,
-    // PointerDeviceKind.mouse,
-  };
+  Set<PointerDeviceKind> get dragDevices => {
+        ...PointerDeviceKind.values
+        // PointerDeviceKind.touch,
+        // PointerDeviceKind.mouse,
+      };
 }

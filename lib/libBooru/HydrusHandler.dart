@@ -103,9 +103,9 @@ class HydrusHandler extends BooruHandler{
                 List dynKnownUrls = parsedResponse['metadata'][i]['known_urls'];
                 List<String> knownUrls = [];
                 if (dynKnownUrls.isNotEmpty){
-                  dynKnownUrls.forEach((element) {
+                  for (var element in dynKnownUrls) {
                     knownUrls.add(element.toString());
-                  });
+                  }
                 }
                 BooruItem item = BooruItem(
                   fileURL: "${booru.baseURL}/get_files/file?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
@@ -148,10 +148,10 @@ class HydrusHandler extends BooruHandler{
       var dio = Dio();
       List<String> tags = [];
       String tagString = '';
-      item.tagsList.forEach((element) {
+      for (var element in item.tagsList) {
         tags.add(element.replaceAll("_", " "));
         tagString += '"$element",';
-      });
+      }
       tagString = tagString.substring(0,tagString.length -1);
       Response dioResponse = await dio.post(url,
         options: Options(headers: {

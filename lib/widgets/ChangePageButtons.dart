@@ -43,15 +43,15 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
       updateState();
     });
 
-    bottomOffset = searchHandler.viewedItem.value.isVideo() ? kToolbarHeight * 3 : kToolbarHeight * 2;
-    itemListener = searchHandler.viewedItem.listen((BooruItem item) {
-      if (item.isVideo()) {
-        bottomOffset = kToolbarHeight * 3;
-      } else {
-        bottomOffset = kToolbarHeight * 2;
-      }
-      updateState();
-    });
+    bottomOffset = kToolbarHeight * 3; // searchHandler.viewedItem.value.isVideo() ? kToolbarHeight * 3 : kToolbarHeight * 2;
+    // itemListener = searchHandler.viewedItem.listen((BooruItem item) {
+    //   if (item.isVideo()) {
+    //     bottomOffset = kToolbarHeight * 3;
+    //   } else {
+    //     bottomOffset = kToolbarHeight * 2;
+    //   }
+    //   updateState();
+    // });
   }
 
   void updateState() {
@@ -69,7 +69,7 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
 
   void changePage(int direction) {
     if (widget.controller?.hasClients ?? false) {
-      if(repeatCount > 0) {
+      if (repeatCount > 0) {
         ServiceHandler.vibrate(duration: 2);
       }
       widget.controller!.jumpToPage(((widget.controller!.page ?? 0) + direction).round());
@@ -77,7 +77,7 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
   }
 
   Widget buildButton(IconData icon, int direction) {
-    final int fasterAfter = 20;
+    const int fasterAfter = 20;
 
     return GestureDetector(
       onLongPressStart: (details) {
@@ -120,21 +120,22 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
 
   @override
   Widget build(BuildContext context) {
-    if (isVisible) {
-      return AnimatedPositioned(
+    return AnimatedPositioned(
+      duration: Duration(milliseconds: 200),
+      bottom: bottomOffset,
+      right: settingsHandler.changePageButtonsPosition == "Right" ? 40 : null,
+      left: settingsHandler.changePageButtonsPosition == "Left" ? 40 : null,
+      child: AnimatedSwitcher(
         duration: Duration(milliseconds: 200),
-        bottom: bottomOffset,
-        right: settingsHandler.changePageButtonsPosition == "Right" ? 40 : null,
-        left: settingsHandler.changePageButtonsPosition == "Left" ? 40 : null,
-        child: Row(
-          children: <Widget>[
-            buildButton(Icons.arrow_back_ios, -1),
-            buildButton(Icons.arrow_forward_ios, 1),
-          ],
-        ),
-      );
-    } else {
-      return const SizedBox();
-    }
+        child: isVisible
+            ? Row(
+                children: <Widget>[
+                  buildButton(Icons.arrow_back_ios, -1),
+                  buildButton(Icons.arrow_forward_ios, 1),
+                ],
+              )
+            : const SizedBox(),
+      ),
+    );
   }
 }

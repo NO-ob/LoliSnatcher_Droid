@@ -19,7 +19,7 @@ class LoliSync{
   int amount = -1;
   int current = -1;
 
-  var server;
+  HttpServer? server;
   bool syncKilled = false;
 
   Stream<String> startServer(String? ipOverride, String? portOverride) async* {
@@ -33,7 +33,7 @@ class LoliSync{
     server = await HttpServer.bind(ip, port);
 
     yield "Server active at $ip:$port";
-    await for (var req in server) {
+    await for (var req in server!) {
       Logger.Inst().log(req.uri.path.toString(), "LoliSync", "startServer", LogTypes.loliSyncInfo);
       switch (req.uri.path.toString()) {
         case("/lolisync/booruitem"):
@@ -185,7 +185,7 @@ class LoliSync{
 
 
   void killServer() async {
-    await server.close();
+    await server?.close();
     FlashElements.showSnackbar(
       title: Text(
         "LoliSync server killed!",
@@ -310,9 +310,9 @@ class LoliSync{
         case "Settings":
           yield "Sync Starting $address";
           Map<String, dynamic> settingsJSON = settingsHandler.toJSON();
-          settingsHandler.deviceSpecificSettings.forEach((element) {
+          for (var element in settingsHandler.deviceSpecificSettings) {
             settingsJSON.remove(element);
-          });
+          }
           String resp = await sendSettings(settingsJSON);
           yield resp;
           break;

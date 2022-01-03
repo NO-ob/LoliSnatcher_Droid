@@ -136,9 +136,12 @@ class _BooruPageState extends State<BooruPage> {
                 SettingsButton(name: '', enabled: false),
                 SettingsBooruDropdown(
                   selected: selectedBooru,
-                  onChanged: (Booru? newValue){
+                  onChanged: (Booru? newValue) {
+                    final bool isNewValuePresent = settingsHandler.booruList.contains(newValue);
                     setState((){
-                      selectedBooru = newValue;
+                      selectedBooru = isNewValuePresent ? newValue : settingsHandler.booruList[0];
+                      settingsHandler.prefBooru = selectedBooru?.name ?? '';
+                      settingsHandler.sortBooruList();
                     });
                   },
                   title: 'Booru',
@@ -361,7 +364,10 @@ class _BooruPageState extends State<BooruPage> {
                             // Rename config if its already in the list
                             booru.name = booru.name! + ' (duplicate)';
                           }
-                          Navigator.of(context).push(MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => BooruEdit(booru)));
+                          Navigator.of(context).push(MaterialPageRoute(
+                            fullscreenDialog: true,
+                            builder: (BuildContext context) => BooruEdit(booru),
+                          ));
                         }
                       } else {
                         FlashElements.showSnackbar(

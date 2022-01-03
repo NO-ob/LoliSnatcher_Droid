@@ -325,76 +325,80 @@ class SettingsBooruDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Booru> boorus = Get.find<SettingsHandler>().booruList;
     return ListTile(
       title: Container(
         margin: EdgeInsets.symmetric(vertical: 8),
-        child: Obx(() => GestureDetector(
-          onTap: openItemsList,
-          child: DropdownButtonFormField<Booru>(
-            key: dropdownKey,
-            value: selected,
-            icon: Icon(Icons.arrow_drop_down),
-            onChanged: onChanged,
-            menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: title,
-              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
-              contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
-            ),
-            dropdownColor: Get.theme.colorScheme.surface,
-            selectedItemBuilder: (BuildContext context) {
-                return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
-                  return DropdownMenuItem<Booru>(
-                    value: value,
-                    child: Container(
-                      child: Row(
-                        children: <Widget>[
-                          (value.type == "Favourites"
-                              ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                              : CachedFavicon(value.faviconURL!)
-                          ),
-                          Text(" ${value.name!}"),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList();
-              },
-            items: boorus.map<DropdownMenuItem<Booru>>((Booru value){
-              bool isCurrent = value == selected;
+        child: Obx(() {
+          List<Booru> boorus = Get.find<SettingsHandler>().booruList;
+          Booru? newSelected = boorus.contains(selected) ? selected : boorus.first;
 
-              return DropdownMenuItem<Booru>(
-                value: value,
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: isCurrent
-                  ? BoxDecoration(
-                    border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                    borderRadius: BorderRadius.circular(5),
-                  )
-                  : null,
-                  child: Row(
-                    children: <Widget>[
-                      (value.type == "Favourites"
-                          ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                          : CachedFavicon(value.faviconURL!)
-                      ),
-                      Text(" ${value.name!}", style: TextStyle(color: Get.theme.colorScheme.onSurface)),
-                    ],
-                  ),
+          return GestureDetector(
+            onTap: openItemsList,
+            child: DropdownButtonFormField<Booru>(
+              key: dropdownKey,
+              value: newSelected,
+              icon: Icon(Icons.arrow_drop_down),
+              onChanged: onChanged,
+              menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: title,
+                labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
+                contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
                 ),
-              );
-            }).toList(),
-          )
-        ))
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+                ),
+              ),
+              dropdownColor: Get.theme.colorScheme.surface,
+              selectedItemBuilder: (BuildContext context) {
+                  return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
+                    return DropdownMenuItem<Booru>(
+                      value: value,
+                      child: Container(
+                        child: Row(
+                          children: <Widget>[
+                            (value.type == "Favourites"
+                                ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                                : CachedFavicon(value.faviconURL!)
+                            ),
+                            Text(" ${value.name!}"),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList();
+                },
+              items: boorus.map<DropdownMenuItem<Booru>>((Booru value){
+                bool isCurrent = value == newSelected;
+
+                return DropdownMenuItem<Booru>(
+                  value: value,
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: isCurrent
+                    ? BoxDecoration(
+                      border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                      borderRadius: BorderRadius.circular(5),
+                    )
+                    : null,
+                    child: Row(
+                      children: <Widget>[
+                        (value.type == "Favourites"
+                            ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                            : CachedFavicon(value.faviconURL!)
+                        ),
+                        Text(" ${value.name!}", style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            )
+          );
+        })
       ),
       trailing: trailingIcon,
       dense: false,
@@ -457,7 +461,7 @@ class SettingsTextInput extends StatefulWidget {
 
 class _SettingsTextInputState extends State<SettingsTextInput> {
   bool isFocused = false;
-  FocusNode _focusNode = FocusNode();
+  final FocusNode _focusNode = FocusNode();
 
   Timer? _longPressRepeatTimer;
   int repeatCount = 0;
@@ -465,10 +469,19 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   @override
   void initState() {
     super.initState();
-    _focusNode.addListener(() {
-      isFocused = _focusNode.hasFocus;
-      setState(() { });
-    });
+    _focusNode.addListener(focusListener);
+  }
+
+  void focusListener() {
+    isFocused = _focusNode.hasFocus;
+    setState(() { });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.removeListener(focusListener);
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void stepNumberDown() {

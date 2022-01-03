@@ -21,7 +21,7 @@ class ThumbCardBuild extends StatelessWidget {
 
   void onDoubleTap(int index) async {
     BooruItem item = tab.booruHandler.filteredFetched[index];
-    if(item.isFavourite.value != null) {
+    if (item.isFavourite.value != null) {
       ServiceHandler.vibrate();
 
       item.isFavourite.toggle();
@@ -44,14 +44,8 @@ class ThumbCardBuild extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: item.fileURL));
     FlashElements.showSnackbar(
       duration: Duration(seconds: 2),
-      title: Text(
-        "Copied File URL to clipboard!",
-        style: TextStyle(fontSize: 20)
-      ),
-      content: Text(
-        item.fileURL,
-        style: TextStyle(fontSize: 16)
-      ),
+      title: Text("Copied File URL to clipboard!", style: TextStyle(fontSize: 20)),
+      content: Text(item.fileURL, style: TextStyle(fontSize: 16)),
       leadingIcon: Icons.copy,
       sideColor: Colors.green,
     );
@@ -72,13 +66,13 @@ class ThumbCardBuild extends StatelessWidget {
           borderOnForeground: true,
           child: Ink(
             decoration: (isCurrent || isSelected)
-              ? BoxDecoration(
-                border: Border.all(
-                  color: isCurrent ? Colors.red : Get.theme.colorScheme.secondary,
-                  width: 2.0,
-                ),
-              )
-              : null,
+                ? BoxDecoration(
+                    border: Border.all(
+                      color: isCurrent ? Colors.red : Get.theme.colorScheme.secondary,
+                      width: 2.0,
+                    ),
+                  )
+                : null,
             child: GestureDetector(
               onSecondaryTap: () {
                 onSecondaryTap(index);
@@ -88,6 +82,7 @@ class ThumbCardBuild extends StatelessWidget {
                 highlightShape: BoxShape.rectangle,
                 containedInkWell: false,
                 highlightColor: Get.theme.colorScheme.secondary,
+                splashColor: Colors.pink,
                 child: ThumbBuild(index, columnCount, tab),
                 onTap: () {
                   onTap(index);
@@ -101,7 +96,7 @@ class ThumbCardBuild extends StatelessWidget {
               ),
             ),
           ),
-        )
+        ),
       );
     });
   }

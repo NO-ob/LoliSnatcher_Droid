@@ -47,7 +47,7 @@ class SettingsHandler extends GetxController {
   // runtime settings vars
   bool hasHydrus = false;
   bool mergeEnabled = false;
-  List<LogTypes> ignoreLogTypes = [];
+  List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
@@ -575,7 +575,7 @@ class SettingsHandler extends GetxController {
       }
     } catch(err) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err',"SettingsHandler","validateValue",LogTypes.settingsError);
+      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", LogTypes.settingsError);
       return settingParams["default"];
     }
   }
@@ -609,7 +609,6 @@ class SettingsHandler extends GetxController {
       dbHandler = DBHandler();
       favDbHandler = DBHandler();
     }
-    ignoreLogTypes.addAll(LogTypes.values);
     return true;
   }
 

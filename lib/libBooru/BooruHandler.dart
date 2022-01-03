@@ -12,6 +12,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 abstract class BooruHandler {
   // pagenum = -1 as "didn't load anything yet" state
   // gets set to higher number for special cases in handler factory
+  String className = 'BooruHandler';
   RxInt pageNum = (-1).obs;
   int limit = 20;
   String prevTags = "";
@@ -41,7 +42,7 @@ abstract class BooruHandler {
     }
 
     String? url = makeURL(tags);
-    Logger.Inst().log(url!, "BooruHandler", "Search", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log(url!, className, "Search", LogTypes.booruHandlerSearchURL);
     try {
       int length = fetched.length;
       Uri uri = Uri.parse(url);
@@ -53,13 +54,13 @@ abstract class BooruHandler {
           locked.value = true;
         }
       } else {
-        Logger.Inst().log("BooruHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("BooruHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("BooruHandler url response is: ${response.body}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("$className status is: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("$className url is: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("$className url response is: ${response.body}", className, "Search", LogTypes.booruHandlerFetchFailed);
         errorString.value = response.statusCode.toString();
       }
     } catch (e) {
-      Logger.Inst().log(e.toString(), "BooruHandler", "Search", LogTypes.exception);
+      Logger.Inst().log(e.toString(), className, "Search", LogTypes.exception);
       errorString.value = e.toString();
     }
 

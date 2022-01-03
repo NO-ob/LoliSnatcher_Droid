@@ -17,9 +17,10 @@ import 'package:LoliSnatcher/widgets/GridBuilder.dart';
 import 'package:LoliSnatcher/widgets/StaggeredBuilder.dart';
 import 'package:LoliSnatcher/widgets/WaterfallErrorButtons.dart';
 
+// TODO avoid rebuilding when global restate happens
+
 class WaterfallView extends StatefulWidget {
-  final SearchGlobal tab;
-  WaterfallView(this.tab);
+  WaterfallView();
   @override
   _WaterfallState createState() => _WaterfallState();
 }
@@ -33,14 +34,19 @@ class _WaterfallState extends State<WaterfallView> {
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   bool scrollDone = true;
-  StreamSubscription? viewedListener, isLoadingListener;
+  late StreamSubscription indexListener, viewedListener, isLoadingListener;
 
   @override
   void initState() {
     super.initState();
 
+    viewerHandler.inViewer.value = false;
+
     // scroll to current viewed item
     viewedListener = searchHandler.viewedIndex.listen(jumpTo);
+
+    // listen to current tab change to restore the scroll value
+    indexListener = searchHandler.index.listen(tabChanged);
 
     // listen to isLoading to select first loaded item for desktop
     isLoadingListener = searchHandler.isLoading.listen((bool isLoading) {
@@ -50,38 +56,28 @@ class _WaterfallState extends State<WaterfallView> {
     });
 
     setVolumeListener();
-
-    initView();
-  }
-
-  @override
-  void didUpdateWidget(WaterfallView oldWidget) {
-    bool isTabChanged = widget.tab.id != oldWidget.tab.id;
-    if(isTabChanged) {
-      initView();
-    }
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void initView() {
-    // reset bools
-    viewerHandler.inViewer.value = false;
-
-    // restore scroll position on tab change
-    if (searchHandler.gridScrollController.hasClients) {
-      searchHandler.gridScrollController.jumpTo(searchHandler.currentTab.scrollPosition);
-    } else { // if (searchHandler.currentTab.scrollPosition != 0) {
-      // TODO reset the controller when appMode changes
-      searchHandler.gridScrollController = AutoScrollController(
-        initialScrollOffset: searchHandler.currentTab.scrollPosition,
-        viewportBoundaryGetter: () => Rect.fromLTRB(0, settingsHandler.appMode == 'Desktop' ? 0 : (kToolbarHeight + 2), 0, 0),
-      );
-    }
-
-    // reser the volume butons state
+    // reset the volume butons state
     ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
 
-    // print('GRID INIT');
+    tabChanged(0);
+  }
+
+  void tabChanged(int newIndex) {
+    // print('tabChanged: ${searchHandler.currentTab.scrollPosition} ${searchHandler.gridScrollController.hasClients}');
+
+    // postpone scroll updates until the current render is done, since this is called after the global restate after exiting settings
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      // restore scroll position on tab change
+      if (searchHandler.gridScrollController.hasClients) {
+        searchHandler.gridScrollController.jumpTo(searchHandler.currentTab.scrollPosition);
+      } else { // if (searchHandler.currentTab.scrollPosition != 0) {
+        // TODO reset the controller when appMode changes
+        searchHandler.gridScrollController = AutoScrollController(
+          initialScrollOffset: searchHandler.currentTab.scrollPosition,
+          viewportBoundaryGetter: () => Rect.fromLTRB(0, settingsHandler.appMode == 'Desktop' ? 0 : (kToolbarHeight + 2), 0, 0),
+        );
+      }
+    });
   }
 
   void setVolumeListener() {
@@ -109,8 +105,9 @@ class _WaterfallState extends State<WaterfallView> {
 
   @override
   void dispose() {
-    viewedListener?.cancel();
-    isLoadingListener?.cancel();
+    indexListener.cancel();
+    viewedListener.cancel();
+    isLoadingListener.cancel();
     kbFocusNode.dispose();
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
@@ -119,12 +116,18 @@ class _WaterfallState extends State<WaterfallView> {
   }
 
   void jumpTo(int newIndex) async {
+    if (!searchHandler.gridScrollController.hasClients) {
+      return;
+    }
     if(newIndex == -1) {
       return;
     }
 
-    if(!viewerHandler.inViewer.value && settingsHandler.appMode == 'Mobile') {
-      await Future.delayed(Duration(milliseconds: 500));
+    bool isMobile = settingsHandler.appMode == 'Mobile';
+
+    if(!viewerHandler.inViewer.value && isMobile) {
+      return;
+      // await Future.delayed(Duration(milliseconds: 500));
     }
 
     if(newIndex == 0) {
@@ -132,9 +135,9 @@ class _WaterfallState extends State<WaterfallView> {
       searchHandler.gridScrollController.jumpTo(0);
     } else {
       // scroll to viewed item
-      searchHandler.gridScrollController.scrollToIndex(
+      await searchHandler.gridScrollController.scrollToIndex(
         newIndex,
-        duration: Duration(milliseconds: 50),
+        duration: Duration(milliseconds: isMobile ? 10 : 100),
         preferPosition: AutoScrollPosition.begin
       );
     }
@@ -187,17 +190,11 @@ class _WaterfallState extends State<WaterfallView> {
 
   @override
   Widget build(BuildContext context) {
-    // super.build(context);
-
-    if (FocusScope.of(context).focusedChild == null){
-      print("kb focus node requesting focus");
-      kbFocusNode.requestFocus();
-    }
-
     // print('!!! WATERFALL BUILD: ${searchHandler.currentFetched.length}');
 
     return RawKeyboardListener(
-      autofocus: false,
+      // Note: use autofocus instead focusedChild == null that was used before, old way caused unnecesary rebuilds and broke hero animation
+      autofocus: true,
       focusNode: kbFocusNode,
       onKey: (RawKeyEvent event) {
         // print('waterfall keyboard ${viewerHandler.inViewer.value}');

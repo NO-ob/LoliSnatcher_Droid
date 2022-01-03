@@ -160,9 +160,16 @@ class _NotesRendererState extends State<NotesRenderer> {
     final double scaledWidth = note.width * screenToImageRatio * ratioDiff;
     final double scaledHeight = note.height * screenToImageRatio * ratioDiff;
 
+    // TODO don't render when out of view
+    // ...but is it really needed? that will add extra calculations...
+
     // print('sW:$screenWidth sH:$screenHeight iW:$imageWidth iH:$imageHeight iR:$imageRatio');
     // print('rD:$ratioDiff sTOiR:$screenToImageRatio oX:$offsetX oY:$offsetY t:${note.content}');
     // print('-------');
+
+    if(loading) {
+      return const SizedBox();
+    }
 
     return NoteBuild(
       text: note.content,
@@ -193,7 +200,7 @@ class _NotesRendererState extends State<NotesRenderer> {
                 Positioned(
                   left: 60,
                   top: kToolbarHeight * 1.5,
-                  child: Container(
+                  child: SizedBox(
                     width: 30,
                     height: 30,
                     child: Stack(

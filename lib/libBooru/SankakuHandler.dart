@@ -11,10 +11,11 @@ import 'NoteItem.dart';
 import '../utilities/Logger.dart';
 
 
-final String className = 'SankakuHandler';
-
 class SankakuHandler extends BooruHandler{
   SankakuHandler(Booru booru,int limit) : super(booru,limit);
+
+  @override
+  String className = 'SankakuHandler';
 
   String authToken = "";
 
@@ -40,11 +41,11 @@ class SankakuHandler extends BooruHandler{
       fetched.value = [];
     }
     String url = makeURL(tags);
-    Logger.Inst().log(url, className,"Search", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log(url, className, "Search", LogTypes.booruHandlerSearchURL);
     try {
       if(authToken == "" && booru.userID != "" && booru.apiKey != "") {
         authToken = await getAuthToken();
-        Logger.Inst().log("Authtoken: $authToken", className,"Search", LogTypes.booruHandlerInfo);
+        Logger.Inst().log("Authtoken: $authToken", className, "Search", LogTypes.booruHandlerInfo);
       }
       Uri uri = Uri.parse(url);
       final response = await http.get(uri, headers: getHeaders());
@@ -54,12 +55,12 @@ class SankakuHandler extends BooruHandler{
         parseResponse(response);
         if (fetched.length == length){locked.value = true;}
       } else {
-        Logger.Inst().log("Sankaku load fail ${response.statusCode}", className,"Search", LogTypes.booruHandlerInfo);
-        Logger.Inst().log(response.body, className,"Search", LogTypes.booruHandlerInfo);
+        Logger.Inst().log("Sankaku load fail ${response.statusCode}", className, "Search", LogTypes.booruHandlerInfo);
+        Logger.Inst().log(response.body, className, "Search", LogTypes.booruHandlerInfo);
         errorString.value = response.statusCode.toString();
       }
     } catch(e) {
-      Logger.Inst().log(e.toString(), className,"Search", LogTypes.exception);
+      Logger.Inst().log(e.toString(), className, "Search", LogTypes.exception);
       errorString.value = e.toString();
     }
 
