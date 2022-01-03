@@ -291,7 +291,7 @@ class _MainDrawerState extends State<MainDrawer> {
                             ]
                           ),
                           action: () async {
-                            settingsHandler.showUpdate();
+                            settingsHandler.showUpdate(true);
                           },
                         );
                       } else {

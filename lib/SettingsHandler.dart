@@ -1423,12 +1423,26 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
-    // String fakeUpdate = '{"version_name": "2.0.0", "build_number": 999, "title": "Test Title", "changelog": "Test Changelog\\r\\n- Test Changelog\\r\\n-- Test Changelog\\r\\n", "is_in_store": true, "is_update_in_store": true, "is_important": true, "store_package": "com.android.chrome", "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"}'; // fake update json for tests
+    const String changelog = r"""Changelog text here""";
+    Map<String, dynamic> fakeUpdate = {
+      "version_name": "2.1.0",
+      "build_number": 164,
+      "title": "Comments, Notes and Fixes",
+      "changelog": changelog,
+      "is_in_store": true, // is app still in store
+      "is_update_in_store": false, // is update approved in store
+      "is_important": false, // is update important => force open dialog on start
+      "store_package": "com.noaisu.play.loliSnatcher", // custom app package name, to allow to redirect store users to new app if it will be needed
+      "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
+    }; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
     try {
       final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/update.json'));
       final json = jsonDecode(response.body);
-      // final json = jsonDecode(fakeUpdate);
+      // final json = jsonDecode(jsonEncode(fakeUpdate));
+
+      // use this and fakeUpdate to generate json file
+      Logger.Inst().log(jsonEncode(json), 'SettingsHandler', 'checkUpdate', LogTypes.settingsError);
 
       updateInfo.value = UpdateInfo(
         versionName: json["version_name"] ?? '0.0.0',
@@ -1442,29 +1456,27 @@ class SettingsHandler extends GetxController {
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
 
-      // if current build number is less than update build number in json
-      if(buildNumber < (updateInfo.value!.buildNumber)) {
-        // is allowed to open update dialog (either after user pressed a button or update is considered important)
-        if((withMessage || updateInfo.value!.isImportant)) {
-          // if app is from store and app is still in store
-          if(EnvironmentConfig.isFromStore && updateInfo.value!.isInStore) {
-            // if update is available in store
-            if(updateInfo.value!.isUpdateInStore) {
-              showUpdate();
-            } else {
-              // otherwise show latest version message
+      if(buildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
+        if(EnvironmentConfig.isFromStore) { // installed from store
+          if(updateInfo.value!.isInStore) { // app is still in store
+            if(updateInfo.value!.isUpdateInStore) { // update is in store
+              showUpdate(withMessage || updateInfo.value!.isImportant);
+            } else { // update is not in store yet, show latest version message
               showLastVersionMessage(withMessage);
+              updateInfo.value = null;
             }
-          } else {
-            // otherwise always show dialog with a link to github
-            showUpdate();
+          } else { // app was removed from store
+            // then always notify user so they can move to github version and get news about removal
+            showUpdate(true);
           }
+        } else { // installed from github
+          showUpdate(withMessage || updateInfo.value!.isImportant);
         }
-      } else {
-        // otherwise show latest version message
+      } else { // otherwise show latest version message
         showLastVersionMessage(withMessage);
         updateInfo.value = null;
       }
+
     } catch (e) {
       if(withMessage) {
         FlashElements.showSnackbar(
@@ -1497,8 +1509,8 @@ class SettingsHandler extends GetxController {
     }
   }
 
-  void showUpdate() {
-    if(updateInfo.value != null) {
+  void showUpdate(bool withMessage) {
+    if(withMessage && updateInfo.value != null) {
       // TODO get from some external variable when building
       bool isFromStore = EnvironmentConfig.isFromStore;
 
@@ -1508,7 +1520,7 @@ class SettingsHandler extends GetxController {
           contentItems: [
             Text('Currently Installed: $verStr+$buildNumber'),
             Text(''),
-            Text('${updateInfo.value!.title}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(updateInfo.value!.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
             Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(''),
