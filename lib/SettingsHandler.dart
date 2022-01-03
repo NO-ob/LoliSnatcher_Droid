@@ -38,8 +38,8 @@ class SettingsHandler extends GetxController {
   // version vars
   String appName = "LoliSnatcher";
   String packageName = "com.noaisu.loliSnatcher";
-  String verStr = "2.0.1";
-  int buildNumber = 164;
+  String verStr = "2.1.0";
+  int buildNumber = 165;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
