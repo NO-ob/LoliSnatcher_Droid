@@ -423,7 +423,7 @@ class SearchHandler extends GetxController {
           }
         } else {
           foundBrokenItem = true;
-          brokenItems.add(booruAndTags[0] + ': ' + booruAndTags[1]);
+          brokenItems.add(booruAndTags[0] + ': ' + (booruAndTags.length > 1 ? booruAndTags[1] : ""));
         }
       }
     }
