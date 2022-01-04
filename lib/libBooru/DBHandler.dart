@@ -346,7 +346,7 @@ class DBHandler{
   }
 
   Future<void> clearTabRestore() async {
-    await db?.rawDelete("DELETE FROM TabRestore WHERE id IN (SELECT id FROM TabRestore);"); // remove previous items
+    await db?.rawDelete("DELETE FROM TabRestore WHERE id IS NOT NULL;"); // remove previous items
     return;
   }
 
