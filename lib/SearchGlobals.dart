@@ -399,6 +399,7 @@ class SearchHandler extends GetxController {
     if(result.length == 2) {
       // split list into tabs
       List<List<String>> splitInput = decodeBackupString(result[1]);
+      // print('restoreTabs: ${splitInput}');
       for (List<String> booruAndTags in splitInput) {
         // check for parsing errors
         bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
@@ -466,9 +467,9 @@ class SearchHandler extends GetxController {
         defaultBooru = settingsHandler.booruList[0];
       }
       if(defaultBooru.type != null) {
-        changeTabIndex(0);
         SearchGlobal newTab = SearchGlobal(defaultBooru.obs, null, settingsHandler.defTags);
         list.add(newTab);
+        changeTabIndex(0);
       }
       searchTextController.text = settingsHandler.defTags;
     }
@@ -569,6 +570,7 @@ class SearchHandler extends GetxController {
   void backupTabs() {
     String? backupString = getBackupString();
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    // print('backupString: $backupString');
     if(backupString != null) {
       settingsHandler.dbHandler.addTabRestore(backupString);
     } else {

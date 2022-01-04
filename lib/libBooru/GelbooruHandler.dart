@@ -37,6 +37,14 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   void parseResponse(response) {
+    if(booru.baseURL!.contains('gelbooru.com')) {
+      parseJsonResponse(response);
+    } else {
+      parseXmlResponse(response);
+    }
+  }
+
+  void parseJsonResponse(response) {
     var parsedResponse = jsonDecode(response.body);
     var posts = (response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse) ?? []; // gelbooru: { post: [...] }, others [post, ...]
     List<BooruItem> newItems = [];
@@ -56,6 +64,7 @@ class GelbooruHandler extends BooruHandler {
             sampleURL = booru.baseURL! + sampleURL;
             previewURL = booru.baseURL! + previewURL;
           }
+
           BooruItem item = BooruItem(
             fileURL: fileURL,
             sampleURL: sampleURL,
@@ -74,9 +83,70 @@ class GelbooruHandler extends BooruHandler {
             serverId: current["id"]?.toString(),
             rating: current["rating"]?.toString(),
             score: current["score"]?.toString(),
-            // sources: [current["source"]!],
+            sources: (current["source"].runtimeType == String) ? [current["source"]!] : null,
             md5String: current["md5"]?.toString(),
             postDate: current["created_at"]?.toString(), // Fri Jun 18 02:13:45 -0500 2021
+            postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
+          );
+
+          newItems.add(item);
+        }
+      } catch (e) {
+        Logger.Inst().log(e.toString(), className, "parseResponse", LogTypes.exception);
+      }
+    }
+
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
+  }
+
+
+  dynamic getAttrOrElem(XmlElement item, String key) {
+    return booru.baseURL!.contains('gelbooru.com') ? item.getElement(key)?.innerText : item.getAttribute(key);
+  }
+  void parseXmlResponse(response) {
+    var parsedResponse = XmlDocument.parse(response.body);
+    var posts = parsedResponse.findAllElements('post'); // gelbooru: <post><file_url>...</file_url></post>, others <post file_url="..." />
+    List<BooruItem> newItems = [];
+
+    for (int i = 0; i < posts.length; i++) {
+      var current = posts.elementAt(i);
+      try {
+        if (getAttrOrElem(current, "file_url") != null) {
+          // Fix for bleachbooru
+          String fileURL = "", sampleURL = "", previewURL = "";
+          fileURL += getAttrOrElem(current, "file_url")!.toString();
+          // sample url is optional, on gelbooru there is sample == 0/1 to tell if it exists
+          sampleURL += getAttrOrElem(current, "sample_url")?.toString() ?? getAttrOrElem(current, "file_url")!.toString();
+          previewURL += getAttrOrElem(current, "preview_url")!.toString();
+          if (!fileURL.contains("http")) {
+            fileURL = booru.baseURL! + fileURL;
+            sampleURL = booru.baseURL! + sampleURL;
+            previewURL = booru.baseURL! + previewURL;
+          }
+
+          BooruItem item = BooruItem(
+            fileURL: fileURL,
+            sampleURL: sampleURL,
+            thumbnailURL: previewURL,
+            tagsList: getAttrOrElem(current, "tags").split(" "),
+            postURL: makePostURL(getAttrOrElem(current, "id")!.toString()),
+            fileWidth: double.tryParse(getAttrOrElem(current, "width")?.toString() ?? '') ?? null,
+            fileHeight: double.tryParse(getAttrOrElem(current, "height")?.toString() ?? '') ?? null,
+            sampleWidth: double.tryParse(getAttrOrElem(current, "sample_width")?.toString() ?? '') ?? null,
+            sampleHeight: double.tryParse(getAttrOrElem(current, "sample_height")?.toString() ?? '') ?? null,
+            previewWidth: double.tryParse(getAttrOrElem(current, "preview_width")?.toString() ?? '') ?? null,
+            previewHeight: double.tryParse(getAttrOrElem(current, "preview_height")?.toString() ?? '') ?? null,
+            hasNotes: getAttrOrElem(current, "has_notes")?.toString() == 'true',
+            // TODO rule34xxx api bug? sometimes (mostly when there is only one comment) api returns empty array
+            hasComments: getAttrOrElem(current, "has_comments")?.toString() == 'true',
+            serverId: getAttrOrElem(current, "id")?.toString(),
+            rating: getAttrOrElem(current, "rating")?.toString(),
+            score: getAttrOrElem(current, "score")?.toString(),
+            sources: [getAttrOrElem(current, "source")!],
+            md5String: getAttrOrElem(current, "md5")?.toString(),
+            postDate: getAttrOrElem(current, "created_at")?.toString(), // Fri Jun 18 02:13:45 -0500 2021
             postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
           );
 
@@ -108,10 +178,11 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeURL(String tags) {
     int cappedPage = max(0, pageNum.value); // needed because searchCount happens before first page increment
+    String isJson = booru.baseURL!.contains("gelbooru") ? "&json=1" : "&json=0";
     if (booru.apiKey == "") {
-      return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1";
+      return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$isJson";
     } else {
-      return "${booru.baseURL}/index.php?api_key=${booru.apiKey}&user_id=${booru.userID}&page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1";
+      return "${booru.baseURL}/index.php?api_key=${booru.apiKey}&user_id=${booru.userID}&page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$isJson";
     }
   }
 
@@ -165,7 +236,7 @@ class GelbooruHandler extends BooruHandler {
   Future<void> searchCount(String input) async {
     int result = 0;
     // gelbooru json has count in @attributes, but there is no count data on r34xxx json, so we switch back to xml
-    String url = booru.baseURL!.contains('gelbooru.com') ? makeURL(input) : makeURL(input).replaceFirst('json=1', 'json=0'); 
+    String url = makeURL(input);
 
     try {
       Uri uri = Uri.parse(url);
@@ -208,6 +279,12 @@ class GelbooruHandler extends BooruHandler {
         if (commentsXML.length > 0) {
           for (int i = 0; i < commentsXML.length; i++) {
             var current = commentsXML.elementAt(i);
+            String? avatar = booru.baseURL!.contains("gelbooru.com")
+              ? (current.getAttribute("creator_id")!.isEmpty
+                  ? "${booru.baseURL}/user_avatars/avatar_${current.getAttribute("creator")}.jpg"
+                  : "${booru.baseURL}/user_avatars/honkonymous.png")
+              : null;
+
             comments.add(CommentItem(
               id: current.getAttribute("id"),
               title: current.getAttribute("id"),
@@ -215,6 +292,7 @@ class GelbooruHandler extends BooruHandler {
               authorID: current.getAttribute("creator_id"),
               authorName: current.getAttribute("creator"),
               postID: current.getAttribute("post_id"),
+              avatarUrl: avatar,
               // TODO broken on rule34xxx? returns current time
               createDate: current.getAttribute("created_at"), // 2021-11-15 12:09
               createDateFormat: "yyyy-MM-dd HH:mm",
