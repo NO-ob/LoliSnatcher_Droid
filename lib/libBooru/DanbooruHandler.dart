@@ -43,7 +43,6 @@ class DanbooruHandler extends BooruHandler{
               thumbnailURL: current["preview_file_url"].toString(),
               tagsList: current["tag_string"].toString().split(" "),
               postURL: makePostURL(current["id"].toString()),
-              fileExt: current["file_ext"].toString(),
               fileSize: int.tryParse(current["file_size"].toString()) ?? null,
               fileHeight: double.tryParse(current["image_height"].toString()) ?? null,
               fileWidth: double.tryParse(current["image_width"].toString()) ?? null,
