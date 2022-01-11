@@ -3,7 +3,7 @@
 	"build_number": 169,
 	"title": "Danbooru",
 	"changelog": "Main changes:\n- Fix Danbooru",
-	"is_in_store": true,
+	"is_in_store": false,
 	"is_update_in_store": false,
 	"is_important": false,
 	"store_package": "com.noaisu.play.loliSnatcher",
