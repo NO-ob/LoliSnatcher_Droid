@@ -26,8 +26,9 @@ class DanbooruHandler extends BooruHandler{
 
     // Create a BooruItem for each post in the list
     List<BooruItem> newItems = [];
-    try {
-      for (int i = 0; i < posts.length; i++) {
+
+    for (int i = 0; i < posts.length; i++) {
+      try {
         var current = posts.elementAt(i);
         Logger.Inst().log(current.toString(), "DanbooruHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
         /**
@@ -62,11 +63,10 @@ class DanbooruHandler extends BooruHandler{
         } else {
           Logger.Inst().log("Item #$i has no file url", "DanbooruHandler", "parseResponse", LogTypes.booruHandlerInfo);
         }
+      } catch (e){
+        Logger.Inst().log("Exception during fetch $e", "DanbooruHandler", "parseResponse", LogTypes.booruHandlerFetchFailed);
       }
-    } catch (e){
-      Logger.Inst().log("Exception during fetch $e", "DanbooruHandler", "parseResponse", LogTypes.exception);
     }
-
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
     setMultipleTrackedValues(lengthBefore, fetched.length);
