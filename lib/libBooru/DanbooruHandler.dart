@@ -38,7 +38,7 @@ class DanbooruHandler extends BooruHandler{
         if (current.containsKey("file_url")){
           if ((current["file_url"].length > 0)) {
             BooruItem item = BooruItem(
-              fileURL: current["file_url"].toString(),
+              fileURL: current["file_url"].toString().endsWith(".zip") ? current["large_file_url"].toString() : current["file_url"].toString(),
               sampleURL: current["large_file_url"].toString(),
               thumbnailURL: current["preview_file_url"].toString(),
               tagsList: current["tag_string"].toString().split(" "),
