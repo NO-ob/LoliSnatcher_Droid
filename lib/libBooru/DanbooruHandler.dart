@@ -26,37 +26,45 @@ class DanbooruHandler extends BooruHandler{
 
     // Create a BooruItem for each post in the list
     List<BooruItem> newItems = [];
-    for (int i = 0; i < posts.length; i++) {
-      var current = posts.elementAt(i);
-      Logger.Inst().log(current.toString(), "DanbooruHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
-      /**
-       * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
-       * to go with the rest of the data so cannot be displayed and are pointless for the app
-       */
-      if ((current["file_url"].length > 0)) {
-        BooruItem item = BooruItem(
-          fileURL: current["file_url"].toString(),
-          sampleURL: current["large_file_url"].toString(),
-          thumbnailURL: current["preview_file_url"].toString(),
-          tagsList: current["tag_string"].toString().split(" "),
-          postURL: makePostURL(current["id"].toString()),
-          fileExt: current["file_ext"].toString(),
-          fileSize: int.tryParse(current["file_size"].toString()) ?? null,
-          fileHeight: double.tryParse(current["image_height"].toString()) ?? null,
-          fileWidth: double.tryParse(current["image_width"].toString()) ?? null,
-          hasNotes: current["last_noted_at"] != null,
-          hasComments: current["last_commented_at"] != null,
-          serverId: current["id"].toString(),
-          rating: current["rating"].toString(),
-          score: current["score"].toString(),
-          sources: [current["source"].toString()],
-          md5String: current["md5"].toString(),
-          postDate: current["created_at"].toString(), // 2021-06-17T16:27:45-04:00
-          postDateFormat: "yyyy-MM-dd'T'HH:mm:ss", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ssZ",
-        );
+    try {
+      for (int i = 0; i < posts.length; i++) {
+        var current = posts.elementAt(i);
+        Logger.Inst().log(current.toString(), "DanbooruHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
+        /**
+         * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
+         * to go with the rest of the data so cannot be displayed and are pointless for the app
+         */
+        if (current.containsKey("file_url")){
+          if ((current["file_url"].length > 0)) {
+            BooruItem item = BooruItem(
+              fileURL: current["file_url"].toString(),
+              sampleURL: current["large_file_url"].toString(),
+              thumbnailURL: current["preview_file_url"].toString(),
+              tagsList: current["tag_string"].toString().split(" "),
+              postURL: makePostURL(current["id"].toString()),
+              fileExt: current["file_ext"].toString(),
+              fileSize: int.tryParse(current["file_size"].toString()) ?? null,
+              fileHeight: double.tryParse(current["image_height"].toString()) ?? null,
+              fileWidth: double.tryParse(current["image_width"].toString()) ?? null,
+              hasNotes: current["last_noted_at"] != null,
+              hasComments: current["last_commented_at"] != null,
+              serverId: current["id"].toString(),
+              rating: current["rating"].toString(),
+              score: current["score"].toString(),
+              sources: [current["source"].toString()],
+              md5String: current["md5"].toString(),
+              postDate: current["created_at"].toString(), // 2021-06-17T16:27:45-04:00
+              postDateFormat: "yyyy-MM-dd'T'HH:mm:ss", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ssZ",
+            );
 
-        newItems.add(item);
+            newItems.add(item);
+          }
+        } else {
+          Logger.Inst().log("Item #$i has no file url", "DanbooruHandler", "parseResponse", LogTypes.booruHandlerInfo);
+        }
       }
+    } catch (e){
+      Logger.Inst().log("Exception during fetch $e", "DanbooruHandler", "parseResponse", LogTypes.exception);
     }
 
     int lengthBefore = fetched.length;
