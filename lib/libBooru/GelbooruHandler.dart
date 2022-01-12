@@ -191,7 +191,7 @@ class GelbooruHandler extends BooruHandler {
     if (booru.baseURL!.contains("rule34.xxx")) {
       return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
     } else {
-      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10";
+      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1";
     }
   }
 
@@ -200,19 +200,7 @@ class GelbooruHandler extends BooruHandler {
     List<String> searchTags = [];
     String url = makeTagURL(input);
     try {
-      if (booru.baseURL!.contains("rule34.xxx")) {
-        Uri uri = Uri.parse(url);
-        final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": "LoliSnatcher_Droid/$verStr"});
-        // 200 is the success http response code
-        if (response.statusCode == 200) {
-          var parsedResponse = jsonDecode(response.body);
-          if (parsedResponse.length > 0) {
-            for (int i = 0; i < parsedResponse.length; i++) {
-              searchTags.add(parsedResponse.elementAt(i)["value"]);
-            }
-          }
-        }
-      } else {
+      if(booru.baseURL!.contains("safebooru.org")){
         Uri uri = Uri.parse(url);
         final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent": "LoliSnatcher_Droid/$verStr"});
         // 200 is the success http response code
@@ -225,7 +213,24 @@ class GelbooruHandler extends BooruHandler {
             }
           }
         }
+      } else {
+        Uri uri = Uri.parse(url);
+        final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": "LoliSnatcher_Droid/$verStr"});
+        // 200 is the success http response code
+        if (response.statusCode == 200) {
+          var parsedResponse = booru.baseURL!.contains("rule34.xxx") ?
+          jsonDecode(response.body) :
+          jsonDecode(response.body)["tag"];
+          if (parsedResponse.length > 0) {
+            for (int i = 0; i < parsedResponse.length; i++) {
+              booru.baseURL!.contains("rule34.xxx") ?
+              searchTags.add(parsedResponse.elementAt(i)["value"]):
+              searchTags.add(parsedResponse.elementAt(i)["name"]);
+            }
+          }
+        }
       }
+
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
     }
