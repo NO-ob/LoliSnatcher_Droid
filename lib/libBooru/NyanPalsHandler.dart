@@ -88,7 +88,7 @@ class NyanPalsHandler extends BooruHandler{
         includeTags += tag + ",";
       }
     });
-    return "${booru.baseURL}/kontent?include=$includeTags&exclude=$excludeTags&allow=&limit=$limit&method=uploaded&offset=${pageNum.value * limit}&order=DESC&token=null";
+    return "${booru.baseURL}/kontent?include=$includeTags&exclude=$excludeTags&allow=&limit=$limit&method=uploaded&offset=${pageNum * limit}&order=DESC&token=null";
   }
 
   String makeTagURL(String input){

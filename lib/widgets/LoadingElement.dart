@@ -219,10 +219,10 @@ class _LoadingElementState extends State<LoadingElement> {
     String expectedSpeedText = (hasProgressData && percentDone < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
 
     double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
+    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " ${Tools.pluralize('second', expectedTime.round())} left") : '';
 
     int sinceStartSeconds = (sinceStart / 1000).floor();
-    String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()} second${sinceStartSeconds == 1 ? '' : 's'} ago' : '';
+    String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()} ${Tools.pluralize('second', sinceStartSeconds)} ago' : '';
 
     bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated.value;
 

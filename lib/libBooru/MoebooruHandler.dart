@@ -1,27 +1,26 @@
 import 'dart:math';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:xml/xml.dart' as xml;
+
+import 'package:xml/xml.dart';
+import 'package:http/http.dart' as http;
 import 'BooruItem.dart';
 import 'GelbooruHandler.dart';
 import 'Booru.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**
  * Booru Handler for the gelbooru engine only difference do gelbooru is the search/api url all the returned data is the same
  */
 class MoebooruHandler extends GelbooruHandler {
-  MoebooruHandler(Booru booru,int limit) : super(booru,limit);
+  MoebooruHandler(Booru booru, int limit) : super(booru, limit);
 
   @override
-  // This will create a url to goto the images page in the browser
-  String makePostURL(String id){
-    return "${booru.baseURL}/post/show/$id/";
-  }
-
+  String className = 'MoebooruHandler';
 
   // TODO change to json
+  // can probably use the same method as gelbooru when the individual BooruItem is moved to separate method
   @override
-  void parseResponse(response){
-    var parsedResponse = xml.parse(response.body);
+  void parseResponse(response) {
+    var parsedResponse = XmlDocument.parse(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
      * all the data needed about each image
@@ -32,17 +31,17 @@ class MoebooruHandler extends GelbooruHandler {
     List<BooruItem> newItems = [];
     for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
-      Logger.Inst().log(current.toString(), "MoebooruHandler","parseResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(current.toString(), "MoebooruHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       /**
        * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
        */
-      if(current.getAttribute("file_url") != null){
+      if (current.getAttribute("file_url") != null) {
         // Fix for bleachbooru
         String fileURL = "", sampleURL = "", previewURL = "";
         fileURL += current.getAttribute("file_url")!.toString();
         sampleURL += current.getAttribute("sample_url")!.toString();
         previewURL += current.getAttribute("preview_url")!.toString();
-        if (!fileURL.contains("http")){
+        if (!fileURL.contains("http")) {
           fileURL = booru.baseURL! + fileURL;
           sampleURL = booru.baseURL! + sampleURL;
           previewURL = booru.baseURL! + previewURL;
@@ -53,12 +52,12 @@ class MoebooruHandler extends GelbooruHandler {
           thumbnailURL: previewURL,
           tagsList: current.getAttribute("tags")!.split(" "),
           postURL: makePostURL(current.getAttribute("id")!),
-          fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
-          fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
-          sampleWidth: double.tryParse(current.getAttribute('sample_width') ?? '') ?? null,
-          sampleHeight: double.tryParse(current.getAttribute('sample_height') ?? '') ?? null,
-          previewWidth: double.tryParse(current.getAttribute('preview_width') ?? '') ?? null,
-          previewHeight: double.tryParse(current.getAttribute('preview_height') ?? '') ?? null,
+          fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
+          fileHeight: double.tryParse(current.getAttribute('height') ?? ''),
+          sampleWidth: double.tryParse(current.getAttribute('sample_width') ?? ''),
+          sampleHeight: double.tryParse(current.getAttribute('sample_height') ?? ''),
+          previewWidth: double.tryParse(current.getAttribute('preview_width') ?? ''),
+          previewHeight: double.tryParse(current.getAttribute('preview_height') ?? ''),
           serverId: current.getAttribute("id"),
           rating: current.getAttribute("rating"),
           score: current.getAttribute("score"),
@@ -67,7 +66,7 @@ class MoebooruHandler extends GelbooruHandler {
           postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
           postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
         );
-        
+
         newItems.add(item);
       }
     }
@@ -79,9 +78,9 @@ class MoebooruHandler extends GelbooruHandler {
 
   @override
   // This will create a url for the http request
-  String makeURL(String tags){
-    int cappedPage = max(1, pageNum.value);
-    if (booru.apiKey == ""){
+  String makeURL(String tags) {
+    int cappedPage = max(1, pageNum);
+    if (booru.apiKey == "") {
       return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
     } else {
       return "${booru.baseURL}/post.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
@@ -89,8 +88,39 @@ class MoebooruHandler extends GelbooruHandler {
   }
 
   @override
-  String makeTagURL(String input){
-      return "${booru.baseURL}/tag.xml?limit=10&name=$input*";
+  // This will create a url to goto the images page in the browser
+  String makePostURL(String id) {
+    return "${booru.baseURL}/post/show/$id/";
+  }
+
+  @override
+  String makeTagURL(String input) {
+    return "${booru.baseURL}/tag.xml?limit=10&order=count&name=$input*";
+  }
+
+  @override
+  Future tagSearch(String input) async {
+    List<String> searchTags = [];
+    String url = makeTagURL(input);
+
+    try {
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent": "LoliSnatcher_Droid/$verStr"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = XmlDocument.parse(response.body);
+        var tags = parsedResponse.findAllElements("tag");
+        if (tags.isNotEmpty) {
+          for (int i = 0; i < tags.length; i++) {
+            searchTags.add(tags.elementAt(i).getAttribute("name")!.trim());
+          }
+        }
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
+    }
+
+    return searchTags;
   }
 
   // TODO parse comments from html

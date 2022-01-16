@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'dart:io';
 
 import 'package:dart_vlc/dart_vlc.dart';
@@ -14,6 +13,7 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:app_links/app_links.dart';
 
+import 'package:LoliSnatcher/ScrollPhysics.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -59,11 +59,11 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    settingsHandler = Get.put(SettingsHandler());
+    settingsHandler = Get.put(SettingsHandler(), permanent: true);
     // settingsHandler.initialize();
-    searchHandler = Get.put(SearchHandler(updateState));
-    snatchHandler = Get.put(SnatchHandler());
-    viewerHandler = Get.put(ViewerHandler());
+    searchHandler = Get.put(SearchHandler(updateState), permanent: true);
+    snatchHandler = Get.put(SnatchHandler(), permanent: true);
+    viewerHandler = Get.put(ViewerHandler(), permanent: true);
 
     initHandlers();
 
@@ -107,7 +107,10 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
-    // TODO
+    Get.delete<ViewerHandler>();
+    Get.delete<SnatchHandler>();
+    Get.delete<SearchHandler>();
+    Get.delete<SettingsHandler>();
     super.dispose();
   }
 
@@ -239,8 +242,9 @@ class _MainAppState extends State<MainApp> {
   }
 }
 
-// Added a preloader to load booruconfigs and settings other wise the booruselector misbehaves
 class Preloader extends StatelessWidget {
+  Preloader({Key? key}) : super(key: key);
+
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   @override
@@ -302,7 +306,7 @@ class _HomeState extends State<Home> {
   Timer? memeTimer;
   ThemeItem? selectedTheme;
 
-  late AppLinks appLinks;
+  AppLinks? appLinks;
 
   @override
   void initState() {
@@ -358,7 +362,7 @@ class _HomeState extends State<Home> {
       );
 
       // check if there is a link on start
-      final appLink = await appLinks.getInitialAppLink();
+      final Uri? appLink = await appLinks!.getInitialAppLink();
       if (appLink != null) {
         openAppLink(appLink.toString());
       }
@@ -376,7 +380,7 @@ class _HomeState extends State<Home> {
           // Rename config if its already in the list
           booru.name = booru.name! + ' (duplicate)';
         }
-        SettingsPageOpen(context: context, page: () => BooruEdit(booru));
+        SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
       }
     }
   }
@@ -397,14 +401,4 @@ class _HomeState extends State<Home> {
       return MobileHome();
     }
   }
-}
-
-class CustomScrollBehavior extends MaterialScrollBehavior {
-  // Override behavior methods and getters like dragDevices
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        ...PointerDeviceKind.values
-        // PointerDeviceKind.touch,
-        // PointerDeviceKind.mouse,
-      };
 }

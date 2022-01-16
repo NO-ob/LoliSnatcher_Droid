@@ -13,7 +13,7 @@ class ThumbCardBuild extends StatelessWidget {
   final int index;
   final int columnCount;
   final SearchGlobal tab;
-  final Function(int) onTap;
+  final void Function(int) onTap;
   ThumbCardBuild(this.index, this.columnCount, this.onTap, this.tab, {Key? key}) : super(key: key);
 
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
@@ -53,9 +53,12 @@ class ThumbCardBuild extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // print('ThumbCardBuild: $index');
     return Obx(() {
       bool isSelected = tab.selected.contains(index);
       bool isCurrent = settingsHandler.appMode == 'Desktop' && (searchHandler.viewedIndex.value == index);
+
+      // print('ThumbCardBuild obx: $index');
 
       return AutoScrollTag(
         highlightColor: Colors.red,

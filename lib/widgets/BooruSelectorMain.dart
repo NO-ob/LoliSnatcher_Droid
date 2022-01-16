@@ -10,7 +10,8 @@ import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
 class BooruSelectorMain extends StatefulWidget {
   final bool isPrimary;
-  BooruSelectorMain(this.isPrimary);
+  const BooruSelectorMain(this.isPrimary, {Key? key}) : super(key: key);
+
   @override
   _BooruSelectorMainState createState() => _BooruSelectorMainState();
 }

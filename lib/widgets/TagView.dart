@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/CommentsDialog.dart';
@@ -33,6 +36,8 @@ class _TagViewState extends State<TagView> {
   ScrollController scrollController = ScrollController();
 
   late BooruItem item;
+  late List<String> tags;
+  bool? sortTags;
   late StreamSubscription<BooruItem> itemSubscription;
 
   @override
@@ -41,11 +46,15 @@ class _TagViewState extends State<TagView> {
     searchHandler.searchTextController.addListener(onTextChanged);
 
     item = searchHandler.viewedItem.value;
+    // copy tags to avoid changing the original array
+    tags = [...item.tagsList];
     parseTags();
     itemSubscription = searchHandler.viewedItem.listen((BooruItem item) {
       // print('item changed to $item');
       this.item = item;
+      this.tags = [...item.tagsList];
       parseTags();
+      sortTagsList();
     });
   }
 
@@ -57,7 +66,16 @@ class _TagViewState extends State<TagView> {
   }
 
   void parseTags() {
-    hatedAndLovedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
+    hatedAndLovedTags = settingsHandler.parseTagsList(tags, isCapped: false);
+    setState(() { });
+  }
+
+  void sortTagsList() {
+    if (sortTags == null) {
+      tags = [...item.tagsList];
+    } else {
+      tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
+    }
     setState(() { });
   }
 
@@ -73,8 +91,9 @@ class _TagViewState extends State<TagView> {
     final String itemId = item.serverId ?? '';
     final String rating = item.rating ?? '';
     final String score = item.score ?? '';
+    final String md5 = item.md5String ?? '';
     final List<String> sources = item.sources ?? [];
-    final bool tagsAvailable = item.tagsList.length > 0;
+    final bool tagsAvailable = tags.isNotEmpty;
     String postDate = item.postDate ?? '';
     final String postDateFormat = item.postDateFormat ?? '';
     String formattedDate = '';
@@ -106,6 +125,7 @@ class _TagViewState extends State<TagView> {
           infoText('Score', score),
           infoText('Resolution', fileRes),
           infoText('Size', fileSize),
+          infoText('MD5', md5),
           infoText('Has Notes', hasNotes, canCopy: false),
           infoText('Posted', formattedDate),
           commentsButton(),
@@ -113,6 +133,27 @@ class _TagViewState extends State<TagView> {
           sourcesList(sources),
           if(tagsAvailable) Divider(height: 2, thickness: 2, color: Colors.grey[800]),
           if(tagsAvailable) infoText('Tags', ' ', canCopy: false),
+          if(tagsAvailable)
+            Container(
+              margin: EdgeInsets.only(left: 10),
+              child: Transform(
+                alignment: Alignment.center,
+                transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+                child: IconButton(
+                  icon: Icon((sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha),
+                  onPressed: () {
+                    if (sortTags == true) {
+                      sortTags = false;
+                    } else if (sortTags == false) {
+                      sortTags = null;
+                    } else {
+                      sortTags = true;
+                    }
+                    sortTagsList();
+                  },
+                ),
+              ),
+            ),
         ],
         addAutomaticKeepAlives: false,
       ),
@@ -189,7 +230,7 @@ class _TagViewState extends State<TagView> {
         child: Column(
           children: [
             Divider(height: 2, thickness: 2, color: Colors.grey[800]),
-            infoText(sources.length == 1 ? 'Source' : 'Sources', ' ', canCopy: false),
+            infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
             Column(children: 
               sources.map((link) => ListTile(
                 onLongPress: () {
@@ -414,13 +455,13 @@ class _TagViewState extends State<TagView> {
       delegate: SliverChildBuilderDelegate(
         tagsItemBuilder,
         addAutomaticKeepAlives: false,
-        childCount: item.tagsList.length,
+        childCount: tags.length,
       ),
     );
   }
 
   Widget tagsItemBuilder(BuildContext context, int index) {
-    String currentTag = item.tagsList[index];
+    String currentTag = tags[index];
 
     bool isHated = hatedAndLovedTags[0].contains(currentTag);
     bool isLoved = hatedAndLovedTags[1].contains(currentTag);
@@ -482,11 +523,13 @@ class _TagViewState extends State<TagView> {
               },
             ),
             GestureDetector(
-              onLongPress: () {
+              onLongPress: () async {
                 ServiceHandler.vibrate();
                 Navigator.of(context).pop(true); // exit drawer
                 Navigator.of(context).pop(true); // exit viewer
-                searchHandler.addTabByString(currentTag, switchToNew: true);
+                WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+                  searchHandler.addTabByString(currentTag, switchToNew: true);
+                });
               },
               child: IconButton(
                 icon: Icon(
@@ -537,13 +580,16 @@ class _TagViewState extends State<TagView> {
         thickness: 4,
         radius: Radius.circular(10),
         isAlwaysShown: true,
-        child: CustomScrollView(
+        child: DesktopScrollWrap(
           controller: scrollController,
-          physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
-          slivers: [
-            infoBuild(),
-            tagsBuild(),
-          ],
+          child: CustomScrollView(
+            controller: scrollController,
+            physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+            slivers: [
+              infoBuild(),
+              tagsBuild(),
+            ],
+          ),
         ),
       ),
     );

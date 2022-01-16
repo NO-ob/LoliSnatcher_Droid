@@ -240,10 +240,11 @@ class DioLoader {
         if (onDoneFile != null) {
           await file.readAsBytes();
           onDoneFile?.call(file, url);
+          dispose();
         } else if(onDone != null) {
           onDone?.call(await file.readAsBytes(), url);
+          dispose();
         }
-        dispose();
         return;
       } else {
         // load from network and cache if enabled
@@ -279,10 +280,11 @@ class DioLoader {
         onEvent?.call('loaded', null);
         if (onDoneFile != null && tempFile != null) {
           onDoneFile?.call(tempFile, url);
+          dispose();
         } else if(onDone != null) {
           onDone?.call(response.data, url);
+          dispose();
         }
-        dispose();
         return;
       }
     } catch (e) {
@@ -319,6 +321,7 @@ class DioLoader {
       }
 
       onEvent?.call('size', int.tryParse(response.headers['content-length']?.first ?? '') ?? 0);
+      dispose();
       return;
     } catch (e) {
       if(e is Exception) {

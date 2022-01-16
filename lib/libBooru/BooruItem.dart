@@ -135,13 +135,13 @@ class BooruItem{
     return item;
   }
 
-  static BooruItem fromDBRow(dynamic row) {
+  static BooruItem fromDBRow(dynamic row, List<String> tags) {
     BooruItem item = BooruItem(
       fileURL: row["fileURL"].toString(),
       sampleURL: row["sampleURL"].toString(),
       thumbnailURL: row["thumbnailURL"].toString(),
       // use custom separator to avoid conflicts with tags containing commas
-      tagsList: row["tags"].toString().split("@@@"),
+      tagsList: tags,
       postURL: row["postURL"].toString(),
     );
     item.isFavourite.value = Tools.intToBool(row["isFavourite"]) ;

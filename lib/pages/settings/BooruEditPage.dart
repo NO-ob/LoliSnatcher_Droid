@@ -37,12 +37,23 @@ class _BooruEditState extends State<BooruEdit> {
 
   String selectedBooruType = "AutoDetect";
   List<String> booruTypes = [
-    "Danbooru", "e621", "Gelbooru",
-    "GelbooruV1", "Moebooru", "Philomena",
-    "Sankaku", "Shimmie", "Szurubooru",
-    "Hydrus", "BooruOnRails", "Rainbooru",
-    "R34Hentai", "World", "IdolSankaku",
-    "InkBunny", "AGNPH"
+    "AGNPH",
+    "BooruOnRails",
+    "Danbooru",
+    "e621",
+    "Gelbooru",
+    "GelbooruV1",
+    "Hydrus",
+    "IdolSankaku",
+    "InkBunny",
+    "Moebooru",
+    "Philomena",
+    "Rainbooru",
+    "R34Hentai",
+    "Sankaku",
+    "Shimmie",
+    "Szurubooru",
+    "World",
   ];
 
   bool isTesting = false;
@@ -529,13 +540,13 @@ class _BooruEditState extends State<BooruEdit> {
     } else {
       List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
       test = temp[0];
-      test.pageNum.value = temp[1];
-      test.pageNum.value ++;
+      test.pageNum = temp[1];
+      test.pageNum++;
       
       testFetched = (await test.Search(" ", null)) ?? [];
 
-      if(test.errorString.value.isNotEmpty) {
-        errorString = test.errorString.value;
+      if(test.errorString.isNotEmpty) {
+        errorString = test.errorString;
       }
     }
 

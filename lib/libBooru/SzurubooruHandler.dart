@@ -87,7 +87,7 @@ class SzurubooruHandler extends BooruHandler{
 
   // This will create a url for the http request
   String makeURL(String tags){
-    return "${booru.baseURL}/api/posts/?offset=${pageNum.value*limit}&limit=${limit.toString()}&query=$tags";
+    return "${booru.baseURL}/api/posts/?offset=${pageNum * limit}&limit=${limit.toString()}&query=$tags";
   }
 
   String makeTagURL(String input){

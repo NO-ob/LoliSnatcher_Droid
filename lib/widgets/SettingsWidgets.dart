@@ -51,7 +51,7 @@ class SettingsButton extends StatelessWidget {
       action?.call();
     } else {
       if(page != null) {
-        SettingsPageOpen(context: context, page: page!);
+        SettingsPageOpen(context: context, page: page!).open();
       }
     }
   }
@@ -101,26 +101,28 @@ class SettingsPageOpen {
     required this.page,
     required this.context,
     this.condition = true,
-  }) {
-    if(!condition) return;
-
-    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    bool isTooNarrow = MediaQuery.of(context).size.width < 550;
-    if(!isTooNarrow && (settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux)) {
-      Get.dialog(Dialog(
-        child: Container(
-          width: 500,
-          child: page(),
-        ),
-      ));
-    } else {
-      Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page()));
-    }
-  }
+  });
 
   final Widget Function() page;
   final BuildContext context;
   final bool condition;
+
+  Future<bool> open() async {
+    if(!condition) return true;
+
+    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    bool isTooNarrow = MediaQuery.of(context).size.width < 550;
+    if(!isTooNarrow && (settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux)) {
+      return (await Get.dialog(Dialog(
+        child: Container(
+          width: 500,
+          child: page(),
+        ),
+      )) ?? false);
+    } else {
+      return (await Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page())) ?? false);
+    }
+  }
 }
 
 
@@ -224,6 +226,7 @@ class SettingsDropdown extends StatelessWidget {
             menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
             isExpanded: true,
             decoration: InputDecoration(
+              hintText: title,
               labelText: title,
               labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
               contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),

@@ -31,7 +31,7 @@ dependencies:
   path_provider: ^2.0.8
   app_links: ^2.2.0
   flex_color_picker: ^2.2.0
-  flash: ^2.0.3+1
+  flash: ^2.0.3+2
   dropdown_search: ^2.0.1
   marquee: ^2.2.0
   fast_marquee:
@@ -44,14 +44,11 @@ dependencies:
   get: ^4.6.1
   permission_handler: ^8.1.6 # next update will require android sdk version 31
   image: ^3.1.0
-  google_fonts: ^2.1.1
+  google_fonts: ^2.2.0
   photo_view: # ^0.12.0
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
   html: ^0.15.0
-  flutter_staggered_grid_view: # ^0.4.0
-    git:
-      url: "https://github.com/bladeofgod/flutter_staggered_grid_view.git"
   waterfall_flow: ^3.0.2
   scroll_to_index: ^2.1.1
   flutter_inner_drawer:

@@ -18,22 +18,40 @@ import 'package:LoliSnatcher/widgets/MascotImage.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/MainAppbar.dart';
 
-class MobileHome extends StatelessWidget {
+class MobileHome extends StatefulWidget {
+  const MobileHome({Key? key}) : super(key: key);
+
+  @override
+  State<MobileHome> createState() => _MobileHomeState();
+}
+
+class _MobileHomeState extends State<MobileHome> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
 
-  void _toggleDrawer(InnerDrawerDirection direction) {
+  bool isDrawerOpened = false;
+
+  void _toggleDrawer(InnerDrawerDirection? direction) {
     mainDrawerKey.currentState?.toggle(
       // if not set, the last direction will be used
-      //InnerDrawerDirection.start OR InnerDrawerDirection.end                        
-      direction: direction
+      //InnerDrawerDirection.start OR InnerDrawerDirection.end
+      direction: direction,
     );
   }
 
+  
+
   Future<bool> _onBackPressed(BuildContext context) async {
+    if (isDrawerOpened) {
+      // close the drawer if it's opened
+      _toggleDrawer(null);
+      return false;
+    }
+
+    // ... otherwise, ask to close the app
     final shouldPop = await showDialog(
       context: context,
       builder: (context) {
@@ -58,7 +76,7 @@ class MobileHome extends StatelessWidget {
       },
     );
 
-    return shouldPop ?? false; //shouldPop != null ? true : false;
+    return shouldPop ?? false;
   }
 
   Widget menuButton(InnerDrawerDirection direction) {
@@ -77,7 +95,7 @@ class MobileHome extends StatelessWidget {
           // } else {
           //   mainScaffoldKey.currentState?.openEndDrawer();
           // }
-        }
+        },
       ),
     );
   }
@@ -86,32 +104,6 @@ class MobileHome extends StatelessWidget {
   Widget build(BuildContext context) {
     // print('!!! main build !!!');
 
-    Widget scaff = Scaffold(
-      key: mainScaffoldKey,
-      resizeToAvoidBottomInset: true,
-      // appBar: MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
-      extendBodyBehindAppBar: true,
-      body: SafeArea(
-        child: WillPopScope(
-          onWillPop: () {
-            return _onBackPressed(context);
-          },
-          child: Stack(
-            children: [
-              ImagePreviews(),
-              MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
-            ],
-          )
-        ),
-      ),
-      // Old drawer stuff:
-      // drawer: MainDrawer(key: mainDrawerKey),
-      // endDrawer: MainDrawer(key: mainDrawerKey),
-      // drawerEnableOpenDragGesture: true,
-      // endDrawerEnableOpenDragGesture: true,
-      // drawerEdgeDragWidth: MediaQuery.of(context).size.width / 2, // allows to detect horizontal swipes on the whole screen => open drawer by swiping right-to-left
-    );
-
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         return InnerDrawer(
@@ -119,7 +111,7 @@ class MobileHome extends StatelessWidget {
           onTapClose: true,
           swipe: true,
           swipeChild: true,
-          
+
           //When setting the vertical offset, be sure to use only top or bottom
           offset: IDOffset.only(
             bottom: 0.0,
@@ -127,25 +119,26 @@ class MobileHome extends StatelessWidget {
             left: orientation == Orientation.landscape ? 0 : 0.5,
           ),
           scale: IDOffset.horizontal(1),
-          
+
           proportionalChildArea: true,
           borderRadius: 10,
           leftAnimationType: InnerDrawerAnimation.quadratic,
           rightAnimationType: InnerDrawerAnimation.quadratic,
           backgroundDecoration: BoxDecoration(color: Get.theme.colorScheme.background),
-          
+
           //when a pointer that is in contact with the screen and moves to the right or left
           onDragUpdate: (double val, InnerDrawerDirection? direction) {
-              // return values between 1 and 0
-              // print(val);
-              // check if the swipe is to the right or to the left
-              // print(direction==InnerDrawerDirection.start);
+            // return values between 1 and 0
+            // print(val);
+            // check if the swipe is to the right or to the left
+            // print(direction==InnerDrawerDirection.start);
           },
 
           innerDrawerCallback: (bool isOpen, InnerDrawerDirection? direction) {
             // print('$isOpen $direction');
-            if(!isOpen) {
-              if(searchHandler.searchBoxFocus.hasFocus) {
+            isDrawerOpened = isOpen;
+            if (!isOpen) {
+              if (searchHandler.searchBoxFocus.hasFocus) {
                 searchHandler.searchBoxFocus.unfocus();
               }
             }
@@ -153,15 +146,38 @@ class MobileHome extends StatelessWidget {
 
           leftChild: MainDrawer(),
           rightChild: MainDrawer(),
-          
+
           // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
-          scaffold: scaff,
+          scaffold: Scaffold(
+            key: mainScaffoldKey,
+            resizeToAvoidBottomInset: false,
+            // appBar: MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
+            extendBodyBehindAppBar: true,
+            body: SafeArea(
+              child: WillPopScope(
+                onWillPop: () {
+                  return _onBackPressed(context);
+                },
+                child: Stack(
+                  children: [
+                    ImagePreviews(),
+                    MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
+                  ],
+                ),
+              ),
+            ),
+            // Old drawer stuff:
+            // drawer: MainDrawer(key: mainDrawerKey),
+            // endDrawer: MainDrawer(key: mainDrawerKey),
+            // drawerEnableOpenDragGesture: true,
+            // endDrawerEnableOpenDragGesture: true,
+            // drawerEdgeDragWidth: MediaQuery.of(context).size.width / 2, // allows to detect horizontal swipes on the whole screen => open drawer by swiping right-to-left
+          ),
         );
-      }
+      },
     );
   }
 }
-
 
 class MainDrawer extends StatefulWidget {
   MainDrawer({Key? key}) : super(key: key);
@@ -200,12 +216,11 @@ class _MainDrawerState extends State<MainDrawer> {
                 return const SizedBox.shrink();
               }
             }),
-
             Expanded(
               child: Listener(
                 onPointerDown: (event) {
                   // print("pointer down");
-                  if(searchHandler.searchBoxFocus.hasFocus) {
+                  if (searchHandler.searchBoxFocus.hasFocus) {
                     searchHandler.searchBoxFocus.unfocus();
                   }
                 },
@@ -217,17 +232,17 @@ class _MainDrawerState extends State<MainDrawer> {
                     TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
                     BooruSelectorMain(true),
 
-                    if(settingsHandler.booruList.length > 1)
+                    if (settingsHandler.booruList.length > 1)
                       SettingsToggle(
                         title: 'Multibooru Mode',
                         value: settingsHandler.mergeEnabled,
                         onChanged: (newValue) {
-                          if(settingsHandler.booruList.length < 2) {
+                          if (settingsHandler.booruList.length < 2) {
                             FlashElements.showSnackbar(
                               context: context,
                               title: Text(
                                 "Error!",
-                                style: TextStyle(fontSize: 20)
+                                style: TextStyle(fontSize: 20),
                               ),
                               content: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,8 +261,8 @@ class _MainDrawerState extends State<MainDrawer> {
                           }
                         },
                       ),
-                    if(settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled)
-                      BooruSelectorMain(false),
+
+                    if (settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled) BooruSelectorMain(false),
 
                     Obx(() {
                       if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
@@ -269,7 +284,7 @@ class _MainDrawerState extends State<MainDrawer> {
                     ),
 
                     Obx(() {
-                      if(settingsHandler.updateInfo.value != null) {
+                      if (settingsHandler.updateInfo.value != null) {
                         return SettingsButton(
                           name: 'Update Available!',
                           icon: Stack(
@@ -279,16 +294,18 @@ class _MainDrawerState extends State<MainDrawer> {
                               Positioned(
                                 top: 1,
                                 left: 1,
-                                child: Center(child: Container(
-                                  width: 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(15),
+                                child: Center(
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
                                   ),
-                                ))
+                                ),
                               ),
-                            ]
+                            ],
                           ),
                           action: () async {
                             settingsHandler.showUpdate(true);
@@ -299,12 +316,10 @@ class _MainDrawerState extends State<MainDrawer> {
                       }
                     }),
 
-                    if(settingsHandler.enableDrawerMascot)
-                      MascotImage(),
-
+                    if (settingsHandler.enableDrawerMascot) MascotImage(),
                   ],
                 ),
-              )
+              ),
             ),
           ],
         ),

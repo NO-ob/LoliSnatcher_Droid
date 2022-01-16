@@ -132,6 +132,32 @@ class DBHandler{
     return resultStr;
   }
 
+  Future<Map<String,int>> updateMultipleBooruItems(List<BooruItem> items) async {
+    List<String?> itemIDs = await getItemIDs(items.map((item) => item.postURL).toList());
+
+    int saved = 0, exist = 0;
+    for (BooruItem item in items) {
+      int itemIndex = items.indexWhere((element) => element.postURL == item.postURL);
+      String? itemID = (itemIDs.isNotEmpty && itemIndex != -1) ? itemIDs[itemIndex] : null;
+
+      if (itemID == null || itemID.isEmpty) {
+        var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)",
+            [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true)]);
+        itemID = result?.toString();
+        updateTags(item.tagsList, itemID);
+        saved++;
+      } else {
+        exist++;
+      }
+    }
+    await deleteUntracked();
+
+    return {
+      "saved": saved,
+      "exist": exist
+    };
+  }
+
 
   //Gets a BooruItem id from the database based on a fileurl
   Future<String?> getItemID(String postURL) async {
@@ -143,6 +169,21 @@ class DBHandler{
     } else {
       return null;
     }
+  }
+
+  Future<List<String?>> getItemIDs(List<String> postURLs) async {
+    List? result = await db?.rawQuery("SELECT id, postURL FROM BooruItem WHERE postURL IN (${List.generate(postURLs.length, (_) => '?').join(',')})", postURLs);
+
+    List<String?> ids = List.generate(postURLs.length, (index) => null);
+    if (result != null && result.isNotEmpty) {
+      for (Map<String, dynamic> item in result) {
+        int postIndex = postURLs.indexOf(item["postURL"]);
+        if (postIndex != -1) {
+          ids[postIndex] = item["id"].toString();
+        }
+      }
+    }
+    return ids;
   }
 
   Future<List<BooruItem>> getSankakuItems() async {
@@ -189,39 +230,64 @@ class DBHandler{
       siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
     }
 
-    if (searchTags.isNotEmpty) {
-      // TODO find a way to do this without fetching tags twice
-      result = await db?.rawQuery(
-          "SELECT BooruItem.id as dbid, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag2.name, '@@@') as tags FROM BooruItem "
-              "INNER JOIN ImageTag on dbid = ImageTag.booruItemID "
-              "INNER JOIN Tag on ImageTag.tagID = Tag.id AND Tag.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+    // benchmark reqest time
+    // DateTime start = DateTime.now();
 
-              "INNER JOIN ImageTag ImageTag2 on dbid = ImageTag2.booruItemID " // required to get all tags of the item
-              "INNER JOIN Tag Tag2 on ImageTag2.tagID = Tag2.id "
-              "WHERE $siteQuery isFavourite = 1 GROUP BY dbid "
-              "HAVING COUNT(DISTINCT Tag.name) = ${searchTags.length} ORDER BY dbid $order LIMIT $limit OFFSET $offset", searchTags);
+    if (searchTags.isNotEmpty) {
+      result = await db?.rawQuery(
+        "SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite FROM BooruItem bi "
+        "JOIN (SELECT it.booruItemID FROM ImageTag it JOIN Tag t ON t.id = it.tagID "
+              "WHERE t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+              "GROUP BY it.booruItemID HAVING COUNT(DISTINCT t.name) = ${searchTags.length}) tags ON tags.booruItemID = dbid "
+
+        "WHERE $siteQuery bi.isFavourite = 1 GROUP BY dbid ORDER BY dbid $order LIMIT $limit OFFSET $offset", searchTags);
     } else {
       result = await db?.rawQuery(
-          "SELECT BooruItem.id as dbid, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite, GROUP_CONCAT(Tag.name, '@@@') as tags FROM BooruItem "
-            "INNER JOIN ImageTag on dbid = ImageTag.booruItemID "
-            "INNER JOIN Tag on ImageTag.tagID = Tag.id "
-            "WHERE $siteQuery isFavourite = 1 GROUP BY dbid ORDER BY dbid $order LIMIT $limit OFFSET $offset");
+          "SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite FROM BooruItem bi "
+            "WHERE $siteQuery bi.isFavourite = 1 GROUP BY dbid ORDER BY dbid $order LIMIT $limit OFFSET $offset");
     }
+
+    // benchmark reqest time
+    // DateTime end = DateTime.now();
+    // Duration diff = end.difference(start);
+    // print('Searching DB took: ${diff.inMilliseconds} ms');
 
     Logger.Inst().log("got results from db", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
     Logger.Inst().log(result, "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
 
     if (result != null && result.isNotEmpty) {
-      return result.map((r) {
-        BooruItem item = BooruItem.fromDBRow(r);
+      // start = DateTime.now();
+
+      // TODO can be improved?
+      List<dynamic>? tags = await getTagsList(List<int>.from(result.map((e) => e["dbid"])));
+
+      List<BooruItem> items = result.map((r) {
+        List<String> itemTags = List<String>.from(tags?.where((el) => el["booruItemID"] == r["dbid"]).map((el) => el["name"]) ?? []);
+        BooruItem item = BooruItem.fromDBRow(r, itemTags);
         if (mode == "loliSyncFav") {
           item.isSnatched.value = false;
         }
         return item;
       }).toList();
+
+      // end = DateTime.now();
+      // diff = end.difference(start);
+      // print('Fetching tags took: ${diff.inMilliseconds} ms');
+
+      return items;
     } else {
       return [];
     }
+  }
+
+  //Gets a list of tags related to given posts ids
+  Future<dynamic> getTagsList(List<int> postIDs) async {
+    List<String> postIDsString = postIDs.map((id) => "'$id'").toList();
+    List? result = await db?.rawQuery(
+        "SELECT ImageTag.booruItemID, Tag.name FROM Tag "
+            "INNER JOIN ImageTag on Tag.id = ImageTag.tagID "
+            "WHERE ImageTag.booruItemID IN (${postIDsString.join(',')})");
+    return result;
   }
 
   //Gets amount of BooruItems from the database
@@ -387,18 +453,18 @@ class DBHandler{
   }
 
   // Get search history entries
-  Future<List<List<String>>> getSearchHistory() async{
+  Future<List<Map<String, dynamic>>> getSearchHistory() async{
     var metaData = await db?.rawQuery("SELECT * FROM SearchHistory GROUP BY searchText, booruName ORDER BY id DESC");
-    List<List<String>> result = [];
+    List<Map<String, dynamic>> result = [];
     metaData?.forEach((s) {
-      result.add([
-        s['id'].toString(),
-        s['searchText'].toString(),
-        s['booruType'].toString(),
-        s['booruName'].toString(),
-        s['isFavourite'].toString(),
-        s['timestamp'].toString(),
-      ]);
+      result.add({
+        'id': s['id'],
+        'searchText': s['searchText'].toString(),
+        'booruType': s['booruType'].toString(),
+        'booruName': s['booruName'].toString(),
+        'isFavourite': s['isFavourite'].toString(),
+        'timestamp': s['timestamp'].toString(),
+      });
     });
     return result;
   }
@@ -415,7 +481,7 @@ class DBHandler{
   }
 
   // Delete entry from search history (if no id given - clears everything)
-  Future<void> deleteFromSearchHistory(String? id) async{
+  Future<void> deleteFromSearchHistory(int? id) async{
     if(id != null) {
       await db?.rawDelete("DELETE FROM SearchHistory WHERE id IN (?)", [id]);
     } else {
@@ -425,7 +491,7 @@ class DBHandler{
   }
 
   // Set/unset search history entry as favourite
-  Future<void> setFavouriteSearchHistory(String id, bool isFavourite) async{
+  Future<void> setFavouriteSearchHistory(int id, bool isFavourite) async{
     await db?.rawUpdate("UPDATE SearchHistory SET isFavourite = ? WHERE id = ?", [Tools.boolToInt(isFavourite), id]);
     return;
   }

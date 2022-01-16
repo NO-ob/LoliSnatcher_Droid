@@ -38,7 +38,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   Player? videoController;
   Media? media;
 
-  RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   bool isFromCache = false, isStopped = false, firstViewFix = false, isViewed = false, isZoomed = false, isLoaded = false;
@@ -46,8 +46,8 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   StreamSubscription? indexListener;
 
-  CancelToken? _dioCancelToken;
-  DioLoader? client;
+  CancelToken? _cancelToken, _sizeCancelToken;
+  DioLoader? client, sizeClient;
   File? _video;
 
   @override
@@ -107,11 +107,11 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
         return;
     }
 
-    _dioCancelToken = CancelToken();
+    _cancelToken = CancelToken();
     client = DioLoader(
       widget.booruItem.fileURL,
       headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
-      cancelToken: _dioCancelToken,
+      cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
       onError: _onError,
@@ -136,14 +136,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   Future<void> getSize() async {
-    _dioCancelToken = CancelToken();
-    client = DioLoader(
+    _sizeCancelToken = CancelToken();
+    sizeClient = DioLoader(
       widget.booruItem.fileURL,
       headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
-      cancelToken: _dioCancelToken,
+      cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
     );
-    client!.runRequestSize();
+    sizeClient!.runRequestSize();
     return;
   }
 
@@ -208,6 +208,9 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
+    viewController..outputStateStream.listen(onViewStateChanged);
+    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+
     isViewed = settingsHandler.appMode == 'Mobile'
       ? searchHandler.viewedIndex.value == widget.index
       : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
@@ -240,9 +243,6 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   void initVideo(ignoreTagsCheck) {
-    viewController..outputStateStream.listen(onViewStateChanged);
-    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
-
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
@@ -287,6 +287,8 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   void disposeClient() {
     client?.dispose();
     client = null;
+    sizeClient?.dispose();
+    sizeClient = null;
   }
 
   void disposables() {
@@ -295,8 +297,11 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     videoController?.dispose();
     videoController = null;
 
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
-      _dioCancelToken?.cancel();
+    if (!(_cancelToken != null && _cancelToken!.isCancelled)){
+      _cancelToken?.cancel();
+    }
+    if (!(_sizeCancelToken != null && _sizeCancelToken!.isCancelled)){
+      _sizeCancelToken?.cancel();
     }
     disposeClient();
   }

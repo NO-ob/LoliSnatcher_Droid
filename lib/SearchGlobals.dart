@@ -68,23 +68,23 @@ class SearchHandler extends GetxController {
     setViewedItem(-1);
 
     if(list.length > 1) {
-      if (tabIndex == currentIndex) {
-        // if current tab is the one being removed
-        if (currentIndex == list.length - 1) {
-          // if current tab is the last one, switch to previous one
+      if (tabIndex == currentIndex) { // if current tab is the one being removed
+        if (currentIndex == list.length - 1) { // if current tab is the last one, switch to previous one
           changeTabIndex(currentIndex - 1);
           list.removeAt(currentIndex + 1);
-        } else {
-          // if current tab is not the last one, switch to next one
-          list.removeAt(currentIndex);
-          changeTabIndex(currentIndex);
+        } else { // if current tab is not the last one, switch to next one
+          changeTabIndex(currentIndex + 1, switchOnly: true);
+          list.removeAt(currentIndex - 1);
+          changeTabIndex(currentIndex - 1);
         }
-      } else {
-        // if current tab is not the one being removed
+      } else { // if current tab is not the one being removed
+        if(tabIndex < currentIndex) { // if tab to be removed is before current tab
+          changeTabIndex(currentIndex - 1, switchOnly: true);
+        }
         list.removeAt(tabIndex);
+        changeTabIndex(currentIndex);
       }
-    } else {
-      // if there is only one tab, reset to default tags
+    } else { // if there is only one tab, reset to default tags
       FlashElements.showSnackbar(
         title: Text(
           "Removed Last Tab",
@@ -140,21 +140,47 @@ class SearchHandler extends GetxController {
   FocusNode searchBoxFocus = FocusNode();
 
   // switch to tab #index
-  void changeTabIndex(int i) {
+  void changeTabIndex(int i, {bool switchOnly = false, ignoreSameIndexCheck = false}) {
     // change only if new index != current index
     final int oldIndex = currentIndex;
-    final int newIndex = i;
-    if(newIndex != currentIndex) {
+    int newIndex = i;
+
+    // protection from early execution on start
+    if(list.isEmpty) {
+      return;
+    }
+
+    // protection from out of bounds
+    if(newIndex > (list.length - 1)) {
+      newIndex = list.length - 1;
+    } else if(newIndex < 0) {
+      newIndex = 0;
+    }
+
+    // change index only when it's different
+    if(!ignoreSameIndexCheck && newIndex != currentIndex) {
       index.value = newIndex;
       Tools.forceClearMemoryCache(withLive: true);
     }
-    // set search text anyway
+
+    // set search text (even if index didn't change)
     searchTextController.text = currentTab.tags;
 
-    // set last page state
-    isLastPage.value = currentBooruHandler.locked.value;
-    // trigger first load OR get old filteredFetched list
-    bool isNewSearch = currentFetched.length == 0;
+
+    /// Get state from (new) current tab (current page, is end of search, did stop on error)
+    pageNum.value = currentBooruHandler.pageNum;
+    isLastPage.value = currentBooruHandler.locked;
+    errorString.value = currentBooruHandler.errorString;
+
+
+    if (switchOnly) {
+      // only used when we need to switch tabs around, but don't trigger new search call (e.g. when removing tabs)
+      return;
+    }
+
+
+    // trigger first search OR just get old filteredFetched list
+    bool isNewSearch = currentFetched.isEmpty;
     // print('isNEW: $isNewSearch ${currentIndex}');
     // trigger search if there are items inside booruHandler
     if(isNewSearch) {
@@ -172,22 +198,24 @@ class SearchHandler extends GetxController {
   // recreate current tab with custom starting page number
   void changeCurrentTabPageNumber(int newPageNum) {
     SearchGlobal newTab = SearchGlobal(currentTab.selectedBooru, currentTab.secondaryBoorus, currentTab.tags);
-    newTab.booruHandler.pageNum.value = newPageNum;
+    newTab.booruHandler.pageNum = newPageNum;
+    pageNum.value = newPageNum;
     list[currentIndex] = newTab;
-    changeTabIndex(currentIndex);
+
+    changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
   }
 
   // search on the current tab until we reach given page number or there is an error
   void searchCurrentTabUntilPageNumber(int newPageNum, {int? customDelay}) async {
-    if(newPageNum > currentBooruHandler.pageNum.value) {
-      int tempNum = currentBooruHandler.pageNum.value;
+    if(newPageNum > pageNum.value) {
+      int tempNum = pageNum.value;
       while (tempNum < newPageNum) {
         if(!isLoading.value) {
           await runSearch();
           tempNum ++;
-          // print('search num $tempNum ${currentBooruHandler.pageNum.value}');
+          // print('search num $tempNum ${pageNum.value}');
 
-          if(currentBooruHandler.errorString.value.isNotEmpty) {
+          if(errorString.value.isNotEmpty) {
             break;
           }
 
@@ -197,8 +225,13 @@ class SearchHandler extends GetxController {
     }
   }
 
+
   int get currentIndex => index.value;
   SearchGlobal get currentTab => list[currentIndex];
+  BooruHandler get currentBooruHandler => currentTab.booruHandler;
+  List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
+
+
   RxInt viewedIndex = (-1).obs;
   Rx<BooruItem> viewedItem = BooruItem(
     fileURL: "",
@@ -207,8 +240,6 @@ class SearchHandler extends GetxController {
     tagsList: [],
     postURL: ""
   ).obs;
-  BooruHandler get currentBooruHandler => currentTab.booruHandler;
-  List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
 
   BooruItem setViewedItem(int i) {
     int newIndex = i;
@@ -233,6 +264,8 @@ class SearchHandler extends GetxController {
     return newItem;
   }
 
+
+  // runs search on current tab
   void searchAction(String text, Booru? newBooru) {
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
@@ -278,7 +311,7 @@ class SearchHandler extends GetxController {
     // reset viewed item
     setViewedItem(-1);
     // run search
-    changeTabIndex(currentIndex);
+    changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
 
     // write to history
     if(text != "" && settingsHandler.searchHistoryEnabled) {
@@ -290,6 +323,7 @@ class SearchHandler extends GetxController {
     }
   }
 
+  // add secondary boorus and run search
   void mergeAction(List<Booru>? secondaryBoorus) {
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
@@ -304,30 +338,44 @@ class SearchHandler extends GetxController {
     list[currentIndex] = newTab;
 
     // run search
-    changeTabIndex(currentIndex);
+    changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
   }
 
+  // current page number
+  RxInt pageNum = (-1).obs;
+  // is currently loading
   RxBool isLoading = true.obs;
+  // did search detect last page (usually when response is an empty array)
   RxBool isLastPage = false.obs;
+  // did search encounter an error
+  RxString errorString = "".obs;
+  
 
+  // run search on current tab
   Future<void> runSearch() async {
     // do nothing if reached the end or detected an error
     if(isLastPage.value) return;
-    if(currentBooruHandler.errorString.isNotEmpty) return;
+    if(errorString.isNotEmpty) return;
 
     // if not last page - set loading state and increment page
-    if (!currentBooruHandler.locked.value) {
+    if (!currentBooruHandler.locked) {
       isLoading.value = true;
       currentBooruHandler.pageNum++;
+      pageNum++;
     }
 
     // fetch new items, but get results from booruHandler and not search itself
     await currentBooruHandler.Search(currentTab.tags, null);
     // print('FINISHED SEARCH: ${booruhandler.filteredFetched.length}');
 
-    // lock new loads if handler detected last page (previous filteredFetched length == current length)
-    if (currentBooruHandler.locked.value && !isLastPage.value) {
+    // lock new loads if handler detected last page
+    // (previous filteredFetched length == current length)
+    if (currentBooruHandler.locked && !isLastPage.value) {
       isLastPage.value = true;
+    }
+
+    if (currentBooruHandler.errorString.isNotEmpty) {
+      errorString.value = currentBooruHandler.errorString;
     }
 
     // request total image count if not already loaded
@@ -341,30 +389,55 @@ class SearchHandler extends GetxController {
     });
     return;
   }
+
+  // reset search to previous page and run again
   Future<void> retrySearch() async {
-    currentBooruHandler.errorString.value = '';
-    currentBooruHandler.locked.value = false;
+    currentBooruHandler.errorString = '';
+    errorString.value = '';
+
+    currentBooruHandler.locked = false;
     isLastPage.value = false;
+
     currentBooruHandler.pageNum--;
+    pageNum--;
     await runSearch();
     return;
   }
 
 
 
-  RxBool isRestored = false.obs;
+  
 
-  // ignore: close_sinks
-  StreamController<String>? volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
-  // ignore: cancel_subscriptions
-  StreamSubscription? rootVolumeListener;
 
+
+  // stream that will notify it's listeners when it receives a volume button event
+  StreamController<String>? _volumeStream;
+  Stream<String>? get volumeStream => _volumeStream?.stream;
+
+  // listener for native volume button events
+  StreamSubscription? _rootVolumeListener;
+
+  // hack to allow global restates to force refresh of everything (mainly used when saving settings when exiting settings page)
   Function rootRestate;
-  SearchHandler(this.rootRestate) {
-    rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
-      volumeStream?.sink.add(event);
+  
+  @override
+  void onInit() {
+    super.onInit();
+    _volumeStream = Platform.isAndroid ? StreamController.broadcast() : null;
+    _rootVolumeListener = volumeKeyChannel?.receiveBroadcastStream().listen((event) {
+      _volumeStream?.sink.add(event);
     });
   }
+
+  @override
+  void onClose() {
+    _rootVolumeListener?.cancel();
+    _volumeStream?.close();
+    super.onClose();
+  }
+
+
+  SearchHandler(this.rootRestate);
 
 
 
@@ -373,10 +446,16 @@ class SearchHandler extends GetxController {
   // special strings used to separate parts of tab backup string
   // tab - separates info parts about tab itself, list - separates tabs list entries
 
-  Rx<DateTime> lastBackupTime = DateTime.now().obs;
+  // bool to notify the main build that tab restoratiuon is complete
+  RxBool isRestored = false.obs;
 
-  // example of backup string: "booruName1|||tags1|||tab~~~booruName2|||tags2|||selected~~~booruName3|||tags3|||tab"
+  // keeps track of the last time tabs were backupped
+  DateTime lastBackupTime = DateTime.now();
+
+  // TODO rework to use json structure instead
+  // special strings used to separate parts of tab backup string
   final String tabDivider = '|||', listDivider = '~~~';
+  // example of backup string: "booruName1|||tags1|||tab~~~booruName2|||tags2|||selected~~~booruName3|||tags3|||tab"
 
   // Restores tabs from a string saved in DB
   List<List<String>> decodeBackupString(String input) {
@@ -440,7 +519,7 @@ class SearchHandler extends GetxController {
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Restored ${restoredGlobals.length} tab${restoredGlobals.length == 1 ? '' : 's'} from previous session!'),
+            Text('Restored ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)} from previous session!'),
 
             if(foundBrokenItem)
               // notify user if there was unknown booru or invalid entry in the list
@@ -501,7 +580,7 @@ class SearchHandler extends GetxController {
 
     FlashElements.showSnackbar(
       title: Text('Tabs merged'),
-      content: Text('Added ${restoredGlobals.length} new tab${restoredGlobals.length == 1 ? '' : 's'}!'),
+      content: Text('Added ${restoredGlobals.length} new ${Tools.pluralize('tab', restoredGlobals.length)}!'),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore
     );
@@ -513,7 +592,7 @@ class SearchHandler extends GetxController {
     int newIndex = 0;
 
     // reset current tab index to avoid exceptions when tab list length is different
-    changeTabIndex(0);
+    changeTabIndex(0, switchOnly: true);
 
     for (List<String> booruAndTags in splitInput) {
       // check for parsing errors
@@ -539,7 +618,7 @@ class SearchHandler extends GetxController {
 
     FlashElements.showSnackbar(
       title: Text('Tabs replaced'),
-      content: Text('Received ${restoredGlobals.length} tab${restoredGlobals.length == 1 ? '' : 's'}!'),
+      content: Text('Received ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)}!'),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore
     );
@@ -577,7 +656,7 @@ class SearchHandler extends GetxController {
       settingsHandler.dbHandler.clearTabRestore();
     }
 
-    lastBackupTime.value = DateTime.now();
+    lastBackupTime = DateTime.now();
   }
 
 }
@@ -614,7 +693,7 @@ class SearchGlobal {
     final int pageNumTemp = temp[1];
 
     booruHandler = handlerTemp;
-    booruHandler.pageNum.value = pageNumTemp;
+    booruHandler.pageNum = pageNumTemp;
   }
 
   String toString() {

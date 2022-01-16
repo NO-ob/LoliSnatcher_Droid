@@ -32,7 +32,7 @@ class CachedThumbBetter extends StatefulWidget {
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
-  RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _restartedCount = 0;
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in

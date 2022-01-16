@@ -43,7 +43,6 @@ import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
  */
 class ViewerPage extends StatefulWidget {
   final int index;
-
   ViewerPage(this.index);
 
   @override
@@ -163,6 +162,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
   @override
   Widget build(BuildContext context) {
+    // print('!!! ViewerPage build ${searchHandler.viewedIndex.value} !!!');
     //kbFocusNode.requestFocus();
 
     return Scaffold(
@@ -237,65 +237,76 @@ class _ViewerPageState extends State<ViewerPage> {
                     bool isImage = item.isImage();
                     // print(fileURL);
                     // print('isVideo: '+isVideo.toString());
-                    // Render only if viewed or in preloadCount range
 
-                    late Widget itemWidget;
-                    if(isImage) {
-                      itemWidget = MediaViewerBetter(
-                        item.key,
-                        item,
-                        index,
-                        searchHandler.currentTab,
-                      );
-                    } else if(isVideo) {
-                      if(settingsHandler.disableVideo) {
-                        itemWidget = Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
-                      } else {
-                        if(Platform.isAndroid || Platform.isIOS) {
-                          itemWidget = VideoApp(item.key, item, index, searchHandler.currentTab, true);
-                        } else if(Platform.isWindows || Platform.isLinux) {
-                          itemWidget = VideoAppDesktop(item.key, item, index, searchHandler.currentTab);
-                        } else {
-                          return VideoAppPlaceholder(item: item, index: index);
-                        }
+                    SearchGlobal tab = searchHandler.currentTab;
+
+                    return Obx(() {
+                      bool isViewed = index == searchHandler.viewedIndex.value;
+                      bool isNear = (searchHandler.viewedIndex.value - index).abs() <= settingsHandler.preloadCount;
+                      // print('!! preloadpageview item build $index $isViewed $isNear !!');
+                      if(!isViewed && !isNear) {
+                        // don't render if out of preload range
+                        return const SizedBox();
                       }
-                    } else {
-                      itemWidget = UnknownPlaceholder(item: item, index: index);
-                    }
 
-                    // Cut to the size of the container, prevents overlapping
-                    return ClipRect(
-                      //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
-                      child: GestureDetector(
-                        // onTapUp: (TapUpDetails tapInfo) {
-                        //   if(isVideo) return;
-                        //   // TODO WIP
-                        //   // change page if tapped on 20% of any side of the screen AND not a video
-                        //   double tapPosX = tapInfo.localPosition.dx;
-                        //   double screenWidth = MediaQuery.of(context).size.width;
-                        //   double sideThreshold = screenWidth / 5;
+                      late Widget itemWidget;
+                      if(isImage) {
+                        itemWidget = MediaViewerBetter(
+                          item.key,
+                          item,
+                          index,
+                          tab,
+                        );
+                      } else if(isVideo) {
+                        if(settingsHandler.disableVideo) {
+                          itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
+                        } else {
+                          if(Platform.isAndroid || Platform.isIOS) {
+                            itemWidget = VideoApp(item.key, item, index, tab, true);
+                          } else if(Platform.isWindows || Platform.isLinux) {
+                            itemWidget = VideoAppDesktop(item.key, item, index, tab);
+                          } else {
+                            return VideoAppPlaceholder(item: item, index: index);
+                          }
+                        }
+                      } else {
+                        itemWidget = UnknownPlaceholder(item: item, index: index);
+                      }
 
-                        //   if(tapPosX > (screenWidth - sideThreshold)) {
-                        //     controller.animateToPage(searchHandler.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                        //   } else if(tapPosX < sideThreshold) {
-                        //     controller.animateToPage(searchHandler.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                        //   }
-                        // },
-                        onLongPress: () async {
-                          // print('longpress');
-                          bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
-                          viewerHandler.displayAppbar.value = newAppbarVisibility;
+                      // Cut to the size of the container, prevents overlapping
+                      return ClipRect(
+                        //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+                        child: GestureDetector(
+                          // onTapUp: (TapUpDetails tapInfo) {
+                          //   if(isVideo) return;
+                          //   // TODO WIP
+                          //   // change page if tapped on 20% of any side of the screen AND not a video
+                          //   double tapPosX = tapInfo.localPosition.dx;
+                          //   double screenWidth = MediaQuery.of(context).size.width;
+                          //   double sideThreshold = screenWidth / 5;
 
-                          ServiceHandler.vibrate();
+                          //   if(tapPosX > (screenWidth - sideThreshold)) {
+                          //     controller.animateToPage(searchHandler.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                          //   } else if(tapPosX < sideThreshold) {
+                          //     controller.animateToPage(searchHandler.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
+                          //   }
+                          // },
+                          onLongPress: () async {
+                            // print('longpress');
+                            bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
+                            viewerHandler.displayAppbar.value = newAppbarVisibility;
 
-                          // enable volume buttons if current page is a video AND appbar is set to visible
-                          bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
-                          bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-                          ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                        },
-                        child: itemWidget,
-                      ),
-                    );
+                            ServiceHandler.vibrate();
+
+                            // enable volume buttons if current page is a video AND appbar is set to visible
+                            bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
+                            bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+                            ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                          },
+                          child: itemWidget,
+                        ),
+                      );
+                    });
                   },
                   controller: controller,
                   onPageChanged: (int index) {
@@ -345,7 +356,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
   void setVolumeListener() {
     volumeListener?.cancel();
-    volumeListener = searchHandler.volumeStream?.stream.listen(volumeCallback);
+    volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
   }
   void volumeCallback(String event) {
     // print('in gallery $event');
@@ -628,6 +639,10 @@ class _ViewerPageState extends State<ViewerPage> {
 
   List<Widget> appBarActions() {
     List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
+      if(searchHandler.viewedIndex.value == -1) {
+        return false;
+      }
+
       bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage();
       bool isScaleButton = btn[0] == 'reloadnoscale';
       bool isScaleAllowed = isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
@@ -775,6 +790,10 @@ class _ViewerPageState extends State<ViewerPage> {
         // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
+          if(searchHandler.viewedIndex.value == -1) {
+            return Icon(Icons.favorite_border);
+          }
+
           final bool? isFav = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value;
           return AnimatedCrossFade(
             duration: Duration(milliseconds: 200),
@@ -797,6 +816,10 @@ class _ViewerPageState extends State<ViewerPage> {
     switch (action) {
       case 'snatch':
         return Obx(() {
+          if(searchHandler.viewedIndex.value == -1) {
+            return Container();
+          }
+
           final bool isSnatched = searchHandler.currentFetched[searchHandler.viewedIndex.value].isSnatched.value == true;
           if(!isSnatched) {
             return const SizedBox();
@@ -818,6 +841,11 @@ class _ViewerPageState extends State<ViewerPage> {
   String buttonText(List<String> actionAndLabel) {
     String action = actionAndLabel[0], defaultLabel = actionAndLabel[1];
     late String label;
+
+    if(searchHandler.viewedIndex.value == -1) {
+      return defaultLabel;
+    }
+
     switch(action) {
       case("autoscroll"):
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";

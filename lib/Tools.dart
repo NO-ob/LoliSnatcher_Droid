@@ -41,4 +41,8 @@ class Tools {
     PaintingBinding.instance?.imageCache?.clear();
     if(withLive) PaintingBinding.instance?.imageCache?.clearLiveImages();
   }
+
+  static String pluralize(String str, int count) {
+    return count == 1 ? str : str + 's';
+  }
 }

@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -15,9 +14,8 @@ import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
 import 'package:LoliSnatcher/widgets/GridBuilder.dart';
 import 'package:LoliSnatcher/widgets/StaggeredBuilder.dart';
+import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/WaterfallErrorButtons.dart';
-
-// TODO avoid rebuilding when global restate happens
 
 class WaterfallView extends StatefulWidget {
   WaterfallView();
@@ -35,6 +33,8 @@ class _WaterfallState extends State<WaterfallView> {
   StreamSubscription? volumeListener;
   bool scrollDone = true;
   late StreamSubscription indexListener, viewedListener, isLoadingListener;
+
+  bool isStaggered = false;
 
   @override
   void initState() {
@@ -64,6 +64,8 @@ class _WaterfallState extends State<WaterfallView> {
       initialScrollOffset: searchHandler.currentTab.scrollPosition,
       viewportBoundaryGetter: () => Rect.fromLTRB(0, settingsHandler.appMode == 'Desktop' ? 0 : (kToolbarHeight + 2), 0, 0),
     );
+
+    isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
   }
 
   void tabChanged(int newIndex) {
@@ -82,11 +84,18 @@ class _WaterfallState extends State<WaterfallView> {
         );
       }
     });
+
+    // check if grid type changed when changing tab
+    bool newIsStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+    if (isStaggered != newIsStaggered) {
+      isStaggered = newIsStaggered;
+      setState(() { });
+    }
   }
 
   void setVolumeListener() {
     volumeListener?.cancel();
-    volumeListener = searchHandler.volumeStream?.stream.listen(volumeCallback);
+    volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
   }
   void volumeCallback(String event) async {
     if(!viewerHandler.inViewer.value) {
@@ -196,6 +205,15 @@ class _WaterfallState extends State<WaterfallView> {
   Widget build(BuildContext context) {
     // print('!!! WATERFALL BUILD: ${searchHandler.currentFetched.length}');
 
+    // check if grid type changed when rebuilding the widget (must happen only on start and when saving settings)
+    bool newIsStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+    if (isStaggered != newIsStaggered) {
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        isStaggered = newIsStaggered;
+        setState(() { });
+      });
+    }
+
     return RawKeyboardListener(
       // Note: use autofocus instead focusedChild == null that was used before, old way caused unnecesary rebuilds and broke hero animation
       autofocus: true,
@@ -278,40 +296,10 @@ class _WaterfallState extends State<WaterfallView> {
                 onRefresh: () async {
                   searchHandler.searchAction(searchHandler.currentTab.tags, null);
                 },
-                child: ImprovedScrolling(
-                  scrollController: searchHandler.gridScrollController,
-                  // onScroll: (scrollOffset) => debugPrint(
-                  //   'Scroll offset: $scrollOffset',
-                  // ),
-                  // onMMBScrollStateChanged: (scrolling) => debugPrint(
-                  //   'Is scrolling: $scrolling',
-                  // ),
-                  // onMMBScrollCursorPositionUpdate: (localCursorOffset, scrollActivity) => debugPrint(
-                  //       'Cursor position: $localCursorOffset\n'
-                  //       'Scroll activity: $scrollActivity',
-                  // ),
-                  enableMMBScrolling: true,
-                  enableKeyboardScrolling: true,
-                  enableCustomMouseWheelScrolling: true,
-                  // mmbScrollConfig: MMBScrollConfig(
-                  //   customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
-                  // ),
-                  keyboardScrollConfig: KeyboardScrollConfig(
-                    arrowsScrollAmount: 250.0,
-                    homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
-                      return const Duration(milliseconds: 100);
-                    },
-                    endScrollDurationBuilder: (currentScrollOffset, maxScrollOffset) {
-                      return const Duration(milliseconds: 2000);
-                    },
-                  ),
-                  customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
-                    scrollAmountMultiplier: 15.0,
-                  ),
-                  // TODO: temporary fallback to waterfall if booru doesn't give image sizes in api, until staggered view is fixed
-                  child: (settingsHandler.previewDisplay != 'Staggered' || !searchHandler.currentBooruHandler.hasSizeData)
-                    ? GridBuilder(onTap)
-                    : StaggeredBuilder(onTap),
+                child: DesktopScrollWrap(
+                  controller: searchHandler.gridScrollController,
+                  // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
+                  child: isStaggered ? StaggeredBuilder(onTap) : GridBuilder(onTap),
                 ),
               ),
             ),
@@ -333,6 +321,7 @@ class _WaterfallState extends State<WaterfallView> {
                   // print('isNotAtStart: $isNotAtStart');
                   // print('isAtOrNearEdge: $isAtOrNearEdge');
                   // TODO extra search could trigger when changing tabs
+                  // print('!! scroll triggered search !!');
                   searchHandler.runSearch();
                 }
               }

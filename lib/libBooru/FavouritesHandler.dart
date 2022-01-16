@@ -16,13 +16,13 @@ class FavouritesHandler extends BooruHandler{
       fetched.value = [];
     }
 
-    fetched.addAll(await settingsHandler.dbHandler.searchDB(tags, fetched.length.toString(), limit.toString(), "DESC", "Favourites"));
+    fetched.addAll(await settingsHandler.dbHandler.searchDB(tags, (pageNum * limit).toString(), limit.toString(), "DESC", "Favourites"));
     print("dbhandler fetched length is ${fetched.length}");
     prevTags = tags;
 
     if (fetched.isEmpty || fetched.length == length) {
       Logger.Inst().log("dbhandler dbLocked", "FavouritesHandler", "search", LogTypes.booruHandlerInfo);
-      locked.value = true;
+      locked = true;
     }
 
     return fetched;

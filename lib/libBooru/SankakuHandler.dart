@@ -53,15 +53,17 @@ class SankakuHandler extends BooruHandler{
       if (response.statusCode == 200) {
         prevTags = tags;
         parseResponse(response);
-        if (fetched.length == length){locked.value = true;}
+        if (fetched.length == length) {
+          locked = true;
+        }
       } else {
         Logger.Inst().log("Sankaku load fail ${response.statusCode}", className, "Search", LogTypes.booruHandlerInfo);
         Logger.Inst().log(response.body, className, "Search", LogTypes.booruHandlerInfo);
-        errorString.value = response.statusCode.toString();
+        errorString = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.exception);
-      errorString.value = e.toString();
+      errorString = e.toString();
     }
 
     return fetched;
@@ -142,17 +144,18 @@ class SankakuHandler extends BooruHandler{
 
   @override
   Map<String,String> getHeaders() {
-    return authToken == ""
+    return authToken.isEmpty
         ? {
-      "Content-Type":"application/json",
-      "Accept": "application/json",
-      "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
-    }: {
-      "Content-Type":"application/json",
-      "Accept": "application/json",
-      "Authorization": authToken,
-      "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
-    };
+          "Content-Type":"application/json",
+          "Accept": "application/json",
+          "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
+        }
+        : {
+          "Content-Type":"application/json",
+          "Accept": "application/json",
+          "Authorization": authToken,
+          "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
+        };
   }
 
   // This will create a url to goto the images page in the browser

@@ -161,7 +161,9 @@ class SettingsHandler extends GetxController {
     'version', 'SDK', 'disableImageScaling',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
-    'showStatusBar'
+    'showStatusBar', 'showFPS', 'showPerf', 'showImageStats',
+    'isDebug', 'showURLOnThumb', 'disableImageIsolates',
+    'mergeEnabled'
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -369,6 +371,10 @@ class SettingsHandler extends GetxController {
       "default": true,
     },
     "disableImageScaling": {
+      "type": "bool",
+      "default": false,
+    },
+    "disableImageIsolates": {
       "type": "bool",
       "default": false,
     },
@@ -817,6 +823,8 @@ class SettingsHandler extends GetxController {
         return changePageButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
+      case 'disableImageIsolates':
+        return disableImageIsolates;
       case 'cacheDuration':
         return cacheDuration;
       case 'cacheSize':
@@ -959,6 +967,9 @@ class SettingsHandler extends GetxController {
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
+      case 'disableImageIsolates':
+        disableImageIsolates = validatedValue;
+        break;
       case 'cacheDuration':
         cacheDuration = validatedValue;
         break;
@@ -1043,6 +1054,7 @@ class SettingsHandler extends GetxController {
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
       "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
+      "disableImageIsolates" : validateValue("disableImageIsolates", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
       "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
@@ -1423,21 +1435,22 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
-    const String changelog = r"""Changelog text here""";
+    const String changelog = r"""Changelog""";
     Map<String, dynamic> fakeUpdate = {
       "version_name": "2.1.0",
-      "build_number": 164,
-      "title": "Comments, Notes and Fixes",
+      "build_number": 168,
+      "title": "Title",
       "changelog": changelog,
       "is_in_store": true, // is app still in store
-      "is_update_in_store": false, // is update approved in store
       "is_important": false, // is update important => force open dialog on start
       "store_package": "com.noaisu.play.loliSnatcher", // custom app package name, to allow to redirect store users to new app if it will be needed
       "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
     }; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
+
     try {
-      final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/update.json'));
+      const String updateFileName = EnvironmentConfig.isFromStore ? "update_store.json" : "update.json";
+      final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName'));
       final json = jsonDecode(response.body);
       // final json = jsonDecode(jsonEncode(fakeUpdate));
 
@@ -1450,7 +1463,6 @@ class SettingsHandler extends GetxController {
         title: json["title"] ?? '...',
         changelog: json["changelog"] ?? '...',
         isInStore: json["is_in_store"] ?? false,
-        isUpdateInStore: json["is_update_in_store"] ?? false,
         isImportant: json["is_important"] ?? false,
         storePackage: json["store_package"] ?? '',
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
@@ -1459,12 +1471,7 @@ class SettingsHandler extends GetxController {
       if(buildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
         if(EnvironmentConfig.isFromStore) { // installed from store
           if(updateInfo.value!.isInStore) { // app is still in store
-            if(updateInfo.value!.isUpdateInStore) { // update is in store
-              showUpdate(withMessage || updateInfo.value!.isImportant);
-            } else { // update is not in store yet, show latest version message
-              showLastVersionMessage(withMessage);
-              updateInfo.value = null;
-            }
+            showUpdate(withMessage || updateInfo.value!.isImportant);
           } else { // app was removed from store
             // then always notify user so they can move to github version and get news about removal
             showUpdate(true);
@@ -1635,7 +1642,6 @@ class UpdateInfo {
   String title;
   String changelog;
   bool isInStore;
-  bool isUpdateInStore;
   bool isImportant;
   String storePackage;
   String githubURL;
@@ -1646,7 +1652,6 @@ class UpdateInfo {
     required this.title,
     required this.changelog,
     required this.isInStore,
-    required this.isUpdateInStore,
     required this.isImportant,
     required this.storePackage,
     required this.githubURL,

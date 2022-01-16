@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
@@ -37,7 +36,17 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   void parseResponse(response) {
-    if(booru.baseURL!.contains('gelbooru.com')) {
+    // bool isXML = response.body.contains("<posts>");
+    bool isJSON = false;
+    try {
+      // TODO is it possible to get the confirmation that response is JSON without trying to parse it?
+      var json = jsonDecode(response.body);
+      isJSON = true;
+    } catch (e) {
+      isJSON = false;
+    }
+
+    if (isJSON) {
       parseJsonResponse(response);
     } else {
       parseXmlResponse(response);
@@ -46,7 +55,8 @@ class GelbooruHandler extends BooruHandler {
 
   void parseJsonResponse(response) {
     var parsedResponse = jsonDecode(response.body);
-    var posts = (response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse) ?? []; // gelbooru: { post: [...] }, others [post, ...]
+    // gelbooru: { post: [...] }, others [post, ...]
+    var posts = (response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse) ?? [];
     List<BooruItem> newItems = [];
 
     for (int i = 0; i < posts.length; i++) {
@@ -71,12 +81,12 @@ class GelbooruHandler extends BooruHandler {
             thumbnailURL: previewURL,
             tagsList: current["tags"].split(" "),
             postURL: makePostURL(current["id"]!.toString()),
-            fileWidth: double.tryParse(current["width"]?.toString() ?? '') ?? null,
-            fileHeight: double.tryParse(current["height"]?.toString() ?? '') ?? null,
-            sampleWidth: double.tryParse(current["sample_width"]?.toString() ?? '') ?? null,
-            sampleHeight: double.tryParse(current["sample_height"]?.toString() ?? '') ?? null,
-            previewWidth: double.tryParse(current["preview_width"]?.toString() ?? '') ?? null,
-            previewHeight: double.tryParse(current["preview_height"]?.toString() ?? '') ?? null,
+            fileWidth: double.tryParse(current["width"]?.toString() ?? ''),
+            fileHeight: double.tryParse(current["height"]?.toString() ?? ''),
+            sampleWidth: double.tryParse(current["sample_width"]?.toString() ?? ''),
+            sampleHeight: double.tryParse(current["sample_height"]?.toString() ?? ''),
+            previewWidth: double.tryParse(current["preview_width"]?.toString() ?? ''),
+            previewHeight: double.tryParse(current["preview_height"]?.toString() ?? ''),
             hasNotes: current["has_notes"]?.toString() == 'true',
             // TODO rule34xxx api bug? sometimes (mostly when there is only one comment) api returns empty array
             hasComments: current["has_comments"]?.toString() == 'true',
@@ -101,13 +111,14 @@ class GelbooruHandler extends BooruHandler {
     setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
-
   dynamic getAttrOrElem(XmlElement item, String key) {
-    return booru.baseURL!.contains('gelbooru.com') ? item.getElement(key)?.innerText : item.getAttribute(key);
+    return isGelbooru() ? item.getElement(key)?.innerText : item.getAttribute(key);
   }
+
   void parseXmlResponse(response) {
     var parsedResponse = XmlDocument.parse(response.body);
-    var posts = parsedResponse.findAllElements('post'); // gelbooru: <post><file_url>...</file_url></post>, others <post file_url="..." />
+    // gelbooru: <post><file_url>...</file_url></post>, others <post file_url="..." />
+    var posts = parsedResponse.findAllElements('post');
     List<BooruItem> newItems = [];
 
     for (int i = 0; i < posts.length; i++) {
@@ -132,37 +143,31 @@ class GelbooruHandler extends BooruHandler {
             thumbnailURL: previewURL,
             tagsList: getAttrOrElem(current, "tags").split(" "),
             postURL: makePostURL(getAttrOrElem(current, "id")!.toString()),
-            fileWidth: double.tryParse(getAttrOrElem(current, "width")?.toString() ?? '') ?? null,
-            fileHeight: double.tryParse(getAttrOrElem(current, "height")?.toString() ?? '') ?? null,
-            sampleWidth: double.tryParse(getAttrOrElem(current, "sample_width")?.toString() ?? '') ?? null,
-            sampleHeight: double.tryParse(getAttrOrElem(current, "sample_height")?.toString() ?? '') ?? null,
-            previewWidth: double.tryParse(getAttrOrElem(current, "preview_width")?.toString() ?? '') ?? null,
-            previewHeight: double.tryParse(getAttrOrElem(current, "preview_height")?.toString() ?? '') ?? null,
+            fileWidth: double.tryParse(getAttrOrElem(current, "width")?.toString() ?? ''),
+            fileHeight: double.tryParse(getAttrOrElem(current, "height")?.toString() ?? ''),
+            sampleWidth: double.tryParse(getAttrOrElem(current, "sample_width")?.toString() ?? ''),
+            sampleHeight: double.tryParse(getAttrOrElem(current, "sample_height")?.toString() ?? ''),
+            previewWidth: double.tryParse(getAttrOrElem(current, "preview_width")?.toString() ?? ''),
+            previewHeight: double.tryParse(getAttrOrElem(current, "preview_height")?.toString() ?? ''),
             hasNotes: getAttrOrElem(current, "has_notes")?.toString() == 'true',
             // TODO rule34xxx api bug? sometimes (mostly when there is only one comment) api returns empty array
             hasComments: getAttrOrElem(current, "has_comments")?.toString() == 'true',
             serverId: getAttrOrElem(current, "id")?.toString(),
             rating: getAttrOrElem(current, "rating")?.toString(),
             score: getAttrOrElem(current, "score")?.toString(),
-            sources: [getAttrOrElem(current, "source")!],
+            sources: getAttrOrElem(current, "source") != null ? [getAttrOrElem(current, "source")!] : null,
             md5String: getAttrOrElem(current, "md5")?.toString(),
             postDate: getAttrOrElem(current, "created_at")?.toString(), // Fri Jun 18 02:13:45 -0500 2021
             postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
           );
 
-          // New way - in batches
           newItems.add(item);
-
-          // Old way - one by one
-          // fetched.add(item);
-          // setTrackedValues(fetched.length - 1);
         }
       } catch (e) {
         Logger.Inst().log(e.toString(), className, "parseResponse", LogTypes.exception);
       }
     }
 
-    // write to fetched and get items fav data in bulk
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
     setMultipleTrackedValues(lengthBefore, fetched.length);
@@ -177,8 +182,9 @@ class GelbooruHandler extends BooruHandler {
   // This will create a url for the http request
   @override
   String makeURL(String tags) {
-    int cappedPage = max(0, pageNum.value); // needed because searchCount happens before first page increment
-    String isJson = booru.baseURL!.contains("gelbooru") ? "&json=1" : "&json=0";
+    int cappedPage = max(0, pageNum);
+    String isJson = isGelbooru() ? "&json=1" : "&json=0";
+
     if (booru.apiKey == "") {
       return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$isJson";
     } else {
@@ -186,12 +192,22 @@ class GelbooruHandler extends BooruHandler {
     }
   }
 
+  bool isGelbooru() {
+    return booru.baseURL!.contains("gelbooru.com");
+  }
+
+  bool isNotGelbooru() {
+    return (booru.baseURL!.contains("rule34.xxx") || booru.baseURL!.contains("safebooru.org") || booru.baseURL!.contains("realbooru.com"));
+  }
+
   @override
   String makeTagURL(String input) {
-    if (booru.baseURL!.contains("rule34.xxx")) {
+    String isJson = isGelbooru() ? "&json=1" : "&json=0";
+    // 16.01.22 - r34xx has order=count&direction=desc, but only it has it, so not worth adding it
+    if (isNotGelbooru()) {
       return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
     } else {
-      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1";
+      return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10$isJson";
     }
   }
 
@@ -199,41 +215,37 @@ class GelbooruHandler extends BooruHandler {
   Future tagSearch(String input) async {
     List<String> searchTags = [];
     String url = makeTagURL(input);
+
     try {
-      if(booru.baseURL!.contains("safebooru.org")){
-        Uri uri = Uri.parse(url);
-        final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent": "LoliSnatcher_Droid/$verStr"});
-        // 200 is the success http response code
-        if (response.statusCode == 200) {
-          var parsedResponse = XmlDocument.parse(response.body);
-          var tags = parsedResponse.findAllElements("tag");
-          if (tags.length > 0) {
-            for (int i = 0; i < tags.length; i++) {
-              searchTags.add(tags.elementAt(i).getAttribute("name")!.trim());
-            }
-          }
-        }
-      } else {
-        Uri uri = Uri.parse(url);
-        final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": "LoliSnatcher_Droid/$verStr"});
-        // 200 is the success http response code
-        if (response.statusCode == 200) {
-          var parsedResponse = booru.baseURL!.contains("rule34.xxx") ?
-          jsonDecode(response.body) :
-          jsonDecode(response.body)["tag"];
-          if (parsedResponse.length > 0) {
-            for (int i = 0; i < parsedResponse.length; i++) {
-              booru.baseURL!.contains("rule34.xxx") ?
-              searchTags.add(parsedResponse.elementAt(i)["value"]):
-              searchTags.add(parsedResponse.elementAt(i)["name"]);
-            }
+      // xml format:
+      // Uri uri = Uri.parse(url);
+      // final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent": "LoliSnatcher_Droid/$verStr"});
+      // // 200 is the success http response code
+      // if (response.statusCode == 200) {
+      //   var parsedResponse = XmlDocument.parse(response.body);
+      //   var tags = parsedResponse.findAllElements("tag");
+      //   if (tags.isNotEmpty) {
+      //     for (int i = 0; i < tags.length; i++) {
+      //       searchTags.add(tags.elementAt(i).getAttribute("name")!.trim());
+      //     }
+      //   }
+      // }
+
+      Uri uri = Uri.parse(url);
+      final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": "LoliSnatcher_Droid/$verStr"});
+      // 200 is the success http response code
+      if (response.statusCode == 200) {
+        var parsedResponse = (isGelbooru() ? jsonDecode(response.body)["tag"] : jsonDecode(response.body)) ?? [];
+        if (parsedResponse?.isNotEmpty ?? false) {
+          for (int i = 0; i < parsedResponse.length; i++) {
+            isGelbooru() ? searchTags.add(parsedResponse.elementAt(i)["name"]) : searchTags.add(parsedResponse.elementAt(i)["value"]);
           }
         }
       }
-
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
     }
+
     return searchTags;
   }
 
@@ -248,7 +260,7 @@ class GelbooruHandler extends BooruHandler {
       final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        if(response.body.contains("@attributes")) {
+        if (response.body.contains("@attributes")) {
           var parsedResponse = jsonDecode(response.body);
           result = parsedResponse["@attributes"]["count"];
         } else {
@@ -284,11 +296,11 @@ class GelbooruHandler extends BooruHandler {
         if (commentsXML.length > 0) {
           for (int i = 0; i < commentsXML.length; i++) {
             var current = commentsXML.elementAt(i);
-            String? avatar = booru.baseURL!.contains("gelbooru.com")
-              ? (current.getAttribute("creator_id")!.isEmpty
-                  ? "${booru.baseURL}/user_avatars/avatar_${current.getAttribute("creator")}.jpg"
-                  : "${booru.baseURL}/user_avatars/honkonymous.png")
-              : null;
+            String? avatar = isGelbooru()
+                ? (current.getAttribute("creator_id")!.isEmpty
+                    ? "${booru.baseURL}/user_avatars/avatar_${current.getAttribute("creator")}.jpg"
+                    : "${booru.baseURL}/user_avatars/honkonymous.png")
+                : null;
 
             comments.add(CommentItem(
               id: current.getAttribute("id"),

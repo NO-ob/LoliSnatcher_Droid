@@ -62,14 +62,14 @@ class HydrusHandler extends BooruHandler{
     }
   }
 
-  Future getResultsPage(pageNum) async{
+  Future getResultsPage(int pageNum) async{
     try {
       int pageMax = (_fileIDs.length > limit ? (_fileIDs.length / limit).ceil() : 1);
-      if (pageNum.value >= pageMax){
-        locked.value = true;
+      if (pageNum >= pageMax) {
+        locked = true;
       } else {
-        int lowerBound = ((pageNum.value < 1) ? 0 : pageNum.value * limit);
-        int upperBound = (pageNum.value + 1< pageMax) ? (lowerBound + limit) : _fileIDs.length;
+        int lowerBound = ((pageNum < 1) ? 0 : pageNum * limit);
+        int upperBound = (pageNum + 1< pageMax) ? (lowerBound + limit) : _fileIDs.length;
         String fileIDString = '[';
         for (int i = lowerBound; i < upperBound ; i++){
           fileIDString += _fileIDs[i].toString();

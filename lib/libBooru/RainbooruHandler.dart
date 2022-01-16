@@ -32,14 +32,16 @@ class RainbooruHandler extends BooruHandler {
         await parseResponse(response);
       } else {
         Logger.Inst().log("rainbooru status is" + response.statusCode.toString(), "RainbooruHandler","parseResponse", LogTypes.booruHandlerInfo);
-        errorString.value = response.statusCode.toString();
+        errorString = response.statusCode.toString();
       }
       prevTags = tags;
-      if (fetched.length == length){locked.value = true;}
+      if (fetched.length == length) {
+        locked = true;
+      }
       return fetched;
     } catch(e) {
       Logger.Inst().log(e.toString(), "RainbooruHandler","parseResponse", LogTypes.exception);
-      errorString.value = e.toString();
+      errorString = e.toString();
       return fetched;
     }
   }

@@ -47,7 +47,7 @@ class ViewerHandler extends GetxController {
   RxBool displayAppbar = true.obs; // is gallery toolbar visible
   RxBool isZoomed = false.obs; // is current item zoomed in
   RxBool isLoaded = false.obs; // is current item loaded
-  Rx<PhotoViewControllerValue> viewState = Rx(PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null)); // current view state
+  Rx<PhotoViewControllerValue> viewState = Rx(const PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null)); // current view state
   RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoApp)
   RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
 
@@ -60,7 +60,7 @@ class ViewerHandler extends GetxController {
     isLoaded.value = false;
     isFullscreen.value = false;
     isDesktopFullscreen.value = false;
-    viewState.value = PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null);
+    viewState.value = const PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null);
   }
 
   // Get zoom state of new current item

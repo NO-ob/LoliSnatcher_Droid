@@ -16,9 +16,6 @@ class LoliSync{
   String ip = "127.0.0.1";
   int port = 8080;
 
-  int amount = -1;
-  int current = -1;
-
   HttpServer? server;
   bool syncKilled = false;
 
@@ -36,6 +33,10 @@ class LoliSync{
     await for (var req in server!) {
       Logger.Inst().log(req.uri.path.toString(), "LoliSync", "startServer", LogTypes.loliSyncInfo);
       switch (req.uri.path.toString()) {
+        case("/lolisync/boorubatch"):
+          yield 'Received booru items batch';
+          yield await storeBooruBatch(req, settingsHandler);
+          break;
         case("/lolisync/booruitem"):
           yield await storeBooruItem(req, settingsHandler);
           break;
@@ -50,6 +51,9 @@ class LoliSync{
           break;
         case("/lolisync/test"):
           yield 'Test';
+          break;
+        case("/lolisync/complete"):
+          yield 'Sync Complete';
           break;
       }
       await req.response.close();
@@ -67,20 +71,68 @@ class LoliSync{
         return "Settings Saved";
       } catch (e) {
         Logger.Inst().log(e.toString(), "LoliSync", "storeSettings", LogTypes.exception);
+        req.response.statusCode = 404;
+        req.response.write("Invalid Query");
+        return "Something went wrong ${e.toString()}";
       }
     } else {
       req.response.statusCode = 404;
       req.response.write("Invalid Query");
       return "Invalid Query";
     }
-    return "Something went wrong";
+  }
+
+  Future<String> storeBooruBatch(var req, SettingsHandler settingsHandler) async {
+    if (req.method == 'POST') {
+      try {
+        int amount = int.parse(req.uri.queryParameters["amount"]!);
+        int offset = int.parse(req.uri.queryParameters["offset"]!);
+        int size = int.parse(req.uri.queryParameters["size"]!);
+        Logger.Inst().log("request to update booru batch recieved", "LoliSync", "storeBooruItem", LogTypes.loliSyncInfo);
+        String content = await utf8.decoder.bind(req).join();
+        List<BooruItem> items = List.from(jsonDecode(content)).map((e) => BooruItem.fromJSON(jsonEncode(e))).toList();
+        if (settingsHandler.dbEnabled) {
+          Map<String, int> result = await settingsHandler.dbHandler.updateMultipleBooruItems(items);
+          int saved = result["saved"] ?? 0;
+          int exist = result["exist"] ?? 0;
+
+          String savedString = saved > 0 ? "Added $saved" : '';
+          String existString = exist > 0 ? "Skipped $exist" : '';
+          String divider = (savedString != '' && existString != '') ? '/' : '';
+          String totalResult = savedString + divider + existString;
+          req.response.statusCode = 200;
+          req.response.write(totalResult);
+
+          int lastIndex = offset + size;
+          if (lastIndex == amount - 1) {
+            return "Favourites Synced";
+          } else {
+            return "$offset-$lastIndex / $amount - $totalResult";
+          }
+        } else {
+          req.response.statusCode = 200;
+          req.response.write('DB is disabled');
+          return "DB is disabled";
+        }
+
+      } catch (e) {
+        Logger.Inst().log(e.toString(), "LoliSync", "storeBooruItem", LogTypes.exception);
+        req.response.statusCode = 404;
+        req.response.write("Invalid Query");
+        return "Something went wrong ${e.toString()}";
+      }
+    } else {
+      req.response.statusCode = 404;
+      req.response.write("Invalid Query");
+      return "Invalid Query";
+    }
   }
 
   Future<String> storeBooruItem(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
-        amount = int.parse(req.uri.queryParameters["amount"]!);
-        current = int.parse(req.uri.queryParameters["current"]!);
+        int amount = int.parse(req.uri.queryParameters["amount"]!);
+        int current = int.parse(req.uri.queryParameters["current"]!);
         Logger.Inst().log("request to update booru item recieved", "LoliSync", "storeBooruItem", LogTypes.loliSyncInfo);
         String content = await utf8.decoder.bind(req).join(); /*2*/
         BooruItem item = BooruItem.fromJSON(content);
@@ -94,25 +146,30 @@ class LoliSync{
           } else {
             return "$current / $amount - $result";
           }
+        } else {
+          req.response.statusCode = 200;
+          req.response.write('DB is disabled');
+          return "DB is disabled";
         }
-
       } catch (e) {
         Logger.Inst().log(e.toString(), "LoliSync", "storeBooruItem", LogTypes.exception);
+        req.response.statusCode = 404;
+        req.response.write("Invalid Query");
+        return "Something went wrong ${e.toString()}";
       }
     } else {
       req.response.statusCode = 404;
       req.response.write("Invalid Query");
       return "Invalid Query";
     }
-    return "Something went wrong";
   }
 
   Future<String> storeBooru(var req, SettingsHandler settingsHandler) async{
     if (req.method == 'POST') {
       try {
         Logger.Inst().log("request to add item recieved", "LoliSync", "storeBooru", LogTypes.loliSyncInfo);
-        amount = int.parse(req.uri.queryParameters["amount"]!);
-        current = int.parse(req.uri.queryParameters["current"]!);
+        int amount = int.parse(req.uri.queryParameters["amount"]!);
+        int current = int.parse(req.uri.queryParameters["current"]!);
         String content = await utf8.decoder.bind(req).join(); /*2*/
         Booru booru = Booru.fromJSON(content);
 
@@ -138,15 +195,15 @@ class LoliSync{
         }
       } catch (e) {
         Logger.Inst().log(e.toString(), "LoliSync", "storeBooru", LogTypes.exception);
+        req.response.statusCode = 404;
+        req.response.write("Invalid Query");
+        return "Something went wrong ${e.toString()}";
       }
     } else {
       req.response.statusCode = 404;
       req.response.write("Invalid Query");
       return "Invalid Query";
     }
-    req.response.statusCode = 404;
-    req.response.write("Invalid Query");
-    return "Something went wrong";
   }
 
   Future<String> storeTabs(var req, SettingsHandler settingsHandler) async {
@@ -172,13 +229,15 @@ class LoliSync{
         return "Tabs Saved";
       } catch (e) {
         Logger.Inst().log(e.toString(), "LoliSync", "storeTabs", LogTypes.exception);
+        req.response.statusCode = 404;
+        req.response.write("Invalid Query");
+        return "Something went wrong ${e.toString()}";
       }
     } else {
       req.response.statusCode = 404;
       req.response.write("Invalid Query");
       return "Invalid Query";
     }
-    return "Something went wrong";
   }
 
 
@@ -200,6 +259,17 @@ class LoliSync{
 
   void killSync(){
     syncKilled = true;
+  }
+
+  Future<String> sendBooruBatch(List<BooruItem> items, int favouritesCount, int offset) async {
+    int lastIndex = offset + items.length;
+    Logger.Inst().log("Sending batch $offset-$lastIndex / $favouritesCount", "LoliSync", "sendBooruItem", LogTypes.loliSyncInfo);
+    HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/boorubatch?amount=$favouritesCount&offset=$offset&size=${items.length}")
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode(items.map((e) => e.toJSON()).toList()));
+    HttpClientResponse response = await request.close();
+    String responseStr = await utf8.decoder.bind(response).join();
+    return responseStr;
   }
 
   Future<String> sendBooruItem(BooruItem item, int favouritesCount, int current) async {
@@ -244,14 +314,44 @@ class LoliSync{
     return responseStr;
   }
 
+  // TODO add timeout
   Future<String> sendTest() async {
-    Logger.Inst().log("Sending test", "LoliSync", "sendTabs", LogTypes.loliSyncInfo);
-    HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/test");
-    HttpClientResponse response = await request.close();
-    if(response.statusCode != 200) {
+    Logger.Inst().log("Sending test", "LoliSync", "sendTest", LogTypes.loliSyncInfo);
+    try {
+      HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/test");
+      HttpClientResponse response = await request.close();
+      if(response.statusCode != 200) {
+        FlashElements.showSnackbar(
+          title: Text(
+            "Test error: ${response.statusCode} ${response.reasonPhrase}",
+            style: TextStyle(fontSize: 20)
+          ),
+          leadingIcon: Icons.warning_amber,
+          leadingIconColor: Colors.red,
+          sideColor: Colors.red,
+        );
+        return "Test error";
+      } else {
+        FlashElements.showSnackbar(
+          title: Text(
+            "Test request received a positive response",
+            style: TextStyle(fontSize: 20)
+          ),
+          content: Text(
+            "There should be a 'Test' message on the other device",
+            style: TextStyle(fontSize: 20)
+          ),
+          leadingIcon: Icons.warning_amber,
+          leadingIconColor: Colors.green,
+          sideColor: Colors.green,
+        );
+        return 'Test OK';
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), "LoliSync", "sendTest", LogTypes.exception);
       FlashElements.showSnackbar(
         title: Text(
-          "Test error: ${response.statusCode} ${response.reasonPhrase}",
+          "Test error: ${e.toString()}",
           style: TextStyle(fontSize: 20)
         ),
         leadingIcon: Icons.warning_amber,
@@ -259,8 +359,18 @@ class LoliSync{
         sideColor: Colors.red,
       );
       return "Test error";
-    } else {
-      return 'Test OK';
+    }
+  }
+
+  Future<String> sendSyncComplete() async {
+    Logger.Inst().log("Sending sync complete", "LoliSync", "sendSyncComplete", LogTypes.loliSyncInfo);
+    try {
+      HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/complete");
+      HttpClientResponse response = await request.close();
+      return response.statusCode.toString();
+    } catch (e) {
+      Logger.Inst().log(e.toString(), "LoliSync", "sendSyncComplete", LogTypes.exception);
+      return "Sync Complete error ${e.toString()}";
     }
   }
 
@@ -271,12 +381,45 @@ class LoliSync{
     this.ip = ipOverride;
     this.port = int.tryParse(portOverride) ?? 8080;
     final String address = '$ip:$port';
+    syncKilled = false;
 
     for (int i = 0; i < toSync.length; i++) {
       switch(toSync.elementAt(i)) {
+        case "Favouritesv2":
+          yield "Sync Starting $address";
+          yield "Preparing favoirites data";
+          int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
+          yield "Favourites count: $favouritesCount";
+          if (favouritesCount > 0) {
+            int limit = 100;
+            int ceiling = (favouritesCount / limit).ceil();
+
+            // If favSkip is set, start from skipAmount/limit, but limitted to (last 1000 items (ceiling - 1))
+            int startFrom = min((ceiling - 1), (favSkip == 0 ? 0 : (favSkip / limit).floor()));
+
+            for(int i = startFrom; i < ceiling; i++) {
+              if (!syncKilled) {
+                int offset = i * limit;
+                // TODO rework to send only missing ones?
+                yield "Fetching favourites $offset / $favouritesCount";
+                List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("", offset.toString(), limit.toString(), "ASC", "loliSyncFav");
+                Logger.Inst().log("fetched is ${fetched.length} i is $i", "LoliSync", "startSync", LogTypes.loliSyncInfo);
+
+                String resp = await sendBooruBatch(fetched, favouritesCount, offset);
+                int count = offset + fetched.length;
+                yield "$offset-$count / $favouritesCount - $resp";
+              }
+            }
+            yield "Favourites sent";
+          } else {
+            yield "No Favourites";
+          }
+          break;
         case "Favourites":
           yield "Sync Starting $address";
+          yield "Preparing favoirites data";
           int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
+          yield "Favourites count: $favouritesCount";
           if (favouritesCount > 0) {
             int limit = 100;
             int ceiling = (favouritesCount / limit).ceil();
@@ -288,7 +431,9 @@ class LoliSync{
               if (!syncKilled) {
                 int offset = i * limit;
                 // TODO rework to send only missing ones?
+                yield "Fetching favourites $offset / $favouritesCount";
                 List<BooruItem> fetched = await settingsHandler.dbHandler.searchDB("", offset.toString(), limit.toString(), "ASC", "loliSyncFav");
+                yield "Fetched ${fetched.length} favourites";
                 Logger.Inst().log("fetched is ${fetched.length} i is $i", "LoliSync", "startSync", LogTypes.loliSyncInfo);
                 for (int x = 0; x < fetched.length; x++){
                   int count = offset + x;
@@ -309,6 +454,7 @@ class LoliSync{
           break;
         case "Settings":
           yield "Sync Starting $address";
+          yield "Preparing settings data";
           Map<String, dynamic> settingsJSON = settingsHandler.toJSON();
           for (var element in settingsHandler.deviceSpecificSettings) {
             settingsJSON.remove(element);
@@ -318,6 +464,7 @@ class LoliSync{
           break;
         case "Booru":
           yield "Sync Starting $address";
+          yield "Preparing booru data";
           int booruCount = settingsHandler.booruList.length;
           if (booruCount > 0){
             for (int i = 0; i < booruCount; i++){
@@ -337,11 +484,20 @@ class LoliSync{
           break;
         case "Tabs":
           yield "Sync Starting $address";
+          yield "Preparing tabs data";
           String resp = await sendTabs(searchHandler.getBackupString(), tabsMode);
+          yield resp;
+          break;
+        case "Test":
+          yield "Sync Starting $address";
+          yield "Preparing test data";
+          String resp = await sendTest();
           yield resp;
           break;
       }
     }
 
+    yield "Sync Complete";
+    String resp = await sendSyncComplete();
   }
 }

@@ -93,7 +93,7 @@ class WorldHandler extends BooruHandler {
     String excludeTags = tags.split(' ').where((f) => f.startsWith('-')).toList().map((tag) => tag.replaceAll(RegExp(r'_'), '+').replaceAll(RegExp(r'^-'), '')).toList().join('|');
     // ignores custom limits
     // 
-    int skip = (pageNum.value * limit) < 0 ? 0 : pageNum.value * limit;
+    int skip = (pageNum * limit) < 0 ? 0 : (pageNum * limit);
     return "${booru.baseURL}/api/post/Search?IncludeLinks=true&Tag=$includeTags&ExcludeTag=$excludeTags&OrderBy=0&Skip=${skip.toString()}&Take=${limit.toString()}&DisableTotal=false";
   }
 

@@ -1,0 +1,11 @@
+{
+	"version_name": "2.1.5",
+	"build_number": 169,
+	"title": "Danbooru",
+	"changelog": "Main changes:\n- Fix Danbooru",
+	"is_in_store": true,
+	"is_update_in_store": true,
+	"is_important": false,
+	"store_package": "com.noaisu.play.loliSnatcher",
+	"github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
+}

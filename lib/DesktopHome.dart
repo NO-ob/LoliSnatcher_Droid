@@ -20,9 +20,9 @@ import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/ResizableSplitView.dart';
 
 class DesktopHome extends StatelessWidget {
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
 
   @override
   Widget build(BuildContext context) {

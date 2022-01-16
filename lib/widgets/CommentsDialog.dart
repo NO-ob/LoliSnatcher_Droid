@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -5,10 +7,11 @@ import 'package:intl/intl.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 
 // TODO parse [quote] https://github.com/flexbooru/flexbooru/blob/2084976a1db68c312ec4b9169f88e7425f35a539/android/src/main/java/onlymash/flexbooru/widget/CommentView.kt
 // TODO add support for more boorus
@@ -39,19 +42,19 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   String formatDate(String date, String format) {
     String formattedDate = '';
-    if(date.isNotEmpty && format.isNotEmpty) {
+    if (date.isNotEmpty && format.isNotEmpty) {
       try {
         // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
         // remove timezones from strings until they fix it
         DateTime parsedDate;
-        if(format == "unix") {
+        if (format == "unix") {
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(date) * 1000);
         } else {
           date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
           parsedDate = DateFormat(format).parseLoose(date).toLocal();
         }
         formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
-      } catch(e) {
+      } catch (e) {
         print('$date $format $e');
       }
     }
@@ -59,13 +62,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Widget scoreText(int? score) {
-    if(score == null) {
+    if (score == null) {
       return Text('');
     } else {
       Color color = Colors.grey;
-      if(score > 0) {
+      if (score > 0) {
         color = Colors.green;
-      } else if(score < 0) {
+      } else if (score < 0) {
         color = Colors.red;
       }
 
@@ -112,7 +115,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
-        child: Container(
+        child: SizedBox(
           width: double.maxFinite,
           child: Scrollbar(
             controller: scrollController,
@@ -128,21 +131,25 @@ class _CommentsDialogState extends State<CommentsDialog> {
               onRefresh: () async {
                 getComments();
               },
-              child: areThereErrors ? errorsBuild() : listBuild()),
-          )
-        )
-      )
+              child: areThereErrors ? errorsBuild() : listBuild(),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget listBuild() {
-    return ListView.builder(
-      padding: EdgeInsets.all(5),
+    return DesktopScrollWrap(
       controller: scrollController,
-      physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
-      itemCount: comments.length,
-      scrollDirection: Axis.vertical,
-      itemBuilder: listEntryBuild,
+      child: ListView.builder(
+        padding: EdgeInsets.all(5),
+        controller: scrollController,
+        physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        itemCount: comments.length,
+        scrollDirection: Axis.vertical,
+        itemBuilder: listEntryBuild,
+      ),
     );
   }
 
@@ -150,83 +157,87 @@ class _CommentsDialogState extends State<CommentsDialog> {
     CommentItem currentEntry = comments[index];
 
     Widget entryRow = Container(
-        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-        child: Ink(
-          child: InkWell(
-            onTap: () {},
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        margin: const EdgeInsets.only(right: 10),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: currentEntry.avatarUrl != null
-                            ? Image.network(currentEntry.avatarUrl!, errorBuilder: (context, url, error) {
-                                return Center(child: Text(currentEntry.authorName?.substring(0, 2) ?? '?'));
-                              })
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      child: Ink(
+        child: InkWell(
+          onTap: () {},
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: currentEntry.avatarUrl != null ? 60 : 40,
+                      height: currentEntry.avatarUrl != null ? 60 : 40,
+                      margin: const EdgeInsets.only(right: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(currentEntry.avatarUrl != null ? 10 : 20),
+                        child: currentEntry.avatarUrl != null
+                            ? Image.network(
+                                currentEntry.avatarUrl!,
+                                fit: BoxFit.cover,
+                                filterQuality: FilterQuality.medium,
+                                errorBuilder: (context, url, error) {
+                                  return Center(child: Text(currentEntry.authorName?.substring(0, 2) ?? '?'));
+                                },
+                              )
                             : Center(child: Text(currentEntry.authorName?.substring(0, 2) ?? '?')),
-                        ),
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if(currentEntry.authorName?.isNotEmpty == true)
-                            Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: SelectableText(currentEntry.authorName!, style: TextStyle(fontWeight: FontWeight.bold)),
-                            ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (currentEntry.authorName?.isNotEmpty == true)
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: Row(
-                              children: [
-                                if(currentEntry.title?.isNotEmpty == true)
-                                  SelectableText(currentEntry.title!, style: TextStyle(fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 5),
-                                if(currentEntry.createDate?.isNotEmpty == true)
-                                  Text(formatDate(currentEntry.createDate!, currentEntry.createDateFormat!), style: TextStyle(fontSize: 12, color: Get.theme.colorScheme.onSurface.withOpacity(0.5))),
-                                const SizedBox(width: 15),
-                                scoreText(currentEntry.score),
-                              ]
-                            ),
+                            child: SelectableText(currentEntry.authorName!, style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
-                        ],
-                      )
-                    ],
+                        Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Row(children: [
+                            if (currentEntry.title?.isNotEmpty == true)
+                              SelectableText(currentEntry.title!, style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(width: 5),
+                            if (currentEntry.createDate?.isNotEmpty == true)
+                              Text(formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
+                                  style: TextStyle(fontSize: 12, color: Get.theme.colorScheme.onSurface.withOpacity(0.5))),
+                            const SizedBox(width: 15),
+                            scoreText(currentEntry.score),
+                          ]),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12.0),
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    color: Get.theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(6),
                   ),
-
-                  const SizedBox(height: 8),
-
-                  Container(
-                    padding: const EdgeInsets.all(12.0),
-                    width: double.maxFinite,
-                    decoration: BoxDecoration(
-                      color: Get.theme.colorScheme.surface,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: SelectableLinkify(
-                      text: '${currentEntry.content ?? ''}',
-                      options: LinkifyOptions(humanize: false, removeWww: true, looseUrl: true),
-                      onOpen: (link) async {
-                        ServiceHandler.launchURL(link.url);
-                      },
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  child: SelectableLinkify(
+                    text: currentEntry.content ?? '',
+                    options: LinkifyOptions(humanize: false, removeWww: true, looseUrl: true),
+                    scrollPhysics: const NeverScrollableScrollPhysics(),
+                    onOpen: (link) async {
+                      ServiceHandler.launchURL(link.url);
+                    },
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ));
+        ),
+      ),
+    );
 
     return Column(children: <Widget>[
       Row(children: [
@@ -238,34 +249,33 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   Widget errorsBuild() {
     return ListView(
-        padding: EdgeInsets.all(5),
-        controller: scrollController,
-        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
-        children: [
-          if (isLoading)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(18.0),
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-                )
-              )
-            )
-          else if (notSupported)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('This Booru doesn\'t have comments or there is no API for them.'),
-              )
-            )
-          else if (comments.length == 0)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text('No comments.'),
-              )
+      padding: EdgeInsets.all(5),
+      controller: scrollController,
+      // physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      children: [
+        if (isLoading)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)),
             ),
-        ]);
+          )
+        else if (notSupported)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('This Booru doesn\'t have comments or there is no API for them.'),
+            ),
+          )
+        else if (comments.length == 0)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text('No comments.'),
+            ),
+          ),
+      ],
+    );
   }
 
   @override
@@ -277,7 +287,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
       insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
       scrollable: false,
       actionButtons: [
-        if(widget.item.postURL.isNotEmpty)
+        if (widget.item.postURL.isNotEmpty)
           ElevatedButton(
             child: Text('Open the Post'),
             onPressed: () {
