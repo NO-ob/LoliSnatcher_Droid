@@ -38,8 +38,8 @@ class SettingsHandler extends GetxController {
   // version vars
   String appName = "LoliSnatcher";
   String packageName = "com.noaisu.loliSnatcher";
-  String verStr = "2.1.5";
-  int buildNumber = 169;
+  String verStr = "2.2.0";
+  int buildNumber = 170;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
@@ -1437,11 +1437,12 @@ class SettingsHandler extends GetxController {
   void checkUpdate({bool withMessage = false}) async {
     const String changelog = r"""Changelog""";
     Map<String, dynamic> fakeUpdate = {
-      "version_name": "2.1.0",
-      "build_number": 168,
+      "version_name": "2.2.0",
+      "build_number": 170,
       "title": "Title",
       "changelog": changelog,
       "is_in_store": true, // is app still in store
+      "is_update_in_store": true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
       "is_important": false, // is update important => force open dialog on start
       "store_package": "com.noaisu.play.loliSnatcher", // custom app package name, to allow to redirect store users to new app if it will be needed
       "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
