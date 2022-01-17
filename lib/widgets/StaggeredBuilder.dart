@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:waterfall_flow/waterfall_flow.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/ThumbCardBuild.dart';
+import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 
 class StaggeredBuilder extends StatelessWidget {
   final void Function(int) onTap;
@@ -29,9 +29,7 @@ class StaggeredBuilder extends StatelessWidget {
       return Obx(() {
         return WaterfallFlow.builder(
           controller: searchHandler.gridScrollController,
-          physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
-              ? const NeverScrollableScrollPhysics()
-              : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           shrinkWrap: false,
           addAutomaticKeepAlives: false,
           cacheExtent: 200,

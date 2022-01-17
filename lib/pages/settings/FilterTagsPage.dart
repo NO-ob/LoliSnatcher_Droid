@@ -161,7 +161,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
           shrinkWrap: false,
           itemCount: tagsList.length,
           scrollDirection: Axis.vertical,
-          physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           itemBuilder: (BuildContext context, int index) {
             String currentEntry = tagsList[index];
             Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));

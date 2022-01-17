@@ -1,10 +1,10 @@
-import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/ThumbCardBuild.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class GridBuilder extends StatelessWidget {
   final void Function(int) onTap;
@@ -23,9 +23,7 @@ class GridBuilder extends StatelessWidget {
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,
-        physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
-            ? const NeverScrollableScrollPhysics()
-            : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         addAutomaticKeepAlives: false,
         cacheExtent: 200,
         shrinkWrap: false,

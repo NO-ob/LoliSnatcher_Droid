@@ -145,7 +145,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
       child: ListView.builder(
         padding: EdgeInsets.all(5),
         controller: scrollController,
-        physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: comments.length,
         scrollDirection: Axis.vertical,
         itemBuilder: listEntryBuild,

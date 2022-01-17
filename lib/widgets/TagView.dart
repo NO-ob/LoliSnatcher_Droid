@@ -584,7 +584,7 @@ class _TagViewState extends State<TagView> {
           controller: scrollController,
           child: CustomScrollView(
             controller: scrollController,
-            physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+            physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: [
               infoBuild(),
               tagsBuild(),
