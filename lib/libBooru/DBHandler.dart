@@ -133,7 +133,7 @@ class DBHandler{
   }
 
   Future<Map<String,int>> updateMultipleBooruItems(List<BooruItem> items) async {
-    List<String?> itemIDs = await getItemIDs(items.map((item) => item.postURL).toList());
+    List<String> itemIDs = await getItemIDs(items.map((item) => item.postURL).toList());
 
     int saved = 0, exist = 0;
     for (BooruItem item in items) {
@@ -171,10 +171,10 @@ class DBHandler{
     }
   }
 
-  Future<List<String?>> getItemIDs(List<String> postURLs) async {
+  Future<List<String>> getItemIDs(List<String> postURLs) async {
     List? result = await db?.rawQuery("SELECT id, postURL FROM BooruItem WHERE postURL IN (${List.generate(postURLs.length, (_) => '?').join(',')})", postURLs);
 
-    List<String?> ids = List.generate(postURLs.length, (index) => null);
+    List<String> ids = List.generate(postURLs.length, (index) => "");
     if (result != null && result.isNotEmpty) {
       for (Map<String, dynamic> item in result) {
         int postIndex = postURLs.indexOf(item["postURL"]);

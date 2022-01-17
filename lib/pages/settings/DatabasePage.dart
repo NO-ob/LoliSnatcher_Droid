@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
@@ -24,6 +25,7 @@ class _DatabasePageState extends State<DatabasePage> {
   bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
   int updatingFailed = 0, updatingDone = 0;
   List<BooruItem> updatingItems = [];
+  List<String> failedURLs = [];
 
   @override
   void initState(){
@@ -74,6 +76,7 @@ class _DatabasePageState extends State<DatabasePage> {
 
     setState(() {
       updatingItems = [];
+      failedURLs = [];
       updatingFailed = 0;
       updatingDone = 0;
       isUpdating = true;
@@ -108,6 +111,7 @@ class _DatabasePageState extends State<DatabasePage> {
         if (result[1] == false) {
           setState(() {
             updatingFailed += 1;
+            failedURLs.add(item.postURL);
           });
           print("something went wrong updating favourites: ${result[2]}");
         } else {
@@ -137,6 +141,32 @@ class _DatabasePageState extends State<DatabasePage> {
       isUpdating = false;
     });
 
+    return true;
+  }
+
+  Future<bool> purgeFailedSankakuItems() async {
+    FlashElements.showSnackbar(
+      duration: Duration(seconds: 6),
+      title: Text(
+          'Failed Item Purge Started!',
+          style: TextStyle(fontSize: 20)
+      ),
+      content: Column(children: [
+        Text(
+            "Items that failed to update will be removed from the database",
+            style: TextStyle(fontSize: 16)
+        ),
+      ]),
+      leadingIcon: Icons.info_outline,
+      leadingIconColor: Colors.green,
+      sideColor: Colors.green,
+    );
+
+    List<String> failedIDs = await settingsHandler.dbHandler.getItemIDs(failedURLs);
+    settingsHandler.dbHandler.deleteItem(failedIDs);
+    setState(() {
+      failedURLs = [];
+    });
     return true;
   }
 
@@ -427,6 +457,17 @@ class _DatabasePageState extends State<DatabasePage> {
                   action: () {
                     setState(() {
                       isUpdating = false;
+                    });
+                  },
+                ),
+              if(!isUpdating && failedURLs.length > 0)
+                SettingsButton(
+                  name: 'Purge Items That Failed to Update',
+                  trailingIcon: Icon(Icons.delete_forever),
+                  drawTopBorder: true,
+                  action: () {
+                    setState(() {
+                      purgeFailedSankakuItems();
                     });
                   },
                 ),
