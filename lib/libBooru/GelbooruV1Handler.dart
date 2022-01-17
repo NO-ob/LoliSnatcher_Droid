@@ -75,6 +75,6 @@ class GelbooruV1Handler extends BooruHandler{
   // This will create a url for the http request
   @override
   String makeURL(String tags){
-    return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum.value * 20).toString()}";
+    return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum * 20).toString()}";
   }
 }

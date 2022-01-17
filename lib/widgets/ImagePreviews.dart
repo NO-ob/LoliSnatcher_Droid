@@ -76,8 +76,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
               name: 'Help',
               icon: Icon(Icons.help_center_outlined),
               action: () {
-                ServiceHandler.launchURL(
-                    "https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
+                ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
               },
               trailingIcon: Icon(Icons.exit_to_app),
             ),
@@ -92,8 +91,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
         child: Column(
           children: [
             CircularProgressIndicator(
-              valueColor:
-                  AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
+              valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
             ),
             Obx(() {
               if (searchHandler.isRestored.value) {

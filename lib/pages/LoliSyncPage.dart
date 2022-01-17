@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
@@ -8,8 +9,8 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/pages/LoliSyncSendPage.dart';
-import 'package:LoliSnatcher/pages/LoliSyncServerPage.dart';
+import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'package:LoliSnatcher/pages/LoliSyncProgressPage.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
@@ -24,6 +25,7 @@ class LoliSyncPage extends StatefulWidget {
   @override
   _LoliSyncPageState createState() => _LoliSyncPageState();
 }
+
 class _LoliSyncPageState extends State<LoliSyncPage> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
@@ -33,9 +35,12 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   final TextEditingController favouritesSkipController = TextEditingController();
   final TextEditingController startPortController = TextEditingController();
 
+  final LoliSync testSync = LoliSync();
+
   SyncSide syncSide = SyncSide.none;
 
-  bool favourites = false, settings = false, booru = false, tabs = false;
+  bool favourites = false, favouritesv2 = false, settings = false, booru = false, tabs = false;
+  int favToggleCount = 0;
   String tabsMode = 'Merge';
   List<String> tabsModesList = ['Merge', 'Replace'];
   int? favCount;
@@ -46,6 +51,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   String? selectedAddress;
 
   Future<bool> _onWillPop() async {
+    testSync.killSync();
+
     settingsHandler.lastSyncIp = ipController.text;
     settingsHandler.lastSyncPort = portController.text;
     bool result = await settingsHandler.saveSettings(restate: false);
@@ -64,16 +71,56 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     getIPList();
   }
 
+  void updateState() {
+    setState(() {});
+  }
+
   void getFavCount() async {
     favCount = await settingsHandler.dbHandler.getFavouritesCount();
-    setState(() { });
+    updateState();
   }
 
   void getIPList() async {
     List<NetworkInterface> temp = await ServiceHandler.getIPList();
     ipList.addAll(temp);
     ipListNames.addAll(temp.map((e) => e.name).toList());
-    setState(() { });
+    updateState();
+  }
+
+  void sendTestRequest() async {
+    if (ipController.text.isEmpty || portController.text.isEmpty) {
+      FlashElements.showSnackbar(
+        context: context,
+        title: Text("Error!", style: TextStyle(fontSize: 20)),
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Please enter IP address and port."),
+          ],
+        ),
+        sideColor: Colors.red,
+        leadingIcon: Icons.error,
+        leadingIconColor: Colors.red,
+      );
+      return;
+    }
+
+    testSync.killSync();
+    Stream<String> stream = testSync.startSync(ipController.text, portController.text, ["Test"], 0, 'Merge');
+    StreamSubscription<String> sub = stream.listen(
+      (data) {
+        // print(data);
+      },
+      onDone: () {
+        // print('Done');
+        testSync.killSync();
+      },
+      onError: (e) {
+        // print('Error $e');
+        testSync.killSync();
+      },
+      cancelOnError: true,
+    );
   }
 
   Widget selectBuild() {
@@ -89,13 +136,12 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           name: '',
           enabled: false,
         ),
-
         SettingsButton(
           name: 'SEND data TO another device',
           icon: Icon(Icons.send_to_mobile),
           action: () {
             syncSide = SyncSide.sender;
-            setState(() { });
+            updateState();
           },
         ),
         SettingsButton(
@@ -103,7 +149,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           icon: Icon(Icons.dns_outlined),
           action: () {
             syncSide = SyncSide.receiver;
-            setState(() { });
+            updateState();
           },
         ),
       ],
@@ -115,7 +161,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       children: <Widget>[
         Container(
           margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: Text("Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
+          child: Text(
+              "Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
         ),
         SettingsTextInput(
           controller: ipController,
@@ -134,55 +181,68 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           clearable: true,
         ),
         SettingsToggle(
-          value: favourites,
+          value: favouritesv2,
           onChanged: (newValue) {
+            if (newValue) favToggleCount++;
+
             setState(() {
-              favourites = newValue;
+              favouritesv2 = newValue;
             });
           },
           title: 'Send Favourites',
           subtitle: Text('Favorites: ${favCount ?? '...'}'),
-          drawBottomBorder: favourites == true ? false : true,
+          drawBottomBorder: favouritesv2 == true ? false : true,
         ),
-
+        if (favToggleCount > 2)
+          SettingsToggle(
+            value: favourites,
+            onChanged: (newValue) {
+              setState(() {
+                favourites = newValue;
+              });
+            },
+            title: 'Send Favourites (Legacy)',
+            subtitle: Text('Favorites: ${favCount ?? '...'}'),
+            drawBottomBorder: favourites == true ? false : true,
+          ),
         AnimatedSwitcher(
           duration: Duration(milliseconds: 200),
-          child: favourites
-          ? SettingsTextInput(
-              controller: favouritesSkipController,
-              title: 'Start Favs Sync from #...',
-              hintText: "Start Favs Sync from #...",
-              inputType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-              clearable: true,
-              numberButtons: true,
-              numberStep: 100,
-              numberMin: 0,
-              numberMax: favCount?.toDouble() ?? double.infinity,
-              trailingIcon: IconButton(
-                icon: Icon(Icons.help_outline),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return SettingsDialog(
-                        title: Text('Start Favs Sync from #...'),
-                        contentItems: <Widget>[
-                          Text('Allows to set from where the sync should start from'),
-                          Text('If you want to sync from the beginning leave this field blank'),
-                          Text(''),
-                          Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
-                          Text('Order of favs: From oldest (0) to newest (X)')
-                        ],
+          child: (favouritesv2 || favourites)
+              ? SettingsTextInput(
+                  controller: favouritesSkipController,
+                  title: 'Start Favs Sync from #...',
+                  hintText: "Start Favs Sync from #...",
+                  inputType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                  clearable: true,
+                  numberButtons: true,
+                  numberStep: 100,
+                  numberMin: 0,
+                  numberMax: favCount?.toDouble() ?? double.infinity,
+                  trailingIcon: IconButton(
+                    icon: Icon(Icons.help_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SettingsDialog(
+                            title: Text('Start Favs Sync from #...'),
+                            contentItems: <Widget>[
+                              Text('Allows to set from where the sync should start from'),
+                              Text('If you want to sync from the beginning leave this field blank'),
+                              Text(''),
+                              Text(
+                                  'Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
+                              Text('Order of favs: From oldest (0) to newest (X)')
+                            ],
+                          );
+                        },
                       );
-                    }
-                  );
-                },
-              ),
-            )
-          : Container()
+                    },
+                  ),
+                )
+              : Container(),
         ),
-
         SettingsToggle(
           value: settings,
           onChanged: (newValue) {
@@ -213,62 +273,90 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           subtitle: Text('Tabs: ${searchHandler.list.length}'),
           drawBottomBorder: tabs == true ? false : true,
         ),
-
         AnimatedSwitcher(
           duration: Duration(milliseconds: 200),
           child: tabs
-          ? SettingsDropdown(
-              selected: tabsMode,
-              values: tabsModesList,
-              onChanged: (String? newValue) {
-                setState(() {
-                  tabsMode = newValue!;
-                });
-              },
-              title: 'Tabs Sync Mode',
-              trailingIcon: IconButton(
-                icon: Icon(Icons.help_outline),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return SettingsDialog(
-                        title: Text('Tabs Sync Mode'),
-                        contentItems: <Widget>[
-                          Text('Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored'),
-                          Text(''),
-                          Text('Replace: Completely replace the tabs on the other device with the tabs from this device'),
-                        ],
+              ? SettingsDropdown(
+                  selected: tabsMode,
+                  values: tabsModesList,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      tabsMode = newValue!;
+                    });
+                  },
+                  title: 'Tabs Sync Mode',
+                  trailingIcon: IconButton(
+                    icon: Icon(Icons.help_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return SettingsDialog(
+                            title: Text('Tabs Sync Mode'),
+                            contentItems: <Widget>[
+                              Text(
+                                  'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored'),
+                              Text(''),
+                              Text('Replace: Completely replace the tabs on the other device with the tabs from this device'),
+                            ],
+                          );
+                        },
                       );
-                    }
+                    },
+                  ),
+                )
+              : Container(),
+        ),
+        SettingsButton(name: '', enabled: false),
+        SettingsButton(
+          name: 'Test Connection',
+          icon: Icon(Icons.wifi_tethering),
+          action: () {
+            sendTestRequest();
+          },
+          trailingIcon: IconButton(
+            icon: Icon(Icons.help_outline),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return SettingsDialog(
+                    title: Text('Test Connection'),
+                    contentItems: <Widget>[
+                      Text('This will send a test request to the other device.'),
+                      Text('There will be a notification stating if the request was successful or not.'),
+                    ],
                   );
                 },
-              ),
-            )
-          : Container()
+              );
+            },
+          ),
         ),
-
-        SettingsButton(name: '', enabled: false),
         SettingsButton(
           name: 'Start Sync',
           icon: Icon(Icons.send_to_mobile),
-          action: () {
+          action: () async {
             bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
-            bool isAnySyncSelected = favourites || settings || booru || tabs;
+            bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs;
             bool syncAllowed = isAddressEntered && isAnySyncSelected;
 
-            if(syncAllowed) {
-              var page = () => LoliSyncSendPage(
-                ip: ipController.text,
-                port: portController.text,
-                settings: settings,
-                favourites: favourites,
-                booru: booru,
-                tabs: tabs,
-                tabsMode: tabsMode,
-                favSkip: int.tryParse(favouritesSkipController.text) ?? 0,
-              );
-              SettingsPageOpen(context: context, page: page);
+            if (syncAllowed) {
+              await SettingsPageOpen(
+                context: context,
+                page: () => LoliSyncProgressPage(
+                  type: 'sender',
+                  ip: ipController.text,
+                  port: portController.text,
+                  favourites: favourites,
+                  favouritesv2: favouritesv2,
+                  favSkip: int.tryParse(favouritesSkipController.text) ?? 0,
+                  settings: settings,
+                  booru: booru,
+                  tabs: tabs,
+                  tabsMode: tabsMode,
+                ),
+              ).open();
+              updateState();
             } else {
               String errorString = '???';
               if (!isAddressEntered) {
@@ -278,10 +366,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               }
               FlashElements.showSnackbar(
                 context: context,
-                title: Text(
-                  "Error!",
-                  style: TextStyle(fontSize: 20)
-                ),
+                title: Text("Error!", style: TextStyle(fontSize: 20)),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -316,27 +401,23 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         Container(
           margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: Text("Start the server if you want your device to recieve data from another, do not use this on public wifi as you might get pozzed"),
+          child: Text("Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed"),
         ),
         SettingsDropdown(
           selected: selectedInterface,
           values: ipListNames,
           onChanged: (String? newValue) {
             selectedInterface = newValue!;
-            NetworkInterface? findInterface;
-            try {
-              findInterface = ipList.firstWhere((el) => el.name == newValue);
-            } catch (e) {
-              
-            }
-            if(newValue == 'Localhost') {
+            NetworkInterface? findInterface = ipList.firstWhereOrNull((el) => el.name == newValue);
+
+            if (newValue == 'Localhost') {
               selectedAddress = '127.0.0.1';
             } else {
-              selectedAddress = findInterface?.addresses[0].address;
+              selectedAddress = findInterface?.addresses.first.address;
             }
-            setState(() { });
+            updateState();
           },
-          title: 'Available Network Interfaces'
+          title: 'Available Network Interfaces',
         ),
         Container(
           margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
@@ -353,18 +434,28 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         SettingsButton(
           name: 'Start Receiver Server',
           icon: Icon(Icons.dns_outlined),
-          page: () => LoliSyncServerPage(selectedAddress, startPortController.text.isEmpty ? '8080' : startPortController.text),
+          action: () async {
+            await SettingsPageOpen(
+              context: context,
+              page: () => LoliSyncProgressPage(
+                type: 'receiver',
+                ip: selectedAddress,
+                port: startPortController.text.isEmpty ? '8080' : startPortController.text,
+              ),
+            ).open();
+            updateState();
+          },
         ),
       ],
     );
   }
 
   Widget conditionalBuild() {
-    if(syncSide == SyncSide.none) {
+    if (syncSide == SyncSide.none) {
       return selectBuild();
-    } else if(syncSide == SyncSide.sender) {
+    } else if (syncSide == SyncSide.sender) {
       return senderBuild();
-    } else if(syncSide == SyncSide.receiver) {
+    } else if (syncSide == SyncSide.receiver) {
       return receiverBuild();
     } else {
       // Should never happen but just in case

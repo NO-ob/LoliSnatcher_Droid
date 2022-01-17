@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
@@ -78,9 +79,9 @@ class SnatchHandler extends GetxController {
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Snatched: ${snatchProgress.value} item${snatchProgress.value == 1 ? "" : "s"}"),
-                if (exists > 0) Text('$exists file${exists == 1 ? ' was' : 's were'} already snatched'),
-                if (failed > 0) Text('Failed to snatch $failed file${failed == 1 ? '' : 's'}'),
+                Text("Snatched: ${snatchProgress.value} ${Tools.pluralize('item', snatchProgress.value)}"),
+                if (exists > 0) Text('$exists ${Tools.pluralize('file', exists)} ${exists == 1 ? 'was' : 'were'} already snatched'),
+                if (failed > 0) Text('Failed to snatch $failed ${Tools.pluralize('file', exists)}'),
               ],
             ),
             leadingIcon: Icons.done_all,
@@ -162,7 +163,7 @@ class SnatchHandler extends GetxController {
 
     List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
     booruHandler = temp[0];
-    booruHandler.pageNum.value = temp[1];
+    booruHandler.pageNum = temp[1];
     booruHandler.pageNum++;
 
     FlashElements.showSnackbar(
@@ -179,7 +180,7 @@ class SnatchHandler extends GetxController {
       sideColor: Colors.yellow,
     );
 
-    while (count < int.parse(amount) && !booruHandler.locked.value) {
+    while (count < int.parse(amount) && !booruHandler.locked) {
       booruItems = (await booruHandler.Search(tags, null)) ?? [];
       booruHandler.pageNum++;
       count = booruItems.length;

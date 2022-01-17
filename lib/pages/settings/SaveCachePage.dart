@@ -317,7 +317,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 bool isLoading = stat['type'] == 'loading';
                 String text = isLoading
                   ? 'Loading...'
-                  : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} file${fileCount == 1 ? '' : 's'}');
+                  : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} ${Tools.pluralize('file', fileCount)}');
 
                 bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
 

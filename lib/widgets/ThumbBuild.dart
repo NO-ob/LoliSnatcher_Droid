@@ -30,6 +30,8 @@ class ThumbBuild extends StatelessWidget {
     // reset the isHated value since we already check for it on every render
     item.isHated.value = isHated;
 
+    // print('ThumbBuild $index');
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(3),
       child: Stack(

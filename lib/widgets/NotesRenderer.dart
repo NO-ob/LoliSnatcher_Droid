@@ -213,6 +213,7 @@ class _NotesRendererState extends State<NotesRenderer> {
                         Icon(
                           Icons.note_add,
                           size: 18,
+                          color: Get.theme.colorScheme.secondary,
                         ),
                       ],
                     ),
@@ -350,7 +351,7 @@ class NotesDialog extends StatelessWidget {
           child: Container(
             width: double.maxFinite,
             child: ListView.builder(
-              physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+              physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               itemCount: item.notes.length,
               itemBuilder: (context, index) {
                 final note = item.notes[index];

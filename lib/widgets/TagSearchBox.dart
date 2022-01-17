@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
@@ -13,7 +14,7 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
-// - debounce search a bit
+// - debounce searches [In progress: needs rewrite of tagSearch to dio to use requests cancelling]
 
 
 class TagSearchBox extends StatefulWidget {
@@ -41,6 +42,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   RxList<List<String>> historyResults = RxList([]);
   RxList<List<String>> databaseResults = RxList([]);
   RxList<List<String>> modifiersResults = RxList([]);
+
+  Timer? debounceTimer;
 
   @override
   void initState() {
@@ -102,7 +105,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void updateOverlay() {
     if (searchHandler.searchBoxFocus.hasFocus) {
-      print("textbox is focused");
+      // print("textbox is focused");
       if (!this._overlayEntry!.mounted) {
         Overlay.of(context)!.insert(this._overlayEntry!);
       } else {
@@ -123,6 +126,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     searchHandler.searchBoxFocus.unfocus();
     searchHandler.searchBoxFocus.removeListener(onFocusChange);
     searchHandler.searchTextController.removeListener(onTextChanged);
+
+    debounceTimer?.cancel();
 
     suggestionsScrollController.dispose();
     searchScrollController.dispose();
@@ -289,6 +294,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 splitInput.removeAt(i);
                 searchHandler.searchTextController.text = splitInput.join(' ');
                 tagStuff();
+                combinedSearch();
               },
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
@@ -322,70 +328,48 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     setState(() { });
   }
 
-  void searchBooru(String input) async {
+  void searchBooru() async {
     booruResults.value = [[' ', 'loading']];
+    // TODO cancel previous search when new starts
     List<String?>? getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
     booruResults.value = getFromBooru?.map((tag){
-      final String tagTemp = tag != null ? tag : '';
+      final String tagTemp = tag ?? '';
       return [tagTemp, 'booru'];
     }).toList() ?? [];
   }
-  void searchHistory(String input) async {
+  void searchHistory() async {
     historyResults.value = [[' ', 'loading']];
-    historyResults.value = input.isNotEmpty
-      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(input, 2)).map((tag){
+    historyResults.value = lastTag.isNotEmpty
+      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(lastTag, 2)).map((tag){
         return [tag, 'history'];
       }).toList()
       : [];
     historyResults.value = historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
   }
-  void searchDatabase(String input) async {
+  void searchDatabase() async {
     databaseResults.value = [[' ', 'loading']];
-    databaseResults.value = input.isNotEmpty
-      ? (await settingsHandler.dbHandler.getTags(input, 2)).map((tag){
+    databaseResults.value = lastTag.isNotEmpty
+      ? (await settingsHandler.dbHandler.getTags(lastTag, 2)).map((tag){
         return [tag, 'database'];
       }).toList()
       : [];
     databaseResults.value = databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList();
   }
-  // void searchModifiers(String input) async { }
+  // TODO add a list of search modifiers (rating:s, sort:score...) to every booru handler
+  // void searchModifiers() async { }
 
   void combinedSearch() {
-    searchBooru(lastTag);
-    searchHistory(lastTag);
-    searchDatabase(lastTag);
-    // searchModifiers(lastTag);
+    debounceTimer?.cancel();
+    // drop previous list even if new search didn't start yet
+    booruResults.value = [[' ', 'loading']];
+    debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      searchBooru();
+      searchHistory();
+      searchDatabase();
+      // searchModifiers();
+    });
   }
 
-  Future<List<List<String>?>> combinedSearchOld(String input) async {
-    List<String?>? getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
-    final List<List<String>> booruResults = getFromBooru?.map((tag){
-      final String tagTemp = tag != null ? tag : '';
-      return [tagTemp, 'booru'];
-    }).toList() ?? [];
-
-    final List<List<String>> historyResults = input.isNotEmpty
-      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(input, 2)).map((tag){
-        return [tag, 'history'];
-      }).toList()
-      : [];
-    final List<List<String>> databaseResults = input.isNotEmpty
-      ? (await settingsHandler.dbHandler.getTags(input, 2)).map((tag){
-        return [tag, 'database'];
-      }).toList()
-      : [];
-
-    // TODO add a list of search modifiers (rating:s, sort:score...) to every booru handler
-    // final List<List<String>> searchModifiersResults = input.isNotEmpty
-    //   ? searchHandler.booruHandler.searchModifiers().where((String sm) => sm.contains(input))
-    //   : [];
-
-    return [
-      ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1), // filter out duplicates
-      ...databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
-      ...booruResults
-    ];
-  }
 
 
   OverlayEntry? _createOverlayEntry() {
@@ -440,23 +424,25 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                   itemBuilder: (BuildContext context, int index) {
                     final List<String> item = items[index];
                     final String tag = item[0];
+                    final String type = item[1];
+
                     if (tag.isNotEmpty) {
                       Widget? itemIcon;
-                      switch (item[1]) {
+                      switch (type) {
                         case 'history':
                           itemIcon = Icon(Icons.history);
-                        break;
+                          break;
                         case 'database':
                           itemIcon = Icon(Icons.archive);
-                        break;
+                          break;
                         case 'loading':
                           itemIcon = CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
                           );
-                        break;
+                          break;
                         default:
                           itemIcon = Icon(null);
-                        break;
+                          break;
                       }
                       return ListTile(
                         horizontalTitleGap: 4,
@@ -470,6 +456,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           isExpanded: false,
                         ),
                         onTap: () {
+                          if(type == 'loading') {
+                            return;
+                          }
+
                           // widget.searchBoxFocus.unfocus();
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(splitInput.last);
@@ -558,6 +548,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     onPressed: () {
                       searchHandler.searchTextController.clear();
                       tagStuff();
+                      combinedSearch();
+                      this._overlayEntry!.markNeedsBuild();
                       setState(() {});
                     },
                     icon: Icon(Icons.clear, color: Get.theme.colorScheme.onBackground),
@@ -582,7 +574,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         child: SingleChildScrollView(
                           controller: tagsScrollController,
                           scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
+                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,

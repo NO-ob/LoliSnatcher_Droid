@@ -46,7 +46,6 @@ class LoadingElement extends StatefulWidget {
 
     required this.startAction,
     required this.stopAction,
-
   }) : super(key: key);
 
   @override
@@ -64,13 +63,13 @@ class _LoadingElementState extends State<LoadingElement> {
   int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0;
 
   @override
-  void initState() {  
+  void initState() {
     super.initState();
 
     _total = widget.total.value;
     _received = widget.received.value;
     _startedAt = widget.startedAt.value;
-  
+
     _totalListener = widget.total.listen((int value) {
       _onBytesAdded(null, value);
     });
@@ -87,7 +86,7 @@ class _LoadingElementState extends State<LoadingElement> {
 
     _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
       // force restate every second to refresh all timers/indicators, even when loading has stopped
-      if(!widget.isDone) {
+      if (!widget.isDone) {
         updateState();
       }
     });
@@ -106,15 +105,15 @@ class _LoadingElementState extends State<LoadingElement> {
       // update after a debounce delay
       updateState();
       _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
-    } else if(_total > 0 && _received >= _total) {
+    } else if (_total > 0 && _received >= _total) {
       // update if completed
       updateState();
     }
   }
 
   void updateState() {
-    if(this.mounted) {
-      setState(() { });
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -162,30 +161,29 @@ class _LoadingElementState extends State<LoadingElement> {
   }
 
   Widget buildElement(BuildContext context, int nowMils, int sinceStart) {
-    if(widget.isDone && !isVisible) {
+    if (widget.isDone && !isVisible) {
       //  Don't do or render anything after file is loaded and widget faded out
       return const SizedBox();
     }
 
-    if(settingsHandler.shitDevice) {
-      if(settingsHandler.loadingGif) {
+    if (settingsHandler.shitDevice) {
+      if (settingsHandler.loadingGif) {
         return Center(child: Image(image: AssetImage('assets/images/loading.gif')));
       } else {
         return Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
-          )
+            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
+          ),
         );
       }
     }
-
 
     bool hasProgressData = widget.hasProgress && (_total > 0);
     int expectedBytes = hasProgressData ? _received : 0;
     int totalBytes = hasProgressData ? _total : 0;
 
     double speedCheckInterval = 1000 / 4;
-    if(hasProgressData && (nowMils - _lastReceivedTime) > speedCheckInterval) {
+    if (hasProgressData && (nowMils - _lastReceivedTime) > speedCheckInterval) {
       _prevReceivedAmount = _lastReceivedAmount;
       _lastReceivedAmount = expectedBytes;
 
@@ -199,14 +197,16 @@ class _LoadingElementState extends State<LoadingElement> {
     bool isVideo = widget.item.isVideo();
 
     String percentDoneText = '';
-    if(hasProgressData) {
-      if(isVideo) {
+    if (hasProgressData) {
+      if (isVideo) {
         percentDoneText = (percentDone == 1) ? 'Rendering...' : '${(percentDone * 100).toStringAsFixed(2)}%';
       } else {
-        percentDoneText = (percentDone == 1) ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...' : '${(percentDone * 100).toStringAsFixed(2)}%';
+        percentDoneText = (percentDone == 1)
+            ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...'
+            : '${(percentDone * 100).toStringAsFixed(2)}%';
       }
     } else {
-      if(isVideo) {
+      if (isVideo) {
         percentDoneText = '${widget.isFromCache ? 'Loading from cache' : 'Buffering'}...';
       } else {
         percentDoneText = widget.isDone ? 'Rendering...' : 'Loading${widget.isFromCache ? ' from cache' : ''}...';
@@ -218,17 +218,20 @@ class _LoadingElementState extends State<LoadingElement> {
     int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
     String expectedSpeedText = (hasProgressData && percentDone < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
 
-    double expectedTime = hasProgressData ? ((totalBytes - expectedBytes) / expectedSpeed) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left") : '';
+    double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
+    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1)
+        ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left")
+        : '';
 
     int sinceStartSeconds = (sinceStart / 1000).floor();
-    String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()} second${sinceStartSeconds == 1 ? '' : 's'} ago' : '';
+    String sinceStartText =
+        (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()} ${Tools.pluralize('second', sinceStartSeconds)} ago' : '';
 
     bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated.value;
 
     // print('$percentDone | $percentDoneText');
 
-    if(!widget.isViewed) {
+    if (!widget.isViewed) {
       // Do the calculations, but don't render anything if not viewed
       return const SizedBox();
     }
@@ -249,151 +252,146 @@ class _LoadingElementState extends State<LoadingElement> {
             ),
           ),
           Expanded(
-            child: Padding(padding: EdgeInsets.fromLTRB(10, 10, 10, 30), child: Column(
-              // move loading info lower if preview is of sample quality (except when item is hated)
-              mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
-              children: widget.isStopped
-                ? [
-                    ...widget.stopReasons.map((reason){
-                      return BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          reason,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        )
-                      );
-                    }),
-                    ElevatedButton.icon(
-                      icon: Icon(Icons.play_arrow, size: 44, color: Colors.blue),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.black54),
-                      ),
-                      label: BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          (widget.isTooBig || widget.item.isHated.value) ? 'Load Anyway' : 'Restart Loading',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                          ),
-                        )
-                      ),
-                      onPressed: () {
-                        widget.startAction?.call();
-                      },
-                    ),
-                    if(isMovedBelow) const SizedBox(height: 60),
-                  ]
-                : (settingsHandler.loadingGif
-                  ? [
-                      Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
-                      const SizedBox(height: 30),
-                      if(percentDoneText != '')
-                        BorderedText(
-                          strokeWidth: 3,
-                          child: Text(
-                            percentDoneText,
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(10, 10, 10, 30),
+              child: Column(
+                // move loading info lower if preview is of sample quality (except when item is hated)
+                mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
+                children: widget.isStopped
+                    ? [
+                        ...widget.stopReasons.map((reason) {
+                          return BorderedText(
+                            strokeWidth: 3,
+                            child: Text(
+                              reason,
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
+                              ),
                             ),
-                          )
-                        ),
-                    ]
-                  : [
-                    if(percentDoneText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          percentDoneText,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
+                          );
+                        }),
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.play_arrow, size: 44, color: Colors.blue),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(Colors.black54),
                           ),
-                        )
-                      ),
-
-                    if(filesizeText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          filesizeText,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-
-                    if(expectedSpeedText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          expectedSpeedText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-
-                    if(expectedTimeText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          expectedTimeText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-
-                    if(sinceStartText != '')
-                      BorderedText(
-                        strokeWidth: 3,
-                        child: Text(
-                          sinceStartText,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white,
-                          ),
-                        )
-                      ),
-
-                    const SizedBox(height: 10),
-                    if(percentDone < 1)
-                      ElevatedButton.icon(
-                        icon: Icon(
-                          Icons.stop,
-                          size: 44,
-                          color: Get.theme.colorScheme.error,
-                        ),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Colors.black54),
-                        ),
-                        label: BorderedText(
-                          strokeWidth: 3,
-                          child: Text(
-                            'Stop Loading',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Get.theme.colorScheme.error,
+                          label: BorderedText(
+                            strokeWidth: 3,
+                            child: Text(
+                              (widget.isTooBig || widget.item.isHated.value) ? 'Load Anyway' : 'Restart Loading',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.blue,
+                              ),
                             ),
-                          )
+                          ),
+                          onPressed: () {
+                            widget.startAction?.call();
+                          },
                         ),
-                        onPressed: () {
-                          widget.stopAction?.call();
-                        },
-                      ),
-
-                    if(isMovedBelow) const SizedBox(height: 60),
-                  ]
-                )
-            ))
+                        if (isMovedBelow) const SizedBox(height: 60),
+                      ]
+                    : (settingsHandler.loadingGif
+                        ? [
+                            Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
+                            const SizedBox(height: 30),
+                            if (percentDoneText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  percentDoneText,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                          ]
+                        : [
+                            if (percentDoneText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  percentDoneText,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            if (filesizeText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  filesizeText,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            if (expectedSpeedText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  expectedSpeedText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            if (expectedTimeText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  expectedTimeText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            if (sinceStartText != '')
+                              BorderedText(
+                                strokeWidth: 3,
+                                child: Text(
+                                  sinceStartText,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 10),
+                            if (percentDone < 1)
+                              ElevatedButton.icon(
+                                icon: Icon(
+                                  Icons.stop,
+                                  size: 44,
+                                  color: Get.theme.colorScheme.error,
+                                ),
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Colors.black54),
+                                ),
+                                label: BorderedText(
+                                    strokeWidth: 3,
+                                    child: Text(
+                                      'Stop Loading',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Get.theme.colorScheme.error,
+                                      ),
+                                    )),
+                                onPressed: () {
+                                  widget.stopAction?.call();
+                                },
+                              ),
+                            if (isMovedBelow) const SizedBox(height: 60),
+                          ]),
+              ),
+            ),
           ),
           SizedBox(
             width: 6,
@@ -446,7 +444,6 @@ class ThumbnailLoadingElement extends StatefulWidget {
     required this.startedAt,
 
     required this.restartAction,
-
   }) : super(key: key);
 
   @override
@@ -454,7 +451,7 @@ class ThumbnailLoadingElement extends StatefulWidget {
 }
 
 class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
@@ -462,13 +459,13 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
   StreamSubscription? _totalListener, _receivedListener, _startedAtListener;
 
   @override
-  void initState() {  
+  void initState() {
     super.initState();
 
     _total = widget.total.value;
     _received = widget.received.value;
     _startedAt = widget.startedAt.value;
-  
+
     _totalListener = widget.total.listen((int value) {
       _onBytesAdded(null, value);
     });
@@ -496,15 +493,15 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
       // update after a debounce delay
       updateState();
       _debounceBytes = Timer(const Duration(milliseconds: debounceDelay), () {});
-    } else if(_total > 0 && _received >= _total) {
+    } else if (_total > 0 && _received >= _total) {
       // update if completed
       updateState();
     }
   }
 
   void updateState() {
-    if(this.mounted) {
-      setState(() { });
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -548,7 +545,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
   }
 
   Widget buildElement(BuildContext context) {
-    if(widget.isDone) {
+    if (widget.isDone) {
       return const SizedBox();
     }
 
@@ -565,9 +562,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.broken_image
-                ),
+                Icon(Icons.broken_image),
                 BorderedText(
                   strokeWidth: 2,
                   child: Text(
@@ -576,7 +571,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
                       fontSize: 14,
                       color: Colors.white,
                     ),
-                  )
+                  ),
                 ),
                 BorderedText(
                   strokeWidth: 2,
@@ -586,13 +581,13 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
                       fontSize: 14,
                       color: Colors.white,
                     ),
-                  )
+                  ),
                 ),
-              ]
-            )
+              ],
+            ),
           ),
           onTap: widget.restartAction,
-        )
+        ),
       );
     }
 
@@ -605,7 +600,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
     //     ? ((percentDone ?? 0) == 1 ? null : '${(percentDone! * 100).toStringAsFixed(2)}%')
     //     : (isFromCache == true ? '...' : null);
 
-    if(widget.isFromCache != false) {
+    if (widget.isFromCache != false) {
       return const SizedBox();
     }
 
@@ -620,7 +615,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
             child: LinearProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
               backgroundColor: Colors.transparent,
-              value: percentDone == 0 ? null : percentDone
+              value: percentDone == 0 ? null : percentDone,
             ),
           ),
         ),
@@ -632,7 +627,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
             child: LinearProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
               backgroundColor: Colors.transparent,
-              value: percentDone == 0 ? null : percentDone
+              value: percentDone == 0 ? null : percentDone,
             ),
           ),
         ),

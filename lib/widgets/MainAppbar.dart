@@ -97,7 +97,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   void sinceLastBackup() {
     FlashElements.showSnackbar(
-      title: Text('Since last backup: ${searchHandler.lastBackupTime.value.difference(DateTime.now()).inSeconds * -1} seconds'),
+      title: Text('Since last backup: ${searchHandler.lastBackupTime.difference(DateTime.now()).inSeconds * -1} seconds'),
       duration: Duration(seconds: 3),
     );
   }
@@ -117,13 +117,14 @@ class _MainAppBarState extends State<MainAppBar> {
           child: ActiveTitle(),
         ),
         actions: [
-          // TODO needs more work and polish
           pageNumberButton(),
 
           // IconButton(
           //   icon: Icon(Icons.timelapse),
           //   onPressed: () {
-          //     sinceLastBackup();
+          //     // sinceLastBackup();
+
+          //     // Tools.forceClearMemoryCache(withLive: true);
           //   },
           // ),
 

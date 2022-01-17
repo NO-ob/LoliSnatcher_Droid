@@ -37,7 +37,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
 
-  RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   bool isStopped = false, isFromCache = false, isViewed = false, isZoomed = false;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   List<String> stopReason = [];
@@ -48,8 +48,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   CancelToken _dioCancelToken = CancelToken();
   DioLoader? client;
 
-  StreamSubscription? noScaleListener;
-  StreamSubscription? indexListener;
+  StreamSubscription? noScaleListener, indexListener;
 
   @override
   void didUpdateWidget(MediaViewerBetter oldWidget) {
@@ -169,6 +168,10 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       }
     });
 
+    // debug output
+    viewController..outputStateStream.listen(onViewStateChanged);
+    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+
     initViewer(false);
   }
 
@@ -189,15 +192,11 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
     if(widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      if (hatedAndLovedTags[0].length > 0) {
+      if (hatedAndLovedTags[0].isNotEmpty) {
         killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
         return;
       }
     }
-
-    // debug output
-    viewController..outputStateStream.listen(onViewStateChanged);
-    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
     isStopped = false;
 
@@ -239,6 +238,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
   @override
   void dispose() {
+    // print('mediaViewer dispose called ${widget.index}');
     disposables();
 
     indexListener?.cancel();
@@ -319,6 +319,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
+  @override
   Widget build(BuildContext context) {
     // print('!!! Build media ${widget.index} $isViewed !!!');
 
@@ -363,6 +364,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                     child: PhotoView(
                       //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
                       imageProvider: mainProvider,
+                      loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
                       // TODO FilterQuality.high somehow leads to a worse looking image on desktop
                       filterQuality: FilterQuality.medium,
                       minScale: PhotoViewComputedScale.contained,

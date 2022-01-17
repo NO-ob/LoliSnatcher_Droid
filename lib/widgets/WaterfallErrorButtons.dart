@@ -1,13 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+
 class WaterfallErrorButtons extends StatefulWidget {
-  WaterfallErrorButtons({Key? key}) : super(key: key);
+  const WaterfallErrorButtons({Key? key}) : super(key: key);
 
   @override
   _WaterfallErrorButtonsState createState() => _WaterfallErrorButtonsState();
@@ -70,22 +72,20 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final String errorFormatted =
-        searchHandler.currentBooruHandler.errorString.isNotEmpty ? '\n${searchHandler.currentBooruHandler.errorString}' : '';
     final String clickName = (Platform.isWindows || Platform.isLinux) ? 'Click' : 'Tap';
     int nowMils = DateTime.now().millisecondsSinceEpoch;
     int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
-    String sinceStartText = sinceStart > 0 ? 'Started ${sinceStart.toString()} second${sinceStart == 1 ? '' : 's'} ago' : '';
+    String sinceStartText = sinceStart > 0 ? 'Started ${sinceStart.toString()} ${Tools.pluralize('second', sinceStart)} ago' : '';
 
     return Obx(() {
       if (searchHandler.isLastPage.value) {
         // if last page...
-        if (searchHandler.currentFetched.length == 0) {
+        if (searchHandler.currentFetched.isEmpty) {
           // ... and no items loaded
           return wrapButton(SettingsButton(
             name: 'No Data Loaded',
             subtitle: Text('$clickName Here to Reload'),
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             dense: true,
             action: () {
               searchHandler.retrySearch();
@@ -96,11 +96,11 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           //if(searchHandler.currentFetched.length > 0) {
           // .. has items loaded
           if (isVisible) {
+            final int pageNum = searchHandler.pageNum.value;
             return wrapButton(SettingsButton(
-              name:
-                  'You Reached the End (${searchHandler.currentBooruHandler.pageNum} ${searchHandler.currentBooruHandler.pageNum.value == 1 ? 'page' : 'pages'})',
+              name: 'You Reached the End ($pageNum ${Tools.pluralize('page', pageNum)})',
               subtitle: Text('$clickName Here to Reload Last Page'),
-              icon: Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
               dense: true,
               action: () {
                 searchHandler.retrySearch();
@@ -114,7 +114,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   isVisible = !isVisible;
                   updateState();
                 },
-                icon: Icon(Icons.arrow_drop_down),
+                icon: const Icon(Icons.arrow_drop_down),
               ),
               drawBottomBorder: false,
             ));
@@ -136,7 +136,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                       }
                     },
                     iconSize: 28,
-                    icon: Icon(Icons.refresh),
+                    icon: const Icon(Icons.refresh),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -151,7 +151,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                       updateState();
                     },
                     iconSize: 28,
-                    icon: Icon(Icons.arrow_drop_up),
+                    icon: const Icon(Icons.arrow_drop_up),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -164,7 +164,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
         if (searchHandler.isLoading.value) {
           // ... and is currently loading
           return wrapButton(SettingsButton(
-            name: 'Loading Page #${searchHandler.currentBooruHandler.pageNum}',
+            name: 'Loading Page #${searchHandler.pageNum}',
             subtitle: AnimatedOpacity(
               opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 200),
@@ -182,24 +182,25 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             drawBottomBorder: false,
           ));
         } else {
-          if (searchHandler.currentBooruHandler.errorString.isNotEmpty) {
+          if (searchHandler.errorString.isNotEmpty) {
+            final String errorFormatted = searchHandler.errorString.isNotEmpty ? '\n${searchHandler.errorString}' : '';
             // ... if error happened
             return wrapButton(SettingsButton(
-              name: 'Error happened when Loading Page #${searchHandler.currentBooruHandler.pageNum}: $errorFormatted',
+              name: 'Error happened when Loading Page #${searchHandler.pageNum}: $errorFormatted',
               subtitle: Text('$clickName Here to Retry'),
-              icon: Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
               dense: true,
               action: () {
                 searchHandler.retrySearch();
               },
               drawBottomBorder: false,
             ));
-          } else if (searchHandler.currentFetched.length == 0) {
+          } else if (searchHandler.currentFetched.isEmpty) {
             // ... no items loaded
             return wrapButton(SettingsButton(
               name: 'Error, no data loaded:',
               subtitle: Text('$clickName Here to Retry'),
-              icon: Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh),
               dense: true,
               action: () {
                 searchHandler.retrySearch();

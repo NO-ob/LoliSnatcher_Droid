@@ -9,21 +9,19 @@ class MascotImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
-    return Container(
-      child: Align(
-        alignment: FractionalOffset.bottomCenter,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Get.theme.colorScheme.primary,
-          ),
-          child: Image(
-            fit: BoxFit.contain,
-            image: settingsHandler.drawerMascotPathOverride.isEmpty
-                ? AssetImage('assets/images/drawer_icon.png')
-                : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
-          ),
+    return Align(
+      alignment: FractionalOffset.bottomCenter,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Get.theme.colorScheme.primary,
+        ),
+        child: Image(
+          fit: BoxFit.contain,
+          image: settingsHandler.drawerMascotPathOverride.isEmpty
+              ? AssetImage('assets/images/drawer_icon.png')
+              : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
         ),
       ),
     );

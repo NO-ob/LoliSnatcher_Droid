@@ -1,11 +1,14 @@
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class FiltersEdit extends StatefulWidget {
   FiltersEdit();
@@ -151,28 +154,31 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(5),
-      child: ListView.builder(
-        padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-        shrinkWrap: false,
-        itemCount: tagsList.length,
-        scrollDirection: Axis.vertical,
-        physics: const BouncingScrollPhysics(parent: const AlwaysScrollableScrollPhysics()),
-        itemBuilder: (BuildContext context, int index) {
-          String currentEntry = tagsList[index];
-          Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));
-
-          return Row(children: <Widget>[
-            Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  newTagController.text = currentEntry;
-                  showFilterEntryActions(entryRow, currentEntry, index, type);
-                },
-                child: entryRow
-              )
-            ),
-          ]);
-        }
+      child: DesktopScrollWrap(
+        controller: ScrollController(),
+        child: ListView.builder(
+          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+          shrinkWrap: false,
+          itemCount: tagsList.length,
+          scrollDirection: Axis.vertical,
+          physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          itemBuilder: (BuildContext context, int index) {
+            String currentEntry = tagsList[index];
+            Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));
+      
+            return Row(children: <Widget>[
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    newTagController.text = currentEntry;
+                    showFilterEntryActions(entryRow, currentEntry, index, type);
+                  },
+                  child: entryRow
+                )
+              ),
+            ]);
+          }
+        ),
       ),
     );
   }

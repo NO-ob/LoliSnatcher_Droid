@@ -42,17 +42,17 @@ class AGNPHHandler extends BooruHandler{
       if (response.statusCode == 200) {
         parseResponseAndGetTagsLater(response);
         if (fetched.length == length) {
-          locked.value = true;
+          locked = true;
         }
         prevTags = tags;
       } else {
         Logger.Inst().log("AGNPHHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("AGNPHHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
-        errorString.value = response.statusCode.toString();
+        errorString = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "AGNPHHandler", "Search", LogTypes.exception);
-      errorString.value = e.toString();
+      errorString = e.toString();
     }
 
     return fetched;

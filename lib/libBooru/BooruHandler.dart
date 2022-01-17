@@ -13,14 +13,14 @@ abstract class BooruHandler {
   // pagenum = -1 as "didn't load anything yet" state
   // gets set to higher number for special cases in handler factory
   String className = 'BooruHandler';
-  RxInt pageNum = (-1).obs;
+  int pageNum = -1;
   int limit = 20;
   String prevTags = "";
-  RxBool locked = false.obs;
+  bool locked = false;
   Booru booru;
   String verStr = Get.find<SettingsHandler>().verStr;
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
-  RxString errorString = ''.obs;
+  String errorString = '';
 
   List<BooruItem> get filteredFetched => fetched.where((el) => Get.find<SettingsHandler>().filterHated ? !el.isHated.value : true).toList();
 
@@ -34,7 +34,7 @@ abstract class BooruHandler {
    */
   Future Search(String tags, int? pageNumCustom) async {
     if (pageNumCustom != null) {
-      pageNum.value = pageNumCustom;
+      pageNum = pageNumCustom;
     }
     tags = validateTags(tags);
     if (prevTags != tags) {
@@ -51,17 +51,17 @@ abstract class BooruHandler {
         parseResponse(response);
         prevTags = tags;
         if (fetched.length == length) {
-          locked.value = true;
+          locked = true;
         }
       } else {
         Logger.Inst().log("$className status is: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("$className url is: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("$className url response is: ${response.body}", className, "Search", LogTypes.booruHandlerFetchFailed);
-        errorString.value = response.statusCode.toString();
+        errorString = response.statusCode.toString();
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.exception);
-      errorString.value = e.toString();
+      errorString = e.toString();
     }
 
     // print('Fetched: ${filteredFetched.length}');

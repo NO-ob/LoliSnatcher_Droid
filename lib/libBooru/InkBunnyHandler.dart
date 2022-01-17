@@ -88,21 +88,25 @@ class InkBunnyHandler extends BooruHandler{
       Uri uri = Uri.parse(url);
       final response = await http.get(uri,headers: getHeaders());
       if (response.statusCode == 200) {
-        if (totalCount.value > 0 && (pageNum.value * 30) > totalCount.value){
-          if (fetched.length == length){locked.value = true;}
+        if (totalCount.value > 0 && (pageNum * 30) > totalCount.value){
+          if (fetched.length == length) {
+            locked = true;
+          }
         } else {
           parseResponse(await getSubmissionResponse(response));
           prevTags = tags;
         }
-        if (fetched.length == length){locked.value = true;}
+        if (fetched.length == length) {
+          locked = true;
+        }
       } else {
         Logger.Inst().log("InkBunnyHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("InkBunnyHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
-        errorString.value = response.statusCode.toString();
+        errorString = response.statusCode.toString();
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "InkBunnyHandler", "Search", LogTypes.exception);
-      errorString.value = e.toString();
+      errorString = e.toString();
     }
 
     return fetched;

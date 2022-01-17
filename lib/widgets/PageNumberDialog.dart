@@ -49,9 +49,9 @@ class PageNumberDialog extends StatelessWidget {
           numberMax: 10000,
         ),
         SettingsButton(
-          name: 'Current page #${searchHandler.currentBooruHandler.pageNum.value}',
+          name: 'Current page #${searchHandler.pageNum.value}',
           action: () {
-            pageNumberController.text = searchHandler.currentBooruHandler.pageNum.value.toString();
+            pageNumberController.text = searchHandler.pageNum.value.toString();
           },
           drawTopBorder: true,
         ),
@@ -77,7 +77,10 @@ class PageNumberDialog extends StatelessWidget {
           child: Text('Search until page'),
           onPressed: () {
             if (pageNumberController.text.isNotEmpty) {
-              searchHandler.searchCurrentTabUntilPageNumber((int.tryParse(pageNumberController.text) ?? 0) - 1, customDelay: (int.tryParse(delayController.text) ?? 200));
+              searchHandler.searchCurrentTabUntilPageNumber(
+                (int.tryParse(pageNumberController.text) ?? 0) - 1,
+                customDelay: (int.tryParse(delayController.text) ?? 200),
+              );
               Navigator.of(context).pop();
             }
           },

@@ -106,8 +106,7 @@ class R34HentaiHandler extends ShimmieHandler {
   String makeURL(String tags){
     String tagsText = tags.replaceAll(' ', '+');
     tagsText = tagsText.isEmpty ? '' : '$tagsText/';
-    String pageStr = (pageNum.value).toString();
-    return "${booru.baseURL}/post/list/$tagsText$pageStr";
+    return "${booru.baseURL}/post/list/$tagsText$pageNum";
   }
 
   @override

@@ -29,7 +29,7 @@ class MergebooruHandler extends BooruHandler{
     List<bool> isGelbooruV1List = [];
     int fetchedMax = 0;
     for(int i = 0; i < booruHandlers.length; i++){
-      List<BooruItem> tmpFetched = (await booruHandlers[i].Search(tags, pageNum.value + booruHandlerPageNums[i])) ?? [];
+      List<BooruItem> tmpFetched = (await booruHandlers[i].Search(tags, pageNum + booruHandlerPageNums[i])) ?? [];
       tmpFetchedList.add(tmpFetched);
       if (booruHandlers[i].booru.type == "GelbooruV1"){
         isGelbooruV1List.add(true);
@@ -41,7 +41,7 @@ class MergebooruHandler extends BooruHandler{
     int innerFetchedOffset = 0;
     int innerFetchedIndex = -1;
     do {
-      innerFetchedIndex = (innerLimit * pageNum.value) + innerFetchedOffset;
+      innerFetchedIndex = (innerLimit * pageNum) + innerFetchedOffset;
       for (int i = 0; i < tmpFetchedList.length; i++){
         if(innerFetchedIndex < tmpFetchedList[i].length){
           if (hasGelbooruV1 && isGelbooruV1List[i] == false){
@@ -57,21 +57,21 @@ class MergebooruHandler extends BooruHandler{
 
         } else{
           Logger.Inst().log("not adding item from ${booruHandlers[i].booru.name}, length: ${tmpFetchedList[i].length}, index: $innerFetchedIndex", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
-          Logger.Inst().log("innerLimit $innerLimit, pageNum: ${pageNum.value}", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
+          Logger.Inst().log("innerLimit $innerLimit, pageNum: $pageNum", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
           Logger.Inst().log("fetched: ${fetched.length}, fetchedMax: $fetchedMax", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
         }
       }
       innerFetchedOffset ++;
     } while ((fetched.length < fetchedMax) && innerFetchedIndex < fetchedMax);
 
-    this.locked.value = shouldLock();
+    this.locked = shouldLock();
     return fetched;
   }
 
-  bool shouldLock(){
+  bool shouldLock() {
     int lockCount = 0;
     for (int i = 0; i < booruHandlers.length; i++){
-      if (booruHandlers[i].locked.value){
+      if (booruHandlers[i].locked){
         lockCount ++;
       }
     }
