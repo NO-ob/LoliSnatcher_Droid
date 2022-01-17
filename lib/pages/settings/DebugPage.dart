@@ -120,6 +120,15 @@ class _DebugPageState extends State<DebugPage> {
                   },
                   title: 'Enable Self Signed SSL Certificates'
               ),
+              SettingsToggle(
+                value: settingsHandler.desktopListsDrag,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.desktopListsDrag = newValue;
+                  });
+                },
+                title: "Enable drag scroll on lists [Desktop only]"
+              ),
               // SettingsToggle(
               //   value: settingsHandler.isMemeTheme.value,
               //   onChanged: (newValue) {

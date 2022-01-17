@@ -2,6 +2,20 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
+import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
+
+ScrollPhysics? getListPhysics() {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+
+  bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+  if (settingsHandler.desktopListsDrag == false && isDesktopPlatform) {
+    return const NeverScrollableScrollPhysics();
+  } else {
+    return null;
+  }
+}
 
 class DesktopScrollWrap extends StatelessWidget {
   final Widget child;
@@ -15,7 +29,9 @@ class DesktopScrollWrap extends StatelessWidget {
     // on child element wrapped in this
     // otherwise, it will not affect how scroll works
 
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+
+    if (isDesktopPlatform) {
       return ImprovedScrolling(
         scrollController: controller,
         // onScroll: (scrollOffset) => debugPrint(

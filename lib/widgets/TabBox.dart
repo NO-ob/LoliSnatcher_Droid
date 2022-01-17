@@ -315,9 +315,7 @@ class _TabsDialogState extends State<TabsDialog> {
               child: ListView.builder(
                 padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
                 controller: scrollController,
-                physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
-                    ? const NeverScrollableScrollPhysics()
-                    : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 shrinkWrap: false,
                 itemCount: filteredTabs.length,
                 scrollDirection: Axis.vertical,

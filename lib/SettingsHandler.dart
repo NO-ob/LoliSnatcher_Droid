@@ -59,6 +59,7 @@ class SettingsHandler extends GetxController {
   bool disableImageScaling = false;
   // disable isolates on debug builds, because they cause lags in emulator
   bool disableImageIsolates = kDebugMode || false;
+  bool desktopListsDrag = false;
 
   ////////////////////////////////////////////////////
 
@@ -163,7 +164,7 @@ class SettingsHandler extends GetxController {
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showStatusBar', 'showFPS', 'showPerf', 'showImageStats',
     'isDebug', 'showURLOnThumb', 'disableImageIsolates',
-    'mergeEnabled'
+    'mergeEnabled', 'desktopListsDrag'
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -375,6 +376,10 @@ class SettingsHandler extends GetxController {
       "default": false,
     },
     "disableImageIsolates": {
+      "type": "bool",
+      "default": false,
+    },
+    "desktopListsDrag": {
       "type": "bool",
       "default": false,
     },
@@ -825,6 +830,8 @@ class SettingsHandler extends GetxController {
         return disableImageScaling;
       case 'disableImageIsolates':
         return disableImageIsolates;
+      case 'desktopListsDrag':
+        return desktopListsDrag;
       case 'cacheDuration':
         return cacheDuration;
       case 'cacheSize':
@@ -970,6 +977,9 @@ class SettingsHandler extends GetxController {
       case 'disableImageIsolates':
         disableImageIsolates = validatedValue;
         break;
+      case 'desktopListsDrag':
+        desktopListsDrag = validatedValue;
+        break;
       case 'cacheDuration':
         cacheDuration = validatedValue;
         break;
@@ -1055,6 +1065,7 @@ class SettingsHandler extends GetxController {
       "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
       "disableImageIsolates" : validateValue("disableImageIsolates", null, toJSON: true),
+      "desktopListsDrag" : validateValue("desktopListsDrag", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
       "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
