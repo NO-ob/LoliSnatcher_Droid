@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -22,7 +24,7 @@ class BackupRestorePage extends StatefulWidget {
 class _BackupRestorePageState extends State<BackupRestorePage> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   ServiceHandler serviceHandler = ServiceHandler();
-
+  String backupPath = "";
   @override
   void initState() {
     super.initState();
@@ -86,28 +88,38 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         body: Center(
           child: ListView(
             children: [
+              SettingsButton(
+                name: 'Select Backup Directory',
+                action: () async {
+                  String path = await ServiceHandler.getSAFDirectoryAccess();
+                  if (path.isNotEmpty){
+                    setState(() {
+                      backupPath = path;
+                    });
+                  } else {
+                    showSnackbar(context, 'Failed to get backup path!', true);
+                  }
+                },
+                drawTopBorder: true,
+              ),
               Container(
                 margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
-                child: Text('Files backup to "/storage/Android/data/${settingsHandler.packageName}/files".'),
+                child: Text(backupPath.isNotEmpty ? 'Backup path is: $backupPath' : 'No backup directory selected'),
               ),
               Container(
                 margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
                 child: Text('Restore will work only if the files are placed in the same directory.'),
               ),
-              SettingsButton(
+              ] +
+                (backupPath.isNotEmpty ? [SettingsButton(
                 name: 'Backup Settings',
                 action: () async {
                   try {
                     File file = File(await serviceHandler.getConfigDir() + 'settings.json');
-                    Directory? dlDir = (await getExternalStorageDirectories())?.first;
-                    if(dlDir != null) {
-                      File newFile = File(dlDir.path + '/settings.json');
-                      if(!(await newFile.exists())) {
-                        await newFile.create();
-                      }
-                      newFile.writeAsBytes(await file.readAsBytes());
+                    if(backupPath.isNotEmpty) {
+                      serviceHandler.writeImage(file.readAsBytesSync(), "settings", "text/json", "json", backupPath);
                       showSnackbar(context, 'Settings saved to settings.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -123,15 +135,14 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 subtitle: Text('settings.json'),
                 action: () async {
                   try {
-                    Directory? dlDir = (await getExternalStorageDirectories())?.first;
-                    if(dlDir != null) {
-                      File file = File(dlDir.path + '/settings.json');
-                      if (await file.exists()) {
+                    if(backupPath.isNotEmpty) {
+                      Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"settings.json");
+                      if(settingsFileBytes != null){
                         File newFile = File(await serviceHandler.getConfigDir() + 'settings.json');
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
-                        newFile.writeAsBytes(await file.readAsBytes());
+                        await newFile.writeAsBytes(settingsFileBytes);
                         settingsHandler.loadSettingsJson();
                         showSnackbar(context, 'Settings restored from backup!', false);
                       } else {
@@ -153,13 +164,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 action: () async {
                   try {
                     File file = File(await serviceHandler.getConfigDir() + 'store.db');
-                    Directory? dlDir = (await getExternalStorageDirectories())?.first;
-                    if(dlDir != null) {
-                      File newFile = File(dlDir.path + '/store.db');
-                      if(!(await newFile.exists())) {
-                        await newFile.create();
-                      }
-                      newFile.writeAsBytes(await file.readAsBytes());
+                    if(backupPath.isNotEmpty) {
+                      serviceHandler.writeImage(file.readAsBytesSync(), "store", "application/x-sqlite3", "db", backupPath);
                       showSnackbar(context, 'Database saved to store.db', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -174,15 +180,14 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 subtitle: Text('store.db'),
                 action: () async {
                   try {
-                    Directory? dlDir = (await getExternalStorageDirectories())?.first;
-                    if(dlDir != null) {
-                      File file = File(dlDir.path + '/store.db');
-                      if (await file.exists()) {
+                    if(backupPath.isNotEmpty) {
+                      Uint8List? dbFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"store.db");
+                      if(dbFileBytes != null){
                         File newFile = File(await serviceHandler.getConfigDir() + 'store.db');
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
-                        await newFile.writeAsBytes(await file.readAsBytes());
+                        await newFile.writeAsBytes(dbFileBytes);
                         settingsHandler.dbHandler = DBHandler();
                         await settingsHandler.dbHandler.dbConnect(newFile.path);
                         showSnackbar(context, 'Database restored from backup!', false);
@@ -204,60 +209,45 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 name: 'Backup Boorus',
                 action: () async {
                   try {
-                    Directory? dlDir = (await getExternalStorageDirectories())?.first;
-                    if(dlDir != null) {
-                      String configBoorusPath = await serviceHandler.getConfigDir() + 'boorus/';
-                      Directory configBoorusDir = Directory(configBoorusPath);
-                      if(await configBoorusDir.exists()) {
-                        String restoreBoorusPath = dlDir.path + '/boorus/';
-                        Directory restoreBoorusDir = await Directory(restoreBoorusPath).create(recursive:true);
-                        List files = configBoorusDir.listSync();
-                        if (files.length > 0) {
-                          for (int i = 0; i < files.length; i++) {
-                            if (files[i].path.contains(".json")) {
-                              Booru booruFromFile = Booru.fromJSON(files[i].readAsStringSync());
-                              File booruFile = File(restoreBoorusPath + "${booruFromFile.name}.json");
-                              var writer = booruFile.openWrite();
-                              writer.write(jsonEncode(booruFromFile.toJSON()));
-                              writer.close();
-                            }
-                          }
-                          showSnackbar(context, 'Boorus saved in /boorus folder', false);
-                        }
-                      }
+                    print(json.encode(settingsHandler.booruList));
+                    if(backupPath.isNotEmpty) {
+                      await serviceHandler.writeImage(utf8.encode(json.encode(settingsHandler.booruList)), "boorus", "text", "json", backupPath);
+                      showSnackbar(context, 'Boorus saved to boorus.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
                     }
                   } catch (e) {
                     showSnackbar(context, 'Error while saving boorus! $e', true);
+                    print(e);
                   }
                 },
               ),
               SettingsButton(
                 name: 'Restore Boorus',
-                subtitle: Text('/boorus/[Booru Name].json'),
+                subtitle: Text('boorus.json'),
                 action: () async {
+
                   try {
-                    Directory? dlDir = (await getExternalStorageDirectories())?.first;
-                    if(dlDir != null) {
-                      String restoreBoorusPath = dlDir.path + '/boorus/';
-                      Directory restoreBoorusDir = Directory(restoreBoorusPath);
-                      if(await restoreBoorusDir.exists()) {
+                    if(backupPath.isNotEmpty) {
+                      Uint8List? booruFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"boorus.json");
+                      String boorusJSONString = "";
+                      if (booruFileBytes != null){
+                        boorusJSONString = String.fromCharCodes(booruFileBytes);
+                      }
+                      if(boorusJSONString.isNotEmpty) {
+                        List<dynamic> json = jsonDecode(boorusJSONString);
                         String configBoorusPath = await serviceHandler.getConfigDir() + 'boorus/';
                         Directory configBoorusDir = await Directory(configBoorusPath).create(recursive:true);
-                        List files = restoreBoorusDir.listSync();
-                        if (files.length > 0) {
-                          for (int i = 0; i < files.length; i++) {
-                            if (files[i].path.contains(".json")) {
-                              Booru booruFromFile = Booru.fromJSON(files[i].readAsStringSync());
-                              bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booruFromFile.baseURL && el.name == booruFromFile.name) != -1;
+                        if (json.length > 0) {
+                          for (int i = 0; i < json.length; i++) {
+                              Booru booru = Booru.fromJson(json[i]);
+                              bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
                               if(!alreadyExists) {
-                                File booruFile = File(configBoorusDir.path + "${booruFromFile.name}.json");
+                                File booruFile = File(configBoorusDir.path + "${booru.name}.json");
                                 var writer = booruFile.openWrite();
-                                writer.write(jsonEncode(booruFromFile.toJSON()));
+                                writer.write(jsonEncode(booru.toJson()));
                                 writer.close();
                               }
-                            }
                           }
                           settingsHandler.loadBoorus();
                           showSnackbar(context, 'Boorus restored from backup!', false);
@@ -268,10 +258,11 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     }
                   } catch (e) {
                     showSnackbar(context, 'Error while restoring boorus! $e', true);
+                    print(e);
                   }
                 },
               ),
-            ],
+              ]:[])
           ),
         ),
       ),

@@ -266,7 +266,7 @@ class LoliSync{
     Logger.Inst().log("Sending batch $offset-$lastIndex / $favouritesCount", "LoliSync", "sendBooruItem", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/boorubatch?amount=$favouritesCount&offset=$offset&size=${items.length}")
       ..headers.contentType = ContentType.json
-      ..write(jsonEncode(items.map((e) => e.toJSON()).toList()));
+      ..write(jsonEncode(items.map((e) => e.toJson()).toList()));
     HttpClientResponse response = await request.close();
     String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
@@ -276,7 +276,7 @@ class LoliSync{
     Logger.Inst().log("Sending item $current / $favouritesCount", "LoliSync", "sendBooruItem", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/booruitem?amount=$favouritesCount&current=$current")
       ..headers.contentType = ContentType.json
-      ..write(jsonEncode(item.toJSON())); /*3*/
+      ..write(jsonEncode(item.toJson())); /*3*/
     HttpClientResponse response = await request.close();
     String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
@@ -296,7 +296,7 @@ class LoliSync{
     Logger.Inst().log("Sending item $current / $booruCount", "LoliSync", "sendBooru", LogTypes.loliSyncInfo);
     HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/booru?amount=$booruCount&current=$current")
       ..headers.contentType = ContentType.json
-      ..write(jsonEncode(booru.toJSON()));
+      ..write(jsonEncode(booru.toJson()));
     HttpClientResponse response = await request.close();
     String responseStr = await utf8.decoder.bind(response).join();
     return responseStr;
@@ -455,7 +455,7 @@ class LoliSync{
         case "Settings":
           yield "Sync Starting $address";
           yield "Preparing settings data";
-          Map<String, dynamic> settingsJSON = settingsHandler.toJSON();
+          Map<String, dynamic> settingsJSON = settingsHandler.toJson();
           for (var element in settingsHandler.deviceSpecificSettings) {
             settingsJSON.remove(element);
           }

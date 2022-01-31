@@ -44,7 +44,7 @@ class Booru {
     }
   }
 
-  Map toJSON() {
+  Map<String,dynamic> toJson() {
     return {
       "name": name,
       "type": type,
@@ -67,8 +67,18 @@ class Booru {
     this.userID = json["userID"].toString();
   }
 
+  Booru.fromJson(Map<String, dynamic> json) {
+    this.name = json["name"].toString();
+    this.type = json["type"].toString();
+    this.faviconURL = json["faviconURL"].toString();
+    this.baseURL = json["baseURL"].toString();
+    this.defTags = json["defTags"].toString();
+    this.apiKey = json["apiKey"].toString();
+    this.userID = json["userID"].toString();
+  }
+
   String toLink(bool withSensitiveData) {
-    Map json = this.toJSON();
+    Map json = this.toJson();
     if(withSensitiveData == false) {
       json.remove("apiKey");
       json.remove("userID");

@@ -14,7 +14,7 @@ class NoteItem {
     required this.height,
   });
 
-  Map toJSON() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'postID': postID,

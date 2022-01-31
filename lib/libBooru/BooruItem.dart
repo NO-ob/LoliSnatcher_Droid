@@ -90,7 +90,7 @@ class BooruItem{
     return this.mediaType == "image" || this.mediaType == "animation" || this.mediaType == "not_supported_animation";
   }
 
-  Map toJSON() {
+  Map<String, dynamic> toJson() {
     return {
       "postURL": postURL,
       "fileURL": fileURL,
@@ -111,7 +111,7 @@ class BooruItem{
   }
 
   String toString() {
-    return jsonEncode(this.toJSON());
+    return jsonEncode(this.toJson());
   }
 
   static BooruItem fromJSON(String jsonString){

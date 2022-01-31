@@ -39,7 +39,7 @@ class SettingsHandler extends GetxController {
   String appName = "LoliSnatcher";
   String packageName = "com.noaisu.loliSnatcher";
   String verStr = "2.2.0";
-  int buildNumber = 170;
+  int buildNumber = 169;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
@@ -1032,7 +1032,7 @@ class SettingsHandler extends GetxController {
   }
 
 
-  Map<String, dynamic> toJSON() {
+  Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       "defTags": validateValue("defTags", null, toJSON: true),
       "previewMode": validateValue("previewMode", null, toJSON: true),
@@ -1178,7 +1178,7 @@ class SettingsHandler extends GetxController {
 
     File settingsFile = File(path + "settings.json");
     var writer = settingsFile.openWrite();
-    writer.write(jsonEncode(toJSON()));
+    writer.write(jsonEncode(toJson()));
     writer.close();
 
     if(restate) Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
@@ -1345,7 +1345,7 @@ class SettingsHandler extends GetxController {
     await Directory(boorusPath).create(recursive:true);
     File booruFile = File(boorusPath + "${booru.name}.json");
     var writer = booruFile.openWrite();
-    writer.write(jsonEncode(booru.toJSON()));
+    writer.write(jsonEncode(booru.toJson()));
     writer.close();
 
     if(!onlySave) {

@@ -15,6 +15,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
 import android.view.Gravity
@@ -189,6 +190,9 @@ class MainActivity: FlutterActivity() {
             } else if (call.method == "setExtPath"){
                 methodResult = result
                 getDirAccess();
+            }  else if (call.method == "getTempDirAccess"){
+                methodResult = result
+                getTempDirAccess();
             } else if (call.method == "selectImage"){
                 methodResult = result
                 getImageAccess();
@@ -198,6 +202,12 @@ class MainActivity: FlutterActivity() {
             } else if (call.method == "getFileExtension"){
                 val uri: String? = call.argument("uri");
                 result.success(uri?.let { getFileExt(it)});
+            }else if (call.method == "getFileByName"){
+                val uri: String? = call.argument("uri");
+                val fileName: String? = call.argument("fileName");
+                if (fileName != null && uri != null) {
+                    result.success(getFileByName(uri,fileName));
+                }
             }
             else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
@@ -257,6 +267,13 @@ class MainActivity: FlutterActivity() {
             //return intent.data.toString();
     }
 
+    private fun getTempDirAccess() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+        intent.putExtra("pickerMode","directory")
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        startActivityForResult(intent, 1)
+    }
+
     private fun getImageAccess() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         val mimeTypes = arrayOf("image/png", "image/jpeg","image/jpg","image/gif")
@@ -312,6 +329,21 @@ class MainActivity: FlutterActivity() {
             MimeTypeMap.getFileExtensionFromUrl(uri.toString());
         }
         return fileExt ?: ""
+    }
+
+
+    private fun getFileByName(uriString: String,fileName: String): ByteArray?{
+        val uri: Uri = Uri.parse(uriString)
+        val documentTree = DocumentFile.fromTreeUri(context, uri)
+        if (documentTree != null) {
+            for (document in documentTree.listFiles()) {
+                if (document.name.toString() == fileName){
+                    val inputStream: InputStream? = contentResolver.openInputStream(document.uri)
+                    return inputStream?.readBytes();
+                }
+            }
+        }
+        return null
     }
     /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -388,7 +420,5 @@ class MainActivity: FlutterActivity() {
                 Objects.requireNonNull(fos)?.close()
             }
         }
-
-
     }
 }

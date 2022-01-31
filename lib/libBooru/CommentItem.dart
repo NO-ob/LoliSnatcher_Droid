@@ -17,7 +17,7 @@ class CommentItem {
     this.createDateFormat,
   });
 
-  Map toJSON() {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,

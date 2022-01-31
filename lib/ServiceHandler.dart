@@ -110,6 +110,44 @@ class ServiceHandler{
     return result;
   }
 
+
+  // This function only grants access until device reboot
+  static Future<String> getSAFDirectoryAccess() async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("getTempDirAccess");
+      print("Got saf path back");
+      print(result);
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<Uint8List?> getFileFromSAFDirectory(String SAFUri, String fileName) async {
+    Uint8List? result;
+    try {
+      result = await platform.invokeMethod("getFileByName",{"uri":SAFUri,"fileName":fileName});
+      print("found file $fileName");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<String> getFilesByExt(String SAFUri, String fileExt) async {
+    String result = "";
+    try {
+      result = await platform.invokeMethod("getTempDirAccess");
+      print("Got saf path back");
+      print(result);
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+
   Future<String> getConfigDir() async {
     String result = '';
     if (Platform.isAndroid){

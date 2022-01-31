@@ -184,7 +184,7 @@ class AGNPHHandler extends BooruHandler{
   // This will create a url to goto the images page in the browser
   @override
   String makePostURL(String id){
-    return "${booru.baseURL}/post/show/$id";
+    return "${booru.baseURL}/gallery/post/show/$id";
   }
 
   // This will create a url for the http request

@@ -70,7 +70,7 @@ class ImageWriter {
         print("Image written: " + path! + fileName);
         if (settingsHandler.jsonWrite){
           File json = File(path! + fileName.split(".")[0]+".json");
-          await json.writeAsString(jsonEncode(item.toJSON()), flush: true);
+          await json.writeAsString(jsonEncode(item.toJson()), flush: true);
         }
         item.isSnatched.value = true;
         if (settingsHandler.dbEnabled){
