@@ -1,10 +1,10 @@
 {
 	"version_name": "2.2.0",
-	"build_number": 169,
+	"build_number": 170,
 	"title": "Tabs manager and fixes",
 	"changelog": "Main Changes:\n- Fixed possible OOM crash on some devices\n- Improved speed of database queries\n- Fixed tag autocomplete for gelbooru-based sites\n- Tabs manager\n\n------\n\nNew Features:\n- Tabs manager (long press on tabs selector to access it)\n- Tags sorting\n- Added md5 to item info list\n\nLolisync:\n- Send booru items in batches\n- Added toggle to keep the screen awake during the sync process\n- Increased actions history limit to 100\n- Fixed sync streams restarting when they shouldn't\n- Moved test connection button to pre-sync page\n\nFixes:\n- Fixed a bug with gallery view which lead to a high risk of out of memory crashes on some devices\n- Massively improved speeds of database queries, this allows to make loading and syncing of favourites much faster\n- Fixed tag autocomplete for gelbooru-based sites\n- System back gesture/button will now close the main drawer if it's open instead of asking if user wants to exit the app\n- Fix switching between preview modes on the fly\n- Fixed thumbnail grid doing complete redraw when it shouldn't\n- Other small fixes...",
 	"is_in_store": true,
-	"is_update_in_store": false,
+	"is_update_in_store": true,
 	"is_important": false,
 	"store_package": "com.noaisu.play.loliSnatcher",
 	"github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
