@@ -14,7 +14,7 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false;
+  bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false, wakeLockEnabled = true;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
   List<List<String>>? buttonOrder;
   TextEditingController preloadController = TextEditingController();
@@ -39,6 +39,7 @@ class _GalleryPageState extends State<GalleryPage> {
     shitDevice = settingsHandler.shitDevice;
     disableVideo = settingsHandler.disableVideo;
     loadingGif = settingsHandler.loadingGif;
+    wakeLockEnabled = settingsHandler.wakeLockEnabled;
     super.initState();
   }
 
@@ -57,6 +58,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.shitDevice = shitDevice;
     settingsHandler.disableVideo = disableVideo;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
+    settingsHandler.wakeLockEnabled = wakeLockEnabled;
     if (int.parse(scrollSpeedController.text) < 100){
       scrollSpeedController.text = "100";
     }
@@ -483,6 +485,15 @@ class _GalleryPageState extends State<GalleryPage> {
                     );
                   },
                 ),
+              ),
+              SettingsToggle(
+                value: wakeLockEnabled,
+                onChanged: (newValue) {
+                  setState(() {
+                    wakeLockEnabled = newValue;
+                  });
+                },
+                title: 'Prevent Device From Sleeping',
               ),
             ],
           ),

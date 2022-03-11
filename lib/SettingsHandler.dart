@@ -129,7 +129,7 @@ class SettingsHandler extends GetxController {
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
   bool showStatusBar = true;
-
+  bool wakeLockEnabled = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -383,7 +383,10 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
-
+    "wakeLockEnabled": {
+      "type": "bool",
+      "default": true,
+    },
 
     // other
     "buttonOrder": {
@@ -853,6 +856,8 @@ class SettingsHandler extends GetxController {
         return lastSyncIp;
       case 'lastSyncPort':
         return lastSyncPort;
+      case 'wakeLockEnabled':
+        return wakeLockEnabled;
 
       // theme stuff
       case 'theme':
@@ -872,6 +877,7 @@ class SettingsHandler extends GetxController {
 
   dynamic setByString(String varName, dynamic value) {
     dynamic validatedValue = validateValue(varName, value);
+    //Could this just be replaced with getByString(varName) = validatedValue?
     switch (varName) {
       case 'defTags':
         defTags = validatedValue;
@@ -1026,6 +1032,9 @@ class SettingsHandler extends GetxController {
       case 'enableDrawerMascot':
         enableDrawerMascot = validatedValue;
         break;
+      case 'wakeLockEnabled':
+        wakeLockEnabled = validatedValue;
+        break;
       default:
         break;
     }
@@ -1088,7 +1097,7 @@ class SettingsHandler extends GetxController {
       "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
       "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
-
+      "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
       "version": verStr,
       "SDK": SDKVer,
     };
