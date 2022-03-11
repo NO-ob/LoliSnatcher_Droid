@@ -61,6 +61,7 @@ class GelbooruHandler extends BooruHandler {
 
     for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
+      Logger.Inst().log(posts.elementAt(i), className, "parseJsonResponse", LogTypes.booruHandlerRawFetched);
       try {
         if (current["file_url"] != null) {
           // Fix for bleachbooru
@@ -123,6 +124,7 @@ class GelbooruHandler extends BooruHandler {
 
     for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
+      Logger.Inst().log(posts.elementAt(i).toString(), className, "parseXmlResponse", LogTypes.booruHandlerRawFetched);
       try {
         if (getAttrOrElem(current, "file_url") != null) {
           // Fix for bleachbooru
@@ -135,6 +137,27 @@ class GelbooruHandler extends BooruHandler {
             fileURL = booru.baseURL! + fileURL;
             sampleURL = booru.baseURL! + sampleURL;
             previewURL = booru.baseURL! + previewURL;
+          }
+
+          //Fix for realbooru urls not containing the middle part of the urls its in the format of hash digits /01/23/
+          //I think it might only happen on videos but not 100%
+          RegExp doubleSlashNoColon = RegExp(r"(?<!:)//");
+          if (isRealbooru() && doubleSlashNoColon.hasMatch(fileURL)){
+            String urlMiddle = fileURL.split(doubleSlashNoColon)[1];
+            urlMiddle = "/" + urlMiddle.substring(0,2) + "/" + urlMiddle.substring(2,4) + "/";
+            fileURL = fileURL.replaceAll(doubleSlashNoColon, urlMiddle);
+            previewURL = previewURL.replaceAll(doubleSlashNoColon, urlMiddle);
+            if(fileURL.endsWith(".mp4")){
+              sampleURL = fileURL.replaceFirst(".mp4", ".jpg", sampleURL.lastIndexOf(".") -1);
+            } else if (fileURL.endsWith(".webm")){
+              sampleURL = fileURL.replaceFirst(".webm", ".jpg", sampleURL.lastIndexOf(".") -1);
+            } else {
+              sampleURL = sampleURL.replaceAll(doubleSlashNoColon, urlMiddle);
+            }
+            Logger.Inst().log(urlMiddle, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
+            Logger.Inst().log(fileURL, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
+            Logger.Inst().log(sampleURL, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
+            Logger.Inst().log(previewURL, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
           }
 
           BooruItem item = BooruItem(
@@ -198,6 +221,10 @@ class GelbooruHandler extends BooruHandler {
 
   bool isNotGelbooru() {
     return (booru.baseURL!.contains("rule34.xxx") || booru.baseURL!.contains("safebooru.org") || booru.baseURL!.contains("realbooru.com"));
+  }
+
+  bool isRealbooru() {
+    return booru.baseURL!.contains("realbooru.com");
   }
 
   @override
