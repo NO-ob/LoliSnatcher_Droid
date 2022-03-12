@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 
+import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -65,7 +66,7 @@ class ImageWriter {
     if(fileExists || item.isSnatched.value == true) return null;
     try {
       Uri fileURI = Uri.parse(item.fileURL);
-      var response = await http.get(fileURI);
+      var response = await http.get(fileURI,headers: ViewUtils.getFileCustomHeaders(booru,checkForReferer: true));
       if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
         await Directory(path!).create(recursive:true);
         await image.writeAsBytes(response.bodyBytes, flush: true);

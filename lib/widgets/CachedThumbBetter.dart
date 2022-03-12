@@ -66,7 +66,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     _dioCancelToken = CancelToken();
     DioLoader newClient = DioLoader(
       isMain ? thumbURL : widget.booruItem.thumbnailURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,

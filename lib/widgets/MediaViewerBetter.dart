@@ -64,7 +64,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     _dioCancelToken = CancelToken();
     client = DioLoader(
       imageURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,

@@ -110,7 +110,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     _cancelToken = CancelToken();
     client = DioLoader(
       widget.booruItem.fileURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -139,7 +139,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioLoader(
       widget.booruItem.fileURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
     );
@@ -357,7 +357,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
-        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
         startTime: Duration(milliseconds: 50),
       );
     }
@@ -382,14 +382,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
-        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
         startTime: Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
 
     videoController = Player(id: widget.index);
-    videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: false).entries.first.value);
+    videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: false).entries.first.value);
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
     //   media!,

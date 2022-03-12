@@ -1,23 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 class ViewUtils {
 
   // unified http headers list generator for dio in thumb/media/video loaders
-  static Map<String, String> getFileCustomHeaders(SearchGlobal searchGlobal, {bool checkForReferer = false}) {
+  static Map<String, String> getFileCustomHeaders(Booru booru, {bool checkForReferer = false}) {
     // a few boorus doesn't work without a browser useragent
     Map<String,String> headers = {"user-agent": "Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"};
     // some boorus require referer header
     if(checkForReferer) {
-      Booru? curBooru = searchGlobal.selectedBooru.value;
-      switch (curBooru.type) {
+      switch (booru.type) {
         case 'World':
-          if(curBooru.baseURL!.contains('rule34.xyz')) {
+          if(booru.baseURL!.contains('rule34.xyz')) {
             headers["referer"] = "https://rule34xyz.b-cdn.net";
-          } else if(curBooru.baseURL!.contains('rule34.world')) {
+          } else if(booru.baseURL!.contains('rule34.world')) {
             headers["referer"] = "https://rule34storage.b-cdn.net";
           }
           break;

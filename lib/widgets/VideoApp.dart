@@ -98,7 +98,7 @@ class _VideoAppState extends State<VideoApp> {
     _cancelToken = CancelToken();
     client = DioLoader(
       widget.booruItem.fileURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -127,7 +127,7 @@ class _VideoAppState extends State<VideoApp> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioLoader(
       widget.booruItem.fileURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
     );
@@ -372,7 +372,7 @@ class _VideoAppState extends State<VideoApp> {
       videoController = VideoPlayerController.network(
         widget.booruItem.fileURL,
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
-        httpHeaders: ViewUtils.getFileCustomHeaders(widget.searchGlobal, checkForReferer: true),
+        httpHeaders: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       );
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
