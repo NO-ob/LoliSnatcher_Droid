@@ -1,12 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 
-import 'package:LoliSnatcher/utilities/Logger.dart';
-
-import 'Booru.dart';
 import 'package:http/http.dart' as http;
-import 'dart:async';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
+
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class e621Handler extends BooruHandler{
   e621Handler(Booru booru,int limit) : super(booru,limit);

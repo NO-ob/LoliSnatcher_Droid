@@ -1,11 +1,11 @@
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'Booru.dart';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class SzurubooruHandler extends BooruHandler{

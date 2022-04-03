@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:LoliSnatcher/pages/settings/LoggerPage.dart';
-import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/pages/settings/LoggerPage.dart';
+import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class DebugPage extends StatefulWidget {
   DebugPage();

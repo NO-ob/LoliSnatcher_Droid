@@ -1,11 +1,12 @@
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
-import 'package:xml/xml.dart';
 import 'dart:async';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'Booru.dart';
+
+import 'package:http/http.dart' as http;
+import 'package:xml/xml.dart';
+
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 // TODO no setTrackedValues?
 
@@ -212,7 +213,7 @@ class AGNPHHandler extends BooruHandler{
       // 200 is the success http response code
       if (response.statusCode == 200) {
         if (response.body.contains("response")){
-          var parsedResponse = xml.parse(response.body);
+          var parsedResponse = XmlDocument.parse(response.body);
           var tags = parsedResponse.findAllElements("tag");
           if (tags.length > 0){
             for (int i=0; i < tags.length; i++){

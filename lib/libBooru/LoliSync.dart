@@ -2,15 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'BooruItem.dart';
 
 class LoliSync{
   String ip = "127.0.0.1";

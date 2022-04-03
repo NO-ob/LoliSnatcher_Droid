@@ -1,11 +1,10 @@
-import 'dart:convert';
-import 'dart:math';
-
-import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'dart:async';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'Booru.dart';
+import 'dart:convert';
+
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**
  * Booru Handler for the gelbooru engine

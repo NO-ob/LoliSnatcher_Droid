@@ -1,18 +1,21 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/progress_bar.dart';
 import 'package:chewie/src/helpers/utils.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/ViewerHandler.dart';
+
 class LoliControls extends StatefulWidget {
-  LoliControls({Key? key}) : super(key: key);
+  final ChewieController? outsideController;
+  LoliControls({Key? key, this.outsideController}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -21,7 +24,6 @@ class LoliControls extends StatefulWidget {
 }
 
 class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
-
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   late VideoPlayerValue _latestValue;
@@ -77,7 +79,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       child: GestureDetector(
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
-        onTap: () => _cancelAndRestartTimer(),
+        onTap: _cancelAndRestartTimer,
         child: AbsorbPointer(
           absorbing: _hideStuff,
           child: Column(
@@ -115,7 +117,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   @override
   void didChangeDependencies() {
     final _oldController = _chewieController;
-    _chewieController = ChewieController.of(context);
+    _chewieController = widget.outsideController ?? ChewieController.of(context);
     controller = chewieController.videoPlayerController;
 
     if (_oldController != chewieController) {

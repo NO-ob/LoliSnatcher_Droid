@@ -41,9 +41,9 @@ class DesktopHome extends StatelessWidget {
                     const SizedBox(width: 15),
                     TagSearchBox(),
                     TagSearchButton(),
-                    Expanded(child: BooruSelectorMain(true)),
-                    Expanded(child: TabBox()),
-                    Expanded(child: TabBoxButtons(false, MainAxisAlignment.start)),
+                    Expanded(flex: 1, child: BooruSelectorMain(true)),
+                    Expanded(flex: 2, child: TabBox()),
+                    Expanded(flex: 2, child: TabBoxButtons(false, MainAxisAlignment.start)),
                   ],
                 ),
               );

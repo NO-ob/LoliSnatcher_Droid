@@ -1,10 +1,12 @@
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'Booru.dart';
 import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class WorldHandler extends BooruHandler {
   // Dart constructors are weird so it has to call super with the args

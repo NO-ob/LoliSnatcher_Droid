@@ -3,14 +3,13 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
 import 'dart:ui' show hashValues, Codec;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+
+import 'package:LoliSnatcher/ImageWriter.dart';
 
 
 // memoryimage but with url added in attempt to not load extra copies of already loaded images

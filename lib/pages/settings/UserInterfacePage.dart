@@ -176,21 +176,6 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Preview Display',
               ),
-              SettingsToggle(
-                title: 'Show Status Bar',
-                value: settingsHandler.showStatusBar,
-                onChanged: (bool newValue){
-                  settingsHandler.showStatusBar = newValue;
-                  if(newValue) {
-                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-                    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
-                  } else {
-                    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-                  }
-                  setState((){ });
-                },
-              ),
             ],
           ),
         ),

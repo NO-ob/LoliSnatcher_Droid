@@ -1,6 +1,7 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
 
 class Logger {
   static Logger? _loggerInstance;

@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -12,6 +10,8 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 // ignore: must_be_immutable
 class BooruPage extends StatefulWidget {

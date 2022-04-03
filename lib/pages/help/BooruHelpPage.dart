@@ -1,7 +1,6 @@
+import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/widgets/TextExpander.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class BooruHelpPage extends StatefulWidget {
   BooruHelpPage();

@@ -1,16 +1,15 @@
 import 'dart:math';
 
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/DBHandler.dart';
-import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../ServiceHandler.dart';
-import '../../SettingsHandler.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class DatabasePage extends StatefulWidget {
   DatabasePage();

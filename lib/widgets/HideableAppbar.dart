@@ -1,15 +1,17 @@
 import 'dart:async';
 
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget title;
   final List<Widget> actions;
-  final bool autoHide;
-  HideableAppBar(this.title, this.actions, this.autoHide);
+  HideableAppBar(this.title, this.actions);
 
   final double defaultHeight = kToolbarHeight; //56.0
 
@@ -20,6 +22,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
   late StreamSubscription<bool> appbarListener;
@@ -27,8 +30,12 @@ class _HideableAppBarState extends State<HideableAppBar> {
   @override
   void initState() {
     super.initState();
-    viewerHandler.displayAppbar.value = !widget.autoHide;
+
+    ServiceHandler.setSystemUiVisibility(!settingsHandler.autoHideImageBar);
+    viewerHandler.displayAppbar.value = !settingsHandler.autoHideImageBar;
+
     appbarListener = viewerHandler.displayAppbar.listen((bool value) {
+      ServiceHandler.setSystemUiVisibility(value);
       setState(() {});
     });
   }
@@ -36,12 +43,15 @@ class _HideableAppBarState extends State<HideableAppBar> {
   @override
   void dispose() {
     appbarListener.cancel();
+    ServiceHandler.setSystemUiVisibility(true);
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea( // to fix height bug when bar on top
+    return SafeArea(
+      // to fix height bug when bar on top
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         curve: Curves.linear,
@@ -63,7 +73,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           ),
           actions: widget.actions,
         ),
-      )
+      ),
     );
   }
 }

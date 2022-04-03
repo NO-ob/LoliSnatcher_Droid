@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
 
 class MascotImage extends StatelessWidget {
   const MascotImage({Key? key}) : super(key: key);

@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'dart:core';
 
+import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:get/get.dart';
-
-import '../SettingsHandler.dart';
 
 class AboutPage extends StatelessWidget {
   final String email = 'no.aisu@protonmail.com';

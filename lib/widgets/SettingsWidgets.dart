@@ -230,12 +230,10 @@ class SettingsDropdown extends StatelessWidget {
               labelText: title,
               labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
               contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-              ),
+              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+              border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
             ),
             dropdownColor: Get.theme.colorScheme.surface,
             selectedItemBuilder: (BuildContext context) {
@@ -348,12 +346,10 @@ class SettingsBooruDropdown extends StatelessWidget {
                 labelText: title,
                 labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
                 contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-                ),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
               ),
               dropdownColor: Get.theme.colorScheme.surface,
               selectedItemBuilder: (BuildContext context) {

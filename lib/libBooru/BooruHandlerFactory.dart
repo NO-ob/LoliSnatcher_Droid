@@ -1,29 +1,30 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
-
-import 'Booru.dart';
-import 'BooruOnRailsHandler.dart';
-import 'DanbooruHandler.dart';
-import 'EmptyHandler.dart';
-import 'GelbooruHandler.dart';
-import 'GelbooruV1Handler.dart';
-import 'HydrusHandler.dart';
-import 'MoebooruHandler.dart';
-import 'PhilomenaHandler.dart';
-import 'SankakuHandler.dart';
-import 'ShimmieHandler.dart';
-import 'SzurubooruHandler.dart';
-import 'e621Handler.dart';
-import 'WorldHandler.dart';
-import 'R34HentaiHandler.dart';
-import 'IdolSankakuHandler.dart';
-import 'AGNPHHandler.dart';
-import 'BooruHandler.dart';
-import 'FavouritesHandler.dart';
-import 'InkBunnyHandler.dart';
-import 'MergebooruHandler.dart';
-import 'NyanPalsHandler.dart';
-import 'RainbooruHandler.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruOnRailsHandler.dart';
+import 'package:LoliSnatcher/libBooru/DanbooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/EmptyHandler.dart';
+import 'package:LoliSnatcher/libBooru/GelbooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/GelbooruV1Handler.dart';
+import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
+import 'package:LoliSnatcher/libBooru/MoebooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/PhilomenaHandler.dart';
+import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
+import 'package:LoliSnatcher/libBooru/ShimmieHandler.dart';
+import 'package:LoliSnatcher/libBooru/SzurubooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/e621Handler.dart';
+import 'package:LoliSnatcher/libBooru/WorldHandler.dart';
+import 'package:LoliSnatcher/libBooru/R34HentaiHandler.dart';
+import 'package:LoliSnatcher/libBooru/IdolSankakuHandler.dart';
+import 'package:LoliSnatcher/libBooru/AGNPHHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/FavouritesHandler.dart';
+import 'package:LoliSnatcher/libBooru/InkBunnyHandler.dart';
+import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/NyanPalsHandler.dart';
+import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
+
 
 
 class BooruHandlerFactory {

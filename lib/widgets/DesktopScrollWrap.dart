@@ -13,7 +13,7 @@ ScrollPhysics? getListPhysics() {
   if (settingsHandler.desktopListsDrag == false && isDesktopPlatform) {
     return const NeverScrollableScrollPhysics();
   } else {
-    return null;
+    return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
   }
 }
 

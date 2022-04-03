@@ -5,9 +5,9 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:vibration/vibration.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:vibration/vibration.dart';
 
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
@@ -286,6 +286,14 @@ class ServiceHandler{
       File dbFile = File(settingsHandler.path + "store.db");
       print(settingsHandler.path);
       await dbFile.delete();
+    }
+  }
+
+  static void setSystemUiVisibility(bool visible) {
+    if (visible) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: SystemUiOverlay.values);
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky, overlays: []);
     }
   }
 

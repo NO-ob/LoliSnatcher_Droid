@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:get/get.dart';
@@ -153,12 +154,10 @@ class _MainAppState extends State<MainApp> {
         primary: theme.primary!,
         onPrimary: onPrimaryIsDark ? Colors.white : Colors.black,
         // onPrimary: isDark ? Colors.white : Colors.black,
-        primaryVariant: theme.primary!,
 
         secondary: theme.accent!,
         onSecondary: onAccentIsDark ? Colors.white : Colors.black,
         // onSecondary: isDark ? Colors.white : Colors.black,
-        secondaryVariant: theme.accent!,
 
         surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
         onSurface: isDark ? Colors.white : Colors.black,
@@ -190,7 +189,7 @@ class _MainAppState extends State<MainApp> {
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
             showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
-            scrollBehavior: CustomScrollBehavior(),
+            scrollBehavior: const CustomScrollBehavior(),
             theme: ThemeData(
               scaffoldBackgroundColor: (isDark && isAmoled) ? Colors.black : null,
               backgroundColor: (isDark && isAmoled) ? Colors.black : null,
@@ -206,6 +205,7 @@ class _MainAppState extends State<MainApp> {
               colorScheme: alternateColorScheme,
               // textTheme: textTheme,
               textSelectionTheme: textSelectionTheme,
+              androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
             ),
 
             // TODO doesnt detect when appbar text color should change depending on the background ???
@@ -253,13 +253,7 @@ class Preloader extends StatelessWidget {
       if (settingsHandler.isInit.value) {
         if (Platform.isAndroid || Platform.isIOS) {
           // set system ui mode
-          if (settingsHandler.showStatusBar) {
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
-          } else {
-            // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
-          }
+          ServiceHandler.setSystemUiVisibility(true);
 
           // force landscape orientation if enabled desktop mode on mobile device
           if (settingsHandler.appMode != "Mobile") {
@@ -307,6 +301,7 @@ class _HomeState extends State<Home> {
   ThemeItem? selectedTheme;
 
   AppLinks? appLinks;
+  StreamSubscription<Uri>? appLinksSubscription;
 
   @override
   void initState() {
@@ -358,10 +353,15 @@ class _HomeState extends State<Home> {
       appLinks = AppLinks();
 
       // check if there is a link on start
-      final Uri? appLink = await appLinks!.getInitialAppLink();
-      if (appLink != null) {
-        openAppLink(appLink.toString());
+      final Uri? initialLink = await appLinks!.getInitialAppLink();
+      if (initialLink != null) {
+        openAppLink(initialLink.toString());
       }
+
+      // listen for deep links
+      appLinksSubscription = appLinks!.uriLinkStream.listen((uri) {
+        openAppLink(uri.toString());
+      });
     }
   }
 
@@ -386,6 +386,7 @@ class _HomeState extends State<Home> {
     cacheClearTimer?.cancel();
     cacheStaleTimer?.cancel();
     memeTimer?.cancel();
+    appLinksSubscription?.cancel();
     super.dispose();
   }
 

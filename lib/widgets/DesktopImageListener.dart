@@ -46,10 +46,10 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   Widget getImageWidget(BooruItem value) {
     if (value.isImage()) {
       return MediaViewerBetter(value.key, value, 1, searchHandler.currentTab);
-    } else if(value.isVideo()) {
+    } else if (value.isVideo()) {
       if (Platform.isAndroid || Platform.isIOS) {
         return VideoApp(value.key, value, 1, searchHandler.currentTab, true);
-      } else if(Platform.isWindows || Platform.isLinux) {
+      } else if (Platform.isWindows || Platform.isLinux) {
         return VideoAppDesktop(value.key, value, 1, searchHandler.currentTab);
       } else {
         return VideoAppPlaceholder(item: value, index: 1);
@@ -68,7 +68,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   @override
   void didUpdateWidget(DesktopImageListener oldWidget) {
     // force redraw on tab change
-    if(oldWidget.searchGlobal != widget.searchGlobal) {
+    if (oldWidget.searchGlobal != widget.searchGlobal) {
       updateListener();
     }
     super.didUpdateWidget(oldWidget);
@@ -91,14 +91,13 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   }
 
   void updateState() {
-    if(this.mounted) {
-      setState(() { });
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
   @override
   void dispose() {
-    itemDelay?.cancel();
     itemListener?.cancel();
     super.dispose();
   }
@@ -110,7 +109,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   @override
   Widget build(BuildContext context) {
-    if(searchHandler.list.isEmpty) {
+    if (searchHandler.list.isEmpty) {
       return const SizedBox();
     }
 
@@ -122,15 +121,12 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
     return Stack(
       children: [
-        if(!viewerHandler.isDesktopFullscreen.value)
-          itemWidget,
-
-        if(!viewerHandler.isDesktopFullscreen.value)
-          NotesRenderer(),
+        if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
+        if (!viewerHandler.isDesktopFullscreen.value) NotesRenderer(),
 
         Container(
           alignment: Alignment.topRight,
-          child:Column(
+          child: Column(
             children: [
               Container(
                 width: 35,
@@ -141,7 +137,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     snatchHandler.queue(
                       [item],
                       searchHandler.currentTab.selectedBooru.value,
-                      0
+                      0,
                     );
                   },
                   child: Icon(Icons.save),
@@ -154,12 +150,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                 margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: FloatingActionButton(
                   onPressed: () {
-                    if(item.isFavourite.value != null) {
+                    if (item.isFavourite.value != null) {
                       item.isFavourite.toggle();
                       settingsHandler.dbHandler.updateBooruItem(item, "local");
                     }
                   },
-                  child: Obx(() => Icon(item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
+                  child: Obx(() => Icon(item.isFavourite.value == true
+                      ? Icons.favorite
+                      : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
                   backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
@@ -178,19 +176,19 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                           Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox()),
                           NotesRenderer(),
                           Container(
-                              padding: EdgeInsets.all(10),
-                              alignment: Alignment.topRight,
-                              child: Container(
-                                width: 30,
-                                height: 30,
-                                child: FloatingActionButton(
-                                  onPressed: () {
-                                    Get.back();
-                                  },
-                                  child: Icon(Icons.fullscreen_exit),
-                                  backgroundColor: Get.theme.colorScheme.secondary,
-                                ),
+                            padding: EdgeInsets.all(10),
+                            alignment: Alignment.topRight,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              child: FloatingActionButton(
+                                onPressed: () {
+                                  Get.back();
+                                },
+                                child: Icon(Icons.fullscreen_exit),
+                                backgroundColor: Get.theme.colorScheme.secondary,
                               ),
+                            ),
                           ),
                         ],
                       ),
@@ -209,8 +207,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
             ],
           ),
         )
-      ]
+      ],
     );
   }
-
 }
