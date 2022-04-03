@@ -138,7 +138,7 @@ class InkBunnyHandler extends BooruHandler{
     } catch(e) {
       Logger.Inst().log(e.toString(), "InkBunnyHandler", "getSubmissionResponse", LogTypes.exception);
     }
-    print("returning null");
+    Logger.Inst().log("returning null", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerInfo);
     return null;
   }
 
@@ -161,13 +161,17 @@ class InkBunnyHandler extends BooruHandler{
 
         // A submission can have multiple files so a booru item must be made for each of them
         var files = current["files"];
+
         for (int i = 0; i < files.length; i++) {
           String sampleURL = files[i]["file_url_screen"],
               thumbURL = files[i]["file_url_preview"],
               fileURL = files[i]["file_url_full"];
-          if (fileURL.endsWith(".mp4")){
+          if (fileURL.endsWith(".mp4") && files[i].containsKey("thumbnail_url_huge")){
             thumbURL = files[i]["thumbnail_url_huge"];
             sampleURL = thumbURL;
+          } else if (i > 0 && !files[0]["file_url_full"].endsWith(".mp4")) {
+            sampleURL = files[0]["file_url_screen"];
+            thumbURL = files[0]["file_url_preview"];
           }
           BooruItem item = BooruItem(
             fileURL: fileURL,
@@ -235,7 +239,7 @@ class InkBunnyHandler extends BooruHandler{
   }
 
   String makeTagURL(String input){
-    print(input);
+    Logger.Inst().log("inkbunny tag search $input ", "InkBunnyHandler", "makeTagURL", LogTypes.booruHandlerInfo);
     return "${booru.baseURL}/api_search_autosuggest.php?keyword=${input.replaceAll("_", "+")}&ratingsmask=11111";
   }
 
@@ -248,16 +252,16 @@ class InkBunnyHandler extends BooruHandler{
       Uri uri = Uri.parse(url);
       var response = await http.get(uri,headers: getHeaders());
       // 200 is the success http response code
-      print(url);
-      print(response.body);
+      Logger.Inst().log("$url ", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("${response.body}", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
       if (response.statusCode == 200) {
-        if (response.body.contains("response")){
-          var parsedResponse = xml.parse(response.body);
-          var tags = parsedResponse.findAllElements("value");
-          if (tags.length > 0){
-            for (int i=0; i < tags.length; i++){
-              print(tags.elementAt(i));
-              searchTags.add(tags.elementAt(i).toString().replaceAll(" ", "_"));
+        var parsedResponse = jsonDecode(response.body);
+        if (parsedResponse.containsKey("results")){
+          var tagObjects = parsedResponse["results"];
+          if (tagObjects.length > 0){
+            for (int i=0; i < tagObjects.length; i++){
+              Logger.Inst().log("tag $i = ${tagObjects[i]["value"]}", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
+              searchTags.add(tagObjects[i]["value"].replaceAll(" ", "_"));
             }
           }
         }
