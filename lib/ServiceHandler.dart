@@ -249,9 +249,9 @@ class ServiceHandler{
     }
   }
 
-  static void disableSleep (){
+  static void disableSleep ({bool forceEnable = false}){
     SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    if (Platform.isAndroid && settingsHandler.wakeLockEnabled){
+    if (Platform.isAndroid && (settingsHandler.wakeLockEnabled || forceEnable)){
       platform.invokeMethod("disableSleep");
     }
   }

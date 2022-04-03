@@ -381,7 +381,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // Otherwise load from network
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
-        widget.booruItem.fileURL,
+        Uri.encodeFull(widget.booruItem.fileURL),
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
         startTime: Duration(milliseconds: 50),
       );
