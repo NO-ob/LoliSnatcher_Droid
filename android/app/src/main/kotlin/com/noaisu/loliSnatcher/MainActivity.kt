@@ -11,9 +11,11 @@ import android.content.Intent.CATEGORY_BROWSABLE
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
@@ -21,6 +23,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.KeyEvent
+import android.view.Window
 import android.view.WindowManager
 import android.webkit.MimeTypeMap
 import android.widget.Toast
@@ -42,6 +45,25 @@ import java.net.NetworkInterface
 
 
 class MainActivity: FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val window: Window = getWindow()
+        val decorView: View = window.getDecorView()
+        val attributes = window.attributes
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.setStatusBarColor(Color.TRANSPARENT)
+            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            window.setNavigationBarColor(Color.TRANSPARENT)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                // https://stackoverflow.com/questions/49190381/fullscreen-app-with-displaycutout
+                attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
+    }
+
     private val CHANNEL = "com.noaisu.loliSnatcher/services"
     private val VOLUME_CHANNEL = "com.noaisu.loliSnatcher/volume"
     private var volumeSink: EventChannel.EventSink? = null

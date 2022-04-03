@@ -2,9 +2,10 @@ import 'dart:math';
 
 import 'package:xml/xml.dart';
 import 'package:http/http.dart' as http;
-import 'BooruItem.dart';
-import 'GelbooruHandler.dart';
-import 'Booru.dart';
+
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/GelbooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**

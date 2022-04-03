@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -118,6 +117,8 @@ class _TabBoxState extends State<TabBox> {
                   : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
               border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
             ),
             dropdownColor: Get.theme.colorScheme.surface,
             onChanged: (SearchGlobal? newValue) {

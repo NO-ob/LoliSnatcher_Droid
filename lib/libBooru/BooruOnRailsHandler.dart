@@ -1,11 +1,12 @@
-import 'dart:convert';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'Booru.dart';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class BooruOnRailsHandler extends BooruHandler {
   bool tagSearchEnabled = true;

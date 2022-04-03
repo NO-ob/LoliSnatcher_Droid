@@ -1,12 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'dart:async';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'Booru.dart';
-import 'package:crypto/crypto.dart';
 
 
 class MergebooruHandler extends BooruHandler{

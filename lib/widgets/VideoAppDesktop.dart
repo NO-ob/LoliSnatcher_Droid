@@ -502,6 +502,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
               if(isViewed && initialized)
                 Video(
                   player: videoController,
+                  playlistLength: 1,
                   scale: 1.0,
                   showControls: true,
                   progressBarInactiveColor: Colors.grey,

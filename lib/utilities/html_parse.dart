@@ -3,7 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 
-import 'html_color.dart' as htmlColor;
+import 'package:LoliSnatcher/utilities/html_color.dart' as htmlColor;
 
 // Original code: https://gist.github.com/seven332/9dc76255d959c8c5194cbd92068b0f60
 

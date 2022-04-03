@@ -1,10 +1,12 @@
-import 'dart:convert';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:http/http.dart' as http;
 import 'dart:async';
-import 'Booru.dart';
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class PhilomenaHandler extends BooruHandler{
   PhilomenaHandler(Booru booru,int limit) : super(booru,limit);

@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:html/parser.dart';
 
-import 'BooruHandler.dart';
-import 'BooruItem.dart';
-import 'Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/ShimmieHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 

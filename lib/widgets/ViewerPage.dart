@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/widgets/ChangePageButtons.dart';
-import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +30,8 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/ZoomButton.dart';
 import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
+import 'package:LoliSnatcher/widgets/ChangePageButtons.dart';
+import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
@@ -160,6 +160,20 @@ class _ViewerPageState extends State<ViewerPage> {
     });
   }
 
+  void toggleToolbar(bool isLongTap) {
+    bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
+    viewerHandler.displayAppbar.value = newAppbarVisibility;
+
+    if(isLongTap) {
+      ServiceHandler.vibrate();
+    }
+
+    // enable volume buttons if current page is a video AND appbar is set to visible
+    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
+    bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+    ServiceHandler.setVolumeButtons(isVolumeAllowed);
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('!!! ViewerPage build ${searchHandler.viewedIndex.value} !!!');
@@ -169,18 +183,23 @@ class _ViewerPageState extends State<ViewerPage> {
       key: viewerScaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
-      appBar: settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(getTitle(), appBarActions(), settingsHandler.autoHideImageBar) : null,
-      bottomNavigationBar: settingsHandler.galleryBarPosition == 'Bottom' ? HideableAppBar(getTitle(), appBarActions(), settingsHandler.autoHideImageBar) : null,
+      appBar: settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(getTitle(), appBarActions()) : null,
+      bottomNavigationBar: settingsHandler.galleryBarPosition == 'Bottom' ? HideableAppBar(getTitle(), appBarActions()) : null,
       backgroundColor: Colors.transparent,
       body: PhotoViewGestureDetectorScope(
         // vertical to prevent swipe-to-dismiss when zoomed
-        axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix for this
+        axis: Axis.vertical, // photo_view doesn't support locking both axises, so we use custom fork to fix this
         child: Dismissible(
           direction: settingsHandler.galleryScrollDirection == 'Vertical' ? DismissDirection.horizontal : DismissDirection.vertical,
           // background: Container(color: Colors.black.withOpacity(0.3)),
           key: const Key('imagePageDismissibleKey'),
           resizeDuration: null, // Duration(milliseconds: 100),
-          dismissThresholds: {DismissDirection.up: 0.2, DismissDirection.down: 0.2, DismissDirection.startToEnd: 0.3, DismissDirection.endToStart: 0.3}, // Amount of swiped away which triggers dismiss
+          dismissThresholds: const {
+            DismissDirection.up: 0.2,
+            DismissDirection.down: 0.2,
+            DismissDirection.startToEnd: 0.3,
+            DismissDirection.endToStart: 0.3
+          }, // Amount of swiped away which triggers dismiss
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
             child: RawKeyboardListener(
@@ -291,17 +310,12 @@ class _ViewerPageState extends State<ViewerPage> {
                           //     controller.animateToPage(searchHandler.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
                           //   }
                           // },
-                          onLongPress: () async {
-                            // print('longpress');
-                            bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
-                            viewerHandler.displayAppbar.value = newAppbarVisibility;
 
-                            ServiceHandler.vibrate();
-
-                            // enable volume buttons if current page is a video AND appbar is set to visible
-                            bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
-                            bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
-                            ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                          onTap: () {
+                            toggleToolbar(false);
+                          },
+                          onLongPress: () {
+                            toggleToolbar(true);
                           },
                           child: itemWidget,
                         ),

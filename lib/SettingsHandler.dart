@@ -128,7 +128,6 @@ class SettingsHandler extends GetxController {
   bool disableVideo = false;
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
-  bool showStatusBar = true;
   bool wakeLockEnabled = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
@@ -162,7 +161,7 @@ class SettingsHandler extends GetxController {
     'version', 'SDK', 'disableImageScaling',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
-    'showStatusBar', 'showFPS', 'showPerf', 'showImageStats',
+    'showFPS', 'showPerf', 'showImageStats',
     'isDebug', 'showURLOnThumb', 'disableImageIsolates',
     'mergeEnabled', 'desktopListsDrag'
   ];
@@ -366,10 +365,6 @@ class SettingsHandler extends GetxController {
     "allowSelfSignedCerts":{
       "type" : "bool",
       "default": false,
-    },
-    "showStatusBar": {
-      "type": "bool",
-      "default": true,
     },
     "disableImageScaling": {
       "type": "bool",

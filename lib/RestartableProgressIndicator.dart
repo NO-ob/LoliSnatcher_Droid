@@ -1,7 +1,9 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:LoliSnatcher/TimedProgressController.dart';
 import 'package:get/get.dart';
+
+import 'package:LoliSnatcher/TimedProgressController.dart';
 
 // code from https://stackoverflow.com/questions/56853554/show-timer-progress-on-a-circularprogressindicator-in-flutter
 

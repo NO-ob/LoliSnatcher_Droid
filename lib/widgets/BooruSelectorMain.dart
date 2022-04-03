@@ -142,6 +142,8 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                     : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
                 border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
               ),
               dropdownBuilder: (BuildContext context, List<Booru> selectedItems) {
                 if (selectedItems.isEmpty) {
@@ -191,12 +193,10 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                 contentPadding: settingsHandler.appMode == 'Desktop'
                     ? EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                     : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-                ),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
+                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
               ),
               dropdownColor: Get.theme.colorScheme.surface,
               onChanged: (Booru? newValue) {

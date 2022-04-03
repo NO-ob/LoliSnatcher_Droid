@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -525,8 +524,10 @@ class _TagViewState extends State<TagView> {
             GestureDetector(
               onLongPress: () async {
                 ServiceHandler.vibrate();
-                Navigator.of(context).pop(true); // exit drawer
-                Navigator.of(context).pop(true); // exit viewer
+                if(settingsHandler.appMode == 'Mobile' && viewerHandler.inViewer.value) {
+                  Navigator.of(context).pop(true); // exit drawer
+                  Navigator.of(context).pop(true); // exit viewer
+                }
                 WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
                   searchHandler.addTabByString(currentTag, switchToNew: true);
                 });

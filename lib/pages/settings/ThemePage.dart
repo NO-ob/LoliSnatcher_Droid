@@ -2,9 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
@@ -12,6 +9,8 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
+import 'package:LoliSnatcher/ImageWriter.dart';
+import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class ThemePage extends StatefulWidget {
   ThemePage();
