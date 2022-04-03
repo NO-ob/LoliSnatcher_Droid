@@ -355,11 +355,7 @@ class _HomeState extends State<Home> {
 
   void initDeepLinks() async {
     if (Platform.isAndroid || Platform.isIOS) {
-      appLinks = AppLinks(
-        onAppLink: (Uri uri, String stringUri) {
-          openAppLink(stringUri);
-        },
-      );
+      appLinks = AppLinks();
 
       // check if there is a link on start
       final Uri? appLink = await appLinks!.getInitialAppLink();

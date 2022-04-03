@@ -509,6 +509,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
                   progressBarThumbColor: Get.theme.colorScheme.secondary,
                   volumeThumbColor: Get.theme.colorScheme.secondary,
                   volumeActiveColor: Get.theme.colorScheme.secondary,
+                  playlistLength: 1,
                 ),
             ]),
             minScale: PhotoViewComputedScale.contained,
