@@ -21,7 +21,11 @@ abstract class BooruHandler {
   String verStr = Get.find<SettingsHandler>().verStr;
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   String errorString = '';
-
+  Map<String,String> tagModifierMap = {
+    "rating:" : "R",
+    "artist:" : "A",
+    "order:" : "O"
+  };
   List<BooruItem> get filteredFetched => fetched.where((el) => Get.find<SettingsHandler>().filterHated ? !el.isHated.value : true).toList();
 
   bool tagSearchEnabled = true;

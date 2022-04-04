@@ -26,11 +26,21 @@ class MergebooruHandler extends BooruHandler{
   }
   @override
   Future Search(String tags, int? pageNumCustom) async {
+    if (pageNumCustom != null) {
+      pageNum = pageNumCustom;
+    }
     List<List<BooruItem>> tmpFetchedList = [];
     List<bool> isGelbooruV1List = [];
     int fetchedMax = 0;
     for(int i = 0; i < booruHandlers.length; i++){
-      List<BooruItem> tmpFetched = (await booruHandlers[i].Search(tags, pageNum + booruHandlerPageNums[i])) ?? [];
+      String currentTags =
+        tags.replaceAll(RegExp(r"(?!""${i + 1}"r")\d+#[A-Za-z09\_\-:]*"), "")
+            .replaceAll("  "," ")
+            .replaceAll(RegExp(r"\d+#"),"");
+      print("TAGS FOR #${i} are: $currentTags");
+      print("pagenum $pageNum handler pagenum ${booruHandlerPageNums[i]}");
+      booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
+      List<BooruItem> tmpFetched = (await booruHandlers[i].Search(currentTags, null)) ?? [];
       tmpFetchedList.add(tmpFetched);
       if (booruHandlers[i].booru.type == "GelbooruV1"){
         isGelbooruV1List.add(true);
@@ -106,7 +116,7 @@ class MergebooruHandler extends BooruHandler{
     for (var element in booruList) {
       List factoryResults = BooruHandlerFactory().getBooruHandler([element], innerLimit);
       booruHandlers.add(factoryResults[0]);
-      booruHandlerPageNums.add(factoryResults[1] + 1);
+      booruHandlerPageNums.add(factoryResults[1]);
       Logger.Inst().log("SETUP MERGE ADDING: ${element.name}", "MergeBooruHandler", "setupMerge", LogTypes.booruHandlerInfo);
       if (element.type == "GelbooruV1"){
         hasGelbooruV1 = true;

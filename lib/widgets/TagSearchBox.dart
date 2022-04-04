@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,8 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
+
+import 'TagChip.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
@@ -257,60 +260,28 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
     for (var i = 0; i < splitInput.length; i++) {
       String stringContent = splitInput.elementAt(i);
-      final bool isExclude = stringContent.startsWith('-');
-      if(isExclude) {
-        stringContent = stringContent.substring(1);
-      }
-
-      // TODO mark stuff like rating:safe, order:id... with purple color
-      // final bool isModifier = false;
-
       if(stringContent.isEmpty) {
         // skip creating chip element for empty tags (i.e double spaces...)
         continue;
       }
-
-      final Container tag = Container(
-        decoration: BoxDecoration(
-          color: isExclude ? Get.theme.colorScheme.error : Colors.green,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        margin: EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 3, 0, 3),
-              child: Text(
-                stringContent,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: isExclude ? Get.theme.colorScheme.onError : Colors.white,
-                ),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                splitInput.removeAt(i);
-                searchHandler.searchTextController.text = splitInput.join(' ');
-                tagStuff();
-                combinedSearch();
-              },
-              child: MouseRegion(
+      tags.add(TagChip(
+        tagString: stringContent,
+        gestureDetector: GestureDetector(
+            onTap: () {
+              splitInput.removeAt(i);
+              searchHandler.searchTextController.text = splitInput.join(' ');
+              tagStuff();
+              combinedSearch();
+            },
+            child: const MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: Container(
-                  // color: Colors.yellow.withOpacity(0.5),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    child: Icon(Icons.cancel, size: 24),
-                  )
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  child: Icon(Icons.cancel, size: 24),
                 )
-              )
-            ),
-          ],
+            )
         ),
-      );
-      tags.add(tag);
+      ));
     }
     return tags;
   }
@@ -331,25 +302,42 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void searchBooru() async {
     booruResults.value = [[' ', 'loading']];
     // TODO cancel previous search when new starts
-    List<String?>? getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
+    List<String?>? getFromBooru = [];
+    if (lastTag.startsWith(RegExp(r"\d+#"))){
+      int multiIndex = int.parse(lastTag.split("#")[0]) - 1;
+      String tag = lastTag.split("#")[1];
+      if (searchHandler.currentBooruHandler is MergebooruHandler){
+        MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
+        if ((multiIndex) >= 0 && multiIndex < handler.booruHandlers.length){
+          print("SEARCHING FOR $tag at ${handler.booruHandlers[multiIndex].booru.name}");
+          getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(tag);
+        }
+      }
+    }
+    if (getFromBooru == []){
+      getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
+    }
+
     booruResults.value = getFromBooru?.map((tag){
       final String tagTemp = tag ?? '';
       return [tagTemp, 'booru'];
     }).toList() ?? [];
   }
   void searchHistory() async {
+    String searchTag = lastTag.startsWith(RegExp(r"\d+#")) ? lastTag.replaceFirst(RegExp(r"\d+#"),"") : lastTag;
     historyResults.value = [[' ', 'loading']];
-    historyResults.value = lastTag.isNotEmpty
-      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(lastTag, 2)).map((tag){
+    historyResults.value = searchTag.isNotEmpty
+      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(searchTag, 2)).map((tag){
         return [tag, 'history'];
       }).toList()
       : [];
     historyResults.value = historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
   }
   void searchDatabase() async {
+    String searchTag = lastTag.startsWith(RegExp(r"\d+#")) ? lastTag.replaceFirst(RegExp(r"\d+#"),"") : lastTag;
     databaseResults.value = [[' ', 'loading']];
-    databaseResults.value = lastTag.isNotEmpty
-      ? (await settingsHandler.dbHandler.getTags(lastTag, 2)).map((tag){
+    databaseResults.value = searchTag.isNotEmpty
+      ? (await settingsHandler.dbHandler.getTags(searchTag, 2)).map((tag){
         return [tag, 'database'];
       }).toList()
       : [];
@@ -463,12 +451,13 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           // widget.searchBoxFocus.unfocus();
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(splitInput.last);
+                          print("LAST IS ${splitInput.last}");
+                          String multiIndex = splitInput.last.startsWith(RegExp(r"\d+#")) ? splitInput.last.split("#")[0] + "#" : "";
                           String newInput = "";
-
                           if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
-                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + (isExclude ? '-' : '') + tag.replaceAll("_", " ") + ",";
+                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + multiIndex + (isExclude ? '-' : '') + tag.replaceAll("_", " ") + ",";
                           } else {
-                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + (isExclude ? '-' : '') + tag + " ";
+                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + multiIndex + (isExclude ? '-' : '') + tag + " ";
                           }
 
                           searchHandler.searchTextController.text = newInput;
