@@ -41,7 +41,6 @@ class TagChip extends StatelessWidget {
     List<Widget> tagPins = [];
 
     if (stringContent.startsWith(RegExp(r"\d+#"))) {
-      print("matched int#");
       String multiIndex = stringContent.split("#")[0];
       stringContent = stringContent.split("#")[1];
       tagPins.add(getTagPin(multiIndex));
@@ -57,14 +56,17 @@ class TagChip extends StatelessWidget {
     });
 
     final bool isExclude = stringContent.startsWith('-');
-    if(isExclude) {
+    final bool isOr = stringContent.startsWith('~');
+    if(isExclude || isOr) {
       stringContent = stringContent.substring(1);
     }
 
-
+    Color chipColour = Colors.green;
+    if (isExclude) chipColour = Get.theme.colorScheme.error;
+    if (isOr) chipColour = Colors.blue;
     return Container(
       decoration: BoxDecoration(
-        color: isExclude ? Get.theme.colorScheme.error : Colors.green,
+        color: chipColour,
         borderRadius: BorderRadius.circular(16),
       ),
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),

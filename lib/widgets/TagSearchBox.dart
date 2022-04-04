@@ -39,6 +39,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   String input = "";
   String lastTag = "";
+  int multiIndex = -1;
   List<String> splitInput = [];
 
   RxList<List<String>> booruResults = RxList([]);
@@ -293,9 +294,24 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     } else {
       splitInput = input.split(" ");
     }
+
+    lastTag = splitInput.last;
+    multiIndex = -1;
+    if (lastTag.startsWith(RegExp(r"\d+#"))){
+      int tmpIndex = int.parse(lastTag.split("#")[0]) - 1;
+      String tag = lastTag.split("#")[1];
+      if (searchHandler.currentBooruHandler is MergebooruHandler){
+        MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
+        if ((tmpIndex) >= 0 && tmpIndex < handler.booruHandlers.length){
+          multiIndex = tmpIndex;
+          lastTag = tag;
+        }
+      }
+    }
+
     // Get last tag in the input and remove minus (exclude symbol)
     // TODO /bug?: use the tag behind the current cursor position, not the last tag
-    lastTag = splitInput.last.replaceAll(RegExp(r'^-'), '');
+    lastTag = lastTag.replaceAll(RegExp(r'^-'), '').replaceAll(RegExp(r'^~'), '');
     setState(() { });
   }
 
@@ -303,18 +319,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     booruResults.value = [[' ', 'loading']];
     // TODO cancel previous search when new starts
     List<String?>? getFromBooru = [];
-    if (lastTag.startsWith(RegExp(r"\d+#"))){
-      int multiIndex = int.parse(lastTag.split("#")[0]) - 1;
-      String tag = lastTag.split("#")[1];
-      if (searchHandler.currentBooruHandler is MergebooruHandler){
-        MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-        if ((multiIndex) >= 0 && multiIndex < handler.booruHandlers.length){
-          print("SEARCHING FOR $tag at ${handler.booruHandlers[multiIndex].booru.name}");
-          getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(tag);
-        }
-      }
-    }
-    if (getFromBooru == []){
+    if (multiIndex != -1){
+      MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
+      getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag);
+    } else {
       getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
     }
 
@@ -323,21 +331,20 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       return [tagTemp, 'booru'];
     }).toList() ?? [];
   }
+
   void searchHistory() async {
-    String searchTag = lastTag.startsWith(RegExp(r"\d+#")) ? lastTag.replaceFirst(RegExp(r"\d+#"),"") : lastTag;
     historyResults.value = [[' ', 'loading']];
-    historyResults.value = searchTag.isNotEmpty
-      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(searchTag, 2)).map((tag){
+    historyResults.value = lastTag.isNotEmpty
+      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(lastTag, 2)).map((tag){
         return [tag, 'history'];
       }).toList()
       : [];
     historyResults.value = historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
   }
   void searchDatabase() async {
-    String searchTag = lastTag.startsWith(RegExp(r"\d+#")) ? lastTag.replaceFirst(RegExp(r"\d+#"),"") : lastTag;
     databaseResults.value = [[' ', 'loading']];
-    databaseResults.value = searchTag.isNotEmpty
-      ? (await settingsHandler.dbHandler.getTags(searchTag, 2)).map((tag){
+    databaseResults.value = lastTag.isNotEmpty
+      ? (await settingsHandler.dbHandler.getTags(lastTag, 2)).map((tag){
         return [tag, 'database'];
       }).toList()
       : [];
@@ -449,15 +456,16 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           }
 
                           // widget.searchBoxFocus.unfocus();
-                          // Keep minus if its in the beggining of current (last) tag
-                          bool isExclude = RegExp(r'^-').hasMatch(splitInput.last);
-                          print("LAST IS ${splitInput.last}");
+
                           String multiIndex = splitInput.last.startsWith(RegExp(r"\d+#")) ? splitInput.last.split("#")[0] + "#" : "";
+                          // Keep minus if its in the beggining of current (last) tag
+                          bool isExclude = RegExp(r'^-').hasMatch(splitInput.last.replaceAll(RegExp(r"\d+#"), ""));
+                          bool isOr = RegExp(r'^~').hasMatch(splitInput.last.replaceAll(RegExp(r"\d+#"), ""));
                           String newInput = "";
                           if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
-                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + multiIndex + (isExclude ? '-' : '') + tag.replaceAll("_", " ") + ",";
+                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag.replaceAll("_", " ") + ",";
                           } else {
-                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + multiIndex + (isExclude ? '-' : '') + tag + " ";
+                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag + " ";
                           }
 
                           searchHandler.searchTextController.text = newInput;
