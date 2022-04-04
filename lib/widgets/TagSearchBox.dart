@@ -39,6 +39,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   String input = "";
   String lastTag = "";
+  String replaceString = "";
+  int startIndex = 0;
   int multiIndex = -1;
   List<String> splitInput = [];
 
@@ -294,8 +296,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     } else {
       splitInput = input.split(" ");
     }
-
-    lastTag = splitInput.last;
+    startIndex = 0;
+    setSelectedTag(input);
     multiIndex = -1;
     if (lastTag.startsWith(RegExp(r"\d+#"))){
       int tmpIndex = int.parse(lastTag.split("#")[0]) - 1;
@@ -311,8 +313,40 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
     // Get last tag in the input and remove minus (exclude symbol)
     // TODO /bug?: use the tag behind the current cursor position, not the last tag
+
     lastTag = lastTag.replaceAll(RegExp(r'^-'), '').replaceAll(RegExp(r'^~'), '');
+    print("LASTTAG: $lastTag");
     setState(() { });
+  }
+
+  void setSelectedTag(String input){
+    int cursorPos = searchHandler.searchTextController.selection.baseOffset;
+    if (cursorPos < 0) cursorPos = 0;
+    int tmpStartIndex = cursorPos - 1;
+    while(
+    tmpStartIndex > 0 &&
+        (
+            searchHandler.currentTab.selectedBooru.value.type == "Hydrus"?
+            input[tmpStartIndex] != ",":
+            input[tmpStartIndex] != " "
+        )
+    ) {
+      tmpStartIndex --;
+    }
+    if (cursorPos == input.length){
+      lastTag = splitInput.last;
+      replaceString = lastTag;
+    } else {
+      int endIndex = input.indexOf(" ", cursorPos);
+      if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
+        endIndex = input.indexOf(",", tmpStartIndex);
+      }
+      if (endIndex == -1) endIndex = cursorPos;
+      lastTag = input.substring((tmpStartIndex == 0 ? tmpStartIndex : tmpStartIndex + 1), cursorPos).trim();
+      replaceString = input.substring((tmpStartIndex == 0 ? tmpStartIndex : tmpStartIndex + 1), endIndex);
+      startIndex = tmpStartIndex;
+    }
+
   }
 
   void searchBooru() async {
@@ -457,19 +491,26 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
                           // widget.searchBoxFocus.unfocus();
 
-                          String multiIndex = splitInput.last.startsWith(RegExp(r"\d+#")) ? splitInput.last.split("#")[0] + "#" : "";
+                          String multiIndex = replaceString.startsWith(RegExp(r"\d+#")) ? replaceString.split("#")[0] + "#" : "";
                           // Keep minus if its in the beggining of current (last) tag
-                          bool isExclude = RegExp(r'^-').hasMatch(splitInput.last.replaceAll(RegExp(r"\d+#"), ""));
-                          bool isOr = RegExp(r'^~').hasMatch(splitInput.last.replaceAll(RegExp(r"\d+#"), ""));
-                          String newInput = "";
+                          bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
+                          bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
+                          String newTag = "";
                           if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
-                            newInput = input.substring(0, input.lastIndexOf(",") + 1) + multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag.replaceAll("_", " ") + ",";
+                            newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag.replaceAll("_", " ") + ",";
                           } else {
-                            newInput = input.substring(0, input.lastIndexOf(" ") + 1) + multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag + " ";
+                            newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag + " ";
+                          }
+                          String newInput = "";
+                          if (startIndex >= 0 && replaceString.isNotEmpty){
+                            newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, startIndex);
+                          } else if (startIndex == -1){
+                            newInput = newTag + (searchHandler.currentTab.selectedBooru.value.type == "Hydrus" ? "," : " ") + searchHandler.searchTextController.text;
+                          } else {
+                            newInput = searchHandler.searchTextController.text + newTag;
                           }
 
                           searchHandler.searchTextController.text = newInput;
-
                           // Set the cursor to the end of the search and reset the overlay data
                           searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: newInput.length));
                           animateTransition();
@@ -533,6 +574,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 // set cursor to the end when tapped unfocused
                 searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
                 animateTransition();
+              } else {
+                tagStuff();
+                combinedSearch();
               }
             },
             decoration: InputDecoration(
