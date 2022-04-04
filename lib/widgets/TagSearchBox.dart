@@ -311,9 +311,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       }
     }
 
-    // Get last tag in the input and remove minus (exclude symbol)
-    // TODO /bug?: use the tag behind the current cursor position, not the last tag
-
+    //remove minus (exclude symbol) or tilde (or symbol)
     lastTag = lastTag.replaceAll(RegExp(r'^-'), '').replaceAll(RegExp(r'^~'), '');
     print("LASTTAG: $lastTag");
     setState(() { });
