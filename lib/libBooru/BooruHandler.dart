@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:async';
 
+import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,6 +21,7 @@ abstract class BooruHandler {
   bool locked = false;
   Booru booru;
   String verStr = Get.find<SettingsHandler>().verStr;
+  TagHandler tagHandler = Get.find<TagHandler>();
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   String errorString = '';
   Map<String,String> tagModifierMap = {
@@ -112,6 +115,39 @@ abstract class BooruHandler {
     };
   }
 
+  void populateTagEngine(List<BooruItem> items) async{
+    for(int x = 0; x < items.length; x++) {
+      for (int i = 0; i < items[x].tagsList.length; i++) {
+        if (!tagHandler.hasTag(items[x].tagsList[i])) {
+          TagType tagType = await getTagType(items[x].tagsList[i]);
+          tagHandler.putTag(Tag(getTagDisplayString(items[x].tagsList[i]),items[x].tagsList[i], tagType));
+        }
+      }
+    }
+      return;
+  }
+
+  String getTagDisplayString(String tag){
+    // TODO Convert tag from things like artist:artistname to artistname
+    return tag;
+  }
+
+  Future<TagType> getTagType(String tag) async{
+    //TODO get Tag Type from booruhandler
+    Random rand = Random();
+    int randInt = rand.nextInt(100);
+    if (randInt >= 0 && randInt < 24) {
+      return TagType.artist;
+    }
+    if (randInt >= 25 && randInt < 49) {
+      return TagType.copyright;
+    }
+    if (randInt >= 50 && randInt < 74) {
+      return TagType.character;
+    }
+    return TagType.none;
+  }
+
   String getDescription() {
     return '';
   }
@@ -132,7 +168,7 @@ abstract class BooruHandler {
       fetched[fetchedIndex].isFavourite.value = values[1];
     }
     List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList);
-    fetched[fetchedIndex].isHated.value = tagLists[0].length > 0;
+    fetched[fetchedIndex].isHated.value = tagLists[0].isNotEmpty;
     // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
     return;
   }

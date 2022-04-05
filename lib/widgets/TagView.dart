@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +31,7 @@ class _TagViewState extends State<TagView> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
-
+  final TagHandler tagHandler = Get.find<TagHandler>();
   List<List<String>> hatedAndLovedTags = [];
   ScrollController scrollController = ScrollController();
 
@@ -475,89 +476,94 @@ class _TagViewState extends State<TagView> {
 
     if (currentTag != '') {
       return Column(children: <Widget>[
-        ListTile(
-          onTap: () {
-            tagDialog(
-              tag: currentTag,
-              isHated: isHated,
-              isLoved: isLoved,
-              isInSearch: isInSearch,
-            );
-          },
-          title: Row(children: [
-            MarqueeText(
-              key: ValueKey(currentTag),
-              text: currentTag,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              isExpanded: true,
-            ),
-
-            if(tagIconAndColor.length > 0)
-              ...[
-                ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
-                const SizedBox(width: 5),
-              ],
-            IconButton(
-              icon: Icon(
-                  Icons.add,
-                  color: Get.theme.colorScheme.secondary
-              ),
-              onPressed: () {
-                searchHandler.addTagToSearch(currentTag);
-                FlashElements.showSnackbar(
-                  context: context,
-                  duration: Duration(seconds: 2),
-                  title: Text(
-                      "Added to current tab:",
-                      style: TextStyle(fontSize: 20)
-                  ),
-                  content: Text(
-                      currentTag,
-                      style: TextStyle(fontSize: 16)
-                  ),
-                  leadingIcon: Icons.add,
-                  sideColor: Colors.green,
+        Container (
+          decoration: BoxDecoration (
+              color: tagHandler.getTag(currentTag).getColour(),
+          ),
+          child:        ListTile(
+              onTap: () {
+                tagDialog(
+                  tag: currentTag,
+                  isHated: isHated,
+                  isLoved: isLoved,
+                  isInSearch: isInSearch,
                 );
               },
-            ),
-            GestureDetector(
-              onLongPress: () async {
-                ServiceHandler.vibrate();
-                if(settingsHandler.appMode == 'Mobile' && viewerHandler.inViewer.value) {
-                  Navigator.of(context).pop(true); // exit drawer
-                  Navigator.of(context).pop(true); // exit viewer
-                }
-                WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-                  searchHandler.addTabByString(currentTag, switchToNew: true);
-                });
-              },
-              child: IconButton(
-                icon: Icon(
-                  Icons.fiber_new,
-                  color: Get.theme.colorScheme.secondary
+              title: Row(children: [
+                MarqueeText(
+                  key: ValueKey(currentTag),
+                  text: tagHandler.getTag(currentTag).displayString,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  isExpanded: true,
                 ),
-                onPressed: () {
-                  searchHandler.addTabByString(currentTag);
 
-                  FlashElements.showSnackbar(
-                    context: context,
-                    duration: Duration(seconds: 2),
-                    title: Text(
-                      "Added new tab:",
-                      style: TextStyle(fontSize: 20)
+                if(tagIconAndColor.isNotEmpty)
+                  ...[
+                    ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
+                    const SizedBox(width: 5),
+                  ],
+                IconButton(
+                  icon: Icon(
+                      Icons.add,
+                      color: Get.theme.colorScheme.secondary
+                  ),
+                  onPressed: () {
+                    searchHandler.addTagToSearch(currentTag);
+                    FlashElements.showSnackbar(
+                      context: context,
+                      duration: const Duration(seconds: 2),
+                      title: const Text(
+                          "Added to current tab:",
+                          style: TextStyle(fontSize: 20)
+                      ),
+                      content: Text(
+                          currentTag,
+                          style: TextStyle(fontSize: 16)
+                      ),
+                      leadingIcon: Icons.add,
+                      sideColor: Colors.green,
+                    );
+                  },
+                ),
+                GestureDetector(
+                  onLongPress: () async {
+                    ServiceHandler.vibrate();
+                    if(settingsHandler.appMode == 'Mobile' && viewerHandler.inViewer.value) {
+                      Navigator.of(context).pop(true); // exit drawer
+                      Navigator.of(context).pop(true); // exit viewer
+                    }
+                    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+                      searchHandler.addTabByString(currentTag, switchToNew: true);
+                    });
+                  },
+                  child: IconButton(
+                    icon: Icon(
+                        Icons.fiber_new,
+                        color: Get.theme.colorScheme.secondary
                     ),
-                    content: Text(
-                      currentTag,
-                      style: TextStyle(fontSize: 16)
-                    ),
-                    leadingIcon: Icons.fiber_new,
-                    sideColor: Colors.green,
-                  );
-                },
-              ),
-            ),
-          ])
+                    onPressed: () {
+                      searchHandler.addTabByString(currentTag);
+
+                      FlashElements.showSnackbar(
+                        context: context,
+                        duration: Duration(seconds: 2),
+                        title: Text(
+                            "Added new tab:",
+                            style: TextStyle(fontSize: 20)
+                        ),
+                        content: Text(
+                            currentTag,
+                            style: TextStyle(fontSize: 16)
+                        ),
+                        leadingIcon: Icons.fiber_new,
+                        sideColor: Colors.green,
+                      );
+                    },
+                  ),
+                ),
+              ])
+          ),
         ),
         Divider(
           color: Colors.grey[800],

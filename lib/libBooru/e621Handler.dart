@@ -73,7 +73,7 @@ class e621Handler extends BooruHandler{
           score: current['score']['total'].toString(),
           sources: List<String>.from(current['sources'] ?? []),
           md5String: current['file']['md5'],
-          postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
+          postDate: current['created_at'].toString().replaceAll("t", "T"), // 2021-06-13T02:09:45.138-04:00
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
         );
 

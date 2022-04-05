@@ -99,7 +99,6 @@ class GelbooruHandler extends BooruHandler {
             postDate: current["created_at"]?.toString(), // Fri Jun 18 02:13:45 -0500 2021
             postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
           );
-
           newItems.add(item);
         }
       } catch (e) {
@@ -109,6 +108,7 @@ class GelbooruHandler extends BooruHandler {
 
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
+    populateTagEngine(newItems);
     setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 

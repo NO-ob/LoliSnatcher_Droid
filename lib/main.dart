@@ -28,6 +28,8 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+
 // import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 void main() {
@@ -55,6 +57,7 @@ class _MainAppState extends State<MainApp> {
   late final SearchHandler searchHandler;
   late final SnatchHandler snatchHandler;
   late final ViewerHandler viewerHandler;
+  late final TagHandler tagHandler;
   int maxFps = 60;
 
   @override
@@ -65,7 +68,7 @@ class _MainAppState extends State<MainApp> {
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
-
+    tagHandler = Get.put(TagHandler(settingsHandler), permanent: true);
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {
@@ -83,6 +86,7 @@ class _MainAppState extends State<MainApp> {
   void initHandlers() async {
     await settingsHandler.initialize();
     await searchHandler.restoreTabs();
+    await tagHandler.initialize();
   }
 
   void setMaxFPS() async {
@@ -111,6 +115,7 @@ class _MainAppState extends State<MainApp> {
     Get.delete<ViewerHandler>();
     Get.delete<SnatchHandler>();
     Get.delete<SearchHandler>();
+    Get.delete<TagHandler>();
     Get.delete<SettingsHandler>();
     super.dispose();
   }
@@ -291,7 +296,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
-
+  final TagHandler tagHandler = Get.find<TagHandler>();
   Timer? cacheClearTimer;
   Timer? cacheStaleTimer;
   ImageWriter imageWriter = ImageWriter();
@@ -317,6 +322,7 @@ class _HomeState extends State<Home> {
       // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
+      tagHandler.saveTags();
     });
 
     imageWriter.clearStaleCache();
