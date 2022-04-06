@@ -2,16 +2,34 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:get/get.dart';
 import 'package:html/dom.dart';
+
+class UntypedCollection {
+  final List<String> tags;
+  final int cooldown;
+  final Booru booru;
+  UntypedCollection(this.tags, this.cooldown, this.booru);
+}
 
 class TagHandler extends GetxController{
   Map<String,Tag> _tagMap = {};
   SettingsHandler settingsHandler;
-  // Needs to be moved to settings at some point
-  TagHandler (this.settingsHandler);
+  RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
+  RxBool tagFetchActive = false.obs;
+
+  TagHandler (this.settingsHandler){
+    untypedQueue.listen((List<UntypedCollection> list) {
+      tryGetTagTypes();
+    });
+  }
 
   bool hasTag(String tagString){
     if (_tagMap.containsKey(tagString)) {
@@ -31,6 +49,51 @@ class TagHandler extends GetxController{
 
   void putTag(Tag tag){
     _tagMap[tag.fullString] = tag;
+  }
+
+  void tryGetTagTypes() {
+    if (!tagFetchActive.value) {
+      if (untypedQueue.length > 0) {
+        getTagTypes(untypedQueue.removeLast());
+      } else if (untypedQueue.length == 0) {
+        //
+      }
+    }
+  }
+
+  Future getTagTypes(UntypedCollection untyped) async {
+    Logger.Inst().log("Snatching tags: ${untyped.tags}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
+    tagFetchActive.value = true;
+    List temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
+    BooruHandler booruHandler = temp[0];
+    int tagCounter = 0;
+    do {
+      List<String> workingTags = [];
+      int tagMax = (untyped.tags.length > 30) ? 30 : untyped.tags.length;
+      for (int i = 0; i < tagMax; i++){
+        String tag = untyped.tags.removeLast();
+        if (!hasTag(tag)) workingTags.add(tag);
+      }
+      await Future.delayed(Duration(milliseconds: untyped.cooldown), () async{
+        List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
+        for (int i = 0; i < newTags.length; i++){
+          putTag(newTags[i]);
+          //TODO write tag to database
+          tagCounter ++;
+        }
+      });
+    } while (untyped.tags.isNotEmpty);
+    Logger.Inst().log("Got $tagCounter tag types, untyped list length was: ${untyped.tags.length}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
+    tagFetchActive.value = false;
+    tryGetTagTypes();
+  }
+
+
+  void queue(List<String> untypedTags, Booru booru, int cooldown) {
+    Logger.Inst().log("Added ${untypedTags.length} tags to queue from ${booru.name}", "TagHandler", "queue", LogTypes.tagHandlerInfo);
+    if (untypedTags.isNotEmpty) {
+      untypedQueue.add(UntypedCollection(untypedTags, cooldown, booru));
+    }
   }
 
   Future<void> initialize() async {
@@ -63,9 +126,7 @@ class TagHandler extends GetxController{
     List<Tag> tagList = (json.decode(jsonString) as List)
         .map((tagData) => Tag.fromJson(tagData))
         .toList();
-    print("TagHandler got tags: ${tagList.length}");
-    print("TagHandler got tags: ${tagList.length}");
-    print("TagHandler got tags: ${tagList.length}");
+    Logger.Inst().log("TagHandler got tags: ${tagList.length}", "TagHandler", "loadFromJSON", LogTypes.tagHandlerInfo);
     for (int i = 0; i < tagList.length; i++){
       _tagMap[tagList[i].fullString] = tagList[i];
     }

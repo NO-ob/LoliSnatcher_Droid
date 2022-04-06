@@ -7,8 +7,9 @@ import 'package:get/get.dart';
 
 enum TagType {
   artist,
-  copyright,
   character,
+  copyright,
+  meta,
   none
 }
 
@@ -41,11 +42,13 @@ class Tag {
       case(TagType.artist):
         return Colors.red;
       case(TagType.copyright):
-        return Colors.blue;
+        return Colors.purple;
       case(TagType.character):
         return Colors.green;
+      case(TagType.meta):
+        return Colors.orange;
       default:{
-        return Colors.black;
+        return Colors.transparent;
       }
     }
   }

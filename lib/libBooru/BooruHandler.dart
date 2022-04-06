@@ -24,6 +24,7 @@ abstract class BooruHandler {
   TagHandler tagHandler = Get.find<TagHandler>();
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   String errorString = '';
+  Map<String, TagType> tagTypeMap = {};
   Map<String,String> tagModifierMap = {
     "rating:" : "R",
     "artist:" : "A",
@@ -86,6 +87,7 @@ abstract class BooruHandler {
   String? makePostURL(String id) {}
   String? makeURL(String tags) {}
   String? makeTagURL(String input) {}
+  String? makeDirectTagURL(List<String> tags) {}
   tagSearch(String input) {}
 
   bool hasCommentsSupport = false;
@@ -117,14 +119,15 @@ abstract class BooruHandler {
 
   void populateTagEngine(List<BooruItem> items) async{
     for(int x = 0; x < items.length; x++) {
+      List<String> unTyped = [];
       for (int i = 0; i < items[x].tagsList.length; i++) {
         if (!tagHandler.hasTag(items[x].tagsList[i])) {
-          TagType tagType = await getTagType(items[x].tagsList[i]);
-          tagHandler.putTag(Tag(getTagDisplayString(items[x].tagsList[i]),items[x].tagsList[i], tagType));
+          unTyped.add(items[x].tagsList[i]);
         }
       }
+      if (unTyped.isNotEmpty) tagHandler.queue(unTyped, booru, 500);
     }
-      return;
+    return;
   }
 
   String getTagDisplayString(String tag){
@@ -132,20 +135,8 @@ abstract class BooruHandler {
     return tag;
   }
 
-  Future<TagType> getTagType(String tag) async{
-    //TODO get Tag Type from booruhandler
-    Random rand = Random();
-    int randInt = rand.nextInt(100);
-    if (randInt >= 0 && randInt < 24) {
-      return TagType.artist;
-    }
-    if (randInt >= 25 && randInt < 49) {
-      return TagType.copyright;
-    }
-    if (randInt >= 50 && randInt < 74) {
-      return TagType.character;
-    }
-    return TagType.none;
+  Future<List<Tag>> genTagObjects(List<String> tags) async{
+    return [];
   }
 
   String getDescription() {

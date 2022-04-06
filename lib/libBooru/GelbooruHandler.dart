@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
 
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart';
 import 'package:xml/xml.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
@@ -24,6 +26,14 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   bool hasSizeData = true;
+
+  @override
+  Map<String, TagType> tagTypeMap = {
+    "5": TagType.meta,
+    "3": TagType.copyright,
+    "4": TagType.character,
+    "1": TagType.artist
+  };
 
   @override
   Map<String, String> getHeaders() {
@@ -274,6 +284,46 @@ class GelbooruHandler extends BooruHandler {
     }
 
     return searchTags;
+  }
+
+  @override
+  String makeDirectTagURL(List<String> tags) {
+    String isJson = isGelbooru() ? "&json=1" : "&json=0";
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=500$isJson";
+  }
+
+  @override
+  Future<List<Tag>> genTagObjects(List<String> tags) async{
+    List<Tag> tagObjects = [];
+    Logger.Inst().log("Got tag list: $tags", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
+    if (isGelbooru()) {
+      String url = makeDirectTagURL(tags);
+      Logger.Inst().log("DirectTagURL: $url", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
+      try {
+        Uri uri = Uri.parse(url);
+        final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": "LoliSnatcher_Droid/$verStr"});
+        // 200 is the success http response code
+        if (response.statusCode == 200) {
+          var parsedResponse = (isGelbooru() ? jsonDecode(response.body)["tag"] : jsonDecode(response.body)) ?? [];
+          if (parsedResponse?.isNotEmpty ?? false) {
+            Logger.Inst().log("Tag response length: ${parsedResponse.length},Tag list length: ${tags.length}", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
+            for (int i = 0; i < parsedResponse.length; i++) {
+              String fullString = isGelbooru() ? parsedResponse.elementAt(i)["name"] : parsedResponse.elementAt(i)["value"];
+              String displayString = getTagDisplayString(fullString);
+              String typeKey = parsedResponse.elementAt(i)["type"].toString();
+              TagType? tagType = TagType.none;
+              if (tagTypeMap.containsKey(typeKey)) tagType = (tagTypeMap[typeKey] ?? TagType.none);
+              if (fullString.isNotEmpty && displayString.isNotEmpty){
+                tagObjects.add(Tag(displayString,fullString,tagType));
+              }
+            }
+          }
+        }
+      } catch (e) {
+        Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
+      }
+    }
+    return tagObjects;
   }
 
   @override

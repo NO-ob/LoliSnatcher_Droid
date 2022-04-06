@@ -22,6 +22,8 @@ class Logger {
         .map((m) => m.group(0))
         .forEach((String? str) => debugPrint("$preText$str"));
 
+    settingsHandler.ignoreLogTypes.remove(LogTypes.booruHandlerTagInfo);
+    settingsHandler.ignoreLogTypes.remove(LogTypes.tagHandlerInfo);
     if (settingsHandler.ignoreLogTypes.any((val) => logType == val)) {
       // Ignore
     } else {
@@ -45,6 +47,8 @@ enum LogTypes {
   booruHandlerFetchFailed,
   booruHandlerRawFetched,
   booruHandlerInfo,
+  booruHandlerTagInfo,
+  tagHandlerInfo,
   exception,
   loliSyncInfo,
 }

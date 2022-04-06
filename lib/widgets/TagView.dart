@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,12 +50,14 @@ class _TagViewState extends State<TagView> {
     // copy tags to avoid changing the original array
     tags = [...item.tagsList];
     parseTags();
+    groupTagsList();
     itemSubscription = searchHandler.viewedItem.listen((BooruItem item) {
       // print('item changed to $item');
       this.item = item;
       this.tags = [...item.tagsList];
       parseTags();
       sortTagsList();
+      groupTagsList();
     });
   }
 
@@ -76,6 +79,33 @@ class _TagViewState extends State<TagView> {
     } else {
       tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
     }
+    setState(() { });
+  }
+
+  void groupTagsList() {
+    print("grouptagslist");
+    print("grouptagslist");
+    print("grouptagslist");
+    print("grouptagslist");
+    Map<TagType,List<String>> tagMap = {};
+    List<String> groupedTags = [];
+    for (int i = 0; i < TagType.values.length; i++){
+      tagMap[TagType.values[i]] = [];
+    }
+    for (int i = 0; i < tags.length; i++){
+      if (tagHandler.hasTag(tags[i])){
+        tagMap[tagHandler.getTag(tags[i]).tagType]?.add(tags[i]);
+      } else {
+        tagMap[TagType.none]?.add(tags[i]);
+      }
+    }
+    tagMap.forEach((key, value) => {
+      print("Type: $key Tags: $value")
+    });
+    for (var value in tagMap.values) {
+      groupedTags.addAll(value);
+    }
+    tags = groupedTags;
     setState(() { });
   }
 
@@ -478,7 +508,9 @@ class _TagViewState extends State<TagView> {
       return Column(children: <Widget>[
         Container (
           decoration: BoxDecoration (
-              color: tagHandler.getTag(currentTag).getColour(),
+            border: Border(
+              left: BorderSide(width: 10.0, color: tagHandler.getTag(currentTag).getColour())
+            ),
           ),
           child:        ListTile(
               onTap: () {
