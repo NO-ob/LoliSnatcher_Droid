@@ -43,7 +43,7 @@ class TagHandler extends GetxController{
     if (hasTag(tagString)) {
       tag = _tagMap[tagString];
     }
-    tag ??= Tag("","",TagType.none);
+    tag ??= Tag(tagString,tagString,TagType.none);
     return tag;
   }
 
