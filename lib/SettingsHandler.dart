@@ -1179,10 +1179,6 @@ class SettingsHandler extends GetxController {
     await getPerms();
     if (path == "") await setConfigDir();
     await Directory(path).create(recursive:true);
-    print(path);
-    print(path);
-    print(path);
-    print(path);
     File settingsFile = File(path + "settings.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
