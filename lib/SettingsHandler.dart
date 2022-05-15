@@ -1179,7 +1179,10 @@ class SettingsHandler extends GetxController {
     await getPerms();
     if (path == "") await setConfigDir();
     await Directory(path).create(recursive:true);
-
+    print(path);
+    print(path);
+    print(path);
+    print(path);
     File settingsFile = File(path + "settings.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
@@ -1277,10 +1280,14 @@ class SettingsHandler extends GetxController {
           if (files[i].path.contains(fromLegacy ? ".booru" : ".json")) { // && files[i].path != 'settings.json'
             // print(files[i].toString());
             Booru booruFromFile = fromLegacy ? Booru.fromFileLegacy(files[i]) : Booru.fromJSON(files[i].readAsStringSync());
-            tempList.add(booruFromFile);
-            if(fromLegacy) {
+            if (booruFromFile.baseURL!.contains("realbooru.com") && booruFromFile.type == "Gelbooru"){
+              booruFromFile.type = "Realbooru";
+              saveBooru(booruFromFile,onlySave: true);
+            } else if(fromLegacy) {
               saveBooru(booruFromFile, onlySave: true);
             }
+            tempList.add(booruFromFile);
+
             if (booruFromFile.type == "Hydrus") {
               hasHydrus = true;
             }

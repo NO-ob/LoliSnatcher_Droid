@@ -83,10 +83,6 @@ class _TagViewState extends State<TagView> {
   }
 
   void groupTagsList() {
-    print("grouptagslist");
-    print("grouptagslist");
-    print("grouptagslist");
-    print("grouptagslist");
     Map<TagType,List<String>> tagMap = {};
     List<String> groupedTags = [];
     for (int i = 0; i < TagType.values.length; i++){
@@ -100,7 +96,7 @@ class _TagViewState extends State<TagView> {
       }
     }
     tagMap.forEach((key, value) => {
-      print("Type: $key Tags: $value")
+      //print("Type: $key Tags: $value")
     });
     for (var value in tagMap.values) {
       groupedTags.addAll(value);

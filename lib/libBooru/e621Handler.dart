@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/Booru.dart';
@@ -46,6 +47,12 @@ class e621Handler extends BooruHandler{
           sampleURL = current['sample']['url'];
           thumbURL = current['preview']['url'];
         }
+        tagHandler.addTagsWithType([...current['tags']['character']],TagType.character);
+        tagHandler.addTagsWithType([...current['tags']['copyright']],TagType.copyright);
+        tagHandler.addTagsWithType([...current['tags']['artist']],TagType.artist);
+        tagHandler.addTagsWithType([...current['tags']['meta']],TagType.meta);
+        tagHandler.addTagsWithType([...current['tags']['general']],TagType.none);
+        tagHandler.addTagsWithType([...current['tags']['species']],TagType.species);
         BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,

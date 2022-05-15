@@ -28,20 +28,20 @@ class BooruOnRailsHandler extends BooruHandler {
   @override
   void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    var posts = parsedResponse['search'];
+    var posts = parsedResponse['posts'];
     // Create a BooruItem for each post in the list
     List<BooruItem> newItems = [];
     for (int i =0; i < posts.length; i++) {
       var current = posts[i];
       Logger.Inst().log(current.toString(), "BooruOnRailsHandler", "parsedResponse", LogTypes.booruHandlerRawFetched);
-      List<String> currentTags = current['tags'].split(", ");
-      for (int x = 0; x< currentTags.length; x++){
-        if (currentTags[x].contains(" ")){
-          currentTags[x] = currentTags[x].replaceAll(" ", "+");
+      List<String> currentTags = [];
+      for (int x = 0; x < current['tags'].length; x++){
+        if (current['tags'][x].contains(" ")){
+          currentTags.add(current['tags'][x].toString().replaceAll(" ", "+"));
         }
       }
-      if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['thumb_small'] != null) {
-        String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
+      if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['large'] != null) {
+        String sampleURL = current['representations']['large'], thumbURL = current['representations']['medium'];
         if(current["mime_type"].toString().contains("video")) {
           String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
           sampleURL = tmpURL;
@@ -53,6 +53,7 @@ class BooruOnRailsHandler extends BooruHandler {
           thumbURL = booru.baseURL! + thumbURL;
           fileURL = booru.baseURL! + fileURL;
         }
+
         BooruItem item = BooruItem(
           fileURL: fileURL,
           fileWidth: current['width'].toDouble(),
@@ -84,15 +85,15 @@ class BooruOnRailsHandler extends BooruHandler {
   String makeURL(String tags){
     //https://twibooru.org/search.json?&key=&q=*&perpage=5&page=1
     if (booru.apiKey == ""){
-      return "${booru.baseURL}/search.json?q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v3/search/posts?q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
     } else {
-      return "${booru.baseURL}/search.json?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v3/search/posts?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
     }
 
   }
 
   String makeTagURL(String input){
-    return "${booru.baseURL}/tags.json?tq=*$input*";
+    return "${booru.baseURL}/api/v3/search/tags?q=*$input*";
   }
   @override
   Future tagSearch(String input) async {
@@ -106,7 +107,7 @@ class BooruOnRailsHandler extends BooruHandler {
       final response = await http.get(uri,headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        List<dynamic> parsedResponse = jsonDecode(response.body);
+        List<dynamic> parsedResponse = jsonDecode(response.body)['tags'];
         List tagStringReplacements = [
           ["-colon-",":"],
           ["-dash-","-"],
@@ -115,7 +116,7 @@ class BooruOnRailsHandler extends BooruHandler {
           ["-dot-","."],
           ["-plus-","+"]
         ];
-        if (parsedResponse.length > 0){
+        if (parsedResponse.isNotEmpty){
           for (int i=0; i < 10; i++) {
             String tag = parsedResponse[i]['slug'].toString();
             for (int x = 0; x < tagStringReplacements.length; x++){

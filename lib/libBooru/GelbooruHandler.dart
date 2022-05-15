@@ -32,7 +32,8 @@ class GelbooruHandler extends BooruHandler {
     "5": TagType.meta,
     "3": TagType.copyright,
     "4": TagType.character,
-    "1": TagType.artist
+    "1": TagType.artist,
+    "0": TagType.none
   };
 
   @override
@@ -47,6 +48,9 @@ class GelbooruHandler extends BooruHandler {
   @override
   void parseResponse(response) {
     // bool isXML = response.body.contains("<posts>");
+    if(booru.baseURL!.contains("://realbooru.com")){
+      return;
+    }
     bool isJSON = false;
     try {
       // TODO is it possible to get the confirmation that response is JSON without trying to parse it?
@@ -118,7 +122,7 @@ class GelbooruHandler extends BooruHandler {
 
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
-    populateTagEngine(newItems);
+    populateTagHandler(newItems);
     setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
@@ -147,27 +151,6 @@ class GelbooruHandler extends BooruHandler {
             fileURL = booru.baseURL! + fileURL;
             sampleURL = booru.baseURL! + sampleURL;
             previewURL = booru.baseURL! + previewURL;
-          }
-
-          //Fix for realbooru urls not containing the middle part of the urls its in the format of hash digits /01/23/
-          //I think it might only happen on videos but not 100%
-          RegExp doubleSlashNoColon = RegExp(r"(?<!:)//");
-          if (isRealbooru() && doubleSlashNoColon.hasMatch(fileURL)){
-            String urlMiddle = fileURL.split(doubleSlashNoColon)[1];
-            urlMiddle = "/" + urlMiddle.substring(0,2) + "/" + urlMiddle.substring(2,4) + "/";
-            fileURL = fileURL.replaceAll(doubleSlashNoColon, urlMiddle);
-            previewURL = previewURL.replaceAll(doubleSlashNoColon, urlMiddle);
-            if(fileURL.endsWith(".mp4")){
-              sampleURL = fileURL.replaceFirst(".mp4", ".jpg", sampleURL.lastIndexOf(".") -1);
-            } else if (fileURL.endsWith(".webm")){
-              sampleURL = fileURL.replaceFirst(".webm", ".jpg", sampleURL.lastIndexOf(".") -1);
-            } else {
-              sampleURL = sampleURL.replaceAll(doubleSlashNoColon, urlMiddle);
-            }
-            Logger.Inst().log(urlMiddle, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
-            Logger.Inst().log(fileURL, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
-            Logger.Inst().log(sampleURL, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
-            Logger.Inst().log(previewURL, className, "parseXmlResponse", LogTypes.booruHandlerInfo);
           }
 
           BooruItem item = BooruItem(
@@ -214,9 +197,9 @@ class GelbooruHandler extends BooruHandler {
 
   // This will create a url for the http request
   @override
-  String makeURL(String tags) {
+  String makeURL(String tags,{bool forceXML=false}) {
     int cappedPage = max(0, pageNum);
-    String isJson = isGelbooru() ? "&json=1" : "&json=0";
+    String isJson = isGelbooru() && !forceXML ? "&json=1" : "&json=0";
 
     if (booru.apiKey == "") {
       return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$isJson";
@@ -230,11 +213,7 @@ class GelbooruHandler extends BooruHandler {
   }
 
   bool isNotGelbooru() {
-    return (booru.baseURL!.contains("rule34.xxx") || booru.baseURL!.contains("safebooru.org") || booru.baseURL!.contains("realbooru.com"));
-  }
-
-  bool isRealbooru() {
-    return booru.baseURL!.contains("realbooru.com");
+    return (booru.baseURL!.contains("rule34.xxx") || booru.baseURL!.contains("safebooru.org"));
   }
 
   @override

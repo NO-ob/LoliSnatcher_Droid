@@ -79,7 +79,7 @@ class MoebooruHandler extends GelbooruHandler {
 
   @override
   // This will create a url for the http request
-  String makeURL(String tags) {
+  String makeURL(String tags, {bool forceXML=false}) {
     int cappedPage = max(1, pageNum);
     if (booru.apiKey == "") {
       return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";

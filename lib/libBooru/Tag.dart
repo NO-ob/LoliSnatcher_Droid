@@ -10,6 +10,7 @@ enum TagType {
   character,
   copyright,
   meta,
+  species,
   none
 }
 
@@ -45,6 +46,8 @@ class Tag {
         return Colors.purple;
       case(TagType.character):
         return Colors.green;
+      case(TagType.species):
+        return Colors.blue;
       case(TagType.meta):
         return Colors.orange;
       default:{

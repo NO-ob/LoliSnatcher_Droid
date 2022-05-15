@@ -26,13 +26,6 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
   @override
   void initState() {
     super.initState();
-
-    if (!widget.isPrimary && searchHandler.currentTab.secondaryBoorus == null && settingsHandler.booruList.length > 1) {
-      List<Booru> leftoverBoorus =
-          settingsHandler.booruList.where((booru) => booru.name != searchHandler.currentTab.selectedBooru.value.name).toList();
-      print("secondary Booru is null setting to: " + leftoverBoorus[1].toString());
-      searchHandler.currentTab.secondaryBoorus = [leftoverBoorus[1]].obs;
-    }
   }
 
   // TODO fix this
@@ -105,7 +98,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
           child: Obx(() => DropdownSearch<Booru>.multiSelection(
               mode: Mode.MENU,
               // showSearchBox: true,
-              items: settingsHandler.booruList.where((b) => b != searchHandler.currentTab.selectedBooru.value).toList(),
+              items: settingsHandler.booruList,
               onChanged: (List<Booru> newList) {
                 if (newList.isNotEmpty) {
                   searchHandler.mergeAction(newList);

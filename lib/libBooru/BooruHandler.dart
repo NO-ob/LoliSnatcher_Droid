@@ -117,17 +117,16 @@ abstract class BooruHandler {
     };
   }
 
-  void populateTagEngine(List<BooruItem> items) async{
+  void populateTagHandler(List<BooruItem> items) async{
+    List<String> unTyped = [];
     for(int x = 0; x < items.length; x++) {
-      List<String> unTyped = [];
       for (int i = 0; i < items[x].tagsList.length; i++) {
-        if (!tagHandler.hasTag(items[x].tagsList[i])) {
+        if (!tagHandler.hasTag(items[x].tagsList[i]) && !unTyped.contains(items[x].tagsList[i])) {
           unTyped.add(items[x].tagsList[i]);
         }
       }
-      if (unTyped.isNotEmpty) tagHandler.queue(unTyped, booru, 500);
     }
-    return;
+    if (unTyped.isNotEmpty) tagHandler.queue(unTyped, booru, 500);
   }
 
   String getTagDisplayString(String tag){

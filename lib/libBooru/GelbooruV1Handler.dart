@@ -31,7 +31,9 @@ class GelbooruV1Handler extends BooruHandler{
   void parseResponse(response) {
     var document = parse(response.body);
     var spans = document.getElementsByClassName("thumb");
-
+    if(booru.baseURL!.contains("://realbooru.com")){
+      return;
+    }
     List<BooruItem> newItems = [];
     for (int i = 0; i < spans.length; i++){
       Logger.Inst().log(spans.elementAt(i).children[0].innerHtml, className, "parseResponse", LogTypes.booruHandlerRawFetched);

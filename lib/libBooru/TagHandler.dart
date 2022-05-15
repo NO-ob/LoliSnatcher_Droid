@@ -11,6 +11,7 @@ import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:get/get.dart';
 import 'package:html/dom.dart';
+import 'package:http/http.dart';
 
 class UntypedCollection {
   final List<String> tags;
@@ -53,10 +54,8 @@ class TagHandler extends GetxController{
 
   void tryGetTagTypes() {
     if (!tagFetchActive.value) {
-      if (untypedQueue.length > 0) {
+      if (untypedQueue.isNotEmpty) {
         getTagTypes(untypedQueue.removeLast());
-      } else if (untypedQueue.length == 0) {
-        //
       }
     }
   }
@@ -69,25 +68,44 @@ class TagHandler extends GetxController{
     int tagCounter = 0;
     do {
       List<String> workingTags = [];
-      int tagMax = (untyped.tags.length > 30) ? 30 : untyped.tags.length;
-      for (int i = 0; i < tagMax; i++){
-        String tag = untyped.tags.removeLast();
-        if (!hasTag(tag)) workingTags.add(tag);
-      }
-      await Future.delayed(Duration(milliseconds: untyped.cooldown), () async{
-        List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
-        for (int i = 0; i < newTags.length; i++){
-          putTag(newTags[i]);
-          //TODO write tag to database
-          tagCounter ++;
+      int tagMax = (untyped.tags.length > 30) ? 100 : untyped.tags.length;
+
+      for (int i = tagMax - 1; i > 0; i--){
+        if (untyped.tags.isNotEmpty){
+          String tag = untyped.tags.removeLast();
+          if (!hasTag(tag) && !workingTags.contains(tag)){
+            workingTags.add(tag);
+            print("adding $tag");
+          }
         }
-      });
+      }
+      if (workingTags.isNotEmpty){
+        await Future.delayed(Duration(milliseconds: untyped.cooldown), () async{
+          List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
+          for (int i = 0; i < newTags.length; i++){
+            putTag(newTags[i]);
+            //TODO write tag to database
+            tagCounter ++;
+          }
+        });
+      }
     } while (untyped.tags.isNotEmpty);
     Logger.Inst().log("Got $tagCounter tag types, untyped list length was: ${untyped.tags.length}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
     tagFetchActive.value = false;
     tryGetTagTypes();
   }
 
+  void addTagsWithType(List<String> tags, TagType type) async {
+    for(int i = 0; i < tags.length; i++){
+      if (!hasTag(tags[i])){
+        putTag(Tag(tags[i],tags[i],type));
+      } else if (type != TagType.none){
+        if (getTag(tags[i]).tagType == TagType.none){
+          putTag(Tag(tags[i],tags[i],type));
+        }
+      }
+    }
+  }
 
   void queue(List<String> untypedTags, Booru booru, int cooldown) {
     Logger.Inst().log("Added ${untypedTags.length} tags to queue from ${booru.name}", "TagHandler", "queue", LogTypes.tagHandlerInfo);
@@ -116,6 +134,7 @@ class TagHandler extends GetxController{
   }
 
   Future<bool> loadTags() async {
+      //TODO load tags from database
       if(await checkForTagsFile()) {
         await loadTagsFile();
       }

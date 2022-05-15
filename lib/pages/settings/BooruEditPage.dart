@@ -49,6 +49,7 @@ class _BooruEditState extends State<BooruEdit> {
     "Moebooru",
     "Philomena",
     "Rainbooru",
+    "Realbooru",
     "R34Hentai",
     "Sankaku",
     "Shimmie",

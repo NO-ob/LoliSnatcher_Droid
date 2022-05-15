@@ -8,6 +8,8 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
 
+import 'Tag.dart';
+
 /**
  * Booru Handler for the Danbooru engine
  */
@@ -30,10 +32,21 @@ class IdolSankakuHandler extends SankakuHandler{
       var current = parsedResponse[i];
       Logger.Inst().log(current.toString(), "IdolSankakuHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
       List<String> tags = [];
-      for (int x=0; x < current['tags'].length; x++) {
-        tags.add(current['tags'][x]['name'].toString());
+      Map<TagType, List<String>> tagMap = {};
+      for (int x=0; x < current["tags"].length; x++) {
+        tags.add(current["tags"][x]["name"].toString());
+        String typeStr = current["tags"][x]["type"].toString();
+        TagType type = tagTypeMap[typeStr] ?? TagType.none;
+        if (tagMap.containsKey(type)){
+          tagMap[type]?.add(current["tags"][x]["name"].toString());
+        } else {
+          tagMap[type] = [current["tags"][x]["name"].toString()];
+        }
       }
       if (current['file_url'] != null) {
+        for(int i = 0; i < tagMap.entries.length; i++){
+          tagHandler.addTagsWithType(tagMap.entries.elementAt(i).value,tagMap.entries.elementAt(i).key);
+        }
         String protocol = 'https:';
         BooruItem item = BooruItem(
           fileURL: protocol + current['file_url'],

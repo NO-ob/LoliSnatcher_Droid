@@ -10,8 +10,19 @@ import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
+import 'Tag.dart';
+
 class SankakuHandler extends BooruHandler{
   SankakuHandler(Booru booru,int limit) : super(booru,limit);
+
+  @override
+  Map<String, TagType> tagTypeMap = {
+    "8": TagType.meta,
+    "3": TagType.copyright,
+    "4": TagType.character,
+    "1": TagType.artist,
+    "0": TagType.none
+  };
 
   @override
   String className = 'SankakuHandler';
@@ -76,13 +87,24 @@ class SankakuHandler extends BooruHandler{
     List<BooruItem> newItems = [];
     for (int i = 0; i < parsedResponse.length; i++) {
       var current = parsedResponse[i];
-      // Logger.Inst().log(current.toString(), className, "parseResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(current.toString(), className, "parseResponse", LogTypes.booruHandlerRawFetched);
       List<String> tags = [];
+      Map<TagType, List<String>> tagMap = {};
       for (int x=0; x < current["tags"].length; x++) {
         tags.add(current["tags"][x]["name"].toString());
+        String typeStr = current["tags"][x]["type"].toString();
+        TagType type = tagTypeMap[typeStr] ?? TagType.none;
+        if (tagMap.containsKey(type)){
+          tagMap[type]?.add(current["tags"][x]["name"].toString());
+        } else {
+          tagMap[type] = [current["tags"][x]["name"].toString()];
+        }
       }
 
       if (current["file_url"] != null) {
+        for(int i = 0; i < tagMap.entries.length; i++){
+          tagHandler.addTagsWithType(tagMap.entries.elementAt(i).value,tagMap.entries.elementAt(i).key);
+        }
         // String fileExt = current["file_type"].split("/")[1]; // image/jpeg
         BooruItem item = BooruItem(
           fileURL: current["file_url"],
@@ -147,13 +169,17 @@ class SankakuHandler extends BooruHandler{
         ? {
           "Content-Type":"application/json",
           "Accept": "application/json",
-          "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
+          "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0",
+          "Referer" : "https://beta.sankakucomplex.com/",
+          "Origin" : "https://beta.sankakucomplex.com/"
         }
         : {
           "Content-Type":"application/json",
           "Accept": "application/json",
           "Authorization": authToken,
-          "user-agent":"Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"
+          "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0",
+          "Referer" : "https://beta.sankakucomplex.com/",
+          "Origin" : "https://beta.sankakucomplex.com/"
         };
   }
 

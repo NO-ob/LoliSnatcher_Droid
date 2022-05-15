@@ -34,9 +34,9 @@ class MergebooruHandler extends BooruHandler{
     int fetchedMax = 0;
     for(int i = 0; i < booruHandlers.length; i++){
       String currentTags =
-        tags.replaceAll(RegExp(r"(?!""${i + 1}"r")\d+#[A-Za-z09\_\-~:]*"), "")
+        tags.replaceAll(RegExp(r"(?!""${i + 1}"r")\d+#[A-Za-z0-9\_\-~:]*"), "")
             .replaceAll("  "," ")
-            .replaceAll(RegExp(r"\d+#"),"");
+            .replaceAll(RegExp(r"\d+#"),"").trim();
       Logger.Inst().log("TAGS FOR #${i} are: $currentTags", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       List<BooruItem> tmpFetched = (await booruHandlers[i].Search(currentTags, null)) ?? [];

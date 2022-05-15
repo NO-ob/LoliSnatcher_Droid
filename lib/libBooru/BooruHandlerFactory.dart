@@ -25,6 +25,8 @@ import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/NyanPalsHandler.dart';
 import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
 
+import 'RealbooruHandler.dart';
+
 
 
 class BooruHandlerFactory {
@@ -42,6 +44,9 @@ class BooruHandlerFactory {
           break;
         case("Gelbooru"):
           booruHandler = GelbooruHandler(boorus[0], limit);
+          break;
+        case("Realbooru"):
+          booruHandler = RealbooruHandler(boorus[0], limit);
           break;
         case("Danbooru"):
           pageNum = 0;

@@ -9,6 +9,8 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
+import 'Tag.dart';
+
 /**
  * Booru Handler for the Danbooru engine
  */
@@ -39,6 +41,11 @@ class DanbooruHandler extends BooruHandler{
          */
         if (current.containsKey("file_url")){
           if ((current["file_url"].length > 0)) {
+            tagHandler.addTagsWithType(current['tag_string_general'].toString().split(" "),TagType.none);
+            tagHandler.addTagsWithType(current['tag_string_character'].toString().split(" "),TagType.character);
+            tagHandler.addTagsWithType(current['tag_string_copyright'].toString().split(" "),TagType.copyright);
+            tagHandler.addTagsWithType(current['tag_string_artist'].toString().split(" "),TagType.artist);
+            tagHandler.addTagsWithType(current['tag_string_meta'].toString().split(" "),TagType.meta);
             BooruItem item = BooruItem(
               fileURL: current["file_url"].toString().endsWith(".zip") ? current["large_file_url"].toString() : current["file_url"].toString(),
               sampleURL: current["large_file_url"].toString(),
