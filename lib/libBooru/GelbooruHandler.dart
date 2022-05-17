@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:async';
 
-import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:http/http.dart' as http;
-import 'package:image/image.dart';
+import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
@@ -12,6 +11,7 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/libBooru/NoteItem.dart';
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /**
@@ -70,12 +70,12 @@ class GelbooruHandler extends BooruHandler {
   void parseJsonResponse(response) {
     var parsedResponse = jsonDecode(response.body);
     // gelbooru: { post: [...] }, others [post, ...]
-    var posts = (response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse) ?? [];
+    List posts = (response.body.contains("@attributes") ? parsedResponse["post"] : parsedResponse) ?? [];
     List<BooruItem> newItems = [];
 
     for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
-      Logger.Inst().log(posts.elementAt(i), className, "parseJsonResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(current, className, "parseJsonResponse", LogTypes.booruHandlerRawFetched);
       try {
         if (current["file_url"] != null) {
           // Fix for bleachbooru
@@ -94,7 +94,8 @@ class GelbooruHandler extends BooruHandler {
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: previewURL,
-            tagsList: current["tags"].split(" "),
+            // parseFragment to parse html elements (i.e. &amp; => &)
+            tagsList: parseFragment(current["tags"]).text?.split(" ") ?? [],
             postURL: makePostURL(current["id"]!.toString()),
             fileWidth: double.tryParse(current["width"]?.toString() ?? ''),
             fileHeight: double.tryParse(current["height"]?.toString() ?? ''),
@@ -157,7 +158,7 @@ class GelbooruHandler extends BooruHandler {
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: previewURL,
-            tagsList: getAttrOrElem(current, "tags").split(" "),
+            tagsList: parseFragment(getAttrOrElem(current, "tags")).text?.split(" ") ?? [],
             postURL: makePostURL(getAttrOrElem(current, "id")!.toString()),
             fileWidth: double.tryParse(getAttrOrElem(current, "width")?.toString() ?? ''),
             fileHeight: double.tryParse(getAttrOrElem(current, "height")?.toString() ?? ''),
@@ -186,6 +187,7 @@ class GelbooruHandler extends BooruHandler {
 
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
+    populateTagHandler(newItems);
     setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
@@ -197,7 +199,7 @@ class GelbooruHandler extends BooruHandler {
 
   // This will create a url for the http request
   @override
-  String makeURL(String tags,{bool forceXML=false}) {
+  String makeURL(String tags, {bool forceXML=false}) {
     int cappedPage = max(0, pageNum);
     String isJson = isGelbooru() && !forceXML ? "&json=1" : "&json=0";
 
@@ -275,11 +277,11 @@ class GelbooruHandler extends BooruHandler {
   Future<List<Tag>> genTagObjects(List<String> tags) async{
     List<Tag> tagObjects = [];
     Logger.Inst().log("Got tag list: $tags", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
+    String url = makeDirectTagURL(tags);
+    Logger.Inst().log("DirectTagURL: $url", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
+    Uri uri = Uri.parse(url);
     if (isGelbooru()) {
-      String url = makeDirectTagURL(tags);
-      Logger.Inst().log("DirectTagURL: $url", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
       try {
-        Uri uri = Uri.parse(url);
         final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": "LoliSnatcher_Droid/$verStr"});
         // 200 is the success http response code
         if (response.statusCode == 200) {
@@ -287,7 +289,7 @@ class GelbooruHandler extends BooruHandler {
           if (parsedResponse?.isNotEmpty ?? false) {
             Logger.Inst().log("Tag response length: ${parsedResponse.length},Tag list length: ${tags.length}", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
             for (int i = 0; i < parsedResponse.length; i++) {
-              String fullString = isGelbooru() ? parsedResponse.elementAt(i)["name"] : parsedResponse.elementAt(i)["value"];
+              String fullString = parseFragment(isGelbooru() ? parsedResponse.elementAt(i)["name"] : parsedResponse.elementAt(i)["value"]).text!;
               String displayString = getTagDisplayString(fullString);
               String typeKey = parsedResponse.elementAt(i)["type"].toString();
               TagType? tagType = TagType.none;

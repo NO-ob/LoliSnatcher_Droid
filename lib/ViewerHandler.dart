@@ -69,7 +69,7 @@ class ViewerHandler extends GetxController {
     if(currentKey.value != key) return;
 
     // addPostFrameCallback waits until widget is built to avoid calling setState in it while other setState is active
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       dynamic state = currentKey.value?.currentState;
       dynamic widget = state?.widget;
       switch (widget.runtimeType) {
@@ -81,7 +81,7 @@ class ViewerHandler extends GetxController {
           break;
         case VideoApp:
           isZoomed.value = state?.isZoomed ?? false;
-          isLoaded.value = true;
+          isLoaded.value = state?.isVideoInit();
           isFullscreen.value = state?.chewieController?.isFullScreen ?? false;
           viewState.value = state?.viewController.value;
           break;

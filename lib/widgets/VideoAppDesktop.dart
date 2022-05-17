@@ -180,7 +180,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
         // 
         break;
       case 'size':
-        onSize(data);
+        onSize(data as int);
         break;
       case 'isFromCache':
         isFromCache = true;
@@ -211,14 +211,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode == 'Mobile'
+    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
       ? searchHandler.viewedIndex.value == widget.index
       : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode == 'Mobile' ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;
@@ -242,7 +242,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     }
   }
 
-  void initVideo(ignoreTagsCheck) {
+  void initVideo(bool ignoreTagsCheck) {
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
@@ -463,6 +463,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
     // TODO move controls outside, to exclude them from zoom
 
+    VideoDimensions? dimensions = videoController?.videoDimensions;
+    double aspectRatio = dimensions != null ? (dimensions.width / dimensions.height) : 1;
+    double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
+    Size childSize = Size(
+      aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
+      aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
+    );
+
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
       child: Material(
@@ -473,53 +481,56 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             }
           },
           child: PhotoView.customChild(
-            child: Stack(children: [
-              CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-              LoadingElement(
-                item: widget.booruItem,
-                hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
-                isFromCache: isFromCache,
-                isDone: initialized && firstViewFix,
-                isTooBig: isTooBig > 0,
-                isStopped: isStopped,
-                stopReasons: stopReason,
-                isViewed: isViewed,
-                total: _total,
-                received: _received,
-                startedAt: _startedAt,
-                startAction: () {
-                  if(isTooBig == 1) {
-                    isTooBig = 2;
-                  }
-                  initVideo(true);
-                  updateState();
-                },
-                stopAction: () {
-                  killLoading(['Stopped by User']);
-                },
-              ),
-
-              if(isViewed && initialized)
-                Video(
-                  player: videoController,
-                  playlistLength: 1,
-                  scale: 1.0,
-                  showControls: true,
-                  progressBarInactiveColor: Colors.grey,
-                  progressBarActiveColor: Get.theme.colorScheme.secondary,
-                  progressBarThumbColor: Get.theme.colorScheme.secondary,
-                  volumeThumbColor: Get.theme.colorScheme.secondary,
-                  volumeActiveColor: Get.theme.colorScheme.secondary,
-                ),
-            ]),
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,
+            childSize: childSize,
             enableRotation: false,
             basePosition: Alignment.center,
             controller: viewController,
             // tightMode: true,
             scaleStateController: scaleController,
+            child: Stack(
+              children: [
+                CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+                LoadingElement(
+                  item: widget.booruItem,
+                  hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
+                  isFromCache: isFromCache,
+                  isDone: initialized && firstViewFix,
+                  isTooBig: isTooBig > 0,
+                  isStopped: isStopped,
+                  stopReasons: stopReason,
+                  isViewed: isViewed,
+                  total: _total,
+                  received: _received,
+                  startedAt: _startedAt,
+                  startAction: () {
+                    if(isTooBig == 1) {
+                      isTooBig = 2;
+                    }
+                    initVideo(true);
+                    updateState();
+                  },
+                  stopAction: () {
+                    killLoading(['Stopped by User']);
+                  },
+                ),
+
+                if(isViewed && initialized)
+                  Video(
+                    player: videoController,
+                    playlistLength: 1,
+                    scale: 1.0,
+                    showControls: true,
+                    progressBarInactiveColor: Colors.grey,
+                    progressBarActiveColor: Get.theme.colorScheme.secondary,
+                    progressBarThumbColor: Get.theme.colorScheme.secondary,
+                    volumeThumbColor: Get.theme.colorScheme.secondary,
+                    volumeActiveColor: Get.theme.colorScheme.secondary,
+                  ),
+              ],
+            ),
           )
         )
       )

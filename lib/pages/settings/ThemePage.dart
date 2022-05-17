@@ -11,9 +11,11 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/utilities/debouncer.dart';
 
 class ThemePage extends StatefulWidget {
-  ThemePage();
+  const ThemePage({Key? key}) : super(key: key);
+
   @override
   _ThemePageState createState() => _ThemePageState();
 }
@@ -30,8 +32,6 @@ class _ThemePageState extends State<ThemePage> {
   late Color? accentPickerColor; // Color for picker in dialog using onChanged
   bool needToWriteMascot = false;
 
-  Timer? debounceThemeChange;
-
   @override
   void initState() {
     super.initState();
@@ -46,7 +46,7 @@ class _ThemePageState extends State<ThemePage> {
 
   @override
   void dispose() {
-    debounceThemeChange?.cancel();
+    Debounce.cancel('theme_change');
     super.dispose();
   }
 
@@ -83,16 +83,14 @@ class _ThemePageState extends State<ThemePage> {
     // TODO fix theme not updating update on desktop pages, there settings pages use dialogs, which don't change with the global state
 
     // set global restate to happen only after X ms after last update happens
-    debounceThemeChange?.cancel();
-    debounceThemeChange = Timer(Duration(milliseconds: 500), () {
-      _onWillPop();
-      setState(() { });
-      // Timer(Duration(milliseconds: 500), () {
-      //   // trigger second time to force dropdowns to rerender completely
-      //   _onWillPop();
-      //   setState(() { });
-      // });
-    });
+    Debounce.debounce(
+      tag: 'theme_change',
+      callback: () async {
+        _onWillPop();
+        setState(() { });
+      },
+      duration: const Duration(milliseconds: 500),
+    );
   }
 
   Future<bool> colorPickerDialog(Color startColor, void Function(Color) onChange) async {

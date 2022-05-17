@@ -69,7 +69,7 @@ class DioLoader {
     return false;
   }
 
-  Future<void> start(Uint8List? bytes, Function(dynamic) func, void Function(dynamic) callback) async {
+  Future<void> start(Uint8List? bytes, void Function(dynamic) func, void Function(dynamic) callback) async {
     isolate = await Isolate.spawn(func, receivePort.sendPort);
     receivePort.listen((dynamic data) async {
       if (data is SendPort) {
@@ -94,14 +94,14 @@ class DioLoader {
     final ReceivePort receivePort = ReceivePort();
     d.send(receivePort.sendPort);
 
-    final config = await receivePort.first;
+    final IsolateCacheConfig config = IsolateCacheConfig.fromHost(await receivePort.first);
     File? file = await (ImageWriterIsolate(
-      config['cacheRootPath']
+      config.cacheRootPath
     ).writeCacheFromBytes(
-      config['fileURL'],
-      config['bytes'], 
-      config['typeFolder'],
-      clearName: config['typeFolder'] == 'favicons' ? false : true
+      config.fileURL,
+      config.bytes, 
+      config.typeFolder,
+      clearName: config.typeFolder == 'favicons' ? false : true
     ));
     d.send(file);
   }
@@ -110,13 +110,13 @@ class DioLoader {
     final ReceivePort receivePort = ReceivePort();
     d.send(receivePort.sendPort);
 
-    final config = await receivePort.first;
+    final IsolateCacheConfig config = IsolateCacheConfig.fromHost(await receivePort.first);
     File? file = await (ImageWriterIsolate(
-      config['cacheRootPath']
+      config.cacheRootPath
     ).readFileFromCache(
-      config['fileURL'],
-      config['typeFolder'],
-      clearName: config['typeFolder'] == 'favicons' ? false : true
+      config.fileURL,
+      config.typeFolder,
+      clearName: config.typeFolder == 'favicons' ? false : true
     ));
     d.send(file);
   }
@@ -125,13 +125,13 @@ class DioLoader {
     final ReceivePort receivePort = ReceivePort();
     d.send(receivePort.sendPort);
 
-    final config = await receivePort.first;
+    final IsolateCacheConfig config = IsolateCacheConfig.fromHost(await receivePort.first);
     Uint8List? file = await (ImageWriterIsolate(
-      config['cacheRootPath']
+      config.cacheRootPath
     ).readBytesFromCache(
-      config['fileURL'],
-      config['typeFolder'],
-      clearName: config['typeFolder'] == 'favicons' ? false : true
+      config.fileURL,
+      config.typeFolder,
+      clearName: config.typeFolder == 'favicons' ? false : true
     ));
     d.send(file);
   }
@@ -144,8 +144,8 @@ class DioLoader {
       // print('path found: $filePath');
       if (filePath != null) {
         // read from cache
-        final File file = File(filePath);
-        final FileStat fileStat = await file.stat();
+        final File fileToCache = File(filePath);
+        final FileStat fileStat = await fileToCache.stat();
         onEvent?.call('isFromCache', null);
         onProgress?.call(fileStat.size, fileStat.size);
 
@@ -153,7 +153,7 @@ class DioLoader {
           start(null, readFileFromCache, (dynamic file) async {
             if(file != null) {
               onEvent?.call('loaded', null);
-              onDoneFile?.call(file, url);
+              onDoneFile?.call(file as File, url);
             }
             dispose();
           });
@@ -161,7 +161,7 @@ class DioLoader {
           start(null, readBytesFromCache, (dynamic bytes) async {
             if(bytes != null) {
               onEvent?.call('loaded', null);
-              onDone?.call(bytes, url);
+              onDone?.call(bytes as Uint8List, url);
             }
             dispose();
           });
@@ -194,19 +194,19 @@ class DioLoader {
           if(onDoneFile == null && onDone != null) {
             // return bytes if file is not requested
             onEvent?.call('loaded', null);
-            onDone?.call(response.data, url);
+            onDone?.call(response.data as Uint8List, url);
           }
-          start(response.data, writeToCache, (dynamic data) {
-            if(data != null) {
+          start(response.data as Uint8List?, writeToCache, (dynamic file) {
+            if(file != null) {
               // onEvent?.call('isFromCache');
               onEvent?.call('loaded', null);
-              onDoneFile?.call(data, url);
+              onDoneFile?.call(file as File, url);
             }
             dispose();
           });
         } else {
           onEvent?.call('loaded', null);
-          onDone?.call(response.data, url);
+          onDone?.call(response.data as Uint8List, url);
           dispose();
         }
         return;
@@ -271,7 +271,7 @@ class DioLoader {
 
         File? tempFile;
         if (cacheEnabled) {
-          tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
+          tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
           if(tempFile != null) {
             // onEvent?.call('isFromCache');
           }
@@ -282,7 +282,7 @@ class DioLoader {
           onDoneFile?.call(tempFile, url);
           dispose();
         } else if(onDone != null) {
-          onDone?.call(response.data, url);
+          onDone?.call(response.data as Uint8List, url);
           dispose();
         }
         return;
@@ -345,4 +345,21 @@ class DioLoadException implements Exception {
   String toString() => 'Dio Request failed, statusCode: $statusCode, url: $url, msg: $message';
 
   String toStringShort() => '${statusCode ?? message ?? 'Error'}';
+}
+
+
+class IsolateCacheConfig {
+  final String cacheRootPath;
+  final String fileURL;
+  final List<int> bytes;
+  final String typeFolder;
+
+  IsolateCacheConfig({required this.cacheRootPath, required this.fileURL, required this.bytes, required this.typeFolder});
+
+  IsolateCacheConfig.fromHost(dynamic data)
+    : cacheRootPath = data['cacheRootPath'] as String,
+      fileURL = data['fileURL'] as String,
+      bytes = data['bytes'] as List<int>? ?? [],
+      typeFolder = data['typeFolder'] as String;
+
 }

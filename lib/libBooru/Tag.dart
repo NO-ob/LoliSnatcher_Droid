@@ -47,7 +47,7 @@ class Tag {
       case(TagType.character):
         return Colors.green;
       case(TagType.species):
-        return Colors.blue;
+        return Colors.brown;
       case(TagType.meta):
         return Colors.orange;
       default:{

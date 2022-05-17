@@ -13,7 +13,7 @@ class Logger {
     return _loggerInstance!;
   }
 
-  void log(var logStr, String callerClass, String callerFunction, LogTypes? logType) {
+  void log(dynamic logStr, String callerClass, String callerFunction, LogTypes? logType) {
     String appName = settingsHandler.appName;
     //Using != val was still printing for some reason so else is used
 
@@ -22,8 +22,6 @@ class Logger {
         .map((m) => m.group(0))
         .forEach((String? str) => debugPrint("$preText$str"));
 
-    settingsHandler.ignoreLogTypes.remove(LogTypes.booruHandlerTagInfo);
-    settingsHandler.ignoreLogTypes.remove(LogTypes.tagHandlerInfo);
     if (settingsHandler.ignoreLogTypes.any((val) => logType == val)) {
       // Ignore
     } else {

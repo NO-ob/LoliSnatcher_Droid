@@ -22,9 +22,9 @@ class ThumbBuild extends StatelessWidget {
     IconData itemIcon = ViewUtils.getFileIcon(item.mediaType);
 
     List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
-    bool isHated = parsedTags[0].length > 0;
-    bool isLoved = parsedTags[1].length > 0;
-    bool isSound = parsedTags[2].length > 0;
+    bool isHated = parsedTags[0].isNotEmpty;
+    bool isLoved = parsedTags[1].isNotEmpty;
+    bool isSound = parsedTags[2].isNotEmpty;
     bool isNoted = item.hasNotes == true;
 
     // reset the isHated value since we already check for it on every render
@@ -56,23 +56,23 @@ class ThumbBuild extends StatelessWidget {
                 const SizedBox(),
 
                 Container(
-                  padding: EdgeInsets.all(3),
+                  padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.66),
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(5)),
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
                   ),
                   child: Obx(() => Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
 
-                      if (item.isFavourite.value == null) Text('.'),
+                      if (item.isFavourite.value == null) const Text('.'),
 
                       AnimatedCrossFade(
-                        duration: Duration(milliseconds: 200),
+                        duration: const Duration(milliseconds: 200),
                         crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                         firstChild: AnimatedSwitcher(
-                          duration: Duration(milliseconds: 200),
+                          duration: const Duration(milliseconds: 200),
                           child: Icon(
                             item.isFavourite.value == true ? Icons.favorite : Icons.star,
                             color: item.isFavourite.value == true ? Colors.red : Colors.grey,
@@ -84,21 +84,21 @@ class ThumbBuild extends StatelessWidget {
                       ),
 
                       if (item.isSnatched.value == true)
-                        Icon(
+                        const Icon(
                           Icons.save_alt,
                           color: Colors.white,
                           size: 14,
                         ),
 
                       if (isSound)
-                        Icon(
+                        const Icon(
                           Icons.volume_up_rounded,
                           color: Colors.white,
                           size: 14,
                         ),
 
                       if (isNoted)
-                        Icon(
+                        const Icon(
                           Icons.note_add,
                           color: Colors.white,
                           size: 14,

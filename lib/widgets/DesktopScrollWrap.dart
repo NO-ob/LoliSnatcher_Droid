@@ -47,8 +47,8 @@ class DesktopScrollWrap extends StatelessWidget {
         enableMMBScrolling: true,
         enableKeyboardScrolling: true,
         enableCustomMouseWheelScrolling: true,
-        mmbScrollConfig: MMBScrollConfig(
-          velocityBackpropagationPercent: 15 / 100,
+        mmbScrollConfig: const MMBScrollConfig(
+          velocityBackpropagationPercent: 8 / 100,
           // customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
         ),
         keyboardScrollConfig: KeyboardScrollConfig(
@@ -61,7 +61,7 @@ class DesktopScrollWrap extends StatelessWidget {
           },
         ),
         customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
-          scrollAmountMultiplier: 15.0,
+          scrollAmountMultiplier: 10.0,
         ),
         child: child,
       );

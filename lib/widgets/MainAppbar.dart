@@ -14,16 +14,17 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/PageNumberDialog.dart';
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
+  const MainAppBar({Key? key, required this.leading, required this.trailing}) : super(key: key);
   final Widget leading;
   final Widget trailing;
-  MainAppBar({Key? key, required this.leading, required this.trailing}) : super(key: key);
 
   final double defaultHeight = kToolbarHeight; //56.0
 
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
+
   @override
-  _MainAppBarState createState() => _MainAppBarState();
+  State<MainAppBar> createState() => _MainAppBarState();
 }
 
 class _MainAppBarState extends State<MainAppBar> {
@@ -54,9 +55,11 @@ class _MainAppBarState extends State<MainAppBar> {
 
   void updatePosition(double newOffset) {
     final double prevOffset = _scrollOffset;
-    double scrollChange = ((_lastScrollPosition - newOffset) / searchHandler.gridScrollController.position.viewportDimension) * 10;
+    final double viewportDimension = searchHandler.gridScrollController.position.viewportDimension;
+    double scrollChange = ((_lastScrollPosition - newOffset) / viewportDimension) * 10;
 
     if (newOffset < 0 || (newOffset + 100) > searchHandler.gridScrollController.position.maxScrollExtent) {
+      // do nothing when oversrolling
       return;
     }
 
@@ -68,9 +71,14 @@ class _MainAppBarState extends State<MainAppBar> {
       _scrollOffset = 1.0;
     }
 
+    if (newOffset < (viewportDimension / 3)) {
+      // always show toolbar when close to top
+      _scrollOffset = 1.0;
+    }
+
     if (prevOffset != _scrollOffset) {
       // print('Scroll Offset: $_scrollOffset');
-      WidgetsBinding.instance?.addPostFrameCallback((_) => setState(() {}));
+      WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
     }
   }
 
@@ -84,7 +92,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget pageNumberButton() {
     return IconButton(
-      icon: Icon(Icons.format_list_numbered),
+      icon: const Icon(Icons.format_list_numbered),
       onPressed: () {
         showDialog(
             context: context,
@@ -98,24 +106,21 @@ class _MainAppBarState extends State<MainAppBar> {
   void sinceLastBackup() {
     FlashElements.showSnackbar(
       title: Text('Since last backup: ${searchHandler.lastBackupTime.difference(DateTime.now()).inSeconds * -1} seconds'),
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       curve: Curves.linear,
       color: Colors.transparent,
       height: _scrollOffset * (widget.defaultHeight + MediaQuery.of(context).padding.top),
       child: AppBar(
         automaticallyImplyLeading: true,
         leading: widget.leading,
-        title: FittedBox(
-          fit: BoxFit.fitWidth,
-          child: ActiveTitle(),
-        ),
+        title: const ActiveTitle(),
         actions: [
           pageNumberButton(),
 
@@ -132,7 +137,7 @@ class _MainAppBarState extends State<MainAppBar> {
             if (searchHandler.list.isNotEmpty) {
               return Stack(alignment: Alignment.center, children: [
                 IconButton(
-                  icon: Icon(Icons.save),
+                  icon: const Icon(Icons.save),
                   onPressed: () {
                     getPerms();
                     // call a function to save the currently viewed image when the save button is pressed
@@ -146,28 +151,30 @@ class _MainAppBarState extends State<MainAppBar> {
                     } else {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text("No items selected", style: TextStyle(fontSize: 20)),
-                        overrideLeadingIconWidget: Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
+                        title: const Text("No items selected", style: TextStyle(fontSize: 20)),
+                        overrideLeadingIconWidget: const Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
                       );
                     }
                   },
                 ),
                 if (searchHandler.currentTab.selected.isNotEmpty)
                   Positioned(
-                    child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.secondary,
-                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Center(
-                            child: FittedBox(
-                          child: Text('${searchHandler.currentTab.selected.length}', style: TextStyle(color: Get.theme.colorScheme.onSecondary)),
-                        ))),
                     right: 2,
                     bottom: 5,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Get.theme.colorScheme.secondary,
+                        border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Center(
+                          child: FittedBox(
+                          child: Text('${searchHandler.currentTab.selected.length}', style: TextStyle(color: Get.theme.colorScheme.onSecondary)),
+                        ),
+                      ),
+                    ),
                   ),
               ]);
             } else {

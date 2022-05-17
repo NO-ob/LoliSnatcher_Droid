@@ -36,7 +36,7 @@ class SnatchHandler extends GetxController {
   Stream<Map<String, int>> writeMultipleFake(List<BooruItem> items, Booru booru, int cooldown) async* {
     int snatchedCounter = 0;
     for (int i = 0; i < items.length; i++) {
-      await Future.delayed(Duration(milliseconds: 2000), () async {});
+      await Future.delayed(const Duration(milliseconds: 2000), () async {});
       snatchedCounter++;
       yield {
         "snatched": snatchedCounter,
@@ -73,9 +73,9 @@ class SnatchHandler extends GetxController {
           // last yield in stream will send exists and failed counts
           // but show this message only when queue is empty => snatching is complete
           FlashElements.showSnackbar(
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
             position: Positions.top,
-            title: Text("Snatching Complete", style: TextStyle(fontSize: 20)),
+            title: const Text("Snatching Complete", style: TextStyle(fontSize: 20)),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -119,9 +119,9 @@ class SnatchHandler extends GetxController {
 
       if (booruItems.length > 1) {
         FlashElements.showSnackbar(
-          title: Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
+          title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
           position: Positions.top,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -134,9 +134,9 @@ class SnatchHandler extends GetxController {
         );
       } else {
         FlashElements.showSnackbar(
-          title: Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
+          title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
           position: Positions.top,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -153,7 +153,7 @@ class SnatchHandler extends GetxController {
   Future searchSnatch(String tags, String amount, int cooldown, Booru booru) async {
     int count = 0, limit;
     BooruHandler booruHandler;
-    var booruItems;
+    List<BooruItem> booruItems = [];
 
     if (int.parse(amount) <= 100) {
       limit = int.parse(amount);
@@ -162,16 +162,16 @@ class SnatchHandler extends GetxController {
     }
 
     List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
-    booruHandler = temp[0];
-    booruHandler.pageNum = temp[1];
+    booruHandler = temp[0] as BooruHandler;
+    booruHandler.pageNum = temp[1] as int;
     booruHandler.pageNum++;
 
     FlashElements.showSnackbar(
-      title: Text("Snatching Images", style: TextStyle(fontSize: 20)),
+      title: const Text("Snatching Images", style: TextStyle(fontSize: 20)),
       position: Positions.top,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: const [
           Text('Do not close the app!'),
         ],
       ),
@@ -181,7 +181,7 @@ class SnatchHandler extends GetxController {
     );
 
     while (count < int.parse(amount) && !booruHandler.locked) {
-      booruItems = (await booruHandler.Search(tags, null)) ?? [];
+      booruItems = (await booruHandler.Search(tags, null) ?? []);
       booruHandler.pageNum++;
       count = booruItems.length;
       print(count);

@@ -30,7 +30,7 @@ class PageNumberDialog extends StatelessWidget {
           onlyInput: true,
           controller: pageNumberController,
           autofocus: true,
-          inputType: TextInputType.numberWithOptions(signed: false, decimal: false),
+          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
           numberButtons: true,
           numberStep: 1,
           numberMin: -1,
@@ -42,7 +42,7 @@ class PageNumberDialog extends StatelessWidget {
           onlyInput: true,
           controller: delayController,
           autofocus: false,
-          inputType: TextInputType.numberWithOptions(signed: false, decimal: false),
+          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
           numberButtons: true,
           numberStep: 100,
           numberMin: 0,
@@ -65,7 +65,7 @@ class PageNumberDialog extends StatelessWidget {
       ],
       actionButtons: <Widget>[
         ElevatedButton(
-          child: Text('Jump to page'),
+          child: const Text('Jump to page'),
           onPressed: () {
             if (pageNumberController.text.isNotEmpty) {
               searchHandler.changeCurrentTabPageNumber((int.tryParse(pageNumberController.text) ?? 0) - 1);
@@ -74,7 +74,7 @@ class PageNumberDialog extends StatelessWidget {
           },
         ),
         ElevatedButton(
-          child: Text('Search until page'),
+          child: const Text('Search until page'),
           onPressed: () {
             if (pageNumberController.text.isNotEmpty) {
               searchHandler.searchCurrentTabUntilPageNumber(

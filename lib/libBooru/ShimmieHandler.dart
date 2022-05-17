@@ -42,13 +42,13 @@ class ShimmieHandler extends BooruHandler{
 
   @override
   void parseResponse(response){
-    var parsedResponse = xml.parse(response.body);
+    var parsedResponse = xml.XmlDocument.parse(response.body);
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
      * all the data needed about each image
      */
     var posts = parsedResponse.findAllElements('post');
-    if (posts.length < 1){
+    if (posts.isEmpty) {
       posts = parsedResponse.findAllElements('tag');
     }
 
@@ -74,10 +74,10 @@ class ShimmieHandler extends BooruHandler{
             thumbnailURL: preURL + current.getAttribute("preview_url")!,
             tagsList: current.getAttribute("tags")!.split(" "),
             postURL: makePostURL(current.getAttribute("id")!),
-            fileWidth: double.tryParse(current.getAttribute('width') ?? '') ?? null,
-            fileHeight: double.tryParse(current.getAttribute('height') ?? '') ?? null,
-            previewWidth: double.tryParse(current.getAttribute('preview_width') ?? '') ?? null,
-            previewHeight: double.tryParse(current.getAttribute('preview_height') ?? '') ?? null,
+            fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
+            fileHeight: double.tryParse(current.getAttribute('height') ?? ''),
+            previewWidth: double.tryParse(current.getAttribute('preview_width') ?? ''),
+            previewHeight: double.tryParse(current.getAttribute('preview_height') ?? ''),
             serverId: current.getAttribute("id"),
             score: current.getAttribute("score"),
             sources: [current.getAttribute("source") ?? ''],
@@ -145,7 +145,7 @@ class ShimmieHandler extends BooruHandler{
         final response = await http.get(uri, headers: getHeaders());
         // 200 is the success http response code
         if (response.statusCode == 200) {
-          var parsedResponse = xml.parse(response.body);
+          var parsedResponse = xml.XmlDocument.parse(response.body);
           var root = parsedResponse.findAllElements('posts').toList();
           if(root.length == 1) {
             result = int.parse(root[0].getAttribute('count') ?? '0');
@@ -174,7 +174,7 @@ class ShimmieHandler extends BooruHandler{
       if (response.statusCode == 200) {
         var document = parse(response.body);
         var spans = document.querySelectorAll(".comment:not(.comment_add)");
-        if (spans.length > 0) {
+        if (spans.isNotEmpty) {
           for (int i=0; i < spans.length; i++){
             var current = spans.elementAt(i);
             comments.add(CommentItem(

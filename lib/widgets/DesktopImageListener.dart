@@ -22,10 +22,11 @@ import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
  *
  */
 class DesktopImageListener extends StatefulWidget {
+  const DesktopImageListener(this.searchGlobal, {Key? key}) : super(key: key);
   final SearchGlobal searchGlobal;
-  DesktopImageListener(this.searchGlobal);
+
   @override
-  _DesktopImageListenerState createState() => _DesktopImageListenerState();
+  State<DesktopImageListener> createState() => _DesktopImageListenerState();
 }
 
 class _DesktopImageListenerState extends State<DesktopImageListener> {
@@ -50,6 +51,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       if (Platform.isAndroid || Platform.isIOS) {
         return VideoApp(value.key, value, 1, searchHandler.currentTab, true);
       } else if (Platform.isWindows || Platform.isLinux) {
+        // return VideoAppPlaceholder(item: value, index: 1);
         return VideoAppDesktop(value.key, value, 1, searchHandler.currentTab);
       } else {
         return VideoAppPlaceholder(item: value, index: 1);

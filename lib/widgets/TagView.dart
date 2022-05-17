@@ -23,7 +23,7 @@ import 'package:LoliSnatcher/widgets/CommentsDialog.dart';
 import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 
 class TagView extends StatefulWidget {
-  TagView();
+  const TagView({Key? key}) : super(key: key);
   @override
   _TagViewState createState() => _TagViewState();
 }
@@ -54,7 +54,7 @@ class _TagViewState extends State<TagView> {
     itemSubscription = searchHandler.viewedItem.listen((BooruItem item) {
       // print('item changed to $item');
       this.item = item;
-      this.tags = [...item.tagsList];
+      tags = [...item.tagsList];
       parseTags();
       sortTagsList();
       groupTagsList();
@@ -70,26 +70,28 @@ class _TagViewState extends State<TagView> {
 
   void parseTags() {
     hatedAndLovedTags = settingsHandler.parseTagsList(tags, isCapped: false);
-    setState(() { });
+    setState(() {});
   }
 
   void sortTagsList() {
     if (sortTags == null) {
       tags = [...item.tagsList];
+      groupTagsList();
     } else {
       tags.sort((a, b) => sortTags == true ? a.compareTo(b) : b.compareTo(a));
     }
-    setState(() { });
+    setState(() {});
   }
 
   void groupTagsList() {
-    Map<TagType,List<String>> tagMap = {};
+    Map<TagType, List<String>> tagMap = {};
     List<String> groupedTags = [];
-    for (int i = 0; i < TagType.values.length; i++){
+    for (int i = 0; i < TagType.values.length; i++) {
       tagMap[TagType.values[i]] = [];
     }
-    for (int i = 0; i < tags.length; i++){
-      if (tagHandler.hasTag(tags[i])){
+
+    for (int i = 0; i < tags.length; i++) {
+      if (tagHandler.hasTag(tags[i])) {
         tagMap[tagHandler.getTag(tags[i]).tagType]?.add(tags[i]);
       } else {
         tagMap[TagType.none]?.add(tags[i]);
@@ -102,16 +104,17 @@ class _TagViewState extends State<TagView> {
       groupedTags.addAll(value);
     }
     tags = groupedTags;
-    setState(() { });
+    setState(() {});
   }
 
   void onTextChanged() {
-    setState(() { });
+    setState(() {});
   }
 
   Widget infoBuild() {
     final String fileName = Tools.getFileName(item.fileURL);
-    final String fileRes = (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
+    final String fileRes =
+        (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
     final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
     final String hasNotes = item.hasNotes != null ? item.hasNotes.toString() : '';
     final String itemId = item.serverId ?? '';
@@ -123,12 +126,12 @@ class _TagViewState extends State<TagView> {
     String postDate = item.postDate ?? '';
     final String postDateFormat = item.postDateFormat ?? '';
     String formattedDate = '';
-    if(postDate.isNotEmpty && postDateFormat.isNotEmpty) {
+    if (postDate.isNotEmpty && postDateFormat.isNotEmpty) {
       try {
         // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
         // remove timezones from strings until they fix it
         DateTime parsedDate;
-        if(postDateFormat == "unix"){
+        if (postDateFormat == "unix") {
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
         } else {
           postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
@@ -136,7 +139,7 @@ class _TagViewState extends State<TagView> {
         }
         // print(postDate);
         formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
-      } catch(e) {
+      } catch (e) {
         print('$postDate $postDateFormat');
         print(e);
       }
@@ -157,11 +160,21 @@ class _TagViewState extends State<TagView> {
           commentsButton(),
           notesButton(),
           sourcesList(sources),
-          if(tagsAvailable) Divider(height: 2, thickness: 2, color: Colors.grey[800]),
-          if(tagsAvailable) infoText('Tags', ' ', canCopy: false),
-          if(tagsAvailable)
+          if (tagsAvailable)
+            Divider(
+              height: 2,
+              thickness: 2,
+              color: Colors.grey[800],
+            ),
+          if (tagsAvailable)
+            infoText(
+              'Tags',
+              ' ',
+              canCopy: false,
+            ),
+          if (tagsAvailable)
             Container(
-              margin: EdgeInsets.only(left: 10),
+              margin: const EdgeInsets.only(left: 10),
               child: Transform(
                 alignment: Alignment.center,
                 transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
@@ -191,20 +204,18 @@ class _TagViewState extends State<TagView> {
     final bool hasComments = item.hasComments == true;
     final IconData icon = hasComments ? CupertinoIcons.text_bubble_fill : CupertinoIcons.text_bubble;
 
-    if(!hasSupport || item.fileURL.isEmpty) {
+    if (!hasSupport || item.fileURL.isEmpty) {
       return const SizedBox();
     }
-  
+
     return SettingsButton(
       name: 'Comments',
       icon: Icon(icon),
       action: () {
-        showDialog(
+        SettingsPageOpen(
           context: context,
-          builder: (context) {
-            return CommentsDialog(searchHandler.viewedItem.value);
-          }
-        );
+          page: () => CommentsDialog(searchHandler.viewedItem.value),
+        ).open();
       },
       drawBottomBorder: false,
     );
@@ -214,15 +225,15 @@ class _TagViewState extends State<TagView> {
     final bool hasSupport = searchHandler.currentBooruHandler.hasNotesSupport;
     final bool hasNotes = item.hasNotes == true;
 
-    if(!hasSupport || !hasNotes) {
+    if (!hasSupport || !hasNotes) {
       return const SizedBox();
     }
 
     return Obx(() {
-      if(item.notes.isNotEmpty) {
+      if (item.notes.isNotEmpty) {
         return SettingsButton(
           name: (viewerHandler.showNotes.value ? 'Hide' : 'Show') + ' Notes (${item.notes.length})',
-          icon: Icon(Icons.note_add),
+          icon: const Icon(Icons.note_add),
           action: () {
             viewerHandler.showNotes.toggle();
           },
@@ -231,7 +242,7 @@ class _TagViewState extends State<TagView> {
               context: context,
               builder: (context) {
                 return NotesDialog(searchHandler.viewedItem.value);
-              }
+              },
             );
           },
           drawBottomBorder: false,
@@ -239,7 +250,7 @@ class _TagViewState extends State<TagView> {
       } else {
         return SettingsButton(
           name: 'Load notes',
-          icon: Icon(Icons.note_add),
+          icon: const Icon(Icons.note_add),
           action: () async {
             item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!);
           },
@@ -251,40 +262,36 @@ class _TagViewState extends State<TagView> {
 
   Widget sourcesList(List<String> sources) {
     sources = sources.where((link) => link.trim().isNotEmpty).toList();
-    if(sources.isNotEmpty) {
-      return Container(
-        child: Column(
-          children: [
-            Divider(height: 2, thickness: 2, color: Colors.grey[800]),
-            infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
-            Column(children: 
-              sources.map((link) => ListTile(
-                onLongPress: () {
-                  ServiceHandler.vibrate();
-                  Clipboard.setData(ClipboardData(text: link));
-                  FlashElements.showSnackbar(
-                    context: context,
-                    duration: Duration(seconds: 2),
-                    title: Text(
-                      "Copied source to clipboard!",
-                      style: TextStyle(fontSize: 20)
-                    ),
-                    content: Text(
-                      link,
-                      style: TextStyle(fontSize: 16)
-                    ),
-                    leadingIcon: Icons.copy,
-                    sideColor: Colors.green,
-                  );
-                },
-                onTap: () {
-                  ServiceHandler.launchURL(link);
-                },
-                title: Text(link, overflow: TextOverflow.ellipsis)
-              )).toList()
-            )
-          ],
-        )
+    if (sources.isNotEmpty) {
+      return Column(
+        children: [
+          Divider(height: 2, thickness: 2, color: Colors.grey[800]),
+          infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
+          Column(
+            children: sources
+                .map(
+                  (link) => ListTile(
+                    onLongPress: () {
+                      ServiceHandler.vibrate();
+                      Clipboard.setData(ClipboardData(text: link));
+                      FlashElements.showSnackbar(
+                        context: context,
+                        duration: const Duration(seconds: 2),
+                        title: const Text("Copied source to clipboard!", style: TextStyle(fontSize: 20)),
+                        content: Text(link, style: const TextStyle(fontSize: 16)),
+                        leadingIcon: Icons.copy,
+                        sideColor: Colors.green,
+                      );
+                    },
+                    onTap: () {
+                      ServiceHandler.launchURL(link);
+                    },
+                    title: Text(link, overflow: TextOverflow.ellipsis),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
       );
     } else {
       return const SizedBox();
@@ -292,35 +299,33 @@ class _TagViewState extends State<TagView> {
   }
 
   Widget infoText(String title, String data, {bool canCopy = true}) {
-    if(data.isNotEmpty) {
-      return Container(
-        child: ListTile(
-          onTap: () {
-            if(canCopy) {
-              Clipboard.setData(ClipboardData(text: data));
-              FlashElements.showSnackbar(
-                context: context,
-                duration: Duration(seconds: 2),
-                title: Text(
-                  "Copied $title to clipboard!",
-                  style: TextStyle(fontSize: 20)
-                ),
-                content: Text(
-                  data,
-                  style: TextStyle(fontSize: 16)
-                ),
-                leadingIcon: Icons.copy,
-                sideColor: Colors.green,
-              );
-            }
-          },
-          title: Row(
-            children: [
-              Text('$title: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
-              Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
-            ]
-          )
-        )
+    if (data.isNotEmpty) {
+      return ListTile(
+        onTap: () {
+          if (canCopy) {
+            Clipboard.setData(ClipboardData(text: data));
+            FlashElements.showSnackbar(
+              context: context,
+              duration: const Duration(seconds: 2),
+              title: Text(
+                "Copied $title to clipboard!",
+                style: const TextStyle(fontSize: 20),
+              ),
+              content: Text(
+                data,
+                style: const TextStyle(fontSize: 16),
+              ),
+              leadingIcon: Icons.copy,
+              sideColor: Colors.green,
+            );
+          }
+        },
+        title: Row(
+          children: [
+            Text('$title: ', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900)),
+            Expanded(child: Text(data, overflow: TextOverflow.ellipsis)),
+          ],
+        ),
       );
     } else {
       return const SizedBox();
@@ -337,7 +342,7 @@ class _TagViewState extends State<TagView> {
       SettingsDialog(
         contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
         contentItems: [
-          Container(
+          SizedBox(
             height: 60,
             width: Get.mediaQuery.size.width,
             child: ListTile(
@@ -347,24 +352,39 @@ class _TagViewState extends State<TagView> {
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
                 isExpanded: false,
-              )
-            )
+              ),
+            ),
           ),
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 24,
+                color: tagHandler.getTag(tag).getColour(),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                tagHandler.getTag(tag).tagType.toString().split('.').last,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           ListTile(
-            leading: Icon(Icons.copy),
-            title: Text("Copy"),
+            leading: const Icon(Icons.copy),
+            title: const Text("Copy"),
             onTap: () {
               Clipboard.setData(ClipboardData(text: tag));
               FlashElements.showSnackbar(
                 context: context,
-                duration: Duration(seconds: 2),
-                title: Text(
+                duration: const Duration(seconds: 2),
+                title: const Text(
                   "Copied to clipboard!",
-                  style: TextStyle(fontSize: 20)
+                  style: TextStyle(fontSize: 20),
                 ),
                 content: Text(
                   tag,
-                  style: TextStyle(fontSize: 16)
+                  style: const TextStyle(fontSize: 16),
                 ),
                 leadingIcon: Icons.copy,
                 sideColor: Colors.green,
@@ -372,32 +392,32 @@ class _TagViewState extends State<TagView> {
               Navigator.of(context).pop(true);
             },
           ),
-          if(isInSearch)
+          if (isInSearch)
             ListTile(
-              leading: Icon(Icons.remove),
-              title: Text("Remove from Search"),
+              leading: const Icon(Icons.remove),
+              title: const Text("Remove from Search"),
               onTap: () {
                 searchHandler.removeTagFromSearch(tag);
                 Navigator.of(context).pop(true);
               },
             ),
-          if(!isInSearch)
+          if (!isInSearch)
             ListTile(
-              leading: Icon(Icons.add, color: Colors.green),
-              title: Text("Add to Search"),
+              leading: const Icon(Icons.add, color: Colors.green),
+              title: const Text("Add to Search"),
               onTap: () {
                 searchHandler.addTagToSearch(tag);
 
                 FlashElements.showSnackbar(
                   context: context,
-                  duration: Duration(seconds: 2),
-                  title: Text(
+                  duration: const Duration(seconds: 2),
+                  title: const Text(
                     "Added to search bar:",
-                    style: TextStyle(fontSize: 20)
+                    style: TextStyle(fontSize: 20),
                   ),
                   content: Text(
                     tag,
-                    style: TextStyle(fontSize: 16)
+                    style: const TextStyle(fontSize: 16),
                   ),
                   leadingIcon: Icons.add,
                   sideColor: Colors.green,
@@ -406,23 +426,23 @@ class _TagViewState extends State<TagView> {
                 Navigator.of(context).pop(true);
               },
             ),
-          if(!isInSearch)
+          if (!isInSearch)
             ListTile(
-              leading: Icon(Icons.add, color: Colors.red),
-              title: Text("Add to Search (Exclude)"),
+              leading: const Icon(Icons.add, color: Colors.red),
+              title: const Text("Add to Search (Exclude)"),
               onTap: () {
                 searchHandler.addTagToSearch('-$tag');
 
                 FlashElements.showSnackbar(
                   context: context,
-                  duration: Duration(seconds: 2),
-                  title: Text(
+                  duration: const Duration(seconds: 2),
+                  title: const Text(
                     "Added to search bar (Exclude):",
-                    style: TextStyle(fontSize: 20)
+                    style: TextStyle(fontSize: 20),
                   ),
                   content: Text(
                     tag,
-                    style: TextStyle(fontSize: 16)
+                    style: const TextStyle(fontSize: 16),
                   ),
                   leadingIcon: Icons.add,
                   sideColor: Colors.green,
@@ -431,47 +451,47 @@ class _TagViewState extends State<TagView> {
                 Navigator.of(context).pop(true);
               },
             ),
-          if(!isHated && !isLoved)
+          if (!isHated && !isLoved)
             ListTile(
-              leading: Icon(Icons.star, color: Colors.yellow),
-              title: Text("Add to Loved"),
+              leading: const Icon(Icons.star, color: Colors.yellow),
+              title: const Text("Add to Loved"),
               onTap: () {
                 settingsHandler.addTagToList('loved', tag);
                 parseTags();
                 Navigator.of(context).pop(true);
               },
             ),
-          if(!isHated && !isLoved)
+          if (!isHated && !isLoved)
             ListTile(
-              leading: Icon(CupertinoIcons.eye_slash, color: Colors.red),
-              title: Text("Add to Hated"),
+              leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
+              title: const Text("Add to Hated"),
               onTap: () {
                 settingsHandler.addTagToList('hated', tag);
                 parseTags();
                 Navigator.of(context).pop(true);
               },
             ),
-          if(isLoved)
+          if (isLoved)
             ListTile(
-              leading: Icon(Icons.star),
-              title: Text("Remove from Loved"),
+              leading: const Icon(Icons.star),
+              title: const Text("Remove from Loved"),
               onTap: () {
                 settingsHandler.removeTagFromList('loved', tag);
                 parseTags();
                 Navigator.of(context).pop(true);
               },
             ),
-          if(isHated)
+          if (isHated)
             ListTile(
-              leading: Icon(CupertinoIcons.eye_slash),
-              title: Text("Remove from Hated"),
+              leading: const Icon(CupertinoIcons.eye_slash),
+              title: const Text("Remove from Hated"),
               onTap: () {
                 settingsHandler.removeTagFromList('hated', tag);
                 parseTags();
                 Navigator.of(context).pop(true);
               },
             ),
-        ]
+        ],
       ),
     );
   }
@@ -492,23 +512,25 @@ class _TagViewState extends State<TagView> {
     bool isHated = hatedAndLovedTags[0].contains(currentTag);
     bool isLoved = hatedAndLovedTags[1].contains(currentTag);
     bool isSound = hatedAndLovedTags[2].contains(currentTag);
-    bool isInSearch = searchHandler.searchTextController.text.toLowerCase().split(' ').indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') != -1;
+    bool isInSearch = searchHandler.searchTextController.text
+            .toLowerCase()
+            .split(' ')
+            .indexWhere((tag) => tag == currentTag.toLowerCase() || tag == '-${currentTag.toLowerCase()}') !=
+        -1;
 
-    List<dynamic> tagIconAndColor = [];
-    if (isSound) tagIconAndColor.add([Icons.volume_up_rounded, Get.theme.colorScheme.onBackground]);
-    if (isHated) tagIconAndColor.add([CupertinoIcons.eye_slash, Colors.red]);
-    if (isLoved) tagIconAndColor.add([Icons.star, Colors.yellow]);
-    if (isInSearch) tagIconAndColor.add([Icons.search, Get.theme.colorScheme.onBackground]);
+    List<TagInfoIcon> tagIconAndColor = [];
+    if (isSound) tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Get.theme.colorScheme.onBackground));
+    if (isHated) tagIconAndColor.add(TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
+    if (isLoved) tagIconAndColor.add(TagInfoIcon(Icons.star, Colors.yellow));
+    if (isInSearch) tagIconAndColor.add(TagInfoIcon(Icons.search, Get.theme.colorScheme.onBackground));
 
     if (currentTag != '') {
       return Column(children: <Widget>[
-        Container (
-          decoration: BoxDecoration (
-            border: Border(
-              left: BorderSide(width: 10.0, color: tagHandler.getTag(currentTag).getColour())
-            ),
+        Container(
+          decoration: BoxDecoration(
+            border: Border(left: BorderSide(width: 10.0, color: tagHandler.getTag(currentTag).getColour())),
           ),
-          child:        ListTile(
+          child: ListTile(
               onTap: () {
                 tagDialog(
                   tag: currentTag,
@@ -525,30 +547,19 @@ class _TagViewState extends State<TagView> {
                   fontWeight: FontWeight.w700,
                   isExpanded: true,
                 ),
-
-                if(tagIconAndColor.isNotEmpty)
-                  ...[
-                    ...tagIconAndColor.map((t) => Icon(t[0], color: t[1])),
-                    const SizedBox(width: 5),
-                  ],
+                if (tagIconAndColor.isNotEmpty) ...[
+                  ...tagIconAndColor.map((t) => Icon(t.icon, color: t.color)),
+                  const SizedBox(width: 5),
+                ],
                 IconButton(
-                  icon: Icon(
-                      Icons.add,
-                      color: Get.theme.colorScheme.secondary
-                  ),
+                  icon: Icon(Icons.add, color: Get.theme.colorScheme.secondary),
                   onPressed: () {
                     searchHandler.addTagToSearch(currentTag);
                     FlashElements.showSnackbar(
                       context: context,
                       duration: const Duration(seconds: 2),
-                      title: const Text(
-                          "Added to current tab:",
-                          style: TextStyle(fontSize: 20)
-                      ),
-                      content: Text(
-                          currentTag,
-                          style: TextStyle(fontSize: 16)
-                      ),
+                      title: const Text("Added to current tab:", style: TextStyle(fontSize: 20)),
+                      content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                       leadingIcon: Icons.add,
                       sideColor: Colors.green,
                     );
@@ -557,41 +568,31 @@ class _TagViewState extends State<TagView> {
                 GestureDetector(
                   onLongPress: () async {
                     ServiceHandler.vibrate();
-                    if(settingsHandler.appMode == 'Mobile' && viewerHandler.inViewer.value) {
+                    if (settingsHandler.appMode.value == AppMode.MOBILE && viewerHandler.inViewer.value) {
                       Navigator.of(context).pop(true); // exit drawer
                       Navigator.of(context).pop(true); // exit viewer
                     }
-                    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                       searchHandler.addTabByString(currentTag, switchToNew: true);
                     });
                   },
                   child: IconButton(
-                    icon: Icon(
-                        Icons.fiber_new,
-                        color: Get.theme.colorScheme.secondary
-                    ),
+                    icon: Icon(Icons.fiber_new, color: Get.theme.colorScheme.secondary),
                     onPressed: () {
                       searchHandler.addTabByString(currentTag);
 
                       FlashElements.showSnackbar(
                         context: context,
-                        duration: Duration(seconds: 2),
-                        title: Text(
-                            "Added new tab:",
-                            style: TextStyle(fontSize: 20)
-                        ),
-                        content: Text(
-                            currentTag,
-                            style: TextStyle(fontSize: 16)
-                        ),
+                        duration: const Duration(seconds: 2),
+                        title: const Text("Added new tab:", style: TextStyle(fontSize: 20)),
+                        content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
                       );
                     },
                   ),
                 ),
-              ])
-          ),
+              ])),
         ),
         Divider(
           color: Colors.grey[800],
@@ -608,13 +609,13 @@ class _TagViewState extends State<TagView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
+      padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
       child: Scrollbar(
         controller: scrollController,
         interactive: true,
         thickness: 4,
-        radius: Radius.circular(10),
-        isAlwaysShown: true,
+        radius: const Radius.circular(10),
+        thumbVisibility: true,
         child: DesktopScrollWrap(
           controller: scrollController,
           child: CustomScrollView(
@@ -629,4 +630,13 @@ class _TagViewState extends State<TagView> {
       ),
     );
   }
+}
+
+
+// TODO move to own/model file
+class TagInfoIcon {
+  final IconData icon;
+  final Color color;
+
+  TagInfoIcon(this.icon, this.color);
 }

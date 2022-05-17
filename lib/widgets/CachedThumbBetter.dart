@@ -15,6 +15,7 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';
+import 'package:LoliSnatcher/utilities/debouncer.dart';
 
 
 class CachedThumbBetter extends StatefulWidget {
@@ -23,10 +24,10 @@ class CachedThumbBetter extends StatefulWidget {
   final int columnCount;
   final SearchGlobal searchGlobal;
   final bool isStandalone; // set to true when used in gallery preview to enable hero animation
-  CachedThumbBetter(this.booruItem, this.index, this.searchGlobal, this.columnCount, this.isStandalone);
+  const CachedThumbBetter(this.booruItem, this.index, this.searchGlobal, this.columnCount, this.isStandalone, {Key? key}) : super(key: key);
 
   @override
-  _CachedThumbBetterState createState() => _CachedThumbBetterState();
+  State<CachedThumbBetter> createState() => _CachedThumbBetterState();
 }
 
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
@@ -37,7 +38,6 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isForVideo = false;
-  Timer? _restartDelay, _debounceStart;
   CancelToken _dioCancelToken = CancelToken();
   DioLoader? client, extraClient;
 
@@ -184,23 +184,26 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   }
 
   void _onError(Exception error, {bool delayed = false}) {
-    //// Error handling
+    /// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
     } else {
       if (_restartedCount < 5) {
         // attempt to reload 5 times with a second delay
-        _restartDelay?.cancel();
-        _restartDelay = Timer(const Duration(seconds: 1), () {
-          restartLoading();
-        });
-        _restartedCount++;
+        Debounce.debounce(
+          tag: 'thumbnail_reload_${widget.searchGlobal.id.toString()}#${widget.index.toString()}',
+          callback: () {
+            restartLoading();
+            _restartedCount++;
+          },
+          duration: const Duration(seconds: 1),
+        );
       } else {
         //show error
         isFailed = true;
         if(delayed) {
           // _onError can happen while widget restates, which will cause an exception, this will delay the restate until the other one is done
-          WidgetsBinding.instance!.addPostFrameCallback((_) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
             updateState();
           });
         } else {
@@ -239,35 +242,32 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     // restart loading if item was marked as hated
     hateListener = widget.booruItem.isHated.listen((bool value) {
       if(value == true) {
-        WidgetsBinding.instance!.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           restartLoading();
         });
       }
     });
 
-    // delay loading a little to improve performance when scrolling fast
-    if(widget.isStandalone) {
-      _debounceStart = Timer(Duration(milliseconds: 200), () {
-        if(isThumbQuality == false && !widget.booruItem.isHated.value) {
-          Future.wait([
-            downloadThumb(false),
-            downloadThumb(true)
-          ]);
-        } else {
-          downloadThumb(true);
-        }
-      });
-    } else {
-      if(isThumbQuality == false && !widget.booruItem.isHated.value) {
-        Future.wait([
-          downloadThumb(false),
-          downloadThumb(true)
-        ]);
-      } else {
-        downloadThumb(true);
-      }
-    }
+    // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
+    Debounce.debounce(
+      tag: 'thumbnail_start_${widget.searchGlobal.id.toString()}#${widget.index.toString()}',
+      callback: () {
+        startDownloading(isThumbQuality);
+      },
+      duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
+    );
     return;
+  }
+
+  void startDownloading(isThumbQuality) {
+    if(isThumbQuality == false && !widget.booruItem.isHated.value) {
+      Future.wait([
+        downloadThumb(false),
+        downloadThumb(true)
+      ]);
+    } else {
+      downloadThumb(true);
+    }
   }
 
   Future<Uint8List?> getVideoThumb() async {
@@ -328,8 +328,8 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     extraProvider?.evict();
     extraProvider = null;
 
-    _restartDelay?.cancel();
-    _debounceStart?.cancel();
+    Debounce.cancel('thumbnail_start_${widget.searchGlobal.id.toString()}#${widget.index.toString()}');
+    Debounce.cancel('thumbnail_reload_${widget.searchGlobal.id.toString()}#${widget.index.toString()}');
 
     if (!(_dioCancelToken.isCancelled)){
       _dioCancelToken.cancel();
@@ -347,34 +347,44 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
         if(isThumbQuality == false && !widget.booruItem.isHated.value) // fetch thumbnail from network while loading a sample
           AnimatedSwitcher( // fade in image
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),
-            child: Image(
-              image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: extraProvider ?? MemoryImage(kTransparentImage)),
-              fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-              isAntiAlias: true,
-              width: double.infinity, // widget.isStandalone ? double.infinity : null,
-              height: double.infinity, // widget.isStandalone ? double.infinity : null,
-              key: ValueKey<bool>(extraProvider != null),
-              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                return const Icon(Icons.broken_image, size: 30);
-              },
-            )
+            child: extraProvider != null
+              ? Image(
+                image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: extraProvider!),
+                fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                isAntiAlias: true,
+                width: double.infinity, // widget.isStandalone ? double.infinity : null,
+                height: double.infinity, // widget.isStandalone ? double.infinity : null,
+                errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                  print('failed to load thumb: ${widget.booruItem.thumbnailURL}');
+                  return const Icon(Icons.broken_image, size: 30);
+                },
+              )
+              : const SizedBox(
+                width: double.infinity,
+                height: double.infinity,
+              ),
           ),
 
         AnimatedSwitcher( // fade in image
-          duration: Duration(milliseconds: widget.isStandalone ? 300 : 10),
-          child: Image(
-            image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: mainProvider ?? MemoryImage(kTransparentImage)),
-            fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-            isAntiAlias: true,
-            filterQuality: FilterQuality.medium,
-            width: double.infinity,
-            height: double.infinity,
-            key: ValueKey<bool>(mainProvider != null),
-            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-              _onError(exception as Exception, delayed: true);
-              return const Icon(Icons.broken_image, size: 30);
-            },
-          )
+          duration: Duration(milliseconds: widget.isStandalone ? 300 : 0),
+          child: mainProvider != null
+            ? Image(
+              image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: mainProvider!),
+              fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+              isAntiAlias: true,
+              filterQuality: FilterQuality.medium,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                print('failed to load sample: ${widget.booruItem.sampleURL}');
+                _onError(exception as Exception, delayed: true);
+                return const Icon(Icons.broken_image, size: 30);
+              },
+            )
+            : const SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+            ),
         ),
 
         if(widget.isStandalone)
@@ -403,7 +413,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
             ),
             width: iconSize,
             height: iconSize,
-            child: Icon(CupertinoIcons.eye_slash, color: Colors.white)
+            child: const Icon(CupertinoIcons.eye_slash, color: Colors.white)
           ),
 
         if (settingsHandler.showURLOnThumb)
@@ -428,6 +438,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
         child: renderImages(context),
       );
     } else {
+      // print('building thumb ${widget.index}');
       return renderImages(context);
     }
   }

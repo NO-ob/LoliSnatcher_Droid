@@ -22,14 +22,14 @@ class Tools {
     return boolean == "true" ? true : false;
   }
 
-  static String getFileExt(fileURL){
+  static String getFileExt(String fileURL){
     int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
     return fileExt;
   }
 
-  static String getFileName(fileURL){
+  static String getFileName(String fileURL){
     int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
@@ -38,8 +38,8 @@ class Tools {
 
   static void forceClearMemoryCache({bool withLive = false}) {
     // clears memory image cache on timer or when changing tabs
-    PaintingBinding.instance?.imageCache?.clear();
-    if(withLive) PaintingBinding.instance?.imageCache?.clearLiveImages();
+    PaintingBinding.instance.imageCache.clear();
+    if(withLive) PaintingBinding.instance.imageCache.clearLiveImages();
   }
 
   static String pluralize(String str, int count) {

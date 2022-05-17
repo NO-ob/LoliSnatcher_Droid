@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 import 'package:get/get.dart';
@@ -17,9 +18,9 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 
 
-var uuid = Uuid();
+var uuid = const Uuid();
 
-var volumeKeyChannel = Platform.isAndroid ? EventChannel('com.noaisu.loliSnatcher/volume') : null;
+var volumeKeyChannel = Platform.isAndroid ? const EventChannel('com.noaisu.loliSnatcher/volume') : null;
 
 class SearchHandler extends GetxController {
   // alternative way to get instance of the controller
@@ -54,7 +55,7 @@ class SearchHandler extends GetxController {
 
     // set to last tab if requested
     if(switchToNew) {
-      changeTabIndex(list.length - 1);
+      changeTabIndex(total - 1);
     }
   }
 
@@ -67,9 +68,9 @@ class SearchHandler extends GetxController {
     // reset viewed item in any case
     setViewedItem(-1);
 
-    if(list.length > 1) {
+    if(total > 1) {
       if (tabIndex == currentIndex) { // if current tab is the one being removed
-        if (currentIndex == list.length - 1) { // if current tab is the last one, switch to previous one
+        if (currentIndex == total - 1) { // if current tab is the last one, switch to previous one
           changeTabIndex(currentIndex - 1);
           list.removeAt(currentIndex + 1);
         } else { // if current tab is not the last one, switch to next one
@@ -86,13 +87,13 @@ class SearchHandler extends GetxController {
       }
     } else { // if there is only one tab, reset to default tags
       FlashElements.showSnackbar(
-        title: Text(
+        title: const Text(
           "Removed Last Tab",
           style: TextStyle(fontSize: 20)
         ),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: const [
             Text('Resetting search to default tags!'),
           ],
         ),
@@ -108,6 +109,50 @@ class SearchHandler extends GetxController {
       list[0] = newTab;
       changeTabIndex(0);
     }
+  }
+
+  void moveTab(int fromIndex, int toIndex) {
+    // value checks
+    if(fromIndex == toIndex) {
+      return;
+    }
+    if(fromIndex < 0 || fromIndex >= total || toIndex < 0 || toIndex >= total) {
+      return;
+    }
+
+    // move tab
+    if (fromIndex < toIndex) {
+      toIndex -= 1;
+    }
+    final SearchGlobal tab = list[fromIndex];
+    list.removeAt(fromIndex);
+    list.insert(toIndex, tab);
+
+    // check how index changed and jump to correct tab
+    if(fromIndex == currentIndex) {
+      // if the current tab is moved, change the current tab index
+      changeTabIndex(toIndex);
+    } else if(toIndex == currentIndex) {
+      // if moved into the place of the current tab, bump index of current tab
+      changeTabIndex(toIndex + 1);
+    } else if(fromIndex < currentIndex && toIndex > currentIndex) {
+      // if tab was before current tab and is moved after current tab, current tab is -1
+      changeTabIndex(currentIndex - 1);
+    } else if(fromIndex > currentIndex && toIndex < currentIndex) {
+      // if tab was after current tab and is moved before current tab, current tab is +1
+      changeTabIndex(currentIndex + 1);
+    } 
+  }
+
+  SearchGlobal? getTabByIndex(int index) {
+    if(index < 0 || index >= total) {
+      return null;
+    }
+    return list[index];
+  }
+
+  int getTabIndex(SearchGlobal tab) {
+    return list.indexOf(tab);
   }
 
   // grid scroll controller
@@ -139,8 +184,17 @@ class SearchHandler extends GetxController {
   // search box focus node
   FocusNode searchBoxFocus = FocusNode();
 
+  late GlobalKey<InnerDrawerState> mainDrawerKey;
+
+  void openAndFocusSearch() async {
+    mainDrawerKey.currentState?.open();
+    await Future.delayed(const Duration(milliseconds: 300));
+    searchBoxFocus.requestFocus();
+    searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchTextController.text.length));
+  }
+
   // switch to tab #index
-  void changeTabIndex(int i, {bool switchOnly = false, ignoreSameIndexCheck = false}) {
+  void changeTabIndex(int i, {bool switchOnly = false, bool ignoreSameIndexCheck = false}) {
     // change only if new index != current index
     final int oldIndex = currentIndex;
     int newIndex = i;
@@ -151,8 +205,8 @@ class SearchHandler extends GetxController {
     }
 
     // protection from out of bounds
-    if(newIndex > (list.length - 1)) {
-      newIndex = list.length - 1;
+    if(newIndex > (total - 1)) {
+      newIndex = total - 1;
     } else if(newIndex < 0) {
       newIndex = 0;
     }
@@ -227,6 +281,7 @@ class SearchHandler extends GetxController {
 
 
   int get currentIndex => index.value;
+  int get total => list.length;
   SearchGlobal get currentTab => list[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
@@ -278,13 +333,13 @@ class SearchHandler extends GetxController {
     // UOOOOOHHHHH
     if (text.toLowerCase().contains("loli")) {
       FlashElements.showSnackbar(
-        duration: Duration(seconds: 2),
-        title: Text(
+        duration: const Duration(seconds: 2),
+        title: const Text(
           "UOOOOOOOHHH",
           style: TextStyle(fontSize: 20)
         ),
         // TODO replace with image asset to avoid system-to-system font differences
-        overrideLeadingIconWidget: Text(' 😭 ', style: TextStyle(fontSize: 40)),
+        overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
         sideColor: Colors.pink,
       );
     }
@@ -294,7 +349,7 @@ class SearchHandler extends GetxController {
       if(settingsHandler.booruList.isNotEmpty) {
         SearchGlobal newTab = SearchGlobal(
           settingsHandler.booruList[0].obs,
-          settingsHandler.mergeEnabled ? currentTab.secondaryBoorus : null,
+          settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
           text
         );
         list.add(newTab);
@@ -302,7 +357,7 @@ class SearchHandler extends GetxController {
     } else {
       SearchGlobal newTab = SearchGlobal(
         newBooru != null ? newBooru.obs : currentTab.selectedBooru,
-        settingsHandler.mergeEnabled ? currentTab.secondaryBoorus : null,
+        settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
         text
       );
       list[currentIndex] = newTab;
@@ -327,7 +382,7 @@ class SearchHandler extends GetxController {
   void mergeAction(List<Booru>? secondaryBoorus) {
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
-    bool canAddSecondary = settingsHandler.mergeEnabled && (secondaryBoorus != null || currentTab.secondaryBoorus == null) && settingsHandler.booruList.length > 1;
+    bool canAddSecondary = settingsHandler.mergeEnabled.value && (secondaryBoorus != null || currentTab.secondaryBoorus == null) && settingsHandler.booruList.length > 1;
     RxList<Booru>? secondary = canAddSecondary
       ? (secondaryBoorus == null
         ? [settingsHandler.booruList[1]].obs
@@ -384,7 +439,7 @@ class SearchHandler extends GetxController {
     }
     
     // delay every new page load
-    Future.delayed(Duration(milliseconds: 200), () {
+    Future.delayed(const Duration(milliseconds: 200), () {
       isLoading.value = false;
     });
     return;
@@ -512,9 +567,9 @@ class SearchHandler extends GetxController {
     // set parsed tabs OR set first default tab if nothing to restore
     if(restoredGlobals.length > 0) {
       FlashElements.showSnackbar(
-        title: Text(
+        title: const Text(
           "Tabs restored",
-          style: TextStyle(fontSize: 20)
+          style: const TextStyle(fontSize: 20)
         ),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,9 +579,9 @@ class SearchHandler extends GetxController {
             if(foundBrokenItem)
               // notify user if there was unknown booru or invalid entry in the list
               ...[
-                Text('Some restored tabs had unknown boorus or broken characters.'),
-                Text('They were set to default or ignored.'),
-                Text('List of broken tabs:'),
+                const Text('Some restored tabs had unknown boorus or broken characters.'),
+                const Text('They were set to default or ignored.'),
+                const Text('List of broken tabs:'),
                 Text(brokenItems.join(', ')),
               ],
           ],
@@ -579,7 +634,7 @@ class SearchHandler extends GetxController {
     // rootRestate();
 
     FlashElements.showSnackbar(
-      title: Text('Tabs merged'),
+      title: const Text('Tabs merged'),
       content: Text('Added ${restoredGlobals.length} new ${Tools.pluralize('tab', restoredGlobals.length)}!'),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore
@@ -617,7 +672,7 @@ class SearchHandler extends GetxController {
     // rootRestate();
 
     FlashElements.showSnackbar(
-      title: Text('Tabs replaced'),
+      title: const Text('Tabs replaced'),
       content: Text('Received ${restoredGlobals.length} ${Tools.pluralize('tab', restoredGlobals.length)}!'),
       sideColor: Colors.green,
       leadingIcon: Icons.settings_backup_restore
@@ -680,7 +735,7 @@ class SearchGlobal {
     tagsList: [],
     postURL: ""
   ).obs;
-  RxList selected = [].obs;
+  RxList<int> selected = RxList<int>.from([]);
 
   SearchGlobal(this.selectedBooru, this.secondaryBoorus, this.tags) {
     List<Booru> tempBooruList = [];
@@ -689,8 +744,8 @@ class SearchGlobal {
        tempBooruList.addAll(secondaryBoorus!);
     }
     final List temp = BooruHandlerFactory().getBooruHandler(tempBooruList, null);
-    final BooruHandler handlerTemp = temp[0];
-    final int pageNumTemp = temp[1];
+    final BooruHandler handlerTemp = temp[0] as BooruHandler;
+    final int pageNumTemp = temp[1] as int;
 
     booruHandler = handlerTemp;
     booruHandler.pageNum = pageNumTemp;

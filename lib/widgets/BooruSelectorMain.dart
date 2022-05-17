@@ -13,37 +13,16 @@ class BooruSelectorMain extends StatefulWidget {
   const BooruSelectorMain(this.isPrimary, {Key? key}) : super(key: key);
 
   @override
-  _BooruSelectorMainState createState() => _BooruSelectorMainState();
+  State<BooruSelectorMain> createState() => _BooruSelectorMainState();
 }
 
 class _BooruSelectorMainState extends State<BooruSelectorMain> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
-  final GlobalKey dropdownKey = GlobalKey();
-  GestureDetector? detector;
-
   @override
   void initState() {
     super.initState();
-  }
-
-  // TODO fix this
-  // dropdownbutton small clickable zone workaround when using inputdecoration
-  // code from: https://github.com/flutter/flutter/issues/53634
-  void openItemsList() {
-    void search(BuildContext? context) {
-      context?.visitChildElements((element) {
-        if (detector != null) return;
-        if (element.widget != null && element.widget is GestureDetector)
-          detector = element.widget as GestureDetector;
-        else
-          search(element);
-      });
-    }
-
-    search(dropdownKey.currentContext);
-    if (detector != null) detector!.onTap?.call();
   }
 
   bool isItemSelected(Booru value, bool checkPrimary) {
@@ -64,7 +43,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
     return Row(
       children: <Widget>[
         //Booru Icon
-        value.type == "Favourites" ? Icon(Icons.favorite, color: Colors.red, size: 18) : CachedFavicon(value.faviconURL!),
+        value.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : CachedFavicon(value.faviconURL!),
         //Booru name
         MarqueeText(
           key: ValueKey(name),
@@ -81,20 +60,20 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
     return Obx(() {
       // no boorus
       if (settingsHandler.booruList.isEmpty) {
-        return Center(
+        return const Center(
           child: Text('Add Boorus in Settings'),
         );
       }
 
       // no tabs
-      if (searchHandler.list.length == 0) {
+      if (searchHandler.list.isEmpty) {
         return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)));
       }
 
       // dropdown for secondary boorus
       if (!widget.isPrimary) {
         return Container(
-          padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
+          padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
           child: Obx(() => DropdownSearch<Booru>.multiSelection(
               mode: Mode.MENU,
               // showSearchBox: true,
@@ -104,7 +83,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                   searchHandler.mergeAction(newList);
                 } else {
                   // if no secondary boorus selected, disable merge mode
-                  settingsHandler.mergeEnabled = false;
+                  settingsHandler.mergeEnabled.value = false;
                   searchHandler.mergeAction(null);
                   // TODO add .drawerRestate()
                   searchHandler.rootRestate();
@@ -128,19 +107,14 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               },
               dropdownSearchDecoration: InputDecoration(
                 labelText: "Secondary Boorus",
-                labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground),
                 hintText: "Secondary Boorus",
-                contentPadding: settingsHandler.appMode == 'Desktop'
-                    ? EdgeInsets.symmetric(horizontal: 12, vertical: 2)
-                    : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
+                contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
+                    ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
+                    : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               dropdownBuilder: (BuildContext context, List<Booru> selectedItems) {
                 if (selectedItems.isEmpty) {
-                  return ListTile(
+                  return const ListTile(
                     contentPadding: EdgeInsets.all(0),
                     leading: Icon(null),
                     title: Text("No boorus selected"),
@@ -162,8 +136,8 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
 
       // dropdown for primary booru
       return Container(
-        // constraints: settingsHandler.appMode == 'Desktop' ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
-        padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.fromLTRB(2, 5, 2, 2) : EdgeInsets.fromLTRB(5, 8, 5, 8),
+        // constraints: settingsHandler.appMode.value == AppMode.DESKTOP ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
+        padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
         child: Obx(() {
           Booru? selectedBooru = searchHandler.currentTab.selectedBooru.value;
           // protection from exceptions when somehow selected booru is not on the list
@@ -171,61 +145,52 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
             selectedBooru = null;
           }
 
-          return GestureDetector(
-            onTap: openItemsList,
-            child: DropdownButtonFormField<Booru>(
-              key: dropdownKey,
-              isExpanded: true,
-              value: selectedBooru,
-              icon: Icon(Icons.arrow_drop_down),
-              itemHeight: kMinInteractiveDimension,
-              decoration: InputDecoration(
-                labelText: 'Booru',
-                labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
-                // contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                contentPadding: settingsHandler.appMode == 'Desktop'
-                    ? EdgeInsets.symmetric(horizontal: 12, vertical: 2)
-                    : EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
-              ),
-              dropdownColor: Get.theme.colorScheme.surface,
-              onChanged: (Booru? newValue) {
-                if (searchHandler.currentTab.selectedBooru.value != newValue) {
-                  // if not already selected
-                  searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
-                }
-              },
-              selectedItemBuilder: (BuildContext context) {
-                return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
-                  return DropdownMenuItem<Booru>(
-                    value: value,
-                    child: Container(
-                      child: buildRow(value),
-                    ),
-                  );
-                }).toList();
-              },
-              items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
-                bool isCurrent = isItemSelected(value, widget.isPrimary);
-                // Return a dropdown item
+          return DropdownButtonFormField<Booru>(
+            isExpanded: true,
+            value: selectedBooru,
+            icon: const Icon(Icons.arrow_drop_down),
+            itemHeight: kMinInteractiveDimension,
+            decoration: InputDecoration(
+              labelText: 'Booru',
+              hintText: 'Booru',
+              contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
+                  ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
+                  : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            dropdownColor: Get.theme.colorScheme.surface,
+            onChanged: (Booru? newValue) {
+              if (searchHandler.currentTab.selectedBooru.value != newValue) {
+                // if not already selected
+                searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
+              }
+            },
+            selectedItemBuilder: (BuildContext context) {
+              return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
                 return DropdownMenuItem<Booru>(
                   value: value,
                   child: Container(
-                    padding: settingsHandler.appMode == 'Desktop' ? EdgeInsets.all(5) : EdgeInsets.fromLTRB(5, 10, 5, 10),
-                    decoration: isCurrent
-                        ? BoxDecoration(
-                            border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                            borderRadius: BorderRadius.circular(5),
-                          )
-                        : null,
                     child: buildRow(value),
                   ),
                 );
-              }).toList(),
-            ),
+              }).toList();
+            },
+            items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
+              bool isCurrent = isItemSelected(value, widget.isPrimary);
+              // Return a dropdown item
+              return DropdownMenuItem<Booru>(
+                value: value,
+                child: Container(
+                  padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                  decoration: isCurrent
+                      ? BoxDecoration(
+                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                          borderRadius: BorderRadius.circular(5),
+                        )
+                      : null,
+                  child: buildRow(value),
+                ),
+              );
+            }).toList(),
           );
         }),
       );

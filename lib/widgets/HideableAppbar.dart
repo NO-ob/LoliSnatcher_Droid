@@ -9,16 +9,17 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
+  const HideableAppBar(this.title, this.actions, {Key? key}) : super(key: key);
   final Widget title;
   final List<Widget> actions;
-  HideableAppBar(this.title, this.actions);
 
   final double defaultHeight = kToolbarHeight; //56.0
 
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
+
   @override
-  _HideableAppBarState createState() => _HideableAppBarState();
+  State<HideableAppBar> createState() => _HideableAppBarState();
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
@@ -53,7 +54,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     return SafeArea(
       // to fix height bug when bar on top
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.linear,
         color: Colors.transparent,
         height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
@@ -64,7 +65,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           foregroundColor: Colors.white,
           leading: IconButton(
             // to ignore icon change
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: FittedBox(

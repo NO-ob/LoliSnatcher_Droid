@@ -18,7 +18,7 @@ import 'package:flutter/widgets.dart';
 /// )
 /// ```
 class BorderedText extends StatelessWidget {
-  BorderedText({
+  const BorderedText({
     required this.child,
     this.strokeCap = StrokeCap.round,
     this.strokeJoin = StrokeJoin.round,

@@ -3,36 +3,31 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 
-
-
 class CachedFavicon extends StatefulWidget {
   final String faviconURL;
-  CachedFavicon(this.faviconURL);
+  const CachedFavicon(this.faviconURL, {Key? key}) : super(key: key);
 
   @override
-  _CachedFaviconState createState() => _CachedFaviconState();
+  State<CachedFavicon> createState() => _CachedFaviconState();
 }
 
 class _CachedFaviconState extends State<CachedFavicon> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-
   bool isFailed = false;
   CancelToken? _dioCancelToken;
   DioLoader? client;
   ImageProvider? faviconProvider;
 
-  DisposableBuildContext? disposableBuildContext;
+  static const double iconSize = 20;
 
   @override
   void didUpdateWidget(CachedFavicon oldWidget) {
     // force redraw on tab change
-    if(oldWidget.faviconURL != widget.faviconURL) {
+    if (oldWidget.faviconURL != widget.faviconURL) {
+      // print('favicon changed');
       restartLoading();
     }
     super.didUpdateWidget(oldWidget);
@@ -45,14 +40,14 @@ class _CachedFaviconState extends State<CachedFavicon> {
       cancelToken: _dioCancelToken,
       onError: _onError,
       onDone: (Uint8List bytes, String url) {
-        if(!isFailed) {
+        if (!isFailed) {
           faviconProvider = getImageProvider(bytes, url);
           updateState();
         }
       },
-      cacheEnabled: settingsHandler.thumbnailCache,
+      cacheEnabled: true,
       cacheFolder: 'favicons',
-      timeoutTime: 2000,
+      timeoutTime: 5000,
     );
     client!.runRequest();
     // client!.runRequestIsolate();
@@ -77,19 +72,18 @@ class _CachedFaviconState extends State<CachedFavicon> {
   @override
   void initState() {
     super.initState();
-    disposableBuildContext = DisposableBuildContext(this);
     downloadFavicon();
   }
 
   void updateState() {
-    if(this.mounted) setState(() { });
+    if (this.mounted) setState(() {});
   }
 
   void restartLoading() {
     disposables();
 
     isFailed = false;
-    
+
     updateState();
 
     downloadFavicon();
@@ -103,14 +97,13 @@ class _CachedFaviconState extends State<CachedFavicon> {
   @override
   void dispose() {
     disposables();
-    disposableBuildContext?.dispose();
     super.dispose();
   }
 
   void disposables() {
-    faviconProvider?.evict();
+    // faviconProvider?.evict();
     faviconProvider = null;
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)){
+    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)) {
       _dioCancelToken?.cancel();
     }
     disposeClient();
@@ -127,15 +120,15 @@ class _CachedFaviconState extends State<CachedFavicon> {
         child: InkWell(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.broken_image, size: 20),
-            ]
+            children: const [
+              Icon(Icons.broken_image, size: iconSize),
+            ],
           ),
           onTap: () {
             isFailed = false;
             restartLoading();
           },
-        )
+        ),
       );
     } else {
       return const Icon(null); // Center(child: CircularProgressIndicator());
@@ -144,44 +137,46 @@ class _CachedFaviconState extends State<CachedFavicon> {
 
   @override
   Widget build(BuildContext context) {
-    const double iconSize = 20;
+    // print('CachedFavicon build ${widget.faviconURL}');
 
-    return Container(
+    // return const SizedBox();
+
+    return SizedBox(
       width: iconSize,
       height: iconSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if(faviconProvider == null)
-            loadingElementBuilder(context),
+          if (faviconProvider == null) loadingElementBuilder(context),
 
           AnimatedOpacity(
             opacity: faviconProvider != null ? 1.0 : 0.0,
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             child: faviconProvider != null
-              ? Image(
-                  image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: faviconProvider!),
-                  width: iconSize,
-                  height: iconSize,
-                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                    isFailed = true;
-                    return loadingElementBuilder(context);
-                    // return const Icon(Icons.broken_image, size: iconSize);
-                  },
-                )
-              : null
+                ? Image(
+                    image: faviconProvider!,
+                    width: iconSize,
+                    height: iconSize,
+                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                      print('failed to load favicon: ${widget.faviconURL}');
+                      isFailed = true;
+                      return loadingElementBuilder(context);
+                      // return const Icon(Icons.broken_image, size: iconSize);
+                    },
+                  )
+                : null,
           ),
 
           // Image(
           //   image: NetworkImage(widget.faviconURL),
           //   width: iconSize,
           //   height: iconSize,
-            // errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-            //   return const Icon(Icons.broken_image, size: iconSize);
-            // },
-          // )
-        ]
-      )
+          //   errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+          //     return const Icon(Icons.broken_image, size: iconSize);
+          //   },
+          // ),
+        ],
+      ),
     );
   }
 }

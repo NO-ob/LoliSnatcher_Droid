@@ -18,27 +18,39 @@ import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/ResizableSplitView.dart';
+import 'package:LoliSnatcher/widgets/DesktopTabs.dart';
 
 class DesktopHome extends StatelessWidget {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+  const DesktopHome({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
         backgroundColor: Get.theme.colorScheme.background,
         actions: <Widget>[
+          // Obx(() {
+          //   if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+          //     return const DesktopTabs();
+          //   } else {
+          //     return const SizedBox();
+          //   }
+          // }),
           Obx(() {
             if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+              // return const SizedBox(width: 5);
               return Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    const SizedBox(width: 15),
+                  children: const <Widget>[
+                    SizedBox(width: 15),
                     TagSearchBox(),
                     TagSearchButton(),
                     Expanded(flex: 1, child: BooruSelectorMain(true)),
@@ -65,7 +77,7 @@ class DesktopHome extends StatelessWidget {
           }),
           Obx(() {
             if (settingsHandler.booruList.isEmpty || searchHandler.list.isEmpty) {
-              return Center(child: Text('Add Boorus in Settings'));
+              return const Center(child: Text('Add Boorus in Settings'));
             } else {
               return const SizedBox();
             }
@@ -95,14 +107,16 @@ class DesktopHome extends StatelessWidget {
                       } else {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: Text("No items selected", style: TextStyle(fontSize: 20)),
-                          overrideLeadingIconWidget: Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
+                          title: const Text("No items selected", style: TextStyle(fontSize: 20)),
+                          overrideLeadingIconWidget: const Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
                         );
                       }
                     },
                   ),
                   if (searchHandler.currentTab.selected.isNotEmpty)
                     Positioned(
+                      right: 2,
+                      bottom: 5,
                       child: Container(
                         width: 20,
                         height: 20,
@@ -117,8 +131,6 @@ class DesktopHome extends StatelessWidget {
                           ),
                         ),
                       ),
-                      right: 2,
-                      bottom: 5,
                     ),
                 ],
               );
@@ -131,8 +143,8 @@ class DesktopHome extends StatelessWidget {
       body: Center(
         child: ResizableSplitView(
           firstChild: ResizableSplitView(
-            firstChild: ImagePreviews(),
-            secondChild: DesktopTagListener(),
+            firstChild: const ImagePreviews(),
+            secondChild: const DesktopTagListener(),
             startRatio: 0.66,
             minRatio: 0.33,
             maxRatio: 1,
@@ -157,21 +169,23 @@ class DesktopHome extends StatelessWidget {
 }
 
 class DesktopTagListener extends StatelessWidget {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  const DesktopTagListener({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final SearchHandler searchHandler = Get.find<SearchHandler>();
+
     return Obx(() {
       if (searchHandler.list.isEmpty) {
         return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)));
       }
 
       return Container(
-        child: TagView(),
-        padding: EdgeInsets.all(2),
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
         ),
+        child: const TagView(),
       );
     });
   }

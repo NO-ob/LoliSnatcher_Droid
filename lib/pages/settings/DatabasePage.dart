@@ -8,6 +8,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
+import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
@@ -171,13 +172,6 @@ class _DatabasePageState extends State<DatabasePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget cancelButton = ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pop(true);
-      },
-      child: Text('Cancel')
-    );
-
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -248,8 +242,8 @@ class _DatabasePageState extends State<DatabasePage> {
                         Text("Delete Database?"),
                       ],
                       actionButtons: [
-                        cancelButton,
-                        ElevatedButton(
+                        const CancelButton(),
+                        ElevatedButton.icon(
                           onPressed: () {
                             serviceHandler.deleteDB(settingsHandler);
 
@@ -269,7 +263,8 @@ class _DatabasePageState extends State<DatabasePage> {
                             );
                             Navigator.of(context).pop(true);
                           },
-                          child: Text('Delete', style: TextStyle(color: Get.theme.colorScheme.error))
+                          label: const Text('Delete'),
+                          icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
                         ),
                       ]
                     ),
@@ -288,8 +283,8 @@ class _DatabasePageState extends State<DatabasePage> {
                           Text("Clear all Snatched items?"),
                         ],
                         actionButtons: [
-                          cancelButton,
-                          ElevatedButton(
+                          const CancelButton(),
+                          ElevatedButton.icon(
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.clearSnatched();
@@ -311,7 +306,8 @@ class _DatabasePageState extends State<DatabasePage> {
                               }
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Clear', style: TextStyle(color: Get.theme.colorScheme.error))
+                            label: const Text('Clear'),
+                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
                           ),
                         ]
                       ),
@@ -330,8 +326,8 @@ class _DatabasePageState extends State<DatabasePage> {
                           Text("Clear all Favourited items?"),
                         ],
                         actionButtons: [
-                          cancelButton,
-                          ElevatedButton(
+                          const CancelButton(),
+                          ElevatedButton.icon(
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.clearFavourites();
@@ -352,7 +348,8 @@ class _DatabasePageState extends State<DatabasePage> {
                               }
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Clear', style: TextStyle(color: Get.theme.colorScheme.error))
+                            label: const Text('Clear'),
+                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
                           ),
                         ]
                       ),
@@ -371,8 +368,8 @@ class _DatabasePageState extends State<DatabasePage> {
                           Text("Clear Search History?"),
                         ],
                         actionButtons: [
-                          cancelButton,
-                          ElevatedButton(
+                          const CancelButton(),
+                          ElevatedButton.icon(
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null){
                                 settingsHandler.dbHandler.deleteFromSearchHistory(null);
@@ -393,7 +390,8 @@ class _DatabasePageState extends State<DatabasePage> {
                               }
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Clear', style: TextStyle(color: Get.theme.colorScheme.error))
+                            label: const Text('Clear'),
+                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
                           ),
                         ]
                       ),

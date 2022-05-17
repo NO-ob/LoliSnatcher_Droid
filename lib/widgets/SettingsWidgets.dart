@@ -64,7 +64,7 @@ class SettingsButton extends StatelessWidget {
           onLongPress?.call()
         },
         child: IconButton(
-          icon: icon ?? Icon(null),
+          icon: icon ?? const Icon(null),
           onPressed: (){
             onTapAction(context);
           },
@@ -101,27 +101,35 @@ class SettingsPageOpen {
     required this.page,
     required this.context,
     this.condition = true,
+    this.barrierDismissible = true,
   });
 
   final Widget Function() page;
   final BuildContext context;
   final bool condition;
+  final bool barrierDismissible;
 
   Future<bool> open() async {
     if(!condition) return true;
 
     SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     bool isTooNarrow = MediaQuery.of(context).size.width < 550;
-    if(!isTooNarrow && (settingsHandler.appMode == "Desktop" || Platform.isWindows || Platform.isLinux)) {
-      return (await Get.dialog(Dialog(
-        child: Container(
-          width: 500,
-          child: page(),
+
+    bool result = false;
+    if(!isTooNarrow && (settingsHandler.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux)) {
+      result = await Get.dialog(
+        Dialog(
+          child: SizedBox(
+            width: 500,
+            child: page(),
+          ),
         ),
-      )) ?? false);
+        barrierDismissible: barrierDismissible,
+      ) ?? false;
     } else {
-      return (await Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page())) ?? false);
+      result = await Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page())) ?? false;
     }
+    return result;
   }
 }
 
@@ -173,7 +181,7 @@ class SettingsToggle extends StatelessWidget {
 }
 
 class SettingsDropdown extends StatelessWidget {
-  SettingsDropdown({
+  const SettingsDropdown({
     Key? key,
     required this.selected,
     required this.values,
@@ -194,85 +202,57 @@ class SettingsDropdown extends StatelessWidget {
   final Widget trailingIcon;
   final Widget Function(String)? childBuilder;
 
-  final GlobalKey dropdownKey = GlobalKey();
-  GestureDetector? detector;
-  // TODO fix this
-  // dropdownbutton small clickable zone workaround when using inputdecoration
-  // code from: https://github.com/flutter/flutter/issues/53634
-  void openItemsList() {
-    void search(BuildContext? context) {
-      context?.visitChildElements((element) {
-        if (detector != null) return;
-        if (element.widget != null && element.widget is GestureDetector)
-          detector = element.widget as GestureDetector;
-        else
-          search(element);
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Container(
-        margin: EdgeInsets.symmetric(vertical: 8),
-        child: GestureDetector(
-          onTap: openItemsList,
-          child: DropdownButtonFormField<String>(
-            key: dropdownKey,
-            value: selected,
-            icon: Icon(Icons.arrow_drop_down),
-            onChanged: onChanged,
-            menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-            isExpanded: true,
-            decoration: InputDecoration(
-              hintText: title,
-              labelText: title,
-              labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
-              contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-              enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-              border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-              focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-              errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
-            ),
-            dropdownColor: Get.theme.colorScheme.surface,
-            selectedItemBuilder: (BuildContext context) {
-              return values.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Container(
-                    child: Row(
-                      children: <Widget>[
-                        childBuilder?.call(value) ?? Text(value)
-                      ],
-                    )
-                  ),
-                );
-              }).toList();
-            },
-            items: values.map<DropdownMenuItem<String>>((String value) {
-              bool isCurrent = value == selected;
-
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: DropdownButtonFormField<String>(
+          value: selected,
+          icon: const Icon(Icons.arrow_drop_down),
+          onChanged: onChanged,
+          menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+          isExpanded: true,
+          decoration: InputDecoration(
+            hintText: title,
+            labelText: title,
+            contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+          ),
+          dropdownColor: Get.theme.colorScheme.surface,
+          selectedItemBuilder: (BuildContext context) {
+            return values.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
-                child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: isCurrent
-                    ? BoxDecoration(
-                        border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                        borderRadius: BorderRadius.circular(5),
-                      )
-                    : null,
-                  child: Row(
-                    children: [
-                      childBuilder?.call(value) ?? Text(value, style: TextStyle(color: Get.theme.colorScheme.onSurface))
-                    ]
-                  ),
+                child: Row(
+                  children: <Widget>[
+                    childBuilder?.call(value) ?? Text(value)
+                  ],
                 ),
               );
-            }).toList(),
-          )
-        )
+            }).toList();
+          },
+          items: values.map<DropdownMenuItem<String>>((String value) {
+            bool isCurrent = value == selected;
+
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: isCurrent
+                  ? BoxDecoration(
+                      border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                      borderRadius: BorderRadius.circular(5),
+                    )
+                  : null,
+                child: Row(
+                  children: [
+                    childBuilder?.call(value) ?? Text(value, style: TextStyle(color: Get.theme.colorScheme.onSurface))
+                  ]
+                ),
+              ),
+            );
+          }).toList(),
+        ),
       ),
       trailing: trailingIcon,
       dense: false,
@@ -287,7 +267,7 @@ class SettingsDropdown extends StatelessWidget {
 }
 
 class SettingsBooruDropdown extends StatelessWidget {
-  SettingsBooruDropdown({
+  const SettingsBooruDropdown({
     Key? key,
     required this.selected,
     required this.onChanged,
@@ -304,98 +284,68 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool drawBottomBorder;
   final Widget trailingIcon;
 
-  final GlobalKey dropdownKey = GlobalKey();
-  GestureDetector? detector;
-  // TODO fix this
-  // dropdownbutton small clickable zone workaround when using inputdecoration
-  // code from: https://github.com/flutter/flutter/issues/53634
-  void openItemsList() {
-    void search(BuildContext? context) {
-      context?.visitChildElements((element) {
-        if (detector != null) return;
-        if (element.widget != null && element.widget is GestureDetector)
-          detector = element.widget as GestureDetector;
-        else
-          search(element);
-      });
-    }
-
-    search(dropdownKey.currentContext);
-    if (detector != null) detector!.onTap?.call();
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Container(
-        margin: EdgeInsets.symmetric(vertical: 8),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         child: Obx(() {
           List<Booru> boorus = Get.find<SettingsHandler>().booruList;
           Booru? newSelected = boorus.contains(selected) ? selected : boorus.first;
 
-          return GestureDetector(
-            onTap: openItemsList,
-            child: DropdownButtonFormField<Booru>(
-              key: dropdownKey,
-              value: newSelected,
-              icon: Icon(Icons.arrow_drop_down),
-              onChanged: onChanged,
-              menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: title,
-                labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
-                contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                border: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.secondary)),
-                errorBorder: OutlineInputBorder(borderSide: BorderSide(color: Get.theme.colorScheme.error)),
-              ),
-              dropdownColor: Get.theme.colorScheme.surface,
-              selectedItemBuilder: (BuildContext context) {
-                  return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
-                    return DropdownMenuItem<Booru>(
-                      value: value,
-                      child: Container(
-                        child: Row(
-                          children: <Widget>[
-                            (value.type == "Favourites"
-                                ? Icon(Icons.favorite, color: Colors.red, size: 18)
-                                : CachedFavicon(value.faviconURL!)
-                            ),
-                            Text(" ${value.name!}"),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList();
-                },
-              items: boorus.map<DropdownMenuItem<Booru>>((Booru value){
-                bool isCurrent = value == newSelected;
-
-                return DropdownMenuItem<Booru>(
-                  value: value,
-                  child: Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: isCurrent
-                    ? BoxDecoration(
-                      border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
-                      borderRadius: BorderRadius.circular(5),
-                    )
-                    : null,
+          return DropdownButtonFormField<Booru>(
+            value: newSelected,
+            icon: const Icon(Icons.arrow_drop_down),
+            onChanged: onChanged,
+            menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
+            isExpanded: true,
+            decoration: InputDecoration(
+              labelText: title,
+              hintText: title,
+              contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
+            ),
+            dropdownColor: Get.theme.colorScheme.surface,
+            selectedItemBuilder: (BuildContext context) {
+                return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
+                  return DropdownMenuItem<Booru>(
+                    value: value,
                     child: Row(
                       children: <Widget>[
                         (value.type == "Favourites"
-                            ? Icon(Icons.favorite, color: Colors.red, size: 18)
+                            ? const Icon(Icons.favorite, color: Colors.red, size: 18)
                             : CachedFavicon(value.faviconURL!)
                         ),
-                        Text(" ${value.name!}", style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+                        Text(" ${value.name!}"),
                       ],
                     ),
+                  );
+                }).toList();
+              },
+            items: boorus.map<DropdownMenuItem<Booru>>((Booru value){
+              bool isCurrent = value == newSelected;
+
+              return DropdownMenuItem<Booru>(
+                value: value,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: isCurrent
+                  ? BoxDecoration(
+                    border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                    borderRadius: BorderRadius.circular(5),
+                  )
+                  : null,
+                  child: Row(
+                    children: <Widget>[
+                      (value.type == "Favourites"
+                          ? const Icon(Icons.favorite, color: Colors.red, size: 18)
+                          : CachedFavicon(value.faviconURL!)
+                      ),
+                      Text(" ${value.name!}", style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+                    ],
                   ),
-                );
-              }).toList(),
-            )
+                ),
+              );
+            }).toList(),
           );
         })
       ),
@@ -425,6 +375,7 @@ class SettingsTextInput extends StatefulWidget {
     this.onSubmitted,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
+    this.margin = const EdgeInsets.symmetric(vertical: 8),
     this.clearable = false,
     this.resetText,
     this.numberButtons = false,
@@ -442,10 +393,11 @@ class SettingsTextInput extends StatefulWidget {
   final String title;
   final String hintText;
   final bool autofocus;
-  final void Function(String?)? onChanged;
+  final void Function(String)? onChanged;
   final void Function(String)? onSubmitted;
   final bool drawTopBorder;
   final bool drawBottomBorder;
+  final EdgeInsets margin;
   final bool clearable;
   final String Function()? resetText;
   final bool numberButtons;
@@ -483,6 +435,10 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     super.dispose();
   }
 
+  void onChangedCallback(String value) {
+      widget.onChanged?.call(value);
+  }
+
   void stepNumberDown() {
     if (widget.numberButtons) {
       if(repeatCount > 0) {
@@ -491,7 +447,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) - widget.numberStep;
       double newValue = valueWithStep >= widget.numberMin ? valueWithStep : widget.numberMin;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
-      widget.onChanged?.call(widget.controller.text);
+      onChangedCallback(widget.controller.text);
     }
   }
 
@@ -503,24 +459,25 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) + widget.numberStep;
       double newValue = valueWithStep <= widget.numberMax ? valueWithStep : widget.numberMax;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
-      widget.onChanged?.call(widget.controller.text);
+      onChangedCallback(widget.controller.text);
     }
   }
 
   Widget buildNumberButton(void Function() stepFunc, IconData icon) {
-    final int fasterAfter = 20;
+    const int fasterAfter = 20;
+
     return GestureDetector(
       onLongPressStart: (details) {
         // repeat every 100ms if the user holds down the button
         if(_longPressRepeatTimer != null) return; 
-        _longPressRepeatTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+        _longPressRepeatTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
           stepFunc();
           repeatCount++;
 
           // repeat faster after a certain amount of times
           if(repeatCount > fasterAfter) {
             _longPressRepeatTimer?.cancel();
-            _longPressRepeatTimer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+            _longPressRepeatTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
               stepFunc();
               repeatCount++;
             });
@@ -566,6 +523,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             icon: Icon(Icons.clear, color: Get.theme.colorScheme.onSurface),
             onPressed: () {
               widget.controller.clear();
+              onChangedCallback(widget.controller.text);
             },
           ),
 
@@ -574,6 +532,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             icon: Icon(Icons.refresh, color: Get.theme.colorScheme.onSurface),
             onPressed: () {
               widget.controller.text = widget.resetText!();
+              onChangedCallback(widget.controller.text);
             },
           ),
 
@@ -599,7 +558,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   Widget build(BuildContext context) {
     // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     final Widget field = Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: widget.margin,
       child: TextFormField(
         focusNode: _focusNode,
         controller: widget.controller,
@@ -607,7 +566,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         keyboardType: widget.inputType,
         enableInteractiveSelection: true,
         inputFormatters: widget.inputFormatters,
-        onChanged: widget.onChanged,
+        onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
         decoration: InputDecoration(
           fillColor: Get.theme.colorScheme.surface,
@@ -616,7 +575,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
           labelText: widget.title,
           hintText: widget.hintText,
           errorText: widget.validator?.call(widget.controller.text),
-          contentPadding: EdgeInsets.fromLTRB(25, 0, 15, 0),
+          contentPadding: const EdgeInsets.fromLTRB(25, 0, 15, 0),
           suffixIcon: Padding(
             padding: const EdgeInsets.only(left: 2, right: 10),
             child: buildSuffixIcons(),
@@ -689,7 +648,6 @@ class SettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
-      
       content: content ?? SingleChildScrollView(
         child: ListBody(
           children: contentItems ?? [],
@@ -704,6 +662,49 @@ class SettingsDialog extends StatelessWidget {
       insetPadding: insetPadding,
       shape: RoundedRectangleBorder(borderRadius: borderRadius ?? BorderRadius.circular(4)),
       scrollable: scrollable,
+    );
+  }
+}
+
+
+
+class SettingsPageDialog extends StatelessWidget {
+  const SettingsPageDialog({
+    Key? key,
+    this.title,
+    this.content,
+    this.actions,
+  }) : super(key: key);
+
+  final Widget? title;
+  final Widget? content;
+  final List<Widget>? actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // extendBodyBehindAppBar: true,
+      // extendBody: true,
+      // resizeToAvoidBottomInset: true,
+      appBar: AppBar(
+        backgroundColor: Get.theme.appBarTheme.backgroundColor!.withOpacity(0.5),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Get.back();
+          },
+        ),
+        title: title,
+        actions: [
+          if((actions?.length ?? 0) > 0)
+            Row(
+              children: actions ?? [],
+            ),
+        ],
+      ),
+      body: SafeArea(
+        child: content ?? Container(),
+      ),
     );
   }
 }
