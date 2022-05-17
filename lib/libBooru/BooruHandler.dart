@@ -28,7 +28,8 @@ abstract class BooruHandler {
   Map<String,String> tagModifierMap = {
     "rating:" : "R",
     "artist:" : "A",
-    "order:" : "O"
+    "order:" : "O",
+    "sort:" : "S",
   };
   List<BooruItem> get filteredFetched => fetched.where((el) => Get.find<SettingsHandler>().filterHated ? !el.isHated.value : true).toList();
 
@@ -121,12 +122,18 @@ abstract class BooruHandler {
     List<String> unTyped = [];
     for(int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
-        if (!tagHandler.hasTag(items[x].tagsList[i]) && !unTyped.contains(items[x].tagsList[i])) {
-          unTyped.add(items[x].tagsList[i]);
+        final String tag = items[x].tagsList[i];
+
+        final bool alreadyStored = tagHandler.hasTag(tag);
+        if (!alreadyStored) {
+          final bool isPresent = unTyped.contains(tag);
+          if(!isPresent) {
+            unTyped.add(tag);
+          }
         }
       }
     }
-    if (unTyped.isNotEmpty) tagHandler.queue(unTyped, booru, 500);
+    if (unTyped.isNotEmpty) tagHandler.queue(unTyped, booru, 200);
   }
 
   String getTagDisplayString(String tag){
@@ -183,8 +190,7 @@ abstract class BooruHandler {
     final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
     if (settingsHandler.favDbHandler.db != null && diff > 0) {
       List<List<bool>> valuesList = await settingsHandler.favDbHandler
-          .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last) //.map((e) => e.fileURL).toList()
-              );
+          .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last)); //.map((e) => e.fileURL).toList()
 
       valuesList.asMap().forEach((index, values) {
         fetched[fetchedIndexes[index]].isSnatched.value = values[0];

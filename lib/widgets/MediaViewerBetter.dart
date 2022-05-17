@@ -23,7 +23,7 @@ class MediaViewerBetter extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
-  MediaViewerBetter(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
+  const MediaViewerBetter(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
 
   @override
   _MediaViewerBetterState createState() => _MediaViewerBetterState();
@@ -53,7 +53,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   @override
   void didUpdateWidget(MediaViewerBetter oldWidget) {
     // force redraw on item data change
-    if(oldWidget.booruItem != widget.booruItem) {
+    if (oldWidget.booruItem != widget.booruItem) {
       killLoading([]);
       initViewer(false);
     }
@@ -78,7 +78,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       cacheFolder: imageFolder,
     );
     // client.runRequest();
-    if(settingsHandler.disableImageIsolates) {
+    if (settingsHandler.disableImageIsolates) {
       client!.runRequest();
     } else {
       client!.runRequestIsolate();
@@ -88,9 +88,9 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
   void onSize(int size) {
     // TODO find a way to stop loading based on size when caching is enabled
-    final int maxSize = 1024 * 1024 * 200;
+    const int maxSize = 1024 * 1024 * 200;
     // print('onSize: $size $maxSize ${size > maxSize}');
-    if(size == 0) {
+    if (size == 0) {
       killLoading(['File is zero bytes']);
     } else if ((size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
@@ -114,10 +114,10 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   void _onEvent(String event, dynamic data) {
     switch (event) {
       case 'loaded':
-        // 
+        //
         break;
       case 'size':
-        onSize(data);
+        onSize(data as int);
         break;
       case 'isFromCache':
         isFromCache = true;
@@ -138,7 +138,6 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       killLoading(['Loading Error: $error']);
       // print('Dio request cancelled: $error');
     }
-    viewerHandler.setLoaded(widget.key, false);
   }
 
   @override
@@ -146,14 +145,14 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    isViewed = settingsHandler.appMode == 'Mobile'
-      ? searchHandler.viewedIndex.value == widget.index
-      : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
+        ? searchHandler.viewedIndex.value == widget.index
+        : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode == 'Mobile' ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;
@@ -176,7 +175,10 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   void initViewer(bool ignoreTagsCheck) {
-    if ((settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) || widget.booruItem.sampleURL == widget.booruItem.fileURL){
+    if ((settingsHandler.galleryMode == "Sample" &&
+            widget.booruItem.sampleURL.isNotEmpty &&
+            widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
+        widget.booruItem.sampleURL == widget.booruItem.fileURL) {
       // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
       imageURL = widget.booruItem.sampleURL;
       imageFolder = 'samples';
@@ -190,7 +192,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
       initViewer(false);
     });
 
-    if(widget.booruItem.isHated.value && !ignoreTagsCheck) {
+    if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       if (hatedAndLovedTags[0].isNotEmpty) {
         killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
@@ -208,7 +210,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   ImageProvider getImageProvider(Uint8List bytes, String url) {
-    if(settingsHandler.disableImageScaling || widget.booruItem.isNoScale.value) {
+    if (settingsHandler.disableImageScaling || widget.booruItem.isNoScale.value) {
       return MemoryImageTest(bytes, imageUrl: url);
     } else {
       int? widthLimit = settingsHandler.disableImageScaling ? null : (Get.mediaQuery.size.width * Get.mediaQuery.devicePixelRatio * 2).round();
@@ -231,6 +233,8 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     isStopped = true;
     stopReason = reason;
 
+    viewerHandler.setLoaded(widget.key, false);
+
     resetZoom();
 
     updateState();
@@ -249,7 +253,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   void updateState() {
-    if(this.mounted) setState(() { });
+    if (this.mounted) setState(() {});
   }
 
   void disposeClient() {
@@ -273,7 +277,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     noScaleListener?.cancel();
     noScaleListener = null;
 
-    if (!(_dioCancelToken.isCancelled)){
+    if (!(_dioCancelToken.isCancelled)) {
       _dioCancelToken.cancel();
     }
     disposeClient();
@@ -287,6 +291,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
     viewerHandler.setZoomed(widget.key, isZoomed);
   }
+
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
     viewerHandler.setViewState(widget.key, viewState);
@@ -294,7 +299,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
   void resetZoom() {
     // Don't zoom until image is loaded
-    if(mainProvider == null) return;
+    if (mainProvider == null) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
   }
 
@@ -307,7 +312,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     // print('ll $lowerLimit $value');
     // if zooming out and zoom is smaller than limit - reset to container size
     // TODO minimal scale to fit can be different from limit
-    if(lowerLimit == 0.75 && value < 0) {
+    if (lowerLimit == 0.75 && value < 0) {
       scaleController.scaleState = PhotoViewScaleState.initial;
     } else {
       viewController.scale = lowerLimit;
@@ -315,7 +320,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   void doubleTapZoom() {
-    if(mainProvider == null) return;
+    if (mainProvider == null) return;
     scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
@@ -325,12 +330,21 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
 
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
-      child: Material( // without this every text element will have broken styles on first frames
+      // without this every text element will have broken styles on first frames
+      child: Material(
         color: Colors.black,
         child: Stack(
           alignment: Alignment.center,
           children: [
-            CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+            // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
+            CachedThumbBetter(
+              widget.booruItem,
+              widget.index,
+              widget.searchGlobal,
+              1,
+              false,
+            ),
+            //
             LoadingElement(
               item: widget.booruItem,
               hasProgress: true,
@@ -344,7 +358,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
               received: _received,
               startedAt: _startedAt,
               startAction: () {
-                if(isTooBig == 1) {
+                if (isTooBig == 1) {
                   isTooBig = 2;
                 }
                 initViewer(true);
@@ -353,36 +367,36 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
                 killLoading(['Stopped by User']);
               },
             ),
+            //
             AnimatedSwitcher(
-              child: mainProvider != null
-                ? Listener(
-                    onPointerSignal: (pointerSignal) {
-                      if(pointerSignal is PointerScrollEvent) {
-                        scrollZoomImage(pointerSignal.scrollDelta.dy);
-                      }
-                    },
-                    child: PhotoView(
-                      //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-                      imageProvider: mainProvider,
-                      loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
-                      // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                      filterQuality: FilterQuality.medium,
-                      minScale: PhotoViewComputedScale.contained,
-                      maxScale: PhotoViewComputedScale.covered * 8,
-                      initialScale: PhotoViewComputedScale.contained,
-                      enableRotation: false,
-                      basePosition: Alignment.center,
-                      controller: viewController,
-                      // tightMode: true,
-                      scaleStateController: scaleController,
-                    )
-                  )
-                : null,
-              duration: Duration(milliseconds: settingsHandler.appMode == 'Desktop' ? 50 : 300)
+              duration: Duration(milliseconds: settingsHandler.appMode.value == AppMode.DESKTOP ? 50 : 300),
+              child: mainProvider == null ? Container() : Listener(
+                onPointerSignal: (pointerSignal) {
+                  if (pointerSignal is PointerScrollEvent) {
+                    scrollZoomImage(pointerSignal.scrollDelta.dy);
+                  }
+                },
+                child: PhotoView(
+                  //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+                  imageProvider: mainProvider!, // ?? MemoryImage(kTransparentImage),
+                  gaplessPlayback: true,
+                  // loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
+                  // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                  filterQuality: FilterQuality.medium,
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 8,
+                  initialScale: PhotoViewComputedScale.contained,
+                  enableRotation: false,
+                  basePosition: Alignment.center,
+                  controller: viewController,
+                  // tightMode: true,
+                  scaleStateController: scaleController,
+                ),
+              ),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }

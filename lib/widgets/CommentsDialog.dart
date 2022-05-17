@@ -18,10 +18,10 @@ import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 
 class CommentsDialog extends StatefulWidget {
   final BooruItem item;
-  CommentsDialog(this.item);
+  const CommentsDialog(this.item, {Key? key}) : super(key: key);
 
   @override
-  _CommentsDialogState createState() => _CommentsDialogState();
+  State<CommentsDialog> createState() => _CommentsDialogState();
 }
 
 class _CommentsDialogState extends State<CommentsDialog> {
@@ -61,7 +61,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   Widget scoreText(int? score) {
     if (score == null) {
-      return Text('');
+      return const Text('');
     } else {
       Color color = Colors.grey;
       if (score > 0) {
@@ -84,7 +84,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     isLoading = true;
     if (widget.item.serverId != null) {
       setState(() {}); // set state to update the loading indicator
-      var fetched = await searchHandler.currentBooruHandler.fetchComments(widget.item.serverId!, 0);
+      List<CommentItem> fetched = await searchHandler.currentBooruHandler.fetchComments(widget.item.serverId!, 0);
       comments = fetched;
     } else {
       notSupported = true;
@@ -108,7 +108,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Widget mainBuild() {
-    bool areThereErrors = isLoading || notSupported || comments.length == 0;
+    bool areThereErrors = isLoading || notSupported || comments.isEmpty;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -119,8 +119,8 @@ class _CommentsDialogState extends State<CommentsDialog> {
             controller: scrollController,
             interactive: true,
             thickness: 8,
-            radius: Radius.circular(10),
-            isAlwaysShown: true,
+            radius: const Radius.circular(10),
+            thumbVisibility: true,
             child: RefreshIndicator(
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               displacement: 80,
@@ -141,7 +141,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     return DesktopScrollWrap(
       controller: scrollController,
       child: ListView.builder(
-        padding: EdgeInsets.all(5),
+        padding: const EdgeInsets.all(5),
         controller: scrollController,
         physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         itemCount: comments.length,
@@ -190,13 +190,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
                         if (currentEntry.authorName?.isNotEmpty == true)
                           Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: SelectableText(currentEntry.authorName!, style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: SelectableText(currentEntry.authorName!, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Row(children: [
                             if (currentEntry.title?.isNotEmpty == true)
-                              SelectableText(currentEntry.title!, style: TextStyle(fontWeight: FontWeight.bold)),
+                              SelectableText(currentEntry.title!, style: const TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(width: 5),
                             if (currentEntry.createDate?.isNotEmpty == true)
                               Text(formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
@@ -219,12 +219,12 @@ class _CommentsDialogState extends State<CommentsDialog> {
                   ),
                   child: SelectableLinkify(
                     text: currentEntry.content ?? '',
-                    options: LinkifyOptions(humanize: false, removeWww: true, looseUrl: true),
+                    options: const LinkifyOptions(humanize: false, removeWww: true, looseUrl: true),
                     scrollPhysics: const NeverScrollableScrollPhysics(),
                     onOpen: (link) async {
                       ServiceHandler.launchURL(link.url);
                     },
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
@@ -247,9 +247,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   Widget errorsBuild() {
     return ListView(
-      padding: EdgeInsets.all(5),
+      padding: const EdgeInsets.all(5),
       controller: scrollController,
-      // physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       children: [
         if (isLoading)
           Center(
@@ -259,16 +259,16 @@ class _CommentsDialogState extends State<CommentsDialog> {
             ),
           )
         else if (notSupported)
-          Center(
+          const Center(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text('This Booru doesn\'t have comments or there is no API for them.'),
             ),
           )
-        else if (comments.length == 0)
-          Center(
+        else if (comments.isEmpty)
+          const Center(
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.0),
               child: Text('No comments.'),
             ),
           ),
@@ -278,29 +278,19 @@ class _CommentsDialogState extends State<CommentsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SettingsDialog(
+    return SettingsPageDialog(
+      title: const Text('Comments'),
       content: mainBuild(),
-      contentPadding: const EdgeInsets.all(6),
-      titlePadding: const EdgeInsets.fromLTRB(6, 18, 2, 6),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 20),
-      scrollable: false,
-      actionButtons: [
+      actions: [
         if (widget.item.postURL.isNotEmpty)
-          ElevatedButton(
-            child: Text('Open the Post'),
+          IconButton(
             onPressed: () {
               ServiceHandler.launchURL(widget.item.postURL);
-              Navigator.of(context).pop(false);
+              // Navigator.of(context).pop(false);
             },
+            icon: const Icon(Icons.public),
           ),
-
-        ElevatedButton(
-          child: Text('Close'),
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
-        ),
-      ],
+      ]
     );
   }
 }

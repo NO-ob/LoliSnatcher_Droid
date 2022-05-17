@@ -79,11 +79,11 @@ class _ImageStatsState extends State<ImageStats> {
   }
 
   void updateValues() {
-    _totalLive.value = PaintingBinding.instance?.imageCache?.liveImageCount ?? 0;
-    _totalPending.value = PaintingBinding.instance?.imageCache?.pendingImageCount ?? 0;
-    _totalAll.value = PaintingBinding.instance?.imageCache?.currentSize ?? 0;
-    _cacheSize.value = PaintingBinding.instance?.imageCache?.currentSizeBytes ?? 0;
-    _cacheMax.value = PaintingBinding.instance?.imageCache?.maximumSizeBytes ?? 0;
+    _totalLive.value = PaintingBinding.instance.imageCache.liveImageCount;
+    _totalPending.value = PaintingBinding.instance.imageCache.pendingImageCount;
+    _totalAll.value = PaintingBinding.instance.imageCache.currentSize;
+    _cacheSize.value = PaintingBinding.instance.imageCache.currentSizeBytes ;
+    _cacheMax.value = PaintingBinding.instance.imageCache.maximumSizeBytes;
   }
 
   void _handleTick(Duration d) {

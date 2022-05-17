@@ -18,23 +18,24 @@ import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/WaterfallErrorButtons.dart';
 
 class WaterfallView extends StatefulWidget {
-  WaterfallView();
+  const WaterfallView({Key? key}) : super(key: key);
   @override
-  _WaterfallState createState() => _WaterfallState();
+  State<WaterfallView> createState() => _WaterfallViewState();
 }
 
-class _WaterfallState extends State<WaterfallView> {
+class _WaterfallViewState extends State<WaterfallView> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
-  Timer? loadingDelay;
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   bool scrollDone = true;
-  late StreamSubscription indexListener, viewedListener, isLoadingListener;
+  late StreamSubscription tabIndexListener, viewedIndexListener, isLoadingListener;
 
   bool isStaggered = false;
+
+  bool get isMobile => settingsHandler.appMode.value == AppMode.MOBILE;
 
   @override
   void initState() {
@@ -43,10 +44,10 @@ class _WaterfallState extends State<WaterfallView> {
     viewerHandler.inViewer.value = false;
 
     // scroll to current viewed item
-    viewedListener = searchHandler.viewedIndex.listen(jumpTo);
+    viewedIndexListener = searchHandler.viewedIndex.listen(viewedIndexChanged);
 
     // listen to current tab change to restore the scroll value
-    indexListener = searchHandler.index.listen(tabChanged);
+    tabIndexListener = searchHandler.index.listen(tabChanged);
 
     // listen to isLoading to select first loaded item for desktop
     isLoadingListener = searchHandler.isLoading.listen((bool isLoading) {
@@ -62,17 +63,26 @@ class _WaterfallState extends State<WaterfallView> {
     // TODO reset the controller when appMode changes
     searchHandler.gridScrollController = AutoScrollController(
       initialScrollOffset: searchHandler.currentTab.scrollPosition,
-      viewportBoundaryGetter: () => Rect.fromLTRB(0, settingsHandler.appMode == 'Desktop' ? 0 : (kToolbarHeight + 2), 0, 0),
+      viewportBoundaryGetter: () => Rect.fromLTRB(0, !isMobile ? 0 : (kToolbarHeight + 2), 0, 0),
     );
 
     isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
+  }
+
+  void viewedIndexChanged(int newIndex) {
+    if (isMobile) {
+      jumpTo(newIndex);
+    } else {
+      // don't auto scroll on viewed index change on desktop
+      // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
+    }
   }
 
   void tabChanged(int newIndex) {
     // print('tabChanged: ${searchHandler.currentTab.scrollPosition} ${searchHandler.gridScrollController.hasClients}');
 
     // postpone scroll updates until the current render is done, since this is called after the global restate after exiting settings
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       // restore scroll position on tab change
       if (searchHandler.gridScrollController.hasClients) {
         searchHandler.gridScrollController.jumpTo(searchHandler.currentTab.scrollPosition);
@@ -80,7 +90,7 @@ class _WaterfallState extends State<WaterfallView> {
         // TODO reset the controller when appMode changes
         searchHandler.gridScrollController = AutoScrollController(
           initialScrollOffset: searchHandler.currentTab.scrollPosition,
-          viewportBoundaryGetter: () => Rect.fromLTRB(0, settingsHandler.appMode == 'Desktop' ? 0 : (kToolbarHeight + 2), 0, 0),
+          viewportBoundaryGetter: () => Rect.fromLTRB(0, !isMobile ? 0 : (kToolbarHeight + 2), 0, 0),
         );
       }
     });
@@ -110,7 +120,7 @@ class _WaterfallState extends State<WaterfallView> {
       if(dir != 0 && scrollDone == true) {
         scrollDone = false;
         final double offset = max(searchHandler.gridScrollController.offset + (settingsHandler.volumeButtonsScrollSpeed * dir), -20);
-        await searchHandler.gridScrollController.animateTo(offset, duration: Duration(milliseconds: 200), curve: Curves.linear);
+        await searchHandler.gridScrollController.animateTo(offset, duration: const Duration(milliseconds: 200), curve: Curves.linear);
         scrollDone = true;
       }
     }
@@ -118,13 +128,12 @@ class _WaterfallState extends State<WaterfallView> {
 
   @override
   void dispose() {
-    indexListener.cancel();
-    viewedListener.cancel();
+    tabIndexListener.cancel();
+    viewedIndexListener.cancel();
     isLoadingListener.cancel();
     kbFocusNode.dispose();
     volumeListener?.cancel();
     ServiceHandler.setVolumeButtons(true);
-    loadingDelay?.cancel();
     super.dispose();
   }
 
@@ -135,8 +144,6 @@ class _WaterfallState extends State<WaterfallView> {
     if(newIndex == -1) {
       return;
     }
-
-    bool isMobile = settingsHandler.appMode == 'Mobile';
 
     if(!viewerHandler.inViewer.value && isMobile) {
       return;
@@ -158,7 +165,7 @@ class _WaterfallState extends State<WaterfallView> {
 
   void afterSearch() {
     // desktop view first load setter
-    if ((searchHandler.currentFetched.length > 0 && searchHandler.currentFetched.length < (settingsHandler.limit + 1)) && settingsHandler.appMode == 'Desktop') {
+    if ((searchHandler.currentFetched.length > 0 && searchHandler.currentFetched.length < (settingsHandler.limit + 1)) && !isMobile) {
       if (searchHandler.viewedItem.value.fileURL.isEmpty) {
         // print("setting booruItem value");
         BooruItem item = searchHandler.setViewedItem(0);
@@ -178,7 +185,7 @@ class _WaterfallState extends State<WaterfallView> {
     BooruItem item = searchHandler.setViewedItem(index);
     viewerHandler.setCurrent(item.key);
 
-    if (settingsHandler.appMode == "Mobile") {
+    if (settingsHandler.appMode.value == AppMode.MOBILE) {
       kbFocusNode.unfocus();
       viewerHandler.inViewer.value = true;
 
@@ -190,7 +197,7 @@ class _WaterfallState extends State<WaterfallView> {
             ViewerPage(index),
           fullscreenDialog: false,
           opaque: false,
-          transitionDuration: Duration(milliseconds: 300),
+          transitionDuration: const Duration(milliseconds: 300),
           barrierColor: Colors.black26,
         ),
       );
@@ -208,7 +215,7 @@ class _WaterfallState extends State<WaterfallView> {
     // check if grid type changed when rebuilding the widget (must happen only on start and when saving settings)
     bool newIsStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
     if (isStaggered != newIsStaggered) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         isStaggered = newIsStaggered;
         setState(() { });
       });
@@ -240,6 +247,7 @@ class _WaterfallState extends State<WaterfallView> {
             if(newIndex < searchHandler.currentFetched.length) {
               item = searchHandler.setViewedItem(newIndex);
               viewerHandler.setCurrent(item.key);
+              jumpTo(newIndex);
             }
 
           } else if(event.physicalKey == PhysicalKeyboardKey.keyJ || event.physicalKey == PhysicalKeyboardKey.keyW) {
@@ -252,6 +260,7 @@ class _WaterfallState extends State<WaterfallView> {
             if(newIndex > -1) {
               item = searchHandler.setViewedItem(newIndex);
               viewerHandler.setCurrent(item.key);
+              jumpTo(newIndex);
             }
 
           } else if(event.physicalKey == PhysicalKeyboardKey.keyD) {
@@ -260,14 +269,16 @@ class _WaterfallState extends State<WaterfallView> {
             if(newIndex < searchHandler.currentFetched.length) {
               item = searchHandler.setViewedItem(newIndex);
               viewerHandler.setCurrent(item.key);
+              jumpTo(newIndex);
             }
 
           } else if(event.physicalKey == PhysicalKeyboardKey.keyA) {
             oldIndex = searchHandler.viewedIndex.value;
             newIndex = oldIndex - 1;
             if(newIndex > -1) {
-              item = searchHandler.setViewedItem(newIndex);;
+              item = searchHandler.setViewedItem(newIndex);
               viewerHandler.setCurrent(item.key);
+              jumpTo(newIndex);
             }
 
           } else if(event.physicalKey == PhysicalKeyboardKey.escape) {
@@ -285,12 +296,12 @@ class _WaterfallState extends State<WaterfallView> {
               controller: searchHandler.gridScrollController,
               interactive: true,
               thickness: 6,
-              radius: Radius.circular(10),
-              isAlwaysShown: true,
+              radius: const Radius.circular(10),
+              thumbVisibility: true,
               child: RefreshIndicator(
                 triggerMode: RefreshIndicatorTriggerMode.anywhere,
                 displacement: 80,
-                edgeOffset: settingsHandler.appMode == 'Mobile' ? kToolbarHeight : 0,
+                edgeOffset: isMobile ? kToolbarHeight : 0,
                 strokeWidth: 4,
                 color: Get.theme.colorScheme.secondary,
                 onRefresh: () async {
@@ -340,7 +351,7 @@ class _WaterfallState extends State<WaterfallView> {
           //   ),
           // )),
 
-          WaterfallErrorButtons(),
+          const WaterfallErrorButtons(),
         ],
       )
     );

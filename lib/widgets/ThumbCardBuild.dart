@@ -44,9 +44,9 @@ class ThumbCardBuild extends StatelessWidget {
     BooruItem item = tab.booruHandler.filteredFetched[index];
     Clipboard.setData(ClipboardData(text: item.fileURL));
     FlashElements.showSnackbar(
-      duration: Duration(seconds: 2),
-      title: Text("Copied File URL to clipboard!", style: TextStyle(fontSize: 20)),
-      content: Text(item.fileURL, style: TextStyle(fontSize: 16)),
+      duration: const Duration(seconds: 2),
+      title: const Text("Copied File URL to clipboard!", style: TextStyle(fontSize: 20)),
+      content: Text(item.fileURL, style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.copy,
       sideColor: Colors.green,
     );
@@ -57,7 +57,7 @@ class ThumbCardBuild extends StatelessWidget {
     // print('ThumbCardBuild: $index');
     return Obx(() {
       bool isSelected = tab.selected.contains(index);
-      bool isCurrent = settingsHandler.appMode == 'Desktop' && (searchHandler.viewedIndex.value == index);
+      bool isCurrent = settingsHandler.appMode.value == AppMode.DESKTOP && (searchHandler.viewedIndex.value == index);
 
       // print('ThumbCardBuild obx: $index');
 

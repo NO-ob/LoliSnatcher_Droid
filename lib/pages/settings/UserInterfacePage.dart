@@ -17,21 +17,22 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final TextEditingController columnsLandscapeController = TextEditingController();
   final TextEditingController columnsPortraitController = TextEditingController();
-  late String appMode, previewMode, previewDisplay;
+  late String previewMode, previewDisplay;
+  late AppMode appMode;
 
   @override
   void initState(){
     super.initState();
     columnsPortraitController.text = settingsHandler.portraitColumns.toString();
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
-    appMode = settingsHandler.appMode;
+    appMode = settingsHandler.appMode.value;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
-    settingsHandler.appMode = appMode;
+    settingsHandler.appMode.value = appMode;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
     if (int.parse(columnsLandscapeController.text) < 1){
@@ -53,30 +54,30 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Interface"),
+          title: const Text("Interface"),
         ),
         body: Center(
           child: ListView(
             children: [
               SettingsDropdown(
-                selected: appMode,
-                values: settingsHandler.map['appMode']?['options'],
+                selected: appMode.toName(),
+                values: AppMode.values.map((e) => e.toName()).toList(),
                 onChanged: (String? newValue){
                   setState((){
-                    appMode = newValue ?? settingsHandler.map['appMode']?['default'];
+                    appMode = AppMode.fromName(newValue ?? '');
                   });
                 },
                 title: 'App UI Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     Get.dialog(
-                      SettingsDialog(
-                        title: const Text('App UI Mode'),
+                      const SettingsDialog(
+                        title: Text('App UI Mode'),
                         contentItems: [
                           Text("- Mobile - Normal Mobile UI"),
                           Text("- Desktop - Ahoviewer Style UI"),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
                           Text("[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs."),
                           Text("If you are on android versions smaller than 11 you can remove the App Mode line from /LoliSnatcher/config/settings.conf"),
                           Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
@@ -149,11 +150,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Preview Quality',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     Get.dialog(
-                      SettingsDialog(
-                        title: const Text('Preview Quality'),
+                      const SettingsDialog(
+                        title: Text('Preview Quality'),
                         contentItems: [
                           Text("This setting changes the resolution of images in the preview grid"),
                           Text(" - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads"),

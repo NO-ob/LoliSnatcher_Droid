@@ -12,6 +12,8 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class ImagePreviews extends StatefulWidget {
+  const ImagePreviews({Key? key}) : super(key: key);
+
   @override
   State<ImagePreviews> createState() => _ImagePreviewsState();
 }
@@ -63,22 +65,22 @@ class _ImagePreviewsState extends State<ImagePreviews> {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            SettingsButton(
+            const SettingsButton(
               name: 'No Booru Configs Found',
               icon: Icon(null),
             ),
             SettingsButton(
               name: 'Add New Booru',
-              icon: Icon(Icons.settings),
+              icon: const Icon(Icons.settings),
               page: () => BooruEdit(Booru("New", "", "", "", "")),
             ),
             SettingsButton(
               name: 'Help',
-              icon: Icon(Icons.help_center_outlined),
+              icon: const Icon(Icons.help_center_outlined),
               action: () {
                 ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
               },
-              trailingIcon: Icon(Icons.exit_to_app),
+              trailingIcon: const Icon(Icons.exit_to_app),
             ),
           ],
         ),
@@ -97,7 +99,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
               if (searchHandler.isRestored.value) {
                 return const SizedBox();
               } else {
-                return Text('Restoring previous session...');
+                return const Text('Restoring previous session...');
               }
             }),
           ],
@@ -106,6 +108,6 @@ class _ImagePreviewsState extends State<ImagePreviews> {
     }
 
     // render thumbnails grid
-    return WaterfallView();
+    return const RepaintBoundary(child: WaterfallView());
   }
 }

@@ -46,7 +46,7 @@ class SettingsHandler extends GetxController {
 
   // runtime settings vars
   bool hasHydrus = false;
-  bool mergeEnabled = false;
+  RxBool mergeEnabled = RxBool(false);
   List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
 
   // debug toggles
@@ -54,7 +54,6 @@ class SettingsHandler extends GetxController {
   RxBool showFPS = false.obs;
   RxBool showPerf = false.obs;
   RxBool showImageStats = false.obs;
-  RxBool isMemeTheme = false.obs;
   bool showURLOnThumb = false;
   bool disableImageScaling = false;
   // disable isolates on debug builds, because they cause lags in emulator
@@ -71,7 +70,7 @@ class SettingsHandler extends GetxController {
   String previewDisplay = "Square";
   String galleryMode = "Full Res";
   String shareAction = "Ask";
-  String appMode = (Platform.isWindows || Platform.isLinux) ? 'Desktop' : 'Mobile';
+  Rx<AppMode> appMode = Rx((Platform.isWindows || Platform.isLinux) ? AppMode.DESKTOP : AppMode.MOBILE);
   String galleryBarPosition = 'Top';
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = "";
@@ -170,11 +169,6 @@ class SettingsHandler extends GetxController {
   // TODO move it in another file?
   Map<String, Map<String, dynamic>> map = {
     // stringFromList
-    "appMode": {
-      "type": "stringFromList",
-      "default": "Mobile",
-      "options": <String>["Mobile", "Desktop"],
-    },
     "previewMode": {
       "type": "stringFromList",
       "default": "Sample",
@@ -401,18 +395,23 @@ class SettingsHandler extends GetxController {
       "default": Duration.zero,
       "options": <Map<String, dynamic>>[
         {'label': 'Never', 'value': Duration.zero},
-        {'label': '30 minutes', 'value': Duration(minutes: 30)},
-        {'label': '1 hour', 'value': Duration(hours: 1)},
-        {'label': '6 hours', 'value': Duration(hours: 6)},
-        {'label': '12 hours', 'value': Duration(hours: 12)},
-        {'label': '1 day', 'value': Duration(days: 1)},
-        {'label': '2 days', 'value': Duration(days: 2)},
-        {'label': '1 week', 'value': Duration(days: 7)},
-        {'label': '1 month', 'value': Duration(days: 30)},
+        {'label': '30 minutes', 'value': const Duration(minutes: 30)},
+        {'label': '1 hour', 'value': const Duration(hours: 1)},
+        {'label': '6 hours', 'value': const Duration(hours: 6)},
+        {'label': '12 hours', 'value': const Duration(hours: 12)},
+        {'label': '1 day', 'value': const Duration(days: 1)},
+        {'label': '2 days', 'value': const Duration(days: 2)},
+        {'label': '1 week', 'value': const Duration(days: 7)},
+        {'label': '1 month', 'value': const Duration(days: 30)},
       ],
     },
 
     // theme
+    "appMode": {
+      "type": "appMode",
+      "default": AppMode.MOBILE,
+      "options": AppMode.values,
+    },
     "theme": {
       "type": "theme",
       "default": ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
@@ -517,6 +516,19 @@ class SettingsHandler extends GetxController {
             }
           }
 
+        case 'appMode':
+          if(toJSON) {
+            // rxobject to string
+            return value.value.toName();
+          } else {
+            if(value is String) {
+              // string to rxobject
+              return AppMode.fromName(value);
+            } else {
+              return settingParams["default"];
+            }
+          }
+
         case 'theme':
           if(toJSON) {
             // rxobject to string
@@ -589,15 +601,6 @@ class SettingsHandler extends GetxController {
     }
   }
 
-  Future<bool> debugLoadAndSaveLegacy() async {
-    if(await checkForLegacySettings()) {
-      await loadLegacySettings();
-    }
-    await saveSettings(restate: true);
-
-    return true;
-  }
-
   Future<bool> loadSettings() async {
     if (path == "") await setConfigDir();
     if (cachePath == "") cachePath = await serviceHandler.getCacheDir();
@@ -605,8 +608,6 @@ class SettingsHandler extends GetxController {
 
     if(await checkForSettings()) {
       await loadSettingsJson();
-    } else if(await checkForLegacySettings()) {
-      await loadLegacySettings();
     } else {
       await saveSettings(restate: true);
     }
@@ -630,130 +631,6 @@ class SettingsHandler extends GetxController {
     String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
     loadFromJSON(settings, true);
-    return;
-  }
-
-  Future<bool> checkForLegacySettings() async {
-    File settingsFile = File(path + "settings.conf");
-    return await settingsFile.exists();
-  }
-  Future<void> loadLegacySettings() async {
-    File settingsFile = File(path + "settings.conf");
-    List<String> settings = await settingsFile.readAsLines();
-    for (int i=0;i < settings.length; i++){
-      List<String> itemSplit = settings[i].split(" = ");
-      if (itemSplit.length < 2) continue; // skip where no ' = ' substring or no value after it
-      String itemName = itemSplit[0];
-      String itemValue = itemSplit[1]; // can be: string, int, double, bool, other special cases
-      switch(itemName) {
-        case("Default Tags"):
-          setByString('defTags', itemValue);
-          break;
-        case("Limit"):
-          setByString('limit', itemValue);
-          break;
-        case("Preview Mode"):
-          setByString('previewMode', itemValue);
-          break;
-        case("Portrait Columns"):
-          setByString('portraitColumns', itemValue);
-          break;
-        case("Landscape Columns"):
-          setByString('landscapeColumns', itemValue);
-          break;
-        case("Preload Count"):
-          setByString('preloadCount', itemValue);
-          break;
-        case("Write Json"):
-          setByString('jsonWrite', itemValue == "true");
-          break;
-        case("Auto Play"):
-          setByString('autoPlayEnabled', itemValue == "true");
-          break;
-        case("Loading Gif"):
-          setByString('loadingGif', itemValue == "true");
-          break;
-        // don't restore thumbnail cache setting, because in 2.0 we need to force enable it for everyone
-        // case("Image Cache"):
-        //   setByString('thumbnailCache', itemValue == "true");
-        //   break;
-        case("Media Cache"):
-          setByString('mediaCache', itemValue == "true");
-          break;
-        case("Video Cache Mode"):
-          setByString('videoCacheMode', itemValue);
-          break;
-        case("Share Action"):
-          setByString('shareAction', itemValue);
-          break;
-        case("Pref Booru"):
-          setByString('prefBooru', itemValue);
-          break;
-        case ("Autohide Bar"):
-          setByString('autoHideImageBar', itemValue == "true");
-          break;
-        case("Snatch Cooldown"):
-          setByString('snatchCooldown', itemValue);
-          break;
-        case ("Preview Display"):
-          setByString('previewDisplay', itemValue);
-          break;
-        case ("Gallery Mode"):
-          setByString('galleryMode', itemValue);
-          break;
-        case ("Gallery Bar Position"):
-          setByString('galleryBarPosition', itemValue);
-          break;
-        case ("Gallery Scroll Direction"):
-          setByString('galleryScrollDirection', itemValue);
-          break;
-        case ("Enable Database"):
-          setByString('dbEnabled', itemValue == "true");
-          break;
-        case ("Search History"):
-          setByString('searchHistoryEnabled', itemValue == "true");
-          break;
-        case ("App Mode"):
-          setByString('appMode', itemValue);
-          break;
-        case("Buttons Order"):
-          List<List<String>> tempOrder = itemValue.split(',').map((bstr) {
-            List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
-            return button;
-          }).where((el) => el[0] != 'null').toList(); // split button names string, get their [name, label] list, filter all wrong values
-
-          tempOrder.addAll(buttonList.where((el) => !tempOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
-          buttonOrder = tempOrder;
-          break;
-        case("Hated Tags"):
-          hatedTags = cleanTagsList(itemValue.split(','));
-          break;
-        case ("Filter Hated"):
-          setByString('filterHated', itemValue == "true");
-          break;
-        case("Loved Tags"):
-          lovedTags = cleanTagsList(itemValue.split(','));
-          break;
-        case ("Volume Buttons Scroll"):
-          setByString('useVolumeButtonsForScroll', itemValue == "true");
-          break;
-        case("Volume Buttons Scroll Speed"):
-          setByString('volumeButtonsScrollSpeed', itemValue);
-          break;
-        case ("Shit Device"):
-          setByString('shitDevice', itemValue == "true");
-          break;
-        case ("Disable Video"):
-          setByString('disableVideo', itemValue == "true");
-          break;
-        case ("Ext Path"):
-          setByString('extPathOverride', itemValue);
-          break;
-        case ("Gallery Auto Scroll"):
-          setByString('galleryAutoScrollTime', itemValue);
-          break;
-      }
-    }
     return;
   }
 
@@ -839,8 +716,6 @@ class SettingsHandler extends GetxController {
 
       case 'prefBooru':
         return prefBooru;
-      case 'appMode':
-        return appMode;
       case 'extPathOverride':
         return extPathOverride;
       case 'drawerMascotPathOverride':
@@ -855,6 +730,8 @@ class SettingsHandler extends GetxController {
         return wakeLockEnabled;
 
       // theme stuff
+      case 'appMode':
+        return appMode;
       case 'theme':
         return theme;
       case 'themeMode':
@@ -990,9 +867,6 @@ class SettingsHandler extends GetxController {
       case 'prefBooru':
         prefBooru = validatedValue;
         break;
-      case 'appMode':
-        appMode = validatedValue;
-        break;
       case 'extPathOverride':
         extPathOverride = validatedValue;
         break;
@@ -1006,6 +880,9 @@ class SettingsHandler extends GetxController {
         allowSelfSignedCerts = validatedValue;
         break;
       // theme stuff
+      case 'appMode':
+        appMode.value = validatedValue;
+        break;
       case 'theme':
         theme.value = validatedValue;
         break;
@@ -1184,72 +1061,9 @@ class SettingsHandler extends GetxController {
     writer.write(jsonEncode(toJson()));
     writer.close();
 
-    if(restate) Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
-    return true;
-  }
-
-  Future<bool> saveSettingsLegacy({withMessage = true}) async {
-    await getPerms();
-    if (path == "") await setConfigDir();
-    await Directory(path).create(recursive:true);
-
-    File settingsFile = File(path + "settings.conf");
-    var writer = settingsFile.openWrite();
-
-    writer.write("Default Tags = $defTags\n");
-    // this.defTags = defTags;
-
-    writer.write("Buttons Order = ${buttonOrder.map((e) => e[0]).join(',')}\n");
-    // this.buttonOrder = buttonOrder;
-
-    writer.write("Hated Tags = ${cleanTagsList(hatedTags).join(',')}\n");
-    // this.hatedTags = hatedTags;
-
-    writer.write("Filter Hated = $filterHated\n");
-
-    writer.write("Loved Tags = ${cleanTagsList(lovedTags).join(',')}\n");
-    // this.lovedTags = lovedTags;
-
-    writer.write("Volume Buttons Scroll = $useVolumeButtonsForScroll\n");
-    writer.write("Volume Buttons Scroll Speed = $volumeButtonsScrollSpeed\n");
-
-    // Write limit if its between 0-100
-    if (limit <= 100 && limit >= 5){
-      writer.write("Limit = $limit\n");
-    } else {
-      // Close writer and alert user
-      writer.write("Limit = 20\n");
-      ServiceHandler.displayToast("Settings Error \n $limit is not a valid Limit amount, Defaulting to 20");
+    if(restate) {
+      Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
     }
-    writer.write("Landscape Columns = $landscapeColumns\n");
-    writer.write("Portrait Columns = $portraitColumns\n");
-    writer.write("Preview Mode = $previewMode\n");
-    writer.write("Preload Count = $preloadCount\n");
-    writer.write("Write Json = $jsonWrite\n");
-    writer.write("Pref Booru = $prefBooru\n");
-    writer.write("Auto Play = $autoPlayEnabled\n");
-    writer.write("Loading Gif = $loadingGif\n");
-    writer.write("Image Cache = $thumbnailCache\n");
-    writer.write("Media Cache = $mediaCache\n");
-    writer.write("Video Cache Mode = $videoCacheMode\n");
-    writer.write("Share Action = $shareAction\n");
-    writer.write("Autohide Bar = $autoHideImageBar\n");
-    writer.write("Snatch Cooldown = $snatchCooldown\n");
-    writer.write("Preview Display = $previewDisplay\n");
-    writer.write("Gallery Mode = $galleryMode\n");
-    writer.write("Gallery Bar Position = $galleryBarPosition\n");
-    writer.write("Gallery Scroll Direction = $galleryScrollDirection\n");
-    writer.write("Enable Database = $dbEnabled\n");
-    writer.write("Search History = $searchHistoryEnabled\n");
-    writer.write("App Mode = $appMode\n");
-    writer.write("Shit Device = $shitDevice\n");
-    writer.write("Disable Video = $disableVideo\n");
-    writer.write("Ext Path = $extPathOverride\n");
-    writer.write("Gallery Auto Scroll = $galleryAutoScrollTime\n");
-    writer.close();
-    if(withMessage) ServiceHandler.displayToast("Settings Saved!\nSome changes may not take effect until the search is refreshed or the app is restarted");
-
-    Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
     return true;
   }
 
@@ -1259,28 +1073,20 @@ class SettingsHandler extends GetxController {
       if (path == "") await setConfigDir();
 
       Directory directory = Directory(boorusPath);
-      Directory legacyDirectory = Directory(path);
-      bool fromLegacy = false;
-
-      // TODO get rid of this legacy logic after 2.1-2.2, when most users will update to json format
-      List files = [];
+      List<FileSystemEntity> files = [];
       if(await directory.exists()) {
         files = directory.listSync();
-      } else if(await legacyDirectory.exists()) {
-        fromLegacy = true;
-        files = legacyDirectory.listSync();
       }
 
-      if (files.length > 0) {
+      if (files.isNotEmpty) {
         for (int i = 0; i < files.length; i++) {
-          if (files[i].path.contains(fromLegacy ? ".booru" : ".json")) { // && files[i].path != 'settings.json'
+          if (files[i].path.contains(".json")) { // && files[i].path != 'settings.json'
             // print(files[i].toString());
-            Booru booruFromFile = fromLegacy ? Booru.fromFileLegacy(files[i]) : Booru.fromJSON(files[i].readAsStringSync());
+            File booruFile = files[i] as File;
+            Booru booruFromFile = Booru.fromJSON(booruFile.readAsStringSync());
             if (booruFromFile.baseURL!.contains("realbooru.com") && booruFromFile.type == "Gelbooru"){
               booruFromFile.type = "Realbooru";
               saveBooru(booruFromFile,onlySave: true);
-            } else if(fromLegacy) {
-              saveBooru(booruFromFile, onlySave: true);
             }
             tempList.add(booruFromFile);
 
@@ -1298,8 +1104,7 @@ class SettingsHandler extends GetxController {
       print('Booru loading error: $e');
     }
 
-    // TODO boorus get duplicated on first load after legacy -> json
-    booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates after legacy -> json saving
+    booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
 
     if (tempList.isNotEmpty){
       sortBooruList();
@@ -1361,25 +1166,6 @@ class SettingsHandler extends GetxController {
       booruList.add(booru);
       sortBooruList();
     }
-    return true;
-  }
-
-  Future saveBooruLegacy(Booru booru) async {
-    if (path == "") await setConfigDir();
-
-    await Directory(path).create(recursive:true);
-    File booruFile = File(path + "${booru.name}.booru");
-    var writer = booruFile.openWrite();
-    writer.write("Booru Name = ${booru.name}\n");
-    writer.write("Booru Type = ${booru.type}\n");
-    writer.write("Favicon URL = ${booru.faviconURL}\n");
-    writer.write("Base URL = ${booru.baseURL}\n");
-    writer.write("API Key = ${booru.apiKey}\n");
-    writer.write("User ID = ${booru.userID}\n");
-    writer.write("Default Tags = ${booru.defTags}\n");
-    writer.close();
-    booruList.add(booru);
-    sortBooruList();
     return true;
   }
 
@@ -1506,9 +1292,9 @@ class SettingsHandler extends GetxController {
     } catch (e) {
       if(withMessage) {
         FlashElements.showSnackbar(
-          title: Text(
+          title: const Text(
             "Update Check Error!",
-            style: TextStyle(fontSize: 20)
+            style: const TextStyle(fontSize: 20)
           ),
           content: Text(
             e.toString()
@@ -1524,7 +1310,7 @@ class SettingsHandler extends GetxController {
   void showLastVersionMessage(bool withMessage) {
     if(withMessage) {
       FlashElements.showSnackbar(
-        title: Text(
+        title: const Text(
           "You already have the latest version!",
           style: TextStyle(fontSize: 20)
         ),
@@ -1545,11 +1331,11 @@ class SettingsHandler extends GetxController {
           title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
           contentItems: [
             Text('Currently Installed: $verStr+$buildNumber'),
-            Text(''),
-            Text(updateInfo.value!.title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(''),
-            Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(''),
+            const Text(''),
+            Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(''),
+            const Text('Changelog:', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(''),
             Text(updateInfo.value!.changelog),
             // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
           ],
@@ -1558,7 +1344,7 @@ class SettingsHandler extends GetxController {
               onPressed: () {
                 Navigator.of(Get.context!).pop(true);
               },
-              child: Text('Later')
+              child: const Text('Later')
             ),
             if(isFromStore && updateInfo.value!.isInStore)
               ElevatedButton.icon(
@@ -1571,8 +1357,8 @@ class SettingsHandler extends GetxController {
                   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
                   Navigator.of(Get.context!).pop(true);
                 },
-                icon: Icon(Icons.play_arrow),
-                label: Text('Visit Play Store')
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Visit Play Store')
               )
             else
               ElevatedButton.icon(
@@ -1580,8 +1366,8 @@ class SettingsHandler extends GetxController {
                   ServiceHandler.launchURL(updateInfo.value!.githubURL);
                   Navigator.of(Get.context!).pop(true);
                 },
-                icon: Icon(Icons.exit_to_app),
-                label: Text('Visit Releases')
+                icon: const Icon(Icons.exit_to_app),
+                label: const Text('Visit Releases')
               ),
           ],
         ),
@@ -1638,9 +1424,9 @@ class SettingsHandler extends GetxController {
     } catch (e) {
       print(e);
       FlashElements.showSnackbar(
-        title: Text(
+        title: const Text(
           "Initialization Error!",
-          style: TextStyle(fontSize: 20)
+          style: const TextStyle(fontSize: 20)
         ),
         content: Text(
           e.toString()
@@ -1682,4 +1468,24 @@ class EnvironmentConfig {
     'LS_IS_STORE',
     defaultValue: false
   );
+}
+
+
+enum AppMode {
+  DESKTOP,
+  MOBILE;
+
+  String toName() {
+    switch(this) {
+      case AppMode.DESKTOP: return 'Desktop';
+      case AppMode.MOBILE: return 'Mobile';
+    }
+  }
+  static AppMode fromName(String name) {
+    switch(name) {
+      case 'Desktop': return AppMode.DESKTOP;
+      case 'Mobile': return AppMode.MOBILE;
+    }
+    return AppMode.MOBILE;
+  }
 }

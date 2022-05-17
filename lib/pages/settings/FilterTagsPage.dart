@@ -18,6 +18,7 @@ class FiltersEdit extends StatefulWidget {
 class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStateMixin {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final TextEditingController newTagController = TextEditingController();
+  final ScrollController scrollController = ScrollController();
   late TabController tabController;
 
   List<String> hatedList = [];
@@ -95,18 +96,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
           children: [
             editableTagsList('Hated'),
             editableTagsList('Loved'),
-            ListView(
-              children: [
-                SettingsToggle(
-                  title: "Remove Items with Hated Tags",
-                  value: filterHated,
-                  onChanged: (bool newValue) {
-                    filterHated = newValue;
-                    updateState();
-                  },
-                ),
-              ]
-            )
+            settingsList(),
           ],
         ),
       )
@@ -138,6 +128,22 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     );
   }
 
+  Widget settingsList() {
+    return ListView(
+      controller: scrollController,
+      children: [
+        SettingsToggle(
+          title: "Remove Items with Hated Tags",
+          value: filterHated,
+          onChanged: (bool newValue) {
+            filterHated = newValue;
+            updateState();
+          },
+        ),
+      ]
+    );
+  }
+
   Widget editableTagsList(type) {
     List<String> tagsList = getTagsList(type);
 
@@ -153,8 +159,9 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     return ClipRRect(
       borderRadius: BorderRadius.circular(5),
       child: DesktopScrollWrap(
-        controller: ScrollController(),
+        controller: scrollController,
         child: ListView.builder(
+          controller: scrollController,
           padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
           shrinkWrap: false,
           itemCount: tagsList.length,

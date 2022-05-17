@@ -91,7 +91,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
   }
 
   Future<bool> _onWillPop() async {
-    final shouldPop = await showDialog(
+    final bool? shouldPop = await showDialog(
       context: context,
       builder: (context) {
         return SettingsDialog(
@@ -120,7 +120,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
         );
       },
     );
-    return shouldPop;
+    return shouldPop ?? false;
   }
 
   @override

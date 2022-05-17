@@ -29,7 +29,7 @@ class VideoApp extends StatefulWidget {
   final int index;
   final SearchGlobal searchGlobal;
   final bool enableFullscreen;
-  VideoApp(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
+  const VideoApp(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
   @override
   _VideoAppState createState() => _VideoAppState();
 }
@@ -139,7 +139,7 @@ class _VideoAppState extends State<VideoApp> {
 
   void onSize(int size) {
     // TODO find a way to stop loading based on size when caching is enabled
-    final int maxSize = 1024 * 1024 * 200;
+    const int maxSize = 1024 * 1024 * 200;
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
@@ -170,7 +170,7 @@ class _VideoAppState extends State<VideoApp> {
         //
         break;
       case 'size':
-        onSize(data);
+        onSize(data as int);
         break;
       case 'isFromCache':
         isFromCache = true;
@@ -201,14 +201,14 @@ class _VideoAppState extends State<VideoApp> {
     viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode == 'Mobile'
+    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
         ? searchHandler.viewedIndex.value == widget.index
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode == 'Mobile' ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;
@@ -232,7 +232,7 @@ class _VideoAppState extends State<VideoApp> {
     }
   }
 
-  void initVideo(ignoreTagsCheck) {
+  void initVideo(bool ignoreTagsCheck) {
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
@@ -251,6 +251,8 @@ class _VideoAppState extends State<VideoApp> {
     isFromCache = false;
     isStopped = true;
     stopReason = reason;
+
+    viewerHandler.setLoaded(widget.key, false);
 
     resetZoom();
 
@@ -296,8 +298,7 @@ class _VideoAppState extends State<VideoApp> {
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
     // print(scaleState);
 
-    isZoomed =
-        scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
+    isZoomed = scaleState == PhotoViewScaleState.zoomedIn || scaleState == PhotoViewScaleState.covering || scaleState == PhotoViewScaleState.originalSize;
     viewerHandler.setZoomed(widget.key, isZoomed);
   }
 
@@ -330,8 +331,8 @@ class _VideoAppState extends State<VideoApp> {
   void doubleTapZoom() {
     if (!isVideoInit()) return;
     // viewController.scale = 2;
-    viewController.updateMultiple(scale: 2);
-    // scaleController.scaleState = PhotoViewScaleState.originalSize;
+    // viewController.updateMultiple(scale: 2);
+    scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
   void _updateVideoState() {
@@ -341,6 +342,10 @@ class _VideoAppState extends State<VideoApp> {
     // });
 
     if (chewieController == null) return;
+
+    if(videoController?.value.isInitialized ?? false) {
+      viewerHandler.setLoaded(widget.key, true);
+    }
 
     if (viewerHandler.isFullscreen.value != chewieController!.isFullScreen) {
       // redisable sleep when changing fullscreen state
@@ -354,7 +359,6 @@ class _VideoAppState extends State<VideoApp> {
       // save fullscreen state only when it changed
       viewerHandler.isFullscreen.value = chewieController!.isFullScreen;
     }
-    
 
     if (searchHandler.viewedIndex.value == widget.index) {
       if (chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
@@ -366,7 +370,7 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   bool isVideoInit() {
-    return chewieController != null && chewieController!.videoPlayerController.value.isInitialized;
+    return chewieController?.videoPlayerController.value.isInitialized ?? false;
   }
 
   Future<void> initPlayer() async {
@@ -425,7 +429,7 @@ class _VideoAppState extends State<VideoApp> {
         _onError(Exception([errorMessage]));
 
         return Center(
-          child: Text(errorMessage, style: TextStyle(color: Colors.white)),
+          child: Text(errorMessage, style: const TextStyle(color: Colors.white)),
         );
       },
 
@@ -510,40 +514,36 @@ class _VideoAppState extends State<VideoApp> {
 
     // TODO move controls outside of chewie, to exclude them from zoom
 
+    double aspectRatio = videoController?.value.aspectRatio ?? 1.0;
+    double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
+    Size childSize = Size(
+      aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
+      aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
+    );
+
     return Hero(
       tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
       child: Material(
-        child: Listener(
-          onPointerSignal: (pointerSignal) {
-            if (pointerSignal is PointerScrollEvent) {
-              scrollZoomImage(pointerSignal.scrollDelta.dy);
-            }
-          },
-          child: initialized
-              ? Stack(
-                  children: [
-                    PhotoView.customChild(
-                      child: Chewie(controller: chewieController!),
-                      minScale: PhotoViewComputedScale.contained,
-                      maxScale: PhotoViewComputedScale.covered * 8,
-                      initialScale: PhotoViewComputedScale.contained,
-                      enableRotation: false,
-                      basePosition: Alignment.center,
-                      controller: viewController,
-                      // tightMode: true,
-                      scaleStateController: scaleController,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: initialized
+                  ? Container()
+                  : CachedThumbBetter(
+                      widget.booruItem,
+                      widget.index,
+                      widget.searchGlobal,
+                      1,
+                      false,
                     ),
-                    TransparentPointer(
-                      child: SafeArea(
-                        child: LoliControls(outsideController: chewieController),
-                      ),
-                    ),
-                  ],
-                )
-              : Stack(
-                  children: [
-                    CachedThumbBetter(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
-                    LoadingElement(
+            ),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: initialized
+                  ? Container()
+                  : LoadingElement(
                       item: widget.booruItem,
                       hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
                       isFromCache: isFromCache,
@@ -566,8 +566,44 @@ class _VideoAppState extends State<VideoApp> {
                         killLoading(['Stopped by User']);
                       },
                     ),
-                  ],
-                ),
+            ),
+            //
+            AnimatedSwitcher(
+              duration: Duration(milliseconds: settingsHandler.appMode.value == AppMode.DESKTOP ? 50 : 200),
+              child: initialized
+                  ? Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (pointerSignal is PointerScrollEvent) {
+                          scrollZoomImage(pointerSignal.scrollDelta.dy);
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          PhotoView.customChild(
+                            child: Chewie(controller: chewieController!),
+                            childSize: childSize,
+                            minScale: PhotoViewComputedScale.contained,
+                            maxScale: PhotoViewComputedScale.covered * 8,
+                            initialScale: PhotoViewComputedScale.contained,
+                            enableRotation: false,
+                            basePosition: Alignment.center,
+                            controller: viewController,
+                            // tightMode: true,
+                            scaleStateController: scaleController,
+                          ),
+                          TransparentPointer(
+                            child: SafeArea(
+                              child: LoliControls(
+                                outsideController: chewieController,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  : Container(),
+            ),
+          ],
         ),
       ),
     );

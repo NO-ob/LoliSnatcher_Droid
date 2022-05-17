@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,19 +7,22 @@ import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-
-import 'TagChip.dart';
+import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/widgets/TagChip.dart';
+import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:LoliSnatcher/utilities/debouncer.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
 // - debounce searches [In progress: needs rewrite of tagSearch to dio to use requests cancelling]
+// - parse tag type from search if possible
 
 
 class TagSearchBox extends StatefulWidget {
-  TagSearchBox();
+  const TagSearchBox({Key? key}) : super(key: key);
   @override
   _TagSearchBoxState createState() => _TagSearchBoxState();
 }
@@ -29,6 +30,7 @@ class TagSearchBox extends StatefulWidget {
 class _TagSearchBoxState extends State<TagSearchBox> {
   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
   final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final TagHandler tagHandler = Get.find<TagHandler>();
 
   ScrollController suggestionsScrollController = ScrollController();
   ScrollController searchScrollController = ScrollController();
@@ -48,8 +50,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   RxList<List<String>> historyResults = RxList([]);
   RxList<List<String>> databaseResults = RxList([]);
   RxList<List<String>> modifiersResults = RxList([]);
-
-  Timer? debounceTimer;
 
   @override
   void initState() {
@@ -78,7 +78,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   void animateTransition() {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (searchScrollController.hasClients) {
         searchScrollController.animateTo(
           searchScrollController.position.maxScrollExtent,
@@ -91,20 +91,20 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void createOverlay() {
     if (searchHandler.searchBoxFocus.hasFocus) {
-      if (this._overlayEntry == null) {
+      if (_overlayEntry == null) {
         tagStuff();
         combinedSearch();
-        this._overlayEntry = _createOverlayEntry();
+        _overlayEntry = _createOverlayEntry();
       }
-      this.updateOverlay();
+      updateOverlay();
     }
   }
 
   void removeOverlay() {
-    if (this._overlayEntry != null) {
-      if (this._overlayEntry!.mounted) {
-        this._overlayEntry!.remove();
-        this._overlayEntry = null; // remove and destroy overlay object from memory
+    if (_overlayEntry != null) {
+      if (_overlayEntry!.mounted) {
+        _overlayEntry!.remove();
+        _overlayEntry = null; // remove and destroy overlay object from memory
       }
     }
   }
@@ -112,16 +112,16 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void updateOverlay() {
     if (searchHandler.searchBoxFocus.hasFocus) {
       // print("textbox is focused");
-      if (!this._overlayEntry!.mounted) {
-        Overlay.of(context)!.insert(this._overlayEntry!);
+      if (!_overlayEntry!.mounted) {
+        Overlay.of(context)!.insert(_overlayEntry!);
       } else {
         tagStuff();
         combinedSearch();
-        this._overlayEntry!.markNeedsBuild();
+        _overlayEntry!.markNeedsBuild();
       }
     } else {
-      if (this._overlayEntry!.mounted) {
-        this._overlayEntry!.remove();
+      if (_overlayEntry!.mounted) {
+        _overlayEntry!.remove();
       }
     }
   }
@@ -133,7 +133,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     searchHandler.searchBoxFocus.removeListener(onFocusChange);
     searchHandler.searchTextController.removeListener(onTextChanged);
 
-    debounceTimer?.cancel();
+    Debounce.cancel('tag_search_box');
 
     suggestionsScrollController.dispose();
     searchScrollController.dispose();
@@ -153,6 +153,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           displayArrows: false,
           displayDoneButton: false,
           footerBuilder: (_) => PreferredSize(
+            preferredSize: const Size.fromHeight(44),
             child: Container(
               color: Get.theme.colorScheme.background,
               height: 44,
@@ -249,7 +250,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 ]
               ),
             ),
-            preferredSize: Size.fromHeight(44)
           ),
         ),
       ],
@@ -313,7 +313,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
     //remove minus (exclude symbol) or tilde (or symbol)
     lastTag = lastTag.replaceAll(RegExp(r'^-'), '').replaceAll(RegExp(r'^~'), '');
-    print("LASTTAG: $lastTag");
+    // print("LASTTAG: $lastTag");
     setState(() { });
   }
 
@@ -386,15 +386,18 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   // void searchModifiers() async { }
 
   void combinedSearch() {
-    debounceTimer?.cancel();
     // drop previous list even if new search didn't start yet
     booruResults.value = [[' ', 'loading']];
-    debounceTimer = Timer(const Duration(milliseconds: 300), () {
-      searchBooru();
-      searchHistory();
-      searchDatabase();
-      // searchModifiers();
-    });
+    Debounce.debounce(
+      tag: 'tag_search_box',
+      callback: () {
+        searchBooru();
+        searchHistory();
+        searchDatabase();
+        // searchModifiers();
+      },
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
 
@@ -433,16 +436,16 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 onTap: () {
                   tagStuff();
                   combinedSearch();
-                  this._overlayEntry!.markNeedsBuild();
+                  _overlayEntry!.markNeedsBuild();
                 },
               );
             } else {
               return Scrollbar(
                 controller: suggestionsScrollController,
                 interactive: true,
-                isAlwaysShown: true,
+                thumbVisibility: true,
                 thickness: 10,
-                radius: Radius.circular(10),
+                radius: const Radius.circular(10),
                 child: ListView.builder(
                   controller: suggestionsScrollController,
                   padding: EdgeInsets.zero,
@@ -453,14 +456,16 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     final String tag = item[0];
                     final String type = item[1];
 
+                    Color tagColor = tagHandler.getTag(tag).getColour();
+
                     if (tag.isNotEmpty) {
-                      Widget? itemIcon;
+                      Widget itemIcon = const SizedBox();
                       switch (type) {
                         case 'history':
-                          itemIcon = Icon(Icons.history);
+                          itemIcon = const Icon(Icons.history);
                           break;
                         case 'database':
-                          itemIcon = Icon(Icons.archive);
+                          itemIcon = const Icon(Icons.archive);
                           break;
                         case 'loading':
                           itemIcon = CircularProgressIndicator(
@@ -468,14 +473,24 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           );
                           break;
                         default:
-                          itemIcon = Icon(null);
+                          itemIcon = const Icon(null);
                           break;
                       }
                       return ListTile(
                         horizontalTitleGap: 4,
                         minLeadingWidth: 20,
                         minVerticalPadding: 0,
-                        leading: itemIcon,
+                        leading: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 24,
+                              color: tagColor,
+                            ),
+                            itemIcon,
+                          ],
+                        ),
                         title: MarqueeText(
                           key: ValueKey(tag),
                           text: tag,
@@ -493,12 +508,13 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
-                          String newTag = "";
-                          if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
-                            newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag.replaceAll("_", " ") + ",";
+                          String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '');
+                          if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus") {
+                            newTag = tag.replaceAll("_", " ") + ",";
                           } else {
-                            newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag + " ";
+                            newTag = tag + " ";
                           }
+
                           String newInput = "";
                           if (startIndex >= 0 && replaceString.isNotEmpty){
                             newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, startIndex);
@@ -515,7 +531,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
                           tagStuff();
                           combinedSearch();
-                          this._overlayEntry!.markNeedsBuild();
+                          _overlayEntry!.markNeedsBuild();
 
                           setState(() { });
                         },
@@ -597,7 +613,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(50)
                     ),
-                    padding: EdgeInsets.symmetric(horizontal: 3, vertical: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(48.5),
                       child: Listener(
@@ -627,7 +643,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       ),
                     )
                   ),
-              contentPadding: EdgeInsets.fromLTRB(15, 0, 5, 0), // left,top,right,bottom
+              contentPadding: const EdgeInsets.fromLTRB(15, 0, 5, 0), // left,top,right,bottom
               focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
                 borderRadius: BorderRadius.circular(50),

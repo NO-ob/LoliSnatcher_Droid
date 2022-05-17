@@ -128,21 +128,6 @@ class _DebugPageState extends State<DebugPage> {
                 },
                 title: "Enable drag scroll on lists [Desktop only]"
               ),
-              // SettingsToggle(
-              //   value: settingsHandler.isMemeTheme.value,
-              //   onChanged: (newValue) {
-              //     setState(() {
-              //       settingsHandler.isMemeTheme.value = newValue;
-              //     });
-              //   },
-              //   title: 'Meme Theme'
-              // ),
-              SettingsButton(
-                name: 'Load and Save Legacy Settings',
-                action: () {
-                  settingsHandler.debugLoadAndSaveLegacy();
-                }
-              ),
 
               SettingsButton(
                 name: 'Animation speed ($timeDilation)',

@@ -253,7 +253,7 @@ class DBHandler{
     // print('Searching DB took: ${diff.inMilliseconds} ms');
 
     Logger.Inst().log("got results from db", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
-    Logger.Inst().log(result, "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
+    Logger.Inst().log(result.toString(), "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
 
     if (result != null && result.isNotEmpty) {
       // start = DateTime.now();
@@ -319,7 +319,7 @@ class DBHandler{
     }
 
     Logger.Inst().log("got results from db", "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
-    Logger.Inst().log(result, "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
+    Logger.Inst().log(result.toString(), "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);
 
     if (result != null && result.isNotEmpty) {
       if(result.length > 1) {
@@ -340,7 +340,7 @@ class DBHandler{
     result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
 
     Logger.Inst().log("got results from db", "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
-    Logger.Inst().log(result, "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
+    Logger.Inst().log(result.toString(), "DBHandler", "getFavouritesCount", LogTypes.booruHandlerInfo);
 
     if (result != null) {
       return result.first["count"];

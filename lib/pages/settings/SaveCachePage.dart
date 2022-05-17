@@ -183,7 +183,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
                   } else {
                     // TODO need to update dir picker to work on desktop
-                    /*if(widget.settingsHandler.appMode == "Desktop") {
+                    /*if(widget.settingsHandler.appMode.value == AppMode.DESKTOP) {
                       Get.dialog(Dialog(
                         child: Container(
                           width: 500,

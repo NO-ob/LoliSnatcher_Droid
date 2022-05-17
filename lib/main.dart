@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:get/get.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -11,7 +9,6 @@ import 'package:statsfl/statsfl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:app_links/app_links.dart';
 
 import 'package:LoliSnatcher/ScrollPhysics.dart';
@@ -29,6 +26,8 @@ import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/widgets/ThemeBuilder.dart';
 
 // import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
@@ -43,13 +42,14 @@ void main() {
     databaseFactory = databaseFactoryFfi;
   }
 
-  runApp(MainApp());
+  runApp(const MainApp());
 }
 
 class MainApp extends StatefulWidget {
+  const MainApp({Key? key}) : super(key: key);
+
   @override
-  _MainAppState createState() => _MainAppState();
-  MainApp();
+  State<MainApp> createState() => _MainAppState();
 }
 
 class _MainAppState extends State<MainApp> {
@@ -72,7 +72,7 @@ class _MainAppState extends State<MainApp> {
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {
-      var window = WidgetsBinding.instance!.window;
+      var window = WidgetsBinding.instance.window;
       window.onPlatformBrightnessChanged = () {
         // This callback is called every time the brightness changes and forces the app root to restate.
         // This allows to not use darkTheme to avoid coloring bugs on AppBars
@@ -85,8 +85,12 @@ class _MainAppState extends State<MainApp> {
 
   void initHandlers() async {
     await settingsHandler.initialize();
-    await searchHandler.restoreTabs();
+
+    // should init earlier than tabs so tags color properly on first render of search box
+    // TODO but this possibly could lead to bad preformance on start if tag storage is too big?
     await tagHandler.initialize();
+
+    await searchHandler.restoreTabs();
   }
 
   void setMaxFPS() async {
@@ -131,50 +135,29 @@ class _MainAppState extends State<MainApp> {
           ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
           : settingsHandler.theme.value;
       ThemeMode themeMode = settingsHandler.themeMode.value;
-      Brightness? platformBrightness = SchedulerBinding.instance?.window.platformBrightness;
-      bool isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrightness == Brightness.dark);
       bool isAmoled = settingsHandler.isAmoled.value;
 
-      Brightness primaryBrightness = ThemeData.estimateBrightnessForColor(theme.primary!);
-      bool onPrimaryIsDark = primaryBrightness == Brightness.dark;
-      Brightness accentBrightness = ThemeData.estimateBrightnessForColor(theme.accent!);
-      bool onAccentIsDark = accentBrightness == Brightness.dark;
-
-      // TextTheme textTheme = TextTheme(
-      //   headline5: GoogleFonts.quicksand(fontSize: 72.0, fontWeight: FontWeight.bold),
-      //   headline6: GoogleFonts.quicksand(fontSize: 36.0),
-      //   bodyText2: GoogleFonts.quicksand(fontSize: 14.0),
-      //   bodyText1: GoogleFonts.quicksand(fontSize: 14.0),
-      // );
-
-      TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
-        cursorColor: theme.accent,
-        selectionColor: Colors.blue.withOpacity(0.66),
-        selectionHandleColor: theme.accent,
+      ThemeHandler themeHandler = ThemeHandler(
+        theme: theme,
+        themeMode: themeMode,
+        isAmoled: isAmoled,
       );
 
-      // print('isDark $isDark');
+      // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      //   statusBarColor: Get.theme.colorScheme.background.withOpacity(0.5),
+      //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      //   statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      //   systemStatusBarContrastEnforced: true,
+        
+      //   systemNavigationBarColor: Get.theme.colorScheme.background.withOpacity(0.5),
+      //   systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      //   systemNavigationBarContrastEnforced: true,
+      //   systemNavigationBarDividerColor: Colors.transparent,
+      // ));
 
-      final ColorScheme alternateColorScheme = ColorScheme(
-        primary: theme.primary!,
-        onPrimary: onPrimaryIsDark ? Colors.white : Colors.black,
-        // onPrimary: isDark ? Colors.white : Colors.black,
 
-        secondary: theme.accent!,
-        onSecondary: onAccentIsDark ? Colors.white : Colors.black,
-        // onSecondary: isDark ? Colors.white : Colors.black,
+      // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
 
-        surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-        onSurface: isDark ? Colors.white : Colors.black,
-
-        background: isDark ? Colors.black : Colors.white,
-        onBackground: isDark ? Colors.white : Colors.black,
-
-        error: Colors.redAccent,
-        onError: Colors.white,
-
-        brightness: isDark ? Brightness.dark : Brightness.light,
-      );
 
       return StatsFl(
         isEnabled: settingsHandler.isDebug.value && settingsHandler.showFPS.value, //Toggle on/off
@@ -195,51 +178,15 @@ class _MainAppState extends State<MainApp> {
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
             showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
             scrollBehavior: const CustomScrollBehavior(),
-            theme: ThemeData(
-              scaffoldBackgroundColor: (isDark && isAmoled) ? Colors.black : null,
-              backgroundColor: (isDark && isAmoled) ? Colors.black : null,
-              canvasColor: (isDark && isAmoled) ? Colors.black : null,
-
-              brightness: isDark ? Brightness.dark : Brightness.light,
-              primaryColor: theme.primary,
-              appBarTheme: AppBarTheme(
-                backgroundColor: alternateColorScheme.primary,
-                foregroundColor: alternateColorScheme.onPrimary,
-              ),
-
-              colorScheme: alternateColorScheme,
-              // textTheme: textTheme,
-              textSelectionTheme: textSelectionTheme,
-              androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-            ),
-
+            // theme: ThemeData(),
+            theme: themeHandler.lightTheme(),
             // TODO doesnt detect when appbar text color should change depending on the background ???
-            // darkTheme: ThemeData.dark().copyWith(
-            //   appBarTheme: AppBarTheme(
-            //     brightness: primaryBrightness,
-            //     titleTextStyle: TextStyle(color: onPrimaryIsDark ? Colors.black : Colors.black),
-            //     toolbarTextStyle: TextStyle(color: onPrimaryIsDark ? Colors.black : Colors.black),
-            //     backgroundColor: theme.primary,
-            //     foregroundColor: onPrimaryIsDark ? Colors.black : Colors.black,
-            //   ),
-            //   scaffoldBackgroundColor: isAmoled ? Colors.black : null,
-            //   backgroundColor: isAmoled ? Colors.black : null,
-            //   canvasColor: isAmoled ? Colors.black : null,
-
-            //   brightness: Brightness.dark,
-            //   primaryColor: theme.primary,
-            //   accentColor: theme.accent,
-
-            //   colorScheme: alternateColorScheme.copyWith(
-            //     brightness: Brightness.dark
-            //   ),
-            //   textTheme: theme.text,
-            //   textSelectionTheme: textSelectionTheme,
-            // ),
+            // darkTheme: ThemeData.dark(),
+            darkTheme: themeHandler.darkTheme(),
 
             themeMode: themeMode,
             navigatorKey: Get.key,
-            home: Preloader(),
+            home: const Preloader(),
           ),
         ),
       );
@@ -248,12 +195,12 @@ class _MainAppState extends State<MainApp> {
 }
 
 class Preloader extends StatelessWidget {
-  Preloader({Key? key}) : super(key: key);
-
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  const Preloader({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+
     return Obx(() {
       if (settingsHandler.isInit.value) {
         if (Platform.isAndroid || Platform.isIOS) {
@@ -261,7 +208,7 @@ class Preloader extends StatelessWidget {
           ServiceHandler.setSystemUiVisibility(true);
 
           // force landscape orientation if enabled desktop mode on mobile device
-          if (settingsHandler.appMode != "Mobile") {
+          if (settingsHandler.appMode.value == AppMode.DESKTOP) {
             SystemChrome.setPreferredOrientations([
               DeviceOrientation.landscapeRight,
               DeviceOrientation.landscapeLeft,
@@ -271,12 +218,12 @@ class Preloader extends StatelessWidget {
           }
         }
 
-        return Home();
+        return const Home();
       } else {
         // no custom theme data here yet, fallback to black bg + pink loading spinner
         return Container(
           color: Colors.black,
-          child: Center(
+          child: const Center(
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(Colors.pink),
             ),
@@ -288,9 +235,10 @@ class Preloader extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
+
   @override
-  _HomeState createState() => _HomeState();
-  Home();
+  State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
@@ -300,10 +248,6 @@ class _HomeState extends State<Home> {
   Timer? cacheClearTimer;
   Timer? cacheStaleTimer;
   ImageWriter imageWriter = ImageWriter();
-
-  int memeCount = 0;
-  Timer? memeTimer;
-  ThemeItem? selectedTheme;
 
   AppLinks? appLinks;
   StreamSubscription<Uri>? appLinksSubscription;
@@ -317,7 +261,7 @@ class _HomeState extends State<Home> {
     // searchHandler.restoreTabs();
 
     // force cache clear every minute + perform tabs backup
-    cacheClearTimer = Timer.periodic(Duration(seconds: 30), (timer) {
+    cacheClearTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       // TODO we don't need to clear cache so much, since all images are cleared on dispose
       // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
@@ -329,29 +273,10 @@ class _HomeState extends State<Home> {
     imageWriter.clearCacheOverflow();
     // run check for stale cache files
     // TODO find a better way and/or cases when it will be better to call these
-    cacheStaleTimer = Timer.periodic(Duration(minutes: 5), (timer) {
+    cacheStaleTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       imageWriter.clearStaleCache();
       imageWriter.clearCacheOverflow();
     });
-
-    // memeTimer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-    //   if(settingsHandler.isMemeTheme.value) {
-    //     if(memeCount + 1 < settingsHandler.map['theme']?['options'].length) {
-    //       memeCount ++;
-    //     } else {
-    //       memeCount = 0;
-    //     }
-
-    //     if(selectedTheme == null) selectedTheme = settingsHandler.theme.value;
-
-    //     settingsHandler.theme.value = settingsHandler.map['theme']?['options'][memeCount];
-    //   } else {
-    //     if(selectedTheme != null) {
-    //       settingsHandler.theme.value = selectedTheme!;
-    //       selectedTheme = null;
-    //     }
-    //   }
-    // });
   }
 
   void initDeepLinks() async {
@@ -391,17 +316,18 @@ class _HomeState extends State<Home> {
   void dispose() {
     cacheClearTimer?.cancel();
     cacheStaleTimer?.cancel();
-    memeTimer?.cancel();
     appLinksSubscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (settingsHandler.appMode != "Mobile") {
-      return DesktopHome();
-    } else {
-      return MobileHome();
-    }
+    return Obx(() {
+      if (settingsHandler.appMode.value == AppMode.MOBILE) {
+        return const MobileHome();
+      } else {
+        return const DesktopHome();
+      }
+    });
   }
 }

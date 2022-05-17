@@ -79,8 +79,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       child: GestureDetector(
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
-        onTap: _cancelAndRestartTimer,
+        onTap: () {
+          _cancelAndRestartTimer();
+          toggleToolbar();
+        },
         child: AbsorbPointer(
+          // children elements won't receive gestures until they are visible
           absorbing: _hideStuff,
           child: Column(
             children: <Widget>[
@@ -231,8 +235,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     String tapSideSymbol = _lastDoubleTapSide > 0 ? '>>' : '<<';
     bool isOneSecond = _lastDoubleTapAmount == 1;
     String msgText = _doubleTapExtraMessage != ''
-    ? "${_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : ""}"
-    : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
+      ? "${_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : ""}"
+      : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
+
     return AnimatedOpacity(
       opacity: _doubleTapped ? 1.0 : 0.0,
       onEnd: () {
@@ -245,7 +250,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
       },
       duration: const Duration(milliseconds: 333),
-      child: Container(
+      child: GestureDetector(
+        onTap: () {
+          _cancelAndRestartTimer();
+          toggleToolbar();
+        },
+        child: Container(
           height: barHeight,
           margin: EdgeInsets.only(
             // when not in fullscreen - move lower to avoid conflict with appbar
@@ -292,7 +302,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               else
                 const SizedBox(),
             ],
-          )),
+          ),
+        ),
+      ),
     );
   }
 
@@ -346,18 +358,18 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               _hideStuff = true;
             });
           }
+
+          toggleToolbar();
         },
         child: Container(
+          // color: Colors.yellow.withOpacity(0.66),
           color: Colors.transparent,
           child: Center(
             child: Stack(
               alignment: Alignment.center,
               children: [
                 AnimatedOpacity(
-                  opacity:
-                      (!_latestValue.isPlaying && !_dragging)
-                          ? 1.0
-                          : 0.0,
+                  opacity: (!_latestValue.isPlaying && !_dragging) ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: GestureDetector(
                     child: Container(
@@ -569,6 +581,15 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       _hideStuff = false;
       _displayTapped = true;
     });
+  }
+
+  void toggleToolbar() {
+    // toggle toolbar and system ui only when controls are visible and not in fullscreen
+    // if the controls are visible buildHitArea and buildDoubleTapMessage listen to taps, otherwise - gestureDetector in the main build
+    print('toggleToolbar $_hideStuff ${chewieController.isFullScreen}');
+    if(_hideStuff && !chewieController.isFullScreen) {
+      viewerHandler.displayAppbar.toggle();
+    }
   }
 
   Future<void> _initialize() async {

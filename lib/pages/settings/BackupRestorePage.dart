@@ -240,7 +240,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         Directory configBoorusDir = await Directory(configBoorusPath).create(recursive:true);
                         if (json.length > 0) {
                           for (int i = 0; i < json.length; i++) {
-                              Booru booru = Booru.fromJson(json[i]);
+                              Booru booru = Booru.fromJsonObject(json[i]);
                               bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
                               if(!alreadyExists) {
                                 File booruFile = File(configBoorusDir.path + "${booru.name}.json");

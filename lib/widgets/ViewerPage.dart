@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:LoliSnatcher/widgets/ViewerTutorial.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +44,7 @@ import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
  */
 class ViewerPage extends StatefulWidget {
   final int index;
-  ViewerPage(this.index);
+  const ViewerPage(this.index, {Key? key}) : super(key: key);
 
   @override
   _ViewerPageState createState() => _ViewerPageState();
@@ -156,7 +157,7 @@ class _ViewerPageState extends State<ViewerPage> {
     return Obx(() {
       final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
       final String formattedTotal = searchHandler.currentFetched.length.toString(); 
-      return Text("$formattedViewedIndex/$formattedTotal", style: TextStyle(color: Colors.white));
+      return Text("$formattedViewedIndex/$formattedTotal", style: const TextStyle(color: Colors.white));
     });
   }
 
@@ -259,37 +260,38 @@ class _ViewerPageState extends State<ViewerPage> {
 
                     SearchGlobal tab = searchHandler.currentTab;
 
+                    late Widget itemWidget;
+                    if(isImage) {
+                      itemWidget = MediaViewerBetter(
+                        item.key,
+                        item,
+                        index,
+                        tab,
+                      );
+                    } else if(isVideo) {
+                      if(settingsHandler.disableVideo) {
+                        itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
+                      } else {
+                        if(Platform.isAndroid || Platform.isIOS) {
+                          itemWidget = VideoApp(item.key, item, index, tab, true);
+                        } else if(Platform.isWindows || Platform.isLinux) {
+                          // itemWidget = VideoAppPlaceholder(item: item, index: index);
+                          itemWidget = VideoAppDesktop(item.key, item, index, tab);
+                        } else {
+                          itemWidget = VideoAppPlaceholder(item: item, index: index);
+                        }
+                      }
+                    } else {
+                      itemWidget = UnknownPlaceholder(item: item, index: index);
+                    }
+
                     return Obx(() {
                       bool isViewed = index == searchHandler.viewedIndex.value;
                       bool isNear = (searchHandler.viewedIndex.value - index).abs() <= settingsHandler.preloadCount;
                       // print('!! preloadpageview item build $index $isViewed $isNear !!');
                       if(!isViewed && !isNear) {
                         // don't render if out of preload range
-                        return const SizedBox();
-                      }
-
-                      late Widget itemWidget;
-                      if(isImage) {
-                        itemWidget = MediaViewerBetter(
-                          item.key,
-                          item,
-                          index,
-                          tab,
-                        );
-                      } else if(isVideo) {
-                        if(settingsHandler.disableVideo) {
-                          itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
-                        } else {
-                          if(Platform.isAndroid || Platform.isIOS) {
-                            itemWidget = VideoApp(item.key, item, index, tab, true);
-                          } else if(Platform.isWindows || Platform.isLinux) {
-                            itemWidget = VideoAppDesktop(item.key, item, index, tab);
-                          } else {
-                            return VideoAppPlaceholder(item: item, index: index);
-                          }
-                        }
-                      } else {
-                        itemWidget = UnknownPlaceholder(item: item, index: index);
+                        return Center(child: Container(color: Colors.black));
                       }
 
                       // Cut to the size of the container, prevents overlapping
@@ -317,7 +319,7 @@ class _ViewerPageState extends State<ViewerPage> {
                           onLongPress: () {
                             toggleToolbar(true);
                           },
-                          child: itemWidget,
+                          child: RepaintBoundary(child: itemWidget),
                         ),
                       );
                     });
@@ -350,9 +352,10 @@ class _ViewerPageState extends State<ViewerPage> {
                   itemCount: searchHandler.currentFetched.length,
                 )),
 
-                NotesRenderer(),
+                const NotesRenderer(),
                 ChangePageButtons(controller),
-                ZoomButton(),
+                const ZoomButton(),
+                const ViewerTutorial(),
               ]),
             ),
           ),
@@ -440,11 +443,11 @@ class _ViewerPageState extends State<ViewerPage> {
         if (newState == true) {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               "Can't start Slideshow",
               style: TextStyle(fontSize: 20)
             ),
-            content: Text(
+            content: const Text(
               "Reached the Last loaded Item",
               style: TextStyle(fontSize: 16)
             ),
@@ -467,7 +470,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
     return SizedBox(
       width: maxWidth,
-      child: Drawer(
+      child: const Drawer(
         child: SafeArea(
           child: TagView(),
         ),
@@ -481,14 +484,14 @@ class _ViewerPageState extends State<ViewerPage> {
       Clipboard.setData(ClipboardData(text: text));
       FlashElements.showSnackbar(
         context: context,
-        duration: Duration(seconds: 2),
-        title: Text(
+        duration: const Duration(seconds: 2),
+        title: const Text(
           "Copied to clipboard!",
           style: TextStyle(fontSize: 20)
         ),
         content: Text(
           text,
-          style: TextStyle(fontSize: 16)
+          style: const TextStyle(fontSize: 16)
         ),
         leadingIcon: Icons.copy,
         sideColor: Colors.green,
@@ -523,19 +526,19 @@ class _ViewerPageState extends State<ViewerPage> {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
         context: context,
-        title: Text(
+        title: const Text(
           "Loading File...",
           style: TextStyle(fontSize: 20)
         ),
-        content: Text(
+        content: const Text(
           "This can take some time, please wait...",
           style: TextStyle(fontSize: 16)
         ),
-        overrideLeadingIconWidget: Container(
+        overrideLeadingIconWidget: SizedBox(
           width: 50,
           height: 50,
           child: Padding(
-            padding: EdgeInsets.all(12),
+            padding: const EdgeInsets.all(12),
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
             ),
@@ -553,11 +556,11 @@ class _ViewerPageState extends State<ViewerPage> {
       } else {
         FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               "Error!",
               style: TextStyle(fontSize: 20)
             ),
-            content: Text(
+            content: const Text(
               "Something went wrong when saving the File before Sharing",
               style: TextStyle(fontSize: 16)
             ),
@@ -579,7 +582,7 @@ class _ViewerPageState extends State<ViewerPage> {
       context: context,
       builder: (context) {
         return SettingsDialog(
-          title: Text('What you want to Share?'),
+          title: const Text('What you want to Share?'),
           contentItems: <Widget>[
             const SizedBox(height: 15),
           Column(
@@ -594,8 +597,8 @@ class _ViewerPageState extends State<ViewerPage> {
                     Navigator.of(context).pop();
                     shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
                   },
-                  leading: Icon(CupertinoIcons.link),
-                  title: Text('Post URL'),
+                  leading: const Icon(CupertinoIcons.link),
+                  title: const Text('Post URL'),
                 ),
 
                 const SizedBox(height: 15),
@@ -608,8 +611,8 @@ class _ViewerPageState extends State<ViewerPage> {
                     Navigator.of(context).pop();
                     shareTextAction(searchHandler.currentFetched[searchHandler.viewedIndex.value].fileURL);
                   },
-                  leading: Icon(CupertinoIcons.link),
-                  title: Text('File URL'),
+                  leading: const Icon(CupertinoIcons.link),
+                  title: const Text('File URL'),
                 ),
 
                 const SizedBox(height: 15),
@@ -622,8 +625,8 @@ class _ViewerPageState extends State<ViewerPage> {
                     Navigator.of(context).pop();
                     shareFileAction();
                   },
-                  leading: Icon(Icons.file_present),
-                  title: Text('File'),
+                  leading: const Icon(Icons.file_present),
+                  title: const Text('File'),
                 ),
 
                 const SizedBox(height: 15),
@@ -637,8 +640,8 @@ class _ViewerPageState extends State<ViewerPage> {
                         Navigator.of(context).pop();
                         shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
                       },
-                      leading: Icon(Icons.file_present),
-                      title: Text('Hydrus'),
+                      leading: const Icon(Icons.file_present),
+                      title: const Text('Hydrus'),
                     )
                   : Container()
               ]
@@ -714,7 +717,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 controller: autoScrollProgressController!,
               ),
 
-            Icon(
+            const Icon(
               Icons.more_vert,
               color: Colors.white,
             ),
@@ -723,7 +726,7 @@ class _ViewerPageState extends State<ViewerPage> {
         itemBuilder: (BuildContext itemBuilder) =>
           overFlowList.map((value) =>
             PopupMenuItem(
-              padding: EdgeInsets.all(0), // remove empty space around the button
+              padding: const EdgeInsets.all(0), // remove empty space around the button
               child: SizedBox(
                 width: double.infinity, // force button to take full width
                 child: ListTile(
@@ -759,6 +762,9 @@ class _ViewerPageState extends State<ViewerPage> {
       absorbing: !clickable,
       child: GestureDetector(
         onLongPress: () {
+          buttonHold(action);
+        },
+        onSecondaryTap: () {
           buttonHold(action);
         },
         child: Stack(
@@ -805,14 +811,14 @@ class _ViewerPageState extends State<ViewerPage> {
         // early return to override with animated icon
         return Obx(() {
           if(searchHandler.viewedIndex.value == -1) {
-            return Icon(Icons.favorite_border);
+            return const Icon(Icons.favorite_border);
           }
 
           final bool? isFav = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value;
           return AnimatedCrossFade(
-            duration: Duration(milliseconds: 200),
+            duration: const Duration(milliseconds: 200),
             crossFadeState: isFav == true ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            firstChild: Icon(Icons.favorite),
+            firstChild: const Icon(Icons.favorite),
             secondChild: Icon(isFav == true ? Icons.favorite : (isFav == false ? Icons.favorite_border : CupertinoIcons.heart_slash)),
           );
         });
@@ -937,7 +943,7 @@ class _ViewerPageState extends State<ViewerPage> {
         } else {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               "No Post URL!",
               style: TextStyle(fontSize: 20)
             ),

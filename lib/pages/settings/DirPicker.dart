@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
@@ -230,12 +231,7 @@ class _DirPickerState extends State<DirPicker> {
                     ],
                   ),
                   actionButtons: <Widget>[
-                    ElevatedButton(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Get.back();
-                      },
-                    ),
+                    const CancelButton(),
                     ElevatedButton(
                       child: Text('Create'),
                       onPressed: () {

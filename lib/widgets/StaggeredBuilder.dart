@@ -21,7 +21,7 @@ class StaggeredBuilder extends StatelessWidget {
     int columnCount =
         (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-    bool isDesktop = settingsHandler.appMode == 'Desktop';
+    bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
 
     return LayoutBuilder(builder: (ctx, constraints) {
       double itemMaxWidth = constraints.maxWidth / columnCount; //MediaQuery.of(context).size.width / columnCount;
@@ -87,7 +87,7 @@ class StaggeredBuilder extends StatelessWidget {
 //       double itemMaxWidth = MediaQuery.of(context).size.width / columnCount;
 //       double itemMaxHeight = MediaQuery.of(context).size.height * 0.6;
 
-//       bool isDesktop = settingsHandler.appMode == 'Desktop';
+//       bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
 
 //       return MasonryGridView.count(
 //         controller: searchHandler.gridScrollController,

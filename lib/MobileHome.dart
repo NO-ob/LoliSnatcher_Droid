@@ -17,6 +17,7 @@ import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/MascotImage.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/MainAppbar.dart';
+import 'package:LoliSnatcher/widgets/ThemeBuilder.dart';
 
 class MobileHome extends StatefulWidget {
   const MobileHome({Key? key}) : super(key: key);
@@ -30,16 +31,22 @@ class _MobileHomeState extends State<MobileHome> {
   final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
-  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
 
   bool isDrawerOpened = false;
 
   void _toggleDrawer(InnerDrawerDirection? direction) {
-    mainDrawerKey.currentState?.toggle(
+    searchHandler.mainDrawerKey.currentState?.toggle(
       // if not set, the last direction will be used
       //InnerDrawerDirection.start OR InnerDrawerDirection.end
       direction: direction,
     );
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    searchHandler.mainDrawerKey = GlobalKey<InnerDrawerState>();
   }
 
   
@@ -52,21 +59,24 @@ class _MobileHomeState extends State<MobileHome> {
     }
 
     // ... otherwise, ask to close the app
-    final shouldPop = await showDialog(
+    final bool? shouldPop = await showDialog(
       context: context,
       builder: (context) {
         return SettingsDialog(
-          title: Text('Are you sure?'),
-          contentItems: <Widget>[Text('Do you want to exit the App?')],
+          title: const Text('Are you sure?'),
+          contentItems: const [
+            Text('Do you want to exit the App?')
+          ],
           actionButtons: <Widget>[
-            ElevatedButton(
-              child: Text('Yes'),
+            ElevatedButton.icon(
+              label: const Text('Yes'),
+              icon: const Icon(Icons.exit_to_app_sharp),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
             ),
             ElevatedButton(
-              child: Text('No'),
+              child: const Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
@@ -79,15 +89,18 @@ class _MobileHomeState extends State<MobileHome> {
     return shouldPop ?? false;
   }
 
+  void _onMenuLongTap () {
+    ServiceHandler.vibrate();
+    // scroll to start on long press of menu buttons
+    searchHandler.gridScrollController.jumpTo(0);
+  }
+
   Widget menuButton(InnerDrawerDirection direction) {
     return GestureDetector(
-      onLongPress: () {
-        ServiceHandler.vibrate();
-        // scroll to start on long press of menu buttons
-        searchHandler.gridScrollController.jumpTo(0);
-      },
+      onLongPress: _onMenuLongTap,
+      onSecondaryTap: _onMenuLongTap,
       child: IconButton(
-        icon: Icon(Icons.menu),
+        icon: const Icon(Icons.menu),
         onPressed: () {
           _toggleDrawer(direction);
 
@@ -107,7 +120,7 @@ class _MobileHomeState extends State<MobileHome> {
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {
         return InnerDrawer(
-          key: mainDrawerKey,
+          key: searchHandler.mainDrawerKey,
           onTapClose: true,
           swipe: true,
           swipeChild: true,
@@ -118,7 +131,7 @@ class _MobileHomeState extends State<MobileHome> {
             right: orientation == Orientation.landscape ? 0 : 0.5,
             left: orientation == Orientation.landscape ? 0 : 0.5,
           ),
-          scale: IDOffset.horizontal(1),
+          scale: const IDOffset.horizontal(1),
 
           proportionalChildArea: true,
           borderRadius: 10,
@@ -144,23 +157,26 @@ class _MobileHomeState extends State<MobileHome> {
             }
           }, // return  true (open) or false (close)
 
-          leftChild: MainDrawer(),
-          rightChild: MainDrawer(),
+          leftChild: const MainDrawer(),
+          rightChild: const MainDrawer(),
 
           // Note: use "automaticallyImplyLeading: false" if you do not personalize "leading" of Bar
           scaffold: Scaffold(
             key: mainScaffoldKey,
             resizeToAvoidBottomInset: false,
             // appBar: MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
+            extendBody: true,
             extendBodyBehindAppBar: true,
             body: SafeArea(
+              top: false,
+              bottom: false,
               child: WillPopScope(
                 onWillPop: () {
                   return _onBackPressed(context);
                 },
                 child: Stack(
                   children: [
-                    ImagePreviews(),
+                    const ImagePreviews(),
                     MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
                   ],
                 ),
@@ -179,151 +195,174 @@ class _MobileHomeState extends State<MobileHome> {
   }
 }
 
-class MainDrawer extends StatefulWidget {
-  MainDrawer({Key? key}) : super(key: key);
-
-  @override
-  _MainDrawerState createState() => _MainDrawerState();
-}
-
-class _MainDrawerState extends State<MainDrawer> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+class MainDrawer extends StatelessWidget {
+  const MainDrawer({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SearchHandler searchHandler = Get.find<SearchHandler>();
+
     // print('build drawer');
 
-    return SafeArea(
-      child: Drawer(
-        child: Column(
-          children: <Widget>[
-            Obx(() {
-              if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
-                return Container(
-                  margin: EdgeInsets.fromLTRB(2, 15, 2, 15),
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      //Tags/Search field
-                      TagSearchBox(),
-                      TagSearchButton(),
-                    ],
-                  ),
-                );
-              } else {
-                return const SizedBox.shrink();
-              }
-            }),
-            Expanded(
-              child: Listener(
-                onPointerDown: (event) {
-                  // print("pointer down");
-                  if (searchHandler.searchBoxFocus.hasFocus) {
-                    searchHandler.searchBoxFocus.unfocus();
-                  }
-                },
-                child: ListView(
-                  controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
-                  children: [
-                    // TODO tabbox and booruselector cause lag when opening a drawer
-                    TabBox(),
-                    TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
-                    BooruSelectorMain(true),
-
-                    if (settingsHandler.booruList.length > 1)
-                      SettingsToggle(
-                        title: 'Multibooru Mode',
-                        value: settingsHandler.mergeEnabled,
-                        onChanged: (newValue) {
-                          if (settingsHandler.booruList.length < 2) {
-                            FlashElements.showSnackbar(
-                              context: context,
-                              title: Text(
-                                "Error!",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              content: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('You need at least 2 booru configs to use this feature!'),
-                                ],
-                              ),
-                              leadingIcon: Icons.error,
-                              leadingIconColor: Colors.red,
-                            );
-                          } else {
-                            setState(() {
-                              settingsHandler.mergeEnabled = newValue;
-                              searchHandler.mergeAction(null);
-                            });
-                          }
-                        },
-                      ),
-
-                    if (settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled) BooruSelectorMain(false),
-
-                    Obx(() {
-                      if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
-                        return SettingsButton(
-                          name: "Snatcher",
-                          icon: Icon(Icons.download_sharp),
-                          page: () => SnatcherPage(),
-                          drawTopBorder: true,
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    }),
-
-                    SettingsButton(
-                      name: "Settings",
-                      icon: Icon(Icons.settings),
-                      page: () => SettingsPage(),
+    return RepaintBoundary(
+      child: SafeArea(
+        child: Drawer(
+          child: Column(
+            children: <Widget>[
+              Obx(() {
+                if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                  return Container(
+                    margin: const EdgeInsets.fromLTRB(2, 15, 2, 15),
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: const <Widget>[
+                        //Tags/Search field
+                        TagSearchBox(),
+                        TagSearchButton(),
+                      ],
                     ),
-
-                    Obx(() {
-                      if (settingsHandler.updateInfo.value != null) {
-                        return SettingsButton(
-                          name: 'Update Available!',
-                          icon: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Icon(Icons.update),
-                              Positioned(
-                                top: 1,
-                                left: 1,
-                                child: Center(
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(15),
+                  );
+                } else {
+                  return const SizedBox.shrink();
+                }
+              }),
+              Expanded(
+                child: Listener(
+                  onPointerDown: (event) {
+                    // print("pointer down");
+                    if (searchHandler.searchBoxFocus.hasFocus) {
+                      searchHandler.searchBoxFocus.unfocus();
+                    }
+                  },
+                  child: ListView(
+                    controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
+                    children: [
+                      const TabBox(),
+                      const TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
+                      const BooruSelectorMain(true),
+                      const MergeBooruToggle(),
+                      Obx(() {
+                        if (settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled.value) {
+                          return const BooruSelectorMain(false);
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }),
+        
+                      Obx(() {
+                        if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
+                          return SettingsButton(
+                            name: "Snatcher",
+                            icon: const Icon(Icons.download_sharp),
+                            page: () => SnatcherPage(),
+                            drawTopBorder: true,
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }),
+        
+                      SettingsButton(
+                        name: "Settings",
+                        icon: const Icon(Icons.settings),
+                        page: () => SettingsPage(),
+                      ),
+        
+                      Obx(() {
+                        if (settingsHandler.updateInfo.value != null) {
+                          return SettingsButton(
+                            name: 'Update Available!',
+                            icon: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Icon(Icons.update),
+                                Positioned(
+                                  top: 1,
+                                  left: 1,
+                                  child: Center(
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          action: () async {
-                            settingsHandler.showUpdate(true);
-                          },
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    }),
-
-                    if (settingsHandler.enableDrawerMascot) MascotImage(),
-                  ],
+                              ],
+                            ),
+                            action: () async {
+                              settingsHandler.showUpdate(true);
+                            },
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }),
+        
+                      if (settingsHandler.enableDrawerMascot) const MascotImage(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class MergeBooruToggle extends StatefulWidget {
+  const MergeBooruToggle({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<MergeBooruToggle> createState() => _MergeBooruToggleState();
+}
+
+class _MergeBooruToggleState extends State<MergeBooruToggle> {
+  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  
+
+  @override
+  Widget build(BuildContext context) {
+    if (settingsHandler.booruList.length < 2) {
+      return const SizedBox.shrink();
+    }
+
+    return SettingsToggle(
+      title: 'Multibooru Mode',
+      value: settingsHandler.mergeEnabled.value,
+      onChanged: (newValue) {
+        if (settingsHandler.booruList.length < 2) {
+          FlashElements.showSnackbar(
+            context: context,
+            title: const Text(
+              "Error!",
+              style: TextStyle(fontSize: 20),
+            ),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Text('You need at least 2 booru configs to use this feature!'),
+              ],
+            ),
+            leadingIcon: Icons.error,
+            leadingIconColor: Colors.red,
+          );
+        } else {
+          setState(() {
+            settingsHandler.mergeEnabled.value = newValue;
+            searchHandler.mergeAction(null);
+          });
+        }
+      },
     );
   }
 }

@@ -219,7 +219,7 @@ class LoliImage extends ImageProvider<LoliImage> {
   }
 
   static void evictImageByUrl(Object key) {
-    PaintingBinding.instance!.imageCache!.containsKey(key);
+    PaintingBinding.instance.imageCache.containsKey(key);
   }
 
   static Dio get _httpClient {
@@ -248,7 +248,7 @@ class LoliImage extends ImageProvider<LoliImage> {
         final File file = File(filePath);
         // meme number to differtiate it from any other request
         // TODO invent other way to do this
-        chunkEvents.add(ImageChunkEvent(
+        chunkEvents.add(const ImageChunkEvent(
           cumulativeBytesLoaded: 133769420,
           expectedTotalBytes: 133769420
         ));
@@ -282,9 +282,9 @@ class LoliImage extends ImageProvider<LoliImage> {
           throw LoliImageLoadException(url: resolved, message: "File didn\'t load");
         }
 
-        if(cacheEnabled) imageWriter.writeCacheFromBytes(resolved, response.data, cacheFolder);
+        if(cacheEnabled) imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder);
 
-        bytes = response.data;
+        bytes = response.data as Uint8List;
       }
 
       return decode(bytes);
@@ -293,7 +293,7 @@ class LoliImage extends ImageProvider<LoliImage> {
       // have had a chance to track the key in the cache at all.
       // Schedule a microtask to give the cache a chance to add the key.
       scheduleMicrotask(() {
-        PaintingBinding.instance!.imageCache!.evict(key);
+        PaintingBinding.instance.imageCache.evict(key);
       });
       rethrow;
     } finally {

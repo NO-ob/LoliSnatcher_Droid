@@ -39,7 +39,7 @@ class FlashElements {
       return;
     }
 
-    bool isDesktop = Get.find<SettingsHandler>().appMode == 'Desktop' || Platform.isWindows || Platform.isLinux;
+    bool isDesktop = Get.find<SettingsHandler>().appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux;
     bool isDark = Get.theme.brightness == Brightness.dark;
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
@@ -51,17 +51,17 @@ class FlashElements {
           buttonPadding: const EdgeInsets.all(0),
           contentPadding: const EdgeInsets.all(0),
           insetPadding: const EdgeInsets.all(0),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
           content: DefaultTextStyle(
             style: TextStyle(color: Get.theme.colorScheme.onBackground),
             child: ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
               child: FlashBar(
                 title: title,
                 content: content,
                 indicatorColor: sideColor,
                 icon: overrideLeadingIconWidget ?? Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: Icon(
                     leadingIcon,
                     color: leadingIconColor ?? Get.theme.colorScheme.onBackground,
@@ -85,14 +85,14 @@ class FlashElements {
           controller: controller,
           margin: (isDesktop && Get.mediaQuery.size.width > 500)
             ? EdgeInsets.symmetric(horizontal: Get.mediaQuery.size.width / 4, vertical: 0)
-            : EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
+            : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
           behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
           position: flashPosition,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(8),
-            topRight: Radius.circular(8),
-            bottomLeft: !isDesktop ? Radius.circular(8) : Radius.zero,
-            bottomRight: !isDesktop ? Radius.circular(8) : Radius.zero,
+            topLeft: const Radius.circular(8),
+            topRight: const Radius.circular(8),
+            bottomLeft: !isDesktop ? const Radius.circular(8) : Radius.zero,
+            bottomRight: !isDesktop ? const Radius.circular(8) : Radius.zero,
           ),
           borderColor: isDark ? Colors.grey[800] : Colors.grey[300],
           boxShadows: kElevationToShadow[8],
@@ -108,7 +108,7 @@ class FlashElements {
               content: content,
               indicatorColor: sideColor,
               icon: overrideLeadingIconWidget ?? Padding(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 child: Icon(
                   leadingIcon,
                   color: leadingIconColor ?? Get.theme.colorScheme.onBackground,

@@ -12,7 +12,7 @@ class ResizableSplitView extends StatefulWidget {
   final double minRatio;
   final double maxRatio;
   final SplitDirection direction;
-  final Function(double)? onRatioChange; 
+  final void Function(double)? onRatioChange; 
 
   const ResizableSplitView({
     Key? key,
@@ -39,9 +39,9 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
   late double _ratio;
   double? _maxSize;
 
-  get _size1 => _ratio * _maxSize!;
+  double get _size1 => _ratio * _maxSize!;
 
-  get _size2 => (1 - _ratio) * _maxSize!;
+  double get _size2 => (1 - _ratio) * _maxSize!;
 
   @override
   void initState() {
@@ -108,8 +108,8 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
                   width: widget.direction == SplitDirection.horizontal ? _dividerWidth : constraints.maxWidth,
                   height: widget.direction == SplitDirection.horizontal ? constraints.maxHeight : _dividerWidth,
                   child: RotationTransition(
-                    child: Icon(Icons.drag_handle),
-                    turns: widget.direction == SplitDirection.horizontal ? AlwaysStoppedAnimation(0.25) : AlwaysStoppedAnimation(0.50),
+                    child: const Icon(Icons.drag_handle),
+                    turns: widget.direction == SplitDirection.horizontal ? const AlwaysStoppedAnimation(0.25) : const AlwaysStoppedAnimation(0.50),
                   ),
                 ),
                 onPanUpdate: updateRatio,

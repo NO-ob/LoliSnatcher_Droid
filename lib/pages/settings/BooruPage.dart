@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -177,27 +178,22 @@ class _BooruPageState extends State<BooruPage> {
                         context: context,
                         builder: (context) {
                           return SettingsDialog(
-                            title: Text('Share Booru'),
+                            title: const Text('Share Booru'),
                             contentItems: <Widget>[
                               Text("Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}."),
-                              Text(''),
-                              Text("Should login/apikey data be included?"),
+                              const Text(''),
+                              const Text("Should login/apikey data be included?"),
                             ],
                             actionButtons: [
+                              const CancelButton(),
                               ElevatedButton(
-                                child: Text('Cancel'),
-                                onPressed: () {
-                                  Navigator.of(context).pop(true);
-                                },
-                              ),
-                              ElevatedButton(
-                                child: Text('Yes'),
+                                child: const Text('Yes'),
                                 onPressed: () {
                                   copyBooruLink(true);
                                 },
                               ),
                               ElevatedButton(
-                                child: Text('No'),
+                                child: const Text('No'),
                                 onPressed: () {
                                   copyBooruLink(false);
                                 },
@@ -275,13 +271,8 @@ class _BooruPageState extends State<BooruPage> {
                           Text("Delete Booru: ${selectedBooru?.name}?"),
                         ],
                         actionButtons: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop(true);
-                            },
-                            child: Text('Cancel')
-                          ),
-                          ElevatedButton(
+                          const CancelButton(),
+                          ElevatedButton.icon(
                             onPressed: () {
                               // save current and select next available booru to avoid exception after deletion
                               Booru tempSelected = selectedBooru!;
@@ -300,7 +291,7 @@ class _BooruPageState extends State<BooruPage> {
                               if (settingsHandler.deleteBooru(tempSelected)) {
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(
+                                  title: const Text(
                                     "Booru Deleted!",
                                     style: TextStyle(fontSize: 20)
                                   ),
@@ -316,11 +307,11 @@ class _BooruPageState extends State<BooruPage> {
 
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(
+                                  title: const Text(
                                     "Error!",
                                     style: TextStyle(fontSize: 20)
                                   ),
-                                  content: Text(
+                                  content: const Text(
                                     "Something went wrong during deletion of a booru config!",
                                     style: TextStyle(fontSize: 16)
                                   ),
@@ -333,7 +324,8 @@ class _BooruPageState extends State<BooruPage> {
                               setState(() { });
                               Navigator.of(context).pop(true);
                             },
-                            child: Text('Delete Booru', style: TextStyle(color: Get.theme.colorScheme.error))
+                            label: const Text('Delete Booru'),
+                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
                           ),
                         ]
                       ),

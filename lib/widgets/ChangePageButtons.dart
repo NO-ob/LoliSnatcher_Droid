@@ -12,10 +12,10 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 
 class ChangePageButtons extends StatefulWidget {
   final PreloadPageController? controller;
-  ChangePageButtons(this.controller, {Key? key}) : super(key: key);
+  const ChangePageButtons(this.controller, {Key? key}) : super(key: key);
 
   @override
-  _ChangePageButtonsState createState() => _ChangePageButtonsState();
+  State<ChangePageButtons> createState() => _ChangePageButtonsState();
 }
 
 class _ChangePageButtonsState extends State<ChangePageButtons> {
@@ -23,10 +23,10 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
   final SearchHandler searchHandler = Get.find<SearchHandler>();
   final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
 
-  bool isVisible = false;
+  bool isVisible = false, isLoaded = false;
   double bottomOffset = kToolbarHeight * 2;
 
-  StreamSubscription<bool>? appbarListener;
+  StreamSubscription<bool>? appbarListener, loadedListener;
   StreamSubscription<BooruItem>? itemListener;
 
   Timer? longPressTimer;
@@ -35,12 +35,22 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
   @override
   void initState() {
     super.initState();
-    isVisible = settingsHandler.changePageButtonsPosition != "Disabled" && settingsHandler.appMode == "Mobile" && viewerHandler.displayAppbar.value;
+    isVisible = settingsHandler.changePageButtonsPosition != "Disabled" &&
+        settingsHandler.appMode.value == AppMode.MOBILE &&
+        viewerHandler.displayAppbar.value;
     appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      if (settingsHandler.changePageButtonsPosition != "Disabled" && settingsHandler.appMode == "Mobile") {
+      if (settingsHandler.changePageButtonsPosition != "Disabled" && settingsHandler.appMode.value == AppMode.MOBILE) {
         isVisible = value;
       }
       updateState();
+    });
+
+    isLoaded = viewerHandler.isLoaded.value;
+    loadedListener = viewerHandler.isLoaded.listen((bool value) {
+      if (isLoaded != value) {
+        isLoaded = value;
+        updateState();
+      }
     });
 
     bottomOffset = kToolbarHeight * 3; // searchHandler.viewedItem.value.isVideo() ? kToolbarHeight * 3 : kToolbarHeight * 2;
@@ -63,6 +73,7 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
   @override
   void dispose() {
     appbarListener?.cancel();
+    loadedListener?.cancel();
     itemListener?.cancel();
     super.dispose();
   }
@@ -83,14 +94,14 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
       onLongPressStart: (details) {
         // repeat every 100ms if the user holds down the button
         if (longPressTimer != null) return;
-        longPressTimer = Timer.periodic(Duration(milliseconds: 200), (timer) {
+        longPressTimer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
           changePage(direction);
           repeatCount++;
 
           // repeat faster after a certain amount of times
           if (repeatCount > fasterAfter) {
             longPressTimer?.cancel();
-            longPressTimer = Timer.periodic(Duration(milliseconds: 100), (timer) {
+            longPressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
               changePage(direction);
               repeatCount++;
             });
@@ -109,32 +120,78 @@ class _ChangePageButtonsState extends State<ChangePageButtons> {
         longPressTimer = null;
         repeatCount = 0;
       },
-      child: IconButton(
-        icon: Icon(icon, color: Colors.grey.withOpacity(0.5), size: 36),
-        onPressed: () {
-          changePage(direction);
-        },
+      onTap: () {
+        changePage(direction);
+      },
+      child: Container(
+        // what idiot designed mirrored arrow icons with 1px of difference????????
+        padding: direction == 1 ? const EdgeInsets.fromLTRB(8, 0, 8, 0) : const EdgeInsets.fromLTRB(7, 0, 8, 0),
+        child: Icon(
+          icon,
+          color: Get.theme.colorScheme.onBackground.withOpacity(0.5),
+          size: 48,
+        ),
       ),
     );
   }
 
+  Widget buildDivider(bool isForVertical) {
+    return SizedBox(
+      width: isForVertical ? 20 : 1,
+      height: isForVertical ? 1 : 20,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Get.theme.colorScheme.onBackground.withOpacity(0.15),
+            width: 1,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> getButtons(bool isVertical) {
+    return [
+      buildButton(Icons.arrow_back, -1),
+      if(isVertical) const SizedBox(height: 10),
+      buildDivider(isVertical),
+      if(isVertical) const SizedBox(height: 10),
+      buildButton(Icons.arrow_forward, 1),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final bool isVertical = Get.mediaQuery.orientation == Orientation.portrait;
+
     return AnimatedPositioned(
-      duration: Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 200),
       bottom: bottomOffset,
       right: settingsHandler.changePageButtonsPosition == "Right" ? 40 : null,
       left: settingsHandler.changePageButtonsPosition == "Left" ? 40 : null,
-      child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 200),
-        child: isVisible
-            ? Row(
-                children: <Widget>[
-                  buildButton(Icons.arrow_back_ios, -1),
-                  buildButton(Icons.arrow_forward_ios, 1),
-                ],
-              )
-            : const SizedBox(),
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: isLoaded ? 1 : 0.25,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: isVisible
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    color: Get.theme.colorScheme.background.withOpacity(0.33),
+                    child: isVertical
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: getButtons(isVertical),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: getButtons(isVertical),
+                          ),
+                  ),
+                )
+              : const SizedBox(),
+        ),
       ),
     );
   }

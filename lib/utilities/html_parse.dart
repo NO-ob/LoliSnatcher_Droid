@@ -21,7 +21,7 @@ InlineSpan _parseRecursive(dynamic node, TextStyle style, bool styleChanged, boo
   } else if (node is dom.Element) {
     return _parseElement(node, style, styleChanged, isBordered);
   } else {
-    return _parseOtherNode(node, style, styleChanged, isBordered);
+    return _parseOtherNode(node as dom.Node, style, styleChanged, isBordered);
   }
 }
 

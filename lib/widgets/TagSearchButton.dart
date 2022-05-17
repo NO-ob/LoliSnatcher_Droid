@@ -5,12 +5,12 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 
 class TagSearchButton extends StatelessWidget {
-  TagSearchButton({Key? key}) : super(key: key);
-
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  const TagSearchButton({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final SearchHandler searchHandler = Get.find<SearchHandler>();
+
     return GestureDetector(
       onSecondaryTap: () {
         searchHandler.searchTextController.clearComposing();

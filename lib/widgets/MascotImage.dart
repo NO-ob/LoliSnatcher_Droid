@@ -21,7 +21,7 @@ class MascotImage extends StatelessWidget {
         child: Image(
           fit: BoxFit.contain,
           image: settingsHandler.drawerMascotPathOverride.isEmpty
-              ? AssetImage('assets/images/drawer_icon.png')
+              ? const AssetImage('assets/images/drawer_icon.png')
               : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
         ),
       ),

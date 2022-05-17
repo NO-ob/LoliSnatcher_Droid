@@ -19,7 +19,7 @@ class GridBuilder extends StatelessWidget {
       int columnCount =
           (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-      bool isDesktop = settingsHandler.appMode == 'Desktop';
+      bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,
@@ -33,7 +33,7 @@ class GridBuilder extends StatelessWidget {
             crossAxisCount: columnCount, childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16),
         itemBuilder: (BuildContext context, int index) {
           return Card(
-            margin: EdgeInsets.all(2),
+            margin: const EdgeInsets.all(2),
             child: GridTile(
               child: ThumbCardBuild(index, columnCount, onTap, searchHandler.currentTab),
             ),

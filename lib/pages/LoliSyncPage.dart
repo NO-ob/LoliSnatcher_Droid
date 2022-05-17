@@ -270,7 +270,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             });
           },
           title: 'Send Tabs',
-          subtitle: Text('Tabs: ${searchHandler.list.length}'),
+          subtitle: Text('Tabs: ${searchHandler.total}'),
           drawBottomBorder: tabs == true ? false : true,
         ),
         AnimatedSwitcher(
@@ -395,7 +395,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               Text("Stats of this device:"),
               Text("Favourites: ${favCount ?? '...'}"),
               Text("Boorus: ${settingsHandler.booruList.length}"),
-              Text("Tabs: ${searchHandler.list.length}"),
+              Text("Tabs: ${searchHandler.total}"),
             ],
           ),
         ),

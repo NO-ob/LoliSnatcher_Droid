@@ -1,69 +1,54 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 
 class TagChip extends StatelessWidget {
-
-  TagChip({
-    Key? key,
-    this.tagString = "",
-    required this.gestureDetector
-  }) : super(key: key);
+  TagChip({Key? key, this.tagString = "", required this.gestureDetector}) : super(key: key);
 
   final String tagString;
   final GestureDetector gestureDetector;
   final SearchHandler searchHandler = Get.find<SearchHandler>();
-
-  Widget getTagPin(String content){
-    return Container(
-        padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(40),
-            color: Colors.white
-        ),
-        margin: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-        child:Text(
-          content,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Colors.purple,
-          ),
-        )
-    );
-  }
+  final TagHandler tagHandler = Get.find<TagHandler>();
 
   @override
   Widget build(BuildContext context) {
     String stringContent = tagString;
     List<Widget> tagPins = [];
 
+    // exclude (-), or(~)
+    final bool isExclude = stringContent.startsWith('-');
+    final bool isOr = stringContent.startsWith('~');
+    if (isExclude || isOr) {
+      stringContent = stringContent.substring(1);
+      tagPins.insert(0, TagPin(content: isOr ? '~' : '-', color: isOr ? Colors.purple : Colors.red));
+    }
+
+    // numbered tags for multibooru
     if (stringContent.startsWith(RegExp(r"\d+#"))) {
       String multiIndex = stringContent.split("#")[0];
       stringContent = stringContent.split("#")[1];
-      tagPins.add(getTagPin(multiIndex));
+      tagPins.add(TagPin(content: multiIndex, color: Colors.purple));
     }
 
-    Map<String,String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
-
+    // shorten stuff like order, sort, rating, ...
+    Map<String, String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
     modifierMap.forEach((modifier, displayValue) {
-      if(stringContent.startsWith(modifier)){
+      if (stringContent.startsWith(modifier)) {
         stringContent = stringContent.replaceFirst(modifier, "");
-        tagPins.add(getTagPin(displayValue));
+        tagPins.add(TagPin(content: displayValue, color: Colors.purple));
       }
     });
 
-    final bool isExclude = stringContent.startsWith('-');
-    final bool isOr = stringContent.startsWith('~');
-    if(isExclude || isOr) {
-      stringContent = stringContent.substring(1);
-    }
+    // color tag bg with their tag type corresponding color
+    // (no type == blue here for cosmetic purposes, everywhere else they have no color)
+    Color chipColour = tagHandler.getTag(stringContent).getColour();
+    chipColour = chipColour == Colors.transparent ? Colors.blue : chipColour;
 
-    Color chipColour = Colors.green;
-    if (isExclude) chipColour = Get.theme.colorScheme.error;
-    if (isOr) chipColour = Colors.blue;
+    // replace all _ with spaces and trim
+    stringContent = stringContent.replaceAll(RegExp(r"_"), " ").trim();
+
     return Container(
       decoration: BoxDecoration(
         color: chipColour,
@@ -74,21 +59,61 @@ class TagChip extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Padding(
-              padding: const EdgeInsets.fromLTRB(10, 3, 0, 3),
-              child: Row(
-                children: tagPins + [
-                  Text(
-                    stringContent,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isExclude ? Get.theme.colorScheme.onError : Colors.white,
-                    ),
+            padding: const EdgeInsets.fromLTRB(10, 3, 0, 3),
+            child: Row(
+              children: [
+                ...tagPins,
+                Text(
+                  stringContent,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isExclude ? Get.theme.colorScheme.onError : Colors.white,
                   ),
-                ],
-              )
+                ),
+              ],
+            ),
           ),
-        gestureDetector,
-      ]
+          gestureDetector,
+        ],
+      ),
+    );
+  }
+}
+
+class TagPin extends StatelessWidget {
+  const TagPin({
+    Key? key,
+    required this.content,
+    required this.color,
+  }) : super(key: key);
+
+  final String content;
+  final Color color;
+
+  String fixContent() {
+    String fixed = content;
+    if (content == '-') {
+      // replace with longer dash
+      fixed = '—';
+    } else if (content == '~') {
+      fixed = ' ~ ';
+    }
+    return fixed;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(40), color: Colors.white),
+      margin: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+      child: Text(
+        fixContent(),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: color,
+        ),
       ),
     );
   }

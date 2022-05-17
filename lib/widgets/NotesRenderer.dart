@@ -12,10 +12,11 @@ import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/utilities/html_parse.dart';
+import 'package:LoliSnatcher/utilities/debouncer.dart';
 import 'package:LoliSnatcher/widgets/TransparentPointer.dart';
 
 class NotesRenderer extends StatefulWidget {
-  NotesRenderer({Key? key}) : super(key: key);
+  const NotesRenderer({Key? key}) : super(key: key);
 
   @override
   _NotesRendererState createState() => _NotesRendererState();
@@ -41,7 +42,6 @@ class _NotesRendererState extends State<NotesRenderer> {
       offsetY,
       viewOffsetX,
       viewOffsetY;
-  Timer? debounceCalculations;
   bool loading = false;
 
   StreamSubscription<BooruItem>? itemListener;
@@ -84,7 +84,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   void dispose() {
     itemListener?.cancel();
     viewStateListener?.cancel();
-    debounceCalculations?.cancel();
+    Debounce.cancel('notes_calculations');
     super.dispose();
   }
 
@@ -103,7 +103,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       return;
     }
 
-    item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!);
+    item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!) as List<NoteItem>;
 
     triggerCalculations();
 
@@ -112,15 +112,16 @@ class _NotesRendererState extends State<NotesRenderer> {
   }
 
   void triggerCalculations() {
-    if (debounceCalculations != null && debounceCalculations?.isActive == true) {
-      debounceCalculations!.cancel();
-    }
     // debounce to prevent unnecessary calculations, especially when resizing
     // lessens the impact on performance, but causes notes to be a bit shake-ey when resizing
-    debounceCalculations = Timer(Duration(milliseconds: 2), () {
-      doCalculations();
-      updateState();
-    });
+    Debounce.debounce(
+      tag: 'notes_calculations',
+      callback: () {
+        doCalculations();
+        updateState();
+      },
+      duration: const Duration(milliseconds: 2),
+    );
   }
 
   void doCalculations() {
@@ -245,7 +246,8 @@ class NoteBuild extends StatefulWidget {
   final double top;
   final double width;
   final double height;
-  NoteBuild({
+
+  const NoteBuild({
     Key? key,
     required this.text,
     required this.left,
@@ -285,11 +287,11 @@ class _NoteBuildState extends State<NoteBuild> {
           },
           onTap: () {
             FlashElements.showSnackbar(
-              title: Text('Note'),
+              title: const Text('Note'),
               content: Text.rich(
                 parse(
                   widget.text ?? '',
-                  TextStyle(
+                  const TextStyle(
                     fontSize: 14,
                   ),
                   false,
@@ -310,17 +312,17 @@ class _NoteBuildState extends State<NoteBuild> {
               width: widget.width,
               height: widget.height,
               decoration: BoxDecoration(
-                color: Color(0xFFFFF300).withOpacity(0.25),
+                color: const Color(0xFFFFF300).withOpacity(0.25),
                 borderRadius: BorderRadius.circular(2),
                 border: Border.all(
-                  color: Color(0xFFFFF176),
+                  color: const Color(0xFFFFF176),
                 ),
               ),
               child: (widget.width > 30 && widget.height > 30) // don't show if too small
                   ? Text.rich(
                       parse(
                         widget.text ?? '',
-                        TextStyle(
+                        const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                         ),
@@ -344,7 +346,7 @@ class NotesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SettingsDialog(
-      title: Text('Notes'),
+      title: const Text('Notes'),
       content: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Material(
@@ -359,7 +361,7 @@ class NotesDialog extends StatelessWidget {
                   title: Text.rich(
                     parse(
                       note.content ?? '',
-                      TextStyle(
+                      const TextStyle(
                         fontSize: 14,
                       ),
                       false,
@@ -384,7 +386,7 @@ class NotesDialog extends StatelessWidget {
       scrollable: false,
       actionButtons: [
         ElevatedButton(
-          child: Text('Close'),
+          child: const Text('Close'),
           onPressed: () {
             Navigator.of(context).pop(false);
           },
