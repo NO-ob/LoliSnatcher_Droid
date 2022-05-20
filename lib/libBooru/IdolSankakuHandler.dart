@@ -7,12 +7,9 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 
-import 'Tag.dart';
-
-/**
- * Booru Handler for the Danbooru engine
- */
+/// Booru Handler for the Danbooru engine
 class IdolSankakuHandler extends SankakuHandler{
   // Dart constructors are weird so it has to call super with the args
   IdolSankakuHandler(Booru booru,int limit) : super(booru,limit);
@@ -45,7 +42,7 @@ class IdolSankakuHandler extends SankakuHandler{
       }
       if (current['file_url'] != null) {
         for(int i = 0; i < tagMap.entries.length; i++){
-          tagHandler.addTagsWithType(tagMap.entries.elementAt(i).value,tagMap.entries.elementAt(i).key);
+          addTagsWithType(tagMap.entries.elementAt(i).value,tagMap.entries.elementAt(i).key);
         }
         String protocol = 'https:';
         BooruItem item = BooruItem(
@@ -82,14 +79,17 @@ class IdolSankakuHandler extends SankakuHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "https://idol.sankakucomplex.com/post/show/$id";
   }
 
+  @override
   String makeURL(String tags){
     return "${booru.baseURL}/post/index.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/tag/index.json?name=$input*&limit=10";
   }

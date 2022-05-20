@@ -21,14 +21,15 @@ enum SyncSide {
 }
 
 class LoliSyncPage extends StatefulWidget {
-  LoliSyncPage();
+  const LoliSyncPage({Key? key}) : super(key: key);
+
   @override
-  _LoliSyncPageState createState() => _LoliSyncPageState();
+  State<LoliSyncPage> createState() => _LoliSyncPageState();
 }
 
 class _LoliSyncPageState extends State<LoliSyncPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   final TextEditingController ipController = TextEditingController();
   final TextEditingController portController = TextEditingController();
@@ -91,10 +92,10 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     if (ipController.text.isEmpty || portController.text.isEmpty) {
       FlashElements.showSnackbar(
         context: context,
-        title: Text("Error!", style: TextStyle(fontSize: 20)),
+        title: const Text("Error!", style: TextStyle(fontSize: 20)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          children: const [
             Text("Please enter IP address and port."),
           ],
         ),
@@ -127,18 +128,18 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        SettingsButton(
+        const SettingsButton(
           name: 'Select what you want to do',
           icon: Icon(Icons.help_center_outlined),
           enabled: false,
         ),
-        SettingsButton(
+        const SettingsButton(
           name: '',
           enabled: false,
         ),
         SettingsButton(
           name: 'SEND data TO another device',
-          icon: Icon(Icons.send_to_mobile),
+          icon: const Icon(Icons.send_to_mobile),
           action: () {
             syncSide = SyncSide.sender;
             updateState();
@@ -146,7 +147,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         SettingsButton(
           name: 'RECEIVE data FROM another device',
-          icon: Icon(Icons.dns_outlined),
+          icon: const Icon(Icons.dns_outlined),
           action: () {
             syncSide = SyncSide.receiver;
             updateState();
@@ -160,8 +161,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     return ListView(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: Text(
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          child: const Text(
               "Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
         ),
         SettingsTextInput(
@@ -206,7 +207,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             drawBottomBorder: favourites == true ? false : true,
           ),
         AnimatedSwitcher(
-          duration: Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 200),
           child: (favouritesv2 || favourites)
               ? SettingsTextInput(
                   controller: favouritesSkipController,
@@ -220,19 +221,18 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   numberMin: 0,
                   numberMax: favCount?.toDouble() ?? double.infinity,
                   trailingIcon: IconButton(
-                    icon: Icon(Icons.help_outline),
+                    icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return SettingsDialog(
+                          return const SettingsDialog(
                             title: Text('Start Favs Sync from #...'),
                             contentItems: <Widget>[
                               Text('Allows to set from where the sync should start from'),
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
-                              Text(
-                                  'Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
+                              Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
                               Text('Order of favs: From oldest (0) to newest (X)')
                             ],
                           );
@@ -274,7 +274,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           drawBottomBorder: tabs == true ? false : true,
         ),
         AnimatedSwitcher(
-          duration: Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 200),
           child: tabs
               ? SettingsDropdown(
                   selected: tabsMode,
@@ -286,12 +286,12 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   },
                   title: 'Tabs Sync Mode',
                   trailingIcon: IconButton(
-                    icon: Icon(Icons.help_outline),
+                    icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return SettingsDialog(
+                          return const SettingsDialog(
                             title: Text('Tabs Sync Mode'),
                             contentItems: <Widget>[
                               Text(
@@ -307,20 +307,20 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 )
               : Container(),
         ),
-        SettingsButton(name: '', enabled: false),
+        const SettingsButton(name: '', enabled: false),
         SettingsButton(
           name: 'Test Connection',
-          icon: Icon(Icons.wifi_tethering),
+          icon: const Icon(Icons.wifi_tethering),
           action: () {
             sendTestRequest();
           },
           trailingIcon: IconButton(
-            icon: Icon(Icons.help_outline),
+            icon: const Icon(Icons.help_outline),
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) {
-                  return SettingsDialog(
+                  return const SettingsDialog(
                     title: Text('Test Connection'),
                     contentItems: <Widget>[
                       Text('This will send a test request to the other device.'),
@@ -334,7 +334,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         SettingsButton(
           name: 'Start Sync',
-          icon: Icon(Icons.send_to_mobile),
+          icon: const Icon(Icons.send_to_mobile),
           action: () async {
             bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
             bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs;
@@ -366,7 +366,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               }
               FlashElements.showSnackbar(
                 context: context,
-                title: Text("Error!", style: TextStyle(fontSize: 20)),
+                title: const Text("Error!", style: TextStyle(fontSize: 20)),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -388,11 +388,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     return ListView(
       children: <Widget>[
         Container(
-          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Stats of this device:"),
+              const Text("Stats of this device:"),
               Text("Favourites: ${favCount ?? '...'}"),
               Text("Boorus: ${settingsHandler.booruList.length}"),
               Text("Tabs: ${searchHandler.total}"),
@@ -400,8 +400,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           ),
         ),
         Container(
-          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: Text("Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed"),
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+          child: const Text("Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed"),
         ),
         SettingsDropdown(
           selected: selectedInterface,
@@ -420,7 +420,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           title: 'Available Network Interfaces',
         ),
         Container(
-          margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: Text('Selected Interface IP: ${selectedAddress ?? 'none'}'),
         ),
         SettingsTextInput(
@@ -433,7 +433,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         ),
         SettingsButton(
           name: 'Start Receiver Server',
-          icon: Icon(Icons.dns_outlined),
+          icon: const Icon(Icons.dns_outlined),
           action: () async {
             await SettingsPageOpen(
               context: context,
@@ -470,7 +470,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("LoliSync"),
+          title: const Text("LoliSync"),
         ),
         body: Center(child: conditionalBuild()),
       ),

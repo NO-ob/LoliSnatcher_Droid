@@ -19,10 +19,10 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 
-/**
- * This class is used loading from and writing settings to files
- */
+/// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
+  static SettingsHandler get instance => Get.find<SettingsHandler>();
+
   ServiceHandler serviceHandler = ServiceHandler();
   DBHandler dbHandler = DBHandler();
   DBHandler favDbHandler = DBHandler();
@@ -470,7 +470,7 @@ class SettingsHandler extends GetxController {
           }
 
         case 'string':
-          if(!(value is String)) {
+          if(value is! String) {
             throw 'value "$value" for $name is not a String';
           } else {
             return value;
@@ -491,7 +491,7 @@ class SettingsHandler extends GetxController {
           }
 
         case 'bool':
-          if(!(value is bool)) {
+          if(value is! bool) {
             if(value is String && (value == 'true' || value == 'false')) {
               return value == 'true' ? true : false;
             } else {
@@ -551,7 +551,7 @@ class SettingsHandler extends GetxController {
             if (value is String) {
               // string to rxobject
               final List<ThemeMode> findMode = ThemeMode.values.where((element) => element.toString() == 'ThemeMode.$value').toList();
-              if (findMode.length > 0) {
+              if (findMode.isNotEmpty) {
                 // if theme mode is present
                 return findMode[0];
               } else {
@@ -623,11 +623,11 @@ class SettingsHandler extends GetxController {
   }
 
   Future<bool> checkForSettings() async {
-    File settingsFile = File(path + "settings.json");
+    File settingsFile = File("${path}settings.json");
     return await settingsFile.exists();
   }
   Future<void> loadSettingsJson() async {
-    File settingsFile = File(path + "settings.json");
+    File settingsFile = File("${path}settings.json");
     String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
     loadFromJSON(settings, true);
@@ -1056,13 +1056,13 @@ class SettingsHandler extends GetxController {
     await getPerms();
     if (path == "") await setConfigDir();
     await Directory(path).create(recursive:true);
-    File settingsFile = File(path + "settings.json");
+    File settingsFile = File("${path}settings.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
     writer.close();
 
     if(restate) {
-      Get.find<SearchHandler>().rootRestate(); // force global state update to redraw stuff
+      SearchHandler.instance.rootRestate(); // force global state update to redraw stuff
     }
     return true;
   }
@@ -1151,11 +1151,11 @@ class SettingsHandler extends GetxController {
     booruList.value = sorted;
   }
 
-  Future saveBooru(Booru booru, {bool onlySave: false}) async {
+  Future saveBooru(Booru booru, {bool onlySave = false}) async {
     if (path == "") await setConfigDir();
 
     await Directory(boorusPath).create(recursive:true);
-    File booruFile = File(boorusPath + "${booru.name}.json");
+    File booruFile = File("$boorusPath${booru.name}.json");
     var writer = booruFile.openWrite();
     writer.write(jsonEncode(booru.toJson()));
     writer.close();
@@ -1170,7 +1170,7 @@ class SettingsHandler extends GetxController {
   }
 
   bool deleteBooru(Booru booru){
-    File booruFile = File(boorusPath + "${booru.name}.json");
+    File booruFile = File("$boorusPath${booru.name}.json");
     booruFile.deleteSync();
     if (prefBooru == booru.name){
       prefBooru = "";
@@ -1294,7 +1294,7 @@ class SettingsHandler extends GetxController {
         FlashElements.showSnackbar(
           title: const Text(
             "Update Check Error!",
-            style: const TextStyle(fontSize: 20)
+            style: TextStyle(fontSize: 20)
           ),
           content: Text(
             e.toString()
@@ -1326,51 +1326,54 @@ class SettingsHandler extends GetxController {
       // TODO get from some external variable when building
       bool isFromStore = EnvironmentConfig.isFromStore;
 
-      Get.dialog(
-        SettingsDialog(
-          title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
-          contentItems: [
-            Text('Currently Installed: $verStr+$buildNumber'),
-            const Text(''),
-            Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Text(''),
-            const Text('Changelog:', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const Text(''),
-            Text(updateInfo.value!.changelog),
-            // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
-          ],
-          actionButtons: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(Get.context!).pop(true);
-              },
-              child: const Text('Later')
-            ),
-            if(isFromStore && updateInfo.value!.isInStore)
-              ElevatedButton.icon(
-                onPressed: () async {
-                  // try {
-                  //   ServiceHandler.launchURL("market://details?id=" + updateInfo.value!.storePackage);
-                  // } on PlatformException catch(e) {
-                  //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
-                  // }
-                  ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
-                  Navigator.of(Get.context!).pop(true);
-                },
-                icon: const Icon(Icons.play_arrow),
-                label: const Text('Visit Play Store')
-              )
-            else
-              ElevatedButton.icon(
+      showDialog(
+        context: Get.context!,
+        builder: (BuildContext context) {
+          return SettingsDialog(
+            title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
+            contentItems: [
+              Text('Currently Installed: $verStr+$buildNumber'),
+              const Text(''),
+              Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(''),
+              const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(''),
+              Text(updateInfo.value!.changelog),
+              // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+            ],
+            actionButtons: [
+              ElevatedButton(
                 onPressed: () {
-                  ServiceHandler.launchURL(updateInfo.value!.githubURL);
-                  Navigator.of(Get.context!).pop(true);
+                  Navigator.of(context).pop(true);
                 },
-                icon: const Icon(Icons.exit_to_app),
-                label: const Text('Visit Releases')
+                child: const Text('Later')
               ),
-          ],
-        ),
+              if(isFromStore && updateInfo.value!.isInStore)
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    // try {
+                    //   ServiceHandler.launchURL("market://details?id=" + updateInfo.value!.storePackage);
+                    // } on PlatformException catch(e) {
+                    //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                    // }
+                    ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}");
+                    Navigator.of(context).pop(true);
+                  },
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Visit Play Store')
+                )
+              else
+                ElevatedButton.icon(
+                  onPressed: () {
+                    ServiceHandler.launchURL(updateInfo.value!.githubURL);
+                    Navigator.of(context).pop(true);
+                  },
+                  icon: const Icon(Icons.exit_to_app),
+                  label: const Text('Visit Releases')
+                ),
+            ],
+          );
+        },
         barrierDismissible: false,
       );
     }
@@ -1380,7 +1383,7 @@ class SettingsHandler extends GetxController {
     // print('-=-=-=-=-=-=-=-');
     // print(Platform.environment);
     path = await serviceHandler.getConfigDir();
-    boorusPath = path + 'boorus/';
+    boorusPath = '${path}boorus/';
     return;
   }
 
@@ -1426,7 +1429,7 @@ class SettingsHandler extends GetxController {
       FlashElements.showSnackbar(
         title: const Text(
           "Initialization Error!",
-          style: const TextStyle(fontSize: 20)
+          style: TextStyle(fontSize: 20)
         ),
         content: Text(
           e.toString()

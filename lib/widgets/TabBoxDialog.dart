@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -24,7 +23,7 @@ class TabBoxDialog extends StatefulWidget {
 }
 
 class _TabBoxDialogState extends State<TabBoxDialog> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   List<SearchGlobal> tabs = [], filteredTabs = [], selectedTabs = [];
   final AutoScrollController scrollController = AutoScrollController();
@@ -72,7 +71,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
       filteredTabs = [...tabs].where((t) {
         String filterText = filterController.text.toLowerCase();
         bool doTagsMatch = t.tags.toLowerCase().contains(filterText);
-        String booruText = 'booru:' + (t.selectedBooru.value.name?.toLowerCase() ?? "");
+        String booruText = 'booru:${t.selectedBooru.value.name?.toLowerCase() ?? ""}';
         bool doBooruMatch = booruText.contains(filterText);
         bool textFilter = doTagsMatch || doBooruMatch;
         return textFilter;
@@ -109,7 +108,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
                 if (tabIndex != -1) {
@@ -126,7 +125,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
                 Clipboard.setData(ClipboardData(text: data.tags));
@@ -148,7 +147,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
                 await showDialog(
@@ -169,7 +168,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () {
                 if (tabIndex != -1) {
@@ -249,7 +248,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
       value: isSelected,
       fillColor: MaterialStateProperty.resolveWith((states) {
         if(states.contains(MaterialState.selected)) {
-          return Get.theme.colorScheme.secondary;
+          return Theme.of(context).colorScheme.secondary;
         } else if(states.contains(MaterialState.hovered)) {
           return Colors.grey;
         } else {
@@ -278,7 +277,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
           side: BorderSide(
-            color: isCurrent ? Get.theme.colorScheme.secondary : Colors.grey,
+            color: isCurrent ? Theme.of(context).colorScheme.secondary : Colors.grey,
             style: BorderStyle.solid,
           ),
         ),
@@ -415,7 +414,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
                     const CancelButton(),
                     ElevatedButton.icon(
                       label: const Text("Delete"),
-                      icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
+                      icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                       onPressed: () {
                         for(int i = 0; i < selectedTabs.length; i++) {
                           final int index = searchHandler.list.indexOf(selectedTabs[i]);

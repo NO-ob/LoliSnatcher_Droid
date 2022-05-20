@@ -1,14 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:marquee/marquee.dart';
-import 'package:fast_marquee/fast_marquee.dart' as FM;
+import 'package:fast_marquee/fast_marquee.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 
 // Based on code from: https://github.com/nt4f04uNd/nt4f04unds_widgets/blob/f14e448d23d347f17c05549972e638d61cf300b4/lib/src/widgets/marquee.dart
 
 class MarqueeText extends StatelessWidget {
-  MarqueeText({
+  const MarqueeText({
     Key? key,
     required this.text,
     required this.fontSize,
@@ -22,15 +19,13 @@ class MarqueeText extends StatelessWidget {
     this.startAfter = const Duration(milliseconds: 1000),
     this.pauseAfterRound = const Duration(milliseconds: 1500),
     this.isExpanded = true,
-  }) : super(key: key) {
-    this.color = this.color == null ? Get.theme.colorScheme.onBackground : this.color;
-  }
+  }) : super(key: key);
 
   final String text;
   final double fontSize;
   final FontWeight fontWeight;
   final double addedHeight;
-  Color? color;
+  final Color? color;
   final double velocity;
   final Curve curve;
   final double blankSpace;
@@ -46,29 +41,9 @@ class MarqueeText extends StatelessWidget {
       : innerBox(context);
   }
 
-  Widget oldMarquee() {
-    return Marquee(
-      text: text,
-      blankSpace: blankSpace,
-      accelerationCurve: curve,
-      velocity: velocity,
-      startPadding: startPadding,
-      fadingEdgeStartFraction: 0,
-      fadingEdgeEndFraction: 0.3,
-      showFadingOnlyWhenScrolling: false,
-      startAfter: startAfter,
-      pauseAfterRound: pauseAfterRound,
-      style: TextStyle(
-        fontSize: fontSize,
-        color: color,
-        fontWeight: fontWeight,
-      ),
-    );
-  }
-
-  Widget newMarquee() {
+  Widget marquee(BuildContext context) {
     // This one can detect when text overflows by itself, but I'll leave AutoSize to resize text a bit when nearing overflow
-    return FM.Marquee(
+    return Marquee(
       text: text,
       blankSpace: blankSpace,
       curve: curve,
@@ -81,7 +56,7 @@ class MarqueeText extends StatelessWidget {
       pauseAfterRound: pauseAfterRound,
       style: TextStyle(
         fontSize: fontSize,
-        color: color,
+        color: color ?? Theme.of(context).colorScheme.onBackground,
         fontWeight: fontWeight,
       ),
     );
@@ -98,10 +73,10 @@ class MarqueeText extends StatelessWidget {
         maxLines: 2,
         style: TextStyle(
           fontSize: fontSize,
-          color: color,
+          color: color ?? Theme.of(context).colorScheme.onBackground,
           fontWeight: fontWeight,
         ),
-        overflowReplacement: newMarquee(),
+        overflowReplacement: marquee(context),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -13,13 +12,14 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class DatabasePage extends StatefulWidget {
-  DatabasePage();
+  const DatabasePage({Key? key}) : super(key: key);
+
   @override
-  _DatabasePageState createState() => _DatabasePageState();
+  State<DatabasePage> createState() => _DatabasePageState();
 }
 
 class _DatabasePageState extends State<DatabasePage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   final ServiceHandler serviceHandler = ServiceHandler();
 
   bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
@@ -28,7 +28,7 @@ class _DatabasePageState extends State<DatabasePage> {
   List<String> failedURLs = [];
 
   @override
-  void initState(){
+  void initState() {
     dbEnabled = settingsHandler.dbEnabled;
     searchHistoryEnabled = settingsHandler.searchHistoryEnabled;
     super.initState();
@@ -43,9 +43,9 @@ class _DatabasePageState extends State<DatabasePage> {
     return result;
   }
 
-  Booru? getSankakuBooru(){
-    for (int i = 0; i < settingsHandler.booruList.length; i++){
-      if (settingsHandler.booruList[i].baseURL == "https://capi-v2.sankakucomplex.com"){
+  Booru? getSankakuBooru() {
+    for (int i = 0; i < settingsHandler.booruList.length; i++) {
+      if (settingsHandler.booruList[i].baseURL == "https://capi-v2.sankakucomplex.com") {
         return settingsHandler.booruList[i];
       }
     }
@@ -54,21 +54,14 @@ class _DatabasePageState extends State<DatabasePage> {
 
   Future<bool> updateSankakuItems() async {
     FlashElements.showSnackbar(
-      duration: Duration(seconds: 6),
-      title: Text(
-          'Sankaku Favourites Update Started!',
-          style: TextStyle(fontSize: 20)
+      duration: const Duration(seconds: 6),
+      title: const Text('Sankaku Favourites Update Started!', style: TextStyle(fontSize: 20)),
+      content: Column(
+        children: const [
+          Text("New image urls will be fetched for Sankaku items in your favourites", style: TextStyle(fontSize: 16)),
+          Text("Don't leave this page until the process is complete or stopped", style: TextStyle(fontSize: 14)),
+        ],
       ),
-      content: Column(children: [
-        Text(
-          "New image urls will be fetched for Sankaku items in your favourites",
-          style: TextStyle(fontSize: 16)
-        ),
-        Text(
-          "Don't leave this page until the process is complete or stopped",
-          style: TextStyle(fontSize: 14)
-        ),
-      ]),
       leadingIcon: Icons.info_outline,
       leadingIconColor: Colors.green,
       sideColor: Colors.green,
@@ -84,12 +77,9 @@ class _DatabasePageState extends State<DatabasePage> {
 
     updatingItems = await settingsHandler.dbHandler.getSankakuItems();
     Booru? sankakuBooru = getSankakuBooru();
-    if(sankakuBooru == null) {
+    if (sankakuBooru == null) {
       FlashElements.showSnackbar(
-        title: Text(
-          'No Sankaku config found!',
-          style: TextStyle(fontSize: 20)
-        ),
+        title: const Text('No Sankaku config found!', style: TextStyle(fontSize: 20)),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -104,9 +94,9 @@ class _DatabasePageState extends State<DatabasePage> {
     }
 
     SankakuHandler sankakuHandler = SankakuHandler(sankakuBooru, 10);
-    for(BooruItem item in updatingItems) {
-      if(isUpdating) {
-        await Future.delayed(Duration(milliseconds: 100));
+    for (BooruItem item in updatingItems) {
+      if (isUpdating) {
+        await Future.delayed(const Duration(milliseconds: 100));
         List result = await sankakuHandler.updateItem(item);
         if (result[1] == false) {
           setState(() {
@@ -124,12 +114,9 @@ class _DatabasePageState extends State<DatabasePage> {
       }
     }
 
-    if(isUpdating) {
+    if (isUpdating) {
       FlashElements.showSnackbar(
-        title: Text(
-          'Sankaku Favourites Update Complete!',
-          style: TextStyle(fontSize: 20)
-        ),
+        title: const Text('Sankaku Favourites Update Complete!', style: TextStyle(fontSize: 20)),
         leadingIcon: Icons.check,
         leadingIconColor: Colors.green,
         sideColor: Colors.green,
@@ -146,17 +133,13 @@ class _DatabasePageState extends State<DatabasePage> {
 
   Future<bool> purgeFailedSankakuItems() async {
     FlashElements.showSnackbar(
-      duration: Duration(seconds: 6),
-      title: Text(
-          'Failed Item Purge Started!',
-          style: TextStyle(fontSize: 20)
+      duration: const Duration(seconds: 6),
+      title: const Text('Failed Item Purge Started!', style: TextStyle(fontSize: 20)),
+      content: Column(
+        children: const [
+          Text("Items that failed to update will be removed from the database", style: TextStyle(fontSize: 16)),
+        ],
       ),
-      content: Column(children: [
-        Text(
-            "Items that failed to update will be removed from the database",
-            style: TextStyle(fontSize: 16)
-        ),
-      ]),
       leadingIcon: Icons.info_outline,
       leadingIconColor: Colors.green,
       sideColor: Colors.green,
@@ -177,7 +160,7 @@ class _DatabasePageState extends State<DatabasePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Database"),
+          title: const Text("Database"),
         ),
         body: Center(
           child: ListView(
@@ -191,16 +174,16 @@ class _DatabasePageState extends State<DatabasePage> {
                 },
                 title: 'Enable Database',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
-                    Get.dialog(
-                      SettingsDialog(
-                        title: const Text('Database'),
-                        contentItems: [
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(title: Text('Database'), contentItems: [
                           Text("The database will store favourites and also track if an item is snatched"),
                           Text("If an item is snatched it wont be snatched again"),
-                        ]
-                      ),
+                        ]);
+                      },
                     );
                   },
                 ),
@@ -214,91 +197,87 @@ class _DatabasePageState extends State<DatabasePage> {
                 },
                 title: 'Enable Search History',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
-                    Get.dialog(
-                      SettingsDialog(
-                        title: const Text('Search History'),
-                        contentItems: [
-                          Text("Requires enabled Database."),
-                          Text("Long press any history entry for additional actions (Delete, Set as Favourite...)"),
-                          Text("Favourited entries are pinned to the top of the list and will not be counted towards item limit."),
-                          Text("Records last 5000 search queries."),
-                        ],
-                      ),
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('Search History'),
+                          contentItems: [
+                            Text("Requires enabled Database."),
+                            Text("Long press any history entry for additional actions (Delete, Set as Favourite...)"),
+                            Text("Favourited entries are pinned to the top of the list and will not be counted towards item limit."),
+                            Text("Records last 5000 search queries."),
+                          ],
+                        );
+                      },
                     );
                   },
                 ),
               ),
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
               SettingsButton(
                 name: 'Delete Database',
-                icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+                icon: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
                 action: () {
-                  Get.dialog(
-                    SettingsDialog(
-                      title: const Text('Are you sure?'),
-                      contentItems: [
-                        Text("Delete Database?"),
-                      ],
-                      actionButtons: [
-                        const CancelButton(),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            serviceHandler.deleteDB(settingsHandler);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SettingsDialog(
+                        title: const Text('Are you sure?'),
+                        contentItems: const [
+                          Text("Delete Database?"),
+                        ],
+                        actionButtons: [
+                          const CancelButton(),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              serviceHandler.deleteDB(settingsHandler);
 
-                            FlashElements.showSnackbar(
-                              context: context,
-                              title: Text(
-                                "Database Deleted!",
-                                style: TextStyle(fontSize: 20)
-                              ),
-                              content: Text(
-                                "An app restart is required!",
-                                style: TextStyle(fontSize: 16)
-                              ),
-                              leadingIcon: Icons.delete_forever,
-                              leadingIconColor: Colors.red,
-                              sideColor: Colors.yellow,
-                            );
-                            Navigator.of(context).pop(true);
-                          },
-                          label: const Text('Delete'),
-                          icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
-                        ),
-                      ]
-                    ),
+                              FlashElements.showSnackbar(
+                                context: context,
+                                title: const Text("Database Deleted!", style: TextStyle(fontSize: 20)),
+                                content: const Text("An app restart is required!", style: TextStyle(fontSize: 16)),
+                                leadingIcon: Icons.delete_forever,
+                                leadingIconColor: Colors.red,
+                                sideColor: Colors.yellow,
+                              );
+                              Navigator.of(context).pop(true);
+                            },
+                            label: const Text('Delete'),
+                            icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                          ),
+                        ],
+                      );
+                    },
                   );
-                }
+                },
               ),
               SettingsButton(
                 name: 'Clear Snatched Items',
-                icon: Icon(Icons.delete_outline, color: Get.theme.errorColor),
-                trailingIcon: Icon(Icons.save_alt),
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).errorColor),
+                trailingIcon: const Icon(Icons.save_alt),
                 action: () {
-                  Get.dialog(
-                      SettingsDialog(
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SettingsDialog(
                         title: const Text('Are you sure?'),
-                        contentItems: [
+                        contentItems: const [
                           Text("Clear all Snatched items?"),
                         ],
                         actionButtons: [
                           const CancelButton(),
                           ElevatedButton.icon(
                             onPressed: () {
-                              if (settingsHandler.dbHandler.db != null){
+                              if (settingsHandler.dbHandler.db != null) {
                                 settingsHandler.dbHandler.clearSnatched();
 
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(
-                                    "Snatched Cleared!",
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  content: Text(
-                                    "An app restart may be required!",
-                                    style: TextStyle(fontSize: 16)
-                                  ),
+                                  title: const Text("Snatched Cleared!", style: TextStyle(fontSize: 20)),
+                                  content: const Text("An app restart may be required!", style: TextStyle(fontSize: 16)),
                                   leadingIcon: Icons.delete_forever,
                                   leadingIconColor: Colors.red,
                                   sideColor: Colors.yellow,
@@ -307,40 +286,37 @@ class _DatabasePageState extends State<DatabasePage> {
                               Navigator.of(context).pop(true);
                             },
                             label: const Text('Clear'),
-                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
+                            icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                           ),
-                        ]
-                      ),
-                    );
-                }
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
               SettingsButton(
                 name: 'Clear Favourited Items',
-                icon: Icon(Icons.delete_outline, color: Get.theme.errorColor),
-                trailingIcon: Icon(Icons.favorite_outline),
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).errorColor),
+                trailingIcon: const Icon(Icons.favorite_outline),
                 action: () {
-                  Get.dialog(
-                      SettingsDialog(
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SettingsDialog(
                         title: const Text('Are you sure?'),
-                        contentItems: [
+                        contentItems: const [
                           Text("Clear all Favourited items?"),
                         ],
                         actionButtons: [
                           const CancelButton(),
                           ElevatedButton.icon(
                             onPressed: () {
-                              if (settingsHandler.dbHandler.db != null){
+                              if (settingsHandler.dbHandler.db != null) {
                                 settingsHandler.dbHandler.clearFavourites();
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(
-                                    "Favourites Cleared!",
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  content: Text(
-                                    "An app restart may be required!",
-                                    style: TextStyle(fontSize: 16)
-                                  ),
+                                  title: const Text("Favourites Cleared!", style: TextStyle(fontSize: 20)),
+                                  content: const Text("An app restart may be required!", style: TextStyle(fontSize: 16)),
                                   leadingIcon: Icons.delete_forever,
                                   leadingIconColor: Colors.red,
                                   sideColor: Colors.yellow,
@@ -349,40 +325,37 @@ class _DatabasePageState extends State<DatabasePage> {
                               Navigator.of(context).pop(true);
                             },
                             label: const Text('Clear'),
-                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
+                            icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                           ),
-                        ]
-                      ),
-                    );
-                }
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
               SettingsButton(
                 name: 'Clear Search History',
-                icon: Icon(Icons.delete_outline, color: Get.theme.errorColor),
-                trailingIcon: Icon(Icons.history),
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).errorColor),
+                trailingIcon: const Icon(Icons.history),
                 action: () {
-                  Get.dialog(
-                      SettingsDialog(
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return SettingsDialog(
                         title: const Text('Are you sure?'),
-                        contentItems: [
+                        contentItems: const [
                           Text("Clear Search History?"),
                         ],
                         actionButtons: [
                           const CancelButton(),
                           ElevatedButton.icon(
                             onPressed: () {
-                              if (settingsHandler.dbHandler.db != null){
+                              if (settingsHandler.dbHandler.db != null) {
                                 settingsHandler.dbHandler.deleteFromSearchHistory(null);
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(
-                                    "Search History Cleared!",
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  content: Text(
-                                    "An app restart may be required!",
-                                    style: TextStyle(fontSize: 16)
-                                  ),
+                                  title: const Text("Search History Cleared!", style: TextStyle(fontSize: 20)),
+                                  content: const Text("An app restart may be required!", style: TextStyle(fontSize: 16)),
                                   leadingIcon: Icons.delete_forever,
                                   leadingIconColor: Colors.red,
                                   sideColor: Colors.yellow,
@@ -391,12 +364,13 @@ class _DatabasePageState extends State<DatabasePage> {
                               Navigator.of(context).pop(true);
                             },
                             label: const Text('Clear'),
-                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
+                            icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                           ),
-                        ]
-                      ),
-                    );
-                }
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
 
               // SettingsButton(name: '', enabled: false),
@@ -422,32 +396,33 @@ class _DatabasePageState extends State<DatabasePage> {
               //     }
               // ),
 
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
               SettingsButton(
-                  name: 'Update Sankaku URLs',
-                  trailingIcon: Icon(Icons.image),
-                  action: () {
-                    if(!isUpdating) {
-                      updateSankakuItems();
-                    }
+                name: 'Update Sankaku URLs',
+                trailingIcon: const Icon(Icons.image),
+                action: () {
+                  if (!isUpdating) {
+                    updateSankakuItems();
                   }
+                },
               ),
-              if(isUpdating)
+              if (isUpdating)
                 Padding(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Updating ${updatingItems.length == 0 ? '...' : updatingItems.length} items:'),
+                      Text('Updating ${updatingItems.isEmpty ? '...' : updatingItems.length} items:'),
                       Text('Left: ${max(updatingItems.length - updatingDone - updatingFailed, 0)}'),
                       Text('Done: $updatingDone'),
                       Text('Failed: $updatingFailed'),
-                      Text(''),
-                      Text( "Stop and try again later if you start seeing 'Failed' number constantly growing, you could have reached rate limit and/or Sankaku blocks requests from your IP."),
-                    ]
-                  )
+                      const Text(''),
+                      const Text(
+                          "Stop and try again later if you start seeing 'Failed' number constantly growing, you could have reached rate limit and/or Sankaku blocks requests from your IP."),
+                    ],
+                  ),
                 ),
-              if(isUpdating)
+              if (isUpdating)
                 SettingsButton(
                   name: 'Press here to stop',
                   drawTopBorder: true,
@@ -457,10 +432,10 @@ class _DatabasePageState extends State<DatabasePage> {
                     });
                   },
                 ),
-              if(!isUpdating && failedURLs.length > 0)
+              if (!isUpdating && failedURLs.isNotEmpty)
                 SettingsButton(
                   name: 'Purge Items That Failed to Update',
-                  trailingIcon: Icon(Icons.delete_forever),
+                  trailingIcon: const Icon(Icons.delete_forever),
                   drawTopBorder: true,
                   action: () {
                     setState(() {

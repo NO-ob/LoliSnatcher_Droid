@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:async';
 
+import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:get/get.dart';
@@ -20,8 +22,7 @@ abstract class BooruHandler {
   String prevTags = "";
   bool locked = false;
   Booru booru;
-  String verStr = Get.find<SettingsHandler>().verStr;
-  TagHandler tagHandler = Get.find<TagHandler>();
+  String verStr = SettingsHandler.instance.verStr;
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
   String errorString = '';
   Map<String, TagType> tagTypeMap = {};
@@ -31,16 +32,14 @@ abstract class BooruHandler {
     "order:" : "O",
     "sort:" : "S",
   };
-  List<BooruItem> get filteredFetched => fetched.where((el) => Get.find<SettingsHandler>().filterHated ? !el.isHated.value : true).toList();
+  List<BooruItem> get filteredFetched => fetched.where((el) => SettingsHandler.instance.filterHated ? !el.isHated.value : true).toList();
 
   bool tagSearchEnabled = true;
   bool hasSizeData = false;
   BooruHandler(this.booru, this.limit);
 
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
+  /// This function will call a http get request using the tags and pagenumber parsed to it
+  /// it will then create a list of booruItems
   Future Search(String tags, int? pageNumCustom) async {
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
@@ -85,23 +84,35 @@ abstract class BooruHandler {
     return tags;
   }
 
-  String? makePostURL(String id) {}
-  String? makeURL(String tags) {}
-  String? makeTagURL(String input) {}
-  String? makeDirectTagURL(List<String> tags) {}
-  tagSearch(String input) {}
+  String? makePostURL(String id) {
+    return null;
+  }
+  String? makeURL(String tags) {
+    return null;
+  }
+  String? makeTagURL(String input) {
+    return null;
+  }
+  String? makeDirectTagURL(List<String> tags) {
+    return null;
+  }
+  Future tagSearch(String input) async {
+    return [];
+  }
 
   bool hasCommentsSupport = false;
-  fetchComments(String postID, int pageNum) {
+  Future<List<CommentItem>> fetchComments(String postID, int pageNum) async {
     return [];
   }
 
   // TODO
   bool hasUpdateItemSupport = false;
-  updateItem(BooruItem item) {}
+  Future updateItem(BooruItem item) async {
+    return null;
+  }
 
   bool hasNotesSupport = false;
-  fetchNotes(String postID) {
+  Future<List<NoteItem>> fetchNotes(String postID) async {
     return [];
   }
 
@@ -118,13 +129,17 @@ abstract class BooruHandler {
     };
   }
 
+  void addTagsWithType(List<String> tags, TagType type) {
+    TagHandler.instance.addTagsWithType(tags, type);
+  }
+
   void populateTagHandler(List<BooruItem> items) async{
     List<String> unTyped = [];
     for(int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
         final String tag = items[x].tagsList[i];
 
-        final bool alreadyStored = tagHandler.hasTag(tag);
+        final bool alreadyStored = TagHandler.instance.hasTag(tag);
         if (!alreadyStored) {
           final bool isPresent = unTyped.contains(tag);
           if(!isPresent) {
@@ -133,7 +148,7 @@ abstract class BooruHandler {
         }
       }
     }
-    if (unTyped.isNotEmpty) tagHandler.queue(unTyped, booru, 200);
+    if (unTyped.isNotEmpty) TagHandler.instance.queue(unTyped, booru, 200);
   }
 
   String getTagDisplayString(String tag){
@@ -157,7 +172,8 @@ abstract class BooruHandler {
 
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future<void> setTrackedValues(int fetchedIndex) async {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
     if (settingsHandler.favDbHandler.db != null) {
       // TODO make this work in batches, not calling it on every single item ???
       List<bool> values = await settingsHandler.favDbHandler.getTrackedValues(fetched[fetchedIndex]);
@@ -187,7 +203,7 @@ abstract class BooruHandler {
     // generate list of new fetched indexes
     final List<int> fetchedIndexes = List.generate(diff, (index) => beforePos + index);
 
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     if (settingsHandler.favDbHandler.db != null && diff > 0) {
       List<List<bool>> valuesList = await settingsHandler.favDbHandler
           .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last)); //.map((e) => e.fileURL).toList()
@@ -198,7 +214,7 @@ abstract class BooruHandler {
 
         // TODO probably leads to worse performance on page loads, change to isolate or async maybe?
         List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndexes[index]].tagsList);
-        fetched[fetchedIndexes[index]].isHated.value = tagLists[0].length > 0;
+        fetched[fetchedIndexes[index]].isHated.value = tagLists[0].isNotEmpty;
         // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
       });
     }

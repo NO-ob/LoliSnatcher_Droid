@@ -7,13 +7,10 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-import 'Tag.dart';
-
-/**
- * Booru Handler for the Danbooru engine
- */
+/// Booru Handler for the Danbooru engine
 class DanbooruHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   DanbooruHandler(Booru booru,int limit) : super(booru,limit);
@@ -41,20 +38,20 @@ class DanbooruHandler extends BooruHandler{
          */
         if (current.containsKey("file_url")){
           if ((current["file_url"].length > 0)) {
-            tagHandler.addTagsWithType(current['tag_string_general'].toString().split(" "),TagType.none);
-            tagHandler.addTagsWithType(current['tag_string_character'].toString().split(" "),TagType.character);
-            tagHandler.addTagsWithType(current['tag_string_copyright'].toString().split(" "),TagType.copyright);
-            tagHandler.addTagsWithType(current['tag_string_artist'].toString().split(" "),TagType.artist);
-            tagHandler.addTagsWithType(current['tag_string_meta'].toString().split(" "),TagType.meta);
+            addTagsWithType(current['tag_string_general'].toString().split(" "),TagType.none);
+            addTagsWithType(current['tag_string_character'].toString().split(" "),TagType.character);
+            addTagsWithType(current['tag_string_copyright'].toString().split(" "),TagType.copyright);
+            addTagsWithType(current['tag_string_artist'].toString().split(" "),TagType.artist);
+            addTagsWithType(current['tag_string_meta'].toString().split(" "),TagType.meta);
             BooruItem item = BooruItem(
               fileURL: current["file_url"].toString().endsWith(".zip") ? current["large_file_url"].toString() : current["file_url"].toString(),
               sampleURL: current["large_file_url"].toString(),
               thumbnailURL: current["preview_file_url"].toString(),
               tagsList: current["tag_string"].toString().split(" "),
               postURL: makePostURL(current["id"].toString()),
-              fileSize: int.tryParse(current["file_size"].toString()) ?? null,
-              fileHeight: double.tryParse(current["image_height"].toString()) ?? null,
-              fileWidth: double.tryParse(current["image_width"].toString()) ?? null,
+              fileSize: int.tryParse(current["file_size"].toString()),
+              fileHeight: double.tryParse(current["image_height"].toString()),
+              fileWidth: double.tryParse(current["image_width"].toString()),
               hasNotes: current["last_noted_at"] != null,
               hasComments: current["last_commented_at"] != null,
               serverId: current["id"].toString(),
@@ -81,9 +78,12 @@ class DanbooruHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/posts/$id";
   }
+
+  @override
   String makeURL(String tags){
     if (booru.apiKey == ""){
       return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
@@ -92,9 +92,12 @@ class DanbooruHandler extends BooruHandler{
     }
 
   }
+
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10&order=count";
   }
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];
@@ -105,7 +108,7 @@ class DanbooruHandler extends BooruHandler{
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body);
-        if (parsedResponse.length > 0){
+        if (parsedResponse.isNotEmpty){
           for (int i=0; i < parsedResponse.length; i++){
             searchTags.add(parsedResponse[i]['name']);
           }

@@ -18,7 +18,6 @@ import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/ResizableSplitView.dart';
-import 'package:LoliSnatcher/widgets/DesktopTabs.dart';
 
 class DesktopHome extends StatelessWidget {
   const DesktopHome({Key? key}) : super(key: key);
@@ -26,15 +25,15 @@ class DesktopHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
-    final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
+    final SnatchHandler snatchHandler = SnatchHandler.instance;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
-        backgroundColor: Get.theme.colorScheme.background,
+        backgroundColor: Theme.of(context).colorScheme.background,
         actions: <Widget>[
           // Obx(() {
           //   if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
@@ -55,7 +54,7 @@ class DesktopHome extends StatelessWidget {
                     TagSearchButton(),
                     Expanded(flex: 1, child: BooruSelectorMain(true)),
                     Expanded(flex: 2, child: TabBox()),
-                    Expanded(flex: 2, child: TabBoxButtons(false, MainAxisAlignment.start)),
+                    Expanded(flex: 2, child: TabBoxButtons(false, WrapAlignment.start)),
                   ],
                 ),
               );
@@ -67,9 +66,9 @@ class DesktopHome extends StatelessWidget {
             if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
               return SettingsButton(
                 name: 'Snatcher',
-                icon: Icon(Icons.download, color: Get.theme.colorScheme.onBackground),
+                icon: Icon(Icons.download, color: Theme.of(context).colorScheme.onBackground),
                 iconOnly: true,
-                page: () => SnatcherPage(),
+                page: () => const SnatcherPage(),
               );
             } else {
               return const SizedBox();
@@ -84,9 +83,9 @@ class DesktopHome extends StatelessWidget {
           }),
           SettingsButton(
             name: 'Settings',
-            icon: Icon(Icons.settings, color: Get.theme.colorScheme.onBackground),
+            icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onBackground),
             iconOnly: true,
-            page: () => SettingsPage(),
+            page: () => const SettingsPage(),
           ),
           Obx(() {
             if (searchHandler.list.isNotEmpty) {
@@ -95,12 +94,12 @@ class DesktopHome extends StatelessWidget {
                 children: [
                   SettingsButton(
                     name: 'Save',
-                    icon: Icon(Icons.save, color: Get.theme.colorScheme.onBackground),
+                    icon: Icon(Icons.save, color: Theme.of(context).colorScheme.onBackground),
                     iconOnly: true,
                     action: () {
                       getPerms();
                       // call a function to save the currently viewed image when the save button is pressed
-                      if (searchHandler.currentTab.selected.length > 0) {
+                      if (searchHandler.currentTab.selected.isNotEmpty) {
                         snatchHandler.queue(
                             searchHandler.currentTab.getSelected(), searchHandler.currentTab.selectedBooru.value, settingsHandler.snatchCooldown);
                         searchHandler.currentTab.selected.value = [];
@@ -121,13 +120,13 @@ class DesktopHome extends StatelessWidget {
                         width: 20,
                         height: 20,
                         decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.secondary,
-                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                          color: Theme.of(context).colorScheme.secondary,
+                          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Center(
                           child: FittedBox(
-                            child: Text('${searchHandler.currentTab.selected.length}', style: TextStyle(color: Get.theme.colorScheme.onSecondary)),
+                            child: Text('${searchHandler.currentTab.selected.length}', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                           ),
                         ),
                       ),
@@ -173,17 +172,17 @@ class DesktopTagListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SearchHandler searchHandler = SearchHandler.instance;
 
     return Obx(() {
       if (searchHandler.list.isEmpty) {
-        return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)));
+        return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)));
       }
 
       return Container(
         padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
-          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
         ),
         child: const TagView(),
       );

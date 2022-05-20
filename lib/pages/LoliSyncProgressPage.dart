@@ -9,12 +9,8 @@ import 'package:LoliSnatcher/libBooru/LoliSync.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class LoliSyncProgressPage extends StatefulWidget {
-  final String type, port, tabsMode;
-  final String? ip;
-  final bool favourites, favouritesv2, settings, booru, tabs;
-  final int favSkip;
-
-  LoliSyncProgressPage({
+  const LoliSyncProgressPage({
+    super.key, 
     required this.type, // sender or receiver
     required this.ip,
     required this.port,
@@ -27,8 +23,13 @@ class LoliSyncProgressPage extends StatefulWidget {
     this.tabsMode = "Merge",
   });
 
+  final String type, port, tabsMode;
+  final String? ip;
+  final bool favourites, favouritesv2, settings, booru, tabs;
+  final int favSkip;
+
   @override
-  _LoliSyncProgressPageState createState() => _LoliSyncProgressPageState();
+  State<LoliSyncProgressPage> createState() => _LoliSyncProgressPageState();
 }
 
 class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {

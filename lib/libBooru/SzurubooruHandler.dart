@@ -11,6 +11,7 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 class SzurubooruHandler extends BooruHandler{
   SzurubooruHandler(Booru booru,int limit) : super(booru,limit);
 
+  @override
   bool tagSearchEnabled = false;
 
   @override
@@ -22,6 +23,7 @@ class SzurubooruHandler extends BooruHandler{
     }
   }
 
+  @override
   void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     /**
@@ -74,22 +76,25 @@ class SzurubooruHandler extends BooruHandler{
   @override
   Map<String,String> getHeaders() {
     if(booru.apiKey!.isNotEmpty){
-      return {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr", "Authorization": "Token " + base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))};
+      return {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr", "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"};
     } else {
       return {"Content-Type":"application/json","Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"};
     }
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/post/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     return "${booru.baseURL}/api/posts/?offset=${pageNum * limit}&limit=${limit.toString()}&query=$tags";
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/api/tags/?offset=0&limit=10&query=$input*";
   }
@@ -104,7 +109,7 @@ class SzurubooruHandler extends BooruHandler{
       // 200 is the success http response code
       if (response.statusCode == 200) {
         Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-        if (parsedResponse.length > 0){
+        if (parsedResponse.isNotEmpty){
           for (int i=0; i < parsedResponse["results"].length; i++){
             String tag = parsedResponse["results"][i]['names'][0].toString().replaceAll(r":", r"\:");
             searchTags.add(tag);

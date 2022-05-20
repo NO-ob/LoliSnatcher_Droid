@@ -84,11 +84,13 @@ class WorldHandler extends BooruHandler {
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/post/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     // convert "tag_name_1 tag_name_2" to "tag name 1|tag name 2" and filter excluded tags out
     String includeTags = tags.split(' ').where((f) => !f.startsWith('-')).toList().map((tag) => tag.replaceAll(RegExp(r'_'), '+')).toList().join('|');
@@ -100,6 +102,7 @@ class WorldHandler extends BooruHandler {
   }
 
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/api/tag/Search";
   }
@@ -122,14 +125,14 @@ class WorldHandler extends BooruHandler {
       // 200 is the success http response code
       if (response.statusCode == 200) {
         List<dynamic> parsedResponse = jsonDecode(response.body)["items"];
-        if (parsedResponse.length > 0) {
+        if (parsedResponse.isNotEmpty) {
           for (int i=0; i < parsedResponse.length; i++){
             Map<String,dynamic> current = parsedResponse.elementAt(i);
             searchTags.add(current['value'].replaceAll(RegExp(r' '), '_'));
           }
         }
       } else {
-        Logger.Inst().log('Tag search error:' + response.statusCode.toString(), "WorldHandler", "tagSearch", LogTypes.booruHandlerInfo);
+        Logger.Inst().log('Tag search error:${response.statusCode}', "WorldHandler", "tagSearch", LogTypes.booruHandlerInfo);
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "WorldHandler", "tagSearch", LogTypes.exception);
@@ -138,9 +141,10 @@ class WorldHandler extends BooruHandler {
     return searchTags;
   }
 
-  Future<void> searchCount(String tags) async {
+  @override
+  Future<void> searchCount(String input) async {
     int result = 0;
-    String url = makeURL(tags);
+    String url = makeURL(input);
     url = url.replaceAll(RegExp(r''), '');
 
     try {

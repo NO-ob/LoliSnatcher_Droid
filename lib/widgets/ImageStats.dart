@@ -5,6 +5,20 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/Tools.dart';
 
 class ImageStats extends StatefulWidget {
+  ImageStats(
+    {
+      Key? key,
+      required this.child,
+      this.width = 120,
+      this.height = 40,
+      this.isEnabled = true,
+      this.align
+    }
+  ) : super(key: key) {
+    assert(width >= 80, "width must be >= 80px");
+    assert((height >= 8), "height must be >= 8px");
+  }
+
   /// Toggle the stats on/off, there should be no performance cost when the widget is off.
   final bool isEnabled;
 
@@ -20,34 +34,20 @@ class ImageStats extends StatefulWidget {
   /// Where to align the stats relative to the child
   final Alignment? align;
 
-  ImageStats(
-    {
-      Key? key,
-      required this.child,
-      this.width = 120,
-      this.height = 40,
-      this.isEnabled = true,
-      this.align
-    }
-  ) : super(key: key) {
-    assert(width >= 80, "width must be >= 80px");
-    assert((height >= 8), "height must be >= 8px");
-  }
-
   @override
-  _ImageStatsState createState() => _ImageStatsState();
+  State<ImageStats> createState() => _ImageStatsState();
 }
 
 class _ImageStatsState extends State<ImageStats> {
   int _lastCalcTime = 0;
   late Ticker _ticker;
   double _ticks = 0;
-  RxInt _totalLive = 0.obs;
-  RxInt _totalPending = 0.obs;
-  RxInt _totalAll = 0.obs;
-  RxInt _cacheSize = 0.obs;
-  RxInt _cacheMax = 0.obs;
-  bool _shouldRepaint = false;
+  final RxInt _totalLive = 0.obs;
+  final RxInt _totalPending = 0.obs;
+  final RxInt _totalAll = 0.obs;
+  final RxInt _cacheSize = 0.obs;
+  final RxInt _cacheMax = 0.obs;
+  final bool _shouldRepaint = false;
   int sampleTimeMs = 500;
 
   int get nowMs => DateTime.now().millisecondsSinceEpoch;

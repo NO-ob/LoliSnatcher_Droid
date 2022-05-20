@@ -11,14 +11,14 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/ThumbBuild.dart';
 
 class ThumbCardBuild extends StatelessWidget {
+  ThumbCardBuild(this.index, this.columnCount, this.onTap, this.tab, {Key? key}) : super(key: key);
   final int index;
   final int columnCount;
   final SearchGlobal tab;
   final void Function(int) onTap;
-  ThumbCardBuild(this.index, this.columnCount, this.onTap, this.tab, {Key? key}) : super(key: key);
 
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   void onDoubleTap(int index) async {
     BooruItem item = tab.booruHandler.filteredFetched[index];
@@ -72,7 +72,7 @@ class ThumbCardBuild extends StatelessWidget {
             decoration: (isCurrent || isSelected)
                 ? BoxDecoration(
                     border: Border.all(
-                      color: isCurrent ? Colors.red : Get.theme.colorScheme.secondary,
+                      color: isCurrent ? Colors.red : Theme.of(context).colorScheme.secondary,
                       width: 2.0,
                     ),
                   )
@@ -85,7 +85,7 @@ class ThumbCardBuild extends StatelessWidget {
                 enableFeedback: true,
                 highlightShape: BoxShape.rectangle,
                 containedInkWell: false,
-                highlightColor: Get.theme.colorScheme.secondary,
+                highlightColor: Theme.of(context).colorScheme.secondary,
                 splashColor: Colors.pink,
                 child: ThumbBuild(index, columnCount, tab),
                 onTap: () {

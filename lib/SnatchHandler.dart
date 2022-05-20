@@ -18,6 +18,9 @@ class SnatchItem {
 }
 
 class SnatchHandler extends GetxController {
+  static SnatchHandler get instance => Get.find<SnatchHandler>();
+
+
   RxBool snatchActive = false.obs;
   RxString snatchStatus = "".obs;
   RxInt snatchProgress = 0.obs;
@@ -69,7 +72,7 @@ class SnatchHandler extends GetxController {
           snatchProgress.value = snatchProgress.value + 1;
         }
 
-        if (exists != null && failed != null && queuedList.length == 0) {
+        if (exists != null && failed != null && queuedList.isEmpty) {
           // last yield in stream will send exists and failed counts
           // but show this message only when queue is empty => snatching is complete
           FlashElements.showSnackbar(
@@ -91,7 +94,7 @@ class SnatchHandler extends GetxController {
         }
       },
       onDone: () {
-        if (queuedList.length > 0) {
+        if (queuedList.isNotEmpty) {
           snatch(queuedList.removeLast());
         } else {
           snatchActive.value = false;
@@ -104,9 +107,9 @@ class SnatchHandler extends GetxController {
 
   void trySnatch() {
     if (!snatchActive.value) {
-      if (queuedList.length > 0) {
+      if (queuedList.isNotEmpty) {
         snatch(queuedList.removeLast());
-      } else if (queuedList.length == 0) {
+      } else if (queuedList.isEmpty) {
         //
       }
     }

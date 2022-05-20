@@ -1,7 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
-
-import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class Booru {
   String? name = "", faviconURL = "", type = "", baseURL = "", apiKey = "", userID = "", defTags = "";
@@ -49,7 +46,7 @@ class Booru {
     }
     String jsonString = jsonEncode(json);
     print(jsonString);
-    return 'https://www.loli.snatcher?' + base64UrlEncode(jsonString.codeUnits);
+    return 'https://www.loli.snatcher?${base64UrlEncode(jsonString.codeUnits)}';
   }
 
   Booru.fromLink(String link) {

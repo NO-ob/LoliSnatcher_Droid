@@ -10,24 +10,6 @@ import 'package:LoliSnatcher/widgets/BorderedText.dart';
 import 'package:LoliSnatcher/utilities/debouncer.dart';
 
 class LoadingElement extends StatefulWidget {
-  final BooruItem item;
-
-  final bool hasProgress;
-  final bool isFromCache;
-  final bool isDone;
-
-  final bool isTooBig;
-  final bool isStopped;
-  final List<String> stopReasons;
-  final bool isViewed;
-
-  final RxInt total;
-  final RxInt received;
-  final RxInt startedAt;
-
-  final void Function()? startAction;
-  final void Function()? stopAction;
-
   const LoadingElement({
     Key? key,
     required this.item,
@@ -49,12 +31,30 @@ class LoadingElement extends StatefulWidget {
     required this.stopAction,
   }) : super(key: key);
 
+  final BooruItem item;
+
+  final bool hasProgress;
+  final bool isFromCache;
+  final bool isDone;
+
+  final bool isTooBig;
+  final bool isStopped;
+  final List<String> stopReasons;
+  final bool isViewed;
+
+  final RxInt total;
+  final RxInt received;
+  final RxInt startedAt;
+
+  final void Function()? startAction;
+  final void Function()? stopAction;
+
   @override
-  _LoadingElementState createState() => _LoadingElementState();
+  State<LoadingElement> createState() => _LoadingElementState();
 }
 
 class _LoadingElementState extends State<LoadingElement> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
@@ -114,7 +114,7 @@ class _LoadingElementState extends State<LoadingElement> {
   }
 
   void updateState() {
-    if (this.mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -174,7 +174,7 @@ class _LoadingElementState extends State<LoadingElement> {
       } else {
         return Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
+            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
           ),
         );
       }
@@ -218,11 +218,11 @@ class _LoadingElementState extends State<LoadingElement> {
     String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
 
     int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
-    String expectedSpeedText = (hasProgressData && percentDone < 1) ? (Tools.formatBytes(expectedSpeed, 1) + '/s') : '';
+    String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
 
     double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
     String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1)
-        ? ("~" + expectedTime.toStringAsFixed(1) + " second${expectedTime == 1 ? '' : 's'} left")
+        ? ("~${expectedTime.toStringAsFixed(1)} second${expectedTime == 1 ? '' : 's'} left")
         : '';
 
     int sinceStartSeconds = (sinceStart / 1000).floor();
@@ -246,7 +246,7 @@ class _LoadingElementState extends State<LoadingElement> {
           child: RotatedBox(
             quarterTurns: -1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
               backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
@@ -372,7 +372,7 @@ class _LoadingElementState extends State<LoadingElement> {
                               icon: Icon(
                                 Icons.stop,
                                 size: 44,
-                                color: Get.theme.colorScheme.error,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                               style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all(Colors.black54),
@@ -383,7 +383,7 @@ class _LoadingElementState extends State<LoadingElement> {
                                     'Stop Loading',
                                     style: TextStyle(
                                       fontSize: 18,
-                                      color: Get.theme.colorScheme.error,
+                                      color: Theme.of(context).colorScheme.error,
                                     ),
                                   )),
                               onPressed: () {
@@ -400,7 +400,7 @@ class _LoadingElementState extends State<LoadingElement> {
           child: RotatedBox(
             quarterTurns: percentDone != 0 ? -1 : 1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
               backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
@@ -418,19 +418,6 @@ class _LoadingElementState extends State<LoadingElement> {
 
 // For thumbnails
 class ThumbnailLoadingElement extends StatefulWidget {
-  final BooruItem item;
-
-  final bool hasProgress;
-  final bool? isFromCache;
-  final bool isDone;
-  final bool isFailed;
-
-  final RxInt total;
-  final RxInt received;
-  final RxInt startedAt;
-
-  final void Function()? restartAction;
-
   const ThumbnailLoadingElement({
     Key? key,
     required this.item,
@@ -447,12 +434,25 @@ class ThumbnailLoadingElement extends StatefulWidget {
     required this.restartAction,
   }) : super(key: key);
 
+  final BooruItem item;
+
+  final bool hasProgress;
+  final bool? isFromCache;
+  final bool isDone;
+  final bool isFailed;
+
+  final RxInt total;
+  final RxInt received;
+  final RxInt startedAt;
+
+  final void Function()? restartAction;
+
   @override
-  _ThumbnailLoadingElementState createState() => _ThumbnailLoadingElementState();
+  State<ThumbnailLoadingElement> createState() => _ThumbnailLoadingElementState();
 }
 
 class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   bool isVisible = false;
   int _total = 0, _received = 0, _startedAt = 0;
@@ -498,7 +498,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
   }
 
   void updateState() {
-    if (this.mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -550,6 +550,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
     if (widget.isFailed) {
       return Center(
         child: InkWell(
+          onTap: widget.restartAction,
           child: Container(
             height: 90,
             padding: const EdgeInsets.all(4),
@@ -584,7 +585,6 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
               ],
             ),
           ),
-          onTap: widget.restartAction,
         ),
       );
     }
@@ -611,7 +611,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
           child: RotatedBox(
             quarterTurns: -1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
               backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
@@ -623,7 +623,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
           child: RotatedBox(
             quarterTurns: percentDone != 0 ? -1 : 1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
               backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
@@ -634,7 +634,7 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
         //   width: 100 / widget.columnCount,
         //   child: CircularProgressIndicator(
         //     strokeWidth: 14 / widget.columnCount,
-        //     valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.secondary),
+        //     valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
         //     value: percentDone,
         //   ),
         // ),

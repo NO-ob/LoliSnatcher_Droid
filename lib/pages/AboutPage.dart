@@ -1,6 +1,5 @@
 import 'dart:core';
 
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -8,13 +7,12 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class AboutPage extends StatelessWidget {
-  AboutPage({Key? key}) : super(key: key);
-
-  final String email = 'no.aisu@protonmail.com';
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  const AboutPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    const String email = 'no.aisu@protonmail.com';
+
     return Scaffold(
       appBar: AppBar(
           title: const Text("LoliSnatcher")

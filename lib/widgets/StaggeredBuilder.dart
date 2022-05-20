@@ -10,14 +10,14 @@ import 'package:LoliSnatcher/widgets/ThumbCardBuild.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 
 class StaggeredBuilder extends StatelessWidget {
+  const StaggeredBuilder(this.onTap, {Key? key}) : super(key: key);
   final void Function(int) onTap;
-  StaggeredBuilder(this.onTap, {Key? key}) : super(key: key);
-
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
+
     int columnCount =
         (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
@@ -54,7 +54,7 @@ class StaggeredBuilder extends StatelessWidget {
             // force to use minimum 100 px and max 60% of screen height
             possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
 
-            return Container(
+            return SizedBox(
               height: possibleHeight,
               width: possibleWidth,
               // constraints: hasSizeData
@@ -68,63 +68,3 @@ class StaggeredBuilder extends StatelessWidget {
     });
   }
 }
-
-
-// Legacy - left here just in case we need it again
-// class StaggeredBuilderOld extends StatelessWidget {
-//   final void Function(int) onTap;
-//   StaggeredBuilderOld(this.onTap, {Key? key}) : super(key: key);
-
-//   final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-//   final SearchHandler searchHandler = Get.find<SearchHandler>();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // TODO flutter upgrade to 2.0.6 seems to prevent memory overflow and stutter on new images a little, but it still won't unload things that are not in view
-//     return Obx(() {
-//       int columnCount =
-//           (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
-//       double itemMaxWidth = MediaQuery.of(context).size.width / columnCount;
-//       double itemMaxHeight = MediaQuery.of(context).size.height * 0.6;
-
-//       bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
-
-//       return MasonryGridView.count(
-//         controller: searchHandler.gridScrollController,
-//         physics: (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
-//             ? NeverScrollableScrollPhysics()
-//             : null, // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-//         addAutomaticKeepAlives: false,
-//         shrinkWrap: false,
-//         itemCount: searchHandler.currentFetched.length,
-//         padding: EdgeInsets.fromLTRB(2, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 2, 80),
-//         crossAxisCount: columnCount,
-//         itemBuilder: (BuildContext context, int index) {
-//           double? widthData = searchHandler.currentFetched[index].fileWidth ?? null;
-//           double? heightData = searchHandler.currentFetched[index].fileHeight ?? null;
-
-//           double possibleWidth = itemMaxWidth;
-//           double possibleHeight = itemMaxWidth;
-//           bool hasSizeData = heightData != null && widthData != null;
-//           if (hasSizeData) {
-//             double aspectRatio = widthData / heightData;
-//             possibleHeight = possibleWidth / aspectRatio;
-//           }
-//           // force to use minimum 100 px and max 60% of screen height
-//           possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
-
-//           return Container(
-//             height: possibleHeight,
-//             width: possibleWidth,
-//             // constraints: hasSizeData
-//             //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
-//             //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
-//             child: ThumbCardBuild(index, columnCount, onTap, searchHandler.currentTab),
-//           );
-//         },
-//         mainAxisSpacing: 4.0,
-//         crossAxisSpacing: 4.0,
-//       );
-//     });
-//   }
-// }

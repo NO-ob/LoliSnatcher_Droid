@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
@@ -9,14 +8,14 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class FiltersEdit extends StatefulWidget {
-  FiltersEdit();
+  const FiltersEdit({Key? key}) : super(key: key);
 
   @override
-  _FiltersEditState createState() => _FiltersEditState();
+  State<FiltersEdit> createState() => _FiltersEditState();
 }
 
 class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStateMixin {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   final TextEditingController newTagController = TextEditingController();
   final ScrollController scrollController = ScrollController();
   late TabController tabController;
@@ -36,7 +35,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
   }
 
   void updateState() {
-    if(this.mounted) {
+    if(mounted) {
       setState(() {});
     }
   }
@@ -63,20 +62,20 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Filters Editor"),
+          title: const Text("Filters Editor"),
           bottom: TabBar(
             controller: tabController,
-            indicatorColor: Get.theme.colorScheme.secondary,
+            indicatorColor: Theme.of(context).colorScheme.secondary,
             tabs: [
               Tab(
                 text: 'Hated ${hatedList.isNotEmpty ? '(${hatedList.length})' : ''}'.trim(),
-                icon: Icon(CupertinoIcons.eye_slash, color: Colors.red),
+                icon: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
               ),
               Tab(
                 text: 'Loved ${lovedList.isNotEmpty ? '(${lovedList.length})' : ''}'.trim(),
-                icon: Icon(Icons.star, color: Colors.yellow),
+                icon: const Icon(Icons.star, color: Colors.yellow),
               ),
-              Tab(
+              const Tab(
                 text: 'Settings',
                 icon: Icon(Icons.settings),
               ),
@@ -88,7 +87,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
             onPressed: () {
               openAddNewDialog();
             },
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           )
           : null,
         body: TabBarView(
@@ -104,7 +103,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
   }
 
   void openAddNewDialog() {
-    Widget entryRow = getEntryRow('[Add new ${tabController.index == 0 ? 'Hated' : 'Loved'}]', Icon(Icons.add));
+    Widget entryRow = getEntryRow('[Add new ${tabController.index == 0 ? 'Hated' : 'Loved'}]', const Icon(Icons.add));
     newTagController.text = '';
     showFilterEntryActions(entryRow, '', -1, tabController.index == 0 ? 'Hated' : 'Loved');
   }
@@ -115,7 +114,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
       child: ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
-          side: BorderSide(color: Get.theme.colorScheme.secondary),
+          side: BorderSide(color: Theme.of(context).colorScheme.secondary),
         ),
         onTap: null,
         leading: icon,
@@ -162,14 +161,14 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
         controller: scrollController,
         child: ListView.builder(
           controller: scrollController,
-          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
+          padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
           shrinkWrap: false,
           itemCount: tagsList.length,
           scrollDirection: Axis.vertical,
           physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           itemBuilder: (BuildContext context, int index) {
             String currentEntry = tagsList[index];
-            Widget entryRow = getEntryRow(tagsList[index], Icon(CupertinoIcons.tag));
+            Widget entryRow = getEntryRow(tagsList[index], const Icon(CupertinoIcons.tag));
       
             return Row(children: <Widget>[
               Expanded(
@@ -193,13 +192,13 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
     if(changedList.contains(tag)) {
       FlashElements.showSnackbar(
         context: context,
-        title: Text(
+        title: const Text(
           "Duplicate tag!",
           style: TextStyle(fontSize: 20)
         ),
         content: Text(
           "'$tag' is already in $type list",
-          style: TextStyle(fontSize: 16)
+          style: const TextStyle(fontSize: 16)
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.yellow,
@@ -236,7 +235,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
 
         return SettingsDialog(
           contentItems: <Widget>[
-            Container(
+            SizedBox(
               width: double.maxFinite,
               child: AbsorbPointer(absorbing: true, child: entryRow)
             ),
@@ -262,7 +261,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                   } else {
                     FlashElements.showSnackbar(
                       context: context,
-                      title: Text(
+                      title: const Text(
                         "Empty input!",
                         style: TextStyle(fontSize: 20)
                       ),
@@ -280,7 +279,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
               child: ListTile(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(5),
-                  side: BorderSide(color: Get.theme.colorScheme.secondary),
+                  side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                 ),
                 onTap: () async {
                   String text = newTagController.text;
@@ -293,7 +292,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                   } else {
                     FlashElements.showSnackbar(
                       context: context,
-                      title: Text(
+                      title: const Text(
                         "Empty input!",
                         style: TextStyle(fontSize: 20)
                       ),
@@ -303,8 +302,8 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                     );
                   }
                 },
-                leading: Icon(Icons.save),
-                title: Text('Save'),
+                leading: const Icon(Icons.save),
+                title: const Text('Save'),
               )
             ),
 
@@ -314,7 +313,7 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                 child: ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
-                    side: BorderSide(color: Get.theme.colorScheme.secondary),
+                    side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                   ),
                   onTap: () async {
                     if(type == 'Hated') {
@@ -325,12 +324,12 @@ class _FiltersEditState extends State<FiltersEdit> with SingleTickerProviderStat
                     updateState();
                     Navigator.of(context).pop(true);
                   },
-                  leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
-                  title: Text('Delete', style: TextStyle(color: Get.theme.errorColor)),
+                  leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
+                  title: Text('Delete', style: TextStyle(color: Theme.of(context).errorColor)),
                 )
               ),
           ],
-          actionButtons: <Widget>[ ],
+          actionButtons: const [],
         );
       },
     );

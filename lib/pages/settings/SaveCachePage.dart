@@ -4,32 +4,33 @@ import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
+// import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
 import 'package:LoliSnatcher/ImageWriterIsolate.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 class SaveCachePage extends StatefulWidget {
-  SaveCachePage();
+  const SaveCachePage({Key? key}) : super(key: key);
+
   @override
-  _SaveCachePageState createState() => _SaveCachePageState();
+  State<SaveCachePage> createState() => _SaveCachePageState();
 }
 
 class _SaveCachePageState extends State<SaveCachePage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  late String videoCacheMode, extPathOverride;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final ServiceHandler serviceHandler = ServiceHandler();
+  final ImageWriter imageWriter = ImageWriter();
+
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
-  final ServiceHandler serviceHandler = ServiceHandler();
+  
+  late String videoCacheMode, extPathOverride;
   bool jsonWrite = false, thumbnailCache = true, mediaCache = false;
-
-  final ImageWriter imageWriter = ImageWriter();
   
   final List<Map<String, String?>> cacheTypes = [
     {'folder': null, 'label': 'Total'},
@@ -128,7 +129,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
       child:Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Snatching & Caching"),
+          title: const Text("Snatching & Caching"),
         ),
         body: Center(
           child: ListView(
@@ -172,7 +173,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
               SettingsButton(
                 name: 'Set Storage Directory',
                 subtitle: Text(extPathOverride.isEmpty ? '...' : 'Current: $extPathOverride'),
-                icon: Icon(Icons.folder_outlined),
+                icon: const Icon(Icons.folder_outlined),
                 action: () async {
                   //String url = await ServiceHandler.setExtDir();
 
@@ -183,23 +184,32 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
                   } else {
                     // TODO need to update dir picker to work on desktop
-                    /*if(widget.settingsHandler.appMode.value == AppMode.DESKTOP) {
-                      Get.dialog(Dialog(
-                        child: Container(
-                          width: 500,
-                          child: DirPicker(path),
-                        ),
-                      )).then((value) => {setPath(value == null ? "" : value)});
-                    } else {
-                      Get.to(() => DirPicker(path))!.then((value) => {setPath(value == null ? "" : value)});
-                    }*/
+                    // String? value;
+                    // if(settingsHandler.appMode.value == AppMode.DESKTOP) {
+                    //   value = await showDialog(
+                    //     context: context,
+                    //     builder: (BuildContext context) {
+                    //       return Dialog(
+                    //         child: SizedBox(
+                    //           width: 500,
+                    //           child: DirPicker(path),
+                    //         ),
+                    //       );
+                    //     },
+                    //   );
+                    // } else {
+                    //   value = await Get.to(() => DirPicker(path))!;
+                    // }
+                    // setPath(value ?? "");
+
+
                     FlashElements.showSnackbar(
                       context: context,
-                      title: Text(
+                      title: const Text(
                         'Error!',
                         style: TextStyle(fontSize: 20)
                       ),
-                      content: Text(
+                      content: const Text(
                         'Currently not available for this platform',
                         style: TextStyle(fontSize: 16)
                       ),
@@ -213,14 +223,14 @@ class _SaveCachePageState extends State<SaveCachePage> {
               if(extPathOverride.isNotEmpty)
                 SettingsButton(
                   name: 'Reset Storage Directory',
-                  icon: Icon(Icons.refresh),
+                  icon: const Icon(Icons.refresh),
                   action: () {
                     setState(() {
                       extPathOverride = '';
                     });
                   },
                 ),
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
 
               SettingsToggle(
                 value: thumbnailCache,
@@ -250,12 +260,12 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 title: 'Video Cache Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('Video Cache Modes'),
                           contentItems: <Widget>[
                             Text("- Stream - Don't cache, start playing as soon as possible"),
@@ -304,9 +314,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 numberMax: double.infinity,
               ),
 
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
 
-              SettingsButton(name: 'Cache Stats:'),
+              const SettingsButton(name: 'Cache Stats:'),
               ...cacheTypes.map((type) {
                 Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type['folder'], orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
                 String? folder = type['folder'];
@@ -325,7 +335,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   name: '$label: $text',
                   icon: isLoading
                     ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+                        valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
                       )
                     : Icon(allowedToClear ? Icons.delete : null),
                   action: () async {
@@ -333,14 +343,14 @@ class _SaveCachePageState extends State<SaveCachePage> {
                       FlashElements.showSnackbar(
                         context: context,
                         position: Positions.top,
-                        duration: Duration(seconds: 2),
-                        title: Text(
+                        duration: const Duration(seconds: 2),
+                        title: const Text(
                           'Cache cleared!',
                           style: TextStyle(fontSize: 20)
                         ),
                         content: Text(
                           'Cleared $label cache!',
-                          style: TextStyle(fontSize: 16)
+                          style: const TextStyle(fontSize: 16)
                         ),
                         leadingIcon: Icons.delete_forever,
                         leadingIconColor: Colors.red,
@@ -356,18 +366,18 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
               SettingsButton(
                 name: 'Clear cache completely',
-                icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+                icon: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
                 action: () async {
                   FlashElements.showSnackbar(
                     context: context,
                     position: Positions.top,
-                    title: Text(
+                    title: const Text(
                       'Cache cleared!',
                       style: TextStyle(fontSize: 20)
                     ),
                     content: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                      children: const [
                         Text(
                           'Cleared cache completely!',
                           style: TextStyle(fontSize: 16)

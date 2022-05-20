@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:LoliSnatcher/widgets/ViewerTutorial.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +20,7 @@ import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/TimedProgressController.dart';
 import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
 
-// import 'package:LoliSnatcher/widgets/PreloadPageView.dart' as PreloadPageView;
+
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 import 'package:LoliSnatcher/widgets/HideableAppbar.dart';
@@ -29,34 +28,31 @@ import 'package:LoliSnatcher/widgets/TagView.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/widgets/ZoomButton.dart';
 import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
-import 'package:LoliSnatcher/widgets/ChangePageButtons.dart';
 import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
+import 'package:LoliSnatcher/widgets/GalleryButtons.dart';
+import 'package:LoliSnatcher/widgets/ViewerTutorial.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
 
-/**
- * The image page is what is dispalyed when an iamge is clicked it shows a full resolution
- * version of an image and allows scrolling left and right through the currently loaded booruItems
- *
- */
+/// The image page is what is dispalyed when an iamge is clicked it shows a full resolution
+/// version of an image and allows scrolling left and right through the currently loaded booruItems
+///
 class ViewerPage extends StatefulWidget {
-  final int index;
   const ViewerPage(this.index, {Key? key}) : super(key: key);
+  final int index;
 
   @override
-  _ViewerPageState createState() => _ViewerPageState();
+  State<ViewerPage> createState() => _ViewerPageState();
 }
 
 class _ViewerPageState extends State<ViewerPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
-  // PreloadPageView.PageController? controller;
   bool autoScroll = false;
   Timer? autoScrollTimer;
   TimedProgressController? autoScrollProgressController;
@@ -67,69 +63,9 @@ class _ViewerPageState extends State<ViewerPage> {
   StreamSubscription? volumeListener;
   final GlobalKey<ScaffoldState> viewerScaffoldKey = GlobalKey<ScaffoldState>();
 
-  ///////////////////// TODO Experiment with new gesture - tap on the sides to change pages
-  ///////////////////// Didn't work since it felt unstable and conflicted with other gestures (video double tap, zoom...)
-  /// Wrap androidBuilder with this
-  // Listener(
-  //       onPointerDown: (opm) {
-  //         savePointerPosition(opm.pointer, opm.position);
-  //       },
-  //       // onPointerMove: (opm) {
-  //       //   savePointerPosition(opm.pointer, opm.position);
-  //       // },
-  //       onPointerCancel: (opc) {
-  //         clearPointerPosition(opc.pointer, opc.position);
-  //       },
-  //       onPointerUp: (opc) {
-  //         clearPointerPosition(opc.pointer, opc.position);
-  //       },
-  // );
-  // Map<int, Offset> touchPositions = <int, Offset>{};
-
-  // void savePointerPosition(int index, Offset position) {
-  //   touchPositions[index] = position;
-  // }
-
-  // void clearPointerPosition(int index, Offset position) {
-  //   Map<int, Offset> before = new Map.from(touchPositions);
-  //   touchPositions.remove(index);
-  //   actionCheck(before, index, position);
-  // }
-
-  // void actionCheck(Map<int, Offset> before, int cancelIndex, Offset cancelOffset) async {
-  //   if(touchPositions.length == 0) { // no active pointers
-  //     if(!viewerHandler.isZoomed.value) { // image is not zoomed
-  //       if(before.length == 2) { // two fingers were down
-  //         // if two fingers were down TODO: how to detect when tapped with two fingers? check with delay?
-  //         // viewerScaffoldKey.currentState?.openEndDrawer();
-  //       } else if(before.length == 1) { // only one finger was down
-  //         Offset position = before.values.first;
-
-  //         if(before.keys.first != cancelIndex || (position.dx - cancelOffset.dx).abs() > 30 || (position.dy - cancelOffset.dy).abs() > 30) {
-  //           return;
-  //         }
-
-  //         double zoomButtonBottom = Get.height - kToolbarHeight * 3 - 6;
-  //         double zoomButtonTop = zoomButtonBottom - 42;
-  //         bool isNotInLeftZoomButtonRange = settingsHandler.zoomButtonPosition == 'Left' ? position.dy < zoomButtonTop || position.dy > zoomButtonBottom : true;
-  //         bool isNotInRightZoomButtonRange = settingsHandler.zoomButtonPosition == 'Right' ? position.dy < zoomButtonTop || position.dy > zoomButtonBottom : true;
-
-  //         if (position.dx < (Get.width * 0.10) && isNotInLeftZoomButtonRange) {
-  //           // next page if tapped on dx less than 10% of width
-  //           await controller.previousPage(duration: Duration(milliseconds: 10), curve: Curves.easeInOut);
-  //         } else if (position.dx > (Get.width * 0.90) && isNotInRightZoomButtonRange) {
-  //           // next page if tapped on dx more than 90% of width
-  //           await controller.nextPage(duration: Duration(milliseconds: 10), curve: Curves.easeInOut);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
   @override
   void initState() {
     super.initState();
-    // controller = PreloadPageView.PageController(
     controller = PreloadPageController(
       initialPage: widget.index,
     );
@@ -178,7 +114,7 @@ class _ViewerPageState extends State<ViewerPage> {
   @override
   Widget build(BuildContext context) {
     // print('!!! ViewerPage build ${searchHandler.viewedIndex.value} !!!');
-    //kbFocusNode.requestFocus();
+    // kbFocusNode.requestFocus();
 
     return Scaffold(
       key: viewerScaffoldKey,
@@ -245,7 +181,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 }
               },
               child: Stack(children: [
-                Obx(() => PreloadPageView.builder( // PreloadPageView.PageView.builder(
+                Obx(() => PreloadPageView.builder(
                   preloadPagesCount: settingsHandler.preloadCount,
                   // allowImplicitScrolling: true,
                   scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
@@ -296,23 +232,8 @@ class _ViewerPageState extends State<ViewerPage> {
 
                       // Cut to the size of the container, prevents overlapping
                       return ClipRect(
-                        //Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+                        // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
                         child: GestureDetector(
-                          // onTapUp: (TapUpDetails tapInfo) {
-                          //   if(isVideo) return;
-                          //   // TODO WIP
-                          //   // change page if tapped on 20% of any side of the screen AND not a video
-                          //   double tapPosX = tapInfo.localPosition.dx;
-                          //   double screenWidth = MediaQuery.of(context).size.width;
-                          //   double sideThreshold = screenWidth / 5;
-
-                          //   if(tapPosX > (screenWidth - sideThreshold)) {
-                          //     controller.animateToPage(searchHandler.viewedIndex.value + 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                          //   } else if(tapPosX < sideThreshold) {
-                          //     controller.animateToPage(searchHandler.viewedIndex.value - 1, duration: Duration(milliseconds: 100), curve: Curves.easeInOut);
-                          //   }
-                          // },
-
                           onTap: () {
                             toggleToolbar(false);
                           },
@@ -353,8 +274,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 )),
 
                 const NotesRenderer(),
-                ChangePageButtons(controller),
-                const ZoomButton(),
+                GalleryButtons(controller),
                 const ViewerTutorial(),
               ]),
             ),
@@ -364,7 +284,7 @@ class _ViewerPageState extends State<ViewerPage> {
       endDrawerEnableOpenDragGesture: false,
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Get.theme.colorScheme.background.withOpacity(0.5), // copy existing main app theme, but make background semitransparent
+          canvasColor: Theme.of(context).colorScheme.background.withOpacity(0.5), // copy existing main app theme, but make background semitransparent
         ),
         child: renderDrawer(),
       )
@@ -521,7 +441,7 @@ class _ViewerPageState extends State<ViewerPage> {
 
     if(path != null) {
       // File is already in cache - share from there
-      await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
+      await serviceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -540,7 +460,7 @@ class _ViewerPageState extends State<ViewerPage> {
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+              valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
             ),
           )
         ),
@@ -552,7 +472,7 @@ class _ViewerPageState extends State<ViewerPage> {
       final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media');
       if(cacheFile != null) {
         path = cacheFile.path;
-        await serviceHandler.loadShareFileIntent(path, (item.isVideo() ? 'video' : 'image') + '/' + item.fileExt!);
+        await serviceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
             context: context,
@@ -591,7 +511,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 ListTile(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Get.theme.colorScheme.secondary),
+                      side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                     ),
                   onTap: (){
                     Navigator.of(context).pop();
@@ -605,7 +525,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Get.theme.colorScheme.secondary),
+                    side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                   ),
                   onTap: (){
                     Navigator.of(context).pop();
@@ -619,7 +539,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Get.theme.colorScheme.secondary),
+                    side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                   ),
                   onTap: (){
                     Navigator.of(context).pop();
@@ -634,7 +554,7 @@ class _ViewerPageState extends State<ViewerPage> {
                   ? ListTile(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Get.theme.colorScheme.secondary),
+                        side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                       ),
                       onTap: (){
                         Navigator.of(context).pop();
@@ -686,15 +606,6 @@ class _ViewerPageState extends State<ViewerPage> {
       actions.add(buildIconButton(value[0], true));
     }
 
-    // TODO zoom button for testing, but maybe make it a real option?
-    // actions.add(Obx(() => IconButton(
-    //   icon: Icon(Get.find<ViewerHandler>().isZoomed.value ? Icons.zoom_out : Icons.zoom_in),
-    //   color: Colors.white,
-    //   onPressed: () {
-    //     Get.find<ViewerHandler>().toggleZoom();
-    //   },
-    // )));
-
     // Debug - print current item info
     // actions.add(IconButton(
     //   icon: Icon(Icons.developer_board),
@@ -726,7 +637,8 @@ class _ViewerPageState extends State<ViewerPage> {
         itemBuilder: (BuildContext itemBuilder) =>
           overFlowList.map((value) =>
             PopupMenuItem(
-              padding: const EdgeInsets.all(0), // remove empty space around the button
+              padding: const EdgeInsets.all(0),
+              value: value[0], // remove empty space around the button
               child: SizedBox(
                 width: double.infinity, // force button to take full width
                 child: ListTile(
@@ -744,9 +656,8 @@ class _ViewerPageState extends State<ViewerPage> {
                   // ),
                   leading: buildIconButton(value[0], false),
                   title: Text(buttonText(value))
-                )
+                ),
               ),
-              value: value[0]
             )
           ).toList()
       ));
@@ -845,9 +756,9 @@ class _ViewerPageState extends State<ViewerPage> {
             return const SizedBox();
           } else {
             return Positioned(
-              child: Icon(Icons.save_alt, size: Get.theme.buttonTheme.height / 2.1),
               right: 2,
               bottom: 5,
+              child: Icon(Icons.save_alt, size: Theme.of(context).buttonTheme.height / 2.1),
             );
           }
         });

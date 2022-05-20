@@ -5,9 +5,7 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the gelbooru engine
- */
+/// Booru Handler for the gelbooru engine
 class GelbooruV1Handler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   GelbooruV1Handler(Booru booru,int limit): super(booru,limit);

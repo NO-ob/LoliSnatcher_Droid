@@ -17,8 +17,8 @@ class BooruSelectorMain extends StatefulWidget {
 }
 
 class _BooruSelectorMainState extends State<BooruSelectorMain> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   @override
   void initState() {
@@ -67,7 +67,11 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
 
       // no tabs
       if (searchHandler.list.isEmpty) {
-        return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)));
+        return Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
+          ),
+        );
       }
 
       // dropdown for secondary boorus
@@ -75,7 +79,6 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         return Container(
           padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
           child: Obx(() => DropdownSearch<Booru>.multiSelection(
-              mode: Mode.MENU,
               // showSearchBox: true,
               items: settingsHandler.booruList,
               onChanged: (List<Booru> newList) {
@@ -89,22 +92,24 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                   searchHandler.rootRestate();
                 }
               },
-              popupItemBuilder: (BuildContext context, Booru? value, bool isSelected) {
-                return Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: buildRow(value),
-                );
-              },
-              popupSelectionWidget: (BuildContext context, Booru item, bool isSelected) {
-                return Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Checkbox(
-                    value: isSelected,
-                    onChanged: (bool? value) {},
-                    activeColor: Get.theme.colorScheme.secondary,
-                  ),
-                );
-              },
+              popupProps: PopupPropsMultiSelection.menu(
+                itemBuilder: (BuildContext context, Booru? value, bool isSelected) {
+                  return Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: buildRow(value),
+                  );
+                },
+                popupSelectionWidget: (BuildContext context, Booru item, bool isSelected) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Checkbox(
+                      value: isSelected,
+                      onChanged: (bool? value) {},
+                      activeColor: Theme.of(context).colorScheme.secondary,
+                    ),
+                  );
+                },
+              ),
               dropdownSearchDecoration: InputDecoration(
                 labelText: "Secondary Boorus",
                 hintText: "Secondary Boorus",
@@ -157,7 +162,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            dropdownColor: Get.theme.colorScheme.surface,
+            dropdownColor: Theme.of(context).colorScheme.surface,
             onChanged: (Booru? newValue) {
               if (searchHandler.currentTab.selectedBooru.value != newValue) {
                 // if not already selected
@@ -183,7 +188,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
                   padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
                   decoration: isCurrent
                       ? BoxDecoration(
-                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
                           borderRadius: BorderRadius.circular(5),
                         )
                       : null,

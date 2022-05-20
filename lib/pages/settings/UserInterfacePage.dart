@@ -2,21 +2,23 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class UserInterfacePage extends StatefulWidget {
-  UserInterfacePage();
+  const UserInterfacePage({Key? key}) : super(key: key);
+
   @override
-  _UserInterfacePageState createState() => _UserInterfacePageState();
+  State<UserInterfacePage> createState() => _UserInterfacePageState();
 }
 
 class _UserInterfacePageState extends State<UserInterfacePage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+
   final TextEditingController columnsLandscapeController = TextEditingController();
   final TextEditingController columnsPortraitController = TextEditingController();
+
   late String previewMode, previewDisplay;
   late AppMode appMode;
 
@@ -71,18 +73,21 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
-                    Get.dialog(
-                      const SettingsDialog(
-                        title: Text('App UI Mode'),
-                        contentItems: [
-                          Text("- Mobile - Normal Mobile UI"),
-                          Text("- Desktop - Ahoviewer Style UI"),
-                          SizedBox(height: 10),
-                          Text("[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs."),
-                          Text("If you are on android versions smaller than 11 you can remove the App Mode line from /LoliSnatcher/config/settings.conf"),
-                          Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
-                        ]
-                      ),
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('App UI Mode'),
+                          contentItems: [
+                            Text("- Mobile - Normal Mobile UI"),
+                            Text("- Desktop - Ahoviewer Style UI"),
+                            SizedBox(height: 10),
+                            Text("[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs."),
+                            Text("If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json"),
+                            Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
+                          ]
+                        );
+                      },
                     );
                   },
                 ),
@@ -152,17 +157,20 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
-                    Get.dialog(
-                      const SettingsDialog(
-                        title: Text('Preview Quality'),
-                        contentItems: [
-                          Text("This setting changes the resolution of images in the preview grid"),
-                          Text(" - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads"),
-                          Text(" - Thumbnail - Low resolution"),
-                          Text(" "),
-                          Text("[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid")
-                        ]
-                      ),
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('Preview Quality'),
+                          contentItems: [
+                            Text("This setting changes the resolution of images in the preview grid"),
+                            Text(" - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads"),
+                            Text(" - Thumbnail - Low resolution"),
+                            Text(" "),
+                            Text("[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid")
+                          ]
+                        );
+                      },
                     );
                   },
                 ),

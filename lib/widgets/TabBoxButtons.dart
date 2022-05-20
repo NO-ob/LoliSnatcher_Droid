@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -9,7 +8,7 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 class TabBoxButtons extends StatelessWidget {
   const TabBoxButtons(this.withArrows, this.alignment, {Key? key}) : super(key: key);
   final bool withArrows;
-  final MainAxisAlignment? alignment;
+  final WrapAlignment? alignment;
 
   Future<bool> showHistory(BuildContext context) async {
     return await SettingsPageOpen(
@@ -20,18 +19,20 @@ class TabBoxButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
 
-    return Row(
-      mainAxisAlignment: alignment ?? MainAxisAlignment.spaceEvenly,
-      mainAxisSize: MainAxisSize.min,
+    final Color iconColor = Theme.of(context).colorScheme.secondary;
+
+    return Wrap(
+      alignment: alignment ?? WrapAlignment.spaceEvenly,
       children: [
         const SizedBox(width: 25),
 
         if (withArrows)
           IconButton(
             icon: const Icon(Icons.arrow_upward),
+            color: iconColor,
             onPressed: () {
               // switch to the prev tab, loop if reached the first
               if ((searchHandler.currentIndex - 1) < 0) {
@@ -44,6 +45,7 @@ class TabBoxButtons extends StatelessWidget {
 
         IconButton(
           icon: const Icon(Icons.remove_circle_outline),
+          color: iconColor,
           onPressed: () {
             // Remove selected searchglobal from list and apply nearest to search bar
             searchHandler.removeTabAt();
@@ -52,6 +54,7 @@ class TabBoxButtons extends StatelessWidget {
 
         IconButton(
           icon: const Icon(Icons.history),
+          color: iconColor,
           onPressed: () async {
             await showHistory(context);
           },
@@ -59,6 +62,7 @@ class TabBoxButtons extends StatelessWidget {
 
         IconButton(
           icon: const Icon(Icons.add_circle_outline),
+          color: iconColor,
           onPressed: () {
             // add new tab and switch to it
             searchHandler.searchTextController.text = settingsHandler.defTags;
@@ -72,6 +76,7 @@ class TabBoxButtons extends StatelessWidget {
         if (withArrows)
           IconButton(
             icon: const Icon(Icons.arrow_downward),
+            color: iconColor,
             onPressed: () {
               // switch to the next tab, loop if reached the last
               if ((searchHandler.currentIndex + 1) > (searchHandler.total - 1)) {

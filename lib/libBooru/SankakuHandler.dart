@@ -8,9 +8,8 @@ import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/libBooru/NoteItem.dart';
+import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-
-import 'Tag.dart';
 
 class SankakuHandler extends BooruHandler{
   SankakuHandler(Booru booru,int limit) : super(booru,limit);
@@ -38,13 +37,12 @@ class SankakuHandler extends BooruHandler{
   @override
   bool hasItemUpdateSupport = true;
 
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
+  /// This function will call a http get request using the tags and pagenumber parsed to it
+  /// it will then create a list of booruItems
 
   //Tried stripping further but it breaks auth. Putting the auth stuff into the getHeaders function and overriding doesn't work
   // Overriding search having just the auth stuff then calling super.search also doesn't work
+  @override
   Future Search(String tags, int? pageNumCustom) async {
     int length = fetched.length;
     if (prevTags != tags){
@@ -103,7 +101,7 @@ class SankakuHandler extends BooruHandler{
 
       if (current["file_url"] != null) {
         for(int i = 0; i < tagMap.entries.length; i++){
-          tagHandler.addTagsWithType(tagMap.entries.elementAt(i).value,tagMap.entries.elementAt(i).key);
+          addTagsWithType(tagMap.entries.elementAt(i).value,tagMap.entries.elementAt(i).key);
         }
         // String fileExt = current["file_type"].split("/")[1]; // image/jpeg
         BooruItem item = BooruItem(
@@ -139,27 +137,28 @@ class SankakuHandler extends BooruHandler{
     setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
-  Future<List> updateItem(BooruItem booruItem) async {
+  @override
+  Future<List> updateItem(BooruItem item) async {
     try {
       if(authToken == "" && booru.userID != "" && booru.apiKey != "") {
         authToken = await getAuthToken();
       }
-      http.Response response = await http.get(Uri.parse(makeApiPostURL(booruItem.postURL.split("/").last)), headers: getHeaders());
+      http.Response response = await http.get(Uri.parse(makeApiPostURL(item.postURL.split("/").last)), headers: getHeaders());
       if (response.statusCode != 200) {
-        return [booruItem, false, 'Invalid status code ${response.statusCode}'];
+        return [item, false, 'Invalid status code ${response.statusCode}'];
       } else {
         var current = jsonDecode(response.body);
         Logger.Inst().log(current.toString(), className, "updateFavourite", LogTypes.booruHandlerRawFetched);
         if (current["file_url"] != null) {
-          booruItem.fileURL = current["file_url"];
-          booruItem.sampleURL = current["sample_url"];
-          booruItem.thumbnailURL = current["preview_url"];
+          item.fileURL = current["file_url"];
+          item.sampleURL = current["sample_url"];
+          item.thumbnailURL = current["preview_url"];
         }
       }
     } catch (e) {
-      return [booruItem, false, e.toString()];
+      return [item, false, e.toString()];
     }
-    return [booruItem, true, null];
+    return [item, true, null];
   }
 
 
@@ -184,11 +183,13 @@ class SankakuHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "https://chan.sankakucomplex.com/post/show/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     return "${booru.baseURL}/posts?tags=${tags.trim()}&limit=${limit.toString()}&page=${pageNum.toString()}";
   }
@@ -226,6 +227,7 @@ class SankakuHandler extends BooruHandler{
     return token;
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/tags?name=${input.toLowerCase()}&limit=10";
   }
@@ -236,7 +238,7 @@ class SankakuHandler extends BooruHandler{
     String url = makeTagURL(input);
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"Mozilla/5.0 (Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0"});
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
@@ -261,7 +263,7 @@ class SankakuHandler extends BooruHandler{
 
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
@@ -300,7 +302,7 @@ class SankakuHandler extends BooruHandler{
 
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "application/json", "user-agent":"LoliSnatcher_Droid/$verStr"});
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);

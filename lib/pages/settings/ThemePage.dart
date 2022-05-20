@@ -17,12 +17,13 @@ class ThemePage extends StatefulWidget {
   const ThemePage({Key? key}) : super(key: key);
 
   @override
-  _ThemePageState createState() => _ThemePageState();
+  State<ThemePage> createState() => _ThemePageState();
 }
 
 class _ThemePageState extends State<ThemePage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   ServiceHandler serviceHandler = ServiceHandler();
+
   late ThemeItem theme;
   late ThemeMode themeMode;
   late bool isAmoled;
@@ -30,6 +31,7 @@ class _ThemePageState extends State<ThemePage> {
   late String mascotPathOverride;
   late Color? primaryPickerColor; // Color for picker shown in Card on the screen.
   late Color? accentPickerColor; // Color for picker in dialog using onChanged
+
   bool needToWriteMascot = false;
 
   @override
@@ -105,15 +107,15 @@ class _ThemePageState extends State<ThemePage> {
       wheelDiameter: 300,
       heading: Text(
         'Select color',
-        style: Get.theme.textTheme.subtitle1,
+        style: Theme.of(context).textTheme.subtitle1,
       ),
       subheading: Text(
         'Selected color and its shades',
-        style: Get.theme.textTheme.subtitle1,
+        style: Theme.of(context).textTheme.subtitle1,
       ),
       wheelSubheading: Text(
         'Selected color and its shades',
-        style: Get.theme.textTheme.subtitle1,
+        style: Theme.of(context).textTheme.subtitle1,
       ),
       showMaterialName: true,
       showColorName: true,
@@ -121,11 +123,11 @@ class _ThemePageState extends State<ThemePage> {
       copyPasteBehavior: const ColorPickerCopyPasteBehavior(
         longPressMenu: true,
       ),
-      materialNameTextStyle: Get.theme.textTheme.caption,
-      colorNameTextStyle: Get.theme.textTheme.caption,
-      colorCodeTextStyle: Get.theme.textTheme.bodyText2,
-      colorCodePrefixStyle: Get.theme.textTheme.caption,
-      selectedPickerTypeColor: Get.theme.colorScheme.primary,
+      materialNameTextStyle: Theme.of(context).textTheme.caption,
+      colorNameTextStyle: Theme.of(context).textTheme.caption,
+      colorCodeTextStyle: Theme.of(context).textTheme.bodyText2,
+      colorCodePrefixStyle: Theme.of(context).textTheme.caption,
+      selectedPickerTypeColor: Theme.of(context).colorScheme.primary,
       pickersEnabled: const <ColorPickerType, bool>{
         ColorPickerType.both: true,
         ColorPickerType.primary: false,
@@ -134,7 +136,7 @@ class _ThemePageState extends State<ThemePage> {
         ColorPickerType.custom: true,
         ColorPickerType.wheel: true,
       },
-      actionButtons: ColorPickerActionButtons(
+      actionButtons: const ColorPickerActionButtons(
         // okButton: true,
         okIcon: Icons.save,
         dialogOkButtonType: ColorPickerActionButtonType.elevated,
@@ -149,7 +151,7 @@ class _ThemePageState extends State<ThemePage> {
       constraints: BoxConstraints(
         minHeight: 480,
         minWidth: 300,
-        maxWidth: min(Get.mediaQuery.size.width * 0.9, 400)
+        maxWidth: min(MediaQuery.of(context).size.width * 0.9, 400)
       ),
     );
   }
@@ -161,7 +163,7 @@ class _ThemePageState extends State<ThemePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Themes"),
+          title: const Text("Themes"),
         ),
         body: Center(
           child: ListView(
@@ -181,14 +183,14 @@ class _ThemePageState extends State<ThemePage> {
                     case ("Dark"):
                       return Row(
                         children: [
-                          const SizedBox(width: size, child: const Icon(Icons.dark_mode)),
+                          const SizedBox(width: size, child: Icon(Icons.dark_mode)),
                           Text(prettyValue),
                         ]
                       );
                     case ("Light"):
                       return Row(
                         children: [
-                          const SizedBox(width: size, child: const Icon(Icons.light_mode)),
+                          const SizedBox(width: size, child: Icon(Icons.light_mode)),
                           Text(prettyValue),
                         ]
                       );
@@ -326,7 +328,7 @@ class _ThemePageState extends State<ThemePage> {
               if(theme.name == 'Custom')
                 SettingsButton(
                   name: 'Reset Custom Colors',
-                  icon: Icon(Icons.refresh),
+                  icon: const Icon(Icons.refresh),
                   drawTopBorder: true,
                   action: () {
                     ThemeItem theme = settingsHandler.map['theme']?['default'];
@@ -336,7 +338,7 @@ class _ThemePageState extends State<ThemePage> {
                   },
                 ),
 
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
               SettingsToggle(
                 value: enableMascot,
                 onChanged: (bool newValue) {
@@ -348,7 +350,7 @@ class _ThemePageState extends State<ThemePage> {
               SettingsButton(
                 name: 'Set Custom Mascot',
                 subtitle: Text(mascotPathOverride.isEmpty ? '...' : 'Current: $mascotPathOverride'),
-                icon: Icon(Icons.image_search_outlined),
+                icon: const Icon(Icons.image_search_outlined),
                 drawTopBorder: true,
                 action: () async{
                     mascotPathOverride = await ServiceHandler.getImageSAFUri();
@@ -359,7 +361,7 @@ class _ThemePageState extends State<ThemePage> {
               if(mascotPathOverride.isNotEmpty)
                 SettingsButton(
                   name: 'Remove Custom Mascot',
-                  icon: Icon(Icons.delete_forever),
+                  icon: const Icon(Icons.delete_forever),
                   drawTopBorder: true,
                   action: () async{
                     File file = File(mascotPathOverride);

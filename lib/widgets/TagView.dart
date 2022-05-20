@@ -24,15 +24,17 @@ import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 
 class TagView extends StatefulWidget {
   const TagView({Key? key}) : super(key: key);
+
   @override
-  _TagViewState createState() => _TagViewState();
+  State<TagView> createState() => _TagViewState();
 }
 
 class _TagViewState extends State<TagView> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
-  final TagHandler tagHandler = Get.find<TagHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
+
   List<List<String>> hatedAndLovedTags = [];
   ScrollController scrollController = ScrollController();
 
@@ -232,7 +234,7 @@ class _TagViewState extends State<TagView> {
     return Obx(() {
       if (item.notes.isNotEmpty) {
         return SettingsButton(
-          name: (viewerHandler.showNotes.value ? 'Hide' : 'Show') + ' Notes (${item.notes.length})',
+          name: '${viewerHandler.showNotes.value ? 'Hide' : 'Show'} Notes (${item.notes.length})',
           icon: const Icon(Icons.note_add),
           action: () {
             viewerHandler.showNotes.toggle();
@@ -338,161 +340,164 @@ class _TagViewState extends State<TagView> {
     required bool isLoved,
     required bool isInSearch,
   }) {
-    Get.dialog(
-      SettingsDialog(
-        contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-        contentItems: [
-          SizedBox(
-            height: 60,
-            width: Get.mediaQuery.size.width,
-            child: ListTile(
-              title: MarqueeText(
-                key: ValueKey(tag),
-                text: tag,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                isExpanded: false,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SettingsDialog(
+          contentPadding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+          contentItems: [
+            SizedBox(
+              height: 60,
+              width: MediaQuery.of(context).size.width,
+              child: ListTile(
+                title: MarqueeText(
+                  key: ValueKey(tag),
+                  text: tag,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  isExpanded: false,
+                ),
               ),
             ),
-          ),
-          Row(
-            children: [
-              Container(
-                width: 6,
-                height: 24,
-                color: tagHandler.getTag(tag).getColour(),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                tagHandler.getTag(tag).tagType.toString().split('.').last,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ListTile(
-            leading: const Icon(Icons.copy),
-            title: const Text("Copy"),
-            onTap: () {
-              Clipboard.setData(ClipboardData(text: tag));
-              FlashElements.showSnackbar(
-                context: context,
-                duration: const Duration(seconds: 2),
-                title: const Text(
-                  "Copied to clipboard!",
-                  style: TextStyle(fontSize: 20),
+            Row(
+              children: [
+                Container(
+                  width: 6,
+                  height: 24,
+                  color: tagHandler.getTag(tag).getColour(),
                 ),
-                content: Text(
-                  tag,
-                  style: const TextStyle(fontSize: 16),
+                const SizedBox(width: 10),
+                Text(
+                  tagHandler.getTag(tag).tagType.toString().split('.').last,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                leadingIcon: Icons.copy,
-                sideColor: Colors.green,
-              );
-              Navigator.of(context).pop(true);
-            },
-          ),
-          if (isInSearch)
-            ListTile(
-              leading: const Icon(Icons.remove),
-              title: const Text("Remove from Search"),
-              onTap: () {
-                searchHandler.removeTagFromSearch(tag);
-                Navigator.of(context).pop(true);
-              },
+              ],
             ),
-          if (!isInSearch)
+            const SizedBox(height: 10),
             ListTile(
-              leading: const Icon(Icons.add, color: Colors.green),
-              title: const Text("Add to Search"),
+              leading: const Icon(Icons.copy),
+              title: const Text("Copy"),
               onTap: () {
-                searchHandler.addTagToSearch(tag);
-
+                Clipboard.setData(ClipboardData(text: tag));
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
                   title: const Text(
-                    "Added to search bar:",
+                    "Copied to clipboard!",
                     style: TextStyle(fontSize: 20),
                   ),
                   content: Text(
                     tag,
                     style: const TextStyle(fontSize: 16),
                   ),
-                  leadingIcon: Icons.add,
+                  leadingIcon: Icons.copy,
                   sideColor: Colors.green,
                 );
+                Navigator.of(context).pop(true);
+              },
+            ),
+            if (isInSearch)
+              ListTile(
+                leading: const Icon(Icons.remove),
+                title: const Text("Remove from Search"),
+                onTap: () {
+                  searchHandler.removeTagFromSearch(tag);
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            if (!isInSearch)
+              ListTile(
+                leading: const Icon(Icons.add, color: Colors.green),
+                title: const Text("Add to Search"),
+                onTap: () {
+                  searchHandler.addTagToSearch(tag);
 
-                Navigator.of(context).pop(true);
-              },
-            ),
-          if (!isInSearch)
-            ListTile(
-              leading: const Icon(Icons.add, color: Colors.red),
-              title: const Text("Add to Search (Exclude)"),
-              onTap: () {
-                searchHandler.addTagToSearch('-$tag');
+                  FlashElements.showSnackbar(
+                    context: context,
+                    duration: const Duration(seconds: 2),
+                    title: const Text(
+                      "Added to search bar:",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    content: Text(
+                      tag,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    leadingIcon: Icons.add,
+                    sideColor: Colors.green,
+                  );
 
-                FlashElements.showSnackbar(
-                  context: context,
-                  duration: const Duration(seconds: 2),
-                  title: const Text(
-                    "Added to search bar (Exclude):",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  content: Text(
-                    tag,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  leadingIcon: Icons.add,
-                  sideColor: Colors.green,
-                );
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            if (!isInSearch)
+              ListTile(
+                leading: const Icon(Icons.add, color: Colors.red),
+                title: const Text("Add to Search (Exclude)"),
+                onTap: () {
+                  searchHandler.addTagToSearch('-$tag');
 
-                Navigator.of(context).pop(true);
-              },
-            ),
-          if (!isHated && !isLoved)
-            ListTile(
-              leading: const Icon(Icons.star, color: Colors.yellow),
-              title: const Text("Add to Loved"),
-              onTap: () {
-                settingsHandler.addTagToList('loved', tag);
-                parseTags();
-                Navigator.of(context).pop(true);
-              },
-            ),
-          if (!isHated && !isLoved)
-            ListTile(
-              leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
-              title: const Text("Add to Hated"),
-              onTap: () {
-                settingsHandler.addTagToList('hated', tag);
-                parseTags();
-                Navigator.of(context).pop(true);
-              },
-            ),
-          if (isLoved)
-            ListTile(
-              leading: const Icon(Icons.star),
-              title: const Text("Remove from Loved"),
-              onTap: () {
-                settingsHandler.removeTagFromList('loved', tag);
-                parseTags();
-                Navigator.of(context).pop(true);
-              },
-            ),
-          if (isHated)
-            ListTile(
-              leading: const Icon(CupertinoIcons.eye_slash),
-              title: const Text("Remove from Hated"),
-              onTap: () {
-                settingsHandler.removeTagFromList('hated', tag);
-                parseTags();
-                Navigator.of(context).pop(true);
-              },
-            ),
-        ],
-      ),
+                  FlashElements.showSnackbar(
+                    context: context,
+                    duration: const Duration(seconds: 2),
+                    title: const Text(
+                      "Added to search bar (Exclude):",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    content: Text(
+                      tag,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    leadingIcon: Icons.add,
+                    sideColor: Colors.green,
+                  );
+
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            if (!isHated && !isLoved)
+              ListTile(
+                leading: const Icon(Icons.star, color: Colors.yellow),
+                title: const Text("Add to Loved"),
+                onTap: () {
+                  settingsHandler.addTagToList('loved', tag);
+                  parseTags();
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            if (!isHated && !isLoved)
+              ListTile(
+                leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
+                title: const Text("Add to Hated"),
+                onTap: () {
+                  settingsHandler.addTagToList('hated', tag);
+                  parseTags();
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            if (isLoved)
+              ListTile(
+                leading: const Icon(Icons.star),
+                title: const Text("Remove from Loved"),
+                onTap: () {
+                  settingsHandler.removeTagFromList('loved', tag);
+                  parseTags();
+                  Navigator.of(context).pop(true);
+                },
+              ),
+            if (isHated)
+              ListTile(
+                leading: const Icon(CupertinoIcons.eye_slash),
+                title: const Text("Remove from Hated"),
+                onTap: () {
+                  settingsHandler.removeTagFromList('hated', tag);
+                  parseTags();
+                  Navigator.of(context).pop(true);
+                },
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -519,10 +524,10 @@ class _TagViewState extends State<TagView> {
         -1;
 
     List<TagInfoIcon> tagIconAndColor = [];
-    if (isSound) tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Get.theme.colorScheme.onBackground));
+    if (isSound) tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
     if (isHated) tagIconAndColor.add(TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
     if (isLoved) tagIconAndColor.add(TagInfoIcon(Icons.star, Colors.yellow));
-    if (isInSearch) tagIconAndColor.add(TagInfoIcon(Icons.search, Get.theme.colorScheme.onBackground));
+    if (isInSearch) tagIconAndColor.add(TagInfoIcon(Icons.search, Theme.of(context).colorScheme.onBackground));
 
     if (currentTag != '') {
       return Column(children: <Widget>[
@@ -552,7 +557,7 @@ class _TagViewState extends State<TagView> {
                   const SizedBox(width: 5),
                 ],
                 IconButton(
-                  icon: Icon(Icons.add, color: Get.theme.colorScheme.secondary),
+                  icon: Icon(Icons.add, color: Theme.of(context).colorScheme.secondary),
                   onPressed: () {
                     searchHandler.addTagToSearch(currentTag);
                     FlashElements.showSnackbar(
@@ -577,7 +582,7 @@ class _TagViewState extends State<TagView> {
                     });
                   },
                   child: IconButton(
-                    icon: Icon(Icons.fiber_new, color: Get.theme.colorScheme.secondary),
+                    icon: Icon(Icons.fiber_new, color: Theme.of(context).colorScheme.secondary),
                     onPressed: () {
                       searchHandler.addTabByString(currentTag);
 

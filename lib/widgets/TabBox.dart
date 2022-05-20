@@ -11,18 +11,10 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/TabBoxDialog.dart';
 
 
-class TabBox extends StatefulWidget {
+class TabBox extends StatelessWidget {
   const TabBox({Key? key}) : super(key: key);
 
-  @override
-  State<TabBox> createState() => _TabBoxState();
-}
-
-class _TabBoxState extends State<TabBox> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-
-  Future<bool> openTabsDialog() async {
+  Future<bool> openTabsDialog(context) async {
     return await SettingsPageOpen(
       context: context,
       page: () => const TabBoxDialog(),
@@ -31,6 +23,9 @@ class _TabBoxState extends State<TabBox> {
 
   @override
   Widget build(BuildContext context) {
+    final SearchHandler searchHandler = SearchHandler.instance;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
     // print('tabbox build');
 
     return Container(
@@ -45,8 +40,8 @@ class _TabBoxState extends State<TabBox> {
         }
 
         return GestureDetector(
-          onLongPress: openTabsDialog,
-          onSecondaryTap: openTabsDialog,
+          onLongPress: () => openTabsDialog(context),
+          onSecondaryTap: () => openTabsDialog(context),
           child: DropdownButtonFormField<SearchGlobal>(
             isExpanded: true,
             value: list[index],
@@ -58,7 +53,7 @@ class _TabBoxState extends State<TabBox> {
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            dropdownColor: Get.theme.colorScheme.surface,
+            dropdownColor: Theme.of(context).colorScheme.surface,
             onChanged: (SearchGlobal? newValue) {
               if (newValue != null) {
                 searchHandler.changeTabIndex(list.indexOf(newValue));
@@ -81,7 +76,7 @@ class _TabBoxState extends State<TabBox> {
                   padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
                   decoration: isCurrent
                       ? BoxDecoration(
-                          border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
                           borderRadius: BorderRadius.circular(5),
                         )
                       : null,

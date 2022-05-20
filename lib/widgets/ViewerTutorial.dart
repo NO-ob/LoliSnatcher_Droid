@@ -67,7 +67,7 @@ class ImageTutorial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,13 +82,13 @@ class ImageTutorial extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 15),
-          Text(
+          const SizedBox(height: 15),
+          const Text(
             'Tap/Long tap: toggle immersive mode',
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             'Double tap: fit to screen / original size / reset zoom',
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),

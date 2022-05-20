@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -21,13 +20,13 @@ class LoliSync{
   bool syncKilled = false;
 
   Stream<String> startServer(String? ipOverride, String? portOverride) async* {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     String newIp = ipOverride ?? await ServiceHandler.getIP();
     int newPort = int.tryParse(portOverride ?? '8080') ?? 8080;
 
-    this.ip = newIp;
-    this.port = newPort;
+    ip = newIp;
+    port = newPort;
     server = await HttpServer.bind(ip, port);
 
     yield "Server active at $ip:$port";
@@ -208,7 +207,8 @@ class LoliSync{
   }
 
   Future<String> storeTabs(var req, SettingsHandler settingsHandler) async {
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SearchHandler searchHandler = SearchHandler.instance;
+
     if (req.method == 'POST') {
       try {
         Logger.Inst().log("request to update tabs recieved", "LoliSync", "storeTabs", LogTypes.loliSyncInfo);
@@ -247,7 +247,7 @@ class LoliSync{
   void killServer() async {
     await server?.close();
     FlashElements.showSnackbar(
-      title: Text(
+      title: const Text(
         "LoliSync server killed!",
         style: TextStyle(fontSize: 20)
       ),
@@ -325,7 +325,7 @@ class LoliSync{
         FlashElements.showSnackbar(
           title: Text(
             "Test error: ${response.statusCode} ${response.reasonPhrase}",
-            style: TextStyle(fontSize: 20)
+            style: const TextStyle(fontSize: 20)
           ),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.red,
@@ -334,11 +334,11 @@ class LoliSync{
         return "Test error";
       } else {
         FlashElements.showSnackbar(
-          title: Text(
+          title: const Text(
             "Test request received a positive response",
             style: TextStyle(fontSize: 20)
           ),
-          content: Text(
+          content: const Text(
             "There should be a 'Test' message on the other device",
             style: TextStyle(fontSize: 20)
           ),
@@ -353,7 +353,7 @@ class LoliSync{
       FlashElements.showSnackbar(
         title: Text(
           "Test error: ${e.toString()}",
-          style: TextStyle(fontSize: 20)
+          style: const TextStyle(fontSize: 20)
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
@@ -376,11 +376,11 @@ class LoliSync{
   }
 
   Stream<String> startSync(String ipOverride, String portOverride, List<String> toSync, int favSkip, String tabsMode) async* {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
 
-    this.ip = ipOverride;
-    this.port = int.tryParse(portOverride) ?? 8080;
+    ip = ipOverride;
+    port = int.tryParse(portOverride) ?? 8080;
     final String address = '$ip:$port';
     syncKilled = false;
 

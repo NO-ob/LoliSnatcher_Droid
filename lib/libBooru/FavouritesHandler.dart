@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -10,7 +8,7 @@ class FavouritesHandler extends BooruHandler{
 
   @override
   Future Search(String tags, int? pageNumCustom) async {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     int length = fetched.length;
     if (prevTags != tags) {
@@ -29,15 +27,17 @@ class FavouritesHandler extends BooruHandler{
     return fetched;
   }
 
+  @override
   Future<List<String>> tagSearch(String input) async {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<String> tags = [];
     tags = await settingsHandler.dbHandler.getTags(input, limit);
     return tags;
   }
 
+  @override
   Future<void> searchCount(String input) async {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     totalCount.value = await settingsHandler.dbHandler.searchDBCount(input);
     return;
   }

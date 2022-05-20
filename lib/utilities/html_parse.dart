@@ -28,7 +28,7 @@ InlineSpan _parseRecursive(dynamic node, TextStyle style, bool styleChanged, boo
 // TODO the method always remove whitespace at leading,
 //  but it should check the tail of the previous span
 String _fixWhitespaceInText(String text) {
-  final sb = new StringBuffer();
+  final sb = StringBuffer();
   int pre = ' '.codeUnitAt(0);
   for (int c in text.codeUnits) {
     if (c == ' '.codeUnitAt(0) || c == '\n'.codeUnitAt(0)) {
@@ -46,14 +46,17 @@ String _fixWhitespaceInText(String text) {
 
 InlineSpan _parseText(dom.Text text, TextStyle style, bool styleChanged, bool isBordered) {
   var t = text.data;
-  if (t == null || t.isEmpty) return TextSpan(text: '');
+  if (t.isEmpty) return const TextSpan(text: '');
   // t = _fixWhitespaceInText(t);
   return TextSpan(text: t, style: styleChanged ? style : null);
 }
 
 TextDecoration _combine(TextDecoration? nullable, TextDecoration nonnull) {
-  if (nullable == null) return nonnull;
-  else return TextDecoration.combine([nullable, nonnull]);
+  if (nullable == null) {
+    return nonnull;
+  } else {
+    return TextDecoration.combine([nullable, nonnull]);
+  }
 }
 
 InlineSpan _parseElement(dom.Element element, TextStyle style, bool styleChanged, bool isBordered) {
@@ -101,7 +104,7 @@ InlineSpan _parseElement(dom.Element element, TextStyle style, bool styleChanged
       styleChanged = true;
       break;
     case "tn":
-      element.text = 'Translator note: ' + element.text;
+      element.text = 'Translator note: ${element.text}';
       style = style.copyWith(fontSize: (style.fontSize ?? 14) - 2);
       styleChanged = true;
       break;
@@ -152,7 +155,7 @@ InlineSpan _parseParent(
   }
 
   // Avoid TextSpan with no child
-  if (children.length == 0) return TextSpan(text: '');
+  if (children.isEmpty) return const TextSpan(text: '');
 
   // Avoid TextSpan with only one child
   if (children.length == 1) {
@@ -160,13 +163,15 @@ InlineSpan _parseParent(
     if (span is TextSpan) {
       // Keep origin style/recognizer, or use parent style/recognizer
       if ((span.style != null || !styleChanged) &&
-        (span.recognizer != null || recognizer == null))
+        (span.recognizer != null || recognizer == null)) {
         return span;
-      else return TextSpan(
+      } else {
+        return TextSpan(
         text: span.text,
-        style: span.style != null ? span.style : style,
-        recognizer: span.recognizer != null ? span.recognizer : recognizer,
+        style: span.style ?? style,
+        recognizer: span.recognizer ?? recognizer,
       );
+      }
     }
     // TODO what if it's not TextSpan
   }

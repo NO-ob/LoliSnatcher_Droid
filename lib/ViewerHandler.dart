@@ -8,6 +8,9 @@ import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 
 class ViewerHandler extends GetxController {
+  static ViewerHandler get instance => Get.find<ViewerHandler>();
+
+
   // Keys to get states of all currently built viewers
   RxList<GlobalKey?> activeKeys = RxList([]);
   // Key of the currently viewed media widget

@@ -19,8 +19,8 @@ class ImagePreviews extends StatefulWidget {
 }
 
 class _ImagePreviewsState extends State<ImagePreviews> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   bool booruListFilled = false, tabListFilled = false;
   late StreamSubscription booruListener, tabListener;
@@ -93,7 +93,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
         child: Column(
           children: [
             CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
+              valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
             ),
             Obx(() {
               if (searchHandler.isRestored.value) {

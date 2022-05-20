@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
@@ -10,13 +9,13 @@ class MascotImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return Align(
       alignment: FractionalOffset.bottomCenter,
       child: Container(
         decoration: BoxDecoration(
-          color: Get.theme.colorScheme.primary,
+          color: Theme.of(context).colorScheme.primary,
         ),
         child: Image(
           fit: BoxFit.contain,

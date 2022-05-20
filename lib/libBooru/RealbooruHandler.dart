@@ -1,23 +1,16 @@
 import 'dart:convert';
-import 'dart:math';
 import 'dart:async';
 
 import 'package:LoliSnatcher/libBooru/GelbooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:http/http.dart' as http;
-import 'package:image/image.dart';
 import 'package:xml/xml.dart';
 
-import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/CommentItem.dart';
-import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the gelbooru engine
- */
+/// Booru Handler for the gelbooru engine
 class RealbooruHandler extends GelbooruHandler {
   // Dart constructors are weird so it has to call super with the args
   RealbooruHandler(Booru booru, int limit) : super(booru, limit);
@@ -121,6 +114,7 @@ class RealbooruHandler extends GelbooruHandler {
     totalCount.value = result;
     return;
   }
+
   @override
   bool isGelbooru() {
     return true;
@@ -130,6 +124,7 @@ class RealbooruHandler extends GelbooruHandler {
   String makeDirectTagURL(List<String> tags) {
     return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name=${tags.join(" ")}&limit=500&json=0";
   }
+
   //This may need to be disabled due to spamming
   @override
   Future<List<Tag>> genTagObjects(List<String> tags) async{
@@ -165,6 +160,7 @@ class RealbooruHandler extends GelbooruHandler {
     }
     return tagObjects;
   }
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];

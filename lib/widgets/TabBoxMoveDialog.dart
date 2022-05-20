@@ -16,7 +16,7 @@ class TabBoxMoveDialog extends StatefulWidget {
 }
 
 class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   final TextEditingController indexController = TextEditingController();
 
@@ -27,13 +27,118 @@ class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
     indexController.text = (widget.index + 1).toString();
   }
 
-  Widget buildPreview() {
-    int enteredIndex = int.tryParse(indexController.text) ?? widget.index;
+  @override
+  Widget build(BuildContext context) {
+    return SettingsDialog(
+      contentItems: <Widget>[
+        SizedBox(width: double.maxFinite, child: widget.row),
+        // 
+        const SizedBox(height: 10),
+        Text(widget.indexText, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        // 
+        const SizedBox(height: 10),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () async {
+            searchHandler.moveTab(widget.index, 0);
+            Navigator.of(context).pop(true);
+            Navigator.of(context).pop(true);
+          },
+          leading: const Icon(Icons.vertical_align_top),
+          title: const Text('To Top'),
+        ),
+        // 
+        const SizedBox(height: 10),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () async {
+            searchHandler.moveTab(widget.index, searchHandler.total);
+            Navigator.of(context).pop(true);
+            Navigator.of(context).pop(true);
+          },
+          leading: const Icon(Icons.vertical_align_bottom),
+          title: const Text('To Bottom'),
+        ),
+        // 
+        const SizedBox(height: 30),
+        SettingsTextInput(
+          title: "Tab Number",
+          hintText: "Tab Number",
+          onlyInput: true,
+          controller: indexController,
+          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+          numberButtons: true,
+          resetText: () => (widget.index + 1).toString(),
+          numberStep: 1,
+          numberMin: 1,
+          numberMax: searchHandler.total.toDouble(),
+          onChanged: (String value) {
+            setState(() { });
+          },
+        ),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () async {
+            final int? enteredIndex = int.tryParse(indexController.text);
+            if(enteredIndex == null) {
+              Get.snackbar("Error", "Invalid tab number - Invalid input", snackPosition: SnackPosition.BOTTOM);
+              return;
+            } else {
+              if(enteredIndex < 0 || enteredIndex > searchHandler.total) {
+                Get.snackbar("Error", "Invalid tab number - Out of range", snackPosition: SnackPosition.BOTTOM);
+                return;
+              }
+
+              searchHandler.moveTab(widget.index, enteredIndex - 1);
+              Navigator.of(context).pop(true);
+              Navigator.of(context).pop(true);
+            }
+          },
+          leading: const Icon(Icons.vertical_align_center),
+          title: const Text('To Set Number'),
+        ),
+        // 
+        const SizedBox(height: 10),
+        const Text('Preview:'),
+        const SizedBox(height: 10),
+        TabMovePreview(
+          index: widget.index,
+          indexController: indexController,
+        ),
+      ],
+    );
+  }
+}
+
+class TabMovePreview extends StatelessWidget {
+  const TabMovePreview({
+    Key? key,
+    required this.index,
+    required this.indexController,
+  }) : super(key: key);
+
+  final int index;
+  final TextEditingController indexController;
+
+  @override
+  Widget build(BuildContext context) {
+    final SearchHandler searchHandler = SearchHandler.instance;
+
+    int enteredIndex = int.tryParse(indexController.text) ?? index;
 
     if(enteredIndex < 1) {
-      enteredIndex = widget.index;
+      enteredIndex = index;
     } else if(enteredIndex > searchHandler.total) {
-      enteredIndex = widget.index;
+      enteredIndex = index;
     }
 
     final int prevTabIndex = enteredIndex - 2;
@@ -42,7 +147,7 @@ class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
     final int nextTabIndex = enteredIndex;
     final SearchGlobal? nextTab = searchHandler.getTabByIndex(nextTabIndex);
 
-    final SearchGlobal currentTab = searchHandler.getTabByIndex(widget.index)!;
+    final SearchGlobal currentTab = searchHandler.getTabByIndex(index)!;
     final SearchGlobal firstTab = searchHandler.getTabByIndex(0)!;
     final SearchGlobal lastTab = searchHandler.getTabByIndex(searchHandler.total - 1)!;
 
@@ -84,15 +189,15 @@ class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
         Container(
           margin: const EdgeInsets.only(left: 10, bottom: 10),
           child: ElevatedButton(
-            style: Get.theme.elevatedButtonTheme.style!.copyWith(
+            style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
               backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-              side: MaterialStateProperty.all<BorderSide>(BorderSide(color: Get.theme.colorScheme.secondary, width: 2)),
+              side: MaterialStateProperty.all<BorderSide>(BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2)),
             ),
             child: Text(
               '#$enteredIndex - ${currentTab.tags}',
             ),
             onPressed: () {
-              indexController.text = (widget.index + 1).toString();
+              indexController.text = (index + 1).toString();
             },
           ),
         ),
@@ -124,94 +229,6 @@ class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
             ),
           ),
         
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SettingsDialog(
-      contentItems: <Widget>[
-        SizedBox(width: double.maxFinite, child: widget.row),
-        // 
-        const SizedBox(height: 10),
-        Text(widget.indexText, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        // 
-        const SizedBox(height: 10),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Get.theme.colorScheme.secondary),
-          ),
-          onTap: () async {
-            searchHandler.moveTab(widget.index, 0);
-            Navigator.of(context).pop(true);
-            Navigator.of(context).pop(true);
-          },
-          leading: const Icon(Icons.vertical_align_top),
-          title: const Text('To Top'),
-        ),
-        // 
-        const SizedBox(height: 10),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Get.theme.colorScheme.secondary),
-          ),
-          onTap: () async {
-            searchHandler.moveTab(widget.index, searchHandler.total);
-            Navigator.of(context).pop(true);
-            Navigator.of(context).pop(true);
-          },
-          leading: const Icon(Icons.vertical_align_bottom),
-          title: const Text('To Bottom'),
-        ),
-        // 
-        const SizedBox(height: 30),
-        SettingsTextInput(
-          title: "Tab Number",
-          hintText: "Tab Number",
-          onlyInput: true,
-          controller: indexController,
-          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
-          numberButtons: true,
-          resetText: () => (widget.index + 1).toString(),
-          numberStep: 1,
-          numberMin: 1,
-          numberMax: searchHandler.total.toDouble(),
-          onChanged: (String value) {
-            setState(() { });
-          },
-        ),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Get.theme.colorScheme.secondary),
-          ),
-          onTap: () async {
-            final int? enteredIndex = int.tryParse(indexController.text);
-            if(enteredIndex == null) {
-              Get.snackbar("Error", "Invalid tab number - Invalid input", snackPosition: SnackPosition.BOTTOM);
-              return;
-            } else {
-              if(enteredIndex < 0 || enteredIndex > searchHandler.total) {
-                Get.snackbar("Error", "Invalid tab number - Out of range", snackPosition: SnackPosition.BOTTOM);
-                return;
-              }
-
-              searchHandler.moveTab(widget.index, enteredIndex - 1);
-              Navigator.of(context).pop(true);
-              Navigator.of(context).pop(true);
-            }
-          },
-          leading: const Icon(Icons.vertical_align_center),
-          title: const Text('To Set Number'),
-        ),
-        // 
-        const SizedBox(height: 10),
-        const Text('Preview:'),
-        const SizedBox(height: 10),
-        buildPreview(),
       ],
     );
   }

@@ -8,9 +8,7 @@ import 'package:LoliSnatcher/libBooru/GelbooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the gelbooru engine only difference do gelbooru is the search/api url all the returned data is the same
- */
+/// Booru Handler for the gelbooru engine only difference do gelbooru is the search/api url all the returned data is the same
 class MoebooruHandler extends GelbooruHandler {
   MoebooruHandler(Booru booru, int limit) : super(booru, limit);
 

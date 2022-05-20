@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruOnRailsHandler.dart';
@@ -24,8 +22,7 @@ import 'package:LoliSnatcher/libBooru/InkBunnyHandler.dart';
 import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/NyanPalsHandler.dart';
 import 'package:LoliSnatcher/libBooru/RainbooruHandler.dart';
-
-import 'RealbooruHandler.dart';
+import 'package:LoliSnatcher/libBooru/RealbooruHandler.dart';
 
 
 
@@ -34,8 +31,9 @@ class BooruHandlerFactory {
   int pageNum = -1;
 
   List getBooruHandler(List<Booru> boorus, int? customLimit) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    final int limit = customLimit == null ? settingsHandler.limit : customLimit;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final int limit = customLimit ?? settingsHandler.limit;
+
     if (boorus.length == 1) {
       switch (boorus[0].type) {
         case("Moebooru"):

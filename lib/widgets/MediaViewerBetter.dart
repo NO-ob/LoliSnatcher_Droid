@@ -20,19 +20,19 @@ import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 
 class MediaViewerBetter extends StatefulWidget {
+  const MediaViewerBetter(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
-  const MediaViewerBetter(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
 
   @override
-  _MediaViewerBetterState createState() => _MediaViewerBetterState();
+  State<MediaViewerBetter> createState() => _MediaViewerBetterState();
 }
 
 class _MediaViewerBetterState extends State<MediaViewerBetter> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
@@ -213,7 +213,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     if (settingsHandler.disableImageScaling || widget.booruItem.isNoScale.value) {
       return MemoryImageTest(bytes, imageUrl: url);
     } else {
-      int? widthLimit = settingsHandler.disableImageScaling ? null : (Get.mediaQuery.size.width * Get.mediaQuery.devicePixelRatio * 2).round();
+      int? widthLimit = settingsHandler.disableImageScaling ? null : (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio * 2).round();
       return ResizeImage(
         MemoryImageTest(bytes, imageUrl: url),
         width: widthLimit,
@@ -253,7 +253,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
   }
 
   void updateState() {
-    if (this.mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   void disposeClient() {
@@ -329,7 +329,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     // print('!!! Build media ${widget.index} $isViewed !!!');
 
     return Hero(
-      tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
+      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
       // without this every text element will have broken styles on first frames
       child: Material(
         color: Colors.black,

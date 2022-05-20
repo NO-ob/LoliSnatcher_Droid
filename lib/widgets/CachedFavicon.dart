@@ -76,7 +76,7 @@ class _CachedFaviconState extends State<CachedFavicon> {
   }
 
   void updateState() {
-    if (this.mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   void restartLoading() {

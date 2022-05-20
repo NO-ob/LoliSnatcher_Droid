@@ -20,14 +20,12 @@ import 'package:LoliSnatcher/pages/settings/ThemePage.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/MascotImage.dart';
 
-/**
- * Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
- */
+/// Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
 class SettingsPage extends StatelessWidget {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  int debugTaps = 0;
+  const SettingsPage({Key? key}) : super(key: key);
 
   Future<bool> _onWillPop() async {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     bool result = await settingsHandler.saveSettings(restate: true);
     await settingsHandler.loadSettings();
     // await settingsHandler.getBooru();
@@ -36,156 +34,165 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Settings"),
+          title: const Text("Settings"),
           leading: IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () async {
                 if (await _onWillPop()) {
                   Get.back();
                 }
-              }
-          ),
+              }),
         ),
-        body:Center(
+        body: Center(
           child: ListView(
             children: <Widget>[
               SettingsButton(
                 name: 'Boorus & Search',
-                icon: Icon(Icons.image_search),
-                page: () => BooruPage()
+                icon: const Icon(Icons.image_search),
+                page: () => const BooruPage(),
               ),
               SettingsButton(
                 name: 'Interface',
-                icon: Icon(Icons.grid_on),
-                page: () => UserInterfacePage()
+                icon: const Icon(Icons.grid_on),
+                page: () => const UserInterfacePage(),
               ),
               SettingsButton(
                 name: 'Themes',
-                icon: Icon(Icons.palette),
-                page: () => ThemePage()
+                icon: const Icon(Icons.palette),
+                page: () => const ThemePage(),
               ),
               SettingsButton(
                 name: 'Gallery',
-                icon: Icon(Icons.view_carousel),
-                page: () => GalleryPage()
+                icon: const Icon(Icons.view_carousel),
+                page: () => const GalleryPage(),
               ),
               SettingsButton(
                 name: 'Snatching & Caching',
-                icon: Icon(Icons.settings),
-                page: () => SaveCachePage()
+                icon: const Icon(Icons.settings),
+                page: () => const SaveCachePage(),
               ),
               SettingsButton(
                 name: 'Tag Filters',
-                icon: Icon(CupertinoIcons.tag),
-                page: () => FiltersEdit()
+                icon: const Icon(CupertinoIcons.tag),
+                page: () => const FiltersEdit(),
               ),
               SettingsButton(
                 name: 'Database',
-                icon: Icon(Icons.list_alt),
-                page: () => DatabasePage()
+                icon: const Icon(Icons.list_alt),
+                page: () => const DatabasePage(),
               ),
               SettingsButton(
                 name: 'Backup & Restore [Beta]',
-                icon: Icon(Icons.restore_page),
-                page: () => BackupRestorePage(),
+                icon: const Icon(Icons.restore_page),
+                page: () => const BackupRestorePage(),
               ),
               SettingsButton(
                 name: 'LoliSync',
-                icon: Icon(Icons.sync),
-                action: settingsHandler.dbEnabled ? null : () {
-                  FlashElements.showSnackbar(
-                    context: context,
-                    title: Text(
-                      "Error!",
-                      style: TextStyle(fontSize: 20)
-                    ),
-                    content: Text("Database must be enabled to use LoliSync"),
-                    leadingIcon: Icons.error_outline,
-                    leadingIconColor: Colors.red,
-                    sideColor: Colors.red,
-                  );
-                },
-                page: settingsHandler.dbEnabled ? () => LoliSyncPage() : null,
+                icon: const Icon(Icons.sync),
+                action: settingsHandler.dbEnabled
+                    ? null
+                    : () {
+                        FlashElements.showSnackbar(
+                          context: context,
+                          title: const Text("Error!", style: TextStyle(fontSize: 20)),
+                          content: const Text("Database must be enabled to use LoliSync"),
+                          leadingIcon: Icons.error_outline,
+                          leadingIconColor: Colors.red,
+                          sideColor: Colors.red,
+                        );
+                      },
+                page: settingsHandler.dbEnabled ? () => const LoliSyncPage() : null,
               ),
-
               SettingsButton(
                 name: 'About',
-                icon: Icon(Icons.info_outline),
-                page: () => AboutPage()
+                icon: const Icon(Icons.info_outline),
+                page: () => const AboutPage(),
               ),
               SettingsButton(
                 name: 'Check for Updates',
-                icon: Icon(Icons.update),
+                icon: const Icon(Icons.update),
                 action: () {
                   settingsHandler.checkUpdate(withMessage: true);
                 },
               ),
               SettingsButton(
                 name: 'Help',
-                icon: Icon(Icons.help_center_outlined),
+                icon: const Icon(Icons.help_center_outlined),
                 action: () {
                   ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
                 },
-                trailingIcon: Icon(Icons.exit_to_app)
+                trailingIcon: const Icon(Icons.exit_to_app),
               ),
-
               Obx(() {
-                if(settingsHandler.isDebug.value) {
-                  return SettingsButton(
-                    name: 'Debug',
-                    icon: Icon(Icons.developer_mode),
-                    page: () => DebugPage()
-                  );
+                if (settingsHandler.isDebug.value) {
+                  return SettingsButton(name: 'Debug', icon: const Icon(Icons.developer_mode), page: () => const DebugPage());
                 } else {
                   return const SizedBox();
                 }
               }),
-
-              SettingsButton(
-                name: "Version: ${settingsHandler.verStr}+${settingsHandler.buildNumber}${kDebugMode ? '+Debug' : ''}${EnvironmentConfig.isFromStore ? '+Play' : ''}",
-                icon: Icon(null), // to align with other items
-                action: () {
-                  if(settingsHandler.isDebug.value) {
-                    FlashElements.showSnackbar(
-                      context: context,
-                      title: Text(
-                        "Debug mode is already enabled!",
-                        style: TextStyle(fontSize: 18)
-                      ),
-                      leadingIcon: Icons.warning_amber,
-                      leadingIconColor: Colors.yellow,
-                      sideColor: Colors.yellow,
-                    );
-                  } else {
-                    debugTaps++;
-                    if(debugTaps > 5) {
-                      settingsHandler.isDebug.value = true;
-                      FlashElements.showSnackbar(
-                        context: context,
-                        title: Text(
-                          "Debug mode is enabled!",
-                          style: TextStyle(fontSize: 18)
-                        ),
-                        leadingIcon: Icons.warning_amber,
-                        leadingIconColor: Colors.green,
-                        sideColor: Colors.green,
-                      );
-                    }
-                  }
-                },
-                drawBottomBorder: false
-              ),
-
-              MascotImage(),
+              const VersionButton(),
+              const MascotImage(),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class VersionButton extends StatefulWidget {
+  const VersionButton({Key? key}) : super(key: key);
+
+  @override
+  State<VersionButton> createState() => _VersionButtonState();
+}
+
+class _VersionButtonState extends State<VersionButton> {
+  int debugTaps = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+    final String verText = "Version: ${settingsHandler.verStr}  (${settingsHandler.buildNumber})";
+    const String buildTypeText = EnvironmentConfig.isFromStore ? "/ Play" : (kDebugMode ? "/ Debug" : "");
+
+    return SettingsButton(
+      name: "Version: $verText $buildTypeText",
+      icon: const Icon(null), // to align with other items
+      action: () {
+        if (settingsHandler.isDebug.value) {
+          FlashElements.showSnackbar(
+            context: context,
+            title: const Text("Debug mode is already enabled!", style: TextStyle(fontSize: 18)),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.yellow,
+            sideColor: Colors.yellow,
+          );
+        } else {
+          debugTaps++;
+          if (debugTaps > 5) {
+            settingsHandler.isDebug.value = true;
+            FlashElements.showSnackbar(
+              context: context,
+              title: const Text("Debug mode is enabled!", style: TextStyle(fontSize: 18)),
+              leadingIcon: Icons.warning_amber,
+              leadingIconColor: Colors.green,
+              sideColor: Colors.green,
+            );
+          }
+        }
+
+        setState(() {});
+      },
+      drawBottomBorder: false,
     );
   }
 }

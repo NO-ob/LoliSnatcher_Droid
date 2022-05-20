@@ -10,9 +10,7 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the Shimmie engine
- */
+/// Booru Handler for the Shimmie engine
 class ShimmieHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   ShimmieHandler(Booru booru,int limit) : super(booru,limit);
@@ -127,7 +125,7 @@ class ShimmieHandler extends BooruHandler{
       final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(RegExp('(\:.([0-9])+)'), "").replaceAll("\"", "").split(",");
+        searchTags = response.body.substring(1,(response.body.length - 1)).replaceAll(RegExp('(:.([0-9])+)'), "").replaceAll("\"", "").split(",");
       }
     } catch(e) {
       Logger.Inst().log(e.toString(), "ShimmieHandler", "tagSearch", LogTypes.exception);

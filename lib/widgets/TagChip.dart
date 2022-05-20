@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
@@ -9,8 +8,9 @@ class TagChip extends StatelessWidget {
 
   final String tagString;
   final GestureDetector gestureDetector;
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final TagHandler tagHandler = Get.find<TagHandler>();
+
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,7 @@ class TagChip extends StatelessWidget {
                   stringContent,
                   style: TextStyle(
                     fontSize: 16,
-                    color: isExclude ? Get.theme.colorScheme.onError : Colors.white,
+                    color: isExclude ? Theme.of(context).colorScheme.onError : Colors.white,
                   ),
                 ),
               ],

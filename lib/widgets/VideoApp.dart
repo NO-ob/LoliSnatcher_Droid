@@ -25,19 +25,20 @@ import 'package:LoliSnatcher/widgets/LoliControls.dart';
 import 'package:LoliSnatcher/widgets/TransparentPointer.dart';
 
 class VideoApp extends StatefulWidget {
+  const VideoApp(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
   final bool enableFullscreen;
-  const VideoApp(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
+
   @override
-  _VideoAppState createState() => _VideoAppState();
+  State<VideoApp> createState() => _VideoAppState();
 }
 
 class _VideoAppState extends State<VideoApp> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
@@ -56,6 +57,8 @@ class _VideoAppState extends State<VideoApp> {
   CancelToken? _cancelToken, _sizeCancelToken;
   DioLoader? client, sizeClient;
   File? _video;
+
+  Color get accentColor => Theme.of(context).colorScheme.secondary;
 
   @override
   void didUpdateWidget(VideoApp oldWidget) {
@@ -227,7 +230,7 @@ class _VideoAppState extends State<VideoApp> {
   }
 
   void updateState() {
-    if (this.mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -415,8 +418,8 @@ class _VideoAppState extends State<VideoApp> {
       //   iconColor: Color.fromARGB(255, 200, 200, 200)
       // ),
       materialProgressColors: ChewieProgressColors(
-        playedColor: Get.theme.colorScheme.secondary,
-        handleColor: Get.theme.colorScheme.secondary,
+        playedColor: accentColor,
+        handleColor: accentColor,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white,
       ),
@@ -522,7 +525,7 @@ class _VideoAppState extends State<VideoApp> {
     );
 
     return Hero(
-      tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
+      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
       child: Material(
         child: Stack(
           alignment: Alignment.center,
@@ -580,7 +583,6 @@ class _VideoAppState extends State<VideoApp> {
                       child: Stack(
                         children: [
                           PhotoView.customChild(
-                            child: Chewie(controller: chewieController!),
                             childSize: childSize,
                             minScale: PhotoViewComputedScale.contained,
                             maxScale: PhotoViewComputedScale.covered * 8,
@@ -590,6 +592,7 @@ class _VideoAppState extends State<VideoApp> {
                             controller: viewController,
                             // tightMode: true,
                             scaleStateController: scaleController,
+                            child: Chewie(controller: chewieController!),
                           ),
                           TransparentPointer(
                             child: SafeArea(

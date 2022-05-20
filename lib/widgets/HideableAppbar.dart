@@ -1,8 +1,6 @@
 import 'dart:async';
 
-
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -23,8 +21,8 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HideableAppBarState extends State<HideableAppBar> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   late StreamSubscription<bool> appbarListener;
 

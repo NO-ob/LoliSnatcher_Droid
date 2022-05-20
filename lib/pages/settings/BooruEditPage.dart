@@ -12,21 +12,19 @@ import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
-/**
- * This is the booru editor page.
- */
+/// This is the booru editor page.
 class BooruEdit extends StatefulWidget {
+  BooruEdit(this.booru, {Key? key}) : super(key: key);
   Booru booru;
   String booruType = "";
-  BooruEdit(this.booru);
 
   @override
-  _BooruEditState createState() => _BooruEditState();
+  State<BooruEdit> createState() => _BooruEditState();
 }
 
 class _BooruEditState extends State<BooruEdit> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   final booruNameController = TextEditingController();
   final booruURLController = TextEditingController();
@@ -83,15 +81,15 @@ class _BooruEditState extends State<BooruEdit> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: Text("Booru Editor"),
-        actions: [],
+        title: const Text("Booru Editor"),
+        actions: const [],
       ),
       body: Center(
         child: ListView(
           children: <Widget>[
             testButton(),
             saveButton(),
-            SettingsButton(name: '', enabled: false),
+            const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
               controller: booruNameController,
               title: 'Name',
@@ -132,95 +130,93 @@ class _BooruEditState extends State<BooruEdit> {
             ),
 
             Container(
-              margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+              margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               width: double.infinity,
-              child: Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
+              child: const Text("API Key and User ID may be needed with some boorus but in most cases isn't necessary. If using API Key the User ID also needs to be filled unless it's Derpibooru/Philomena"),
             ),
 
             if(description != null && description.isNotEmpty)
               Container(
-                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
                 child: SelectableText(description),
               ),
 
-            Container(
-                child: Column(
-                    children: selectedBooruType == 'Hydrus'
-                        ? [
-                      Container(
-                        width: double.infinity,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(color: Get.theme.colorScheme.secondary),
-                            ),
-                          ),
-                          onPressed: () async{
-                            if (selectedBooruType == "Hydrus") {
-                              HydrusHandler hydrus = HydrusHandler(Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
-                              String accessKey = await hydrus.getAccessKey();
-                              if (accessKey != "") {
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  title: Text(
-                                    'Access Key Requested',
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  content: Text(
-                                    'Click okay on hydrus then apply. You can test afterwards',
-                                    style: TextStyle(fontSize: 16)
-                                  ),
-                                  leadingIcon: Icons.warning_amber,
-                                  leadingIconColor: Colors.yellow,
-                                  sideColor: Colors.yellow,
-                                );
-                                booruAPIKeyController.text = accessKey;
-                              } else {
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  title: Text(
-                                    'Failed to get access key',
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  content: Text(
-                                    'Do you have the request window open in hydrus?',
-                                    style: TextStyle(fontSize: 16)
-                                  ),
-                                  leadingIcon: Icons.warning_amber,
-                                  leadingIconColor: Colors.red,
-                                  sideColor: Colors.red,
-                                );
-                              }
-                            } else {
-                              FlashElements.showSnackbar(
-                                context: context,
-                                title: Text(
-                                  'Hydrus Only',
-                                  style: TextStyle(fontSize: 20)
-                                ),
-                                content: Text(
-                                  'This button only works for Hydrus',
-                                  style: TextStyle(fontSize: 16)
-                                ),
-                                leadingIcon: Icons.warning_amber,
-                                leadingIconColor: Colors.red,
-                                sideColor: Colors.red,
-                              );
-                            }
-                          },
-                          child: Text("Get Hydrus Api Key"),
+            Column(
+              children: selectedBooruType == 'Hydrus'
+                ? [
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                         ),
                       ),
-                      Container(
-                        margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                        width: double.infinity,
-                        child: Text("To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request"),
-                      ),
-                    ]
-                        : []
-                )
+                      onPressed: () async{
+                        if (selectedBooruType == "Hydrus") {
+                          HydrusHandler hydrus = HydrusHandler(Booru("Hydrus", "Hydrus", "Hydrus", booruURLController.text, ""), 5);
+                          String accessKey = await hydrus.getAccessKey();
+                          if (accessKey != "") {
+                            FlashElements.showSnackbar(
+                              context: context,
+                              title: const Text(
+                                'Access Key Requested',
+                                style: TextStyle(fontSize: 20)
+                              ),
+                              content: const Text(
+                                'Click okay on hydrus then apply. You can test afterwards',
+                                style: TextStyle(fontSize: 16)
+                              ),
+                              leadingIcon: Icons.warning_amber,
+                              leadingIconColor: Colors.yellow,
+                              sideColor: Colors.yellow,
+                            );
+                            booruAPIKeyController.text = accessKey;
+                          } else {
+                            FlashElements.showSnackbar(
+                              context: context,
+                              title: const Text(
+                                'Failed to get access key',
+                                style: TextStyle(fontSize: 20)
+                              ),
+                              content: const Text(
+                                'Do you have the request window open in hydrus?',
+                                style: TextStyle(fontSize: 16)
+                              ),
+                              leadingIcon: Icons.warning_amber,
+                              leadingIconColor: Colors.red,
+                              sideColor: Colors.red,
+                            );
+                          }
+                        } else {
+                          FlashElements.showSnackbar(
+                            context: context,
+                            title: const Text(
+                              'Hydrus Only',
+                              style: TextStyle(fontSize: 20)
+                            ),
+                            content: const Text(
+                              'This button only works for Hydrus',
+                              style: TextStyle(fontSize: 16)
+                            ),
+                            leadingIcon: Icons.warning_amber,
+                            leadingIconColor: Colors.red,
+                            sideColor: Colors.red,
+                          );
+                        }
+                      },
+                      child: const Text("Get Hydrus Api Key"),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                    width: double.infinity,
+                    child: const Text("To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request"),
+                  ),
+                ]
+              : []
             ),
 
             SettingsTextInput(
@@ -267,15 +263,15 @@ class _BooruEditState extends State<BooruEdit> {
       name: 'Test Booru',
       icon: isTesting
         ? CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
           )
-        : Icon(Icons.public),
+        : const Icon(Icons.public),
       action: () async {
         // name and url are required
         if(booruNameController.text == "") {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               'Booru Name is required!',
               style: TextStyle(fontSize: 20)
             ),
@@ -288,7 +284,7 @@ class _BooruEditState extends State<BooruEdit> {
         if(booruURLController.text == "") {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               'Booru URL is required!',
               style: TextStyle(fontSize: 20)
             ),
@@ -300,11 +296,11 @@ class _BooruEditState extends State<BooruEdit> {
         } else {
           // add https if not specified
           if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
-            booruURLController.text = "https://" + booruURLController.text;
+            booruURLController.text = "https://${booruURLController.text}";
           }
           // autofill favicon if not specified
           if(booruFaviconController.text == ""){
-            booruFaviconController.text = booruURLController.text + "/favicon.ico";
+            booruFaviconController.text = "${booruURLController.text}/favicon.ico";
           }
           // TODO make a list of default favicons for boorus where ^default^ one won't work
           if (booruURLController.text.contains("agn.ph")){
@@ -357,9 +353,9 @@ class _BooruEditState extends State<BooruEdit> {
             context: context,
             title: Text(
               'Booru Type is $booruType',
-              style: TextStyle(fontSize: 20)
+              style: const TextStyle(fontSize: 20)
             ),
-            content: Text(
+            content: const Text(
               'Click the Save button to save this config',
               style: TextStyle(fontSize: 16)
             ),
@@ -370,13 +366,13 @@ class _BooruEditState extends State<BooruEdit> {
         } else {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               'No Data Returned',
               style: TextStyle(fontSize: 20)
             ),
             content: Text(
               "Entered Information may be incorrect, booru doesn't allow api access or there was a network error. $errorString",
-              style: TextStyle(fontSize: 16)
+              style: const TextStyle(fontSize: 16)
             ),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
@@ -389,10 +385,8 @@ class _BooruEditState extends State<BooruEdit> {
     );
   }
 
-  /**
-   * The save button is displayed once the test function has run and completed
-   * allowing the user to save the booru config otherwise an empty container is returned
-   */
+  /// The save button is displayed once the test function has run and completed
+  /// allowing the user to save the booru config otherwise an empty container is returned
   Widget saveButton(){
     return SettingsButton(
       name: "Save Booru${widget.booruType == '' ? ' (Run Test First)' : ''}",
@@ -401,7 +395,7 @@ class _BooruEditState extends State<BooruEdit> {
         if(widget.booruType == "") {
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               'Run Test First!',
               style: TextStyle(fontSize: 20)
             ),
@@ -473,9 +467,9 @@ class _BooruEditState extends State<BooruEdit> {
             context: context,
             title: Text(
               booruExistsReason,
-              style: TextStyle(fontSize: 20)
+              style: const TextStyle(fontSize: 20)
             ),
-            content: Text(
+            content: const Text(
               '...and will not be added',
               style: TextStyle(fontSize: 16)
             ),
@@ -488,7 +482,7 @@ class _BooruEditState extends State<BooruEdit> {
 
           FlashElements.showSnackbar(
             context: context,
-            title: Text(
+            title: const Text(
               'Booru Config Saved!',
               style: TextStyle(fontSize: 20)
             ),
@@ -521,11 +515,9 @@ class _BooruEditState extends State<BooruEdit> {
     );
   }
 
-  /**
-   * This function will use the Base URL the user has entered and call a search up to three times
-   * if the searches return null each time it tries the search it uses a different
-   * type of BooruHandler
-   */
+  /// This function will use the Base URL the user has entered and call a search up to three times
+  /// if the searches return null each time it tries the search it uses a different
+  /// type of BooruHandler
   Future<List<String>> booruTest(Booru booru, String userBooruType) async {
     String booruType = "", errorString = "";
     BooruHandler test;

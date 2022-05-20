@@ -32,7 +32,7 @@ class PhilomenaHandler extends BooruHandler{
       if (current['representations']['full'] != null){
         String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
         if(current["mime_type"].toString().contains("video")) {
-          String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
+          String tmpURL = "${sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1)}thumb.gif";
           sampleURL = tmpURL;
           thumbURL = tmpURL;
         }
@@ -75,11 +75,13 @@ class PhilomenaHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/images/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     //https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
     String filter = "2";
@@ -87,13 +89,14 @@ class PhilomenaHandler extends BooruHandler{
       filter = "56027";
     }
     if (booru.apiKey == ""){
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=${tags.replaceAll(" ", ",")}&per_page=${limit.toString()}&page=${pageNum.toString()}";
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q=${tags.replaceAll(" ", ",")}&per_page=${limit.toString()}&page=${pageNum.toString()}";
     }
 
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10";
   }
@@ -120,7 +123,7 @@ class PhilomenaHandler extends BooruHandler{
           ["-dot-","."],
           ["-plus-","+"]
         ];
-        if (parsedResponse.length > 0){
+        if (parsedResponse.isNotEmpty){
           for (int i=0; i < tags.length; i++){
             String tag = tags[i]['slug'].toString();
             for (int x = 0; x < tagStringReplacements.length; x++){

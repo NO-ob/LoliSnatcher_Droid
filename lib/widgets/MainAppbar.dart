@@ -28,10 +28,10 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _MainAppBarState extends State<MainAppBar> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   double _scrollOffset = 1.0;
   double _lastScrollPosition = 0.0;
@@ -97,7 +97,7 @@ class _MainAppBarState extends State<MainAppBar> {
         showDialog(
             context: context,
             builder: (context) {
-              return PageNumberDialog();
+              return const PageNumberDialog();
             });
       },
     );
@@ -141,7 +141,7 @@ class _MainAppBarState extends State<MainAppBar> {
                   onPressed: () {
                     getPerms();
                     // call a function to save the currently viewed image when the save button is pressed
-                    if (searchHandler.currentTab.selected.length > 0) {
+                    if (searchHandler.currentTab.selected.isNotEmpty) {
                       snatchHandler.queue(
                         searchHandler.currentTab.getSelected(),
                         searchHandler.currentTab.selectedBooru.value,
@@ -165,13 +165,16 @@ class _MainAppBarState extends State<MainAppBar> {
                       width: 20,
                       height: 20,
                       decoration: BoxDecoration(
-                        color: Get.theme.colorScheme.secondary,
-                        border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                        color: Theme.of(context).colorScheme.secondary,
+                        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Center(
                           child: FittedBox(
-                          child: Text('${searchHandler.currentTab.selected.length}', style: TextStyle(color: Get.theme.colorScheme.onSecondary)),
+                          child: Text(
+                            '${searchHandler.currentTab.selected.length}',
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                          ),
                         ),
                       ),
                     ),

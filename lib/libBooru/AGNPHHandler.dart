@@ -10,9 +10,7 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 
 // TODO no setTrackedValues?
 
-/**
- * Booru Handler for the gelbooru engine
- */
+/// Booru Handler for the gelbooru engine
 class AGNPHHandler extends BooruHandler{
   @override
   bool tagSearchEnabled = false;
@@ -22,10 +20,8 @@ class AGNPHHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   AGNPHHandler(Booru booru, int limit) : super(booru, limit);
 
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
+  /// This function will call a http get request using the tags and pagenumber parsed to it
+  /// it will then create a list of booruItems
   @override
   Future Search(String tags, int? pageNumCustom) async {
     tags = validateTags(tags);
@@ -74,7 +70,7 @@ class AGNPHHandler extends BooruHandler{
           String tagStr = post!.getElement("tags")?.innerText ?? "";
           if (post.getElement("tags")!.innerText.isNotEmpty){
             tagStr.replaceAll(post.getElement("artist")?.innerText ?? "", "");
-            tagStr = "artist:${post.getElement("artist")?.innerText} " + tagStr;
+            tagStr = "artist:${post.getElement("artist")?.innerText} $tagStr";
           }
           String fileURL = post.getElement("file_url")?.innerText ?? "",
               sampleURL = post.getElement("preview_url")?.innerText ?? "",
@@ -88,8 +84,8 @@ class AGNPHHandler extends BooruHandler{
             thumbnailURL: thumbnailURL,
             tagsList: tagStr.split(" "),
             postURL: makePostURL(postID),
-            fileWidth: double.tryParse(post.getElement("width")?.innerText ?? "") ?? null,
-            fileHeight: double.tryParse(post.getElement("height")?.innerText ?? "") ?? null,
+            fileWidth: double.tryParse(post.getElement("width")?.innerText ?? ""),
+            fileHeight: double.tryParse(post.getElement("height")?.innerText ?? ""),
             serverId: postID,
             rating: post.getElement("rating")?.innerText,
             score: post.getElement("fav_count")?.innerText,
@@ -129,8 +125,8 @@ class AGNPHHandler extends BooruHandler{
           thumbnailURL: thumbnailURL,
           tagsList: [],
           postURL: makePostURL(posts.elementAt(i).getElement("id")?.innerText ?? ""),
-          fileWidth: double.tryParse(posts.elementAt(i).getElement("width")?.innerText ?? "") ?? null,
-          fileHeight: double.tryParse(posts.elementAt(i).getElement("height")?.innerText ?? "") ?? null,
+          fileWidth: double.tryParse(posts.elementAt(i).getElement("width")?.innerText ?? ""),
+          fileHeight: double.tryParse(posts.elementAt(i).getElement("height")?.innerText ?? ""),
           serverId: posts.elementAt(i).getElement("id")?.innerText ?? "",
           rating: posts.elementAt(i).getElement("rating")?.innerText,
           score: posts.elementAt(i).getElement("fav_count")?.innerText,
@@ -158,7 +154,7 @@ class AGNPHHandler extends BooruHandler{
         String tagStr = post!.getElement("tags")?.innerText ?? "";
         if (post.getElement("tags")!.innerText.isNotEmpty){
           String artist = post.getElement("artist")?.innerText ?? "";
-          tagStr = "artist:$artist " + tagStr.replaceAll(artist, "");
+          tagStr = "artist:$artist ${tagStr.replaceAll(artist, "")}";
         }
         fetched.elementAt(fetchedIndex).tagsList = tagStr.split(" ");
       } else {
@@ -215,7 +211,7 @@ class AGNPHHandler extends BooruHandler{
         if (response.body.contains("response")){
           var parsedResponse = XmlDocument.parse(response.body);
           var tags = parsedResponse.findAllElements("tag");
-          if (tags.length > 0){
+          if (tags.isNotEmpty){
             for (int i=0; i < tags.length; i++){
               searchTags.add(tags.elementAt(i).getAttribute("name")!);
             }

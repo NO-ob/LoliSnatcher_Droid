@@ -11,19 +11,18 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 
-/**
- * This is the page which allows the user to batch download images
- */
+/// This is the page which allows the user to batch download images
 class SnatcherPage extends StatefulWidget {
-  SnatcherPage();
+  const SnatcherPage({Key? key}) : super(key: key);
+
   @override
-  _SnatcherPageState createState() => _SnatcherPageState();
+  State<SnatcherPage> createState() => _SnatcherPageState();
 }
 
 class _SnatcherPageState extends State<SnatcherPage> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
 
   final snatcherTagsController = TextEditingController();
   final snatcherAmountController = TextEditingController();
@@ -46,7 +45,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Snatcher")
+        title: const Text("Snatcher")
       ),
       resizeToAvoidBottomInset: true,
       body: Center(
@@ -97,10 +96,10 @@ class _SnatcherPageState extends State<SnatcherPage> {
               title: 'Booru',
             ),
 
-            SettingsButton(name: '', enabled: false),
+            const SettingsButton(name: '', enabled: false),
             SettingsButton(
               name: 'Snatch Files',
-              icon: Icon(Icons.download),
+              icon: const Icon(Icons.download),
               action: () {
                 if (snatcherSleepController.text.isEmpty){
                   snatcherSleepController.text = 0.toString();
@@ -108,7 +107,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 if(selectedBooru == null) {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: Text(
+                    title: const Text(
                       "No Booru Selected!",
                       style: TextStyle(fontSize: 18)
                     ),

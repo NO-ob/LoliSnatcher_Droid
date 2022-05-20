@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 
@@ -12,7 +11,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
 class ServiceHandler{
-  static const platform = const MethodChannel("com.noaisu.loliSnatcher/services");
+  static const platform = MethodChannel("com.noaisu.loliSnatcher/services");
   // Call androids native media scanner on a file path
   void callMediaScanner(String path) async{
     try{
@@ -168,7 +167,7 @@ class ServiceHandler{
     String safuri = "content://com.android.externalstorage.documents/tree/1206-2917%3ALolisnatcher";
     try {
       result = await platform.invokeMethod("testSAF",{"uri" : safuri});
-      print("got saf result" + result);
+      print("got saf result $result");
     } catch (e) {
       print(e);
     }
@@ -250,7 +249,7 @@ class ServiceHandler{
   }
 
   static void disableSleep ({bool forceEnable = false}){
-    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     if (Platform.isAndroid && (settingsHandler.wakeLockEnabled || forceEnable)){
       platform.invokeMethod("disableSleep");
     }
@@ -283,7 +282,7 @@ class ServiceHandler{
 
   void deleteDB(SettingsHandler settingsHandler) async{
     if (Platform.isAndroid){
-      File dbFile = File(settingsHandler.path + "store.db");
+      File dbFile = File("${settingsHandler.path}store.db");
       print(settingsHandler.path);
       await dbFile.delete();
     }
@@ -349,7 +348,7 @@ class ServiceHandler{
 
   static void launchURL(String url){
     if(Platform.isAndroid){
-      platform.invokeMethod("launchURL", {"url":"$url"});
+      platform.invokeMethod("launchURL", {"url": url});
     } else if(Platform.isIOS) {
       // ???
     } else if (Platform.isLinux) {

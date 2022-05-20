@@ -14,6 +14,7 @@ class e621Handler extends BooruHandler{
   @override
   bool hasSizeData = true;
 
+  @override
   void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
     /**
@@ -47,12 +48,12 @@ class e621Handler extends BooruHandler{
           sampleURL = current['sample']['url'];
           thumbURL = current['preview']['url'];
         }
-        tagHandler.addTagsWithType([...current['tags']['character']],TagType.character);
-        tagHandler.addTagsWithType([...current['tags']['copyright']],TagType.copyright);
-        tagHandler.addTagsWithType([...current['tags']['artist']],TagType.artist);
-        tagHandler.addTagsWithType([...current['tags']['meta']],TagType.meta);
-        tagHandler.addTagsWithType([...current['tags']['general']],TagType.none);
-        tagHandler.addTagsWithType([...current['tags']['species']],TagType.species);
+        addTagsWithType([...current['tags']['character']],TagType.character);
+        addTagsWithType([...current['tags']['copyright']],TagType.copyright);
+        addTagsWithType([...current['tags']['artist']],TagType.artist);
+        addTagsWithType([...current['tags']['meta']],TagType.meta);
+        addTagsWithType([...current['tags']['general']],TagType.none);
+        addTagsWithType([...current['tags']['species']],TagType.species);
         BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
@@ -94,10 +95,12 @@ class e621Handler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/posts/$id?";
   }
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     if (booru.apiKey == ""){
       return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
@@ -105,6 +108,7 @@ class e621Handler extends BooruHandler{
       return "${booru.baseURL}/posts.json?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}";
     }
   }
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10";
   }
