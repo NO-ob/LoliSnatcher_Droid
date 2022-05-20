@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class GalleryPage extends StatefulWidget {
-  GalleryPage();
+  const GalleryPage({Key? key}) : super(key: key);
   @override
-  _GalleryPageState createState() => _GalleryPageState();
+  State<GalleryPage> createState() => _GalleryPageState();
 }
 
 class _GalleryPageState extends State<GalleryPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false, wakeLockEnabled = true;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
+
   List<List<String>>? buttonOrder;
+
   TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
   TextEditingController galleryAutoScrollController = TextEditingController();
@@ -87,7 +88,7 @@ class _GalleryPageState extends State<GalleryPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Gallery"),
+          title: const Text("Gallery"),
         ),
         body: Center(
           child: ListView(
@@ -128,12 +129,12 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Gallery Quality',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('Gallery Quality'),
                           contentItems: <Widget>[
                             Text("The gallery quality changes the resolution of images in the gallery viewer."),
@@ -167,12 +168,12 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Default Share Action',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('Share Actions'),
                           contentItems: <Widget>[
                             Text("- Ask - always ask what to share"),
@@ -234,19 +235,19 @@ class _GalleryPageState extends State<GalleryPage> {
 
 
               Container(
-                  margin: EdgeInsets.fromLTRB(10,10,10,10),
+                  margin: const EdgeInsets.fromLTRB(10,10,10,10),
                   child: Column(
                     children: [
                         SettingsButton(
                           name: 'Toolbar Buttons Order',
                           drawBottomBorder: false,
                           trailingIcon: IconButton(
-                            icon: Icon(Icons.help_outline),
+                            icon: const Icon(Icons.help_outline),
                             onPressed: () {
                               showDialog(
                                 context: context,
                                 builder: (context) {
-                                  return SettingsDialog(
+                                  return const SettingsDialog(
                                     title: Text('Buttons Order'),
                                     contentItems: <Widget>[
                                       Text("Long press to change item order."),
@@ -260,16 +261,16 @@ class _GalleryPageState extends State<GalleryPage> {
                         )
                       ),
                       ReorderableListView(
-                        padding: EdgeInsets.fromLTRB(5, 5, 5, 5),
+                        padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         children: [
                           for (int index = 0; index < buttonOrder!.length; index++)
                             ListTile(
                               onTap: () {
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: Text(
+                                  title: const Text(
                                     "Long Press to move items",
                                     style: TextStyle(fontSize: 20)
                                   ),
@@ -280,8 +281,8 @@ class _GalleryPageState extends State<GalleryPage> {
                               },
                               key: Key('$index'),
                               tileColor: index.isOdd ? oddItemColor : evenItemColor,
-                              title: Text('${buttonOrder![index][1]}'),
-                              trailing: Icon(Icons.menu),
+                              title: Text(buttonOrder![index][1]),
+                              trailing: const Icon(Icons.menu),
                             ),
                         ],
                         onReorder: (int oldIndex, int newIndex) {
@@ -309,12 +310,12 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Disable Video',
                 drawTopBorder: true, // instead of border in reorder list
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('Disable Video'),
                           contentItems: <Widget>[
                             Text("Useful on low end devices that crash when trying to load videos."),
@@ -363,12 +364,12 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Low Performance Mode',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('Low Performance Mode'),
                           contentItems: <Widget>[
                             Text("Recommended for old devices and devices with RAM < 2GB."),
@@ -397,12 +398,12 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Use Volume Buttons for Scrolling',
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('Volume Buttons Scrolling'),
                           contentItems: <Widget>[
                             Text("Allows to scroll through previews grid and gallery items using volume buttons"),
@@ -470,12 +471,12 @@ class _GalleryPageState extends State<GalleryPage> {
                   }
                 },
                 trailingIcon: IconButton(
-                  icon: Icon(Icons.help_outline),
+                  icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return SettingsDialog(
+                        return const SettingsDialog(
                           title: Text('AutoScroll / Slideshow'),
                           contentItems: <Widget>[
                             Text("[WIP] Videos and gifs must be scrolled manually for now."),

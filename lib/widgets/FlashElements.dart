@@ -30,7 +30,7 @@ class FlashElements {
     Positions position = Positions.bottom,
     bool asDialog = false,
   }) {
-    bool inViewer = Get.find<ViewerHandler>().inViewer.value;
+    bool inViewer = ViewerHandler.instance.inViewer.value;
     if(!allowInViewer && inViewer) {
       return;
     }
@@ -39,13 +39,16 @@ class FlashElements {
       return;
     }
 
-    bool isDesktop = Get.find<SettingsHandler>().appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux;
-    bool isDark = Get.theme.brightness == Brightness.dark;
+    BuildContext contextToUse = context ?? Get.context!;
+    MediaQueryData mediaQueryData = MediaQuery.of(contextToUse);
+
+    bool isDesktop = SettingsHandler.instance.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux;
+    bool isDark = Theme.of(contextToUse).brightness == Brightness.dark;
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
 
     if(asDialog) {
-      showDialog(context: context ?? Get.context!, builder: (context) {
+      showDialog(context: contextToUse, builder: (context) {
         return SettingsDialog(
           titlePadding: const EdgeInsets.all(0),
           buttonPadding: const EdgeInsets.all(0),
@@ -53,7 +56,7 @@ class FlashElements {
           insetPadding: const EdgeInsets.all(0),
           borderRadius: const BorderRadius.all(Radius.circular(8)),
           content: DefaultTextStyle(
-            style: TextStyle(color: Get.theme.colorScheme.onBackground),
+            style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground),
             child: ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               child: FlashBar(
@@ -64,7 +67,7 @@ class FlashElements {
                   padding: const EdgeInsets.all(12),
                   child: Icon(
                     leadingIcon,
-                    color: leadingIconColor ?? Get.theme.colorScheme.onBackground,
+                    color: leadingIconColor ?? Theme.of(contextToUse).colorScheme.onBackground,
                     size: leadingIconSize,
                   )
                 ),
@@ -78,13 +81,13 @@ class FlashElements {
     }
 
     showFlash(
-      context: context ?? Get.context!,
+      context: contextToUse,
       duration: duration,
       builder: (_, controller) {
         return Flash(
           controller: controller,
-          margin: (isDesktop && Get.mediaQuery.size.width > 500)
-            ? EdgeInsets.symmetric(horizontal: Get.mediaQuery.size.width / 4, vertical: 0)
+          margin: (isDesktop && mediaQueryData.size.width > 500)
+            ? EdgeInsets.symmetric(horizontal: mediaQueryData.size.width / 4, vertical: 0)
             : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
           behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
           position: flashPosition,
@@ -96,13 +99,13 @@ class FlashElements {
           ),
           borderColor: isDark ? Colors.grey[800] : Colors.grey[300],
           boxShadows: kElevationToShadow[8],
-          backgroundColor: Get.theme.colorScheme.background,
+          backgroundColor: Theme.of(contextToUse).colorScheme.background,
           onTap: tapToClose ? () => controller.dismiss() : null,
           forwardAnimationCurve: Curves.linearToEaseOut,
           reverseAnimationCurve: Curves.easeOutCirc,
           horizontalDismissDirection: HorizontalDismissDirection.horizontal,
           child: DefaultTextStyle(
-            style: TextStyle(color: Get.theme.colorScheme.onBackground),
+            style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground),
             child: FlashBar(
               title: title,
               content: content,
@@ -111,23 +114,23 @@ class FlashElements {
                 padding: const EdgeInsets.all(12),
                 child: Icon(
                   leadingIcon,
-                  color: leadingIconColor ?? Get.theme.colorScheme.onBackground,
+                  color: leadingIconColor ?? Theme.of(contextToUse).colorScheme.onBackground,
                   size: leadingIconSize,
                 )
               ),
               shouldIconPulse: shouldLeadingPulse,
               primaryAction: IconButton(
                 onPressed: () => controller.dismiss(),
-                icon: Icon(Icons.close, color: Get.theme.colorScheme.onBackground),
+                icon: Icon(Icons.close, color: Theme.of(contextToUse).colorScheme.onBackground),
               ),
               // actions: <Widget>[
               //   TextButton(
               //     onPressed: () => controller.dismiss('Yes'),
-              //     child: Text(inViewer.toString(), style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              //     child: Text(inViewer.toString(), style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground))
               //   ),
               //   TextButton(
               //     onPressed: () => controller.dismiss('No'),
-              //     child: Text('NO', style: TextStyle(color: Get.theme.colorScheme.onBackground))
+              //     child: Text('NO', style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground))
               //   ),
               // ],
             ),

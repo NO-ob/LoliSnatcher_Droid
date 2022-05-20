@@ -14,9 +14,7 @@ import 'package:LoliSnatcher/libBooru/NoteItem.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the gelbooru engine
- */
+/// Booru Handler for the gelbooru engine
 class GelbooruHandler extends BooruHandler {
   // Dart constructors are weird so it has to call super with the args
   GelbooruHandler(Booru booru, int limit) : super(booru, limit);
@@ -351,7 +349,7 @@ class GelbooruHandler extends BooruHandler {
       if (response.statusCode == 200) {
         var parsedResponse = XmlDocument.parse(response.body);
         var commentsXML = parsedResponse.findAllElements("comment");
-        if (commentsXML.length > 0) {
+        if (commentsXML.isNotEmpty) {
           for (int i = 0; i < commentsXML.length; i++) {
             var current = commentsXML.elementAt(i);
             String? avatar = isGelbooru()
@@ -396,7 +394,7 @@ class GelbooruHandler extends BooruHandler {
       if (response.statusCode == 200) {
         var parsedResponse = XmlDocument.parse(response.body);
         var notesXML = parsedResponse.findAllElements("note");
-        if (notesXML.length > 0) {
+        if (notesXML.isNotEmpty) {
           for (int i = 0; i < notesXML.length; i++) {
             var current = notesXML.elementAt(i);
             notes.add(NoteItem(

@@ -50,44 +50,44 @@ class BooruItem{
     // Create a unique key for every loaded item, to later use them to read the state of their viewer
     key = GlobalKey();
 
-    if (this.sampleURL.isEmpty || this.sampleURL == "null"){
-      this.sampleURL = this.thumbnailURL;
+    if (sampleURL.isEmpty || sampleURL == "null"){
+      sampleURL = thumbnailURL;
     }
-    this.fileExt = this.fileExt != null ? this.fileExt : Tools.getFileExt(this.fileURL);
-    this.fileExt = this.fileExt!.toLowerCase();
-    switch (this.fileExt) {
+    fileExt = (fileExt ?? Tools.getFileExt(fileURL)).toLowerCase();
+
+    switch (fileExt) {
       case 'jpg':
       case 'jpeg':
       case 'png':
       case 'webp':
-        this.mediaType = 'image';
+        mediaType = 'image';
         break;
 
       case 'mp4':
       case 'webm':
-        this.mediaType = 'video';
+        mediaType = 'video';
         break;
 
       case 'gif':
-        this.mediaType = 'animation';
+        mediaType = 'animation';
         break;
 
       case 'apng':
-        this.mediaType = 'not_supported_animation';
+        mediaType = 'not_supported_animation';
         break;
 
       default:
-        this.mediaType = 'unknown';
+        mediaType = 'unknown';
         break;
     }
   }
 
   bool isVideo() {
-    return this.mediaType == "video";
+    return mediaType == "video";
   }
 
   bool isImage() {
-    return this.mediaType == "image" || this.mediaType == "animation" || this.mediaType == "not_supported_animation";
+    return mediaType == "image" || mediaType == "animation" || mediaType == "not_supported_animation";
   }
 
   Map<String, dynamic> toJson() {
@@ -110,8 +110,9 @@ class BooruItem{
     };
   }
 
+  @override
   String toString() {
-    return jsonEncode(this.toJson());
+    return jsonEncode(toJson());
   }
 
   static BooruItem fromJSON(String jsonString){

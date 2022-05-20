@@ -12,14 +12,13 @@ class TimedProgressController {
   Timer? _periodicTimer;
 
   Stream<void> get progressStream => _progressController.stream;
-  StreamController<void> _progressController = StreamController<void>.broadcast();
+  final StreamController<void> _progressController = StreamController<void>.broadcast();
 
   double get progress => _progress;
   double _progress = 0;
 
   TimedProgressController({required this.duration})
-      : assert(duration != null),
-        tickPeriod = _calculateTickPeriod(duration);
+      : tickPeriod = _calculateTickPeriod(duration);
 
   void start() {
     _timer = Timer(duration, () {

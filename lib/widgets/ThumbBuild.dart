@@ -8,16 +8,15 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 
 class ThumbBuild extends StatelessWidget {
+  const ThumbBuild(this.index, this.columnCount, this.searchGlobal, {Key? key}) : super(key: key);
   final int index;
   final int columnCount;
   final SearchGlobal searchGlobal;
 
-  ThumbBuild(this.index, this.columnCount, this.searchGlobal, {Key? key}) : super(key: key);
-
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
     BooruItem item = searchGlobal.booruHandler.filteredFetched[index];
     IconData itemIcon = ViewUtils.getFileIcon(item.mediaType);
 

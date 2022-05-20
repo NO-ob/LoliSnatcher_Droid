@@ -19,7 +19,7 @@ class DesktopTabs extends StatefulWidget {
 }
 
 class _DesktopTabsState extends State<DesktopTabs> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SearchHandler searchHandler = SearchHandler.instance;
   final AutoScrollController scrollController = AutoScrollController();
 
   @override
@@ -64,7 +64,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Get.theme.cardColor,
+        color: Theme.of(context).cardColor,
         border: Border.all(
           color: isSelected ? Colors.red : Colors.grey,
           width: 1,
@@ -92,7 +92,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
             onPressed: () {
               searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
             },
-            hoverColor: Get.theme.hoverColor,
+            hoverColor: Theme.of(context).hoverColor,
             iconSize: 14,
           ),
         ],
@@ -125,7 +125,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
                       key: ValueKey(index),
                       controller: scrollController,
                       index: index,
-                      child: Container(
+                      child: SizedBox(
                         width: 250,
                         child: GestureDetector(
                           onTap: () {

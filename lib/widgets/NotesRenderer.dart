@@ -19,13 +19,13 @@ class NotesRenderer extends StatefulWidget {
   const NotesRenderer({Key? key}) : super(key: key);
 
   @override
-  _NotesRendererState createState() => _NotesRendererState();
+  State<NotesRenderer> createState() => _NotesRendererState();
 }
 
 class _NotesRendererState extends State<NotesRenderer> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   late BooruItem item;
   late double screenWidth,
@@ -75,7 +75,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   }
 
   void updateState() {
-    if (this.mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -103,7 +103,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       return;
     }
 
-    item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!) as List<NoteItem>;
+    item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!);
 
     triggerCalculations();
 
@@ -137,7 +137,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       //  do nothing
     } else {
       // image size can change if scaling is allowed and it's size is too big
-      widthLimit = Get.mediaQuery.size.width * Get.mediaQuery.devicePixelRatio * 2;
+      widthLimit = MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio * 2;
       if (imageWidth > widthLimit) {
         ratioDiff = widthLimit / imageWidth;
         imageWidth = widthLimit;
@@ -208,13 +208,13 @@ class _NotesRendererState extends State<NotesRenderer> {
                       alignment: Alignment.center,
                       children: [
                         CircularProgressIndicator(
-                          color: Get.theme.colorScheme.secondary,
+                          color: Theme.of(context).colorScheme.secondary,
                           strokeWidth: 2,
                         ),
                         Icon(
                           Icons.note_add,
                           size: 18,
-                          color: Get.theme.colorScheme.secondary,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                       ],
                     ),
@@ -257,7 +257,7 @@ class NoteBuild extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NoteBuildState createState() => _NoteBuildState();
+  State<NoteBuild> createState() => _NoteBuildState();
 }
 
 class _NoteBuildState extends State<NoteBuild> {
@@ -350,7 +350,7 @@ class NotesDialog extends StatelessWidget {
       content: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Material(
-          child: Container(
+          child: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
               physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),

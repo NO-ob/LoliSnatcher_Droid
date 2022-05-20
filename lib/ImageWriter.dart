@@ -4,15 +4,13 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-
-import 'package:LoliSnatcher/ViewUtils.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 
 // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
@@ -22,7 +20,7 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 // }
 
 class ImageWriter {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   String? path = "";
   String? cacheRootPath = "";
   ServiceHandler serviceHandler = ServiceHandler();
@@ -32,11 +30,9 @@ class ImageWriter {
     setPaths();
   }
 
-  /**
-   * return null - file already exists
-   * return String - file saved
-   * return Error - something went wrong
-   */
+  /// return null - file already exists
+  /// return String - file saved
+  /// return Error - something went wrong
   Future write(BooruItem item, Booru booru) async {
     int queryLastIndex = item.fileURL.lastIndexOf("?");
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
@@ -48,7 +44,7 @@ class ImageWriter {
     } else if (booru.baseURL!.contains("yande.re")) {
       fileName = "yandere_${item.md5String}.${item.fileExt}";
     } else {
-      fileName = booru.name! + '_' + item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex);
+      fileName = '${booru.name!}_${item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex)}';
     }
     print("out file is $fileName");
     // print(fileName);
@@ -70,9 +66,9 @@ class ImageWriter {
       if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
         await Directory(path!).create(recursive:true);
         await image.writeAsBytes(response.bodyBytes, flush: true);
-        print("Image written: " + path! + fileName);
+        print("Image written: ${path!}$fileName");
         if (settingsHandler.jsonWrite){
-          File json = File(path! + fileName.split(".")[0]+".json");
+          File json = File("${path!}${fileName.split(".")[0]}.json");
           await json.writeAsString(jsonEncode(item.toJson()), flush: true);
         }
         item.isSnatched.value = true;
@@ -88,23 +84,17 @@ class ImageWriter {
           return e;
         }
       } else {
-        print("files ext is " + item.fileExt!);
-        //if (item.fileExt.toUpperCase() == "PNG" || item.fileExt.toUpperCase() == "JPEG" || item.fileExt.toUpperCase() == "JPG"){
-          print("Ext path override is: ${settingsHandler.extPathOverride}");
-          var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt,settingsHandler.extPathOverride);
-          if (writeResp != null){
-            print("write response: $writeResp");
-            item.isSnatched.value = true;
-            if (settingsHandler.dbEnabled){
-              settingsHandler.dbHandler.updateBooruItem(item,"local");
-            }
-            return (fileName);
+        print("files ext is ${item.fileExt!}");
+        print("Ext path override is: ${settingsHandler.extPathOverride}");
+        var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt,settingsHandler.extPathOverride);
+        if (writeResp != null){
+          print("write response: $writeResp");
+          item.isSnatched.value = true;
+          if (settingsHandler.dbEnabled){
+            settingsHandler.dbHandler.updateBooruItem(item,"local");
           }
-        //} else {
-         // Get.snackbar("File write error","Only jpg and png can be saved on android 11 currently",snackPosition: SnackPosition.BOTTOM,duration: Duration(seconds: 5),colorText: Colors.black, backgroundColor: Get.theme.primaryColor);
-         // return 0;
-        //}
-
+          return (fileName);
+        }
       }
     } catch (e){
       print("Image Writer Exception");
@@ -146,7 +136,7 @@ class ImageWriter {
     try {
       var response = await http.get(fileURI);
       await setPaths();
-      cachePath = cacheRootPath! + typeFolder + "/";
+      cachePath = "${cacheRootPath!}$typeFolder/";
       await Directory(cachePath).create(recursive:true);
 
       String fileName = sanitizeName(parseThumbUrlToName(fileURL));
@@ -163,7 +153,7 @@ class ImageWriter {
     File? image;
     try {
       await setPaths();
-      String cachePath = cacheRootPath! + typeFolder + "/";
+      String cachePath = "${cacheRootPath!}$typeFolder/";
       // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
 
@@ -186,7 +176,7 @@ class ImageWriter {
   Future deleteFileFromCache(String fileURL, String typeFolder) async {
     try {
       await setPaths();
-      String cachePath = cacheRootPath! + typeFolder + "/";
+      String cachePath = "${cacheRootPath!}$typeFolder/";
       String fileName = sanitizeName(parseThumbUrlToName(fileURL));
       File file = File(cachePath + fileName);
       if (await file.exists()) {
@@ -205,7 +195,7 @@ class ImageWriter {
   Future deleteCacheFolder(String typeFolder) async {
     try {
       await setPaths();
-      String cachePath = cacheRootPath! + typeFolder + "/";
+      String cachePath = "${cacheRootPath!}$typeFolder/";
       Directory folder = Directory(cachePath);
       if (await folder.exists()) {
         folder.delete(recursive: true);
@@ -224,7 +214,7 @@ class ImageWriter {
     String cachePath;
     try {
       await setPaths();
-      cachePath = cacheRootPath! + typeFolder + "/";
+      cachePath = "${cacheRootPath!}$typeFolder/";
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
       File cacheFile = File(cachePath+fileName);
@@ -255,7 +245,7 @@ class ImageWriter {
     int totalSize = 0;
     try {
       await setPaths();
-      cacheDirPath = cacheRootPath! + (typeFolder ?? '') + "/";
+      cacheDirPath = "${cacheRootPath!}${typeFolder ?? ''}/";
 
       Directory cacheDir = Directory(cacheDirPath);
       bool dirExists = await cacheDir.exists();
@@ -285,7 +275,7 @@ class ImageWriter {
     String cacheDirPath;
     try {
       await setPaths();
-      cacheDirPath = cacheRootPath! + "/";
+      cacheDirPath = "${cacheRootPath!}/";
 
       Directory cacheDir = Directory(cacheDirPath);
       bool dirExists = await cacheDir.exists();
@@ -318,7 +308,7 @@ class ImageWriter {
     int currentCacheSize = 0;
     try {
       await setPaths();
-      cacheDirPath = cacheRootPath! + "/";
+      cacheDirPath = "${cacheRootPath!}/";
 
       Directory cacheDir = Directory(cacheDirPath);
       bool dirExists = await cacheDir.exists();
@@ -401,8 +391,8 @@ class ImageWriter {
       String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
         if (fileBytes != null && fileExt.isNotEmpty){
           String path = await serviceHandler.getConfigDir();
-          File(path + "mascot." + fileExt).writeAsBytes(fileBytes);
-          return (path + "mascot." + fileExt);
+          File("${path}mascot.$fileExt").writeAsBytes(fileBytes);
+          return ("${path}mascot.$fileExt");
         }
     }
     return "";

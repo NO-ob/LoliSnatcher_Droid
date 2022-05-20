@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -16,30 +14,27 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class BackupRestorePage extends StatefulWidget {
-  BackupRestorePage();
+  const BackupRestorePage({Key? key}) : super(key: key);
+
   @override
-  _BackupRestorePageState createState() => _BackupRestorePageState();
+  State<BackupRestorePage> createState() => _BackupRestorePageState();
 }
 
 class _BackupRestorePageState extends State<BackupRestorePage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   ServiceHandler serviceHandler = ServiceHandler();
   String backupPath = "";
-  @override
-  void initState() {
-    super.initState();
-  }
 
   void showSnackbar(BuildContext context, String text, bool isError) {
     FlashElements.showSnackbar(
       context: context,
       title: Text(
         isError ? 'Error!' : 'Success!',
-        style: TextStyle(fontSize: 20)
+        style: const TextStyle(fontSize: 20)
       ),
       content: Text(
         text,
-        style: TextStyle(fontSize: 16)
+        style: const TextStyle(fontSize: 16)
       ),
       leadingIcon: isError ? Icons.error_outline : Icons.done,
       leadingIconColor: isError ? Colors.red : Colors.green,
@@ -61,15 +56,15 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Backup & Restore"),
+          title: const Text("Backup & Restore"),
         ),
         body: Center(
           child: ListView(
             children: [
               Container(
-                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
-                child: Text("This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system"),
+                child: const Text("This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system"),
               )
             ]
           )
@@ -83,7 +78,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Backup & Restore"),
+          title: const Text("Backup & Restore"),
         ),
         body: Center(
           child: ListView(
@@ -103,21 +98,21 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 drawTopBorder: true,
               ),
               Container(
-                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
                 child: Text(backupPath.isNotEmpty ? 'Backup path is: $backupPath' : 'No backup directory selected'),
               ),
               Container(
-                margin: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                 width: double.infinity,
-                child: Text('Restore will work only if the files are placed in the same directory.'),
+                child: const Text('Restore will work only if the files are placed in the same directory.'),
               ),
               ] +
                 (backupPath.isNotEmpty ? [SettingsButton(
                 name: 'Backup Settings',
                 action: () async {
                   try {
-                    File file = File(await serviceHandler.getConfigDir() + 'settings.json');
+                    File file = File('${await serviceHandler.getConfigDir()}settings.json');
                     if(backupPath.isNotEmpty) {
                       serviceHandler.writeImage(file.readAsBytesSync(), "settings", "text/json", "json", backupPath);
                       showSnackbar(context, 'Settings saved to settings.json', false);
@@ -132,13 +127,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               ),
               SettingsButton(
                 name: 'Restore Settings',
-                subtitle: Text('settings.json'),
+                subtitle: const Text('settings.json'),
                 action: () async {
                   try {
                     if(backupPath.isNotEmpty) {
                       Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"settings.json");
                       if(settingsFileBytes != null){
-                        File newFile = File(await serviceHandler.getConfigDir() + 'settings.json');
+                        File newFile = File('${await serviceHandler.getConfigDir()}settings.json');
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
@@ -157,13 +152,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 },
               ),
 
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
                 name: 'Backup Database',
                 action: () async {
                   try {
-                    File file = File(await serviceHandler.getConfigDir() + 'store.db');
+                    File file = File('${await serviceHandler.getConfigDir()}store.db');
                     if(backupPath.isNotEmpty) {
                       serviceHandler.writeImage(file.readAsBytesSync(), "store", "application/x-sqlite3", "db", backupPath);
                       showSnackbar(context, 'Database saved to store.db', false);
@@ -177,13 +172,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               ),
               SettingsButton(
                 name: 'Restore Database',
-                subtitle: Text('store.db'),
+                subtitle: const Text('store.db'),
                 action: () async {
                   try {
                     if(backupPath.isNotEmpty) {
                       Uint8List? dbFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"store.db");
                       if(dbFileBytes != null){
-                        File newFile = File(await serviceHandler.getConfigDir() + 'store.db');
+                        File newFile = File('${await serviceHandler.getConfigDir()}store.db');
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
@@ -203,7 +198,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 },
               ),
 
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
 
               SettingsButton(
                 name: 'Backup Boorus',
@@ -224,7 +219,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
               ),
               SettingsButton(
                 name: 'Restore Boorus',
-                subtitle: Text('boorus.json'),
+                subtitle: const Text('boorus.json'),
                 action: () async {
 
                   try {
@@ -236,14 +231,14 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       }
                       if(boorusJSONString.isNotEmpty) {
                         List<dynamic> json = jsonDecode(boorusJSONString);
-                        String configBoorusPath = await serviceHandler.getConfigDir() + 'boorus/';
+                        String configBoorusPath = '${await serviceHandler.getConfigDir()}boorus/';
                         Directory configBoorusDir = await Directory(configBoorusPath).create(recursive:true);
-                        if (json.length > 0) {
+                        if (json.isNotEmpty) {
                           for (int i = 0; i < json.length; i++) {
                               Booru booru = Booru.fromJsonObject(json[i]);
                               bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
                               if(!alreadyExists) {
-                                File booruFile = File(configBoorusDir.path + "${booru.name}.json");
+                                File booruFile = File("${configBoorusDir.path}${booru.name}.json");
                                 var writer = booruFile.openWrite();
                                 writer.write(jsonEncode(booru.toJson()));
                                 writer.close();

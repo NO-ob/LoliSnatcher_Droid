@@ -16,11 +16,10 @@ import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
 import 'package:LoliSnatcher/widgets/VideoAppPlaceholder.dart';
 import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 
-/** This class will listen for the value of viewedItem in searchGlobals
- * It will return an empty container if that item has no file URL.
- * If the file url isn't empty it will return a current media widget for the fileURL
- *
- */
+/// This class will listen for the value of viewedItem in searchGlobals
+/// It will return an empty container if that item has no file URL.
+/// If the file url isn't empty it will return a current media widget for the fileURL
+///
 class DesktopImageListener extends StatefulWidget {
   const DesktopImageListener(this.searchGlobal, {Key? key}) : super(key: key);
   final SearchGlobal searchGlobal;
@@ -30,10 +29,10 @@ class DesktopImageListener extends StatefulWidget {
 }
 
 class _DesktopImageListenerState extends State<DesktopImageListener> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SnatchHandler snatchHandler = SnatchHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   late BooruItem item;
   StreamSubscription? itemListener;
@@ -85,7 +84,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       isDelayed = true;
       updateState();
       item = newItem;
-      itemDelay = Timer(Duration(milliseconds: 50), () {
+      itemDelay = Timer(const Duration(milliseconds: 50), () {
         isDelayed = false;
         updateState();
       });
@@ -93,7 +92,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   }
 
   void updateState() {
-    if (this.mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
@@ -105,7 +104,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   }
 
   void delayedZoomReset() async {
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 200));
     viewerHandler.resetZoom();
   }
 
@@ -124,7 +123,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     return Stack(
       children: [
         if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
-        if (!viewerHandler.isDesktopFullscreen.value) NotesRenderer(),
+        if (!viewerHandler.isDesktopFullscreen.value) const NotesRenderer(),
 
         Container(
           alignment: Alignment.topRight,
@@ -133,7 +132,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
               Container(
                 width: 35,
                 height: 35,
-                margin: EdgeInsets.all(10),
+                margin: const EdgeInsets.all(10),
                 child: FloatingActionButton(
                   onPressed: () {
                     snatchHandler.queue(
@@ -142,14 +141,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       0,
                     );
                   },
-                  child: Icon(Icons.save),
-                  backgroundColor: Get.theme.colorScheme.secondary,
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  child: const Icon(Icons.save),
                 ),
               ),
               Container(
                 width: 32,
                 height: 32,
-                margin: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                 child: FloatingActionButton(
                   onPressed: () {
                     if (item.isFavourite.value != null) {
@@ -157,13 +156,13 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       settingsHandler.dbHandler.updateBooruItem(item, "local");
                     }
                   },
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: Obx(() => Icon(item.isFavourite.value == true
                       ? Icons.favorite
                       : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
-                  backgroundColor: Get.theme.colorScheme.secondary,
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 30,
                 height: 30,
                 child: FloatingActionButton(
@@ -172,38 +171,41 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     updateState();
                     delayedZoomReset();
 
-                    await Get.dialog(
-                      Stack(
-                        children: [
-                          Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox()),
-                          NotesRenderer(),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            alignment: Alignment.topRight,
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              child: FloatingActionButton(
-                                onPressed: () {
-                                  Get.back();
-                                },
-                                child: Icon(Icons.fullscreen_exit),
-                                backgroundColor: Get.theme.colorScheme.secondary,
+                    await showDialog(
+                      context: context,
+                      // transitionDuration: Duration(milliseconds: 200),
+                      barrierColor: Colors.black,
+                      builder: (BuildContext context) {
+                        return Stack(
+                          children: [
+                            Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox()),
+                            const NotesRenderer(),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              alignment: Alignment.topRight,
+                              child: SizedBox(
+                                width: 30,
+                                height: 30,
+                                child: FloatingActionButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                                  child: const Icon(Icons.fullscreen_exit),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      transitionDuration: Duration(milliseconds: 200),
-                      barrierColor: Colors.black,
+                          ],
+                        );
+                      },
                     );
 
                     viewerHandler.isDesktopFullscreen.value = false;
                     updateState();
                     delayedZoomReset();
                   },
-                  child: Icon(Icons.fullscreen),
-                  backgroundColor: Get.theme.colorScheme.secondary,
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
+                  child: const Icon(Icons.fullscreen),
                 ),
               ),
             ],

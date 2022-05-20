@@ -20,18 +20,19 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 
 class VideoAppDesktop extends StatefulWidget {
+  const VideoAppDesktop(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
   final BooruItem booruItem;
   final int index;
   final SearchGlobal searchGlobal;
-  VideoAppDesktop(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
+
   @override
-  _VideoAppDesktopState createState() => _VideoAppDesktopState();
+  State<VideoAppDesktop> createState() => _VideoAppDesktopState();
 }
 
 class _VideoAppDesktopState extends State<VideoAppDesktop> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
@@ -49,6 +50,8 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   CancelToken? _cancelToken, _sizeCancelToken;
   DioLoader? client, sizeClient;
   File? _video;
+
+  Color get accentColor => Theme.of(context).colorScheme.secondary;
 
   @override
   void didUpdateWidget(VideoAppDesktop oldWidget) {
@@ -149,7 +152,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
 
   void onSize(int size) {
     // TODO find a way to stop loading based on size when caching is enabled
-    final int maxSize = 1024 * 1024 * 200;
+    const int maxSize = 1024 * 1024 * 200;
     // print('onSize: $size $maxSize ${size > maxSize}');
     if(size == 0) {
       killLoading(['File is zero bytes']);
@@ -237,7 +240,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
   }
 
   void updateState() {
-    if(this.mounted) {
+    if(mounted) {
       setState(() { });
     }
   }
@@ -350,7 +353,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // Start from cache if was already cached or only caching is allowed
       media = Media.file(
         _video!,
-        startTime: Duration(milliseconds: 50),
+        startTime: const Duration(milliseconds: 50),
       );
     } else {
       // Otherwise load from network
@@ -358,7 +361,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       media = Media.network(
         widget.booruItem.fileURL,
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
-        startTime: Duration(milliseconds: 50),
+        startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
@@ -375,7 +378,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       media = Media.file(
         _video!,
         // move start a bit forward to help avoid playback start issues
-        startTime: Duration(milliseconds: 50),
+        startTime: const Duration(milliseconds: 50),
       );
     } else {
       // Otherwise load from network
@@ -383,7 +386,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       media = Media.network(
         Uri.encodeFull(widget.booruItem.fileURL),
         extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
-        startTime: Duration(milliseconds: 50),
+        startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
@@ -472,7 +475,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     );
 
     return Hero(
-      tag: 'imageHero' + (isViewed ? '' : 'ignore') + widget.index.toString(),
+      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
       child: Material(
         child: Listener(
           onPointerSignal: (pointerSignal) {
@@ -524,10 +527,10 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
                     scale: 1.0,
                     showControls: true,
                     progressBarInactiveColor: Colors.grey,
-                    progressBarActiveColor: Get.theme.colorScheme.secondary,
-                    progressBarThumbColor: Get.theme.colorScheme.secondary,
-                    volumeThumbColor: Get.theme.colorScheme.secondary,
-                    volumeActiveColor: Get.theme.colorScheme.secondary,
+                    progressBarActiveColor: accentColor,
+                    progressBarThumbColor: accentColor,
+                    volumeThumbColor: accentColor,
+                    volumeActiveColor: accentColor,
                   ),
               ],
             ),

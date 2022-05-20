@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:dio/adapter.dart';
+// import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/ImageWriter.dart';
@@ -30,7 +30,7 @@ class DioLoader {
   final Map<String, dynamic>? headers;
   final CancelToken? cancelToken;
   final void Function(int, int)? onProgress;
-  final void Function(String, dynamic?)? onEvent;
+  final void Function(String, dynamic)? onEvent;
   final void Function(Exception)? onError;
   final void Function(Uint8List, String)? onDone;
   final void Function(File, String)? onDoneFile;
@@ -187,7 +187,7 @@ class DioLoader {
         }
 
         if (response.data == null || response.data.lengthInBytes == 0) {
-          throw DioLoadException(url: resolved, message: "File didn\'t load");
+          throw DioLoadException(url: resolved, message: "File did not load");
         }
 
         if (cacheEnabled) {
@@ -266,7 +266,7 @@ class DioLoader {
         }
 
         if (response.data == null || response.data.lengthInBytes == 0) {
-          throw DioLoadException(url: resolved, message: "File didn\'t load");
+          throw DioLoadException(url: resolved, message: "File did not load");
         }
 
         File? tempFile;

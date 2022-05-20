@@ -64,7 +64,6 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
     settingsHandler = Get.put(SettingsHandler(), permanent: true);
-    // settingsHandler.initialize();
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
@@ -144,12 +143,12 @@ class _MainAppState extends State<MainApp> {
       );
 
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      //   statusBarColor: Get.theme.colorScheme.background.withOpacity(0.5),
+      //   statusBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
       //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       //   statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemStatusBarContrastEnforced: true,
         
-      //   systemNavigationBarColor: Get.theme.colorScheme.background.withOpacity(0.5),
+      //   systemNavigationBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
       //   systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemNavigationBarContrastEnforced: true,
       //   systemNavigationBarDividerColor: Colors.transparent,
@@ -199,7 +198,7 @@ class Preloader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return Obx(() {
       if (settingsHandler.isInit.value) {
@@ -242,9 +241,10 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final TagHandler tagHandler = Get.find<TagHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
+
   Timer? cacheClearTimer;
   Timer? cacheStaleTimer;
   ImageWriter imageWriter = ImageWriter();
@@ -297,7 +297,7 @@ class _HomeState extends State<Home> {
   }
 
   void openAppLink(String url) async {
-    Logger.Inst().log(url, "AppLinks", "openAppLink", LogTypes.settingsLoad);
+    Logger.Inst().log(url, 'AppLinks', 'openAppLink', LogTypes.settingsLoad);
     // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
 
     if (url.contains('loli.snatcher')) {
@@ -305,7 +305,7 @@ class _HomeState extends State<Home> {
       if (booru.name != null && booru.name!.isNotEmpty) {
         if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
           // Rename config if its already in the list
-          booru.name = booru.name! + ' (duplicate)';
+          booru.name = '${booru.name!} (duplicate)';
         }
         SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
       }

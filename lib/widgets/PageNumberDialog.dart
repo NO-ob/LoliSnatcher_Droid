@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class PageNumberDialog extends StatelessWidget {
-  PageNumberDialog({Key? key}) : super(key: key);
-
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-
-  final TextEditingController pageNumberController = TextEditingController();
-  final TextEditingController delayController = TextEditingController();
+  const PageNumberDialog({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final SearchHandler searchHandler = SearchHandler.instance;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+    // TODO is this okay to use controllers like this in stateless or should we convert to stateful?
+    final TextEditingController pageNumberController = TextEditingController();
+    final TextEditingController delayController = TextEditingController();
+
     pageNumberController.text = searchHandler.currentBooruHandler.pageNum.toString();
     delayController.text = 200.toString();
 

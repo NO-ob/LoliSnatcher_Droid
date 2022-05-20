@@ -2,13 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ScrollingText extends StatefulWidget {
-  String text;
-  int size;
-  String mode;
-  Color textColor;
+  const ScrollingText(this.text, this.size, this.mode, this.textColor, {Key? key}) : super(key: key);
+  final String text;
+  final int size;
+  final String mode;
+  final Color textColor;
+
   @override
-  _ScrollingTextState createState() => _ScrollingTextState();
-  ScrollingText(this.text, this.size, this.mode,this.textColor);
+  State<ScrollingText> createState() => _ScrollingTextState();
 }
 
 class _ScrollingTextState extends State<ScrollingText> {
@@ -114,7 +115,7 @@ class _ScrollingTextState extends State<ScrollingText> {
   void infinite() {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
       if (!disposed){
-        if (bufferText.length < 1){
+        if (bufferText.isEmpty){
           if ((counter + maxAllowedSize) < widget.text.length) {
             setState(() {
               counter++;
@@ -138,10 +139,10 @@ class _ScrollingTextState extends State<ScrollingText> {
         }
       }
     });
-    if (bufferText.length < 1){
+    if (bufferText.isEmpty){
       displayText = widget.text.substring(counter, counter + maxAllowedSize);
     } else {
-      displayText = bufferText + " " + widget.text.substring(0, maxAllowedSize - (bufferText.length - 1));
+      displayText = "$bufferText ${widget.text.substring(0, maxAllowedSize - (bufferText.length - 1))}";
     }
   }
   void infiniteWithPause() async {
@@ -151,7 +152,7 @@ class _ScrollingTextState extends State<ScrollingText> {
           setState(() {
             pauseCounter++;
           });
-        } else if (bufferText.length < 1){
+        } else if (bufferText.isEmpty){
           if ((counter + maxAllowedSize) < widget.text.length) {
             setState(() {
               counter++;
@@ -177,14 +178,14 @@ class _ScrollingTextState extends State<ScrollingText> {
       }
     });
 
-    if (bufferText.length < 1){
+    if (bufferText.isEmpty){
       displayText = widget.text.substring(counter, counter + maxAllowedSize);
     } else {
-      displayText = bufferText + " " + widget.text.substring(0, maxAllowedSize - (bufferText.length - 1));
+      displayText = "$bufferText ${widget.text.substring(0, maxAllowedSize - (bufferText.length - 1))}";
     }
 
     if(counter == 0 && pauseCounter <= pauseThreshold) {
-      displayText = displayText! + '...';
+      displayText = '${displayText!}...';
     }
     
   }

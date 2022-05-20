@@ -17,7 +17,6 @@ import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/MascotImage.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/MainAppbar.dart';
-import 'package:LoliSnatcher/widgets/ThemeBuilder.dart';
 
 class MobileHome extends StatefulWidget {
   const MobileHome({Key? key}) : super(key: key);
@@ -27,8 +26,8 @@ class MobileHome extends StatefulWidget {
 }
 
 class _MobileHomeState extends State<MobileHome> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -137,7 +136,7 @@ class _MobileHomeState extends State<MobileHome> {
           borderRadius: 10,
           leftAnimationType: InnerDrawerAnimation.quadratic,
           rightAnimationType: InnerDrawerAnimation.quadratic,
-          backgroundDecoration: BoxDecoration(color: Get.theme.colorScheme.background),
+          backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.background),
 
           //when a pointer that is in contact with the screen and moves to the right or left
           onDragUpdate: (double val, InnerDrawerDirection? direction) {
@@ -200,8 +199,8 @@ class MainDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
 
     // print('build drawer');
 
@@ -240,7 +239,7 @@ class MainDrawer extends StatelessWidget {
                     controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
                     children: [
                       const TabBox(),
-                      const TabBoxButtons(true, MainAxisAlignment.spaceEvenly),
+                      const TabBoxButtons(true, WrapAlignment.spaceEvenly),
                       const BooruSelectorMain(true),
                       const MergeBooruToggle(),
                       Obx(() {
@@ -256,7 +255,7 @@ class MainDrawer extends StatelessWidget {
                           return SettingsButton(
                             name: "Snatcher",
                             icon: const Icon(Icons.download_sharp),
-                            page: () => SnatcherPage(),
+                            page: () => const SnatcherPage(),
                             drawTopBorder: true,
                           );
                         } else {
@@ -267,7 +266,7 @@ class MainDrawer extends StatelessWidget {
                       SettingsButton(
                         name: "Settings",
                         icon: const Icon(Icons.settings),
-                        page: () => SettingsPage(),
+                        page: () => const SettingsPage(),
                       ),
         
                       Obx(() {
@@ -326,9 +325,8 @@ class MergeBooruToggle extends StatefulWidget {
 }
 
 class _MergeBooruToggleState extends State<MergeBooruToggle> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   @override
   Widget build(BuildContext context) {

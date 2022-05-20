@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -9,7 +8,7 @@ class TagSearchButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
+    final SearchHandler searchHandler = SearchHandler.instance;
 
     return GestureDetector(
       onSecondaryTap: () {
@@ -25,7 +24,7 @@ class TagSearchButton extends StatelessWidget {
       },
       child: IconButton(
         iconSize: 30,
-        icon: Icon(Icons.search, color: Get.theme.colorScheme.onSurface),
+        icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface),
         onPressed: () {
           searchHandler.searchTextController.clearComposing();
           searchHandler.searchBoxFocus.unfocus();

@@ -7,7 +7,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
-import 'package:LoliSnatcher/libBooru/DBHandler.dart';
+// import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
@@ -19,8 +19,11 @@ class UntypedCollection {
   UntypedCollection(this.tags, this.cooldown, this.booru);
 }
 
-class TagHandler extends GetxController{
-  Map<String,Tag> _tagMap = {};
+class TagHandler extends GetxController {
+  static TagHandler get instance => Get.find<TagHandler>();
+
+
+  final Map<String,Tag> _tagMap = {};
   SettingsHandler settingsHandler;
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
@@ -121,12 +124,12 @@ class TagHandler extends GetxController{
       return;
   }
   Future<bool> checkForTagsFile() async {
-    File tagFile = File(settingsHandler.path + "tags.json");
+    File tagFile = File("${settingsHandler.path}tags.json");
     return await tagFile.exists();
   }
 
   Future<void> loadTagsFile() async {
-    File tagFile = File(settingsHandler.path + "tags.json");
+    File tagFile = File("${settingsHandler.path}tags.json");
     String settings = await tagFile.readAsString();
     // print('loadJSON $settings');
     loadFromJSON(settings);
@@ -162,7 +165,7 @@ class TagHandler extends GetxController{
     await getPerms();
     if (settingsHandler.path == "") await settingsHandler.setConfigDir();
     await Directory(settingsHandler.path).create(recursive:true);
-    File settingsFile = File(settingsHandler.path + "tags.json");
+    File settingsFile = File("${settingsHandler.path}tags.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toList()));
     writer.close();

@@ -14,8 +14,8 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 
 class LoliControls extends StatefulWidget {
+  const LoliControls({Key? key, this.outsideController}) : super(key: key);
   final ChewieController? outsideController;
-  LoliControls({Key? key, this.outsideController}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -24,7 +24,7 @@ class LoliControls extends StatefulWidget {
 }
 
 class _LoliControlsState extends State<LoliControls> with SingleTickerProviderStateMixin {
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   late VideoPlayerValue _latestValue;
   bool _hideStuff = true;
@@ -120,11 +120,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
   @override
   void didChangeDependencies() {
-    final _oldController = _chewieController;
+    final ChewieController? oldController = _chewieController;
     _chewieController = widget.outsideController ?? ChewieController.of(context);
     controller = chewieController.videoPlayerController;
 
-    if (_oldController != chewieController) {
+    if (oldController != chewieController) {
       _dispose();
       _initialize();
     }
@@ -176,7 +176,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                         width: 130,
                         alignment: Alignment.center,
                         child: chewieController.isLive
-                          ? Expanded(child: const Text('LIVE', style: TextStyle(color: Colors.white)))
+                          ? const Expanded(child: Text('LIVE', style: TextStyle(color: Colors.white)))
                           : _buildPosition(iconColor),
                       ),
                     ]
@@ -216,7 +216,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 300),
       child: AbsorbPointer(
         absorbing: false,
-        child: Container(
+        child: SizedBox(
           height: 5,
           child: Row(
             children: [
@@ -235,7 +235,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     String tapSideSymbol = _lastDoubleTapSide > 0 ? '>>' : '<<';
     bool isOneSecond = _lastDoubleTapAmount == 1;
     String msgText = _doubleTapExtraMessage != ''
-      ? "${_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : ""}"
+      ? (_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : "")
       : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
 
     return AnimatedOpacity(
@@ -270,14 +270,14 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 8,
                       right: 8,
                       left: 8,
                       bottom: 8,
                     ),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: TextStyle(fontSize: 20, color: Colors.white))
+                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
                   )
                 )
               else
@@ -289,14 +289,14 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 8,
                       right: 8,
                       left: 8,
                       bottom: 8,
                     ),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: TextStyle(fontSize: 20, color: Colors.white))
+                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
                   )
                 )
               else
@@ -312,7 +312,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     return GestureDetector(
       onTap: _onExpandCollapse,
       child: Container( // extra container with decoration to force more clickable width, otherwise there is ~40px of empty space on the right
-        decoration: BoxDecoration(color: Colors.transparent),
+        decoration: const BoxDecoration(color: Colors.transparent),
         child: AnimatedOpacity(
           opacity: _hideStuff ? 0.0 : 1.0,
           duration: const Duration(milliseconds: 300),
@@ -397,14 +397,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   ),
                 ),
                 if (_latestValue.isBuffering)
-                  Container(
-                    child: Center(
-                      widthFactor: 3,
-                      heightFactor: 3,
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary),
-                        strokeWidth: 5,
-                      ),
+                  Center(
+                    widthFactor: 3,
+                    heightFactor: 3,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
+                      strokeWidth: 5,
                     ),
                   ),
               ]
@@ -429,7 +427,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           builder: (context) => _PlaybackSpeedDialog(
             speeds: chewieController.playbackSpeeds,
             selected: _latestValue.playbackSpeed,
-            key: Key('playbackSpeedKey'),
+            key: const Key('playbackSpeedKey'),
           ),
         );
 
@@ -568,7 +566,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             : '0$seconds';
 
     final formattedTime =
-        '${hoursString == '00' ? '' : '$hoursString:'}${minutesString == '00' ? '' : '$minutesString'}:$secondsString';
+        '${hoursString == '00' ? '' : '$hoursString:'}${minutesString == '00' ? '' : minutesString}:$secondsString';
 
     return formattedTime;
   }
@@ -801,11 +799,11 @@ class _PlaybackSpeedDialog extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
+        SizedBox(
           height: 58,
           child: Row(
-            children: [
-              const SizedBox(width: 16.0),
+            children: const [
+              SizedBox(width: 16.0),
               Text('Select Video Speed:', style: TextStyle(color: Colors.white)),
             ]
           )
@@ -814,12 +812,12 @@ class _PlaybackSpeedDialog extends StatelessWidget {
           shrinkWrap: true,
           physics: const ScrollPhysics(),
           itemBuilder: (context, index) {
-            final _speed = _speeds[index];
+            final double speed = _speeds[index];
             return ListTile(
               dense: true,
               title: Row(
                 children: [
-                  if (_speed == _selected)
+                  if (speed == _selected)
                     Icon(
                       Icons.check,
                       size: 20.0,
@@ -828,12 +826,12 @@ class _PlaybackSpeedDialog extends StatelessWidget {
                   else
                     Container(width: 20.0),
                   const SizedBox(width: 16.0),
-                  Text(_speed.toString(), style: TextStyle(color: Colors.white)),
+                  Text(speed.toString(), style: const TextStyle(color: Colors.white)),
                 ],
               ),
-              selected: _speed == _selected,
+              selected: speed == _selected,
               onTap: () {
-                Navigator.of(context).pop(_speed);
+                Navigator.of(context).pop(speed);
               },
             );
           },

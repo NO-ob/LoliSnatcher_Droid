@@ -6,14 +6,6 @@ enum SplitDirection {
 }
 
 class ResizableSplitView extends StatefulWidget {
-  final Widget firstChild;
-  final Widget secondChild;
-  final double startRatio;
-  final double minRatio;
-  final double maxRatio;
-  final SplitDirection direction;
-  final void Function(double)? onRatioChange; 
-
   const ResizableSplitView({
     Key? key,
     required this.firstChild,
@@ -29,8 +21,16 @@ class ResizableSplitView extends StatefulWidget {
         assert(minRatio <= 1),
         super(key: key);
 
+  final Widget firstChild;
+  final Widget secondChild;
+  final double startRatio;
+  final double minRatio;
+  final double maxRatio;
+  final SplitDirection direction;
+  final void Function(double)? onRatioChange; 
+
   @override
-  _ResizableSplitViewState createState() => _ResizableSplitViewState();
+  State<ResizableSplitView> createState() => _ResizableSplitViewState();
 }
 
 class _ResizableSplitViewState extends State<ResizableSplitView> {
@@ -76,7 +76,7 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
 
     widget.onRatioChange?.call(_ratio);
 
-    if (this.mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override
@@ -85,7 +85,7 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
       assert(_ratio <= 1);
       assert(_ratio >= 0);
       final double directionSize = widget.direction == SplitDirection.horizontal ? constraints.maxWidth : constraints.maxHeight;
-      if (_maxSize == null) _maxSize = directionSize - _dividerWidth;
+      _maxSize ??= directionSize - _dividerWidth;
       if (_maxSize != directionSize) {
         _maxSize = directionSize - _dividerWidth;
       }
@@ -104,15 +104,15 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
               cursor: SystemMouseCursors.grab,
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
+                onPanUpdate: updateRatio,
                 child: SizedBox(
                   width: widget.direction == SplitDirection.horizontal ? _dividerWidth : constraints.maxWidth,
                   height: widget.direction == SplitDirection.horizontal ? constraints.maxHeight : _dividerWidth,
                   child: RotationTransition(
-                    child: const Icon(Icons.drag_handle),
                     turns: widget.direction == SplitDirection.horizontal ? const AlwaysStoppedAnimation(0.25) : const AlwaysStoppedAnimation(0.50),
+                    child: const Icon(Icons.drag_handle),
                   ),
                 ),
-                onPanUpdate: updateRatio,
               ),
             ),
             SizedBox(

@@ -13,11 +13,15 @@ class ThemeBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return Obx(() {
       ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
-          ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
+          ? ThemeItem(
+              name: 'Custom',
+              primary: settingsHandler.customPrimaryColor.value,
+              accent: settingsHandler.customAccentColor.value,
+            )
           : settingsHandler.theme.value;
       ThemeMode themeMode = settingsHandler.themeMode.value;
       bool isAmoled = settingsHandler.isAmoled.value;
@@ -74,7 +78,7 @@ class ThemeHandler {
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(),
       elevatedButtonTheme: elevatedButtonTheme(),
-      
+
       useMaterial3: true,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
     );
@@ -128,9 +132,6 @@ class ThemeHandler {
       // cardTheme: cardTheme(),
       pageTransitionsTheme: pageTransitionsTheme(),
       // scrollbarTheme: scrollbarTheme(),
-
-
-
     );
   }
 
@@ -150,11 +151,9 @@ class ThemeHandler {
     );
   }
 
-  TextTheme textTheme() =>
-      GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
+  TextTheme textTheme() => GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
 
-  TextSelectionThemeData textSelectionTheme() =>
-      TextSelectionThemeData(
+  TextSelectionThemeData textSelectionTheme() => TextSelectionThemeData(
         cursorColor: theme.accent,
         selectionColor: Colors.blue.withOpacity(0.66),
         selectionHandleColor: theme.accent,
@@ -175,77 +174,77 @@ class ThemeHandler {
       );
 
   ButtonThemeData buttonTheme() => ButtonThemeData(
-    buttonColor: theme.primary!,
-    textTheme: ButtonTextTheme.primary,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  );
+        buttonColor: theme.primary!,
+        textTheme: ButtonTextTheme.primary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      );
 
   FloatingActionButtonThemeData floatingActionButtonTheme() => FloatingActionButtonThemeData(
-    backgroundColor: theme.accent!,
-    foregroundColor: onAccentIsDark ? Colors.white : Colors.black,
-    elevation: 0,
-    shape: const StadiumBorder(),
-  );
+        backgroundColor: theme.accent!,
+        foregroundColor: onAccentIsDark ? Colors.white : Colors.black,
+        elevation: 0,
+        shape: const StadiumBorder(),
+      );
 
   IconThemeData iconTheme() => IconThemeData(
-    color: theme.accent,
-    size: 24,
-  );
+        color: onPrimaryIsDark ? Colors.white : Colors.black,
+        size: 24,
+      );
 
   InputDecorationTheme inputDecorationTheme() => InputDecorationTheme(
-    fillColor: theme.primary,
-    filled: true,
-    labelStyle: TextStyle(
-      color: isDark ? Colors.white : Colors.black,
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-    ),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: theme.accent!, width: 1),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: theme.accent!, width: 2),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: colorScheme().error, width: 2),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: colorScheme().error, width: 2),
-      borderRadius: BorderRadius.circular(8),
-    ),
-  );
+        fillColor: theme.primary,
+        filled: true,
+        labelStyle: TextStyle(
+          color: isDark ? Colors.white : Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: theme.accent!, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: theme.accent!, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: colorScheme().error, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: colorScheme().error, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      );
 
   ButtonBarThemeData buttonBarTheme() => const ButtonBarThemeData(
-    buttonTextTheme: ButtonTextTheme.primary,
-    buttonMinWidth: 120,
-    buttonHeight: 48,
-    alignment: MainAxisAlignment.spaceBetween,
-  );
+        buttonTextTheme: ButtonTextTheme.primary,
+        buttonMinWidth: 120,
+        buttonHeight: 48,
+        alignment: MainAxisAlignment.spaceBetween,
+      );
 
   MaterialBannerThemeData bannerTheme() => const MaterialBannerThemeData(
-    backgroundColor: Colors.red,
-    contentTextStyle: TextStyle(color: Colors.white),
-  );
+        backgroundColor: Colors.red,
+        contentTextStyle: TextStyle(color: Colors.white),
+      );
 
   CardTheme cardTheme() => CardTheme(
-    color: colorScheme().background,
-    elevation: 0,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  );
+        color: colorScheme().background,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      );
 
   PageTransitionsTheme pageTransitionsTheme() => const PageTransitionsTheme(
-    builders: <TargetPlatform, PageTransitionsBuilder>{
-      TargetPlatform.android: ZoomPageTransitionsBuilder(),
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-    },
-  );
+        builders: <TargetPlatform, PageTransitionsBuilder>{
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      );
 
   ScrollbarThemeData scrollbarTheme() => ScrollbarThemeData(
-    thickness: MaterialStateProperty.all<double>(2),
-    interactive: true,
-  );
+        thickness: MaterialStateProperty.all<double>(2),
+        interactive: true,
+      );
 }

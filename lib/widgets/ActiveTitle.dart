@@ -10,8 +10,8 @@ class ActiveTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = Get.find<SearchHandler>();
-    final SnatchHandler snatchHandler = Get.find<SnatchHandler>();
+    final SearchHandler searchHandler = SearchHandler.instance;
+    final SnatchHandler snatchHandler = SnatchHandler.instance;
 
     return Obx(() {
       if (snatchHandler.snatchActive.value) {

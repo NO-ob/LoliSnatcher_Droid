@@ -1,14 +1,13 @@
 import 'dart:io';
 
-import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -16,14 +15,15 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 
 // ignore: must_be_immutable
 class BooruPage extends StatefulWidget {
-  BooruPage();
+  const BooruPage({Key? key}) : super(key: key);
+
   @override
-  _BooruPageState createState() => _BooruPageState();
+  State<BooruPage> createState() => _BooruPageState();
 }
 
 class _BooruPageState extends State<BooruPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   final defaultTagsController = TextEditingController();
   final limitController = TextEditingController();
@@ -50,7 +50,7 @@ class _BooruPageState extends State<BooruPage> {
       Clipboard.setData(ClipboardData(text: link));
       FlashElements.showSnackbar(
         context: context,
-        title: Text(
+        title: const Text(
           'Booru Config Link Copied!',
           style: TextStyle(fontSize: 20)
         ),
@@ -92,7 +92,7 @@ class _BooruPageState extends State<BooruPage> {
         child: Scaffold(
           resizeToAvoidBottomInset: true,
           appBar: AppBar(
-            title: Text("Boorus & Search"),
+            title: const Text("Boorus & Search"),
           ),
           body: Center(
             child: ListView(
@@ -134,7 +134,7 @@ class _BooruPageState extends State<BooruPage> {
                   }
                 ),
 
-                SettingsButton(name: '', enabled: false),
+                const SettingsButton(name: '', enabled: false),
                 SettingsBooruDropdown(
                   selected: selectedBooru,
                   onChanged: (Booru? newValue) {
@@ -147,12 +147,12 @@ class _BooruPageState extends State<BooruPage> {
                   },
                   title: 'Booru',
                   trailingIcon: IconButton(
-                    icon: Icon(Icons.help_outline),
+                    icon: const Icon(Icons.help_outline),
                     onPressed: () {
                       showDialog(
                         context: context,
                         builder: (context) {
-                          return SettingsDialog(
+                          return const SettingsDialog(
                             title: Text('Booru'),
                             contentItems: <Widget>[
                               Text("The Booru selected here will be set as default after saving."),
@@ -168,7 +168,7 @@ class _BooruPageState extends State<BooruPage> {
                 if(selectedBooru != null)
                   SettingsButton(
                     name: 'Share selected',
-                    icon: Icon(Icons.share),
+                    icon: const Icon(Icons.share),
                     action: () {
                       if(selectedBooru?.type == 'Favourites') {
                         return;
@@ -206,7 +206,7 @@ class _BooruPageState extends State<BooruPage> {
                   ),
                 SettingsButton(
                   name: 'Edit selected',
-                  icon: Icon(Icons.edit),
+                  icon: const Icon(Icons.edit),
                   // do nothing if no selected or selected "Favourites"
                   // TODO update all tabs with old booru with a new one
                   // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
@@ -214,13 +214,13 @@ class _BooruPageState extends State<BooruPage> {
                 ),
                 SettingsButton(
                   name: 'Delete selected',
-                  icon: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+                  icon: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
                   action: (){
                     // do nothing if no selected or selected "Favourites" or there are tabs with it
                     if(selectedBooru == null) {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text(
+                        title: const Text(
                           'No Booru Selected!',
                           style: TextStyle(fontSize: 20)
                         ),
@@ -233,7 +233,7 @@ class _BooruPageState extends State<BooruPage> {
                     if(selectedBooru?.type == 'Favourites') {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text(
+                        title: const Text(
                           "Can't delete this Booru!",
                           style: TextStyle(fontSize: 20)
                         ),
@@ -249,11 +249,11 @@ class _BooruPageState extends State<BooruPage> {
                     if(tabsWithBooru.isNotEmpty) {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text(
+                        title: const Text(
                           "Can't delete this Booru!",
                           style: TextStyle(fontSize: 20)
                         ),
-                        content: Text(
+                        content: const Text(
                           "Remove all tabs which use it first!",
                           style: TextStyle(fontSize: 16)
                         ),
@@ -264,85 +264,87 @@ class _BooruPageState extends State<BooruPage> {
                       return;
                     }
 
-                    Get.dialog(
-                      SettingsDialog(
-                        title: const Text('Are you sure?'),
-                        contentItems: [
-                          Text("Delete Booru: ${selectedBooru?.name}?"),
-                        ],
-                        actionButtons: [
-                          const CancelButton(),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              // save current and select next available booru to avoid exception after deletion
-                              Booru tempSelected = selectedBooru!;
-                              if(settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
-                                selectedBooru = settingsHandler.booruList[1];
-                              } else {
-                                selectedBooru = null;
-                              }
-                              // set new prefbooru if it is a deleted one
-                              if(tempSelected.name == settingsHandler.prefBooru) {
-                                settingsHandler.prefBooru = selectedBooru?.name ?? '';
-                              }
-                              // restate to avoid an exception due to changed booru list
-                              setState(() { });
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SettingsDialog(
+                          title: const Text('Are you sure?'),
+                          contentItems: [
+                            Text("Delete Booru: ${selectedBooru?.name}?"),
+                          ],
+                          actionButtons: [
+                            const CancelButton(),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                // save current and select next available booru to avoid exception after deletion
+                                Booru tempSelected = selectedBooru!;
+                                if(settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
+                                  selectedBooru = settingsHandler.booruList[1];
+                                } else {
+                                  selectedBooru = null;
+                                }
+                                // set new prefbooru if it is a deleted one
+                                if(tempSelected.name == settingsHandler.prefBooru) {
+                                  settingsHandler.prefBooru = selectedBooru?.name ?? '';
+                                }
+                                // restate to avoid an exception due to changed booru list
+                                setState(() { });
 
-                              if (settingsHandler.deleteBooru(tempSelected)) {
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  title: const Text(
-                                    "Booru Deleted!",
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  leadingIcon: Icons.delete_forever,
-                                  leadingIconColor: Colors.red,
-                                  sideColor: Colors.yellow,
-                                );
-                              } else {
-                                // restore selected and prefbooru if something went wrong
-                                selectedBooru = tempSelected;
-                                settingsHandler.prefBooru = tempSelected.name ?? '';
-                                settingsHandler.sortBooruList();
+                                if (settingsHandler.deleteBooru(tempSelected)) {
+                                  FlashElements.showSnackbar(
+                                    context: context,
+                                    title: const Text(
+                                      "Booru Deleted!",
+                                      style: TextStyle(fontSize: 20)
+                                    ),
+                                    leadingIcon: Icons.delete_forever,
+                                    leadingIconColor: Colors.red,
+                                    sideColor: Colors.yellow,
+                                  );
+                                } else {
+                                  // restore selected and prefbooru if something went wrong
+                                  selectedBooru = tempSelected;
+                                  settingsHandler.prefBooru = tempSelected.name ?? '';
+                                  settingsHandler.sortBooruList();
 
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  title: const Text(
-                                    "Error!",
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  content: const Text(
-                                    "Something went wrong during deletion of a booru config!",
-                                    style: TextStyle(fontSize: 16)
-                                  ),
-                                  leadingIcon: Icons.warning_amber,
-                                  leadingIconColor: Colors.red,
-                                  sideColor: Colors.red,
-                                );
-                              }
+                                  FlashElements.showSnackbar(
+                                    context: context,
+                                    title: const Text(
+                                      "Error!",
+                                      style: TextStyle(fontSize: 20)
+                                    ),
+                                    content: const Text(
+                                      "Something went wrong during deletion of a booru config!",
+                                      style: TextStyle(fontSize: 16)
+                                    ),
+                                    leadingIcon: Icons.warning_amber,
+                                    leadingIconColor: Colors.red,
+                                    sideColor: Colors.red,
+                                  );
+                                }
 
-                              setState(() { });
-                              Navigator.of(context).pop(true);
-                            },
-                            label: const Text('Delete Booru'),
-                            icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
-                          ),
-                        ]
-                      ),
+                                setState(() { });
+                                Navigator.of(context).pop(true);
+                              },
+                              label: const Text('Delete Booru'),
+                              icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                            ),
+                          ]
+                        );
+                      }
                     );
-
                   },
                 ),
                 SettingsButton(
                   name: 'Add new Booru',
-                  icon: Icon(Icons.add),
+                  icon: const Icon(Icons.add),
                   page: () => BooruEdit(Booru("New","","","","")),
                 ),
 
-                SettingsButton(name: '', enabled: false),
+                const SettingsButton(name: '', enabled: false),
                 SettingsButton(
                   name: 'Add Booru from URL in Clipboard',
-                  icon: Icon(Icons.paste),
+                  icon: const Icon(Icons.paste),
                   action: () async {
                     // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
                     ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
@@ -354,7 +356,7 @@ class _BooruPageState extends State<BooruPage> {
                         if(booru.name != null && booru.name!.isNotEmpty) {
                           if(settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
                             // Rename config if its already in the list
-                            booru.name = booru.name! + ' (duplicate)';
+                            booru.name = '${booru.name!} (duplicate)';
                           }
                           Navigator.of(context).push(MaterialPageRoute(
                             fullscreenDialog: true,
@@ -364,7 +366,7 @@ class _BooruPageState extends State<BooruPage> {
                       } else {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: Text(
+                          title: const Text(
                             "Invalid URL!",
                             style: TextStyle(fontSize: 20)
                           ),
@@ -376,7 +378,7 @@ class _BooruPageState extends State<BooruPage> {
                     } else {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: Text(
+                        title: const Text(
                           'No URL in Clipboard!',
                           style: TextStyle(fontSize: 20)
                         ),

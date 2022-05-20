@@ -7,14 +7,14 @@ import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/ThumbCardBuild.dart';
 
 class GridBuilder extends StatelessWidget {
+  const GridBuilder(this.onTap, {Key? key}) : super(key: key);
   final void Function(int) onTap;
-  GridBuilder(this.onTap, {Key? key}) : super(key: key);
-
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
+
     return Obx(() {
       int columnCount =
           (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;

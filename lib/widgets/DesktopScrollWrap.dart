@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
 ScrollPhysics? getListPhysics() {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
   if (settingsHandler.desktopListsDrag == false && isDesktopPlatform) {

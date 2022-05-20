@@ -25,7 +25,7 @@ var volumeKeyChannel = Platform.isAndroid ? const EventChannel('com.noaisu.loliS
 class SearchHandler extends GetxController {
   // alternative way to get instance of the controller
   // i.e. "SearchHandler.to.list" instead of "Get.find<SearchHandler>().list"
-  static SearchHandler get to => Get.find<SearchHandler>();
+  static SearchHandler get instance => Get.find<SearchHandler>();
 
   // search globals list
   RxList<SearchGlobal> list = RxList<SearchGlobal>([]);
@@ -44,7 +44,7 @@ class SearchHandler extends GetxController {
     list.add(newTab);
 
     // record search query to db
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     if(searchText != "" && settingsHandler.searchHistoryEnabled) {
       settingsHandler.dbHandler.updateSearchHistory(
         searchText,
@@ -102,7 +102,7 @@ class SearchHandler extends GetxController {
         sideColor: Colors.yellow,
       );
 
-      final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
       searchTextController.text = settingsHandler.defTags;
 
       SearchGlobal newTab = SearchGlobal(currentTab.selectedBooru, null, settingsHandler.defTags);
@@ -322,7 +322,7 @@ class SearchHandler extends GetxController {
 
   // runs search on current tab
   void searchAction(String text, Booru? newBooru) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     // Remove extra spaces
     text = text.trim();
@@ -380,7 +380,7 @@ class SearchHandler extends GetxController {
 
   // add secondary boorus and run search
   void mergeAction(List<Booru>? secondaryBoorus) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     bool canAddSecondary = settingsHandler.mergeEnabled.value && (secondaryBoorus != null || currentTab.secondaryBoorus == null) && settingsHandler.booruList.length > 1;
     RxList<Booru>? secondary = canAddSecondary
@@ -523,7 +523,7 @@ class SearchHandler extends GetxController {
     return result;
   }
   Future<void> restoreTabs() async {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<String> result = await settingsHandler.dbHandler.getTabRestore();
     List<SearchGlobal> restoredGlobals = [];
 
@@ -545,7 +545,7 @@ class SearchHandler extends GetxController {
             restoredGlobals.add(newTab);
           } else {
             foundBrokenItem = true;
-            brokenItems.add(booruAndTags[0] + ': ' + booruAndTags[1]);
+            brokenItems.add('${booruAndTags[0]}: ${booruAndTags[1]}');
             SearchGlobal newTab = SearchGlobal(settingsHandler.booruList[0].obs, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
           }
@@ -557,7 +557,7 @@ class SearchHandler extends GetxController {
           }
         } else {
           foundBrokenItem = true;
-          brokenItems.add(booruAndTags[0] + ': ' + (booruAndTags.length > 1 ? booruAndTags[1] : ""));
+          brokenItems.add('${booruAndTags[0]}: ${booruAndTags.length > 1 ? booruAndTags[1] : ""}');
         }
       }
     }
@@ -565,11 +565,11 @@ class SearchHandler extends GetxController {
     isRestored.value = true;
 
     // set parsed tabs OR set first default tab if nothing to restore
-    if(restoredGlobals.length > 0) {
+    if(restoredGlobals.isNotEmpty) {
       FlashElements.showSnackbar(
         title: const Text(
           "Tabs restored",
-          style: const TextStyle(fontSize: 20)
+          style: TextStyle(fontSize: 20)
         ),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -612,7 +612,7 @@ class SearchHandler extends GetxController {
   }
 
   void mergeTabs(String tabStr) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<List<String>> splitInput = decodeBackupString(tabStr);
     List<SearchGlobal> restoredGlobals = [];
     for (List<String> booruAndTags in splitInput) {
@@ -641,7 +641,7 @@ class SearchHandler extends GetxController {
     );
   }
   void replaceTabs(String tabStr) {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<List<String>> splitInput = decodeBackupString(tabStr);
     List<SearchGlobal> restoredGlobals = [];
     int newIndex = 0;
@@ -681,7 +681,7 @@ class SearchHandler extends GetxController {
 
   // Saves current tabs list to DB
   String? getBackupString() {
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     // if there are only one tab - check that its not with default booru and tags
     // if there are more than 1 tab or check return false - start backup
     List<SearchGlobal> tabList = list;
@@ -703,7 +703,7 @@ class SearchHandler extends GetxController {
   }
   void backupTabs() {
     String? backupString = getBackupString();
-    final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     // print('backupString: $backupString');
     if(backupString != null) {
       settingsHandler.dbHandler.addTabRestore(backupString);
@@ -751,6 +751,7 @@ class SearchGlobal {
     booruHandler.pageNum = pageNumTemp;
   }
 
+  @override
   String toString() {
     return ("tags: $tags selectedBooru: ${selectedBooru.toString()} booruHandler: $booruHandler");
   }

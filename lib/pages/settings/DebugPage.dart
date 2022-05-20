@@ -12,13 +12,14 @@ import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class DebugPage extends StatefulWidget {
-  DebugPage();
+  const DebugPage({Key? key}) : super(key: key);
+
   @override
-  _DebugPageState createState() => _DebugPageState();
+  State<DebugPage> createState() => _DebugPageState();
 }
 
 class _DebugPageState extends State<DebugPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   ServiceHandler serviceHandler = ServiceHandler();
   bool allowSelfSignedCerts = false;
   
@@ -51,7 +52,7 @@ class _DebugPageState extends State<DebugPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Debug"),
+          title: const Text("Debug"),
         ),
         body: Center(
           child: ListView(
@@ -131,7 +132,7 @@ class _DebugPageState extends State<DebugPage> {
 
               SettingsButton(
                 name: 'Animation speed ($timeDilation)',
-                icon: Icon(Icons.timelapse),
+                icon: const Icon(Icons.timelapse),
                 action: () {
                   const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20];
                   int currentIndex = speeds.indexOf(timeDilation);
@@ -144,8 +145,8 @@ class _DebugPageState extends State<DebugPage> {
                 },
               ),
 
-              SettingsButton(name: '', enabled: false),
-              SettingsButton(
+              const SettingsButton(name: '', enabled: false),
+              const SettingsButton(
                 name: 'Vibration tests',
               ),
               SettingsButton(
@@ -153,7 +154,7 @@ class _DebugPageState extends State<DebugPage> {
                 subtitle: Row(
                   children: [
                     ElevatedButton(
-                      child: Text('-1'),
+                      child: const Text('-1'),
                       onPressed: () {
                         setState(() {
                           if((vDuration - 1) <= 0) {
@@ -176,13 +177,13 @@ class _DebugPageState extends State<DebugPage> {
                         max: 500,
                         divisions: 500,
                         label: '$vDuration',
-                        activeColor: Get.theme.colorScheme.secondary,
-                        thumbColor: Get.theme.colorScheme.secondary,
-                        inactiveColor: Get.theme.colorScheme.surface,
+                        activeColor: Theme.of(context).colorScheme.secondary,
+                        thumbColor: Theme.of(context).colorScheme.secondary,
+                        inactiveColor: Theme.of(context).colorScheme.surface,
                       ),
                     ),
                     ElevatedButton(
-                      child: Text('+1'),
+                      child: const Text('+1'),
                       onPressed: () {
                         setState(() {
                           if((vDuration + 1) >= 500) {
@@ -205,7 +206,7 @@ class _DebugPageState extends State<DebugPage> {
                 subtitle: Row(
                   children: [
                     ElevatedButton(
-                      child: Text('-1'),
+                      child: const Text('-1'),
                       onPressed: () {
                         setState(() {
                           if((vAmplitude - 1) <= -1) {
@@ -228,13 +229,13 @@ class _DebugPageState extends State<DebugPage> {
                         max: 255,
                         divisions: 256,
                         label: '$vAmplitude',
-                        activeColor: Get.theme.colorScheme.secondary,
-                        thumbColor: Get.theme.colorScheme.secondary,
-                        inactiveColor: Get.theme.colorScheme.surface,
+                        activeColor: Theme.of(context).colorScheme.secondary,
+                        thumbColor: Theme.of(context).colorScheme.secondary,
+                        inactiveColor: Theme.of(context).colorScheme.surface,
                       ),
                     ),
                     ElevatedButton(
-                      child: Text('+1'),
+                      child: const Text('+1'),
                       onPressed: () {
                         setState(() {
                           if((vAmplitude + 1) >= 255) {
@@ -268,14 +269,14 @@ class _DebugPageState extends State<DebugPage> {
                   ServiceHandler.vibrate(flutterWay: vFlutterway, duration: vDuration.round(), amplitude: vAmplitude.round());
                 },
               ),
-              SettingsButton(name: '', enabled: false),
+              const SettingsButton(name: '', enabled: false),
 
-              SettingsButton(name: 'Res: ${Get.mediaQuery.size.width.toPrecision(4)}x${Get.mediaQuery.size.height.toPrecision(4)}'),
-              SettingsButton(name: 'Pixel Ratio: ${Get.mediaQuery.devicePixelRatio.toPrecision(4)}'),
+              SettingsButton(name: 'Res: ${MediaQuery.of(context).size.width.toPrecision(4)}x${MediaQuery.of(context).size.height.toPrecision(4)}'),
+              SettingsButton(name: 'Pixel Ratio: ${MediaQuery.of(context).devicePixelRatio.toPrecision(4)}'),
               SettingsButton(
                 name: 'Logger',
-                icon: Icon(Icons.print),
-                page: () => LoggerPage(),
+                icon: const Icon(Icons.print),
+                page: () => const LoggerPage(),
               ),
             ],
           ),

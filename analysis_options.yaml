@@ -22,21 +22,22 @@ linter:
   # `// ignore_for_file: name_of_lint` syntax on the line or in the file
   # producing the lint.
   rules:
-    # prefer_const_constructors: false
-    # prefer_const_constructors_in_immutables: false
-    # prefer_const_literals_to_create_immutables: false
-    # unnecessary_this: false
-    # annotate_overrides: false
-    # use_key_in_widget_constructors: false
-    # prefer_if_null_operators: false
-    # unnecessary_null_in_if_null_operators: false
-    # file_names: false
-    # slash_for_doc_comments: false
-    # prefer_is_empty: false
-    # non_constant_identifier_names: false
-    # overridden_fields: false
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_literals_to_create_immutables: true
+    unnecessary_this: true
+    annotate_overrides: true
+    use_key_in_widget_constructors: true
+    prefer_if_null_operators: true
+    unnecessary_null_in_if_null_operators: true
+    slash_for_doc_comments: true
+    prefer_is_empty: true
+    non_constant_identifier_names: true
+    overridden_fields: false
     avoid_print: false  # Uncomment to disable the `avoid_print` rule
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
+    file_names: false # .dart files should use 'lowercase_with_underscores' naming scheme
+    always_use_package_imports: true
 
 # analyzer:
 #   language:

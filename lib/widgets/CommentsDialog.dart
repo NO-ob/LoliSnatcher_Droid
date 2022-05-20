@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 
@@ -17,16 +16,16 @@ import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 // Others - don't have api / broken api (e621) / I don't care enough to do them
 
 class CommentsDialog extends StatefulWidget {
-  final BooruItem item;
   const CommentsDialog(this.item, {Key? key}) : super(key: key);
+  final BooruItem item;
 
   @override
   State<CommentsDialog> createState() => _CommentsDialogState();
 }
 
 class _CommentsDialogState extends State<CommentsDialog> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   List<CommentItem> comments = [];
   ScrollController scrollController = ScrollController();
@@ -125,7 +124,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               displacement: 80,
               strokeWidth: 4,
-              color: Get.theme.colorScheme.secondary,
+              color: Theme.of(context).colorScheme.secondary,
               onRefresh: () async {
                 getComments();
               },
@@ -200,7 +199,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                             const SizedBox(width: 5),
                             if (currentEntry.createDate?.isNotEmpty == true)
                               Text(formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
-                                  style: TextStyle(fontSize: 12, color: Get.theme.colorScheme.onSurface.withOpacity(0.5))),
+                                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
                             const SizedBox(width: 15),
                             scoreText(currentEntry.score),
                           ]),
@@ -214,7 +213,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                   padding: const EdgeInsets.all(12.0),
                   width: double.maxFinite,
                   decoration: BoxDecoration(
-                    color: Get.theme.colorScheme.surface,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: SelectableLinkify(
@@ -255,7 +254,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
           Center(
             child: Padding(
               padding: const EdgeInsets.all(18.0),
-              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)),
+              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)),
             ),
           )
         else if (notSupported)

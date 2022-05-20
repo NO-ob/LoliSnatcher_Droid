@@ -3,23 +3,23 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the gelbooru engine
- */
+/// Booru Handler for the gelbooru engine
 class InkBunnyHandler extends BooruHandler{
   String resultsID = "";
   String sessionToken = "";
+
   @override
   bool tagSearchEnabled = false;
+
+  @override
   bool hasSizeData = true;
-  // Dart constructors are weird so it has to call super with the args
+
   InkBunnyHandler(Booru booru, int limit) : super(booru, limit);
 
   Future<bool> setSessionToken() async {
@@ -42,7 +42,7 @@ class InkBunnyHandler extends BooruHandler{
         Logger.Inst().log("Inkbunny couldn't get session token", "InkBunnyHandler", "getSessionToken", LogTypes.booruHandlerInfo);
       }
     } catch (e){
-      Logger.Inst().log("Exception getting session token: $url " + e.toString(), "InkBunnyHandler", "getSessionToken", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("Exception getting session token: $url $e", "InkBunnyHandler", "getSessionToken", LogTypes.booruHandlerInfo);
     }
     return sessionToken.isEmpty ? false : true;
   }
@@ -60,15 +60,14 @@ class InkBunnyHandler extends BooruHandler{
         Logger.Inst().log("Inkbunny failed to set ratings", "InkBunnyHandler", "setRatingOptions", LogTypes.booruHandlerInfo);
       }
     } catch (e){
-      Logger.Inst().log("Exception setting ratings " + e.toString(), "InkBunnyHandler", "setRatingOptions", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("Exception setting ratings $e", "InkBunnyHandler", "setRatingOptions", LogTypes.booruHandlerInfo);
     }
     return true;
   }
 
-  /**
-   * This function will call a http get request using the tags and pagenumber parsed to it
-   * it will then create a list of booruItems
-   */
+  /// This function will call a http get request using the tags and pagenumber parsed to it
+  /// it will then create a list of booruItems
+  @override
   Future Search(String tags, int? pageNumCustom) async {
     if (sessionToken.isEmpty){
       bool gotToken = await setSessionToken();
@@ -127,7 +126,7 @@ class InkBunnyHandler extends BooruHandler{
     }
     Logger.Inst().log("Got submission ids: $ids", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerInfo);
     try {
-      Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=${sessionToken}&submission_ids=$ids");
+      Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=$ids");
       var response = await http.get(uri,headers: getHeaders());
       Logger.Inst().log("Getting submission data: ${uri.toString()}", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
@@ -178,12 +177,12 @@ class InkBunnyHandler extends BooruHandler{
             fileURL: fileURL,
             sampleURL: sampleURL,
             thumbnailURL: thumbURL,
-            fileWidth: double.tryParse(files[i]["full_size_x"] == null ? "" : files[i]["full_size_x"]),
-            fileHeight: double.tryParse(files[i]["full_size_y"] == null ? "" : files[i]["full_size_y"]),
-            sampleWidth: double.tryParse(files[i]["screen_size_x"] == null ? "" : files[i]["screen_size_x"]),
-            sampleHeight: double.tryParse(files[i]["screen_size_y"]  == null ? "" : files[i]["screen_size_y"]),
-            previewWidth: double.tryParse(files[i]["preview_size_x"]  == null ? "" : files[i]["preview_size_x"]),
-            previewHeight: double.tryParse(files[i]["preview_size_y"] == null ? "" : files[i]["preview_size_y"]),
+            fileWidth: double.tryParse(files[i]["full_size_x"] ?? ""),
+            fileHeight: double.tryParse(files[i]["full_size_y"] ?? ""),
+            sampleWidth: double.tryParse(files[i]["screen_size_x"] ?? ""),
+            sampleHeight: double.tryParse(files[i]["screen_size_y"] ?? ""),
+            previewWidth: double.tryParse(files[i]["preview_size_x"] ?? ""),
+            previewHeight: double.tryParse(files[i]["preview_size_y"] ?? ""),
             md5String: files[i]["full_file_md5"],
             tagsList: currentTags,
             postURL: makePostURL(current["submission_id"].toString()),
@@ -210,11 +209,13 @@ class InkBunnyHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/s/$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     String artist = "";
     bool random = false;
@@ -228,7 +229,7 @@ class InkBunnyHandler extends BooruHandler{
           random = true;
         }
       }else {
-        tagStr += tagList[i] + ",";
+        tagStr += "${tagList[i]},";
       }
     }
     //https://inkbunny.net/api_search.php?output_mode=xml&sid=AiMAejQkj7tg5R6Lvff9y3CSMRGTCDtSJDdWku3UMMczHK2Io8mq7fStANk2QsCRBzHcZ7mIaLvXYjVitonv03&text=dragon&get_rid=yes
@@ -239,6 +240,7 @@ class InkBunnyHandler extends BooruHandler{
     }
   }
 
+  @override
   String makeTagURL(String input){
     Logger.Inst().log("inkbunny tag search $input ", "InkBunnyHandler", "makeTagURL", LogTypes.booruHandlerInfo);
     return "${booru.baseURL}/api_search_autosuggest.php?keyword=${input.replaceAll("_", "+")}&ratingsmask=11111";
@@ -254,7 +256,7 @@ class InkBunnyHandler extends BooruHandler{
       var response = await http.get(uri,headers: getHeaders());
       // 200 is the success http response code
       Logger.Inst().log("$url ", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
-      Logger.Inst().log("${response.body}", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
+      Logger.Inst().log(response.body, "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
         if (parsedResponse.containsKey("results")){

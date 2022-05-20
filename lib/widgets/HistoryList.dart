@@ -16,13 +16,14 @@ import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 
 class HistoryList extends StatefulWidget {
   const HistoryList({Key? key}) : super(key: key);
+
   @override
   State<HistoryList> createState() => _HistoryListState();
 }
 
 class _HistoryListState extends State<HistoryList> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   List<HistoryEntry> history = [], filteredHistory = [], selectedEntries = [];
   final ScrollController scrollController = ScrollController();
@@ -124,7 +125,7 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () {
                 if (booru != null) {
@@ -151,7 +152,7 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () {
                 int indexWhere = history.indexWhere((el) => el.id == entry.id);
@@ -174,7 +175,7 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
                 Clipboard.setData(ClipboardData(text: entry.searchText));
@@ -196,14 +197,14 @@ class _HistoryListState extends State<HistoryList> {
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5),
-                side: BorderSide(color: Get.theme.colorScheme.secondary),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
                 selectedEntries.removeWhere((e) => e.id == entry.id);
                 deleteEntry(entry);
                 Navigator.of(context).pop(true);
               },
-              leading: Icon(Icons.delete_forever, color: Get.theme.errorColor),
+              leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
               title: const Text('Delete'),
             ),
           ],
@@ -250,7 +251,7 @@ class _HistoryListState extends State<HistoryList> {
       value: isSelected,
       fillColor: MaterialStateProperty.resolveWith((states) {
         if(states.contains(MaterialState.selected)) {
-          return Get.theme.colorScheme.secondary;
+          return Theme.of(context).colorScheme.secondary;
         } else if(states.contains(MaterialState.hovered)) {
           return Colors.grey;
         } else {
@@ -375,7 +376,7 @@ class _HistoryListState extends State<HistoryList> {
               const SizedBox(height: 60),
 
               if (isLoading)
-                CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary))
+                CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary))
               else if (history.isEmpty)
                 const Text('Search History is empty')
               else if (filteredHistory.isEmpty)
@@ -446,7 +447,7 @@ class _HistoryListState extends State<HistoryList> {
                     const CancelButton(),
                     ElevatedButton.icon(
                       label: const Text("Delete"),
-                      icon: Icon(Icons.delete_forever, color: Get.theme.colorScheme.error),
+                      icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                       onPressed: () async {
                         for(int i = 0; i < selectedEntries.length; i++) {
                           await deleteEntry(selectedEntries[i]);
@@ -498,7 +499,7 @@ class _HistoryListState extends State<HistoryList> {
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               displacement: 80,
               strokeWidth: 4,
-              color: Get.theme.colorScheme.secondary,
+              color: Theme.of(context).colorScheme.secondary,
               onRefresh: () async {
                 getHistory();
               },

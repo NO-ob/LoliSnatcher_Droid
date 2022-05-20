@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -24,9 +23,9 @@ class WaterfallView extends StatefulWidget {
 }
 
 class _WaterfallViewState extends State<WaterfallView> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final ViewerHandler viewerHandler = Get.find<ViewerHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final ViewerHandler viewerHandler = ViewerHandler.instance;
 
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
@@ -165,7 +164,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   void afterSearch() {
     // desktop view first load setter
-    if ((searchHandler.currentFetched.length > 0 && searchHandler.currentFetched.length < (settingsHandler.limit + 1)) && !isMobile) {
+    if ((searchHandler.currentFetched.isNotEmpty && searchHandler.currentFetched.length < (settingsHandler.limit + 1)) && !isMobile) {
       if (searchHandler.viewedItem.value.fileURL.isEmpty) {
         // print("setting booruItem value");
         BooruItem item = searchHandler.setViewedItem(0);
@@ -303,7 +302,7 @@ class _WaterfallViewState extends State<WaterfallView> {
                 displacement: 80,
                 edgeOffset: isMobile ? kToolbarHeight : 0,
                 strokeWidth: 4,
-                color: Get.theme.colorScheme.secondary,
+                color: Theme.of(context).colorScheme.secondary,
                 onRefresh: () async {
                   searchHandler.searchAction(searchHandler.currentTab.tags, null);
                 },

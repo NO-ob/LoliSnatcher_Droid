@@ -12,11 +12,11 @@ class WaterfallErrorButtons extends StatefulWidget {
   const WaterfallErrorButtons({Key? key}) : super(key: key);
 
   @override
-  _WaterfallErrorButtonsState createState() => _WaterfallErrorButtonsState();
+  State<WaterfallErrorButtons> createState() => _WaterfallErrorButtonsState();
 }
 
 class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   int _startedAt = 0;
   Timer? checkInterval;
@@ -67,7 +67,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   }
 
   Widget wrapButton(Widget child) {
-    return Container(color: Get.theme.colorScheme.background.withOpacity(0.66), child: child);
+    return Container(color: Theme.of(context).colorScheme.background.withOpacity(0.66), child: child);
   }
 
   @override
@@ -125,7 +125,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Get.theme.colorScheme.background.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
@@ -143,7 +143,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   const SizedBox(width: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: Get.theme.colorScheme.background.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
@@ -174,7 +174,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
               icon: SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)),
+                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)),
               ),
               dense: true,
               action: () {

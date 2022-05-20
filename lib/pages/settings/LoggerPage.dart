@@ -1,20 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class LoggerPage extends StatefulWidget {
-  LoggerPage();
+  const LoggerPage({Key? key}) : super(key: key);
   @override
-  _LoggerPageState createState() => _LoggerPageState();
+  State<LoggerPage> createState() => _LoggerPageState();
 }
 
 class _LoggerPageState extends State<LoggerPage> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   List<LogTypes> ignoreLogTypes = [];
 
   @override
@@ -27,7 +26,6 @@ class _LoggerPageState extends State<LoggerPage> {
   void dispose() {
     super.dispose();
   }
-
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
@@ -42,7 +40,7 @@ class _LoggerPageState extends State<LoggerPage> {
       child:Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: Text("Logger"),
+          title: const Text("Logger"),
         ),
         body: Center(
           child: ListView.builder(

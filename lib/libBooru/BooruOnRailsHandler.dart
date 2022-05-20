@@ -9,14 +9,17 @@ import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class BooruOnRailsHandler extends BooruHandler {
+  @override
   bool tagSearchEnabled = true;
 
   BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/$id";
   }
+
   @override
   String validateTags(String tags){
     if (tags == "" || tags == " "){
@@ -25,6 +28,7 @@ class BooruOnRailsHandler extends BooruHandler {
       return tags;
     }
   }
+
   @override
   void parseResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
@@ -43,7 +47,7 @@ class BooruOnRailsHandler extends BooruHandler {
       if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['large'] != null) {
         String sampleURL = current['representations']['large'], thumbURL = current['representations']['medium'];
         if(current["mime_type"].toString().contains("video")) {
-          String tmpURL = sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1) + "thumb.gif";
+          String tmpURL = "${sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1)}thumb.gif";
           sampleURL = tmpURL;
           thumbURL = tmpURL;
         }
@@ -82,19 +86,22 @@ class BooruOnRailsHandler extends BooruHandler {
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     //https://twibooru.org/search.json?&key=&q=*&perpage=5&page=1
-    if (booru.apiKey == ""){
-      return "${booru.baseURL}/api/v3/search/posts?q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
-    } else {
-      return "${booru.baseURL}/api/v3/search/posts?key=${booru.apiKey}&q="+tags.replaceAll(" ", ",")+"&perpage=${limit.toString()}&page=${pageNum.toString()}";
-    }
+    final String tagsWithCommas = tags.replaceAll(" ", ",");
+    final String limitStr = limit.toString();
+    final String pageStr = pageNum.toString();
+    final String apiKeyStr = ((booru.apiKey?.isEmpty ?? '') == '') ? "" : "key=${booru.apiKey}&";
 
+    return "${booru.baseURL}/api/v3/search/posts?${apiKeyStr}q=$tagsWithCommas&perpage=$limitStr&page=$pageStr";
   }
 
+  @override
   String makeTagURL(String input){
     return "${booru.baseURL}/api/v3/search/tags?q=*$input*";
   }
+
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];

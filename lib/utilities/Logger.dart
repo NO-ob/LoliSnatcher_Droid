@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
 class Logger {
   static Logger? _loggerInstance;
   // Needs to be moved to settings at some point
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   static Logger Inst() {
     _loggerInstance ??= Logger();

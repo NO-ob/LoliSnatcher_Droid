@@ -14,9 +14,7 @@ import 'package:LoliSnatcher/ImageWriter.dart';
 
 // memoryimage but with url added in attempt to not load extra copies of already loaded images
 class MemoryImageTest extends ImageProvider<MemoryImageTest> {
-  const MemoryImageTest(this.bytes, { this.imageUrl, this.scale = 1.0 })
-    : assert(bytes != null),
-      assert(scale != null);
+  const MemoryImageTest(this.bytes, { this.imageUrl, this.scale = 1.0 });
 
   final Uint8List bytes;
   final String? imageUrl;
@@ -44,13 +42,14 @@ class MemoryImageTest extends ImageProvider<MemoryImageTest> {
 
   @override
   int get hashCode {
-    return hashValues(imageUrl == null ? bytes.hashCode : imageUrl, scale);
+    return hashValues(imageUrl ?? bytes.hashCode, scale);
   }
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is MemoryImageTest
         && (imageUrl == null ? other.bytes == bytes : other.imageUrl == imageUrl)
         && other.scale == scale;
@@ -68,8 +67,9 @@ class _SizeAwareCacheKey {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is _SizeAwareCacheKey
         && other.providerCacheKey == providerCacheKey
         && other.width == width
@@ -90,9 +90,7 @@ class ResizeImageWithUrl extends ImageProvider<_SizeAwareCacheKey> {
       this.width,
       this.height,
       this.allowUpscaling = false,
-  }) : assert(width != null || height != null),
-       assert(allowUpscaling != null),
-       assert(imageUrl != null);
+  }) : assert(width != null || height != null);
 
   final ImageProvider imageProvider;
   final String imageUrl;
@@ -107,8 +105,9 @@ class ResizeImageWithUrl extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is ResizeImageWithUrl
         && other.imageUrl == imageUrl;
   }
@@ -172,9 +171,7 @@ class LoliImage extends ImageProvider<LoliImage> {
       required this.cacheEnabled,
       required this.cacheFolder,
     }
-  )
-    : assert(url != null),
-      assert(scale != null);
+  );
 
   final String url;
 
@@ -205,7 +202,7 @@ class LoliImage extends ImageProvider<LoliImage> {
     print(key.runtimeType);
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as LoliImage, chunkEvents, decode),
+      codec: _loadAsync(key, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -279,7 +276,7 @@ class LoliImage extends ImageProvider<LoliImage> {
         }
 
         if (response.data == null || response.data.lengthInBytes == 0) {
-          throw LoliImageLoadException(url: resolved, message: "File didn\'t load");
+          throw LoliImageLoadException(url: resolved, message: "File didn't load");
         }
 
         if(cacheEnabled) imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder);
@@ -305,8 +302,9 @@ class LoliImage extends ImageProvider<LoliImage> {
 
   @override
   bool operator ==(Object other) {
-    if (other.runtimeType != runtimeType)
+    if (other.runtimeType != runtimeType) {
       return false;
+    }
     return other is LoliImage
         && other.url == url
         && other.scale == scale;
@@ -321,8 +319,7 @@ class LoliImage extends ImageProvider<LoliImage> {
 
 class LoliImageLoadException implements Exception {
   LoliImageLoadException({required this.url, this.statusCode, this.message})
-      : assert(url != null),
-        assert(statusCode != null);
+      : assert(statusCode != null);
 
   final int? statusCode;
   final String? message;

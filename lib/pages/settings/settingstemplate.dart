@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
 class SettingsTemplate extends StatefulWidget {
-  SettingsTemplate();
+  const SettingsTemplate({Key? key}) : super(key: key);
   @override
-  _SettingsTemplateState createState() => _SettingsTemplateState();
+  State<SettingsTemplate> createState() => _SettingsTemplateState();
 }
 
 class _SettingsTemplateState extends State<SettingsTemplate> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   @override
   void initState(){
     super.initState();
   }
+
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     // Set settingshandler values here
@@ -30,12 +30,12 @@ class _SettingsTemplateState extends State<SettingsTemplate> {
       child:Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text("Title"),
+          title: const Text("Title"),
         ),
         body: Center(
           child: ListView(
-            children: [
-
+            children: const [
+              // Add settings here
             ],
           ),
         ),

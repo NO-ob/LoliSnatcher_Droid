@@ -23,14 +23,15 @@ import 'package:LoliSnatcher/utilities/debouncer.dart';
 
 class TagSearchBox extends StatefulWidget {
   const TagSearchBox({Key? key}) : super(key: key);
+
   @override
-  _TagSearchBoxState createState() => _TagSearchBoxState();
+  State<TagSearchBox> createState() => _TagSearchBoxState();
 }
 
 class _TagSearchBoxState extends State<TagSearchBox> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
-  final SearchHandler searchHandler = Get.find<SearchHandler>();
-  final TagHandler tagHandler = Get.find<TagHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
 
   ScrollController suggestionsScrollController = ScrollController();
   ScrollController searchScrollController = ScrollController();
@@ -155,7 +156,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           footerBuilder: (_) => PreferredSize(
             preferredSize: const Size.fromHeight(44),
             child: Container(
-              color: Get.theme.colorScheme.background,
+              color: Theme.of(context).colorScheme.background,
               height: 44,
               child: Row(
                 children: [
@@ -165,7 +166,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       borderRadius: BorderRadius.circular(4),
                       child: Container(
                         height: 40,
-                        color: Get.theme.colorScheme.secondary,
+                        color: Theme.of(context).colorScheme.secondary,
                         child: TextButton(
                           onPressed: () {
                             // Add '_' at current cursor position
@@ -178,7 +179,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             // animateTransition();
                             createOverlay();
                           },
-                          child: Text('__', style: TextStyle(fontSize: 20, color: Get.theme.colorScheme.onSecondary)),
+                          child: Text('__', style: TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onSecondary)),
                         ),
                       ),
                     ),
@@ -189,7 +190,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       borderRadius: BorderRadius.circular(4),
                       child: Container(
                         height: 40,
-                        color: Get.theme.colorScheme.secondary,
+                        color: Theme.of(context).colorScheme.secondary,
                         child: TextButton(
                           onPressed: () async {
                             ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
@@ -201,7 +202,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                               createOverlay();
                             }
                           },
-                          child: Icon(Icons.paste, color: Get.theme.colorScheme.onSecondary),
+                          child: Icon(Icons.paste, color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
                     ),
@@ -212,12 +213,12 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       borderRadius: BorderRadius.circular(4),
                       child: Container(
                         height: 40,
-                        color: Get.theme.colorScheme.secondary,
+                        color: Theme.of(context).colorScheme.secondary,
                         child: TextButton(
                           onPressed: () {
                             searchHandler.searchBoxFocus.unfocus();
                           },
-                          child: Icon(Icons.keyboard_hide, color: Get.theme.colorScheme.onSecondary),
+                          child: Icon(Icons.keyboard_hide, color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
                     ),
@@ -228,7 +229,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       borderRadius: BorderRadius.circular(4),
                       child: Container(
                         height: 40,
-                        color: Get.theme.colorScheme.secondary,
+                        color: Theme.of(context).colorScheme.secondary,
                         child: TextButton(
                           onPressed: () {
                             searchHandler.searchTextController.clearComposing();
@@ -241,7 +242,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             searchHandler.searchBoxFocus.unfocus();
                             searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
                           },
-                          child: Icon(Icons.search, color: Get.theme.colorScheme.onSecondary),
+                          child: Icon(Icons.search, color: Theme.of(context).colorScheme.onSecondary),
                         ),
                       ),
                     ),
@@ -422,13 +423,13 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               ...booruResults,
             ];
 
-            if(items.length == 0) {
+            if(items.isEmpty) {
               return ListTile(
                 horizontalTitleGap: 4,
                 minLeadingWidth: 20,
                 minVerticalPadding: 0,
                 leading: null,
-                title: MarqueeText(
+                title: const MarqueeText(
                   text: 'No Suggestions!',
                   fontSize: 16,
                   isExpanded: false,
@@ -469,7 +470,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           break;
                         case 'loading':
                           itemIcon = CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Get.theme.colorScheme.secondary)
+                            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
                           );
                           break;
                         default:
@@ -504,15 +505,16 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
                           // widget.searchBoxFocus.unfocus();
 
-                          String multiIndex = replaceString.startsWith(RegExp(r"\d+#")) ? replaceString.split("#")[0] + "#" : "";
+                          String multiIndex = replaceString.startsWith(RegExp(r"\d+#")) ? "${replaceString.split("#")[0]}#" : "";
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '');
                           if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus") {
-                            newTag = tag.replaceAll("_", " ") + ",";
+                            final String tagWithSpaces = tag.replaceAll(RegExp(r'_'), ' ');
+                            newTag = "$tagWithSpaces,";
                           } else {
-                            newTag = tag + " ";
+                            newTag = "$tag ";
                           }
 
                           String newInput = "";
@@ -554,7 +556,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     // TODO see if it is possible to make keyboardactions movement a bit smoother
     // keyboardactions don't avoid keyboard in emulator for some reason
     return Expanded(
-      child: Container(
+      child: SizedBox(
         height: 50,
         child: KeyboardActions(
           enable: Platform.isAndroid || Platform.isIOS,
@@ -582,7 +584,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               if(!searchHandler.searchBoxFocus.hasFocus) {
                 // add space to the end
                 if(input.isNotEmpty && input[input.length - 1] != ' ') {
-                  searchHandler.searchTextController.text = input + ' ';
+                  searchHandler.searchTextController.text = '$input ';
                   createOverlay();
                 }
                 // set cursor to the end when tapped unfocused
@@ -594,9 +596,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               }
             },
             decoration: InputDecoration(
-              fillColor: Get.theme.colorScheme.surface,
+              fillColor: Theme.of(context).colorScheme.surface,
               filled: true,
-              hintText: searchHandler.searchTextController.text.length == 0 ? "Enter Tags" : '',
+              hintText: searchHandler.searchTextController.text.isEmpty ? "Enter Tags" : '',
               prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
                 ? IconButton(
                     padding: const EdgeInsets.all(5),
@@ -604,10 +606,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                       searchHandler.searchTextController.clear();
                       tagStuff();
                       combinedSearch();
-                      this._overlayEntry!.markNeedsBuild();
+                      _overlayEntry!.markNeedsBuild();
                       setState(() {});
                     },
-                    icon: Icon(Icons.clear, color: Get.theme.colorScheme.onBackground),
+                    icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onBackground),
                   )
                 : Container(
                     decoration: BoxDecoration(
@@ -645,17 +647,17 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                   ),
               contentPadding: const EdgeInsets.fromLTRB(15, 0, 5, 0), // left,top,right,bottom
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
                 borderRadius: BorderRadius.circular(50),
                 gapPadding: 0,
               ),
               errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.errorColor),
+                borderSide: BorderSide(color: Theme.of(context).errorColor),
                 borderRadius: BorderRadius.circular(50),
                 gapPadding: 0,
               ),
               border: OutlineInputBorder(
-                borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
+                borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
                 borderRadius: BorderRadius.circular(50),
                 gapPadding: 0,
               ),

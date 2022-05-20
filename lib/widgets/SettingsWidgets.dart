@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/widgets/LongPressRepeater.dart';
 
 const double borderWidth = 1;
 
@@ -87,9 +87,9 @@ class SettingsButton extends StatelessWidget {
       },
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -112,18 +112,24 @@ class SettingsPageOpen {
   Future<bool> open() async {
     if(!condition) return true;
 
-    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    SettingsHandler settingsHandler = SettingsHandler.instance;
+
     bool isTooNarrow = MediaQuery.of(context).size.width < 550;
+    bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    bool useDesktopMode = !isTooNarrow && isDesktop;
 
     bool result = false;
-    if(!isTooNarrow && (settingsHandler.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux)) {
-      result = await Get.dialog(
-        Dialog(
-          child: SizedBox(
-            width: 500,
-            child: page(),
-          ),
-        ),
+    if(useDesktopMode) {
+      result = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: SizedBox(
+              width: 500,
+              child: page(),
+            ),
+          );
+        },
         barrierDismissible: barrierDismissible,
       ) ?? false;
     } else {
@@ -169,12 +175,12 @@ class SettingsToggle extends StatelessWidget {
       subtitle: subtitle,
       value: value,
       onChanged: onChanged,
-      activeColor: activeColor ?? Get.theme.colorScheme.secondary,
+      activeColor: activeColor ?? Theme.of(context).colorScheme.secondary,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -218,7 +224,7 @@ class SettingsDropdown extends StatelessWidget {
             labelText: title,
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
-          dropdownColor: Get.theme.colorScheme.surface,
+          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return values.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
@@ -240,13 +246,13 @@ class SettingsDropdown extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: isCurrent
                   ? BoxDecoration(
-                      border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                      border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
                       borderRadius: BorderRadius.circular(5),
                     )
                   : null,
                 child: Row(
                   children: [
-                    childBuilder?.call(value) ?? Text(value, style: TextStyle(color: Get.theme.colorScheme.onSurface))
+                    childBuilder?.call(value) ?? Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface))
                   ]
                 ),
               ),
@@ -258,9 +264,9 @@ class SettingsDropdown extends StatelessWidget {
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -290,7 +296,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       title: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Obx(() {
-          List<Booru> boorus = Get.find<SettingsHandler>().booruList;
+          List<Booru> boorus = SettingsHandler.instance.booruList;
           Booru? newSelected = boorus.contains(selected) ? selected : boorus.first;
 
           return DropdownButtonFormField<Booru>(
@@ -304,7 +310,7 @@ class SettingsBooruDropdown extends StatelessWidget {
               hintText: title,
               contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
             ),
-            dropdownColor: Get.theme.colorScheme.surface,
+            dropdownColor: Theme.of(context).colorScheme.surface,
             selectedItemBuilder: (BuildContext context) {
                 return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
                   return DropdownMenuItem<Booru>(
@@ -330,7 +336,7 @@ class SettingsBooruDropdown extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   decoration: isCurrent
                   ? BoxDecoration(
-                    border: Border.all(color: Get.theme.colorScheme.secondary, width: 1),
+                    border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
                     borderRadius: BorderRadius.circular(5),
                   )
                   : null,
@@ -340,7 +346,7 @@ class SettingsBooruDropdown extends StatelessWidget {
                           ? const Icon(Icons.favorite, color: Colors.red, size: 18)
                           : CachedFavicon(value.faviconURL!)
                       ),
-                      Text(" ${value.name!}", style: TextStyle(color: Get.theme.colorScheme.onSurface)),
+                      Text(" ${value.name!}", style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
                     ],
                   ),
                 ),
@@ -353,9 +359,9 @@ class SettingsBooruDropdown extends StatelessWidget {
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -414,9 +420,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   bool isFocused = false;
   final FocusNode _focusNode = FocusNode();
 
-  Timer? _longPressRepeatTimer;
-  int repeatCount = 0;
-
   @override
   void initState() {
     super.initState();
@@ -441,9 +444,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void stepNumberDown() {
     if (widget.numberButtons) {
-      if(repeatCount > 0) {
-        ServiceHandler.vibrate(duration: 2);
-      }
       double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) - widget.numberStep;
       double newValue = valueWithStep >= widget.numberMin ? valueWithStep : widget.numberMin;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
@@ -453,9 +453,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void stepNumberUp() {
     if(widget.numberButtons) {
-      if(repeatCount > 0) {
-        ServiceHandler.vibrate(duration: 2);
-      }
       double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) + widget.numberStep;
       double newValue = valueWithStep <= widget.numberMax ? valueWithStep : widget.numberMax;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
@@ -464,42 +461,15 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   }
 
   Widget buildNumberButton(void Function() stepFunc, IconData icon) {
-    const int fasterAfter = 20;
-
-    return GestureDetector(
-      onLongPressStart: (details) {
-        // repeat every 100ms if the user holds down the button
-        if(_longPressRepeatTimer != null) return; 
-        _longPressRepeatTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-          stepFunc();
-          repeatCount++;
-
-          // repeat faster after a certain amount of times
-          if(repeatCount > fasterAfter) {
-            _longPressRepeatTimer?.cancel();
-            _longPressRepeatTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-              stepFunc();
-              repeatCount++;
-            });
-          }
-
-        });
+    return LongPressRepeater(
+      onStart: () {
+        stepFunc();
       },
-      onLongPressEnd: (details) {
-        // stop repeating if the user releases the button
-        _longPressRepeatTimer?.cancel();
-        _longPressRepeatTimer = null;
-        repeatCount = 0;
-      },
-      onLongPressCancel: () {
-        print('cancelled');
-        // stop repeating if the user moves the finger/mouse away
-        _longPressRepeatTimer?.cancel();
-        _longPressRepeatTimer = null;
-        repeatCount = 0;
-      },
+      tick: 100,
+      fastTick: 50,
+      fasterAfter: 20,
       child: IconButton(
-        icon: Icon(icon, color: Get.theme.colorScheme.onSurface),
+        icon: Icon(icon, color: Theme.of(context).colorScheme.onSurface),
         onPressed: () {
           stepFunc();
         },
@@ -520,7 +490,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
         if(widget.clearable && isFocused)
           IconButton(
-            icon: Icon(Icons.clear, color: Get.theme.colorScheme.onSurface),
+            icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               widget.controller.clear();
               onChangedCallback(widget.controller.text);
@@ -529,7 +499,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
         if(widget.resetText != null)
           IconButton(
-            icon: Icon(Icons.refresh, color: Get.theme.colorScheme.onSurface),
+            icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               widget.controller.text = widget.resetText!();
               onChangedCallback(widget.controller.text);
@@ -538,14 +508,14 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
         isFocused
           ? IconButton(
-              icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Get.theme.colorScheme.onSurface),
+              icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
                 if(widget.onSubmitted != null) widget.onSubmitted!(widget.controller.text);
                 _focusNode.unfocus();
               },
             )
           : IconButton(
-              icon: Icon(Icons.edit, color: Get.theme.colorScheme.onSurface),
+              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
                 _focusNode.requestFocus();
               },
@@ -569,9 +539,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
         decoration: InputDecoration(
-          fillColor: Get.theme.colorScheme.surface,
+          fillColor: Theme.of(context).colorScheme.surface,
           filled: true,
-          labelStyle: TextStyle(color: Get.theme.colorScheme.onBackground, fontSize: 18),
+          labelStyle: TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 18),
           labelText: widget.title,
           hintText: widget.hintText,
           errorText: widget.validator?.call(widget.controller.text),
@@ -579,21 +549,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
           suffixIcon: Padding(
             padding: const EdgeInsets.only(left: 2, right: 10),
             child: buildSuffixIcons(),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-            borderRadius: BorderRadius.circular(50),
-            gapPadding: 2,
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.errorColor),
-            borderRadius: BorderRadius.circular(50),
-            gapPadding: 2,
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Get.theme.colorScheme.secondary),
-            borderRadius: BorderRadius.circular(50),
-            gapPadding: 2,
           ),
         ),
       )
@@ -610,9 +565,9 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
-        top: widget.drawTopBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: widget.drawBottomBorder ? BorderSide(color: Get.theme.dividerColor, width: borderWidth) : BorderSide.none,
+        bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
       )
     );
   }
@@ -653,7 +608,7 @@ class SettingsDialog extends StatelessWidget {
           children: contentItems ?? [],
         )
       ),
-      backgroundColor: Get.theme.colorScheme.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
 
       titlePadding: titlePadding,
@@ -687,7 +642,7 @@ class SettingsPageDialog extends StatelessWidget {
       // extendBody: true,
       // resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        backgroundColor: Get.theme.appBarTheme.backgroundColor!.withOpacity(0.5),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor!.withOpacity(0.5),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {

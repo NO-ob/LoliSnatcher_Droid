@@ -31,7 +31,7 @@ class CachedThumbBetter extends StatefulWidget {
 }
 
 class _CachedThumbBetterState extends State<CachedThumbBetter> {
-  final SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _restartedCount = 0;
@@ -113,7 +113,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     double? thumbWidth;
     double? thumbHeight;
 
-    if (this.mounted) {
+    if (mounted) {
       // mediaquery will throw an exception if we try to read it after disposing => check if mounted
       final MediaQueryData mQuery = MediaQuery.of(context);
       final double widthLimit = (mQuery.size.width / widget.columnCount) * mQuery.devicePixelRatio * 1;
@@ -293,7 +293,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   }
 
   void updateState() {
-    if(this.mounted) setState(() { });
+    if(mounted) setState(() { });
   }
 
   void disposeClients(bool? isMain) {
@@ -429,7 +429,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   Widget build(BuildContext context) {
     if(widget.isStandalone) {
       return Hero(
-        tag: 'imageHero' + widget.index.toString(),
+        tag: 'imageHero${widget.index}',
         placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
           // keep building the image since the images can be visible in the
           // background of the image gallery

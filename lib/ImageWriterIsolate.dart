@@ -10,7 +10,7 @@ class ImageWriterIsolate {
   Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true}) async{
     File? image;
     try {
-      String cachePath = cacheRootPath + typeFolder + "/";
+      String cachePath = "$cacheRootPath$typeFolder/";
       await Directory(cachePath).create(recursive:true);
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
@@ -27,7 +27,7 @@ class ImageWriterIsolate {
   Future<File?> readFileFromCache(String fileURL, String typeFolder, {bool clearName = true}) async {
     File? image;
     try {
-      String cachePath = cacheRootPath + typeFolder + "/";
+      String cachePath = "$cacheRootPath$typeFolder/";
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
       image = File(cachePath + fileName);
       // TODO is readBytes required here?
@@ -45,7 +45,7 @@ class ImageWriterIsolate {
   Future<Uint8List?> readBytesFromCache(String fileURL, String typeFolder, {bool clearName = true}) async {
     Uint8List? imageBytes;
     try {
-      String cachePath = cacheRootPath + typeFolder + "/";
+      String cachePath = "$cacheRootPath$typeFolder/";
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
       File image = File(cachePath + fileName);
       if(await image.exists()) {
@@ -76,7 +76,7 @@ class ImageWriterIsolate {
     int fileNum = 0;
     int totalSize = 0;
     try {
-      cacheDirPath = cacheRootPath + (typeFolder ?? '') + "/";
+      cacheDirPath = "$cacheRootPath${typeFolder ?? ''}/";
 
       Directory cacheDir = Directory(cacheDirPath);
       bool dirExists = await cacheDir.exists();
