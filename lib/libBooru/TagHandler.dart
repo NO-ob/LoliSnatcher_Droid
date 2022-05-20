@@ -24,11 +24,10 @@ class TagHandler extends GetxController {
 
 
   final Map<String,Tag> _tagMap = {};
-  SettingsHandler settingsHandler;
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
 
-  TagHandler (this.settingsHandler){
+  TagHandler (){
     untypedQueue.listen((List<UntypedCollection> list) {
       tryGetTagTypes();
     });
@@ -118,18 +117,18 @@ class TagHandler extends GetxController {
   }
 
   Future<void> initialize() async {
-      if (settingsHandler.path.isNotEmpty){
+      if (SettingsHandler.instance.path.isNotEmpty){
         await loadTags();
       }
       return;
   }
   Future<bool> checkForTagsFile() async {
-    File tagFile = File("${settingsHandler.path}tags.json");
+    File tagFile = File("${SettingsHandler.instance.path}tags.json");
     return await tagFile.exists();
   }
 
   Future<void> loadTagsFile() async {
-    File tagFile = File("${settingsHandler.path}tags.json");
+    File tagFile = File("${SettingsHandler.instance.path}tags.json");
     String settings = await tagFile.readAsString();
     // print('loadJSON $settings');
     loadFromJSON(settings);
@@ -162,10 +161,11 @@ class TagHandler extends GetxController {
   }
 
   Future<bool> saveTags() async {
+    SettingsHandler settings = SettingsHandler.instance;
     await getPerms();
-    if (settingsHandler.path == "") await settingsHandler.setConfigDir();
-    await Directory(settingsHandler.path).create(recursive:true);
-    File settingsFile = File("${settingsHandler.path}tags.json");
+    if (settings.path == "") await settings.setConfigDir();
+    await Directory(settings.path).create(recursive:true);
+    File settingsFile = File("${settings.path}tags.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toList()));
     writer.close();

@@ -273,7 +273,7 @@ class _ViewerPageState extends State<ViewerPage> {
                   itemCount: searchHandler.currentFetched.length,
                 )),
 
-                const NotesRenderer(),
+                NotesRenderer(controller),
                 GalleryButtons(controller),
                 const ViewerTutorial(),
               ]),
