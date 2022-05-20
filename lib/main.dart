@@ -67,7 +67,7 @@ class _MainAppState extends State<MainApp> {
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
-    tagHandler = Get.put(TagHandler(settingsHandler), permanent: true);
+    tagHandler = Get.put(TagHandler(), permanent: true);
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {

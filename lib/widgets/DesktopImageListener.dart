@@ -123,7 +123,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     return Stack(
       children: [
         if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
-        if (!viewerHandler.isDesktopFullscreen.value) const NotesRenderer(),
+        if (!viewerHandler.isDesktopFullscreen.value) const NotesRenderer(null),
 
         Container(
           alignment: Alignment.topRight,
@@ -179,7 +179,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                         return Stack(
                           children: [
                             Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox()),
-                            const NotesRenderer(),
+                            const NotesRenderer(null),
                             Container(
                               padding: const EdgeInsets.all(10),
                               alignment: Alignment.topRight,

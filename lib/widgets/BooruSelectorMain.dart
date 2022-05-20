@@ -8,30 +8,9 @@ import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 
-class BooruSelectorMain extends StatefulWidget {
-  final bool isPrimary;
+class BooruSelectorMain extends StatelessWidget {
   const BooruSelectorMain(this.isPrimary, {Key? key}) : super(key: key);
-
-  @override
-  State<BooruSelectorMain> createState() => _BooruSelectorMainState();
-}
-
-class _BooruSelectorMainState extends State<BooruSelectorMain> {
-  final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  bool isItemSelected(Booru value, bool checkPrimary) {
-    if (checkPrimary) {
-      return searchHandler.currentTab.selectedBooru.value == value;
-    } else {
-      return searchHandler.currentTab.secondaryBoorus?[0] == value;
-    }
-  }
+  final bool isPrimary;
 
   Widget buildRow(Booru? value) {
     if (value == null) {
@@ -57,6 +36,9 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
+
     return Obx(() {
       // no boorus
       if (settingsHandler.booruList.isEmpty) {
@@ -75,7 +57,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
       }
 
       // dropdown for secondary boorus
-      if (!widget.isPrimary) {
+      if (!isPrimary) {
         return Container(
           padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
           child: Obx(() => DropdownSearch<Booru>.multiSelection(
@@ -146,7 +128,7 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
         child: Obx(() {
           Booru? selectedBooru = searchHandler.currentTab.selectedBooru.value;
           // protection from exceptions when somehow selected booru is not on the list
-          if (!settingsHandler.booruList.contains(widget.isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0])) {
+          if (!settingsHandler.booruList.contains(isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0])) {
             selectedBooru = null;
           }
 
@@ -180,7 +162,13 @@ class _BooruSelectorMainState extends State<BooruSelectorMain> {
               }).toList();
             },
             items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
-              bool isCurrent = isItemSelected(value, widget.isPrimary);
+              bool isCurrent = false;
+              if (isPrimary) {
+                isCurrent = searchHandler.currentTab.selectedBooru.value == value;
+              } else {
+                isCurrent = searchHandler.currentTab.secondaryBoorus?[0] == value;
+              }
+
               // Return a dropdown item
               return DropdownMenuItem<Booru>(
                 value: value,

@@ -14,9 +14,11 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/utilities/html_parse.dart';
 import 'package:LoliSnatcher/utilities/debouncer.dart';
 import 'package:LoliSnatcher/widgets/TransparentPointer.dart';
+import 'package:preload_page_view/preload_page_view.dart';
 
 class NotesRenderer extends StatefulWidget {
-  const NotesRenderer({Key? key}) : super(key: key);
+  const NotesRenderer(this.controller, {Key? key}) : super(key: key);
+  final PreloadPageController? controller;
 
   @override
   State<NotesRenderer> createState() => _NotesRendererState();
@@ -41,7 +43,8 @@ class _NotesRendererState extends State<NotesRenderer> {
       offsetX,
       offsetY,
       viewOffsetX,
-      viewOffsetY;
+      viewOffsetY,
+      pageOffset;
   bool loading = false;
 
   StreamSubscription<BooruItem>? itemListener;
@@ -70,6 +73,10 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     viewStateListener = viewerHandler.viewState.listen((viewState) {
       // TODO when second double tap zoom scale is entered - no state sent?
+      triggerCalculations();
+    });
+
+    widget.controller?.addListener(() {
       triggerCalculations();
     });
   }
@@ -136,8 +143,10 @@ class _NotesRendererState extends State<NotesRenderer> {
     if (settingsHandler.disableImageScaling || item.isNoScale.value) {
       //  do nothing
     } else {
+      Size screenSize = WidgetsBinding.instance.window.physicalSize;
+      double pixelRatio = WidgetsBinding.instance.window.devicePixelRatio;
       // image size can change if scaling is allowed and it's size is too big
-      widthLimit = MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio * 2;
+      widthLimit = screenSize.width * pixelRatio * 2;
       if (imageWidth > widthLimit) {
         ratioDiff = widthLimit / imageWidth;
         imageWidth = widthLimit;
@@ -148,8 +157,15 @@ class _NotesRendererState extends State<NotesRenderer> {
     viewScale = viewerHandler.viewState.value.scale ?? 1;
     screenToImageRatio = viewScale == 1 ? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight)) : viewScale;
 
+    pageOffset = (((widget.controller?.page ?? 0) * 10000).toInt() % 10000) / 10000;
+    pageOffset = pageOffset > 0.5 ? (1 - pageOffset) : (0 - pageOffset);
+    bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
+
     offsetX = (screenWidth / 2) - (imageWidth / 2 * screenToImageRatio);
+    offsetX = isVertical ? offsetX : (offsetX + (pageOffset * screenWidth));
+
     offsetY = (screenHeight / 2) - (imageHeight / 2 * screenToImageRatio);
+    offsetY = isVertical ? (offsetY + (pageOffset * screenHeight )) : offsetY;
 
     viewOffsetX = viewerHandler.viewState.value.position.dx;
     viewOffsetY = viewerHandler.viewState.value.position.dy;
