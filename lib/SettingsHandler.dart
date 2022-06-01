@@ -211,7 +211,7 @@ class SettingsHandler extends GetxController {
     },
     "changePageButtonsPosition": {
       "type": "stringFromList",
-      "default": "Disabled",
+      "default": (Platform.isWindows || Platform.isLinux) ? "Right" : "Disabled",
       "options": <String>["Disabled", "Left", "Right"],
     },
 
@@ -409,7 +409,7 @@ class SettingsHandler extends GetxController {
     // theme
     "appMode": {
       "type": "appMode",
-      "default": AppMode.MOBILE,
+      "default": (Platform.isWindows || Platform.isLinux) ? AppMode.DESKTOP : AppMode.MOBILE,
       "options": AppMode.values,
     },
     "theme": {
@@ -519,11 +519,11 @@ class SettingsHandler extends GetxController {
         case 'appMode':
           if(toJSON) {
             // rxobject to string
-            return value.value.toName();
+            return value.value.toString();
           } else {
             if(value is String) {
               // string to rxobject
-              return AppMode.fromName(value);
+              return AppMode.fromString(value);
             } else {
               return settingParams["default"];
             }
@@ -979,9 +979,17 @@ class SettingsHandler extends GetxController {
   }
 
   Future<bool> loadFromJSON(String jsonString, bool setMissingKeys) async {
-    Map<String, dynamic> json = jsonDecode(jsonString);
+    Map<String, dynamic> json = {};
+    try {
+      json = jsonDecode(jsonString);
+    } catch (e) {
+      Logger.Inst().log('Failed to parse settings config $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    }
 
-    var tempBtnOrder = json["buttonOrder"];
+    // TODO add error handling for invalid values
+    // (don't allow user to exit the page until the value is correct? or just set to default (current behaviour)? mix of both?)
+
+    dynamic tempBtnOrder = json["buttonOrder"];
     if(tempBtnOrder is List) {
       // print('btnorder is a list');
     } else if(tempBtnOrder is String) {
@@ -998,7 +1006,7 @@ class SettingsHandler extends GetxController {
     btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
     buttonOrder = btnOrder;
 
-    var tempHatedTags = json["hatedTags"];
+    dynamic tempHatedTags = json["hatedTags"];
     if(tempHatedTags is List) {
       // print('hatedTags is a list');
     } else if(tempHatedTags is String) {
@@ -1015,7 +1023,7 @@ class SettingsHandler extends GetxController {
       }
     }
 
-    var tempLovedTags = json["lovedTags"];
+    dynamic tempLovedTags = json["lovedTags"];
     if(tempLovedTags is List) {
       // print('lovedTags is a list');
     } else if(tempLovedTags is String) {
@@ -1084,10 +1092,10 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             File booruFile = files[i] as File;
             Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            if (booruFromFile.baseURL!.contains("realbooru.com") && booruFromFile.type == "Gelbooru"){
-              booruFromFile.type = "Realbooru";
-              saveBooru(booruFromFile,onlySave: true);
-            }
+            // if (booruFromFile.baseURL!.contains("realbooru.com") && booruFromFile.type == "Gelbooru"){
+            //   booruFromFile.type = "Realbooru";
+            //   saveBooru(booruFromFile,onlySave: true);
+            // }
             tempList.add(booruFromFile);
 
             if (booruFromFile.type == "Hydrus") {
@@ -1478,13 +1486,15 @@ enum AppMode {
   DESKTOP,
   MOBILE;
 
-  String toName() {
+  @override
+  String toString() {
     switch(this) {
       case AppMode.DESKTOP: return 'Desktop';
       case AppMode.MOBILE: return 'Mobile';
     }
   }
-  static AppMode fromName(String name) {
+
+  static AppMode fromString(String name) {
     switch(name) {
       case 'Desktop': return AppMode.DESKTOP;
       case 'Mobile': return AppMode.MOBILE;

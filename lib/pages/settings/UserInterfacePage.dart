@@ -62,11 +62,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
           child: ListView(
             children: [
               SettingsDropdown(
-                selected: appMode.toName(),
-                values: AppMode.values.map((e) => e.toName()).toList(),
-                onChanged: (String? newValue){
+                value: appMode,
+                items: AppMode.values,
+                onChanged: (AppMode? newValue){
                   setState((){
-                    appMode = AppMode.fromName(newValue ?? '');
+                    appMode = newValue!;
                   });
                 },
                 title: 'App UI Mode',
@@ -103,7 +103,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 onChanged: (String? text) {
                   setState(() { });
                 },
-                resetText: () => settingsHandler.map['portraitColumns']?['default']?.toString() ?? "2",
+                resetText: () => settingsHandler.map['portraitColumns']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
                 numberMin: 1,
@@ -129,7 +129,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['landscapeColumns']?['default']?.toString() ?? "4",
+                resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
                 numberMin: 1,
@@ -146,11 +146,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 }
               ),
               SettingsDropdown(
-                selected: previewMode,
-                values: settingsHandler.map['previewMode']?['options'],
+                value: previewMode,
+                items: settingsHandler.map['previewMode']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    previewMode = newValue ?? settingsHandler.map['previewMode']?['default'];
+                    previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
                   });
                 },
                 title: 'Preview Quality',
@@ -176,11 +176,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 ),
               ),
               SettingsDropdown(
-                selected: previewDisplay,
-                values: settingsHandler.map['previewDisplay']?['options'],
+                value: previewDisplay,
+                items: settingsHandler.map['previewDisplay']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    previewDisplay = newValue ?? settingsHandler.map['previewDisplay']?['default'];
+                    previewDisplay = newValue ?? settingsHandler.map['previewDisplay']!['default'];
                   });
                 },
                 title: 'Preview Display',

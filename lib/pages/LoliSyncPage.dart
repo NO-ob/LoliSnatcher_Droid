@@ -277,8 +277,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           duration: const Duration(milliseconds: 200),
           child: tabs
               ? SettingsDropdown(
-                  selected: tabsMode,
-                  values: tabsModesList,
+                  value: tabsMode,
+                  items: tabsModesList,
                   onChanged: (String? newValue) {
                     setState(() {
                       tabsMode = newValue!;
@@ -404,8 +404,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           child: const Text("Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed"),
         ),
         SettingsDropdown(
-          selected: selectedInterface,
-          values: ipListNames,
+          value: selectedInterface,
+          items: ipListNames,
           onChanged: (String? newValue) {
             selectedInterface = newValue!;
             NetworkInterface? findInterface = ipList.firstWhereOrNull((el) => el.name == newValue);

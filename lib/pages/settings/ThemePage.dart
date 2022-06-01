@@ -169,16 +169,17 @@ class _ThemePageState extends State<ThemePage> {
           child: ListView(
             children: [
               SettingsDropdown(
-                selected: themeMode.toString(),
-                values: ThemeMode.values.map((e) => e.toString()).toList().reversed.toList(),
-                onChanged: (String? newValue) {
-                  themeMode = ThemeMode.values.where((element) => element.toString() == newValue).toList()[0];
+                value: themeMode,
+                items: ThemeMode.values,
+                onChanged: (ThemeMode? newValue) {
+                  themeMode = newValue!;
                   updateTheme();
                 },
                 title: 'Theme Mode',
-                childBuilder: (String value) {
-                  final String prettyValue = value.toString().split('.')[1].capitalizeFirst!;
+                itemBuilder: (ThemeMode item) {
+                  final String prettyValue = item.name.capitalizeFirst!;
                   const double size = 40;
+
                   switch (prettyValue) {
                     case ("Dark"):
                       return Row(
@@ -232,15 +233,15 @@ class _ThemePageState extends State<ThemePage> {
               ),
 
               SettingsDropdown(
-                selected: theme.name,
-                values: List<String>.from(settingsHandler.map['theme']?['options'].map((e) => e.name).toList()),
+                value: theme.name,
+                items: List<String>.from(settingsHandler.map['theme']!['options'].map((e) => e.name).toList()),
                 onChanged: (String? newValue) {
-                  theme = settingsHandler.map['theme']?['options'].where((e) => e.name == newValue).toList()[0];
+                  theme = settingsHandler.map['theme']!['options'].where((e) => e.name == newValue).toList()[0];
                   updateTheme();
                 },
                 title: 'Theme',
-                childBuilder: (String value) {
-                  ThemeItem theme = settingsHandler.map['theme']?['options'].firstWhere((e) => e.name == value);
+                itemBuilder: (String value) {
+                  ThemeItem theme = settingsHandler.map['theme']!['options'].firstWhere((e) => e.name == value);
                   Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
                   Color? accent = theme.name == 'Custom' ? accentPickerColor : theme.accent;
 
@@ -331,7 +332,7 @@ class _ThemePageState extends State<ThemePage> {
                   icon: const Icon(Icons.refresh),
                   drawTopBorder: true,
                   action: () {
-                    ThemeItem theme = settingsHandler.map['theme']?['default'];
+                    ThemeItem theme = settingsHandler.map['theme']!['default'];
                     primaryPickerColor = theme.primary;
                     accentPickerColor = theme.accent;
                     updateTheme();

@@ -105,8 +105,8 @@ class _BooruEditState extends State<BooruEdit> {
               clearable: true,
             ),
             SettingsDropdown(
-              selected: selectedBooruType,
-              values: booruTypes,
+              value: selectedBooruType,
+              items: booruTypes,
               onChanged: (String? newValue){
                 setState((){
                   selectedBooruType = newValue ?? booruTypes[0];

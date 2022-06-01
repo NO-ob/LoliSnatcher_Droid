@@ -55,7 +55,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     extPathOverride = settingsHandler.extPathOverride;
     jsonWrite = settingsHandler.jsonWrite;
     cacheDuration = settingsHandler.cacheDuration;
-    cacheDurationSelected = settingsHandler.map['cacheDuration']?['options'].firstWhere((dur) {
+    cacheDurationSelected = settingsHandler.map['cacheDuration']!['options']!.firstWhere((dur) {
       return dur["value"].inSeconds == cacheDuration.inSeconds;
     });
     cacheSizeController.text = settingsHandler.cacheSize.toString();
@@ -187,7 +187,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['snatchCooldown']?['default']?.toString() ?? "250",
+                resetText: () => settingsHandler.map['snatchCooldown']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 50,
                 numberMin: 0,
@@ -296,11 +296,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 title: 'Cache Media',
               ),
               SettingsDropdown(
-                selected: videoCacheMode,
-                values: settingsHandler.map['videoCacheMode']?['options'],
+                value: videoCacheMode,
+                items: settingsHandler.map['videoCacheMode']!['options'],
                 onChanged: (String? newValue) {
                   setState(() {
-                    videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']?['default'];
+                    videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
                   });
                 },
                 title: 'Video Cache Mode',
@@ -329,13 +329,13 @@ class _SaveCachePageState extends State<SaveCachePage> {
               ),
 
               SettingsDropdown(
-                selected: cacheDurationSelected?["label"] ?? '',
-                values: List<String>.from(settingsHandler.map['cacheDuration']?['options'].map((dur) {
+                value: (cacheDurationSelected?["label"] ?? '') as String,
+                items: List<String>.from(settingsHandler.map['cacheDuration']!['options'].map((dur) {
                   return dur["label"];
                 })),
                 onChanged: (String? newValue) {
                   setState(() {
-                    cacheDurationSelected = settingsHandler.map['cacheDuration']?['options'].firstWhere((dur) {
+                    cacheDurationSelected = settingsHandler.map['cacheDuration']!['options'].firstWhere((dur) {
                       return dur["label"] == newValue;
                     });
                     cacheDuration = cacheDurationSelected!["value"];
@@ -352,7 +352,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['cacheSize']?['default']?.toString() ?? "3",
+                resetText: () => settingsHandler.map['cacheSize']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
                 numberMin: 0,

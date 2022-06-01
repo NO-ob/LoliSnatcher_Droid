@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
@@ -113,7 +114,7 @@ class _BooruPageState extends State<BooruPage> {
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.digitsOnly
                   ],
-                  resetText: () => settingsHandler.map['limit']?['default']?.toString() ?? '10',
+                  resetText: () => settingsHandler.map['limit']!['default']!.toString(),
                   numberButtons: true,
                   numberStep: 10,
                   numberMin: 10,
@@ -203,6 +204,37 @@ class _BooruPageState extends State<BooruPage> {
                         }
                       );
                     },
+                    trailingIcon: IconButton(
+                      icon: const Icon(Icons.help_outline),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return SettingsDialog(
+                              title: const Text('Booru sharing'),
+                              contentItems: <Widget>[
+                                // TODO more explanations about booru sharing
+                                const Text("...................."),
+                                const Text(''),
+                                if (Platform.isAndroid) ...[
+                                  const Text("How to automatically open booru config links in the app on Android 12 and higher:"),
+                                  const Text('1) Tap button below to open system app settings'),
+                                  const Text('2) Go to "Open by default"'),
+                                  const Text('3) Tap on "Add link"/Plus icon and select all available options'),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      openAppSettings();
+                                    },
+                                    child: const Text('Go to settings'),
+                                  ),
+                                ],
+                              ],
+                            );
+                          }
+                        );
+                      },
+                    ),
                   ),
                 SettingsButton(
                   name: 'Edit selected',

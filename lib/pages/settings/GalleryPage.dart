@@ -101,7 +101,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['preloadCount']?['default']?.toString() ?? "1",
+                resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
                 numberMin: 0,
@@ -120,11 +120,11 @@ class _GalleryPageState extends State<GalleryPage> {
                 }
               ),
               SettingsDropdown(
-                selected: galleryMode,
-                values: settingsHandler.map['galleryMode']?['options'],
+                value: galleryMode,
+                items: settingsHandler.map['galleryMode']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    galleryMode = newValue ?? settingsHandler.map['galleryMode']?['default'];
+                    galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
                   });
                 },
                 title: 'Gallery Quality',
@@ -149,21 +149,21 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
               SettingsDropdown(
-                selected: galleryScrollDirection,
-                values: settingsHandler.map['galleryScrollDirection']?['options'],
+                value: galleryScrollDirection,
+                items: settingsHandler.map['galleryScrollDirection']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']?['default'];
+                    galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']!['default'];
                   });
                 },
                 title: 'Gallery Scroll Direction',
               ),
               SettingsDropdown(
-                selected: shareAction,
-                values: settingsHandler.map['shareAction']?['options'],
+                value: shareAction,
+                items: settingsHandler.map['shareAction']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    shareAction = newValue ?? settingsHandler.map['shareAction']?['default'];
+                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
                   });
                 },
                 title: 'Default Share Action',
@@ -193,31 +193,31 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
               SettingsDropdown(
-                selected: galleryBarPosition,
-                values: settingsHandler.map['galleryBarPosition']?['options'],
+                value: galleryBarPosition,
+                items: settingsHandler.map['galleryBarPosition']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']?['default'];
+                    galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']!['default'];
                   });
                 },
                 title: 'Gallery Bar Position',
               ),
               SettingsDropdown(
-                selected: zoomButtonPosition,
-                values: settingsHandler.map['zoomButtonPosition']?['options'],
+                value: zoomButtonPosition,
+                items: settingsHandler.map['zoomButtonPosition']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']?['default'];
+                    zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']!['default'];
                   });
                 },
                 title: 'Zoom Button Position',
               ),
               SettingsDropdown(
-                selected: changePageButtonsPosition,
-                values: settingsHandler.map['changePageButtonsPosition']?['options'],
+                value: changePageButtonsPosition,
+                items: settingsHandler.map['changePageButtonsPosition']!['options'],
                 onChanged: (String? newValue){
                   setState((){
-                    changePageButtonsPosition = newValue ?? settingsHandler.map['changePageButtonsPosition']?['default'];
+                    changePageButtonsPosition = newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
                   });
                 },
                 title: 'Change Page Buttons Position',
@@ -429,7 +429,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']?['default']?.toString() ?? "200",
+                resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 100,
                 numberMin: 100,
@@ -455,7 +455,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['galleryAutoScrollTime']?['default']?.toString() ?? "4000",
+                resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 100,
                 numberMin: 100,

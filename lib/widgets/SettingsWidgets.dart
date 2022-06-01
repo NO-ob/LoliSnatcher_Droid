@@ -190,35 +190,41 @@ class SettingsToggle extends StatelessWidget {
   }
 }
 
-class SettingsDropdown extends StatelessWidget {
+class SettingsDropdown<T> extends StatelessWidget {
   const SettingsDropdown({
     Key? key,
-    required this.selected,
-    required this.values,
+    required this.value,
+    required this.items,
     required this.onChanged,
     required this.title,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon,
-    this.childBuilder,
+    this.itemBuilder,
+    this.itemTitleBuilder,
   }) : super(key: key);
 
-  final String selected;
-  final List<String> values;
-  final void Function(String?)? onChanged;
+  final T value;
+  final List<T> items;
+  final void Function(T?)? onChanged;
   final String title;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? trailingIcon;
-  final Widget Function(String)? childBuilder;
+  final Widget Function(T)? itemBuilder;
+  final String Function(T)? itemTitleBuilder;
+
+  String getTitle(T value) {
+    return itemTitleBuilder?.call(value) ?? value.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       title: Container(
         margin: const EdgeInsets.symmetric(vertical: 8),
-        child: DropdownButtonFormField<String>(
-          value: selected,
+        child: DropdownButtonFormField<T>(
+          value: value,
           icon: const Icon(Icons.arrow_drop_down),
           onChanged: onChanged,
           menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
@@ -229,22 +235,22 @@ class SettingsDropdown extends StatelessWidget {
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
           selectedItemBuilder: (BuildContext context) {
-            return values.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
+            return items.map<DropdownMenuItem<T>>((T item) {
+              return DropdownMenuItem<T>(
+                value: item,
                 child: Row(
                   children: <Widget>[
-                    childBuilder?.call(value) ?? Text(value)
+                    itemBuilder?.call(item) ?? Text(getTitle(item)),
                   ],
                 ),
               );
             }).toList();
           },
-          items: values.map<DropdownMenuItem<String>>((String value) {
-            bool isCurrent = value == selected;
+          items: items.map<DropdownMenuItem<T>>((T item) {
+            bool isCurrent = item == value;
 
-            return DropdownMenuItem<String>(
-              value: value,
+            return DropdownMenuItem<T>(
+              value: item,
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: isCurrent
@@ -255,7 +261,7 @@ class SettingsDropdown extends StatelessWidget {
                   : null,
                 child: Row(
                   children: [
-                    childBuilder?.call(value) ?? Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface))
+                    itemBuilder?.call(item) ?? Text(getTitle(item), style: TextStyle(color: Theme.of(context).colorScheme.onSurface))
                   ]
                 ),
               ),

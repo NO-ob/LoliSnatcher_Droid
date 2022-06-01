@@ -94,9 +94,9 @@ class _TagsManagerState extends State<TagsManager> {
             deleteEntry(entry);
             Navigator.of(context).pop(true);
           },
-          onChangedType: (String? value) {
-            if (value != null && entry.tagType.toString() != value) {
-              entry.tagType = TagType.values.byName(value);
+          onChangedType: (TagType? newValue) {
+            if (newValue != null && entry.tagType != newValue) {
+              entry.tagType = newValue;
               filterTags();
             }
           },
@@ -543,14 +543,14 @@ class TMListItemDialog extends StatefulWidget {
 
   final Tag tag;
   final void Function() onDelete;
-  final void Function(String?) onChangedType;
+  final void Function(TagType?) onChangedType;
 
   @override
   State<TMListItemDialog> createState() => _TMListItemDialogState();
 }
 
 class _TMListItemDialogState extends State<TMListItemDialog> {
-  void _onChangedType(String? value) {
+  void _onChangedType(TagType? value) {
     widget.onChangedType(value);
     setState(() {});
   }
@@ -563,8 +563,8 @@ class _TMListItemDialogState extends State<TMListItemDialog> {
         //
         const SizedBox(height: 10),
         SettingsDropdown(
-          selected: widget.tag.tagType.toString(),
-          values: TagType.values.map((t) => t.toString()).toList(),
+          value: widget.tag.tagType,
+          items: TagType.values,
           onChanged: _onChangedType,
           title: 'Type',
           drawBottomBorder: false,
@@ -653,11 +653,11 @@ class _TMAddDialogState extends State<TMAddDialog> {
           drawBottomBorder: false,
         ),
         SettingsDropdown(
-          selected: _type.toString(),
-          values: TagType.values.map((t) => t.toString()).toList(),
-          onChanged: (String? value) {
+          value: _type,
+          items: TagType.values,
+          onChanged: (TagType? newValue) {
             setState(() {
-              _type = TagType.values.firstWhere((t) => t.toString() == value);
+              _type = newValue!;
             });
           },
           title: 'Type',
