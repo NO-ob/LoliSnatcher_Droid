@@ -161,7 +161,7 @@ class _ViewerPageState extends State<ViewerPage> {
                     // save on S
                     snatchHandler.queue(
                       [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
-                      searchHandler.currentTab.selectedBooru.value,
+                      searchHandler.currentBooru,
                       settingsHandler.snatchCooldown
                     );
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
@@ -549,7 +549,7 @@ class _ViewerPageState extends State<ViewerPage> {
                 ),
 
                 const SizedBox(height: 15),
-                settingsHandler.hasHydrus && searchHandler.currentTab.selectedBooru.value.type != "Hydrus"
+                settingsHandler.hasHydrus && searchHandler.currentBooru.type != "Hydrus"
                   ? ListTile(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -813,7 +813,7 @@ class _ViewerPageState extends State<ViewerPage> {
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
           [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
-          searchHandler.currentTab.selectedBooru.value,
+          searchHandler.currentBooru,
           settingsHandler.snatchCooldown
         );
         break;

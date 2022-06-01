@@ -37,7 +37,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     //If the user has searched tags on the main window they will be loaded into the tags field
     snatcherTagsController.text = searchHandler.currentTab.tags;
     snatcherAmountController.text = 10.toString();
-    selectedBooru = searchHandler.currentTab.selectedBooru.value;
+    selectedBooru = searchHandler.currentBooru;
     snatcherSleepController.text = settingsHandler.snatchCooldown.toString();
   }
 

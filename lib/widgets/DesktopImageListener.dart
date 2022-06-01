@@ -137,7 +137,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   onPressed: () {
                     snatchHandler.queue(
                       [item],
-                      searchHandler.currentTab.selectedBooru.value,
+                      searchHandler.currentBooru,
                       0,
                     );
                   },

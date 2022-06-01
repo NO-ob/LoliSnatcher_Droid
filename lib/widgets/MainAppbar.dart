@@ -144,7 +144,7 @@ class _MainAppBarState extends State<MainAppBar> {
                     if (searchHandler.currentTab.selected.isNotEmpty) {
                       snatchHandler.queue(
                         searchHandler.currentTab.getSelected(),
-                        searchHandler.currentTab.selectedBooru.value,
+                        searchHandler.currentBooru,
                         settingsHandler.snatchCooldown,
                       );
                       searchHandler.currentTab.selected.value = [];

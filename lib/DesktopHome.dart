@@ -101,7 +101,10 @@ class DesktopHome extends StatelessWidget {
                       // call a function to save the currently viewed image when the save button is pressed
                       if (searchHandler.currentTab.selected.isNotEmpty) {
                         snatchHandler.queue(
-                            searchHandler.currentTab.getSelected(), searchHandler.currentTab.selectedBooru.value, settingsHandler.snatchCooldown);
+                          searchHandler.currentTab.getSelected(),
+                          searchHandler.currentBooru,
+                          settingsHandler.snatchCooldown,
+                        );
                         searchHandler.currentTab.selected.value = [];
                       } else {
                         FlashElements.showSnackbar(

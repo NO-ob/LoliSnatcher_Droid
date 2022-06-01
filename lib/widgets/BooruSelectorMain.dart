@@ -125,9 +125,9 @@ class BooruSelectorMain extends StatelessWidget {
         // constraints: settingsHandler.appMode.value == AppMode.DESKTOP ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
         padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
         child: Obx(() {
-          Booru? selectedBooru = searchHandler.currentTab.selectedBooru.value;
+          Booru? selectedBooru = searchHandler.currentBooru;
           // protection from exceptions when somehow selected booru is not on the list
-          if (!settingsHandler.booruList.contains(isPrimary ? searchHandler.currentTab.selectedBooru.value : searchHandler.currentTab.secondaryBoorus?[0])) {
+          if (!settingsHandler.booruList.contains(isPrimary ? selectedBooru : searchHandler.currentTab.secondaryBoorus?[0])) {
             selectedBooru = null;
           }
 
@@ -144,7 +144,7 @@ class BooruSelectorMain extends StatelessWidget {
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             onChanged: (Booru? newValue) {
-              if (searchHandler.currentTab.selectedBooru.value != newValue) {
+              if (searchHandler.currentBooru != newValue) {
                 // if not already selected
                 searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
               }
@@ -162,7 +162,7 @@ class BooruSelectorMain extends StatelessWidget {
             items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
               bool isCurrent = false;
               if (isPrimary) {
-                isCurrent = searchHandler.currentTab.selectedBooru.value == value;
+                isCurrent = searchHandler.currentBooru == value;
               } else {
                 isCurrent = searchHandler.currentTab.secondaryBoorus?[0] == value;
               }

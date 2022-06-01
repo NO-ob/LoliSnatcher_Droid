@@ -292,7 +292,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void tagStuff() {
     input = searchHandler.searchTextController.text;
-    if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
+    if (searchHandler.currentBooru.type == "Hydrus"){
       splitInput = input.split(",");
     } else {
       splitInput = input.split(" ");
@@ -325,7 +325,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     while(
     tmpStartIndex > 0 &&
         (
-            searchHandler.currentTab.selectedBooru.value.type == "Hydrus"?
+            searchHandler.currentBooru.type == "Hydrus"?
             input[tmpStartIndex] != ",":
             input[tmpStartIndex] != " "
         )
@@ -337,7 +337,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       replaceString = lastTag;
     } else {
       int endIndex = input.indexOf(" ", cursorPos);
-      if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus"){
+      if (searchHandler.currentBooru.type == "Hydrus"){
         endIndex = input.indexOf(",", tmpStartIndex);
       }
       if (endIndex == -1) endIndex = cursorPos;
@@ -508,7 +508,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '');
-                          if (searchHandler.currentTab.selectedBooru.value.type == "Hydrus") {
+                          if (searchHandler.currentBooru.type == "Hydrus") {
                             final String tagWithSpaces = tag.replaceAll(RegExp(r'_'), ' ');
                             newTag = "$tagWithSpaces,";
                           } else {
@@ -519,7 +519,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           if (startIndex >= 0 && replaceString.isNotEmpty){
                             newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, startIndex);
                           } else if (startIndex == -1){
-                            newInput = newTag + (searchHandler.currentTab.selectedBooru.value.type == "Hydrus" ? "," : " ") + searchHandler.searchTextController.text;
+                            newInput = newTag + (searchHandler.currentBooru.type == "Hydrus" ? "," : " ") + searchHandler.searchTextController.text;
                           } else {
                             newInput = searchHandler.searchTextController.text + newTag;
                           }
