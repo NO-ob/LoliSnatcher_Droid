@@ -142,8 +142,7 @@ class _TagViewState extends State<TagView> {
         // print(postDate);
         formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
       } catch (e) {
-        print('$postDate $postDateFormat');
-        print(e);
+        print('Date Parse Error :: $postDate $postDateFormat :: $e');
       }
     }
 
@@ -368,7 +367,7 @@ class _TagViewState extends State<TagView> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  tagHandler.getTag(tag).tagType.toString().split('.').last,
+                  tagHandler.getTag(tag).tagType.toString(),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ],
@@ -617,10 +616,6 @@ class _TagViewState extends State<TagView> {
       padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
       child: Scrollbar(
         controller: scrollController,
-        interactive: true,
-        thickness: 4,
-        radius: const Radius.circular(10),
-        thumbVisibility: true,
         child: DesktopScrollWrap(
           controller: scrollController,
           child: CustomScrollView(

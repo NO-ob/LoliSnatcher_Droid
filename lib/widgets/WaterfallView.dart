@@ -293,10 +293,6 @@ class _WaterfallViewState extends State<WaterfallView> {
           NotificationListener<ScrollUpdateNotification>(
             child: Scrollbar(
               controller: searchHandler.gridScrollController,
-              interactive: true,
-              thickness: 6,
-              radius: const Radius.circular(10),
-              thumbVisibility: true,
               child: RefreshIndicator(
                 triggerMode: RefreshIndicatorTriggerMode.anywhere,
                 displacement: 80,

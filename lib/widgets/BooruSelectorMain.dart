@@ -49,10 +49,8 @@ class BooruSelectorMain extends StatelessWidget {
 
       // no tabs
       if (searchHandler.list.isEmpty) {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
-          ),
+        return const Center(
+          child: CircularProgressIndicator(),
         );
       }
 
@@ -81,23 +79,24 @@ class BooruSelectorMain extends StatelessWidget {
                     child: buildRow(value),
                   );
                 },
-                popupSelectionWidget: (BuildContext context, Booru item, bool isSelected) {
+                selectionWidget: (BuildContext context, Booru item, bool isSelected) {
                   return Padding(
                     padding: const EdgeInsets.all(8),
                     child: Checkbox(
                       value: isSelected,
                       onChanged: (bool? value) {},
-                      activeColor: Theme.of(context).colorScheme.secondary,
                     ),
                   );
                 },
               ),
-              dropdownSearchDecoration: InputDecoration(
-                labelText: "Secondary Boorus",
-                hintText: "Secondary Boorus",
-                contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
-                    ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
-                    : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              dropdownDecoratorProps: DropDownDecoratorProps(
+                dropdownSearchDecoration: InputDecoration(
+                  labelText: "Secondary Boorus",
+                  hintText: "Secondary Boorus",
+                  contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
+                      ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
+                      : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
               ),
               dropdownBuilder: (BuildContext context, List<Booru> selectedItems) {
                 if (selectedItems.isEmpty) {
@@ -144,7 +143,6 @@ class BooruSelectorMain extends StatelessWidget {
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            dropdownColor: Theme.of(context).colorScheme.surface,
             onChanged: (Booru? newValue) {
               if (searchHandler.currentTab.selectedBooru.value != newValue) {
                 // if not already selected

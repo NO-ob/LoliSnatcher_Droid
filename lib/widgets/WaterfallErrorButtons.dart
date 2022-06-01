@@ -171,10 +171,10 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                 duration: const Duration(milliseconds: 200),
                 child: Text(sinceStartText),
               ),
-              icon: SizedBox(
+              icon: const SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)),
+                child: CircularProgressIndicator(),
               ),
               dense: true,
               action: () {

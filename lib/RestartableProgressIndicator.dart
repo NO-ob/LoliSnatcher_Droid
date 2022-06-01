@@ -41,7 +41,6 @@ class _RestartableProgressIndicatorState extends State<RestartableProgressIndica
   Widget build(BuildContext context) {
     return CircularProgressIndicator(
       value: controller.progress,
-      valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
     );
   }
 

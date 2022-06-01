@@ -116,10 +116,6 @@ class _CommentsDialogState extends State<CommentsDialog> {
           width: double.maxFinite,
           child: Scrollbar(
             controller: scrollController,
-            interactive: true,
-            thickness: 8,
-            radius: const Radius.circular(10),
-            thumbVisibility: true,
             child: RefreshIndicator(
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               displacement: 80,
@@ -198,8 +194,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
                               SelectableText(currentEntry.title!, style: const TextStyle(fontWeight: FontWeight.bold)),
                             const SizedBox(width: 5),
                             if (currentEntry.createDate?.isNotEmpty == true)
-                              Text(formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
-                                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5))),
+                              Text(
+                                formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                ),
+                              ),
                             const SizedBox(width: 15),
                             scoreText(currentEntry.score),
                           ]),
@@ -251,10 +252,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       children: [
         if (isLoading)
-          Center(
+          const Center(
             child: Padding(
-              padding: const EdgeInsets.all(18.0),
-              child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)),
+              padding: EdgeInsets.all(18.0),
+              child: CircularProgressIndicator(),
             ),
           )
         else if (notSupported)

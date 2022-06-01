@@ -25,7 +25,7 @@ dependencies:
   cupertino_icons: ^1.0.4
   http: ^0.13.4
   dio: ^4.0.5
-  xml: ^6.0.1
+  xml: ^6.1.0
   intl: ^0.17.0
   uuid: ^3.0.6
   package_info_plus: ^1.4.2
@@ -33,7 +33,7 @@ dependencies:
   app_links: ^3.2.0
   flex_color_picker: ^2.5.0
   flash: ^2.0.3+2
-  dropdown_search: ^4.0.1
+  dropdown_search: ^5.0.1
   # marquee: ^2.2.2 # replaced with fast_marquee
   fast_marquee:
     git:
@@ -44,10 +44,10 @@ dependencies:
   flutter_linkify: ^5.0.2
   statsfl: ^2.3.0
   vibration: ^1.7.4-nullsafety.0
-  get: ^4.6.3
+  get: ^4.6.5
   permission_handler: ^9.2.0 # next update will require android sdk version 31
   image: ^3.2.0
-  google_fonts: ^2.3.3
+  google_fonts: ^3.0.1
   photo_view: # ^0.12.0
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
@@ -75,6 +75,9 @@ dependencies:
   crypto: ^3.0.2
   keyboard_actions: ^4.0.0
   flutter_improved_scrolling: ^0.0.3
+
+  huge_listview: ^2.0.3
+  scrollable_positioned_list: ^0.3.2
 
 
 

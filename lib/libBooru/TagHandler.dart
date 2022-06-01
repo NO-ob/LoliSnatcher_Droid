@@ -23,7 +23,9 @@ class TagHandler extends GetxController {
   static TagHandler get instance => Get.find<TagHandler>();
 
 
-  final Map<String,Tag> _tagMap = {};
+  final Map<String, Tag> _tagMap = {};
+  Map<String, Tag> get tagMap => _tagMap;
+
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
 
@@ -34,10 +36,7 @@ class TagHandler extends GetxController {
   }
 
   bool hasTag(String tagString){
-    if (_tagMap.containsKey(tagString)) {
-      return true;
-    }
-    return false;
+    return _tagMap.containsKey(tagString);
   }
 
   Tag getTag(String tagString){
@@ -158,6 +157,10 @@ class TagHandler extends GetxController {
     List<Tag> tagList = [];
     _tagMap.forEach((key,value) => tagList.add(value));
     return tagList;
+  }
+
+  void removeTag(Tag tag){
+    _tagMap.remove(tag.fullString);
   }
 
   Future<bool> saveTags() async {

@@ -122,6 +122,51 @@ class _SaveCachePageState extends State<SaveCachePage> {
     }
   }
 
+  Widget buildCacheButton(Map<String, String?> type) {
+    Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type['folder'], orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
+    String? folder = type['folder'];
+    String label = type['label'] ?? '???';
+    String size = Tools.formatBytes(stat['totalSize']!, 2);
+    int fileCount = stat['fileNum'] ?? 0;
+    bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
+    bool isLoading = stat['type'] == 'loading';
+    String text = isLoading
+      ? 'Loading...'
+      : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} ${Tools.pluralize('file', fileCount)}');
+
+    bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
+
+    return SettingsButton(
+      name: '$label: $text',
+      icon: isLoading
+        ? const CircularProgressIndicator()
+        : Icon(allowedToClear ? Icons.delete_forever : null),
+      action: () async {
+        if (allowedToClear) {
+          FlashElements.showSnackbar(
+            context: context,
+            position: Positions.top,
+            duration: const Duration(seconds: 2),
+            title: const Text(
+              'Cache cleared!',
+              style: TextStyle(fontSize: 20)
+            ),
+            content: Text(
+              'Cleared $label cache!',
+              style: const TextStyle(fontSize: 16)
+            ),
+            leadingIcon: Icons.delete_forever,
+            leadingIconColor: Colors.red,
+            leadingIconSize: 40,
+            sideColor: Colors.yellow,
+          );
+          await imageWriter.deleteCacheFolder(folder);
+          getCacheStats();
+        }
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -317,52 +362,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
               const SettingsButton(name: '', enabled: false),
 
               const SettingsButton(name: 'Cache Stats:'),
-              ...cacheTypes.map((type) {
-                Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type['folder'], orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
-                String? folder = type['folder'];
-                String label = type['label'] ?? '???';
-                String size = Tools.formatBytes(stat['totalSize']!, 2);
-                int fileCount = stat['fileNum'] ?? 0;
-                bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
-                bool isLoading = stat['type'] == 'loading';
-                String text = isLoading
-                  ? 'Loading...'
-                  : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} ${Tools.pluralize('file', fileCount)}');
-
-                bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
-
-                return SettingsButton(
-                  name: '$label: $text',
-                  icon: isLoading
-                    ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
-                      )
-                    : Icon(allowedToClear ? Icons.delete : null),
-                  action: () async {
-                    if (allowedToClear) {
-                      FlashElements.showSnackbar(
-                        context: context,
-                        position: Positions.top,
-                        duration: const Duration(seconds: 2),
-                        title: const Text(
-                          'Cache cleared!',
-                          style: TextStyle(fontSize: 20)
-                        ),
-                        content: Text(
-                          'Cleared $label cache!',
-                          style: const TextStyle(fontSize: 16)
-                        ),
-                        leadingIcon: Icons.delete_forever,
-                        leadingIconColor: Colors.red,
-                        leadingIconSize: 40,
-                        sideColor: Colors.yellow,
-                      );
-                      await imageWriter.deleteCacheFolder(folder);
-                      getCacheStats();
-                    }
-                  }
-                );
-              }),
+              ...cacheTypes.map(buildCacheButton),
 
               SettingsButton(
                 name: 'Clear cache completely',

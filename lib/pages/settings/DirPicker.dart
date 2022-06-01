@@ -196,10 +196,8 @@ class _DirPickerState extends State<DirPicker> {
                     return Container();
                   }
                 } else {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
-                    )
+                  return const Center(
+                    child: CircularProgressIndicator()
                   );
                 }
               }

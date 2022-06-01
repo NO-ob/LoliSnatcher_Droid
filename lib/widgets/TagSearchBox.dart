@@ -416,6 +416,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         height: 300,
         child: Material(
           elevation: 4.0,
+          color: Theme.of(context).colorScheme.surface,
           child: Obx(() {
             List<List<String>> items = [
               ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
@@ -443,10 +444,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             } else {
               return Scrollbar(
                 controller: suggestionsScrollController,
-                interactive: true,
-                thumbVisibility: true,
-                thickness: 10,
-                radius: const Radius.circular(10),
                 child: ListView.builder(
                   controller: suggestionsScrollController,
                   padding: EdgeInsets.zero,
@@ -469,9 +466,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           itemIcon = const Icon(Icons.archive);
                           break;
                         case 'loading':
-                          itemIcon = CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
-                          );
+                          itemIcon = const CircularProgressIndicator();
                           break;
                         default:
                           itemIcon = const Icon(null);
@@ -489,7 +484,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                               height: 24,
                               color: tagColor,
                             ),
-                            itemIcon,
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              child: itemIcon,
+                            ),
                           ],
                         ),
                         title: MarqueeText(
@@ -596,8 +594,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               }
             },
             decoration: InputDecoration(
-              fillColor: Theme.of(context).colorScheme.surface,
-              filled: true,
               hintText: searchHandler.searchTextController.text.isEmpty ? "Enter Tags" : '',
               prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
                 ? IconButton(
@@ -646,21 +642,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     )
                   ),
               contentPadding: const EdgeInsets.fromLTRB(15, 0, 5, 0), // left,top,right,bottom
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                borderRadius: BorderRadius.circular(50),
-                gapPadding: 0,
-              ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).errorColor),
-                borderRadius: BorderRadius.circular(50),
-                gapPadding: 0,
-              ),
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                borderRadius: BorderRadius.circular(50),
-                gapPadding: 0,
-              ),
             ),
           )
         )

@@ -76,6 +76,7 @@ class _HistoryListState extends State<HistoryList> {
         } else if (filterSearchController.text == '') {
           return true;
         } else {
+          // TODO copy filtering logic from tabboxdialog
           final String filter = filterSearchController.text.toLowerCase();
           final bool textFilter = h.searchText.toLowerCase().contains(filter);
           final bool booruFilter = h.booruName.toLowerCase().contains(filter) || h.booruType.toLowerCase().contains(filter);
@@ -130,6 +131,7 @@ class _HistoryListState extends State<HistoryList> {
               onTap: () {
                 if (booru != null) {
                   searchHandler.searchTextController.text = entry.searchText;
+                  // close the tab options dialog
                   Navigator.of(context).pop(true);
                   searchHandler.searchAction(entry.searchText, booru);
                 } else {
@@ -142,10 +144,42 @@ class _HistoryListState extends State<HistoryList> {
                   );
                 }
 
+                // close the history list dialog
                 Navigator.of(context).pop(true);
               },
               leading: const Icon(Icons.open_in_browser),
               title: const Text('Open'),
+            ),
+            // 
+            const SizedBox(height: 10),
+            ListTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+              ),
+              onTap: () {
+                if (booru != null) {
+                  searchHandler.searchTextController.text = entry.searchText;
+                  Navigator.of(context).pop(true);
+                  searchHandler.addTabByString(
+                    entry.searchText,
+                    customBooru: booru,
+                    switchToNew: true,
+                  );
+                } else {
+                  FlashElements.showSnackbar(
+                    context: context,
+                    title: const Text("Unknown Booru type!", style: TextStyle(fontSize: 20)),
+                    leadingIcon: Icons.warning_amber,
+                    leadingIconColor: Colors.red,
+                    sideColor: Colors.red,
+                  );
+                }
+
+                Navigator.of(context).pop(true);
+              },
+              leading: const Icon(Icons.add_circle_outline),
+              title: const Text('Open in new tab'),
             ),
             // 
             const SizedBox(height: 10),
@@ -249,15 +283,6 @@ class _HistoryListState extends State<HistoryList> {
 
     final Widget checkbox = Checkbox(
       value: isSelected,
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if(states.contains(MaterialState.selected)) {
-          return Theme.of(context).colorScheme.secondary;
-        } else if(states.contains(MaterialState.hovered)) {
-          return Colors.grey;
-        } else {
-          return Colors.grey;
-        }
-      }),
       onChanged: (bool? newValue) {
         if(isSelected) {
           selectedEntries.removeWhere((item) => item == currentEntry);
@@ -376,7 +401,7 @@ class _HistoryListState extends State<HistoryList> {
               const SizedBox(height: 60),
 
               if (isLoading)
-                CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary))
+                const CircularProgressIndicator()
               else if (history.isEmpty)
                 const Text('Search History is empty')
               else if (filteredHistory.isEmpty)
@@ -398,12 +423,17 @@ class _HistoryListState extends State<HistoryList> {
         return Row(
           children: [
             Expanded(
-              child: ElevatedButton(
-                child: const Text("Select all"),
-                onPressed: () {
-                  selectedEntries = filteredHistory;
-                  setState(() { });
-                },
+              child: Container(
+                margin: const EdgeInsets.all(10),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.select_all),
+                  label: const Text("Select all"),
+                  onPressed: () {
+                    // create new list through spread to avoid modifying the original list
+                    selectedEntries = [...filteredHistory];
+                    setState(() { });
+                  },
+                ),
               ),
             ),
           ],
@@ -419,7 +449,7 @@ class _HistoryListState extends State<HistoryList> {
           child: Container(
             margin: const EdgeInsets.all(10),
             child: ElevatedButton.icon(
-              label: Text("Delete ${selectedEntries.length} selected ${Tools.pluralize('item', selectedEntries.length)}"),
+              label: Text("Delete ${selectedEntries.length} ${Tools.pluralize('item', selectedEntries.length)}"),
               icon: const Icon(Icons.delete_forever),
               onPressed: () {
                 if(selectedEntries.isEmpty) {
@@ -447,7 +477,7 @@ class _HistoryListState extends State<HistoryList> {
                     const CancelButton(),
                     ElevatedButton.icon(
                       label: const Text("Delete"),
-                      icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                      icon: const Icon(Icons.delete_forever),
                       onPressed: () async {
                         for(int i = 0; i < selectedEntries.length; i++) {
                           await deleteEntry(selectedEntries[i]);
@@ -471,8 +501,9 @@ class _HistoryListState extends State<HistoryList> {
         ),
 
         Expanded(
-          child: ElevatedButton(
-            child: const Text("Clear selection"),
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.border_clear),
+            label: const Text("Clear selection"),
             onPressed: () {
               selectedEntries.clear();
               setState(() { });
@@ -491,10 +522,6 @@ class _HistoryListState extends State<HistoryList> {
           width: double.maxFinite,
           child: Scrollbar(
             controller: scrollController,
-            interactive: true,
-            thickness: 8,
-            radius: const Radius.circular(10),
-            thumbVisibility: true,
             child: RefreshIndicator(
               triggerMode: RefreshIndicatorTriggerMode.anywhere,
               displacement: 80,

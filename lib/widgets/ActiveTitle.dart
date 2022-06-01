@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/widgets/MarqueeText.dart';
+import 'package:LoliSnatcher/widgets/TabBox.dart';
 
 class ActiveTitle extends StatelessWidget {
   const ActiveTitle({Key? key}) : super(key: key);
@@ -27,10 +27,10 @@ class ActiveTitle extends StatelessWidget {
             onTap: () {
               searchHandler.openAndFocusSearch();
             },
-            child: MarqueeText(
-              text: searchHandler.currentTab.tags,
-              fontSize: 16,
-              isExpanded: false,
+            child: TabBoxRow(
+              tab: searchHandler.currentTab,
+              color: Theme.of(context).colorScheme.onPrimary,
+              fontWeight: Theme.of(context).appBarTheme.titleTextStyle!.fontWeight!,
             ),
           );
         }

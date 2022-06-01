@@ -59,7 +59,8 @@ class ImageWriter {
     File image = File(path! + fileName);
     // print(path! + fileName);
     bool fileExists = await image.exists();
-    if(fileExists || item.isSnatched.value == true) return null;
+    // if (fileExists) return null;
+    if (fileExists || item.isSnatched.value == true) return null;
     try {
       Uri fileURI = Uri.parse(item.fileURL);
       var response = await http.get(fileURI,headers: ViewUtils.getFileCustomHeaders(booru,checkForReferer: true));
@@ -80,7 +81,7 @@ class ImageWriter {
             serviceHandler.callMediaScanner(image.path);
           }
         } catch (e){
-          print("Image not found");
+          print("Image not found $e");
           return e;
         }
       } else {
@@ -97,8 +98,7 @@ class ImageWriter {
         }
       }
     } catch (e){
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: write :: $e");
       return e;
     }
     return (fileName);
@@ -143,8 +143,7 @@ class ImageWriter {
       File image = File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes, flush: true);
     } catch (e){
-      print("Image Writer Exception:: cache write");
-      print(e);
+      print("Image Writer Exception :: cache write :: $e");
     }
     return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
@@ -164,8 +163,7 @@ class ImageWriter {
       // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
       // await compute(writeBytesIsolate, {"file": image, "bytes": bytes});
     } catch (e){
-      print("Image Writer Exception:: cache write");
-      print(e);
+      print("Image Writer Exception :: cache write bytes :: $e");
       return null;
     }
     return image;
@@ -186,8 +184,7 @@ class ImageWriter {
         return null;
       }
     } catch (e){
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: delete from cache :: $e");
       return false;
     }
   }
@@ -204,8 +201,7 @@ class ImageWriter {
         return null;
       }
     } catch (e){
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: delete cache folder :: $e");
       return false;
     }
   }
@@ -218,10 +214,8 @@ class ImageWriter {
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
       File cacheFile = File(cachePath+fileName);
-      bool fileExists = await cacheFile.exists();
-      bool fileIsNotEmpty = (await cacheFile.stat()).size > 0;
-      if (fileExists){
-        if(fileIsNotEmpty) {
+      if (await cacheFile.exists()){
+        if(await cacheFile.length() > 0) {
           return cachePath+fileName;
         } else {
           // somehow some files can save with zero bytes - we remove them
@@ -232,8 +226,7 @@ class ImageWriter {
         return null;
       }
     } catch (e){
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: get cache path :: $e");
       return null;
     }
   }
@@ -248,19 +241,17 @@ class ImageWriter {
       cacheDirPath = "${cacheRootPath!}${typeFolder ?? ''}/";
 
       Directory cacheDir = Directory(cacheDirPath);
-      bool dirExists = await cacheDir.exists();
-      if (dirExists) {
-        cacheDir.listSync(recursive: true, followLinks: false)
-          .forEach((FileSystemEntity entity) {
-            if (entity is File) {
-              fileNum++;
-              totalSize += entity.lengthSync();
-            }
-          });
+      if (await cacheDir.exists()) {
+        List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
+        for (FileSystemEntity file in files) {
+          if (file is File) {
+            fileNum++;
+            totalSize += await file.length();
+          }
+        }
       }
     } catch (e){
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: get cache stat :: $e");
     }
 
     return {'fileNum': fileNum, 'totalSize': totalSize};
@@ -278,20 +269,21 @@ class ImageWriter {
       cacheDirPath = "${cacheRootPath!}/";
 
       Directory cacheDir = Directory(cacheDirPath);
-      bool dirExists = await cacheDir.exists();
-      if (dirExists) {
-        cacheDir.listSync(recursive: true, followLinks: false)
-          .forEach((FileSystemEntity entity) {
-            final bool isNotExcludedExt = Tools.getFileExt(entity.path) != 'ico';
-            final bool isStale = (entity.statSync().modified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < DateTime.now().millisecondsSinceEpoch;
-            if (entity is File && isNotExcludedExt && isStale) {
-              entity.delete();
+      if (await cacheDir.exists()) {
+        List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
+        for (FileSystemEntity file in files) {
+          if (file is File) {
+            final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
+            final DateTime lastModified = await file.lastModified();
+            final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < DateTime.now().millisecondsSinceEpoch;
+            if (isNotExcludedExt && isStale) {
+              file.delete();
             }
-          });
+          }
+        }
       }
     } catch (e){
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: clear stale cache :: $e");
     }
     return;
   }
@@ -311,36 +303,29 @@ class ImageWriter {
       cacheDirPath = "${cacheRootPath!}/";
 
       Directory cacheDir = Directory(cacheDirPath);
-      bool dirExists = await cacheDir.exists();
-      if (dirExists) {
-        cacheDir.listSync(recursive: true, followLinks: false)
-          .forEach((FileSystemEntity entity) {
-            if (entity is File) {
-              currentCacheSize += entity.lengthSync();
-            }
-          });
+      if (await cacheDir.exists()) {
+        List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList()).whereType<File>().toList();
+        for (File file in files) {
+          currentCacheSize += await file.length();
+        }
 
         final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
         final int overflowSize = currentCacheSize - limitSize;
         if(overflowSize > 0) {
-          List<FileSystemEntity> files = cacheDir.listSync(recursive: true, followLinks: false).whereType<File>().toList();
-          files.sort((FileSystemEntity a, FileSystemEntity b) {
-            return a.statSync().modified.millisecondsSinceEpoch.compareTo(b.statSync().modified.millisecondsSinceEpoch);
-          });
-          for (var entity in files) {
-            final bool isNotExcludedExt = Tools.getFileExt(entity.path) != 'ico';
-            final FileStat stat = entity.statSync();
+          files.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
+
+          for (File file in files) {
+            final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
             final bool stillOverflows = toDeleteSize < overflowSize;
-            if (entity is File && isNotExcludedExt && stillOverflows) {
-              toDelete.add(entity);
-              toDeleteSize += stat.size;
+            if (isNotExcludedExt && stillOverflows) {
+              toDelete.add(file);
+              toDeleteSize += await file.length();
             }
           }
         }
       }
     } catch (e) {
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Exception :: clear cache overflow :: $e");
     }
 
     // print(toDelete);

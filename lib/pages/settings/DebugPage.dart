@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -10,6 +11,7 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/pages/settings/LoggerPage.dart';
 import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/widgets/TagsManager.dart';
 
 class DebugPage extends StatefulWidget {
   const DebugPage({Key? key}) : super(key: key);
@@ -31,6 +33,13 @@ class _DebugPageState extends State<DebugPage> {
   void initState() {
     super.initState();
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
+  }
+
+  Future<bool> showTagsManager(BuildContext context) async {
+    return await SettingsPageOpen(
+      context: context,
+      page: () => const TagsManager(),
+    ).open();
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
@@ -142,6 +151,14 @@ class _DebugPageState extends State<DebugPage> {
                   }
                   timeDilation = speeds[newIndex];
                   setState(() { });
+                },
+              ),
+
+              SettingsButton(
+                name: 'Tags Manager',
+                icon: const Icon(CupertinoIcons.tag),
+                action: () {
+                  showTagsManager(context);
                 },
               ),
 

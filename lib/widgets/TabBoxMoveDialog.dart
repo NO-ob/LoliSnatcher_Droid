@@ -5,11 +5,9 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class TabBoxMoveDialog extends StatefulWidget {
-  const TabBoxMoveDialog({Key? key, required this.row, required this.index, required this.indexText}) : super(key: key);
-
+  const TabBoxMoveDialog({Key? key, required this.row, required this.index}) : super(key: key);
   final Widget row;
   final int index;
-  final String indexText;
 
   @override
   State<TabBoxMoveDialog> createState() => _TabBoxMoveDialogState();
@@ -32,9 +30,6 @@ class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
     return SettingsDialog(
       contentItems: <Widget>[
         SizedBox(width: double.maxFinite, child: widget.row),
-        // 
-        const SizedBox(height: 10),
-        Text(widget.indexText, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         // 
         const SizedBox(height: 10),
         ListTile(

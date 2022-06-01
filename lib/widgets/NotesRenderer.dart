@@ -223,8 +223,7 @@ class _NotesRendererState extends State<NotesRenderer> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.secondary,
+                        const CircularProgressIndicator(
                           strokeWidth: 2,
                         ),
                         Icon(
@@ -331,7 +330,7 @@ class _NoteBuildState extends State<NoteBuild> {
                 color: const Color(0xFFFFF300).withOpacity(0.25),
                 borderRadius: BorderRadius.circular(2),
                 border: Border.all(
-                  color: const Color(0xFFFFF176),
+                  color: const Color(0xFFFFF176).withOpacity(0.5),
                 ),
               ),
               child: (widget.width > 30 && widget.height > 30) // don't show if too small

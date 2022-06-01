@@ -397,11 +397,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   ),
                 ),
                 if (_latestValue.isBuffering)
-                  Center(
+                  const Center(
                     widthFactor: 3,
                     heightFactor: 3,
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
                       strokeWidth: 5,
                     ),
                   ),

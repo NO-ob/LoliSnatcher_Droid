@@ -141,7 +141,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       0,
                     );
                   },
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: const Icon(Icons.save),
                 ),
               ),
@@ -156,7 +155,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       settingsHandler.dbHandler.updateBooruItem(item, "local");
                     }
                   },
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: Obx(() => Icon(item.isFavourite.value == true
                       ? Icons.favorite
                       : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
@@ -190,7 +188,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                                   onPressed: () {
                                     Get.back();
                                   },
-                                  backgroundColor: Theme.of(context).colorScheme.secondary,
                                   child: const Icon(Icons.fullscreen_exit),
                                 ),
                               ),
@@ -204,7 +201,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                     updateState();
                     delayedZoomReset();
                   },
-                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: const Icon(Icons.fullscreen),
                 ),
               ),

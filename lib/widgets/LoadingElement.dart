@@ -172,10 +172,8 @@ class _LoadingElementState extends State<LoadingElement> {
       if (settingsHandler.loadingGif) {
         return const Center(child: Image(image: AssetImage('assets/images/loading.gif')));
       } else {
-        return Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
-          ),
+        return const Center(
+          child: CircularProgressIndicator(),
         );
       }
     }
@@ -246,8 +244,6 @@ class _LoadingElementState extends State<LoadingElement> {
           child: RotatedBox(
             quarterTurns: -1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
-              backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
           ),
@@ -400,8 +396,6 @@ class _LoadingElementState extends State<LoadingElement> {
           child: RotatedBox(
             quarterTurns: percentDone != 0 ? -1 : 1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
-              backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
           ),
@@ -611,8 +605,6 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
           child: RotatedBox(
             quarterTurns: -1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
-              backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
           ),
@@ -623,8 +615,6 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
           child: RotatedBox(
             quarterTurns: percentDone != 0 ? -1 : 1,
             child: LinearProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
-              backgroundColor: Colors.transparent,
               value: percentDone == 0 ? null : percentDone,
             ),
           ),
@@ -634,7 +624,6 @@ class _ThumbnailLoadingElementState extends State<ThumbnailLoadingElement> {
         //   width: 100 / widget.columnCount,
         //   child: CircularProgressIndicator(
         //     strokeWidth: 14 / widget.columnCount,
-        //     valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
         //     value: percentDone,
         //   ),
         // ),

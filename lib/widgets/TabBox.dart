@@ -53,7 +53,6 @@ class TabBox extends StatelessWidget {
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            dropdownColor: Theme.of(context).colorScheme.surface,
             onChanged: (SearchGlobal? newValue) {
               if (newValue != null) {
                 searchHandler.changeTabIndex(list.indexOf(newValue));
@@ -75,11 +74,11 @@ class TabBox extends StatelessWidget {
                 child: Container(
                   padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
                   decoration: isCurrent
-                      ? BoxDecoration(
-                          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                          borderRadius: BorderRadius.circular(5),
-                        )
-                      : null,
+                    ? BoxDecoration(
+                        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
+                        borderRadius: BorderRadius.circular(5),
+                      )
+                    : null,
                   child: TabBoxRow(key: ValueKey(value), tab: value),
                 ),
               );
@@ -95,19 +94,24 @@ class TabBoxRow extends StatelessWidget {
   const TabBoxRow({
     Key? key,
     required this.tab,
+    this.color,
+    this.fontWeight,
   }) : super(key: key);
 
   final SearchGlobal tab;
+  final Color? color;
+  final FontWeight? fontWeight;
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
-
       // print(value.tags);
-      int? totalCount = tab.booruHandler.totalCount.value;
-      String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
-      String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
+      final int totalCount = tab.booruHandler.totalCount.value;
+      final String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
+      final String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
+
+      final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
+      final bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
 
       return SizedBox(
         width: double.maxFinite,
@@ -123,7 +127,9 @@ class TabBoxRow extends StatelessWidget {
               key: ValueKey(tagText),
               text: tagText,
               fontSize: 16,
-              color: tab.tags == "" ? Colors.grey : null,
+              fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
+              fontWeight: fontWeight ?? FontWeight.normal,
+              color: color ?? (tab.tags == "" ? Colors.grey : null),
             ),
           ],
         ),

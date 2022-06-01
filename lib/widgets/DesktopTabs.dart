@@ -25,6 +25,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       jumpToTab(searchHandler.currentIndex);
     });

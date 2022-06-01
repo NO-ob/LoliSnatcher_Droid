@@ -136,7 +136,7 @@ class _MobileHomeState extends State<MobileHome> {
           borderRadius: 10,
           leftAnimationType: InnerDrawerAnimation.quadratic,
           rightAnimationType: InnerDrawerAnimation.quadratic,
-          backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.background),
+          // backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.background),
 
           //when a pointer that is in contact with the screen and moves to the right or left
           onDragUpdate: (double val, InnerDrawerDirection? direction) {

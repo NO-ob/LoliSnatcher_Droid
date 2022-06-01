@@ -161,11 +161,11 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String verText = "Version: ${settingsHandler.verStr}  (${settingsHandler.buildNumber})";
+    final String verText = "Version: ${settingsHandler.verStr} (${settingsHandler.buildNumber})";
     const String buildTypeText = EnvironmentConfig.isFromStore ? "/ Play" : (kDebugMode ? "/ Debug" : "");
 
     return SettingsButton(
-      name: "Version: $verText $buildTypeText",
+      name: "$verText $buildTypeText".trim(),
       icon: const Icon(null), // to align with other items
       action: () {
         if (settingsHandler.isDebug.value) {

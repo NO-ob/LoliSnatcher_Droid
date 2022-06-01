@@ -363,10 +363,10 @@ class _ThemePageState extends State<ThemePage> {
                   name: 'Remove Custom Mascot',
                   icon: const Icon(Icons.delete_forever),
                   drawTopBorder: true,
-                  action: () async{
+                  action: () async {
                     File file = File(mascotPathOverride);
-                    if (file.existsSync()) {
-                      file.deleteSync();
+                    if (await file.exists()) {
+                      await file.delete();
                     }
                     mascotPathOverride = "";
                     setState(() { });

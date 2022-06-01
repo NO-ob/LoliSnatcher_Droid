@@ -262,9 +262,7 @@ class _BooruEditState extends State<BooruEdit> {
     return SettingsButton(
       name: 'Test Booru',
       icon: isTesting
-        ? CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
-          )
+        ? const CircularProgressIndicator()
         : const Icon(Icons.public),
       action: () async {
         // name and url are required
@@ -387,7 +385,7 @@ class _BooruEditState extends State<BooruEdit> {
 
   /// The save button is displayed once the test function has run and completed
   /// allowing the user to save the booru config otherwise an empty container is returned
-  Widget saveButton(){
+  Widget saveButton() {
     return SettingsButton(
       name: "Save Booru${widget.booruType == '' ? ' (Run Test First)' : ''}",
       icon: Icon(Icons.save, color: widget.booruType == '' ? Colors.red : Colors.green),
@@ -456,7 +454,7 @@ class _BooruEditState extends State<BooruEdit> {
               if(!booruExists && oldEditBooruExists) {
                 // remove the old config (same url and name as the start booru)
                 settingsHandler.booruList.removeAt(i);
-                settingsHandler.deleteBooru(widget.booru);
+                await settingsHandler.deleteBooru(widget.booru);
               }
             }
           }

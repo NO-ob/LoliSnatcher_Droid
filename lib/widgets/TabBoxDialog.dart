@@ -26,17 +26,22 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
   final SearchHandler searchHandler = SearchHandler.instance;
 
   List<SearchGlobal> tabs = [], filteredTabs = [], selectedTabs = [];
-  final AutoScrollController scrollController = AutoScrollController();
+  late final AutoScrollController scrollController;
   final TextEditingController filterController = TextEditingController();
   bool? sortTabs;
 
-  bool get isFilterActive => filteredTabs.length != searchHandler.total;
+  bool get isFilterActive => filteredTabs.length != searchHandler.total || sortTabs != null;
 
   @override
   void initState() {
     super.initState();
     tabs = searchHandler.list;
     filteredTabs = tabs;
+
+    scrollController = AutoScrollController(
+      // pre-scroll on first render to avoid lag
+      initialScrollOffset: searchHandler.currentIndex * (72 + 2), // 72 - tile height, 2 - half of margins between items
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       jumpToCurrent();
@@ -69,12 +74,32 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
   void filterTabs() {
     if (filterController.text.isNotEmpty) {
       filteredTabs = [...tabs].where((t) {
-        String filterText = filterController.text.toLowerCase();
-        bool doTagsMatch = t.tags.toLowerCase().contains(filterText);
-        String booruText = 'booru:${t.selectedBooru.value.name?.toLowerCase() ?? ""}';
-        bool doBooruMatch = booruText.contains(filterText);
-        bool textFilter = doTagsMatch || doBooruMatch;
-        return textFilter;
+        String filterText = filterController.text.toLowerCase().trim();
+
+        bool filterLoaded = filterText == 'loaded';
+        bool filterUnloaded = filterText == 'unloaded';
+        if (filterLoaded || filterUnloaded) {
+          bool checkLoaded = filterLoaded ? t.booruHandler.filteredFetched.isNotEmpty : true;
+          bool checkUnloaded = filterUnloaded ? t.booruHandler.filteredFetched.isEmpty : true;
+          return checkLoaded && checkUnloaded;
+        }
+
+        bool doTagsMatch = false;
+        String booruText = t.selectedBooru.value.name?.toLowerCase() ?? "unknown";
+        String booruTypeText = t.selectedBooru.value.type?.toLowerCase() ?? "unknown";
+        bool doBooruMatch = booruText.contains(filterText) || booruTypeText.contains(filterText);
+        if (filterText.startsWith('booru:')) {
+          // if user explicitly searches booru:xxx, reparse the filter and redo the booru and tags check
+          String? filterBooru = filterText.split(' ')[0].replaceAll('booru:', '');
+          doBooruMatch = booruText.contains(filterBooru) || booruTypeText.contains(filterBooru);
+          filterText = filterText.replaceAll(RegExp(r'booru:\w+'), '').trim();
+          doTagsMatch = filterText.isNotEmpty ? t.tags.toLowerCase().contains(filterText) : true;
+          return doBooruMatch && doTagsMatch;
+        } else {
+          doTagsMatch = t.tags.toLowerCase().contains(filterText);
+        }
+
+        return doTagsMatch || doBooruMatch;
       }).toList();
     } else {
       filteredTabs = [...tabs];
@@ -94,15 +119,9 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
       builder: (context) {
         final int tabIndex = searchHandler.list.indexOf(data);
 
-        final bool isIndexFromFilter = tabIndex != index;
-        final String indexText = isIndexFromFilter ? "#${index + 1} in filtered list, #${tabIndex + 1} in full list" : "#${tabIndex + 1}";
-
         return SettingsDialog(
           contentItems: <Widget>[
             SizedBox(width: double.maxFinite, child: row),
-            // 
-            const SizedBox(height: 10),
-            Text(indexText, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             // 
             const SizedBox(height: 20),
             ListTile(
@@ -155,7 +174,6 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
                   builder: (BuildContext context) => TabBoxMoveDialog(
                     row: buildEntry(index, false, true),
                     index: tabIndex,
-                    indexText: indexText,
                   ),
                 );
                 getTabs();
@@ -177,7 +195,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
                 getTabs();
                 Navigator.of(context).pop(true);
               },
-              leading: const Icon(Icons.delete, color: Colors.red),
+              leading: const Icon(Icons.delete_forever, color: Colors.red),
               title: const Text('Remove'),
             ),
           ],
@@ -187,6 +205,10 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
   }
 
   Widget listBuild() {
+    if (filteredTabs.isEmpty) {
+      return const Center(child: Text('No tabs found'));
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
@@ -194,10 +216,6 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
           width: double.maxFinite,
           child: Scrollbar(
             controller: scrollController,
-            interactive: true,
-            thickness: 8,
-            radius: const Radius.circular(10),
-            thumbVisibility: true,
             child: DesktopScrollWrap(
               controller: scrollController,
               child: ReorderableListView.builder(
@@ -244,17 +262,13 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
     final String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
     final String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
 
+    final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
+
+    final String? givenIndexText = isFilterActive ? "${index + 1}" : null;
+    final String tabIndexText = "${searchHandler.list.indexOf(tab) + 1}";
+
     final Widget checkbox = Checkbox(
       value: isSelected,
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if(states.contains(MaterialState.selected)) {
-          return Theme.of(context).colorScheme.secondary;
-        } else if(states.contains(MaterialState.hovered)) {
-          return Colors.grey;
-        } else {
-          return Colors.grey;
-        }
-      }),
       onChanged: (bool? newValue) {
         if(isSelected) {
           selectedTabs.removeWhere((item) => item == tab);
@@ -283,12 +297,20 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
         ),
         onTap: isActive ? () => showTabEntryActions(buildEntry(index, false, true), tab, index) : null,
         minLeadingWidth: 20,
-        leading: favicon,
+        leading: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            favicon,
+            Text(tabIndexText, style: const TextStyle(fontSize: 10),),
+            if(givenIndexText != null && givenIndexText != '0') Text(givenIndexText, style: const TextStyle(fontSize: 10),),
+          ],
+        ),
         trailing: showCheckbox ? checkbox : null,
         title: MarqueeText(
           key: ValueKey(tagText),
           text: tagText,
           fontSize: 16,
+          fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
           color: tab.tags == "" ? Colors.grey : null,
           isExpanded: false,
         ),
@@ -305,68 +327,143 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(
-            child: Row(children: <Widget>[
-              Expanded(
-                child: SettingsTextInput(
-                  onlyInput: true,
-                  controller: filterController,
-                  onChanged: (String? input) {
-                    filterTabs();
-                  },
-                  title: "Filter Tabs (${filterController.text.isEmpty ? tabs.length : '${filteredTabs.length}/${tabs.length}'})",
-                  hintText: "Filter Tabs (${filterController.text.isEmpty ? tabs.length : '${filteredTabs.length}/${tabs.length}'})",
-                  inputType: TextInputType.text,
-                  clearable: true,
-                  drawBottomBorder: false,
-                  margin: const EdgeInsets.fromLTRB(2, 8, 2, 5),
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                child: IconButton(
-                  icon: const Icon(Icons.subdirectory_arrow_left_outlined),
-                  onPressed: () {
-                    jumpToCurrent();
-                  },
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 10),
-                child: Transform(
-                  alignment: Alignment.center,
-                  transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-                  child: IconButton(
-                    icon: Icon((sortTabs == true || sortTabs == false) ? Icons.sort : Icons.sort_by_alpha),
-                    onPressed: () {
-                      if (sortTabs == true) {
-                        sortTabs = false;
-                      } else if (sortTabs == false) {
-                        sortTabs = null;
-                      } else {
-                        sortTabs = true;
-                      }
-                      filterTabs();
-                    },
-                  ),
-                ),
-              ),
-            ]),
+            child: SettingsTextInput(
+              onlyInput: true,
+              controller: filterController,
+              onChanged: (String? input) {
+                filterTabs();
+              },
+              title: "Filter Tabs (${filterController.text.isEmpty ? tabs.length : '${filteredTabs.length}/${tabs.length}'})",
+              hintText: "Filter Tabs (${filterController.text.isEmpty ? tabs.length : '${filteredTabs.length}/${tabs.length}'})",
+              inputType: TextInputType.text,
+              clearable: true,
+              drawBottomBorder: false,
+              margin: const EdgeInsets.fromLTRB(2, 8, 2, 5),
+            ),
           ),
         ],
       ),
     );
   }
 
+  List<Widget> filterActions() {
+    return [
+      IconButton(
+        icon: const Icon(Icons.subdirectory_arrow_left_outlined),
+        tooltip: 'Scroll to current tab',
+        onPressed: () {
+          jumpToCurrent();
+        },
+      ),
+      Transform(
+        alignment: Alignment.center,
+        transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+        child: IconButton(
+          icon: Icon((sortTabs == true || sortTabs == false) ? Icons.sort : Icons.sort_by_alpha),
+          tooltip: 'Sort tabs',
+          onPressed: () {
+            if (sortTabs == true) {
+              sortTabs = false;
+            } else if (sortTabs == false) {
+              sortTabs = null;
+            } else {
+              sortTabs = true;
+            }
+            filterTabs();
+          },
+        ),
+      ),
+      IconButton(
+        icon: const Icon(Icons.help_center_outlined),
+        tooltip: 'Help',
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return SettingsDialog(
+                title: const Text('Tabs Manager'),
+                contentItems: <Widget>[
+                  Row(
+                    children: const [
+                      Icon(Icons.subdirectory_arrow_left_outlined),
+                      SizedBox(width: 10),
+                      Text('Scroll to current tab'),
+                    ],
+                  ),
+                  const Divider(),
+                  Row(
+                    children: const [
+                      Icon(Icons.sort_by_alpha),
+                      SizedBox(width: 10),
+                      Text('Default tabs order'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.rotationX(pi),
+                        child: const Icon(Icons.sort),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('Sort alphabetically'),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Transform(
+                        alignment: Alignment.center,
+                        transform: Matrix4.rotationX(0),
+                        child: const Icon(Icons.sort),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('Sort alphabetically (reversed)'),
+                    ],
+                  ),
+                  const Divider(),
+                  Row(
+                    children: const [
+                      Icon(Icons.expand),
+                      SizedBox(width: 10),
+                      Text('Long press on a tab to move it'),
+                    ],
+                  ),
+                  const Divider(),
+                  const Text('Filter by booru:'),
+                  const Text('Just type in the name or type of the booru to filter tabs related to it'),
+                  const SizedBox(height: 5),
+                  const Text('Filter by booru AND tags:'),
+                  const Text('Add "booru:" to the beggining of the filter and then enter booru name/type and tags'),
+                  const Text('Example: "booru:gelbooru high_resolution"'),
+                  const Divider(),
+                  const Text('Numbers under the favicon:'),
+                  const Text('First number - tab index in default list order'),
+                  const Text('Second number - tab index in current list order, appears when filtering/sorting is active'),
+                  const Divider(),
+                  const Text('Special filters:'),
+                  const Text('"loaded" - show tabs which have loaded items'),
+                  const Text('"unloaded" - show tabs which are not loaded and/or have zero items'),
+                  const Text('Unloaded tabs have italic text'),
+                ],
+              );
+            }
+          );
+        },
+      ),
+    ];
+  }
+
   Widget selectedActionsBuild() {
     if(selectedTabs.isEmpty) {
-      if(isFilterActive) {
+      if(isFilterActive && filteredTabs.isNotEmpty) {
         return Row(
           children: [
             Expanded(
               child: Container(
-                margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                child: ElevatedButton(
-                  child: const Text("Select all"),
+                margin: const EdgeInsets.all(10),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.select_all),
+                  label: const Text("Select all"),
                   onPressed: () {
                     selectedTabs = filteredTabs.where((element) => element != searchHandler.currentTab).toList();
                     setState(() { });
@@ -386,8 +483,9 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
         Expanded(
           child: Container(
             margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-            child: ElevatedButton(
-              child: Text("Delete ${selectedTabs.length} selected ${Tools.pluralize('tab', selectedTabs.length)}"),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.delete_forever),
+              label: Text("Delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}"),
               onPressed: () {
                 if(selectedTabs.isEmpty) {
                   return;
@@ -414,7 +512,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
                     const CancelButton(),
                     ElevatedButton.icon(
                       label: const Text("Delete"),
-                      icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                      icon: const Icon(Icons.delete_forever),
                       onPressed: () {
                         for(int i = 0; i < selectedTabs.length; i++) {
                           final int index = searchHandler.list.indexOf(selectedTabs[i]);
@@ -441,8 +539,9 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
         Expanded(
           child: Container(
             margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-            child: ElevatedButton(
-              child: const Text("Clear selection"),
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.border_clear),
+              label: const Text("Clear selection"),
               onPressed: () {
                 selectedTabs.clear();
                 setState(() { });
@@ -465,6 +564,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
           selectedActionsBuild(),
         ],
       ),
+      actions: filterActions(),
     );
   }
 }

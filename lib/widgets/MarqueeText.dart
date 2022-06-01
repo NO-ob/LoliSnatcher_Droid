@@ -10,6 +10,7 @@ class MarqueeText extends StatelessWidget {
     required this.text,
     required this.fontSize,
     this.fontWeight = FontWeight.normal,
+    this.fontStyle = FontStyle.normal,
     this.addedHeight = 6,
     this.color,
     this.velocity = 45.0,
@@ -24,6 +25,7 @@ class MarqueeText extends StatelessWidget {
   final String text;
   final double fontSize;
   final FontWeight fontWeight;
+  final FontStyle fontStyle;
   final double addedHeight;
   final Color? color;
   final double velocity;
@@ -58,6 +60,7 @@ class MarqueeText extends StatelessWidget {
         fontSize: fontSize,
         color: color ?? Theme.of(context).colorScheme.onBackground,
         fontWeight: fontWeight,
+        fontStyle: fontStyle,
       ),
     );
   }
@@ -75,6 +78,7 @@ class MarqueeText extends StatelessWidget {
           fontSize: fontSize,
           color: color ?? Theme.of(context).colorScheme.onBackground,
           fontWeight: fontWeight,
+          fontStyle: fontStyle,
         ),
         overflowReplacement: marquee(context),
       ),

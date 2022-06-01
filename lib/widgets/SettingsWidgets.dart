@@ -149,8 +149,7 @@ class SettingsToggle extends StatelessWidget {
     this.subtitle,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
-    this.trailingIcon = const SizedBox(),
-    this.activeColor,
+    this.trailingIcon,
   }) : super(key: key);
 
   final bool value;
@@ -159,29 +158,34 @@ class SettingsToggle extends StatelessWidget {
   final Widget? subtitle;
   final bool drawTopBorder;
   final bool drawBottomBorder;
-  final Widget trailingIcon;
-  final Color? activeColor;
+  final Widget? trailingIcon;
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: Row(children: [
-        MarqueeText(
-          text: title,
-          fontSize: 16,
+    return MergeSemantics(
+      child: ListTile(
+        title: Row(children: [
+          MarqueeText(
+            text: title,
+            fontSize: 16,
+          ),
+          trailingIcon ?? const SizedBox(width: 8),
+        ]),
+        subtitle: subtitle,
+        trailing: Switch(
+          value: value,
+          onChanged: onChanged,
         ),
-        trailingIcon
-      ]),
-      subtitle: subtitle,
-      value: value,
-      onChanged: onChanged,
-      activeColor: activeColor ?? Theme.of(context).colorScheme.secondary,
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-      )
+        onTap: () {
+          onChanged(!value);
+        },
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        )
+      ),
     );
   }
 }
@@ -195,7 +199,7 @@ class SettingsDropdown extends StatelessWidget {
     required this.title,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
-    this.trailingIcon = const SizedBox(),
+    this.trailingIcon,
     this.childBuilder,
   }) : super(key: key);
 
@@ -205,7 +209,7 @@ class SettingsDropdown extends StatelessWidget {
   final String title;
   final bool drawTopBorder;
   final bool drawBottomBorder;
-  final Widget trailingIcon;
+  final Widget? trailingIcon;
   final Widget Function(String)? childBuilder;
 
   @override
@@ -224,7 +228,6 @@ class SettingsDropdown extends StatelessWidget {
             labelText: title,
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
-          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return values.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
@@ -280,7 +283,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.title,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
-    this.trailingIcon = const SizedBox(),
+    this.trailingIcon,
   }) : super(key: key);
 
   final Booru? selected;
@@ -288,7 +291,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   final String title;
   final bool drawTopBorder;
   final bool drawBottomBorder;
-  final Widget trailingIcon;
+  final Widget? trailingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -310,7 +313,6 @@ class SettingsBooruDropdown extends StatelessWidget {
               hintText: title,
               contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
             ),
-            dropdownColor: Theme.of(context).colorScheme.surface,
             selectedItemBuilder: (BuildContext context) {
                 return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
                   return DropdownMenuItem<Booru>(
@@ -335,11 +337,11 @@ class SettingsBooruDropdown extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: isCurrent
-                  ? BoxDecoration(
-                    border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                    borderRadius: BorderRadius.circular(5),
-                  )
-                  : null,
+                    ? BoxDecoration(
+                      border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
+                      borderRadius: BorderRadius.circular(5),
+                    )
+                    : null,
                   child: Row(
                     children: <Widget>[
                       (value.type == "Favourites"
@@ -388,7 +390,7 @@ class SettingsTextInput extends StatefulWidget {
     this.numberStep = 1,
     this.numberMin = 0,
     this.numberMax = 100,
-    this.trailingIcon = const SizedBox(),
+    this.trailingIcon,
     this.onlyInput = false,
   }) : super(key: key);
 
@@ -410,7 +412,7 @@ class SettingsTextInput extends StatefulWidget {
   final double numberStep;
   final double numberMin;
   final double numberMax;
-  final Widget trailingIcon;
+  final Widget? trailingIcon;
   final bool onlyInput; 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -484,12 +486,19 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         if(widget.numberButtons && isFocused)
-          buildNumberButton(stepNumberDown, Icons.remove),
+          Container(
+            key: const Key('number-button-down'),
+            child: buildNumberButton(stepNumberDown, Icons.remove),
+          ),
         if(widget.numberButtons && isFocused)
-          buildNumberButton(stepNumberUp, Icons.add),
+          Container(
+            key: const Key('number-button-up'),
+            child: buildNumberButton(stepNumberUp, Icons.add),
+          ),
 
         if(widget.clearable && isFocused)
           IconButton(
+            key: const Key('clear-button'),
             icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               widget.controller.clear();
@@ -499,6 +508,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
         if(widget.resetText != null)
           IconButton(
+            key: const Key('reset-button'),
             icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
             onPressed: () {
               widget.controller.text = widget.resetText!();
@@ -508,6 +518,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
         isFocused
           ? IconButton(
+              key: const Key('submit-button'),
               icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
                 if(widget.onSubmitted != null) widget.onSubmitted!(widget.controller.text);
@@ -515,6 +526,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               },
             )
           : IconButton(
+              key: const Key('edit-button'),
               icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
               onPressed: () {
                 _focusNode.requestFocus();
@@ -539,13 +551,10 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
         decoration: InputDecoration(
-          fillColor: Theme.of(context).colorScheme.surface,
-          filled: true,
-          labelStyle: TextStyle(color: Theme.of(context).colorScheme.onBackground, fontSize: 18),
           labelText: widget.title,
           hintText: widget.hintText,
           errorText: widget.validator?.call(widget.controller.text),
-          contentPadding: const EdgeInsets.fromLTRB(25, 0, 15, 0),
+          contentPadding: const EdgeInsets.fromLTRB(12, 0, 15, 0),
           suffixIcon: Padding(
             padding: const EdgeInsets.only(left: 2, right: 10),
             child: buildSuffixIcons(),
@@ -629,11 +638,13 @@ class SettingsPageDialog extends StatelessWidget {
     this.title,
     this.content,
     this.actions,
+    this.fab,
   }) : super(key: key);
 
   final Widget? title;
   final Widget? content;
   final List<Widget>? actions;
+  final Widget? fab;
 
   @override
   Widget build(BuildContext context) {
@@ -642,21 +653,25 @@ class SettingsPageDialog extends StatelessWidget {
       // extendBody: true,
       // resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor!.withOpacity(0.5),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Get.back();
-          },
-        ),
+        // leading: IconButton(
+        //   icon: const Icon(Icons.arrow_back),
+        //   onPressed: () {
+        //     Get.back();
+        //   },
+        // ),
         title: title,
         actions: [
           if((actions?.length ?? 0) > 0)
             Row(
-              children: actions ?? [],
+              // add separators between actions and after the last action
+              children: actions?.map((e) => [
+                e,
+                const SizedBox(width: 8),
+              ]).expand((e) => e).toList() ?? [],
             ),
         ],
       ),
+      floatingActionButton: fab,
       body: SafeArea(
         child: content ?? Container(),
       ),

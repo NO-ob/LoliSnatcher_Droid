@@ -467,7 +467,8 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     // TODO move controls outside, to exclude them from zoom
 
     VideoDimensions? dimensions = videoController?.videoDimensions;
-    double aspectRatio = dimensions != null ? (dimensions.width / dimensions.height) : 1;
+    bool areDimensionsValid = dimensions != null && dimensions.width != 0 && dimensions.height != 0;
+    double aspectRatio = areDimensionsValid ? (dimensions.width / dimensions.height) : 16/9;
     double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
     Size childSize = Size(
       aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
@@ -487,7 +488,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,
-            childSize: childSize,
+            childSize: childSize, // areDimensionsValid ? childSize : null,
             enableRotation: false,
             basePosition: Alignment.center,
             controller: viewController,

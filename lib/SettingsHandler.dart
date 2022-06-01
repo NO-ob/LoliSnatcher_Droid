@@ -1075,7 +1075,7 @@ class SettingsHandler extends GetxController {
       Directory directory = Directory(boorusPath);
       List<FileSystemEntity> files = [];
       if(await directory.exists()) {
-        files = directory.listSync();
+        files = await directory.list().toList();
       }
 
       if (files.isNotEmpty) {
@@ -1083,7 +1083,7 @@ class SettingsHandler extends GetxController {
           if (files[i].path.contains(".json")) { // && files[i].path != 'settings.json'
             // print(files[i].toString());
             File booruFile = files[i] as File;
-            Booru booruFromFile = Booru.fromJSON(booruFile.readAsStringSync());
+            Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
             if (booruFromFile.baseURL!.contains("realbooru.com") && booruFromFile.type == "Gelbooru"){
               booruFromFile.type = "Realbooru";
               saveBooru(booruFromFile,onlySave: true);
@@ -1169,9 +1169,9 @@ class SettingsHandler extends GetxController {
     return true;
   }
 
-  bool deleteBooru(Booru booru){
+  Future<bool> deleteBooru(Booru booru) async {
     File booruFile = File("$boorusPath${booru.name}.json");
-    booruFile.deleteSync();
+    await booruFile.delete();
     if (prefBooru == booru.name){
       prefBooru = "";
       saveSettings(restate: true);
@@ -1425,7 +1425,7 @@ class SettingsHandler extends GetxController {
       checkUpdate(withMessage: false);
       isInit.value = true;
     } catch (e) {
-      print(e);
+      print('Settings Init error :: $e');
       FlashElements.showSnackbar(
         title: const Text(
           "Initialization Error!",

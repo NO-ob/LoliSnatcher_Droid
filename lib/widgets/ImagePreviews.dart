@@ -92,9 +92,7 @@ class _ImagePreviewsState extends State<ImagePreviews> {
       return Center(
         child: Column(
           children: [
-            CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary),
-            ),
+            const CircularProgressIndicator(),
             Obx(() {
               if (searchHandler.isRestored.value) {
                 return const SizedBox();

@@ -142,6 +142,7 @@ class _MainAppState extends State<MainApp> {
         isAmoled: isAmoled,
       );
 
+      // TODO fix status bar coloring when in gallery view (AND depending on theme?)
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       //   statusBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
       //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
@@ -177,10 +178,7 @@ class _MainAppState extends State<MainApp> {
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
             showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
             scrollBehavior: const CustomScrollBehavior(),
-            // theme: ThemeData(),
             theme: themeHandler.lightTheme(),
-            // TODO doesnt detect when appbar text color should change depending on the background ???
-            // darkTheme: ThemeData.dark(),
             darkTheme: themeHandler.darkTheme(),
 
             themeMode: themeMode,

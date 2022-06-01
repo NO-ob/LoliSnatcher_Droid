@@ -233,14 +233,15 @@ class SearchHandler extends GetxController {
     }
 
 
+    // reset search bool
+    isLoading.value = false;
+
     // trigger first search OR just get old filteredFetched list
     bool isNewSearch = currentFetched.isEmpty;
     // print('isNEW: $isNewSearch ${currentIndex}');
     // trigger search if there are items inside booruHandler
     if(isNewSearch) {
       runSearch();
-    } else {
-      isLoading.value = false;
     }
 
     // set current viewed index and item of the tab

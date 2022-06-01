@@ -39,8 +39,9 @@ class FlashElements {
       return;
     }
 
-    BuildContext contextToUse = context ?? Get.context!;
-    MediaQueryData mediaQueryData = MediaQuery.of(contextToUse);
+    // TODO default context can result in exception if snackbar was opened on a page that is closed on the moment of dispose
+    BuildContext contextToUse = Get.context!; // context ?? Get.context!; 
+    MediaQueryData mediaQueryData = contextToUse.mediaQuery;
 
     bool isDesktop = SettingsHandler.instance.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux;
     bool isDark = Theme.of(contextToUse).brightness == Brightness.dark;

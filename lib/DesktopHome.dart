@@ -176,7 +176,7 @@ class DesktopTagListener extends StatelessWidget {
 
     return Obx(() {
       if (searchHandler.list.isEmpty) {
-        return Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)));
+        return const Center(child: CircularProgressIndicator());
       }
 
       return Container(

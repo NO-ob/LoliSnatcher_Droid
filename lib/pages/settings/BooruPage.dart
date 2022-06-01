@@ -275,7 +275,7 @@ class _BooruPageState extends State<BooruPage> {
                           actionButtons: [
                             const CancelButton(),
                             ElevatedButton.icon(
-                              onPressed: () {
+                              onPressed: () async {
                                 // save current and select next available booru to avoid exception after deletion
                                 Booru tempSelected = selectedBooru!;
                                 if(settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
@@ -290,7 +290,7 @@ class _BooruPageState extends State<BooruPage> {
                                 // restate to avoid an exception due to changed booru list
                                 setState(() { });
 
-                                if (settingsHandler.deleteBooru(tempSelected)) {
+                                if (await settingsHandler.deleteBooru(tempSelected)) {
                                   FlashElements.showSnackbar(
                                     context: context,
                                     title: const Text(

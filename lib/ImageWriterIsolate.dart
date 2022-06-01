@@ -17,8 +17,7 @@ class ImageWriterIsolate {
       image = File(cachePath + fileName);
       await image.writeAsBytes(bytes, flush: true);
     } catch (e) {
-      print("Image Writer Exception:: cache write");
-      print(e);
+      print("Image Writer Isolate Exception :: cache write bytes :: $e");
       return null;
     }
     return image;
@@ -35,8 +34,7 @@ class ImageWriterIsolate {
         await image.readAsBytes();
       }
     } catch (e){
-      print("Image Writer Exception:: cache write");
-      print(e);
+      print("Image Writer Isolate Exception :: cache write :: $e");
       return null;
     }
     return image;
@@ -52,8 +50,7 @@ class ImageWriterIsolate {
         imageBytes = await image.readAsBytes();
       }
     } catch (e){
-      print("Image Writer Exception:: cache write");
-      print(e);
+      print("Image Writer Isolate Exception :: read bytes cache :: $e");
       return null;
     }
     return imageBytes;
@@ -81,17 +78,16 @@ class ImageWriterIsolate {
       Directory cacheDir = Directory(cacheDirPath);
       bool dirExists = await cacheDir.exists();
       if (dirExists) {
-        cacheDir.listSync(recursive: true, followLinks: false)
-          .forEach((FileSystemEntity entity) {
-            if (entity is File) {
-              fileNum++;
-              totalSize += entity.lengthSync();
-            }
-          });
+        List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
+        for (FileSystemEntity file in files) {
+          if (file is File) {
+            fileNum++;
+            totalSize += await file.length();
+          }
+        }
       }
     } catch (e) {
-      print("Image Writer Exception");
-      print(e);
+      print("Image Writer Isolate Exception :: cache stat :: $e");
     }
 
     return {

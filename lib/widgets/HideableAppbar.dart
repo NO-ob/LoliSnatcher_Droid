@@ -61,6 +61,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           elevation: 1, // set to zero to disable a shadow behind
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
+          shadowColor: Colors.black54,
           leading: IconButton(
             // to ignore icon change
             icon: const Icon(Icons.arrow_back, color: Colors.white),

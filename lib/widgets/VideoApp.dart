@@ -517,7 +517,7 @@ class _VideoAppState extends State<VideoApp> {
 
     // TODO move controls outside of chewie, to exclude them from zoom
 
-    double aspectRatio = videoController?.value.aspectRatio ?? 1.0;
+    double aspectRatio = videoController?.value.aspectRatio ?? 16/9;
     double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
     Size childSize = Size(
       aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,

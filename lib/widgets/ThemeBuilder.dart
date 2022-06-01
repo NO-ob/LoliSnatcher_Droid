@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,17 +51,17 @@ class ThemeHandler {
     isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && SchedulerBinding.instance.window.platformBrightness == Brightness.dark);
 
     Brightness primaryBrightness = ThemeData.estimateBrightnessForColor(theme.primary!);
-    onPrimaryIsDark = primaryBrightness == Brightness.dark;
+    primaryIsDark = primaryBrightness == Brightness.dark;
     Brightness accentBrightness = ThemeData.estimateBrightnessForColor(theme.accent!);
-    onAccentIsDark = accentBrightness == Brightness.dark;
+    accentIsDark = accentBrightness == Brightness.dark;
   }
 
   final ThemeItem theme;
   final ThemeMode themeMode;
   final bool isAmoled;
   late bool isDark;
-  late bool onPrimaryIsDark;
-  late bool onAccentIsDark;
+  late bool primaryIsDark;
+  late bool accentIsDark;
 
   ThemeData getTheme() {
     return isDark ? darkTheme() : lightTheme();
@@ -69,45 +71,13 @@ class ThemeHandler {
     return ThemeData.light().copyWith(
       brightness: Brightness.light,
       primaryColor: theme.primary,
-      appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme().primary,
-        foregroundColor: colorScheme().onPrimary,
-      ),
+      appBarTheme: appBarTheme(),
 
       colorScheme: colorScheme(),
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(),
       elevatedButtonTheme: elevatedButtonTheme(),
 
-      useMaterial3: true,
-      // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-    );
-  }
-
-  ThemeData darkTheme() {
-    return ThemeData.dark().copyWith(
-      scaffoldBackgroundColor: isAmoled ? Colors.black : null,
-      backgroundColor: isAmoled ? Colors.black : null,
-      canvasColor: isAmoled ? Colors.black : null,
-
-      brightness: Brightness.dark,
-      primaryColor: theme.primary,
-      appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme().primary,
-        foregroundColor: colorScheme().onPrimary,
-      ),
-      // appBarTheme: AppBarTheme(
-      //   brightness: primaryBrightness,
-      //   titleTextStyle: TextStyle(color: onPrimaryIsDark ? Colors.black : Colors.black),
-      //   toolbarTextStyle: TextStyle(color: onPrimaryIsDark ? Colors.black : Colors.black),
-      //   backgroundColor: theme.primary,
-      //   foregroundColor: onPrimaryIsDark ? Colors.black : Colors.black,
-      // ),
-
-      colorScheme: colorScheme(),
-      textTheme: textTheme(),
-      textSelectionTheme: textSelectionTheme(),
-      elevatedButtonTheme: elevatedButtonTheme(),
       useMaterial3: true,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -123,24 +93,72 @@ class ThemeHandler {
       floatingActionButtonTheme: floatingActionButtonTheme(),
       iconTheme: iconTheme(),
       inputDecorationTheme: inputDecorationTheme(),
-      // primaryIconTheme: iconTheme(),
-      // primaryTextTheme: textTheme(),
-      // primaryColorDark: colorScheme().onBackground,
-      // primaryColorLight: colorScheme().onBackground,
-      // buttonBarTheme: buttonBarTheme(),
-      // bannerTheme: bannerTheme(),
-      // cardTheme: cardTheme(),
+      primaryIconTheme: iconTheme(),
+      primaryTextTheme: textTheme(),
+      primaryColorDark: colorScheme().onBackground,
+      primaryColorLight: colorScheme().onBackground,
+      buttonBarTheme: buttonBarTheme(),
+      bannerTheme: bannerTheme(),
+      cardTheme: cardTheme(),
       pageTransitionsTheme: pageTransitionsTheme(),
-      // scrollbarTheme: scrollbarTheme(),
+      scrollbarTheme: scrollbarTheme(),
+      progressIndicatorTheme: progressIndicatorTheme(),
+      checkboxTheme: checkboxTheme(),
+      switchTheme: switchTheme(),
+    );
+  }
+
+  ThemeData darkTheme() {
+    return ThemeData.dark().copyWith(
+      brightness: Brightness.dark,
+      primaryColor: theme.primary,
+      appBarTheme: appBarTheme(),
+
+      scaffoldBackgroundColor: isAmoled ? Colors.black : null,
+      backgroundColor: isAmoled ? Colors.black : null,
+      canvasColor: isAmoled ? Colors.black : null,
+
+      colorScheme: colorScheme(),
+      textTheme: textTheme(),
+      textSelectionTheme: textSelectionTheme(),
+      elevatedButtonTheme: elevatedButtonTheme(),
+
+      useMaterial3: true,
+      // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
+
+      // TODO fill as much objects here as possible
+      // TODO maybe add custom extensions, since google added them in flutter3?
+
+      applyElevationOverlayColor: true,
+      buttonTheme: buttonTheme(),
+      cardColor: colorScheme().background,
+      // dividerColor: colorScheme().onBackground,
+      dialogBackgroundColor: colorScheme().background,
+      errorColor: colorScheme().error,
+      floatingActionButtonTheme: floatingActionButtonTheme(),
+      iconTheme: iconTheme(),
+      inputDecorationTheme: inputDecorationTheme(),
+      primaryIconTheme: iconTheme(),
+      primaryTextTheme: textTheme(),
+      primaryColorDark: colorScheme().onBackground,
+      primaryColorLight: colorScheme().onBackground,
+      buttonBarTheme: buttonBarTheme(),
+      bannerTheme: bannerTheme(),
+      cardTheme: cardTheme(),
+      pageTransitionsTheme: pageTransitionsTheme(),
+      scrollbarTheme: scrollbarTheme(),
+      progressIndicatorTheme: progressIndicatorTheme(),
+      checkboxTheme: checkboxTheme(),
+      switchTheme: switchTheme(),
     );
   }
 
   ColorScheme colorScheme() {
     return ColorScheme(
       primary: theme.primary!,
-      onPrimary: onPrimaryIsDark ? Colors.white : Colors.black,
+      onPrimary: primaryIsDark ? Colors.white : Colors.black,
       secondary: theme.accent!,
-      onSecondary: onAccentIsDark ? Colors.white : Colors.black,
+      onSecondary: accentIsDark ? Colors.white : Colors.black,
       surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
       onSurface: isDark ? Colors.white : Colors.black,
       background: isDark ? Colors.black : Colors.white,
@@ -162,15 +180,30 @@ class ThemeHandler {
   ElevatedButtonThemeData elevatedButtonTheme() => ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           primary: theme.accent!,
-          onPrimary: onAccentIsDark ? Colors.white : Colors.black,
+          onPrimary: accentIsDark ? Colors.white : Colors.black,
           onSurface: isDark ? Colors.white : Colors.black,
           textStyle: TextStyle(
-            color: onAccentIsDark ? Colors.white : Colors.black,
+            color: accentIsDark ? Colors.white : Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
+      );
+
+  AppBarTheme appBarTheme() => AppBarTheme(
+        titleTextStyle: TextStyle(
+          color: primaryIsDark ? Colors.white : Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        toolbarTextStyle: TextStyle(
+          color: primaryIsDark ? Colors.white : Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+        backgroundColor: theme.primary,
+        foregroundColor: primaryIsDark ? Colors.white : Colors.black,
       );
 
   ButtonThemeData buttonTheme() => ButtonThemeData(
@@ -181,25 +214,31 @@ class ThemeHandler {
 
   FloatingActionButtonThemeData floatingActionButtonTheme() => FloatingActionButtonThemeData(
         backgroundColor: theme.accent!,
-        foregroundColor: onAccentIsDark ? Colors.white : Colors.black,
+        foregroundColor: accentIsDark ? Colors.white : Colors.black,
         elevation: 0,
-        shape: const StadiumBorder(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       );
 
   IconThemeData iconTheme() => IconThemeData(
-        color: onPrimaryIsDark ? Colors.white : Colors.black,
+        color: colorScheme().onBackground,
         size: 24,
       );
 
   InputDecorationTheme inputDecorationTheme() => InputDecorationTheme(
-        fillColor: theme.primary,
-        filled: true,
+        fillColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
+        filled: false,
         labelStyle: TextStyle(
           color: isDark ? Colors.white : Colors.black,
           fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w500,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        hintStyle: TextStyle(
+          color: isDark ? Colors.grey[300] : Colors.grey[900],
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
+        alignLabelWithHint: false,
+        // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: theme.accent!, width: 1),
           borderRadius: BorderRadius.circular(8),
@@ -214,6 +253,14 @@ class ThemeHandler {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderSide: BorderSide(color: colorScheme().error, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: theme.accent!, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
       );
@@ -240,11 +287,98 @@ class ThemeHandler {
         builders: <TargetPlatform, PageTransitionsBuilder>{
           TargetPlatform.android: ZoomPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+          TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: ZoomPageTransitionsBuilder(),
         },
       );
 
   ScrollbarThemeData scrollbarTheme() => ScrollbarThemeData(
-        thickness: MaterialStateProperty.all<double>(2),
+        thickness: MaterialStateProperty.resolveWith((states) {
+          if (Platform.isAndroid || Platform.isIOS) {
+            return 8;
+          } else {
+            List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+            for (MaterialState state in states) {
+              if (goodStates.contains(state)) {
+                return 8;
+              }
+            }
+            return 4;
+          }
+        }),
         interactive: true,
+        thumbVisibility: MaterialStateProperty.resolveWith((states) {
+          if (Platform.isAndroid || Platform.isIOS) {
+            return true;
+          } else {
+            List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+            for (MaterialState state in states) {
+              if (goodStates.contains(state)) {
+                return true;
+              }
+            }
+            return false;
+          }
+        }),
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+          Color color = isDark ? Colors.grey[300]! : Colors.grey[900]!;
+          color = theme.accent!;
+          for (MaterialState state in states) {
+            if (goodStates.contains(state)) {
+              return color.withOpacity(0.75);
+            }
+          }
+          return color.withOpacity(0.5);
+        }),
+        radius: const Radius.circular(10),
+      );
+
+  ProgressIndicatorThemeData progressIndicatorTheme() => ProgressIndicatorThemeData(
+        color: theme.accent!,
+        circularTrackColor: Colors.transparent,
+        linearTrackColor: Colors.transparent,
+        refreshBackgroundColor: null,
+      );
+
+  CheckboxThemeData checkboxTheme() => CheckboxThemeData(
+        fillColor: MaterialStateProperty.resolveWith((states) {
+          bool isHovered = states.contains(MaterialState.hovered);
+          if (states.contains(MaterialState.selected)) {
+            Color color = theme.accent!;
+            color = isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
+            return color;
+          } else {
+            return isHovered ? Colors.grey[600] : Colors.grey;
+          }
+        }),
+        checkColor: MaterialStateProperty.all(accentIsDark ? Colors.white : Colors.black),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      );
+
+    SwitchThemeData switchTheme() => SwitchThemeData(
+        thumbColor: MaterialStateProperty.resolveWith((states) {
+          bool isHovered = states.contains(MaterialState.hovered);
+          if (states.contains(MaterialState.selected)) {
+            Color color = theme.accent!;
+            color = isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
+            return color;
+          } else {
+            return isHovered ? Colors.grey[600] : Colors.grey[500];
+          }
+        }),
+        trackColor: MaterialStateProperty.resolveWith((states) {
+          bool isHovered = states.contains(MaterialState.hovered);
+          if (states.contains(MaterialState.selected)) {
+            Color color = Color.lerp(theme.accent!, Colors.white, 0.3)!;
+            color = isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
+            return color;
+          } else {
+            return isHovered ? Colors.grey[400] : Colors.grey[300];
+          }
+        }),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
 }

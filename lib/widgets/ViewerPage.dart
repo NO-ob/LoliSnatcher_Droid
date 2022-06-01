@@ -284,7 +284,8 @@ class _ViewerPageState extends State<ViewerPage> {
       endDrawerEnableOpenDragGesture: false,
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
-          canvasColor: Theme.of(context).colorScheme.background.withOpacity(0.5), // copy existing main app theme, but make background semitransparent
+          // copy existing main app theme, but make background semitransparent
+          canvasColor: Theme.of(context).canvasColor.withOpacity(0.66),
         ),
         child: renderDrawer(),
       )
@@ -454,14 +455,12 @@ class _ViewerPageState extends State<ViewerPage> {
           "This can take some time, please wait...",
           style: TextStyle(fontSize: 16)
         ),
-        overrideLeadingIconWidget: SizedBox(
+        overrideLeadingIconWidget: const SizedBox(
           width: 50,
           height: 50,
           child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.secondary)
-            ),
+            padding: EdgeInsets.all(12),
+            child: CircularProgressIndicator(),
           )
         ),
         sideColor: Colors.yellow,

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+// import 'package:path_provider/path_provider.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -114,7 +114,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   try {
                     File file = File('${await serviceHandler.getConfigDir()}settings.json');
                     if(backupPath.isNotEmpty) {
-                      serviceHandler.writeImage(file.readAsBytesSync(), "settings", "text/json", "json", backupPath);
+                      serviceHandler.writeImage(await file.readAsBytes(), "settings", "text/json", "json", backupPath);
                       showSnackbar(context, 'Settings saved to settings.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -160,7 +160,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   try {
                     File file = File('${await serviceHandler.getConfigDir()}store.db');
                     if(backupPath.isNotEmpty) {
-                      serviceHandler.writeImage(file.readAsBytesSync(), "store", "application/x-sqlite3", "db", backupPath);
+                      serviceHandler.writeImage(await file.readAsBytes(), "store", "application/x-sqlite3", "db", backupPath);
                       showSnackbar(context, 'Database saved to store.db', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);

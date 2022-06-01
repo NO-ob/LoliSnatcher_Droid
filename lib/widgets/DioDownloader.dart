@@ -145,9 +145,9 @@ class DioLoader {
       if (filePath != null) {
         // read from cache
         final File fileToCache = File(filePath);
-        final FileStat fileStat = await fileToCache.stat();
+        final int fileSize = await fileToCache.length();
         onEvent?.call('isFromCache', null);
-        onProgress?.call(fileStat.size, fileStat.size);
+        onProgress?.call(fileSize, fileSize);
 
         if(onDoneFile != null) {
           start(null, readFileFromCache, (dynamic file) async {
@@ -232,9 +232,9 @@ class DioLoader {
       if (filePath != null) {
         // read from cache
         final File file = File(filePath);
-        final FileStat fileStat = await file.stat();
+        final int fileSize = await file.length();
         onEvent?.call('isFromCache', null);
-        onProgress?.call(fileStat.size, fileStat.size);
+        onProgress?.call(fileSize, fileSize);
         onEvent?.call('loaded', null);
 
         if (onDoneFile != null) {
