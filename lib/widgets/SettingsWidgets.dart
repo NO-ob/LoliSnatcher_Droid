@@ -218,6 +218,10 @@ class SettingsDropdown<T> extends StatelessWidget {
     return itemTitleBuilder?.call(value) ?? value.toString();
   }
 
+  Widget getItemWidget(T value) {
+    return itemBuilder?.call(value) ?? Text(getTitle(value));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -240,7 +244,7 @@ class SettingsDropdown<T> extends StatelessWidget {
                 value: item,
                 child: Row(
                   children: <Widget>[
-                    itemBuilder?.call(item) ?? Text(getTitle(item)),
+                    getItemWidget(item),
                   ],
                 ),
               );
@@ -261,7 +265,7 @@ class SettingsDropdown<T> extends StatelessWidget {
                   : null,
                 child: Row(
                   children: [
-                    itemBuilder?.call(item) ?? Text(getTitle(item), style: TextStyle(color: Theme.of(context).colorScheme.onSurface))
+                    getItemWidget(item),
                   ]
                 ),
               ),
@@ -284,7 +288,7 @@ class SettingsDropdown<T> extends StatelessWidget {
 class SettingsBooruDropdown extends StatelessWidget {
   const SettingsBooruDropdown({
     Key? key,
-    required this.selected,
+    required this.value,
     required this.onChanged,
     required this.title,
     this.drawTopBorder = false,
@@ -292,7 +296,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.trailingIcon,
   }) : super(key: key);
 
-  final Booru? selected;
+  final Booru value;
   final void Function(Booru?)? onChanged;
   final String title;
   final bool drawTopBorder;
@@ -301,77 +305,28 @@ class SettingsBooruDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Obx(() {
-          List<Booru> boorus = SettingsHandler.instance.booruList;
-          Booru? newSelected = boorus.contains(selected) ? selected : boorus.first;
+    return Obx(() {
+      List<Booru> boorus = SettingsHandler.instance.booruList;
+      Booru newValue = boorus.contains(value) ? value : boorus.first;
 
-          return DropdownButtonFormField<Booru>(
-            value: newSelected,
-            icon: const Icon(Icons.arrow_drop_down),
-            onChanged: onChanged,
-            menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-            isExpanded: true,
-            decoration: InputDecoration(
-              labelText: title,
-              hintText: title,
-              contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-            ),
-            selectedItemBuilder: (BuildContext context) {
-                return boorus.map<DropdownMenuItem<Booru>>((Booru value) {
-                  return DropdownMenuItem<Booru>(
-                    value: value,
-                    child: Row(
-                      children: <Widget>[
-                        (value.type == "Favourites"
-                            ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                            : CachedFavicon(value.faviconURL!)
-                        ),
-                        Text(" ${value.name!}"),
-                      ],
-                    ),
-                  );
-                }).toList();
-              },
-            items: boorus.map<DropdownMenuItem<Booru>>((Booru value){
-              bool isCurrent = value == newSelected;
-
-              return DropdownMenuItem<Booru>(
-                value: value,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: isCurrent
-                    ? BoxDecoration(
-                      border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                      borderRadius: BorderRadius.circular(5),
-                    )
-                    : null,
-                  child: Row(
-                    children: <Widget>[
-                      (value.type == "Favourites"
-                          ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                          : CachedFavicon(value.faviconURL!)
-                      ),
-                      Text(" ${value.name!}", style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
+      return SettingsDropdown(
+        value: newValue,
+        items: boorus,
+        onChanged: onChanged,
+        title: title,
+        itemBuilder: (Booru booru) {
+          return Row(
+            children: <Widget>[
+              (booru.type == "Favourites"
+                  ? const Icon(Icons.favorite, color: Colors.red, size: 18)
+                  : CachedFavicon(booru.faviconURL!)
+              ),
+              Text(" ${booru.name!}"),
+            ],
           );
-        })
-      ),
-      trailing: trailingIcon,
-      dense: false,
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-      )
-    );
+        },
+      );
+    });
   }
 }
 

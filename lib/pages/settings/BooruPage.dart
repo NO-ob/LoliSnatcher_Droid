@@ -137,7 +137,7 @@ class _BooruPageState extends State<BooruPage> {
 
                 const SettingsButton(name: '', enabled: false),
                 SettingsBooruDropdown(
-                  selected: selectedBooru,
+                  value: selectedBooru ?? settingsHandler.booruList[0],
                   onChanged: (Booru? newValue) {
                     final bool isNewValuePresent = settingsHandler.booruList.contains(newValue);
                     setState((){

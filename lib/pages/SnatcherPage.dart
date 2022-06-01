@@ -28,7 +28,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   final snatcherAmountController = TextEditingController();
   final snatcherSleepController = TextEditingController();
 
-  late Booru? selectedBooru;
+  late Booru selectedBooru;
 
   @override
   void initState() {
@@ -87,10 +87,10 @@ class _SnatcherPageState extends State<SnatcherPage> {
               numberMax: double.infinity,
             ),
             SettingsBooruDropdown(
-              selected: selectedBooru,
+              value: selectedBooru,
               onChanged: (Booru? newValue) {
                 setState(() {
-                  selectedBooru = newValue;
+                  selectedBooru = newValue!;
                 });
               },
               title: 'Booru',
@@ -122,7 +122,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   snatcherTagsController.text,
                   snatcherAmountController.text,
                   int.parse(snatcherSleepController.text),
-                  selectedBooru!,
+                  selectedBooru,
                 );
                 Get.back();
                 //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
