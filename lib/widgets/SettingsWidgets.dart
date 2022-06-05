@@ -617,7 +617,7 @@ class SettingsPageDialog extends StatelessWidget {
         // leading: IconButton(
         //   icon: const Icon(Icons.arrow_back),
         //   onPressed: () {
-        //     Get.back();
+        //     Navigator.of(context).pop();
         //   },
         // ),
         title: title,

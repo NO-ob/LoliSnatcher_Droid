@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/NavigationHandler.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/DBHandler.dart';
@@ -1335,7 +1336,7 @@ class SettingsHandler extends GetxController {
       bool isFromStore = EnvironmentConfig.isFromStore;
 
       showDialog(
-        context: Get.context!,
+        context: NavigationHandler.instance.navigatorKey.currentContext!,
         builder: (BuildContext context) {
           return SettingsDialog(
             title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),

@@ -16,6 +16,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/NavigationHandler.dart';
 import 'package:LoliSnatcher/DesktopHome.dart';
 import 'package:LoliSnatcher/MobileHome.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
@@ -57,6 +58,7 @@ class _MainAppState extends State<MainApp> {
   late final SearchHandler searchHandler;
   late final SnatchHandler snatchHandler;
   late final ViewerHandler viewerHandler;
+  late final NavigationHandler navigationHandler;
   late final TagHandler tagHandler;
   int maxFps = 60;
 
@@ -68,6 +70,7 @@ class _MainAppState extends State<MainApp> {
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
+    navigationHandler = Get.put(NavigationHandler(), permanent: true);
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {
@@ -115,6 +118,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
+    Get.delete<NavigationHandler>();
     Get.delete<ViewerHandler>();
     Get.delete<SnatchHandler>();
     Get.delete<SearchHandler>();
@@ -173,7 +177,7 @@ class _MainAppState extends State<MainApp> {
           width: 110,
           height: 80,
           align: Alignment.centerLeft,
-          child: GetMaterialApp(
+          child: MaterialApp(
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
             showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
@@ -182,7 +186,7 @@ class _MainAppState extends State<MainApp> {
             darkTheme: themeHandler.darkTheme(),
 
             themeMode: themeMode,
-            navigatorKey: Get.key,
+            navigatorKey: navigationHandler.navigatorKey,
             home: const Preloader(),
           ),
         ),

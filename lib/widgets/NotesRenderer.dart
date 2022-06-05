@@ -54,8 +54,8 @@ class _NotesRendererState extends State<NotesRenderer> {
   void initState() {
     super.initState();
 
-    screenWidth = Get.width;
-    screenHeight = Get.height;
+    screenWidth = WidgetsBinding.instance.window.physicalSize.width;
+    screenHeight = WidgetsBinding.instance.window.physicalSize.height;
     screenRatio = screenWidth / screenHeight;
 
     item = searchHandler.viewedItem.value;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
+import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
@@ -85,16 +85,37 @@ class _TabBoxMoveDialogState extends State<TabBoxMoveDialog> {
           onTap: () async {
             final int? enteredIndex = int.tryParse(indexController.text);
             if(enteredIndex == null) {
-              Get.snackbar("Error", "Invalid tab number - Invalid input", snackPosition: SnackPosition.BOTTOM);
-              return;
+              return await FlashElements.showSnackbar(
+                title: const Text("Invalid Tab Number"),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const <Widget>[
+                    Text("Invalid Input"),
+                    SizedBox(height: 10),
+                    Text("Please enter a valid tab number"),
+                  ],
+                ),
+              );
             } else {
               if(enteredIndex < 0 || enteredIndex > searchHandler.total) {
-                Get.snackbar("Error", "Invalid tab number - Out of range", snackPosition: SnackPosition.BOTTOM);
-                return;
+                return await FlashElements.showSnackbar(
+                  title: const Text("Invalid Tab Number"),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const <Widget>[
+                      Text("Out of range"),
+                      SizedBox(height: 10),
+                      Text("Please enter a valid tab number"),
+                    ],
+                  ),
+                );
               }
 
               searchHandler.moveTab(widget.index, enteredIndex - 1);
+
+              // close move dialog
               Navigator.of(context).pop(true);
+              // close tab options dialog
               Navigator.of(context).pop(true);
             }
           },

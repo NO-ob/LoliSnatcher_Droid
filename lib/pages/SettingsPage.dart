@@ -46,7 +46,7 @@ class SettingsPage extends StatelessWidget {
               icon: const Icon(Icons.arrow_back),
               onPressed: () async {
                 if (await _onWillPop()) {
-                  Get.back();
+                  Navigator.of(context).pop();
                 }
               }),
         ),

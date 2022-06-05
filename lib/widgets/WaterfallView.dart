@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
@@ -13,6 +14,7 @@ import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/widgets/ViewerPage.dart';
 import 'package:LoliSnatcher/widgets/GridBuilder.dart';
 import 'package:LoliSnatcher/widgets/StaggeredBuilder.dart';
+import 'package:LoliSnatcher/widgets/ShimmerBuilder.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/WaterfallErrorButtons.dart';
 
@@ -305,7 +307,14 @@ class _WaterfallViewState extends State<WaterfallView> {
                 child: DesktopScrollWrap(
                   controller: searchHandler.gridScrollController,
                   // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
-                  child: isStaggered ? StaggeredBuilder(onTap) : GridBuilder(onTap),
+                  child: Obx((){
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      child: (searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty)
+                      ? const ShiverList()
+                      : (isStaggered ? StaggeredBuilder(onTap) : GridBuilder(onTap)),
+                    );
+                  }),
                 ),
               ),
             ),

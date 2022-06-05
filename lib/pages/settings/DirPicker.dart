@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/CancelButton.dart';
@@ -44,13 +43,13 @@ class _DirPickerState extends State<DirPicker> {
               ElevatedButton(
                 child: const Text('Yes'),
                 onPressed: () {
-                  Get.back(result: true);
+                  Navigator.of(context).pop(true);
                 },
               ),
               ElevatedButton(
                 child: const Text('No'),
                 onPressed: () {
-                  Get.back(result: false);
+                  Navigator.of(context).pop(false);
                 },
               ),
             ],
@@ -213,7 +212,7 @@ class _DirPickerState extends State<DirPicker> {
                 heroTag: null,
                 onPressed: () {
                   if (isWritable()){
-                    Get.back(result: "$path/");
+                    Navigator.of(context).pop('$path/');
                   }
                 },
                 backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -243,7 +242,7 @@ class _DirPickerState extends State<DirPicker> {
                           child: const Text('Create'),
                           onPressed: () {
                             mkdir();
-                            Get.back();
+                            Navigator.of(context).pop();
                           },
                         ),
                       ],

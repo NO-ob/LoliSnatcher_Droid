@@ -1,7 +1,6 @@
 import 'dart:core';
 import 'dart:io';
 
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
@@ -136,7 +135,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
               if (await _onWillPop()) {
-                Get.back();
+                Navigator.of(context).pop();
               }
             },
           ),

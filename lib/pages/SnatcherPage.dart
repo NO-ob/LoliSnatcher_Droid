@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
@@ -124,8 +123,10 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   int.parse(snatcherSleepController.text),
                   selectedBooru,
                 );
-                Get.back();
-                //Get.off(SnatcherProgressPage(snatcherTagsController.text,snatcherAmountController.text,snatcherTimeoutController.text));
+
+
+                Navigator.of(context).pop();
+                // TODO make a page which shows progress of all files + list of previous downloads
               },
             ),
           ],

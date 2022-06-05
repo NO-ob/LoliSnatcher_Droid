@@ -186,7 +186,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                                 height: 30,
                                 child: FloatingActionButton(
                                   onPressed: () {
-                                    Get.back();
+                                    Navigator.of(context).pop();
                                   },
                                   child: const Icon(Icons.fullscreen_exit),
                                 ),

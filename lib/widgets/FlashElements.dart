@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/NavigationHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 enum Positions {
@@ -14,8 +14,8 @@ enum Positions {
 }
 
 class FlashElements {
-  static showSnackbar({
-    BuildContext? context, // current build context, if no given - get it from Getx
+  static Future<void> showSnackbar({
+    BuildContext? context, // current build context, if no given - get it from navigatorKey
     required Widget title, // title widget - required
     Widget content = const SizedBox(height: 20),
     Color sideColor = Colors.red, // color of the strip on the left side
@@ -32,58 +32,64 @@ class FlashElements {
   }) {
     bool inViewer = ViewerHandler.instance.inViewer.value;
     if(!allowInViewer && inViewer) {
-      return;
+      return Future.value();
     }
 
-    if(context == null && Get.context == null) {
-      return;
+    if(context == null && NavigationHandler.instance.navigatorKey.currentContext == null) {
+      return Future.value();
     }
 
-    // TODO default context can result in exception if snackbar was opened on a page that is closed on the moment of dispose
-    BuildContext contextToUse = Get.context!; // context ?? Get.context!; 
-    MediaQueryData mediaQueryData = contextToUse.mediaQuery;
+    BuildContext contextToUse = context ?? NavigationHandler.instance.navigatorKey.currentContext!;
+    // TODO can this cause an exception? maybe change to WidgetsBinding ?
+    MediaQueryData mediaQueryData = MediaQuery.of(contextToUse);
+    // Get theme here instead of inside the dialogs themselves, since the dialog could close after the page is changed
+    // therefore causing an exception, because this context is not available anymore
+    ThemeData themeData = Theme.of(contextToUse);
 
     bool isDesktop = SettingsHandler.instance.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux;
-    bool isDark = Theme.of(contextToUse).brightness == Brightness.dark;
+    bool isDark = themeData.brightness == Brightness.dark;
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
 
     if(asDialog) {
-      showDialog(context: contextToUse, builder: (context) {
-        return SettingsDialog(
-          titlePadding: const EdgeInsets.all(0),
-          buttonPadding: const EdgeInsets.all(0),
-          contentPadding: const EdgeInsets.all(0),
-          insetPadding: const EdgeInsets.all(0),
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-          content: DefaultTextStyle(
-            style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              child: FlashBar(
-                title: title,
-                content: content,
-                indicatorColor: sideColor,
-                icon: overrideLeadingIconWidget ?? Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Icon(
-                    leadingIcon,
-                    color: leadingIconColor ?? Theme.of(contextToUse).colorScheme.onBackground,
-                    size: leadingIconSize,
-                  )
+      return showDialog(
+        context: contextToUse,
+        builder: (context) {
+          return SettingsDialog(
+            titlePadding: const EdgeInsets.all(0),
+            buttonPadding: const EdgeInsets.all(0),
+            contentPadding: const EdgeInsets.all(0),
+            insetPadding: const EdgeInsets.all(0),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            content: DefaultTextStyle(
+              style: TextStyle(color: themeData.colorScheme.onBackground),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.all(Radius.circular(8)),
+                child: FlashBar(
+                  title: title,
+                  content: content,
+                  indicatorColor: sideColor,
+                  icon: overrideLeadingIconWidget ?? Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(
+                      leadingIcon,
+                      color: leadingIconColor ?? themeData.colorScheme.onBackground,
+                      size: leadingIconSize,
+                    )
+                  ),
+                  shouldIconPulse: shouldLeadingPulse,
                 ),
-                shouldIconPulse: shouldLeadingPulse,
               ),
             ),
-          ),
-        );
-      });
-      return;
+          );
+        },
+      );
     }
 
-    showFlash(
+    return showFlash(
       context: contextToUse,
       duration: duration,
+      persistent: true, // true - toast is not a part of navigation tree
       builder: (_, controller) {
         return Flash(
           controller: controller,
@@ -100,13 +106,13 @@ class FlashElements {
           ),
           borderColor: isDark ? Colors.grey[800] : Colors.grey[300],
           boxShadows: kElevationToShadow[8],
-          backgroundColor: Theme.of(contextToUse).colorScheme.background,
+          backgroundColor: themeData.colorScheme.background,
           onTap: tapToClose ? () => controller.dismiss() : null,
           forwardAnimationCurve: Curves.linearToEaseOut,
           reverseAnimationCurve: Curves.easeOutCirc,
           horizontalDismissDirection: HorizontalDismissDirection.horizontal,
           child: DefaultTextStyle(
-            style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground),
+            style: TextStyle(color: themeData.colorScheme.onBackground),
             child: FlashBar(
               title: title,
               content: content,
@@ -115,23 +121,23 @@ class FlashElements {
                 padding: const EdgeInsets.all(12),
                 child: Icon(
                   leadingIcon,
-                  color: leadingIconColor ?? Theme.of(contextToUse).colorScheme.onBackground,
+                  color: leadingIconColor ?? themeData.colorScheme.onBackground,
                   size: leadingIconSize,
                 )
               ),
               shouldIconPulse: shouldLeadingPulse,
               primaryAction: IconButton(
                 onPressed: () => controller.dismiss(),
-                icon: Icon(Icons.close, color: Theme.of(contextToUse).colorScheme.onBackground),
+                icon: Icon(Icons.close, color: themeData.colorScheme.onBackground),
               ),
               // actions: <Widget>[
               //   TextButton(
               //     onPressed: () => controller.dismiss('Yes'),
-              //     child: Text(inViewer.toString(), style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground))
+              //     child: Text(inViewer.toString(), style: TextStyle(color: theme.colorScheme.onBackground))
               //   ),
               //   TextButton(
               //     onPressed: () => controller.dismiss('No'),
-              //     child: Text('NO', style: TextStyle(color: Theme.of(contextToUse).colorScheme.onBackground))
+              //     child: Text('NO', style: TextStyle(color: theme.colorScheme.onBackground))
               //   ),
               // ],
             ),
