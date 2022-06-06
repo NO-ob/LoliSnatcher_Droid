@@ -8,7 +8,7 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
-import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/widgets/ActiveTitle.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/PageNumberDialog.dart';

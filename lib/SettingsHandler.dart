@@ -8,11 +8,11 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/NavigationHandler.dart';
-import 'package:LoliSnatcher/ThemeItem.dart';
+import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/handlers/DBHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';

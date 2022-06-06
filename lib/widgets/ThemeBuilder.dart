@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ThemeItem.dart';
+import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 
 class ThemeBuilder extends StatelessWidget {
   const ThemeBuilder({Key? key, required this.child}) : super(key: key);

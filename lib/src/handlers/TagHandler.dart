@@ -9,7 +9,7 @@ import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
 import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
 // import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
 
 class UntypedCollection {

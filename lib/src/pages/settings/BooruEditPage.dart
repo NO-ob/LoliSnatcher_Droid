@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';

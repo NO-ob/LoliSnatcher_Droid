@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/ImageWriter.dart';
+import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';

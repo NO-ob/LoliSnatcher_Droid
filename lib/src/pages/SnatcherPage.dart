@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';

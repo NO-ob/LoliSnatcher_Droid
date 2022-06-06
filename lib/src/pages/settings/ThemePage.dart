@@ -8,8 +8,8 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/ThemeItem.dart';
-import 'package:LoliSnatcher/ImageWriter.dart';
+import 'package:LoliSnatcher/src/data/ThemeItem.dart';
+import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/utils/debouncer.dart';
 

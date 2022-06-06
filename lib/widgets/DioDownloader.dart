@@ -5,8 +5,8 @@ import 'dart:typed_data';
 // import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/ImageWriterIsolate.dart';
+import 'package:LoliSnatcher/src/services/ImageWriter.dart';
+import 'package:LoliSnatcher/src/services/ImageWriterIsolate.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 
 class DioLoader {

@@ -14,7 +14,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/src/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/src/pages/SnatcherPage.dart';
-import 'package:LoliSnatcher/getPerms.dart';
+import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/ResizableSplitView.dart';
