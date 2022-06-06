@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 
 class ThemeBuilder extends StatelessWidget {

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 

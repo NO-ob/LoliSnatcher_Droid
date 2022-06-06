@@ -4,9 +4,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/NoteItem.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';

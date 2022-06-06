@@ -2,8 +2,8 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class AboutPage extends StatelessWidget {

@@ -1,5 +1,5 @@
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:flutter/material.dart';
 
 class ShiverList extends StatelessWidget {

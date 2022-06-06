@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:waterfall_flow/waterfall_flow.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/widgets/ThumbCardBuild.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 

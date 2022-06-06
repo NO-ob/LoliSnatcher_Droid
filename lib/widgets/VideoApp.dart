@@ -12,12 +12,12 @@ import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 import 'package:LoliSnatcher/widgets/LoliControls.dart';
@@ -27,7 +27,7 @@ class VideoApp extends StatefulWidget {
   const VideoApp(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
   final BooruItem booruItem;
   final int index;
-  final SearchGlobal searchGlobal;
+  final SearchTab searchGlobal;
   final bool enableFullscreen;
 
   @override

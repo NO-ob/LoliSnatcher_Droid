@@ -5,10 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
@@ -22,7 +22,7 @@ import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 ///
 class DesktopImageListener extends StatefulWidget {
   const DesktopImageListener(this.searchGlobal, {Key? key}) : super(key: key);
-  final SearchGlobal searchGlobal;
+  final SearchTab searchGlobal;
 
   @override
   State<DesktopImageListener> createState() => _DesktopImageListenerState();

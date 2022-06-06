@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/ThumbBuild.dart';
@@ -14,7 +14,7 @@ class ThumbCardBuild extends StatelessWidget {
   ThumbCardBuild(this.index, this.columnCount, this.onTap, this.tab, {Key? key}) : super(key: key);
   final int index;
   final int columnCount;
-  final SearchGlobal tab;
+  final SearchTab tab;
   final void Function(int) onTap;
 
   final SettingsHandler settingsHandler = SettingsHandler.instance;

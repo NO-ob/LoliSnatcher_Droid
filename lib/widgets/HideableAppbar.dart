@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 
 class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   const HideableAppBar(this.title, this.actions, {Key? key}) : super(key: key);

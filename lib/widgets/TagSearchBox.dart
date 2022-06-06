@@ -6,13 +6,13 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/widgets/TagChip.dart';
 import 'package:LoliSnatcher/src/boorus/MergebooruHandler.dart';
-import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
 import 'package:LoliSnatcher/src/utils/debouncer.dart';
 
 // TODO

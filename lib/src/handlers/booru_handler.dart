@@ -9,9 +9,9 @@ import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/CommentItem.dart';
 import 'package:LoliSnatcher/src/data/NoteItem.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 
 abstract class BooruHandler {
   // pagenum = -1 as "didn't load anything yet" state

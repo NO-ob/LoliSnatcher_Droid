@@ -8,12 +8,12 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 
 
@@ -28,19 +28,19 @@ class SearchHandler extends GetxController {
   static SearchHandler get instance => Get.find<SearchHandler>();
 
   // search globals list
-  RxList<SearchGlobal> list = RxList<SearchGlobal>([]);
+  RxList<SearchTab> list = RxList<SearchTab>([]);
   // current tab index
   Rx<int> index = 0.obs;
 
   // add new tab by the given search string
   void addTabByString(String searchText, {bool switchToNew = false, Booru? customBooru}) {
     // Add after the current tab
-    // list.insert(currentIndex + 1, SearchGlobal(currentBooru.obs, null, searchText));
+    // list.insert(currentIndex + 1, SearchTab(currentBooru.obs, null, searchText));
 
     Rx<Booru> booru = (customBooru ?? currentBooru).obs;
 
     // Add new tab to the end
-    SearchGlobal newTab = SearchGlobal(booru, null, searchText);
+    SearchTab newTab = SearchTab(booru, null, searchText);
     list.add(newTab);
 
     // record search query to db
@@ -105,7 +105,7 @@ class SearchHandler extends GetxController {
       final SettingsHandler settingsHandler = SettingsHandler.instance;
       searchTextController.text = settingsHandler.defTags;
 
-      SearchGlobal newTab = SearchGlobal(currentBooru.obs, null, settingsHandler.defTags);
+      SearchTab newTab = SearchTab(currentBooru.obs, null, settingsHandler.defTags);
       list[0] = newTab;
       changeTabIndex(0);
     }
@@ -124,7 +124,7 @@ class SearchHandler extends GetxController {
     if (fromIndex < toIndex) {
       toIndex -= 1;
     }
-    final SearchGlobal tab = list[fromIndex];
+    final SearchTab tab = list[fromIndex];
     list.removeAt(fromIndex);
     list.insert(toIndex, tab);
 
@@ -144,14 +144,14 @@ class SearchHandler extends GetxController {
     } 
   }
 
-  SearchGlobal? getTabByIndex(int index) {
+  SearchTab? getTabByIndex(int index) {
     if(index < 0 || index >= total) {
       return null;
     }
     return list[index];
   }
 
-  int getTabIndex(SearchGlobal tab) {
+  int getTabIndex(SearchTab tab) {
     return list.indexOf(tab);
   }
 
@@ -252,7 +252,7 @@ class SearchHandler extends GetxController {
 
   // recreate current tab with custom starting page number
   void changeCurrentTabPageNumber(int newPageNum) {
-    SearchGlobal newTab = SearchGlobal(
+    SearchTab newTab = SearchTab(
       currentBooru.obs,
       currentTab.secondaryBoorus,
       currentTab.tags,
@@ -287,7 +287,7 @@ class SearchHandler extends GetxController {
 
   int get currentIndex => index.value;
   int get total => list.length;
-  SearchGlobal get currentTab => list[currentIndex];
+  SearchTab get currentTab => list[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
@@ -353,7 +353,7 @@ class SearchHandler extends GetxController {
     // set new tab data
     if(list.isEmpty) {
       if(settingsHandler.booruList.isNotEmpty) {
-        SearchGlobal newTab = SearchGlobal(
+        SearchTab newTab = SearchTab(
           settingsHandler.booruList[0].obs,
           settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
           text
@@ -361,7 +361,7 @@ class SearchHandler extends GetxController {
         list.add(newTab);
       }
     } else {
-      SearchGlobal newTab = SearchGlobal(
+      SearchTab newTab = SearchTab(
         (newBooru ?? currentBooru).obs,
         settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
         text
@@ -395,7 +395,7 @@ class SearchHandler extends GetxController {
         : secondaryBoorus.obs)
       : null;
 
-    SearchGlobal newTab = SearchGlobal(currentBooru.obs, secondary, currentTab.tags);
+    SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
     list[currentIndex] = newTab;
 
     // run search
@@ -531,7 +531,7 @@ class SearchHandler extends GetxController {
   Future<void> restoreTabs() async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<String> result = await settingsHandler.dbHandler.getTabRestore();
-    List<SearchGlobal> restoredGlobals = [];
+    List<SearchTab> restoredGlobals = [];
 
     bool foundBrokenItem = false;
     List<String> brokenItems = [];
@@ -547,12 +547,12 @@ class SearchHandler extends GetxController {
           // find booru by name and create searchglobal with given tags
           Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
           if(findBooru.name != null) {
-            SearchGlobal newTab = SearchGlobal(findBooru.obs, null, booruAndTags[1]);
+            SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
           } else {
             foundBrokenItem = true;
             brokenItems.add('${booruAndTags[0]}: ${booruAndTags[1]}');
-            SearchGlobal newTab = SearchGlobal(settingsHandler.booruList[0].obs, null, booruAndTags[1]);
+            SearchTab newTab = SearchTab(settingsHandler.booruList[0].obs, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
           }
 
@@ -607,7 +607,7 @@ class SearchHandler extends GetxController {
         defaultBooru = settingsHandler.booruList[0];
       }
       if(defaultBooru.type != null) {
-        SearchGlobal newTab = SearchGlobal(defaultBooru.obs, null, settingsHandler.defTags);
+        SearchTab newTab = SearchTab(defaultBooru.obs, null, settingsHandler.defTags);
         list.add(newTab);
         changeTabIndex(0);
       }
@@ -620,7 +620,7 @@ class SearchHandler extends GetxController {
   void mergeTabs(String tabStr) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<List<String>> splitInput = decodeBackupString(tabStr);
-    List<SearchGlobal> restoredGlobals = [];
+    List<SearchTab> restoredGlobals = [];
     for (List<String> booruAndTags in splitInput) {
       // check for parsing errors
       bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
@@ -628,7 +628,7 @@ class SearchHandler extends GetxController {
         // find booru by name and create searchglobal with given tags
         Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
         if(findBooru.name != null) {
-          SearchGlobal newTab = SearchGlobal(findBooru.obs, null, booruAndTags[1]);
+          SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
           // add only if there are not already the same tab in the list and booru is available on this device
           if(list.indexWhere((tab) => tab.selectedBooru.value.name == newTab.selectedBooru.value.name && tab.tags == newTab.tags) == -1) {
             restoredGlobals.add(newTab);
@@ -649,7 +649,7 @@ class SearchHandler extends GetxController {
   void replaceTabs(String tabStr) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<List<String>> splitInput = decodeBackupString(tabStr);
-    List<SearchGlobal> restoredGlobals = [];
+    List<SearchTab> restoredGlobals = [];
     int newIndex = 0;
 
     // reset current tab index to avoid exceptions when tab list length is different
@@ -662,7 +662,7 @@ class SearchHandler extends GetxController {
         // find booru by name and create searchglobal with given tags
         Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
         if(findBooru.name != null) {
-          SearchGlobal newTab = SearchGlobal(findBooru.obs, null, booruAndTags[1]);
+          SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
           restoredGlobals.add(newTab);
 
           if(booruAndTags[2] == 'selected') {
@@ -690,7 +690,7 @@ class SearchHandler extends GetxController {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     // if there are only one tab - check that its not with default booru and tags
     // if there are more than 1 tab or check return false - start backup
-    List<SearchGlobal> tabList = list;
+    List<SearchTab> tabList = list;
     int tabIndex = currentIndex;
     bool onlyDefaultTab = tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
     if(!onlyDefaultTab && settingsHandler.booruList.isNotEmpty) {
@@ -723,7 +723,7 @@ class SearchHandler extends GetxController {
 }
 
 
-class SearchGlobal {
+class SearchTab {
   // unique id to use for booru controller
   String id = uuid.v4();
   String tags = "";
@@ -743,7 +743,7 @@ class SearchGlobal {
   ).obs;
   RxList<int> selected = RxList<int>.from([]);
 
-  SearchGlobal(this.selectedBooru, this.secondaryBoorus, this.tags) {
+  SearchTab(this.selectedBooru, this.secondaryBoorus, this.tags) {
     List<Booru> tempBooruList = [];
     tempBooruList.add(selectedBooru.value);
     if(secondaryBoorus != null) {

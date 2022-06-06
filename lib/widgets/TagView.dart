@@ -7,10 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
@@ -20,7 +20,7 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/CommentsDialog.dart';
 import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
 
 class TagView extends StatefulWidget {
   const TagView({Key? key}) : super(key: key);

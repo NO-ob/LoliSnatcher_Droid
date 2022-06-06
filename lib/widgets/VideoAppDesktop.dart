@@ -12,9 +12,9 @@ import 'package:dart_vlc/dart_vlc.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';
 
@@ -22,7 +22,7 @@ class VideoAppDesktop extends StatefulWidget {
   const VideoAppDesktop(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
   final BooruItem booruItem;
   final int index;
-  final SearchGlobal searchGlobal;
+  final SearchTab searchGlobal;
 
   @override
   State<VideoAppDesktop> createState() => _VideoAppDesktopState();

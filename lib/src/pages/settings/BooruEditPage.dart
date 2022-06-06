@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/services/getPerms.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/boorus/HydrusHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';

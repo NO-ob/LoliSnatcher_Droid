@@ -10,15 +10,15 @@ import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/src/services/getPerms.dart';
 import 'package:LoliSnatcher/src/utils/timed_progress_controller.dart';
-import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
+import 'package:LoliSnatcher/widgets/RestartableProgressIndicator.dart';
 
 
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
@@ -194,7 +194,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     // print(fileURL);
                     // print('isVideo: '+isVideo.toString());
 
-                    SearchGlobal tab = searchHandler.currentTab;
+                    SearchTab tab = searchHandler.currentTab;
 
                     late Widget itemWidget;
                     if(isImage) {
@@ -418,8 +418,7 @@ class _GalleryPageState extends State<GalleryPage> {
         sideColor: Colors.green,
       );
     } else if (Platform.isAndroid) {
-      ServiceHandler serviceHandler = ServiceHandler();
-      serviceHandler.loadShareTextIntent(text);
+      ServiceHandler.loadShareTextIntent(text);
     }
   }
   void shareHydrusAction(BooruItem item) {
@@ -434,7 +433,6 @@ class _GalleryPageState extends State<GalleryPage> {
   void shareFileAction() async {
     BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
     String? path = await imageWriter.getCachePath(item.fileURL, 'media');
-    ServiceHandler serviceHandler = ServiceHandler();
 
     // TODO rewrite to DioDownloader
     // TODO delete from cache after share window closes
@@ -442,7 +440,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
     if(path != null) {
       // File is already in cache - share from there
-      await serviceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -471,7 +469,7 @@ class _GalleryPageState extends State<GalleryPage> {
       final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media');
       if(cacheFile != null) {
         path = cacheFile.path;
-        await serviceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
             context: context,

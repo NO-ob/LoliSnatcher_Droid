@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:flutter/cupertino.dart';
@@ -53,7 +53,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
     }
   }
 
-  Widget buildRow(SearchGlobal tab) {
+  Widget buildRow(SearchTab tab) {
     bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
 
     // print(value.tags);
@@ -119,7 +119,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
                   scrollDirection: Axis.horizontal,
                   itemCount: searchHandler.list.length,
                   itemBuilder: (context, index) {
-                    final SearchGlobal tab = searchHandler.list[index];
+                    final SearchTab tab = searchHandler.list[index];
 
                     return AutoScrollTag(
                       highlightColor: Colors.red,
@@ -148,13 +148,13 @@ class _DesktopTabsState extends State<DesktopTabs> {
               icon: const Icon(Icons.add),
             ),
             const SizedBox(width: 3),
-            PopupMenuButton<SearchGlobal>(
-              onSelected: (SearchGlobal tab) {
+            PopupMenuButton<SearchTab>(
+              onSelected: (SearchTab tab) {
                 searchHandler.changeTabIndex(searchHandler.list.indexOf(tab));
               },
               itemBuilder: (BuildContext context) {
-                return searchHandler.list.map((SearchGlobal choice) {
-                  return PopupMenuItem<SearchGlobal>(
+                return searchHandler.list.map((SearchTab choice) {
+                  return PopupMenuItem<SearchTab>(
                     value: choice,
                     child: buildRow(choice),
                   );

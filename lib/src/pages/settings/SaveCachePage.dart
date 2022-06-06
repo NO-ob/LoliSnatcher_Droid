@@ -5,8 +5,8 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
@@ -23,7 +23,6 @@ class SaveCachePage extends StatefulWidget {
 
 class _SaveCachePageState extends State<SaveCachePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final ServiceHandler serviceHandler = ServiceHandler();
   final ImageWriter imageWriter = ImageWriter();
 
   final TextEditingController snatchCooldownController = TextEditingController();
@@ -80,7 +79,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
         if (mounted) {
           if (data is SendPort) {
             data.send({
-              'path': await serviceHandler.getCacheDir(),
+              'path': await ServiceHandler.getCacheDir(),
               'type': type['folder'],
             });
           }else {

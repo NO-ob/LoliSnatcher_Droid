@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/widgets/ChangePageButtons.dart';
 import 'package:LoliSnatcher/widgets/ZoomButton.dart';
 

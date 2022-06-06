@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 class TabBoxMoveDialog extends StatefulWidget {
@@ -158,14 +158,14 @@ class TabMovePreview extends StatelessWidget {
     }
 
     final int prevTabIndex = enteredIndex - 2;
-    final SearchGlobal? prevTab = searchHandler.getTabByIndex(prevTabIndex);
+    final SearchTab? prevTab = searchHandler.getTabByIndex(prevTabIndex);
 
     final int nextTabIndex = enteredIndex;
-    final SearchGlobal? nextTab = searchHandler.getTabByIndex(nextTabIndex);
+    final SearchTab? nextTab = searchHandler.getTabByIndex(nextTabIndex);
 
-    final SearchGlobal currentTab = searchHandler.getTabByIndex(index)!;
-    final SearchGlobal firstTab = searchHandler.getTabByIndex(0)!;
-    final SearchGlobal lastTab = searchHandler.getTabByIndex(searchHandler.total - 1)!;
+    final SearchTab currentTab = searchHandler.getTabByIndex(index)!;
+    final SearchTab firstTab = searchHandler.getTabByIndex(0)!;
+    final SearchTab lastTab = searchHandler.getTabByIndex(searchHandler.total - 1)!;
 
     final bool showFirst = enteredIndex > 2;
     final bool showFirstDots = showFirst && (enteredIndex > 1) && (enteredIndex - 1 > 2); // is first tab shown and entered number is bigger than 2 and possible prev tab number is bigger than 2

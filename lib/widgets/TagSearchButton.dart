@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 
 class TagSearchButton extends StatelessWidget {
   const TagSearchButton({Key? key}) : super(key: key);

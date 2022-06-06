@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
@@ -22,7 +22,6 @@ class ThemePage extends StatefulWidget {
 
 class _ThemePageState extends State<ThemePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  ServiceHandler serviceHandler = ServiceHandler();
 
   late ThemeItem theme;
   late ThemeMode themeMode;

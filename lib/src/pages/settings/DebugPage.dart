@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/pages/settings/LoggerPage.dart';
 import 'package:LoliSnatcher/src/utils/http_overrides.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
@@ -22,7 +22,6 @@ class DebugPage extends StatefulWidget {
 
 class _DebugPageState extends State<DebugPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  ServiceHandler serviceHandler = ServiceHandler();
   bool allowSelfSignedCerts = false;
   
   double vDuration = 0;

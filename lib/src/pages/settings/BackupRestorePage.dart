@@ -6,10 +6,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 // import 'package:path_provider/path_provider.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/handlers/DBHandler.dart';
+import 'package:LoliSnatcher/src/handlers/database_handler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
@@ -22,7 +22,6 @@ class BackupRestorePage extends StatefulWidget {
 
 class _BackupRestorePageState extends State<BackupRestorePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  ServiceHandler serviceHandler = ServiceHandler();
   String backupPath = "";
 
   void showSnackbar(BuildContext context, String text, bool isError) {
@@ -112,9 +111,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 name: 'Backup Settings',
                 action: () async {
                   try {
-                    File file = File('${await serviceHandler.getConfigDir()}settings.json');
+                    File file = File('${await ServiceHandler.getConfigDir()}settings.json');
                     if(backupPath.isNotEmpty) {
-                      serviceHandler.writeImage(await file.readAsBytes(), "settings", "text/json", "json", backupPath);
+                      ServiceHandler.writeImage(await file.readAsBytes(), "settings", "text/json", "json", backupPath);
                       showSnackbar(context, 'Settings saved to settings.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -133,7 +132,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     if(backupPath.isNotEmpty) {
                       Uint8List? settingsFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"settings.json");
                       if(settingsFileBytes != null){
-                        File newFile = File('${await serviceHandler.getConfigDir()}settings.json');
+                        File newFile = File('${await ServiceHandler.getConfigDir()}settings.json');
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
@@ -158,9 +157,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 name: 'Backup Database',
                 action: () async {
                   try {
-                    File file = File('${await serviceHandler.getConfigDir()}store.db');
+                    File file = File('${await ServiceHandler.getConfigDir()}store.db');
                     if(backupPath.isNotEmpty) {
-                      serviceHandler.writeImage(await file.readAsBytes(), "store", "application/x-sqlite3", "db", backupPath);
+                      ServiceHandler.writeImage(await file.readAsBytes(), "store", "application/x-sqlite3", "db", backupPath);
                       showSnackbar(context, 'Database saved to store.db', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -178,7 +177,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                     if(backupPath.isNotEmpty) {
                       Uint8List? dbFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"store.db");
                       if(dbFileBytes != null){
-                        File newFile = File('${await serviceHandler.getConfigDir()}store.db');
+                        File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
@@ -206,7 +205,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   try {
                     print(json.encode(settingsHandler.booruList));
                     if(backupPath.isNotEmpty) {
-                      await serviceHandler.writeImage(utf8.encode(json.encode(settingsHandler.booruList)), "boorus", "text", "json", backupPath);
+                      await ServiceHandler.writeImage(utf8.encode(json.encode(settingsHandler.booruList)), "boorus", "text", "json", backupPath);
                       showSnackbar(context, 'Boorus saved to boorus.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -231,7 +230,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       }
                       if(boorusJSONString.isNotEmpty) {
                         List<dynamic> json = jsonDecode(boorusJSONString);
-                        String configBoorusPath = '${await serviceHandler.getConfigDir()}boorus/';
+                        String configBoorusPath = '${await ServiceHandler.getConfigDir()}boorus/';
                         Directory configBoorusDir = await Directory(configBoorusPath).create(recursive:true);
                         if (json.isNotEmpty) {
                           for (int i = 0; i < json.length; i++) {

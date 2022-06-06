@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/ViewerHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/NavigationHandler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 
 enum Positions {

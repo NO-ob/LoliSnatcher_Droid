@@ -7,7 +7,7 @@ import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/src/services/ImageWriterIsolate.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 
 class DioLoader {
   DioLoader(
@@ -74,7 +74,7 @@ class DioLoader {
     receivePort.listen((dynamic data) async {
       if (data is SendPort) {
         data.send({
-          'cacheRootPath': await ServiceHandler().getCacheDir(),
+          'cacheRootPath': await ServiceHandler.getCacheDir(),
           'fileURL': url,
           'bytes': bytes,
           'typeFolder': cacheFolder,

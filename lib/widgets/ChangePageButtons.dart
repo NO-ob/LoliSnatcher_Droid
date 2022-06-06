@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/widgets/LongPressRepeater.dart';
 
 class ChangePageButtons extends StatelessWidget {

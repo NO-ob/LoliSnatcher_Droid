@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
 
 class ActiveTitle extends StatelessWidget {

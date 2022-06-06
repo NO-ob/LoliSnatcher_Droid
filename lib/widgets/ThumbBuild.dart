@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
@@ -11,7 +11,7 @@ class ThumbBuild extends StatelessWidget {
   const ThumbBuild(this.index, this.columnCount, this.searchGlobal, {Key? key}) : super(key: key);
   final int index;
   final int columnCount;
-  final SearchGlobal searchGlobal;
+  final SearchTab searchGlobal;
 
   @override
   Widget build(BuildContext context) {

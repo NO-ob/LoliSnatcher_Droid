@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/pages/settings/BooruEditPage.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
 
 // ignore: must_be_immutable
@@ -60,8 +60,7 @@ class _BooruPageState extends State<BooruPage> {
         sideColor: Colors.green,
       );
     } else if (Platform.isAndroid) {
-      ServiceHandler serviceHandler = ServiceHandler();
-      serviceHandler.loadShareTextIntent(link);
+      ServiceHandler.loadShareTextIntent(link);
     }
   }
 
@@ -277,7 +276,7 @@ class _BooruPageState extends State<BooruPage> {
                     }
 
                     // TODO reset all tabs to next available booru?
-                    List<SearchGlobal> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
+                    List<SearchTab> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
                     if(tabsWithBooru.isNotEmpty) {
                       FlashElements.showSnackbar(
                         context: context,

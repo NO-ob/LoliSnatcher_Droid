@@ -9,12 +9,12 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:LoliSnatcher/src/services/getPerms.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/NavigationHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
 import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/handlers/DBHandler.dart';
+import 'package:LoliSnatcher/src/handlers/database_handler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
@@ -24,7 +24,6 @@ import 'package:LoliSnatcher/src/utils/http_overrides.dart';
 class SettingsHandler extends GetxController {
   static SettingsHandler get instance => Get.find<SettingsHandler>();
 
-  ServiceHandler serviceHandler = ServiceHandler();
   DBHandler dbHandler = DBHandler();
   DBHandler favDbHandler = DBHandler();
 
@@ -33,7 +32,6 @@ class SettingsHandler extends GetxController {
   String cachePath = "";
   String path = "";
   String boorusPath = "";
-  int SDKVer = 0;
 
   // TODO don't forget to update these on every new release
   // version vars
@@ -604,8 +602,7 @@ class SettingsHandler extends GetxController {
 
   Future<bool> loadSettings() async {
     if (path == "") await setConfigDir();
-    if (cachePath == "") cachePath = await serviceHandler.getCacheDir();
-    if (SDKVer == 0) SDKVer = await serviceHandler.getSDKVersion();
+    if (cachePath == "") cachePath = await ServiceHandler.getCacheDir();
 
     if(await checkForSettings()) {
       await loadSettingsJson();
@@ -972,7 +969,8 @@ class SettingsHandler extends GetxController {
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
       "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
       "version": verStr,
-      "SDK": SDKVer,
+      // TODO split into two variables - system name and system version/sdk number
+      // "SDK": SDKVer,
     };
 
     // print('JSON $json');
@@ -1391,7 +1389,7 @@ class SettingsHandler extends GetxController {
   Future<void> setConfigDir() async {
     // print('-=-=-=-=-=-=-=-');
     // print(Platform.environment);
-    path = await serviceHandler.getConfigDir();
+    path = await ServiceHandler.getConfigDir();
     boorusPath = '${path}boorus/';
     return;
   }

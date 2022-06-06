@@ -2,10 +2,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/src/services/getPerms.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 

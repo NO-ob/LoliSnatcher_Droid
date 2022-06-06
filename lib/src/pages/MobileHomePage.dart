@@ -7,15 +7,15 @@ import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
 import 'package:LoliSnatcher/widgets/TabBox.dart';
 import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
 import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/src/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
 import 'package:LoliSnatcher/widgets/MascotImage.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/widgets/MainAppbar.dart';
 
 class MobileHome extends StatefulWidget {

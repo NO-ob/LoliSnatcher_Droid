@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
@@ -25,7 +25,7 @@ class TabBoxDialog extends StatefulWidget {
 class _TabBoxDialogState extends State<TabBoxDialog> {
   final SearchHandler searchHandler = SearchHandler.instance;
 
-  List<SearchGlobal> tabs = [], filteredTabs = [], selectedTabs = [];
+  List<SearchTab> tabs = [], filteredTabs = [], selectedTabs = [];
   late final AutoScrollController scrollController;
   final TextEditingController filterController = TextEditingController();
   bool? sortTabs;
@@ -113,7 +113,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
     setState(() {});
   }
 
-  void showTabEntryActions(Widget row, SearchGlobal data, int index) {
+  void showTabEntryActions(Widget row, SearchTab data, int index) {
     showDialog(
       context: context,
       builder: (context) {
@@ -250,7 +250,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
   }
 
   Widget buildEntry(int index, bool isActive, bool fromFiltered) {
-    final SearchGlobal tab = fromFiltered ? filteredTabs[index] : searchHandler.list[index];
+    final SearchTab tab = fromFiltered ? filteredTabs[index] : searchHandler.list[index];
     final bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
     final bool isCurrent = searchHandler.currentTab == tab;
 
@@ -501,7 +501,7 @@ class _TabBoxDialogState extends State<TabBoxDialog> {
                       children: [
                         Text('Are you sure you want to delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}?'),
                         const SizedBox(height: 10),
-                        ...selectedTabs.map((SearchGlobal tab) {
+                        ...selectedTabs.map((SearchTab tab) {
                           final int index = searchHandler.list.indexOf(tab);
                           return buildEntry(index, false, false);
                         }).toList(),

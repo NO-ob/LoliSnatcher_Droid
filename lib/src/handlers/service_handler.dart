@@ -6,14 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt
 class ServiceHandler{
   static const platform = MethodChannel("com.noaisu.loliSnatcher/services");
   // Call androids native media scanner on a file path
-  void callMediaScanner(String path) async{
+  static void callMediaScanner(String path) async{
     try{
       await platform.invokeMethod("scanMedia",{"path": path});
     } catch(e){
@@ -21,21 +21,23 @@ class ServiceHandler{
     }
   }
 
-  Future<int> getSDKVersion() async {
+  static Future<int> getSDKVersion() async {
     if (Platform.isAndroid) {
       return getAndroidSDKVersion();
     } else if (Platform.isLinux) {
       return 1;
     } else if (Platform.isWindows) {
       return 2;
-    } else if(Platform.isIOS) {
+    } else if (Platform.isIOS) {
       return 9999;
+    } else if (Platform.isMacOS) {
+      return 9998;
     } else {
       return -1;
     }
   }
 
-  Future<int> getAndroidSDKVersion() async{
+  static Future<int> getAndroidSDKVersion() async{
     int result = 0;
     try{
       result = await platform.invokeMethod("getSdkVersion");
@@ -46,7 +48,7 @@ class ServiceHandler{
   }
 
   // Gets main storage dir
-  Future<String> getExtDir() async{
+  static Future<String> getExtDir() async{
     String result = "";
     try{
       if(Platform.isAndroid) {
@@ -148,7 +150,7 @@ class ServiceHandler{
   }
 
 
-  Future<String> getConfigDir() async {
+  static Future<String> getConfigDir() async {
     String result = '';
     if (Platform.isAndroid){
       result = "${await getExtDir()}/LoliSnatcher/config/"; // await platform.invokeMethod("getDocumentsPath"); ?
@@ -161,6 +163,7 @@ class ServiceHandler{
     }
     return result;
   }
+
   static Future<String> testSAFPersistence() async {
     print("test saf persistence");
     String result = "";
@@ -175,7 +178,7 @@ class ServiceHandler{
     return result;
   }
 
-  Future<String> getDocumentsDir() async{
+  static Future<String> getDocumentsDir() async{
     String result = "";
     try{
       result = await platform.invokeMethod("getDocumentsPath");
@@ -185,7 +188,7 @@ class ServiceHandler{
     return result;
   }
 
-  Future<String> getPicturesDir() async{
+  static Future<String> getPicturesDir() async{
     String result = "";
     try{
       if (Platform.isAndroid){
@@ -203,7 +206,7 @@ class ServiceHandler{
     return result;
   }
 
-  Future<String> getCacheDir() async{
+  static Future<String> getCacheDir() async{
     String result = "";
     try{
       if (Platform.isAndroid){
@@ -221,7 +224,7 @@ class ServiceHandler{
     return result;
   }
 
-  Future<void> loadShareTextIntent(String text) async{
+  static Future<void> loadShareTextIntent(String text) async{
     try{
       await platform.invokeMethod("shareText",{"text": text});
       return;
@@ -231,7 +234,7 @@ class ServiceHandler{
     }
   }
 
-  Future<void> loadShareFileIntent(String filePath, String mimeType) async{
+  static Future<void> loadShareFileIntent(String filePath, String mimeType) async{
     try{
       await platform.invokeMethod("shareFile", {"path": filePath, "mimeType": mimeType});
       return;
@@ -261,7 +264,7 @@ class ServiceHandler{
     }
   }
 
-  Future<void> emptyCache() async {
+  static Future<void> emptyCache() async {
     try {
       if (Platform.isAndroid){
         await platform.invokeMethod("emptyCache");
@@ -280,7 +283,7 @@ class ServiceHandler{
     return;
   }
 
-  void deleteDB(SettingsHandler settingsHandler) async{
+  static void deleteDB(SettingsHandler settingsHandler) async{
     if (Platform.isAndroid){
       File dbFile = File("${settingsHandler.path}store.db");
       print(settingsHandler.path);
@@ -358,7 +361,7 @@ class ServiceHandler{
     }
   }
 
-  Future<Uint8List?> makeVidThumb(String videoURL) async {
+  static Future<Uint8List?> makeVidThumb(String videoURL) async {
     Uint8List? thumbnail;
     if (Platform.isAndroid){
       thumbnail = await platform.invokeMethod("makeVidThumb",{"videoURL" : videoURL});
@@ -366,7 +369,7 @@ class ServiceHandler{
     return thumbnail;
   }
 
-  Future<String?> writeImage(var imageData, fileName, mediaType, fileExt, extPathOverride) async{
+  static Future<String?> writeImage(var imageData, fileName, mediaType, fileExt, extPathOverride) async{
     String? result;
     try{
       result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt,"extPathOverride":extPathOverride});

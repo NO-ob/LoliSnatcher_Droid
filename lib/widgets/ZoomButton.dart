@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 
 class ZoomButton extends StatelessWidget {
   const ZoomButton({Key? key}) : super(key: key);

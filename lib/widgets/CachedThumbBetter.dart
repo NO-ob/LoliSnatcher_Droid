@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
@@ -22,7 +22,7 @@ class CachedThumbBetter extends StatefulWidget {
   final BooruItem booruItem;
   final int index;
   final int columnCount;
-  final SearchGlobal searchGlobal;
+  final SearchTab searchGlobal;
   final bool isStandalone; // set to true when used in gallery preview to enable hero animation
   const CachedThumbBetter(this.booruItem, this.index, this.searchGlobal, this.columnCount, this.isStandalone, {Key? key}) : super(key: key);
 
@@ -271,8 +271,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
   }
 
   Future<Uint8List?> getVideoThumb() async {
-    ServiceHandler serviceHandler = ServiceHandler();
-    Uint8List? bytes = await serviceHandler.makeVidThumb(thumbURL);
+    Uint8List? bytes = await ServiceHandler.makeVidThumb(thumbURL);
     return bytes;
   }
 

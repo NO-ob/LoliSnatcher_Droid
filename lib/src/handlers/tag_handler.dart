@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
 // import 'package:LoliSnatcher/libBooru/DBHandler.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:LoliSnatcher/src/services/getPerms.dart';

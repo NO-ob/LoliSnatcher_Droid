@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/SearchGlobals.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/TabBoxDialog.dart';
@@ -32,7 +32,7 @@ class TabBox extends StatelessWidget {
       // constraints: settingsHandler.appMode.value == AppMode.DESKTOP ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
       padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
       child: Obx(() {
-        List<SearchGlobal> list = searchHandler.list;
+        List<SearchTab> list = searchHandler.list;
         int index = searchHandler.currentIndex;
 
         if (list.isEmpty) {
@@ -42,7 +42,7 @@ class TabBox extends StatelessWidget {
         return GestureDetector(
           onLongPress: () => openTabsDialog(context),
           onSecondaryTap: () => openTabsDialog(context),
-          child: DropdownButtonFormField<SearchGlobal>(
+          child: DropdownButtonFormField<SearchTab>(
             isExpanded: true,
             value: list[index],
             icon: const Icon(Icons.arrow_drop_down),
@@ -53,23 +53,23 @@ class TabBox extends StatelessWidget {
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            onChanged: (SearchGlobal? newValue) {
+            onChanged: (SearchTab? newValue) {
               if (newValue != null) {
                 searchHandler.changeTabIndex(list.indexOf(newValue));
               }
             },
             selectedItemBuilder: (BuildContext context) {
-              return list.map<DropdownMenuItem<SearchGlobal>>((SearchGlobal value) {
-                return DropdownMenuItem<SearchGlobal>(
+              return list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
+                return DropdownMenuItem<SearchTab>(
                   value: value,
                   child: TabBoxRow(key: ValueKey(value), tab: value),
                 );
               }).toList();
             },
-            items: list.map<DropdownMenuItem<SearchGlobal>>((SearchGlobal value) {
+            items: list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
               bool isCurrent = list.indexOf(value) == index;
 
-              return DropdownMenuItem<SearchGlobal>(
+              return DropdownMenuItem<SearchTab>(
                 value: value,
                 child: Container(
                   padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
@@ -98,7 +98,7 @@ class TabBoxRow extends StatelessWidget {
     this.fontWeight,
   }) : super(key: key);
 
-  final SearchGlobal tab;
+  final SearchTab tab;
   final Color? color;
   final FontWeight? fontWeight;
 

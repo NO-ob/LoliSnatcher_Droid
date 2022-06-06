@@ -9,9 +9,9 @@ import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
 import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:LoliSnatcher/src/handlers/search_handler.dart';
+import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
@@ -22,7 +22,7 @@ class MediaViewerBetter extends StatefulWidget {
   const MediaViewerBetter(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
   final BooruItem booruItem;
   final int index;
-  final SearchGlobal searchGlobal;
+  final SearchTab searchGlobal;
 
   @override
   State<MediaViewerBetter> createState() => _MediaViewerBetterState();

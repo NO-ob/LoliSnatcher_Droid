@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
 
 

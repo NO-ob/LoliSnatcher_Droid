@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/boorus/SankakuHandler.dart';
@@ -20,7 +20,6 @@ class DatabasePage extends StatefulWidget {
 
 class _DatabasePageState extends State<DatabasePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final ServiceHandler serviceHandler = ServiceHandler();
 
   bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
   int updatingFailed = 0, updatingDone = 0;
@@ -233,7 +232,7 @@ class _DatabasePageState extends State<DatabasePage> {
                           const CancelButton(),
                           ElevatedButton.icon(
                             onPressed: () {
-                              serviceHandler.deleteDB(settingsHandler);
+                              ServiceHandler.deleteDB(settingsHandler);
 
                               FlashElements.showSnackbar(
                                 context: context,

@@ -7,8 +7,8 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 
@@ -22,7 +22,6 @@ class ImageWriter {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   String? path = "";
   String? cacheRootPath = "";
-  ServiceHandler serviceHandler = ServiceHandler();
   int SDKVer = 0;
 
   ImageWriter() {
@@ -50,7 +49,7 @@ class ImageWriter {
     await setPaths();
 
     if(SDKVer == 0){
-        SDKVer = await serviceHandler.getSDKVersion();
+        SDKVer = await ServiceHandler.getSDKVersion();
         print(SDKVer);
     }
 
@@ -77,7 +76,7 @@ class ImageWriter {
         }
         try {
           if(Platform.isAndroid){
-            serviceHandler.callMediaScanner(image.path);
+            ServiceHandler.callMediaScanner(image.path);
           }
         } catch (e){
           print("Image not found $e");
@@ -86,7 +85,7 @@ class ImageWriter {
       } else {
         print("files ext is ${item.fileExt!}");
         print("Ext path override is: ${settingsHandler.extPathOverride}");
-        var writeResp = await serviceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt,settingsHandler.extPathOverride);
+        var writeResp = await ServiceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt,settingsHandler.extPathOverride);
         if (writeResp != null){
           print("write response: $writeResp");
           item.isSnatched.value = true;
@@ -374,7 +373,7 @@ class ImageWriter {
       Uint8List? fileBytes = await ServiceHandler.getSAFFile(contentUri);
       String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
         if (fileBytes != null && fileExt.isNotEmpty){
-          String path = await serviceHandler.getConfigDir();
+          String path = await ServiceHandler.getConfigDir();
           File("${path}mascot.$fileExt").writeAsBytes(fileBytes);
           return ("${path}mascot.$fileExt");
         }
@@ -385,14 +384,14 @@ class ImageWriter {
   Future<bool> setPaths() async {
     if(path == ""){
       if (settingsHandler.extPathOverride.isEmpty){
-        path = await serviceHandler.getPicturesDir();
+        path = await ServiceHandler.getPicturesDir();
       } else {
         path = settingsHandler.extPathOverride;
       }
     }
 
     if(cacheRootPath == ""){
-      cacheRootPath = await serviceHandler.getCacheDir();
+      cacheRootPath = await ServiceHandler.getCacheDir();
     }
     // print('path: $path');
     // print(cache'path: $cacheRootPath');

@@ -4,9 +4,9 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandlerFactory.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 
 class SnatchItem {

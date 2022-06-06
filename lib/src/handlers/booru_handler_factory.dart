@@ -1,4 +1,4 @@
-import 'package:LoliSnatcher/SettingsHandler.dart';
+import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/boorus/BooruOnRailsHandler.dart';
 import 'package:LoliSnatcher/src/boorus/DanbooruHandler.dart';
@@ -16,7 +16,7 @@ import 'package:LoliSnatcher/src/boorus/WorldHandler.dart';
 import 'package:LoliSnatcher/src/boorus/R34HentaiHandler.dart';
 import 'package:LoliSnatcher/src/boorus/IdolSankakuHandler.dart';
 import 'package:LoliSnatcher/src/boorus/AGNPHHandler.dart';
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
 import 'package:LoliSnatcher/src/boorus/FavouritesHandler.dart';
 import 'package:LoliSnatcher/src/boorus/InkBunnyHandler.dart';
 import 'package:LoliSnatcher/src/boorus/MergebooruHandler.dart';

@@ -1,4 +1,4 @@
-import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
+import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 
 class EmptyHandler extends BooruHandler {
