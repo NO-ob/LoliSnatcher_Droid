@@ -9,7 +9,7 @@ import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/CommentItem.dart';
 import 'package:LoliSnatcher/src/data/NoteItem.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 class SankakuHandler extends BooruHandler{
   SankakuHandler(Booru booru,int limit) : super(booru,limit);

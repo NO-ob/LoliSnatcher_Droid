@@ -8,7 +8,7 @@ import 'package:xml/xml.dart';
 
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 /// Booru Handler for the gelbooru engine
 class RealbooruHandler extends GelbooruHandler {

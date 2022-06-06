@@ -13,7 +13,7 @@ import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/widgets/TagChip.dart';
 import 'package:LoliSnatcher/src/boorus/MergebooruHandler.dart';
 import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
-import 'package:LoliSnatcher/utilities/debouncer.dart';
+import 'package:LoliSnatcher/src/utils/debouncer.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter

@@ -13,7 +13,7 @@ import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';

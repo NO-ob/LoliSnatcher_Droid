@@ -7,7 +7,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';

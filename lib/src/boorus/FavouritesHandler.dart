@@ -1,7 +1,7 @@
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 class FavouritesHandler extends BooruHandler{
   FavouritesHandler(Booru booru,int limit): super(booru,limit);

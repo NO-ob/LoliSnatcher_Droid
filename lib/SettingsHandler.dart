@@ -17,8 +17,8 @@ import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/handlers/DBHandler.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
+import 'package:LoliSnatcher/src/utils/http_overrides.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {

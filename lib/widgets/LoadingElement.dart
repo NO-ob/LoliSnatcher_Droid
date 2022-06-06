@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/BorderedText.dart';
-import 'package:LoliSnatcher/utilities/debouncer.dart';
+import 'package:LoliSnatcher/src/utils/debouncer.dart';
 
 class LoadingElement extends StatefulWidget {
   const LoadingElement({

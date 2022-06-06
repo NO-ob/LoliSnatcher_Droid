@@ -10,12 +10,12 @@ import 'package:dio/dio.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';
-import 'package:LoliSnatcher/utilities/debouncer.dart';
+import 'package:LoliSnatcher/src/utils/debouncer.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 
 
 class CachedThumbBetter extends StatefulWidget {
@@ -66,7 +66,7 @@ class _CachedThumbBetterState extends State<CachedThumbBetter> {
     _dioCancelToken = CancelToken();
     DioLoader newClient = DioLoader(
       isMain ? thumbURL : widget.booruItem.thumbnailURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,

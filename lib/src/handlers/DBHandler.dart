@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 
 
 ///////////////////////////////////////////////////////////////
@@ -22,9 +22,9 @@ class DBHandler{
   Future<bool> dbConnect(String path) async {
     // await Sqflite.devSetDebugModeOn(true);
     if(Platform.isAndroid || Platform.isIOS){
-      db = await openDatabase(path + "store.db", version: 1, singleInstance: false);
+      db = await openDatabase("${path}store.db", version: 1, singleInstance: false);
     } else if(Platform.isWindows || Platform.isLinux) {
-      db = await databaseFactory.openDatabase(path + "store.db");
+      db = await databaseFactory.openDatabase("${path}store.db");
     }
     await updateTable();
     await createIndexes();
@@ -34,9 +34,9 @@ class DBHandler{
 
   Future<bool> dbConnectReadOnly(String path) async {
     if(Platform.isAndroid || Platform.isIOS){
-      db = await openDatabase(path + "store.db", version: 1, singleInstance: false);
+      db = await openDatabase("${path}store.db", version: 1, singleInstance: false);
     } else if(Platform.isWindows || Platform.isLinux) {
-      db = await databaseFactory.openDatabase(path + "store.db");
+      db = await databaseFactory.openDatabase("${path}store.db");
     }
     return true;
   }
@@ -110,7 +110,7 @@ class DBHandler{
 
   //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   Future<String?> updateBooruItem(BooruItem item, String mode) async {
-    Logger.Inst().log("updateBooruItem called fileURL is:" + item.fileURL, "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
+    Logger.Inst().log("updateBooruItem called fileURL is: ${item.fileURL}", "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
     String? itemID = await getItemID(item.postURL);
     String resultStr = "";
     if (itemID == null || itemID.isEmpty) {

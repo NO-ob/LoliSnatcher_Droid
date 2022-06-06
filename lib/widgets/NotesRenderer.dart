@@ -11,8 +11,8 @@ import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/NoteItem.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/utilities/html_parse.dart';
-import 'package:LoliSnatcher/utilities/debouncer.dart';
+import 'package:LoliSnatcher/src/utils/html_parse.dart';
+import 'package:LoliSnatcher/src/utils/debouncer.dart';
 import 'package:LoliSnatcher/widgets/TransparentPointer.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 

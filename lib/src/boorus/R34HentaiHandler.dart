@@ -7,7 +7,7 @@ import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/boorus/ShimmieHandler.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 
 class R34HentaiHandler extends ShimmieHandler {

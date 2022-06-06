@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 class e621Handler extends BooruHandler{
   e621Handler(Booru booru,int limit) : super(booru,limit);

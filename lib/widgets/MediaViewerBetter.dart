@@ -8,10 +8,9 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
@@ -64,7 +63,7 @@ class _MediaViewerBetterState extends State<MediaViewerBetter> {
     _dioCancelToken = CancelToken();
     client = DioLoader(
       imageURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,

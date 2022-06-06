@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 
 class ImageStats extends StatefulWidget {
   ImageStats(

@@ -9,8 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 
 // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
@@ -63,7 +62,7 @@ class ImageWriter {
     if (fileExists || item.isSnatched.value == true) return null;
     try {
       Uri fileURI = Uri.parse(item.fileURL);
-      var response = await http.get(fileURI,headers: ViewUtils.getFileCustomHeaders(booru,checkForReferer: true));
+      var response = await http.get(fileURI,headers: Tools.getFileCustomHeaders(booru,checkForReferer: true));
       if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
         await Directory(path!).create(recursive:true);
         await image.writeAsBytes(response.bodyBytes, flush: true);

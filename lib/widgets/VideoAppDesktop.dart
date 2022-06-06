@@ -9,8 +9,7 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 
-import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/ViewUtils.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
@@ -113,7 +112,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     _cancelToken = CancelToken();
     client = DioLoader(
       widget.booruItem.fileURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -142,7 +141,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioLoader(
       widget.booruItem.fileURL,
-      headers: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
     );
@@ -360,7 +359,7 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
-        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+        extras: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
@@ -385,14 +384,14 @@ class _VideoAppDesktopState extends State<VideoAppDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         Uri.encodeFull(widget.booruItem.fileURL),
-        extras: ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+        extras: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
 
     videoController = Player(id: widget.index);
-    videoController!.setUserAgent(ViewUtils.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: false).entries.first.value);
+    videoController!.setUserAgent(Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: false).entries.first.value);
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
     //   media!,

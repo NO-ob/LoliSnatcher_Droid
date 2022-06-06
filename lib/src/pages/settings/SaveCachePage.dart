@@ -9,7 +9,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/Tools.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 // import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
 import 'package:LoliSnatcher/ImageWriterIsolate.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';

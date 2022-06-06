@@ -10,7 +10,7 @@ import 'package:LoliSnatcher/src/data/CommentItem.dart';
 import 'package:LoliSnatcher/src/data/NoteItem.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 
 abstract class BooruHandler {

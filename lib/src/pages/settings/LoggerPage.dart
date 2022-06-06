@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 class LoggerPage extends StatefulWidget {
   const LoggerPage({Key? key}) : super(key: key);

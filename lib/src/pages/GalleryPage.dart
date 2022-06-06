@@ -17,7 +17,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/getPerms.dart';
-import 'package:LoliSnatcher/TimedProgressController.dart';
+import 'package:LoliSnatcher/src/utils/timed_progress_controller.dart';
 import 'package:LoliSnatcher/RestartableProgressIndicator.dart';
 
 

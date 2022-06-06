@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/ViewUtils.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
+import 'package:LoliSnatcher/src/utils/tools.dart';
 
 class ThumbBuild extends StatelessWidget {
   const ThumbBuild(this.index, this.columnCount, this.searchGlobal, {Key? key}) : super(key: key);
@@ -18,7 +18,7 @@ class ThumbBuild extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     BooruItem item = searchGlobal.booruHandler.filteredFetched[index];
-    IconData itemIcon = ViewUtils.getFileIcon(item.mediaType);
+    IconData itemIcon = Tools.getFileIcon(item.mediaType);
 
     List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
     bool isHated = parsedTags[0].isNotEmpty;

@@ -24,7 +24,7 @@ import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/pages/settings/BooruEditPage.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';

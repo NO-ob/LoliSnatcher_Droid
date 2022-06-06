@@ -12,7 +12,7 @@ import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
+import 'package:LoliSnatcher/src/utils/logger.dart';
 
 // ignore: must_be_immutable
 class BooruPage extends StatefulWidget {
