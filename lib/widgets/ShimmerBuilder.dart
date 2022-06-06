@@ -24,7 +24,6 @@ class ShiverList extends StatelessWidget {
               MediaQuery.of(layoutContext).orientation == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
           return GridView(
-            controller: searchHandler.gridScrollController,
             physics: const NeverScrollableScrollPhysics(),
             addAutomaticKeepAlives: false,
             cacheExtent: 200,

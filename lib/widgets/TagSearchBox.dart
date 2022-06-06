@@ -507,12 +507,12 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           // Keep minus if its in the beggining of current (last) tag
                           bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
-                          String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '');
+                          String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag;
                           if (searchHandler.currentBooru.type == "Hydrus") {
-                            final String tagWithSpaces = tag.replaceAll(RegExp(r'_'), ' ');
+                            final String tagWithSpaces = newTag.replaceAll(RegExp(r'_'), ' ');
                             newTag = "$tagWithSpaces,";
                           } else {
-                            newTag = "$tag ";
+                            newTag = "$newTag ";
                           }
 
                           String newInput = "";

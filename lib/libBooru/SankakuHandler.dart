@@ -278,10 +278,10 @@ class SankakuHandler extends BooruHandler{
               authorID: current["author"]["id"].toString(),
               authorName: current["author"]["name"].toString(),
               avatarUrl: current["author"]["avatar"].toString(),
-              score: current["score"],
+              score: current["score"] ?? 0,
               postID: current["post_id"].toString(),
-              createDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
-              createDateFormat: "unix",
+              createDate: current['created_at'].toString(), // unix time without in seconds (need to x1000?)
+              createDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
             ));
           }
         }

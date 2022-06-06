@@ -35,8 +35,8 @@ class TagChip extends StatelessWidget {
     // shorten stuff like order, sort, rating, ...
     Map<String, String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
     modifierMap.forEach((modifier, displayValue) {
-      if (stringContent.startsWith(modifier)) {
-        stringContent = stringContent.replaceFirst(modifier, "");
+      if (stringContent.toLowerCase().startsWith(modifier)) {
+        stringContent = stringContent.toLowerCase().replaceFirst(modifier, "");
         tagPins.add(TagPin(content: displayValue, color: Colors.purple));
       }
     });

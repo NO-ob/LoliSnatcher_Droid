@@ -304,18 +304,19 @@ class _WaterfallViewState extends State<WaterfallView> {
                 onRefresh: () async {
                   searchHandler.searchAction(searchHandler.currentTab.tags, null);
                 },
-                child: DesktopScrollWrap(
-                  controller: searchHandler.gridScrollController,
-                  // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
-                  child: Obx((){
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      child: (searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty)
+                child: Obx((){
+                  final bool isLoadingOrNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: isLoadingOrNoItems
                       ? const ShiverList()
-                      : (isStaggered ? StaggeredBuilder(onTap) : GridBuilder(onTap)),
-                    );
-                  }),
-                ),
+                      : DesktopScrollWrap(
+                          controller: searchHandler.gridScrollController,
+                          // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
+                          child: isStaggered ? StaggeredBuilder(onTap) : GridBuilder(onTap),
+                        ),
+                  );
+                }),
               ),
             ),
             onNotification: (notif) {

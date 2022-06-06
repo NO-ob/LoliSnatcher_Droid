@@ -58,6 +58,27 @@ class _CommentsDialogState extends State<CommentsDialog> {
     return formattedDate;
   }
 
+  String parseContent(String? content) {
+    if (content == null) return '';
+
+    // TODO more rules
+    // TODO maybe there is a better/more optimized way to do this?
+    return content
+        // sankaku(?) quoting
+        .replaceAll('[quote]', '[ ')
+        .replaceAll('[/quote]', ' ]\n')
+        .replaceAll('said:', 'said: ')
+        // .replaceAll(RegExp(r'\[\w+\]'), '[') // probably not correct to do, will trigger on everything that has [smth]
+        // .replaceAll(RegExp(r'\[\/\w+\]'), ']\n')
+
+        // move three dots away from everything
+        .replaceAll('...', ' ... ')
+        // multiple spaces to one
+        .replaceAll(RegExp(r' +'), ' ')
+        // multiple new lines to one
+        .replaceAll(RegExp(r'\n+'), '\n');
+  }
+
   Widget scoreText(int? score) {
     if (score == null) {
       return const Text('');
@@ -218,8 +239,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: SelectableLinkify(
-                    text: currentEntry.content ?? '',
-                    options: const LinkifyOptions(humanize: false, removeWww: true, looseUrl: true),
+                    text: parseContent(currentEntry.content),
+                    options: const LinkifyOptions(
+                      humanize: true,
+                      removeWww: true,
+                      looseUrl: true,
+                      excludeLastPeriod: true,
+                    ),
                     scrollPhysics: const NeverScrollableScrollPhysics(),
                     onOpen: (link) async {
                       ServiceHandler.launchURL(link.url);
@@ -290,7 +316,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
             },
             icon: const Icon(Icons.public),
           ),
-      ]
+      ],
     );
   }
 }
