@@ -11,7 +11,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/widgets/TagChip.dart';
-import 'package:LoliSnatcher/libBooru/MergebooruHandler.dart';
+import 'package:LoliSnatcher/src/boorus/MergebooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:LoliSnatcher/utilities/debouncer.dart';
 

@@ -6,7 +6,7 @@ import 'package:html/parser.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/ShimmieHandler.dart';
+import 'package:LoliSnatcher/src/boorus/ShimmieHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 
@@ -115,9 +115,7 @@ class R34HentaiHandler extends ShimmieHandler {
   }
 }
 
-/**
- * Booru Handler for the r34hentai engine
- */
+/// Booru Handler for the r34hentai engine
 // TODO they removed their api, both shimmie and custom one, but maybe it is still hidden somewhere?
 class R34HentaiHandlerOld extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args

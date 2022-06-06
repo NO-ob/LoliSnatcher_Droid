@@ -34,7 +34,7 @@ import 'package:LoliSnatcher/widgets/GalleryButtons.dart';
 import 'package:LoliSnatcher/widgets/ViewerTutorial.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/HydrusHandler.dart';
+import 'package:LoliSnatcher/src/boorus/HydrusHandler.dart';
 
 /// The image page is what is dispalyed when an iamge is clicked it shows a full resolution
 /// version of an image and allows scrolling left and right through the currently loaded booruItems

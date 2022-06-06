@@ -6,7 +6,7 @@ import 'package:LoliSnatcher/libBooru/CommentItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/SankakuHandler.dart';
+import 'package:LoliSnatcher/src/boorus/SankakuHandler.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 
 /// Booru Handler for the Danbooru engine

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 
-import 'package:LoliSnatcher/libBooru/GelbooruHandler.dart';
+import 'package:LoliSnatcher/src/boorus/GelbooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/Tag.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';

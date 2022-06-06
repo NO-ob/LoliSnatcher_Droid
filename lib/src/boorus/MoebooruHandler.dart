@@ -4,7 +4,7 @@ import 'package:xml/xml.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/GelbooruHandler.dart';
+import 'package:LoliSnatcher/src/boorus/GelbooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
