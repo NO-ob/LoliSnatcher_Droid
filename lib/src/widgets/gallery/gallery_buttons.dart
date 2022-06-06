@@ -6,7 +6,8 @@ import 'package:preload_page_view/preload_page_view.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
 import 'package:LoliSnatcher/src/widgets/gallery/change_page_buttons.dart';
-import 'package:LoliSnatcher/src/widgets/gallery/ZoomButton.dart';
+import 'package:LoliSnatcher/src/widgets/gallery/zoom_button.dart';
+import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
 
 class GalleryButtons extends StatefulWidget {
   const GalleryButtons(this.controller, {Key? key}) : super(key: key);

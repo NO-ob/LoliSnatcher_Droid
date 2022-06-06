@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/booru.dart';
+import 'package:LoliSnatcher/src/data/booru_item.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
 
 class LoliSync{
   String ip = "127.0.0.1";

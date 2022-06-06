@@ -4,11 +4,12 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/src/data/CommentItem.dart';
-import 'package:LoliSnatcher/src/data/NoteItem.dart';
-import 'package:LoliSnatcher/src/data/Tag.dart';
+import 'package:LoliSnatcher/src/data/booru.dart';
+import 'package:LoliSnatcher/src/data/booru_item.dart';
+import 'package:LoliSnatcher/src/data/comment_item.dart';
+import 'package:LoliSnatcher/src/data/note_item.dart';
+import 'package:LoliSnatcher/src/data/tag.dart';
+import 'package:LoliSnatcher/src/data/tag_type.dart';
 import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';

@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/src/widgets/other/CustomImageProvider.dart';
-import 'package:LoliSnatcher/src/services/DioDownloader.dart';
+import 'package:LoliSnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:LoliSnatcher/src/services/dio_downloader.dart';
 
 class Favicon extends StatefulWidget {
   final String faviconURL;
@@ -18,7 +18,7 @@ class Favicon extends StatefulWidget {
 class _FaviconState extends State<Favicon> {
   bool isFailed = false;
   CancelToken? _dioCancelToken;
-  DioLoader? client;
+  DioDownloader? client;
   ImageProvider? faviconProvider;
 
   static const double iconSize = 20;
@@ -35,7 +35,7 @@ class _FaviconState extends State<Favicon> {
 
   Future<void> downloadFavicon() async {
     _dioCancelToken = CancelToken();
-    client = DioLoader(
+    client = DioDownloader(
       widget.faviconURL,
       cancelToken: _dioCancelToken,
       onError: _onError,

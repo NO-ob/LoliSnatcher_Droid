@@ -1,28 +1,28 @@
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/boorus/BooruOnRailsHandler.dart';
-import 'package:LoliSnatcher/src/boorus/DanbooruHandler.dart';
-import 'package:LoliSnatcher/src/boorus/EmptyHandler.dart';
-import 'package:LoliSnatcher/src/boorus/GelbooruHandler.dart';
-import 'package:LoliSnatcher/src/boorus/GelbooruV1Handler.dart';
-import 'package:LoliSnatcher/src/boorus/HydrusHandler.dart';
-import 'package:LoliSnatcher/src/boorus/MoebooruHandler.dart';
-import 'package:LoliSnatcher/src/boorus/PhilomenaHandler.dart';
-import 'package:LoliSnatcher/src/boorus/SankakuHandler.dart';
-import 'package:LoliSnatcher/src/boorus/ShimmieHandler.dart';
-import 'package:LoliSnatcher/src/boorus/SzurubooruHandler.dart';
-import 'package:LoliSnatcher/src/boorus/e621Handler.dart';
-import 'package:LoliSnatcher/src/boorus/WorldHandler.dart';
-import 'package:LoliSnatcher/src/boorus/R34HentaiHandler.dart';
-import 'package:LoliSnatcher/src/boorus/IdolSankakuHandler.dart';
-import 'package:LoliSnatcher/src/boorus/AGNPHHandler.dart';
+import 'package:LoliSnatcher/src/data/booru.dart';
+import 'package:LoliSnatcher/src/boorus/booru_on_rails_handler.dart';
+import 'package:LoliSnatcher/src/boorus/danbooru_handler.dart';
+import 'package:LoliSnatcher/src/boorus/empty_handler.dart';
+import 'package:LoliSnatcher/src/boorus/gelbooru_handler.dart';
+import 'package:LoliSnatcher/src/boorus/gelbooruv1_handler.dart';
+import 'package:LoliSnatcher/src/boorus/hydrus_handler.dart';
+import 'package:LoliSnatcher/src/boorus/moebooru_handler.dart';
+import 'package:LoliSnatcher/src/boorus/philomena_handler.dart';
+import 'package:LoliSnatcher/src/boorus/sankaku_handler.dart';
+import 'package:LoliSnatcher/src/boorus/shimmie_handler.dart';
+import 'package:LoliSnatcher/src/boorus/szurubooru_handler.dart';
+import 'package:LoliSnatcher/src/boorus/e621_handler.dart';
+import 'package:LoliSnatcher/src/boorus/worldxyz_handler.dart';
+import 'package:LoliSnatcher/src/boorus/r34hentai_handler.dart';
+import 'package:LoliSnatcher/src/boorus/idol_sankaku_handler.dart';
+import 'package:LoliSnatcher/src/boorus/agnph_handler.dart';
 import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
-import 'package:LoliSnatcher/src/boorus/FavouritesHandler.dart';
-import 'package:LoliSnatcher/src/boorus/InkBunnyHandler.dart';
-import 'package:LoliSnatcher/src/boorus/MergebooruHandler.dart';
-import 'package:LoliSnatcher/src/boorus/NyanPalsHandler.dart';
-import 'package:LoliSnatcher/src/boorus/RainbooruHandler.dart';
-import 'package:LoliSnatcher/src/boorus/RealbooruHandler.dart';
+import 'package:LoliSnatcher/src/boorus/favourites_handler.dart';
+import 'package:LoliSnatcher/src/boorus/ink_bunny_handler.dart';
+import 'package:LoliSnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:LoliSnatcher/src/boorus/nyanpals_handler.dart';
+import 'package:LoliSnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:LoliSnatcher/src/boorus/realbooru_handler.dart';
 
 
 
@@ -91,7 +91,7 @@ class BooruHandlerFactory {
           booruHandler = R34HentaiHandler(boorus[0], limit);
           break;
         case("World"):
-          booruHandler = WorldHandler(boorus[0], limit);
+          booruHandler = WorldXyzHandler(boorus[0], limit);
           break;
         case("IdolSankaku"):
           pageNum = 0;

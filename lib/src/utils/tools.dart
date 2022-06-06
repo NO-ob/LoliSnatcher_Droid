@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:LoliSnatcher/src/data/Booru.dart';
+import 'package:LoliSnatcher/src/data/booru.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

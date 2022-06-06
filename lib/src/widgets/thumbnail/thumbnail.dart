@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+
 import 'package:get/get.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +11,10 @@ import 'package:dio/dio.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/data/BooruItem.dart';
-import 'package:LoliSnatcher/src/widgets/other/CustomImageProvider.dart';
-import 'package:LoliSnatcher/src/services/DioDownloader.dart';
-import 'package:LoliSnatcher/src/widgets/common/LoadingElement.dart';
+import 'package:LoliSnatcher/src/data/booru_item.dart';
+import 'package:LoliSnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:LoliSnatcher/src/services/dio_downloader.dart';
+import 'package:LoliSnatcher/src/widgets/common/thumbnail_loading.dart';
 import 'package:LoliSnatcher/src/utils/debouncer.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 
@@ -39,7 +40,7 @@ class _ThumbnailState extends State<Thumbnail> {
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isForVideo = false;
   CancelToken _dioCancelToken = CancelToken();
-  DioLoader? client, extraClient;
+  DioDownloader? client, extraClient;
 
   bool? isThumbQuality;
   late String thumbURL;
@@ -64,7 +65,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
   Future<void> downloadThumb(bool isMain) async {
     _dioCancelToken = CancelToken();
-    DioLoader newClient = DioLoader(
+    DioDownloader newClient = DioDownloader(
       isMain ? thumbURL : widget.booruItem.thumbnailURL,
       headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
       cancelToken: _dioCancelToken,
@@ -387,7 +388,7 @@ class _ThumbnailState extends State<Thumbnail> {
         ),
 
         if(widget.isStandalone)
-          ThumbnailLoadingElement(
+          ThumbnailLoading(
             item: widget.booruItem,
             hasProgress: true,
             isFromCache: isFromCache,

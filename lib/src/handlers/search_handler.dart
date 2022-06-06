@@ -10,11 +10,11 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/booru.dart';
+import 'package:LoliSnatcher/src/data/booru_item.dart';
 import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
 import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
-import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
 
 
 

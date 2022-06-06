@@ -1,11 +1,12 @@
-// TODO media actions, video pause/mute... global controller
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
-import 'package:LoliSnatcher/src/widgets/image/MediaViewerBetter.dart';
-import 'package:LoliSnatcher/src/widgets/video/VideoApp.dart';
-import 'package:LoliSnatcher/src/widgets/video/VideoAppDesktop.dart';
+import 'package:LoliSnatcher/src/widgets/image/image_viewer.dart';
+import 'package:LoliSnatcher/src/widgets/video/video_viewer.dart';
+import 'package:LoliSnatcher/src/widgets/video/video_viewer_desktop.dart';
+
+// TODO media actions, video pause/mute... global controller
 
 class ViewerHandler extends GetxController {
   static ViewerHandler get instance => Get.find<ViewerHandler>();
@@ -51,7 +52,7 @@ class ViewerHandler extends GetxController {
   RxBool isZoomed = false.obs; // is current item zoomed in
   RxBool isLoaded = false.obs; // is current item loaded
   Rx<PhotoViewControllerValue> viewState = Rx(const PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null)); // current view state
-  RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoApp)
+  RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
   RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
 
   RxBool showNotes = true.obs;
@@ -75,24 +76,29 @@ class ViewerHandler extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       dynamic state = currentKey.value?.currentState;
       dynamic widget = state?.widget;
+      dynamic widgetState;
       switch (widget.runtimeType) {
-        case MediaViewerBetter:
-          isZoomed.value = state?.isZoomed ?? false;
-          isLoaded.value = state?.mainProvider != null;
+        case ImageViewer:
+          widgetState = state as ImageViewerState;
+          isZoomed.value = widgetState.isZoomed;
+          isLoaded.value = widgetState.mainProvider != null;
           isFullscreen.value = false;
-          viewState.value = state?.viewController.value;
+          viewState.value = widgetState.viewController.value;
           break;
-        case VideoApp:
-          isZoomed.value = state?.isZoomed ?? false;
-          isLoaded.value = state?.isVideoInit();
-          isFullscreen.value = state?.chewieController?.isFullScreen ?? false;
-          viewState.value = state?.viewController.value;
+        case VideoViewer:
+          widgetState = state as VideoViewerState;
+          isZoomed.value = widgetState.isZoomed;
+          isLoaded.value = widgetState.isVideoInit();
+          isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
+          viewState.value = widgetState.viewController.value;
           break;
-        case VideoAppDesktop:
-          isZoomed.value = state?.isZoomed ?? false;
+        case VideoViewerDesktop:
+          widgetState = state as VideoViewerDesktopState;
+          isZoomed.value = widgetState.isZoomed;
+          // TODO find a way to get video loaded state
           isLoaded.value = true;
           isFullscreen.value = false;
-          viewState.value = state?.viewController.value;
+          viewState.value = widgetState.viewController.value;
           break;
         default: break;
       }
@@ -136,7 +142,7 @@ class ViewerHandler extends GetxController {
 
   // Related to videos
   // TODO check if mute is forced when there are two videos in a row and you mute on the first video and then go to the second video
-  bool videoAutoMute = false; // hold volume button in VideoApp to mute videos globally
+  bool videoAutoMute = false; // hold volume button in VideoViewer to mute videos globally
   double videoVolume = 1; 
 
 

@@ -8,17 +8,19 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:LoliSnatcher/src/services/getPerms.dart';
+import 'package:LoliSnatcher/src/services/get_perms.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
-import 'package:LoliSnatcher/src/data/ThemeItem.dart';
-import 'package:LoliSnatcher/src/data/Booru.dart';
+import 'package:LoliSnatcher/src/data/theme_item.dart';
+import 'package:LoliSnatcher/src/data/booru.dart';
 import 'package:LoliSnatcher/src/handlers/database_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
-import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
+import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
 import 'package:LoliSnatcher/src/utils/http_overrides.dart';
+import 'package:LoliSnatcher/src/data/update_info.dart';
+import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
@@ -1450,54 +1452,9 @@ class SettingsHandler extends GetxController {
   }
 }
 
-
-class UpdateInfo {
-  String versionName;
-  int buildNumber;
-  String title;
-  String changelog;
-  bool isInStore;
-  bool isImportant;
-  String storePackage;
-  String githubURL;
-
-  UpdateInfo({
-    required this.versionName,
-    required this.buildNumber,
-    required this.title,
-    required this.changelog,
-    required this.isInStore,
-    required this.isImportant,
-    required this.storePackage,
-    required this.githubURL,
-  });
-}
-
 class EnvironmentConfig {
   static const isFromStore = bool.fromEnvironment(
     'LS_IS_STORE',
     defaultValue: false
   );
-}
-
-
-enum AppMode {
-  DESKTOP,
-  MOBILE;
-
-  @override
-  String toString() {
-    switch(this) {
-      case AppMode.DESKTOP: return 'Desktop';
-      case AppMode.MOBILE: return 'Mobile';
-    }
-  }
-
-  static AppMode fromString(String name) {
-    switch(name) {
-      case 'Desktop': return AppMode.DESKTOP;
-      case 'Mobile': return AppMode.MOBILE;
-    }
-    return AppMode.MOBILE;
-  }
 }

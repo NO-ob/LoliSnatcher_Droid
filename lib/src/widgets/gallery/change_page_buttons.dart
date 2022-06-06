@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/LongPressRepeater.dart';
+import 'package:LoliSnatcher/src/widgets/common/long_press_repeater.dart';
 
 class ChangePageButtons extends StatelessWidget {
   const ChangePageButtons({Key? key, required this.controller, required this.isPrev}) : super(key: key);
