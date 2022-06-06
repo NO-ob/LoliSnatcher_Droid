@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
-import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
+import 'package:LoliSnatcher/src/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/widgets/WaterfallView.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';

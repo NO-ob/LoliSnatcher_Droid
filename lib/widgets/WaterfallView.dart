@@ -11,7 +11,7 @@ import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
-import 'package:LoliSnatcher/widgets/ViewerPage.dart';
+import 'package:LoliSnatcher/src/pages/GalleryPage.dart';
 import 'package:LoliSnatcher/widgets/GridBuilder.dart';
 import 'package:LoliSnatcher/widgets/StaggeredBuilder.dart';
 import 'package:LoliSnatcher/widgets/ShimmerBuilder.dart';
@@ -194,8 +194,8 @@ class _WaterfallViewState extends State<WaterfallView> {
         context,
         PageRouteBuilder(
           pageBuilder: (context, anim1, anim2) => 
-            // Opacity(opacity: 0.5, child: ViewerPage(index)),
-            ViewerPage(index),
+            // Opacity(opacity: 0.5, child: GalleryPage(index)),
+            GalleryPage(index),
           fullscreenDialog: false,
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),

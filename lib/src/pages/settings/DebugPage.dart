@@ -8,7 +8,7 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/pages/settings/LoggerPage.dart';
+import 'package:LoliSnatcher/src/pages/settings/LoggerPage.dart';
 import 'package:LoliSnatcher/utilities/MyHttpOverrides.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/TagsManager.dart';
