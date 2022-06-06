@@ -40,15 +40,15 @@ import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 /// The image page is what is dispalyed when an iamge is clicked it shows a full resolution
 /// version of an image and allows scrolling left and right through the currently loaded booruItems
 ///
-class GalleryPage extends StatefulWidget {
-  const GalleryPage(this.index, {Key? key}) : super(key: key);
+class GalleryViewPage extends StatefulWidget {
+  const GalleryViewPage(this.index, {Key? key}) : super(key: key);
   final int index;
 
   @override
-  State<GalleryPage> createState() => _GalleryPageState();
+  State<GalleryViewPage> createState() => _GalleryViewPageState();
 }
 
-class _GalleryPageState extends State<GalleryPage> {
+class _GalleryViewPageState extends State<GalleryViewPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SnatchHandler snatchHandler = SnatchHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
@@ -114,7 +114,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   Widget build(BuildContext context) {
-    // print('!!! GalleryPage build ${searchHandler.viewedIndex.value} !!!');
+    // print('!!! GalleryViewPage build ${searchHandler.viewedIndex.value} !!!');
     // kbFocusNode.requestFocus();
 
     return Scaffold(

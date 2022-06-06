@@ -195,8 +195,8 @@ class _WaterfallViewState extends State<WaterfallView> {
         context,
         PageRouteBuilder(
           pageBuilder: (context, anim1, anim2) => 
-            // Opacity(opacity: 0.5, child: GalleryPage(index)),
-            GalleryPage(index),
+            // Opacity(opacity: 0.5, child: GalleryViewPage(index)),
+            GalleryViewPage(index),
           fullscreenDialog: false,
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),
