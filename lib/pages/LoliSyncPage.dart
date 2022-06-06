@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/LoliSync.dart';
+import 'package:LoliSnatcher/src/handlers/LoliSyncHandler.dart';
 import 'package:LoliSnatcher/pages/LoliSyncProgressPage.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';

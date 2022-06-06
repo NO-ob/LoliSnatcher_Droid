@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
+import 'package:LoliSnatcher/src/handlers/BooruHandler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';

@@ -26,7 +26,7 @@ import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/widgets/ThemeBuilder.dart';
 

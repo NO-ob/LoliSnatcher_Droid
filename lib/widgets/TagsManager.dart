@@ -15,7 +15,7 @@ import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
 
 class TagsManager extends StatefulWidget {
   const TagsManager({Key? key}) : super(key: key);

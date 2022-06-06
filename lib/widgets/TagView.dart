@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +19,8 @@ import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/CommentsDialog.dart';
 import 'package:LoliSnatcher/widgets/NotesRenderer.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
+import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
 
 class TagView extends StatefulWidget {
   const TagView({Key? key}) : super(key: key);

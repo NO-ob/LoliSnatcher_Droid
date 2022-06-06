@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,7 +9,7 @@ import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/CommentItem.dart';
 import 'package:LoliSnatcher/src/data/NoteItem.dart';
 import 'package:LoliSnatcher/src/data/Tag.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 

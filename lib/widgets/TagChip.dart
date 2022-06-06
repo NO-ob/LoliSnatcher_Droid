@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:LoliSnatcher/src/handlers/TagHandler.dart';
 
 class TagChip extends StatelessWidget {
   TagChip({Key? key, this.tagString = "", required this.gestureDetector}) : super(key: key);
