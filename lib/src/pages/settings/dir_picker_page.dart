@@ -3,10 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/cancel_button.dart';
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class DirPicker extends StatefulWidget {
   const DirPicker(this.path, {Key? key}) : super(key: key);

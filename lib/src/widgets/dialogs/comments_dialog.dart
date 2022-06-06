@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/data/comment_item.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 
 // TODO parse [quote] https://github.com/flexbooru/flexbooru/blob/2084976a1db68c312ec4b9169f88e7425f35a539/android/src/main/java/onlymash/flexbooru/widget/CommentView.kt
 // TODO add support for more boorus

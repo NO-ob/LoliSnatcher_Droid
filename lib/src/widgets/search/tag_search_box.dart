@@ -6,14 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/marquee_text.dart';
-import 'package:LoliSnatcher/src/widgets/search/tag_chip.dart';
-import 'package:LoliSnatcher/src/boorus/mergebooru_handler.dart';
-import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
-import 'package:LoliSnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter

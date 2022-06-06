@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 
 //The ServiceHandler class calls kotlin functions in MainActivity.kt

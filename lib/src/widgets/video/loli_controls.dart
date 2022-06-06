@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 
 class LoliControls extends StatefulWidget {
   const LoliControls({Key? key, this.outsideController}) : super(key: key);

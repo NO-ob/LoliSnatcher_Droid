@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/image/custom_image_provider.dart';
-import 'package:LoliSnatcher/src/services/dio_downloader.dart';
-import 'package:LoliSnatcher/src/widgets/common/thumbnail_loading.dart';
-import 'package:LoliSnatcher/src/utils/debouncer.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:lolisnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 
 class Thumbnail extends StatefulWidget {

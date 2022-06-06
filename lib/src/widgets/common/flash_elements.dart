@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 enum Positions {
   bottom,

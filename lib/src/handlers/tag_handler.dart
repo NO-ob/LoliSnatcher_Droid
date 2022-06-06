@@ -3,15 +3,15 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/booru.dart';
-import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
-import 'package:LoliSnatcher/src/handlers/booru_handler_factory.dart';
-// import 'package:LoliSnatcher/libBooru/DBHandler.dart';
-import 'package:LoliSnatcher/src/data/tag.dart';
-import 'package:LoliSnatcher/src/data/tag_type.dart';
-import 'package:LoliSnatcher/src/services/get_perms.dart';
-import 'package:LoliSnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+// import 'package:lolisnatcher/libBooru/DBHandler.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 class UntypedCollection {
   final List<String> tags;

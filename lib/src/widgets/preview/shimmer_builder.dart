@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ShiverList extends StatelessWidget {
   const ShiverList({Key? key}) : super(key: key);

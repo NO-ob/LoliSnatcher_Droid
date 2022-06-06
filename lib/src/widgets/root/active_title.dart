@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/widgets/tabs/tab_row.dart';
+import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
 
 class ActiveTitle extends StatelessWidget {
   const ActiveTitle({Key? key}) : super(key: key);

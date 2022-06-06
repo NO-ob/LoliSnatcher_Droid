@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class SettingsTemplate extends StatefulWidget {
   const SettingsTemplate({Key? key}) : super(key: key);

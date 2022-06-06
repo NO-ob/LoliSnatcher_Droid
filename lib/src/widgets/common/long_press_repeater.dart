@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:flutter/material.dart';
 
 class LongPressRepeater extends StatefulWidget {

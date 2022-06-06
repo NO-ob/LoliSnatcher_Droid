@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/thumbnail/thumbnail.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ThumbnailBuild extends StatelessWidget {
   const ThumbnailBuild(this.index, this.columnCount, this.searchGlobal, {Key? key}) : super(key: key);

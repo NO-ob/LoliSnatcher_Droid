@@ -5,15 +5,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/marquee_text.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/src/widgets/image/favicon.dart';
-import 'package:LoliSnatcher/src/widgets/common/cancel_button.dart';
-import 'package:LoliSnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/widgets/tabs/tab_move_dialog.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_move_dialog.dart';
 
 class TabManagerDialog extends StatefulWidget {
   const TabManagerDialog({Key? key}) : super(key: key);

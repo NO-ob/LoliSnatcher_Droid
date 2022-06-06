@@ -5,9 +5,9 @@ import 'dart:typed_data';
 // import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/src/services/image_writer.dart';
-import 'package:LoliSnatcher/src/services/image_writer_isolate.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 
 class DioDownloader {
   DioDownloader(

@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
-import 'package:LoliSnatcher/src/widgets/thumbnail/thumbnail_build.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ThumbnailCardBuild extends StatelessWidget {
   ThumbnailCardBuild(this.index, this.columnCount, this.onTap, this.tab, {Key? key}) : super(key: key);

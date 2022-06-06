@@ -4,7 +4,7 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/data/theme_item.dart';
 
 class ThemeHandler {
   ThemeHandler({

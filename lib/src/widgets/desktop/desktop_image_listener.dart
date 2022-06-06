@@ -5,17 +5,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
-import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/video/video_viewer.dart';
-import 'package:LoliSnatcher/src/widgets/image/image_viewer.dart';
-import 'package:LoliSnatcher/src/widgets/gallery/notes_renderer.dart';
-import 'package:LoliSnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
-import 'package:LoliSnatcher/src/widgets/video/video_viewer_desktop.dart';
-import 'package:LoliSnatcher/src/widgets/video/video_viewer_placeholder.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
+import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
+import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 /// This class will listen for the value of viewedItem in searchGlobals
 /// It will return an empty container if that item has no file URL.

@@ -8,21 +8,21 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/common/marquee_text.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/widgets/dialogs/comments_dialog.dart';
-import 'package:LoliSnatcher/src/widgets/gallery/notes_renderer.dart';
-import 'package:LoliSnatcher/src/data/tag_type.dart';
-import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
+import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class TagView extends StatefulWidget {
   const TagView({Key? key}) : super(key: key);

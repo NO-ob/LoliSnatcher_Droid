@@ -1,4 +1,4 @@
-import 'package:LoliSnatcher/src/widgets/common/transparent_pointer.dart';
+import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 import 'package:flutter/material.dart';
 
 class ViewerTutorial extends StatefulWidget {

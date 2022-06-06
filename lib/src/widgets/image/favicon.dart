@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/src/widgets/image/custom_image_provider.dart';
-import 'package:LoliSnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:lolisnatcher/src/services/dio_downloader.dart';
 
 class Favicon extends StatefulWidget {
   final String faviconURL;

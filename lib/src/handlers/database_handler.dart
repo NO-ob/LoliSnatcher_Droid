@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
 
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 
 ///////////////////////////////////////////////////////////////

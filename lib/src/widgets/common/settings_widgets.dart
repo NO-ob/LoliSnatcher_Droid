@@ -5,12 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/data/booru.dart';
-import 'package:LoliSnatcher/src/widgets/image/favicon.dart';
-import 'package:LoliSnatcher/src/widgets/common/marquee_text.dart';
-import 'package:LoliSnatcher/src/widgets/common/long_press_repeater.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 const double borderWidth = 1;
 

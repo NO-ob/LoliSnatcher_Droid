@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/common/bordered_text.dart';
-import 'package:LoliSnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
 
 class MediaLoading extends StatefulWidget {
   const MediaLoading({

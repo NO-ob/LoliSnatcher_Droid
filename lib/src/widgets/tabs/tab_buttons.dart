@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/widgets/history/history.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/history/history.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TabButtons extends StatelessWidget {
   const TabButtons(this.withArrows, this.alignment, {Key? key}) : super(key: key);

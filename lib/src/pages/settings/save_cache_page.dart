@@ -5,14 +5,14 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/services/image_writer.dart';
-import 'package:LoliSnatcher/src/utils/tools.dart';
-// import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
-import 'package:LoliSnatcher/src/services/image_writer_isolate.dart';
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+// import 'package:lolisnatcher/pages/settings/DirPicker.dart';
+import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
 class SaveCachePage extends StatefulWidget {
   const SaveCachePage({Key? key}) : super(key: key);

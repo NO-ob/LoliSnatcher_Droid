@@ -5,12 +5,12 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/data/booru.dart';
-import 'package:LoliSnatcher/src/data/tag.dart';
-import 'package:LoliSnatcher/src/data/tag_type.dart';
-import 'package:LoliSnatcher/src/boorus/gelbooru_handler.dart';
-import 'package:LoliSnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 /// Booru Handler for the gelbooru engine
 class RealbooruHandler extends GelbooruHandler {

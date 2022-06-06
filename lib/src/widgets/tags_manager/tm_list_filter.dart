@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 
 class TagsManagerListFilter extends StatelessWidget {

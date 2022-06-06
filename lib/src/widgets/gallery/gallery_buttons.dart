@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
-import 'package:LoliSnatcher/src/widgets/gallery/change_page_buttons.dart';
-import 'package:LoliSnatcher/src/widgets/gallery/zoom_button.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/widgets/gallery/change_page_buttons.dart';
+import 'package:lolisnatcher/src/widgets/gallery/zoom_button.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class GalleryButtons extends StatefulWidget {
   const GalleryButtons(this.controller, {Key? key}) : super(key: key);

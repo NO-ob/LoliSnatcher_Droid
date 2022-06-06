@@ -8,16 +8,16 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/viewer_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/widgets/thumbnail/thumbnail.dart';
-import 'package:LoliSnatcher/src/widgets/image/custom_image_provider.dart';
-import 'package:LoliSnatcher/src/services/dio_downloader.dart';
-import 'package:LoliSnatcher/src/widgets/common/media_loading.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:lolisnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ImageViewer extends StatefulWidget {
   const ImageViewer(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);

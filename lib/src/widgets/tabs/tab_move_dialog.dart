@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TabMoveDialog extends StatefulWidget {
   const TabMoveDialog({Key? key, required this.row, required this.index}) : super(key: key);

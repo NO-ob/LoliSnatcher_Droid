@@ -2,11 +2,11 @@
 
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/utils/tools.dart';
-import 'package:LoliSnatcher/src/widgets/common/cancel_button.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/widgets/tags_manager/tm_list_item.dart';
-import 'package:LoliSnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 
 
 class TagsManagerListBottom extends StatelessWidget {

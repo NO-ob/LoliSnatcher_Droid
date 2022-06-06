@@ -1,5 +1,6 @@
-import 'package:LoliSnatcher/src/data/tag_type.dart';
 import 'package:flutter/material.dart';
+
+import 'package:lolisnatcher/src/data/tag_type.dart';
 
 class Tag {
   String displayString = "", fullString = "";

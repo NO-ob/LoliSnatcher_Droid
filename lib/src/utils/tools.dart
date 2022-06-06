@@ -1,7 +1,9 @@
 import 'dart:math';
-import 'package:LoliSnatcher/src/data/booru.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'package:lolisnatcher/src/data/booru.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9

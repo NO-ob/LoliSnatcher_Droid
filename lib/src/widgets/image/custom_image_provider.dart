@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
-import 'package:LoliSnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
 
 
 // memoryimage but with url added in attempt to not load extra copies of already loaded images

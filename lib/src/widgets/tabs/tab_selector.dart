@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/widgets/tabs/tab_manager_dialog.dart';
-import 'package:LoliSnatcher/src/widgets/tabs/tab_row.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_manager_dialog.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 
 class TabSelector extends StatelessWidget {

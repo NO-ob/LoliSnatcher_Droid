@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
-import 'package:LoliSnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class GridBuilder extends StatelessWidget {
   const GridBuilder(this.onTap, {Key? key}) : super(key: key);

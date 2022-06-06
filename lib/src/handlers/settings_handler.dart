@@ -8,19 +8,19 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:LoliSnatcher/src/services/get_perms.dart';
-import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
-import 'package:LoliSnatcher/src/data/theme_item.dart';
-import 'package:LoliSnatcher/src/data/booru.dart';
-import 'package:LoliSnatcher/src/handlers/database_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/flash_elements.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/src/utils/http_overrides.dart';
-import 'package:LoliSnatcher/src/data/update_info.dart';
-import 'package:LoliSnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/http_overrides.dart';
+import 'package:lolisnatcher/src/data/update_info.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {

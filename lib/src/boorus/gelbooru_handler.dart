@@ -6,14 +6,14 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
-import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
-import 'package:LoliSnatcher/src/data/booru_item.dart';
-import 'package:LoliSnatcher/src/data/booru.dart';
-import 'package:LoliSnatcher/src/data/comment_item.dart';
-import 'package:LoliSnatcher/src/data/note_item.dart';
-import 'package:LoliSnatcher/src/data/tag.dart';
-import 'package:LoliSnatcher/src/data/tag_type.dart';
-import 'package:LoliSnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 /// Booru Handler for the gelbooru engine
 class GelbooruHandler extends BooruHandler {

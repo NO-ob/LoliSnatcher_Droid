@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:LoliSnatcher/src/handlers/search_handler.dart';
-import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class PageNumberDialog extends StatelessWidget {
   const PageNumberDialog({Key? key}) : super(key: key);
