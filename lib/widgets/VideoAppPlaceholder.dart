@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CachedThumbBetter.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 

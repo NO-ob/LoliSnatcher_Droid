@@ -4,9 +4,9 @@ import 'dart:convert';
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 
@@ -14,6 +14,7 @@ import 'package:LoliSnatcher/utilities/Logger.dart';
 class RainbooruHandler extends BooruHandler {
   RainbooruHandler(Booru booru,int limit) : super(booru,limit);
 
+  @override
   bool tagSearchEnabled = true;
 
   @override
@@ -33,7 +34,7 @@ class RainbooruHandler extends BooruHandler {
       if (response.statusCode == 200) {
         await parseResponse(response);
       } else {
-        Logger.Inst().log("rainbooru status is" + response.statusCode.toString(), "RainbooruHandler","parseResponse", LogTypes.booruHandlerInfo);
+        Logger.Inst().log("rainbooru status is${response.statusCode}", "RainbooruHandler","parseResponse", LogTypes.booruHandlerInfo);
         errorString = response.statusCode.toString();
       }
       prevTags = tags;
@@ -67,8 +68,8 @@ class RainbooruHandler extends BooruHandler {
         var post = document.getElementById("immainpage");
         if (post != null){
           var postsURLs = post.querySelector("div#immainpage > a");
-          String fileURL = "" + postsURLs!.attributes["href"]!;
-          String sampleURL = "" + postsURLs.firstChild!.attributes["src"]!;
+          String fileURL = postsURLs!.attributes["href"]!;
+          String sampleURL = postsURLs.firstChild!.attributes["src"]!;
           var tags = document.querySelectorAll("a.tag");
           List<String> currentTags = [];
           for (int x = 0; x < tags.length; x++) {
@@ -94,21 +95,24 @@ class RainbooruHandler extends BooruHandler {
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/img/$id";
   }
 
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     //https://www.rainbooru.org/search?search=safe,solo&page=0
     if (tags != "*") {
-      return "${booru.baseURL}/search?filters=&search="+tags.replaceAll(" ", ",")+"&page=${pageNum.toString()}";
+      return "${booru.baseURL}/search?filters=&search=${tags.replaceAll(" ", ",")}&page=${pageNum.toString()}";
     } else {
       return "${booru.baseURL}/?search=&page=${pageNum.toString()}";
     }
   }
 
+  @override
   String makeTagURL(String input){
     return "https://twibooru.org/tags.json?tq=*$input*";
   }
@@ -134,7 +138,7 @@ class RainbooruHandler extends BooruHandler {
           ["-dot-","."],
           ["-plus-","+"]
         ];
-        if (parsedResponse.length > 0){
+        if (parsedResponse.isNotEmpty){
           for (int i=0; i < 10; i++) {
             String tag = parsedResponse[i]['slug'].toString();
             for (int x = 0; x < tagStringReplacements.length; x++){

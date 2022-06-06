@@ -2,12 +2,12 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'package:LoliSnatcher/libBooru/CommentItem.dart';
+import 'package:LoliSnatcher/src/data/CommentItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/boorus/SankakuHandler.dart';
-import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
 
 /// Booru Handler for the Danbooru engine
 class IdolSankakuHandler extends SankakuHandler{

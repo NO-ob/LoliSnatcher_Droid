@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 

@@ -6,7 +6,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/ThumbBuild.dart';
 

@@ -1,8 +1,8 @@
 import 'package:html/parser.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /// Booru Handler for the gelbooru engine

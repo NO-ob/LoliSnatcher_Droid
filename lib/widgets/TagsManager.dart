@@ -14,7 +14,7 @@ import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
-import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 
 class TagsManager extends StatefulWidget {

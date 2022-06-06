@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 

@@ -1,5 +1,5 @@
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/boorus/BooruOnRailsHandler.dart';
 import 'package:LoliSnatcher/src/boorus/DanbooruHandler.dart';
 import 'package:LoliSnatcher/src/boorus/EmptyHandler.dart';

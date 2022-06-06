@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
@@ -37,7 +37,7 @@ class MergebooruHandler extends BooruHandler{
         tags.replaceAll(RegExp(r"(?!""${i + 1}"r")\d+#[A-Za-z0-9\_\-~:]*"), "")
             .replaceAll("  "," ")
             .replaceAll(RegExp(r"\d+#"),"").trim();
-      Logger.Inst().log("TAGS FOR #${i} are: $currentTags", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("TAGS FOR #$i are: $currentTags", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
       List<BooruItem> tmpFetched = (await booruHandlers[i].Search(currentTags, null)) ?? [];
       tmpFetchedList.add(tmpFetched);
@@ -74,7 +74,7 @@ class MergebooruHandler extends BooruHandler{
       innerFetchedOffset ++;
     } while ((fetched.length < fetchedMax) && innerFetchedIndex < fetchedMax);
 
-    this.locked = shouldLock();
+    locked = shouldLock();
     return fetched;
   }
 
@@ -110,7 +110,7 @@ class MergebooruHandler extends BooruHandler{
   }
   @override
   void setupMerge(List<Booru> boorus){
-    innerLimit = (this.limit / boorus.length).ceil();
+    innerLimit = (limit / boorus.length).ceil();
     booruList.addAll(boorus);
     for (var element in booruList) {
       List factoryResults = BooruHandlerFactory().getBooruHandler([element], innerLimit);
@@ -128,13 +128,14 @@ class MergebooruHandler extends BooruHandler{
       return booruHandlers[0].tagSearch(input);
   }
 
+  @override
   Future<void> searchCount(String input) async {
     int result = 0;
     for (int i = 0; i < booruHandlers.length; i++){
       await booruHandlers[i].searchCount(input);
       result += booruHandlers[i].totalCount.value;
     }
-    this.totalCount.value = result;
+    totalCount.value = result;
     return;
   }
 

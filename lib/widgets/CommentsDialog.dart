@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/libBooru/CommentItem.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/CommentItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
 

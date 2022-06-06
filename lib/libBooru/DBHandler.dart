@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
 
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/Tools.dart';
 

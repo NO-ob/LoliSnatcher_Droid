@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/libBooru/NoteItem.dart';
+import 'package:LoliSnatcher/src/data/NoteItem.dart';
 
 class BooruItem{
   late Key key;

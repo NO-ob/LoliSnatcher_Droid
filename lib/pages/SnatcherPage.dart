@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';

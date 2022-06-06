@@ -11,7 +11,7 @@ import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/ViewUtils.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/CustomImageProvider.dart';
 import 'package:LoliSnatcher/widgets/DioDownloader.dart';
 import 'package:LoliSnatcher/widgets/LoadingElement.dart';

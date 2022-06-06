@@ -1,15 +1,16 @@
 import 'dart:math';
 import 'dart:async';
 
-import 'package:LoliSnatcher/libBooru/CommentItem.dart';
-import 'package:LoliSnatcher/libBooru/NoteItem.dart';
-import 'package:LoliSnatcher/libBooru/Tag.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/CommentItem.dart';
+import 'package:LoliSnatcher/src/data/NoteItem.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
+import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 

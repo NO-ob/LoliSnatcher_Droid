@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:LoliSnatcher/libBooru/TagHandler.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +13,7 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
 import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/Tools.dart';
 import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';

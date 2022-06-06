@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 class WorldHandler extends BooruHandler {

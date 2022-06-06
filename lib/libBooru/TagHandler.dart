@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
 import 'package:LoliSnatcher/libBooru/BooruHandlerFactory.dart';
 // import 'package:LoliSnatcher/libBooru/DBHandler.dart';
-import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:LoliSnatcher/getPerms.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 

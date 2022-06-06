@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/ServiceHandler.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/boorus/SankakuHandler.dart';
 import 'package:LoliSnatcher/widgets/CancelButton.dart';
 import 'package:LoliSnatcher/widgets/FlashElements.dart';

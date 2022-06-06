@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:LoliSnatcher/src/boorus/GelbooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /// Booru Handler for the gelbooru engine

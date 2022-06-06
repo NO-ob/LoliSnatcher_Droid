@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/Tools.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/BorderedText.dart';
 import 'package:LoliSnatcher/utilities/debouncer.dart';
 

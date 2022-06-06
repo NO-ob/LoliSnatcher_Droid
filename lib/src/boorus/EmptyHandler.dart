@@ -1,5 +1,5 @@
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 
 class EmptyHandler extends BooruHandler {
   // Dart constructors are weird so it has to call super with the args

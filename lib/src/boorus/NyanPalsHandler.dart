@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
-/**
- * Booru Handler for the gelbooru engine
- */
+/// Booru Handler for the gelbooru engine
 class NyanPalsHandler extends BooruHandler{
   // Dart constructors are weird so it has to call super with the args
   NyanPalsHandler(Booru booru, int limit): super(booru,limit);
@@ -48,13 +46,13 @@ class NyanPalsHandler extends BooruHandler{
         md5String: md5
       );
 
-      thumbURL = booru.baseURL! + "/img/pettankontent/";
+      thumbURL = "${booru.baseURL!}/img/pettankontent/";
       if (item.mediaType == "video") {
-        thumbURL = thumbURL + item.md5String! + ".mp4";
+        thumbURL = "$thumbURL${item.md5String!}.mp4";
       } else if (item.mediaType == "animation") {
-        thumbURL = thumbURL + "_" + item.md5String! + ".gif";
+        thumbURL = "${thumbURL}_${item.md5String!}.gif";
       } else {
-        thumbURL = thumbURL + "_" + item.md5String! + ".png";
+        thumbURL = "${thumbURL}_${item.md5String!}.png";
       }
       item.thumbnailURL = thumbURL;
 
@@ -70,11 +68,13 @@ class NyanPalsHandler extends BooruHandler{
   }
 
   // This will create a url to goto the images page in the browser
+  @override
   String makePostURL(String id){
     return "${booru.baseURL}/index.php?page=post&s=view&id=$id";
   }
 
   // This will create a url for the http request
+  @override
   String makeURL(String tags){
     //https://nyanpals.com/kontent?include=nsfw&exclude=&allow=&limit=50&method=uploaded&offset=0&order=DESC&token=null
     String includeTags = "";
@@ -82,14 +82,15 @@ class NyanPalsHandler extends BooruHandler{
     tags.split(" ").forEach((element) {
       String tag = element.replaceAll("_", " ");
       if (tag.contains("-")){
-        excludeTags += tag.replaceAll("-", "") + ",";
+        excludeTags += "${tag.replaceAll("-", "")},";
       } else {
-        includeTags += tag + ",";
+        includeTags += "$tag,";
       }
     });
     return "${booru.baseURL}/kontent?include=$includeTags&exclude=$excludeTags&allow=&limit=$limit&method=uploaded&offset=${pageNum * limit}&order=DESC&token=null";
   }
 
+  @override
   String makeTagURL(String input){
     if (booru.baseURL!.contains("rule34.xxx")){
       return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity

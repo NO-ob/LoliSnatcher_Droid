@@ -7,11 +7,11 @@ import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
 import 'package:LoliSnatcher/libBooru/BooruHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/libBooru/CommentItem.dart';
-import 'package:LoliSnatcher/libBooru/NoteItem.dart';
-import 'package:LoliSnatcher/libBooru/Tag.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
+import 'package:LoliSnatcher/src/data/CommentItem.dart';
+import 'package:LoliSnatcher/src/data/NoteItem.dart';
+import 'package:LoliSnatcher/src/data/Tag.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 
 /// Booru Handler for the gelbooru engine

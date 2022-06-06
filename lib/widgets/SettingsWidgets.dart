@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/widgets/CachedFavicon.dart';
 import 'package:LoliSnatcher/widgets/MarqueeText.dart';
 import 'package:LoliSnatcher/widgets/LongPressRepeater.dart';

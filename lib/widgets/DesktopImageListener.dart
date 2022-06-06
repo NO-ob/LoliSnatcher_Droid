@@ -9,7 +9,7 @@ import 'package:LoliSnatcher/SearchGlobals.dart';
 import 'package:LoliSnatcher/SettingsHandler.dart';
 import 'package:LoliSnatcher/SnatchHandler.dart';
 import 'package:LoliSnatcher/ViewerHandler.dart';
-import 'package:LoliSnatcher/libBooru/BooruItem.dart';
+import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/widgets/VideoApp.dart';
 import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
 import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';

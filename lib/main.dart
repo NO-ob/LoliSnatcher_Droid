@@ -22,7 +22,7 @@ import 'package:LoliSnatcher/MobileHome.dart';
 import 'package:LoliSnatcher/ThemeItem.dart';
 import 'package:LoliSnatcher/widgets/ImageStats.dart';
 import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
+import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/utilities/Logger.dart';
 import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
