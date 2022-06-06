@@ -15,8 +15,8 @@ import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
 import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/handlers/database_handler.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
 import 'package:LoliSnatcher/src/utils/http_overrides.dart';
 

@@ -13,12 +13,12 @@ import 'package:LoliSnatcher/src/pages/settings/DebugPage.dart';
 import 'package:LoliSnatcher/src/pages/settings/GalleryPage.dart';
 import 'package:LoliSnatcher/src/pages/settings/UserInterfacePage.dart';
 import 'package:LoliSnatcher/src/pages/settings/FilterTagsPage.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/pages/LoliSyncPage.dart';
 import 'package:LoliSnatcher/src/pages/settings/BackupRestorePage.dart';
 import 'package:LoliSnatcher/src/pages/settings/ThemePage.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/MascotImage.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/MascotImage.dart';
 
 /// Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
 class SettingsPage extends StatelessWidget {

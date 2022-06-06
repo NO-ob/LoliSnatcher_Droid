@@ -10,7 +10,7 @@ import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/data/ThemeItem.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/utils/debouncer.dart';
 
 class ThemePage extends StatefulWidget {

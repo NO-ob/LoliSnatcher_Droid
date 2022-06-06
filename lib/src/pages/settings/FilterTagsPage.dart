@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
-import 'package:LoliSnatcher/widgets/MarqueeText.dart';
-import 'package:LoliSnatcher/widgets/DesktopScrollWrap.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/MarqueeText.dart';
+import 'package:LoliSnatcher/src/widgets/desktop/DesktopScrollWrap.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 
 class FiltersEdit extends StatefulWidget {
   const FiltersEdit({Key? key}) : super(key: key);

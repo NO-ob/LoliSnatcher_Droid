@@ -10,7 +10,7 @@ import 'package:LoliSnatcher/src/handlers/booru_handler.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
 
 /// Booru Handler for the gelbooru engine
 class HydrusHandler extends BooruHandler{

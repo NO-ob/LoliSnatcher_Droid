@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
-import 'package:LoliSnatcher/widgets/MediaViewerBetter.dart';
-import 'package:LoliSnatcher/widgets/VideoApp.dart';
-import 'package:LoliSnatcher/widgets/VideoAppDesktop.dart';
+import 'package:LoliSnatcher/src/widgets/image/MediaViewerBetter.dart';
+import 'package:LoliSnatcher/src/widgets/video/VideoApp.dart';
+import 'package:LoliSnatcher/src/widgets/video/VideoAppDesktop.dart';
 
 class ViewerHandler extends GetxController {
   static ViewerHandler get instance => Get.find<ViewerHandler>();

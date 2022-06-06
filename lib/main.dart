@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:app_links/app_links.dart';
 
-import 'package:LoliSnatcher/widgets/ScrollPhysics.dart';
+import 'package:LoliSnatcher/src/widgets/root/ScrollPhysics.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
 import 'package:LoliSnatcher/src/handlers/search_handler.dart';
@@ -20,15 +20,15 @@ import 'package:LoliSnatcher/src/handlers/navigation_handler.dart';
 import 'package:LoliSnatcher/src/pages/DesktopHomePage.dart';
 import 'package:LoliSnatcher/src/pages/MobileHomePage.dart';
 import 'package:LoliSnatcher/src/data/ThemeItem.dart';
-import 'package:LoliSnatcher/widgets/ImageStats.dart';
+import 'package:LoliSnatcher/src/widgets/root/ImageStats.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/pages/settings/BooruEditPage.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/handlers/tag_handler.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/widgets/ThemeBuilder.dart';
+import 'package:LoliSnatcher/src/widgets/root/ThemeBuilder.dart';
 
 // import 'package:LoliSnatcher/widgets/FlashElements.dart';
 

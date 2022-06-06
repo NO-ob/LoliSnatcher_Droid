@@ -10,7 +10,7 @@ import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/utils/logger.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
 
 class LoliSync{
   String ip = "127.0.0.1";

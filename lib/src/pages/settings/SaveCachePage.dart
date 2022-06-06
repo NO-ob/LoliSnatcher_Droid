@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/services/ImageWriter.dart';
 import 'package:LoliSnatcher/src/utils/tools.dart';
 // import 'package:LoliSnatcher/pages/settings/DirPicker.dart';
 import 'package:LoliSnatcher/src/services/ImageWriterIsolate.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
 
 class SaveCachePage extends StatefulWidget {
   const SaveCachePage({Key? key}) : super(key: key);

@@ -11,8 +11,8 @@ import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/loli_sync_handler.dart';
 import 'package:LoliSnatcher/src/pages/LoliSyncProgressPage.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 
 enum SyncSide {
   none,

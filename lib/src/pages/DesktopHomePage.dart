@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
-import 'package:LoliSnatcher/widgets/DesktopImageListener.dart';
-import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
-import 'package:LoliSnatcher/widgets/TagView.dart';
-import 'package:LoliSnatcher/widgets/TabBox.dart';
-import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
-import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/search/tab_booru_selector.dart';
+import 'package:LoliSnatcher/src/widgets/desktop/DesktopImageListener.dart';
+import 'package:LoliSnatcher/src/widgets/preview/ImagePreviews.dart';
+import 'package:LoliSnatcher/src/widgets/gallery/TagView.dart';
+import 'package:LoliSnatcher/src/widgets/tabs/TabBox.dart';
+import 'package:LoliSnatcher/src/widgets/tabs/TabBoxButtons.dart';
+import 'package:LoliSnatcher/src/widgets/search/TagSearchBox.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/src/handlers/snatch_handler.dart';
 import 'package:LoliSnatcher/src/pages/SnatcherPage.dart';
 import 'package:LoliSnatcher/src/services/getPerms.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
-import 'package:LoliSnatcher/widgets/ResizableSplitView.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/search/TagSearchButton.dart';
+import 'package:LoliSnatcher/src/widgets/desktop/ResizableSplitView.dart';
 
 class DesktopHome extends StatelessWidget {
   const DesktopHome({Key? key}) : super(key: key);
@@ -52,7 +52,7 @@ class DesktopHome extends StatelessWidget {
                     SizedBox(width: 15),
                     TagSearchBox(),
                     TagSearchButton(),
-                    Expanded(flex: 1, child: BooruSelectorMain(true)),
+                    Expanded(flex: 1, child: TabBooruSelector(true)),
                     Expanded(flex: 2, child: TabBox()),
                     Expanded(flex: 2, child: TabBoxButtons(false, WrapAlignment.start)),
                   ],

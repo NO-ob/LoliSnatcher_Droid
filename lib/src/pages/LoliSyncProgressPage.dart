@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/handlers/loli_sync_handler.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 
 class LoliSyncProgressPage extends StatefulWidget {
   const LoliSyncProgressPage({

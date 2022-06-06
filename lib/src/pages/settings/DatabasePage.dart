@@ -7,9 +7,9 @@ import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/data/Booru.dart';
 import 'package:LoliSnatcher/src/data/BooruItem.dart';
 import 'package:LoliSnatcher/src/boorus/SankakuHandler.dart';
-import 'package:LoliSnatcher/widgets/CancelButton.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/common/cancel_button.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
 
 class DatabasePage extends StatefulWidget {
   const DatabasePage({Key? key}) : super(key: key);

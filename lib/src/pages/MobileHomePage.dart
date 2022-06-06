@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 
-import 'package:LoliSnatcher/widgets/BooruSelectorMain.dart';
-import 'package:LoliSnatcher/widgets/ImagePreviews.dart';
-import 'package:LoliSnatcher/widgets/TabBox.dart';
-import 'package:LoliSnatcher/widgets/TabBoxButtons.dart';
-import 'package:LoliSnatcher/widgets/TagSearchBox.dart';
+import 'package:LoliSnatcher/src/widgets/search/tab_booru_selector.dart';
+import 'package:LoliSnatcher/src/widgets/preview/ImagePreviews.dart';
+import 'package:LoliSnatcher/src/widgets/tabs/TabBox.dart';
+import 'package:LoliSnatcher/src/widgets/tabs/TabBoxButtons.dart';
+import 'package:LoliSnatcher/src/widgets/search/TagSearchBox.dart';
 import 'package:LoliSnatcher/src/handlers/search_handler.dart';
 import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/pages/SettingsPage.dart';
 import 'package:LoliSnatcher/src/pages/SnatcherPage.dart';
-import 'package:LoliSnatcher/widgets/FlashElements.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/widgets/TagSearchButton.dart';
-import 'package:LoliSnatcher/widgets/MascotImage.dart';
+import 'package:LoliSnatcher/src/widgets/common/FlashElements.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/search/TagSearchButton.dart';
+import 'package:LoliSnatcher/src/widgets/common/MascotImage.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
-import 'package:LoliSnatcher/widgets/MainAppbar.dart';
+import 'package:LoliSnatcher/src/widgets/root/MainAppbar.dart';
 
 class MobileHome extends StatefulWidget {
   const MobileHome({Key? key}) : super(key: key);
@@ -240,11 +240,11 @@ class MainDrawer extends StatelessWidget {
                     children: [
                       const TabBox(),
                       const TabBoxButtons(true, WrapAlignment.spaceEvenly),
-                      const BooruSelectorMain(true),
+                      const TabBooruSelector(true),
                       const MergeBooruToggle(),
                       Obx(() {
                         if (settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled.value) {
-                          return const BooruSelectorMain(false);
+                          return const TabBooruSelector(false);
                         } else {
                           return const SizedBox.shrink();
                         }

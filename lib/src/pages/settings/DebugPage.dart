@@ -10,8 +10,8 @@ import 'package:LoliSnatcher/src/handlers/settings_handler.dart';
 import 'package:LoliSnatcher/src/handlers/service_handler.dart';
 import 'package:LoliSnatcher/src/pages/settings/LoggerPage.dart';
 import 'package:LoliSnatcher/src/utils/http_overrides.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/widgets/TagsManager.dart';
+import 'package:LoliSnatcher/src/widgets/common/SettingsWidgets.dart';
+import 'package:LoliSnatcher/src/widgets/tags_manager/TagsManager.dart';
 
 class DebugPage extends StatefulWidget {
   const DebugPage({Key? key}) : super(key: key);
