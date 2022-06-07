@@ -128,11 +128,9 @@ class MainActivity: FlutterActivity() {
                         Environment.DIRECTORY_PICTURES).absolutePath);
             } else if (call.method == "getCachePath"){
                 result.success(context.cacheDir.absolutePath);
-            }
-            else if (call.method == "getSdkVersion"){
+            } else if (call.method == "getSdkVersion"){
                 result.success(android.os.Build.VERSION.SDK_INT);
-            }
-            else if (call.method == "writeImage"){
+            } else if (call.method == "writeImage"){
                 var imageBytes = call.argument<ByteArray>("imageData");
                 val fileName = call.argument<String>("fileName");
                 val mediaType = call.argument<String>("mediaType");
@@ -224,14 +222,13 @@ class MainActivity: FlutterActivity() {
             } else if (call.method == "getFileExtension"){
                 val uri: String? = call.argument("uri");
                 result.success(uri?.let { getFileExt(it)});
-            }else if (call.method == "getFileByName"){
+            } else if (call.method == "getFileByName"){
                 val uri: String? = call.argument("uri");
                 val fileName: String? = call.argument("fileName");
                 if (fileName != null && uri != null) {
                     result.success(getFileByName(uri,fileName));
                 }
-            }
-            else if (call.method == "testSAF"){
+            } else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
                 val permissions =
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

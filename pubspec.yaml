@@ -1,4 +1,4 @@
-name: LoliSnatcher
+name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
@@ -20,61 +20,62 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.4
-  http: ^0.13.4
-  dio: ^4.0.5
-  xml: ^6.0.1
-  intl: ^0.17.0
-  uuid: ^3.0.6
-  package_info_plus: ^1.4.2
-  path_provider: ^2.0.10
+
   app_links: ^3.2.0
-  flex_color_picker: ^2.5.0
-  flash: ^2.0.3+2
-  dropdown_search: ^4.0.1
-  # marquee: ^2.2.2 # replaced with fast_marquee
-  fast_marquee:
-    git:
-      # url: "https://github.com/hacker1024/fast_marquee.git" # original
-      url: "https://github.com/NANI-SORE/fast_marquee.git"
-      ref: 62cf0021640b4e67f1e889fcbeebd9b0104ff6d0 # master - forked to fix for flutter 3.0
   auto_size_text: ^3.0.0
-  flutter_linkify: ^5.0.2
-  statsfl: ^2.3.0
-  vibration: ^1.7.4-nullsafety.0
-  get: ^4.6.3
-  permission_handler: ^9.2.0 # next update will require android sdk version 31
-  image: ^3.2.0
-  google_fonts: ^2.3.3
-  photo_view: # ^0.12.0
-    git:
-      url: "https://github.com/NANI-SORE/photo_view.git"
-      ref: e1efd408a788d497ef76a6ab755c648cc93e9380 # master
-  html: ^0.15.0
-  waterfall_flow: ^3.0.2
-  scroll_to_index: ^3.0.1
-  flutter_inner_drawer:
-    git:
-      url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
-      ref: 8e50920055dcb04b6b58560629daced7b86be36e # master
-  transparent_image: ^2.0.0
-  video_player: ^2.4.2
+  chewie: ^1.3.3
+  crypto: ^3.0.2
+  cupertino_icons: ^1.0.5
   # dart_vlc: ^0.2.0 # ^0.1.9 # 
   dart_vlc: # forked to update vlc lib on windows
     git:
       url: "https://github.com/NANI-SORE/dart_vlc_with_sm.git"
       # ref: e587fcff584bf1c3ce726137316048006284f7bb # main - 0.2.0 , can't update, for some reason doesn't see main vlc files?
       ref: f52c01d72c200431b251507fed2bd970fe7f7412 # main - 0.1.9
-  chewie: ^1.3.3
+  dio: ^4.0.5
+  dropdown_search: ^5.0.2
+  fast_marquee:
+    git:
+      # url: "https://github.com/hacker1024/fast_marquee.git" # original
+      url: "https://github.com/NANI-SORE/fast_marquee.git"
+      ref: 62cf0021640b4e67f1e889fcbeebd9b0104ff6d0 # master - forked to fix for flutter 3.0
+  flash: ^2.0.3+2
+  flex_color_picker: ^2.5.0
+  flutter_displaymode: ^0.4.0
+  flutter_improved_scrolling: ^0.0.3
+  flutter_inner_drawer:
+    git:
+      url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
+      ref: 8e50920055dcb04b6b58560629daced7b86be36e # master
+  flutter_linkify: ^5.0.2
+  get: ^4.6.5
+  google_fonts: ^3.0.1
+  html: ^0.15.0
+  http: ^0.13.4
+  huge_listview: ^2.0.3
+  image: ^3.2.0
+  intl: ^0.17.0
+  keyboard_actions: ^4.0.0
+  # marquee: ^2.2.2 # replaced with fast_marquee
+  package_info_plus: ^1.4.2
+  path_provider: ^2.0.10
+  permission_handler: ^9.2.0
+  photo_view: # ^0.12.0
+    git:
+      url: "https://github.com/NANI-SORE/photo_view.git"
+      ref: e1efd408a788d497ef76a6ab755c648cc93e9380 # master
+  preload_page_view: ^0.1.6
+  scroll_to_index: ^3.0.1
+  scrollable_positioned_list: ^0.3.2
   sqflite: ^2.0.2+1
   sqflite_common_ffi: ^2.1.1
-  preload_page_view: ^0.1.6
-  flutter_displaymode: ^0.4.0
-  crypto: ^3.0.2
-  keyboard_actions: ^4.0.0
-  flutter_improved_scrolling: ^0.0.3
+  statsfl: ^2.3.0
+  transparent_image: ^2.0.0
+  uuid: ^3.0.6
+  vibration: ^1.7.4-nullsafety.0
+  video_player: ^2.4.2
+  waterfall_flow: ^3.0.2
+  xml: ^6.1.0
 
 
 
@@ -95,7 +96,6 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^2.0.1
 
 

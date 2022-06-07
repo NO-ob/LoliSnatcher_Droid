@@ -11,25 +11,25 @@ import 'package:flutter/services.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:app_links/app_links.dart';
 
-import 'package:LoliSnatcher/ScrollPhysics.dart';
-import 'package:LoliSnatcher/SettingsHandler.dart';
-import 'package:LoliSnatcher/SnatchHandler.dart';
-import 'package:LoliSnatcher/SearchGlobals.dart';
-import 'package:LoliSnatcher/ViewerHandler.dart';
-import 'package:LoliSnatcher/DesktopHome.dart';
-import 'package:LoliSnatcher/MobileHome.dart';
-import 'package:LoliSnatcher/ThemeItem.dart';
-import 'package:LoliSnatcher/widgets/ImageStats.dart';
-import 'package:LoliSnatcher/ImageWriter.dart';
-import 'package:LoliSnatcher/libBooru/Booru.dart';
-import 'package:LoliSnatcher/pages/settings/BooruEditPage.dart';
-import 'package:LoliSnatcher/utilities/Logger.dart';
-import 'package:LoliSnatcher/widgets/SettingsWidgets.dart';
-import 'package:LoliSnatcher/libBooru/TagHandler.dart';
-import 'package:LoliSnatcher/ServiceHandler.dart';
-import 'package:LoliSnatcher/widgets/ThemeBuilder.dart';
-
-// import 'package:LoliSnatcher/widgets/FlashElements.dart';
+import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/pages/desktop_home_page.dart';
+import 'package:lolisnatcher/src/pages/mobile_home_page.dart';
+import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/theme_handler.dart';
+import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +57,7 @@ class _MainAppState extends State<MainApp> {
   late final SearchHandler searchHandler;
   late final SnatchHandler snatchHandler;
   late final ViewerHandler viewerHandler;
+  late final NavigationHandler navigationHandler;
   late final TagHandler tagHandler;
   int maxFps = 60;
 
@@ -68,6 +69,7 @@ class _MainAppState extends State<MainApp> {
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
+    navigationHandler = Get.put(NavigationHandler(), permanent: true);
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {
@@ -115,6 +117,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
+    Get.delete<NavigationHandler>();
     Get.delete<ViewerHandler>();
     Get.delete<SnatchHandler>();
     Get.delete<SearchHandler>();
@@ -142,6 +145,7 @@ class _MainAppState extends State<MainApp> {
         isAmoled: isAmoled,
       );
 
+      // TODO fix status bar coloring when in gallery view (AND depending on theme?)
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       //   statusBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
       //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
@@ -172,19 +176,16 @@ class _MainAppState extends State<MainApp> {
           width: 110,
           height: 80,
           align: Alignment.centerLeft,
-          child: GetMaterialApp(
+          child: MaterialApp(
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
             showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
             scrollBehavior: const CustomScrollBehavior(),
-            // theme: ThemeData(),
             theme: themeHandler.lightTheme(),
-            // TODO doesnt detect when appbar text color should change depending on the background ???
-            // darkTheme: ThemeData.dark(),
             darkTheme: themeHandler.darkTheme(),
 
             themeMode: themeMode,
-            navigatorKey: Get.key,
+            navigatorKey: navigationHandler.navigatorKey,
             home: const Preloader(),
           ),
         ),
