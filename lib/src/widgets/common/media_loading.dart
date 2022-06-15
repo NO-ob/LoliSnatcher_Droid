@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
 
@@ -61,7 +62,7 @@ class _MediaLoadingState extends State<MediaLoading> {
   Timer? _checkInterval;
   StreamSubscription? _totalListener, _receivedListener, _startedAtListener;
 
-  int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _lastReceivedTime = 0;
+  int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _prevReceivedTime = 0, _lastReceivedTime = 0;
 
   @override
   void initState() {
@@ -95,6 +96,9 @@ class _MediaLoadingState extends State<MediaLoading> {
         updateState();
       }
     });
+
+    _prevReceivedTime = DateTime.now().millisecondsSinceEpoch - 1;
+    _lastReceivedTime = _prevReceivedTime + 1;
   }
 
   void _onBytesAdded(int? received, int? total) {
@@ -126,6 +130,7 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     _prevReceivedAmount = 0;
     _lastReceivedAmount = 0;
+    _prevReceivedTime = 0;
     _lastReceivedTime = 0;
 
     _totalListener?.cancel();
@@ -187,6 +192,7 @@ class _MediaLoadingState extends State<MediaLoading> {
       _prevReceivedAmount = _lastReceivedAmount;
       _lastReceivedAmount = expectedBytes;
 
+      _prevReceivedTime = _lastReceivedTime;
       _lastReceivedTime = nowMils;
     }
 
@@ -215,17 +221,18 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
 
-    int expectedSpeed = hasProgressData ? ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval).round()) : 0;
+    int expectedSpeed = 0;
+    if (hasProgressData && _prevReceivedAmount > 0 && _lastReceivedAmount > 0) {
+      expectedSpeed = ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / (nowMils - _prevReceivedTime))).round();
+      // expectedSpeed = ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval)).round();
+    }
     String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
 
     double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1)
-        ? ("~${expectedTime.toStringAsFixed(1)} second${expectedTime == 1 ? '' : 's'} left")
-        : '';
+    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ("~${expectedTime.toStringAsFixed(1)} s") : '';
 
     int sinceStartSeconds = (sinceStart / 1000).floor();
-    String sinceStartText =
-        (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()} ${Tools.pluralize('second', sinceStartSeconds)} ago' : '';
+    String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()}s ago' : '';
 
     bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated.value;
 
@@ -236,171 +243,181 @@ class _MediaLoadingState extends State<MediaLoading> {
       return const SizedBox();
     }
 
+    List<Widget> children = [];
+    if (widget.isStopped) {
+      children = [
+        ...widget.stopReasons.map((String reason) {
+          return LoadingText(
+            text: reason,
+            fontSize: 18,
+          );
+        }),
+        const SizedBox(height: 10),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.play_arrow, size: 44, color: Colors.blue),
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(Colors.black54),
+          ),
+          label: LoadingText(
+            text: (widget.isTooBig || widget.item.isHated.value) ? 'Load Anyway' : 'Restart Loading',
+            fontSize: 16,
+            color: Colors.blue,
+          ),
+          onPressed: () {
+            widget.startAction?.call();
+          },
+        ),
+        if (isMovedBelow) const SizedBox(height: 60),
+      ];
+    } else {
+      if (settingsHandler.loadingGif) {
+        children = [
+          const Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
+          const SizedBox(height: 30),
+          LoadingText(
+            text: percentDoneText,
+            fontSize: 18,
+          ),
+        ];
+      } else {
+        children = [
+          LoadingText(
+            text: percentDoneText,
+            fontSize: 18,
+          ),
+          LoadingText(
+            text: filesizeText,
+            fontSize: 16,
+          ),
+          LoadingText(
+            text: expectedSpeedText,
+            fontSize: 14,
+          ),
+          LoadingText(
+            text: expectedTimeText,
+            fontSize: 14,
+          ),
+          LoadingText(
+            text: sinceStartText,
+            fontSize: 14,
+          ),
+          const SizedBox(height: 10),
+          if (percentDone < 1)
+            ElevatedButton.icon(
+              icon: Icon(
+                Icons.stop,
+                size: 44,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(Colors.black54),
+              ),
+              label: LoadingText(
+                text: 'Stop Loading',
+                fontSize: 18,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              onPressed: () {
+                widget.stopAction?.call();
+              },
+            ),
+          if (isMovedBelow) const SizedBox(height: 60),
+        ];
+      }
+    }
+
+    return buildIndicator(
+      context,
+      percentDone,
+      Column(
+        // move loading info lower if preview is of sample quality (except when item is hated)
+        mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
+        children: children,
+      ),
+    );
+  }
+
+  Widget buildIndicator(BuildContext context, double percentDone, Widget child) {
+    final Widget progressIndicator = percentDone == 0
+        ? const LinearProgressIndicator()
+        : AnimatedProgressIndicator(
+            value: percentDone,
+            animationDuration: const Duration(milliseconds: 150),
+            indicatorStyle: IndicatorStyle.linear,
+            valueColor: Theme.of(context).progressIndicatorTheme.color!.withOpacity(0.66),
+            minHeight: 6,
+          );
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SizedBox(
-          width: 6,
-          child: RotatedBox(
-            quarterTurns: -1,
-            child: LinearProgressIndicator(
-              value: percentDone == 0 ? null : percentDone,
-            ),
-          ),
+        RotatedBox(
+          quarterTurns: -1,
+          child: progressIndicator,
         ),
+        //
+        //
         Expanded(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
-            child: Column(
-              // move loading info lower if preview is of sample quality (except when item is hated)
-              mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
-              children: widget.isStopped
-                  ? [
-                      ...widget.stopReasons.map((reason) {
-                        return BorderedText(
-                          strokeWidth: 3,
-                          child: Text(
-                            reason,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      }),
-                      const SizedBox(height: 10),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.play_arrow, size: 44, color: Colors.blue),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Colors.black54),
-                        ),
-                        label: BorderedText(
-                          strokeWidth: 3,
-                          child: Text(
-                            (widget.isTooBig || widget.item.isHated.value) ? 'Load Anyway' : 'Restart Loading',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          widget.startAction?.call();
-                        },
-                      ),
-                      if (isMovedBelow) const SizedBox(height: 60),
-                    ]
-                  : (settingsHandler.loadingGif
-                      ? [
-                          const Center(child: Image(image: AssetImage('assets/images/loading.gif'))),
-                          const SizedBox(height: 30),
-                          if (percentDoneText != '')
-                            BorderedText(
-                              strokeWidth: 3,
-                              child: Text(
-                                percentDoneText,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                        ]
-                      : [
-                          if (percentDoneText != '')
-                            BorderedText(
-                              strokeWidth: 3,
-                              child: Text(
-                                percentDoneText,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          if (filesizeText != '')
-                            BorderedText(
-                              strokeWidth: 3,
-                              child: Text(
-                                filesizeText,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          if (expectedSpeedText != '')
-                            BorderedText(
-                              strokeWidth: 3,
-                              child: Text(
-                                expectedSpeedText,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          if (expectedTimeText != '')
-                            BorderedText(
-                              strokeWidth: 3,
-                              child: Text(
-                                expectedTimeText,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          if (sinceStartText != '')
-                            BorderedText(
-                              strokeWidth: 3,
-                              child: Text(
-                                sinceStartText,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 10),
-                          if (percentDone < 1)
-                            ElevatedButton.icon(
-                              icon: Icon(
-                                Icons.stop,
-                                size: 44,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.black54),
-                              ),
-                              label: BorderedText(
-                                  strokeWidth: 3,
-                                  child: Text(
-                                    'Stop Loading',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: Theme.of(context).colorScheme.error,
-                                    ),
-                                  )),
-                              onPressed: () {
-                                widget.stopAction?.call();
-                              },
-                            ),
-                          if (isMovedBelow) const SizedBox(height: 60),
-                        ]),
-            ),
+            child: child,
           ),
         ),
-        SizedBox(
-          width: 6,
-          child: RotatedBox(
-            quarterTurns: percentDone != 0 ? -1 : 1,
-            child: LinearProgressIndicator(
-              value: percentDone == 0 ? null : percentDone,
-            ),
-          ),
+        //
+        //
+        RotatedBox(
+          quarterTurns: percentDone != 0 ? -1 : 1,
+          child: progressIndicator,
         ),
       ],
+    );
+  }
+}
+
+class LoadingText extends StatelessWidget {
+  const LoadingText({
+    Key? key,
+    required this.text,
+    required this.fontSize,
+    this.color = Colors.white,
+  }) : super(key: key);
+
+  final String text;
+  final double fontSize;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    if (text.isEmpty) {
+      return const SizedBox();
+    }
+
+    return BorderedText(
+      key: ValueKey<String>(text),
+      strokeWidth: 3,
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: fontSize,
+          color: color,
+        ),
+      ),
+    );
+
+    // TODO animate text value changes?
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 50),
+      child: BorderedText(
+        key: ValueKey<String>(text),
+        strokeWidth: 3,
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: fontSize,
+            color: color,
+          ),
+        ),
+      ),
     );
   }
 }

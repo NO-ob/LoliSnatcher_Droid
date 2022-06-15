@@ -39,43 +39,47 @@ class WorldXyzHandler extends BooruHandler {
     List<BooruItem> newItems = [];
     for (int i = 0; i < posts.length; i++) {
       var current = posts.elementAt(i);
-      Logger.Inst().log(current.toString(), "WorldXyzHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
+      try {
+        Logger.Inst().log(current.toString(), "WorldXyzHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
 
-      List<dynamic> imageLinks = current['imageLinks'];
-      bool isVideo = current['type'] == 1; //type 1 - video, type 0 - image
-      String bestFile = imageLinks.where((f) => f["type"] == (isVideo ? 10 : 2)).toList()[0]["url"];
-      String sampleImage = imageLinks.where((f) => f["type"] == 2).toList()[0]["url"]; // isVideo ? 2 : 5 ???
-      String thumbImage = imageLinks.where((f) => f["type"] == 4).toList()[0]["url"];
-      // Site generates links to RAW images, but they often lead to 404, override them
-      // if(bestImage.contains('.raw.')) {
-      //   bestIndex = 1;
-      //   bestImage = imageLinks[bestIndex]['url'];
-      // }
+        List<dynamic> imageLinks = current['imageLinks'];
+        bool isVideo = current['type'] == 1; //type 1 - video, type 0 - image
+        String bestFile = imageLinks.where((f) => f["type"] == (isVideo ? 10 : 2)).toList()[0]["url"];
+        String sampleImage = imageLinks.where((f) => f["type"] == 2).toList()[0]["url"]; // isVideo ? 2 : 5 ???
+        String thumbImage = imageLinks.where((f) => f["type"] == 4).toList()[0]["url"];
+        // Site generates links to RAW images, but they often lead to 404, override them
+        // if(bestImage.contains('.raw.')) {
+        //   bestIndex = 1;
+        //   bestImage = imageLinks[bestIndex]['url'];
+        // }
 
-      // They mostly use cdn, but sometimes they aren't and it leads to same domain, this fixes such links
-      bestFile = bestFile.startsWith('https') ? bestFile : (booru.baseURL! + bestFile);
-      sampleImage = sampleImage.startsWith('https') ? sampleImage : (booru.baseURL! + sampleImage);
-      thumbImage = thumbImage.startsWith('https') ? thumbImage : (booru.baseURL! + thumbImage);
+        // They mostly use cdn, but sometimes they aren't and it leads to same domain, this fixes such links
+        bestFile = bestFile.startsWith('https') ? bestFile : (booru.baseURL! + bestFile);
+        sampleImage = sampleImage.startsWith('https') ? sampleImage : (booru.baseURL! + sampleImage);
+        thumbImage = thumbImage.startsWith('https') ? thumbImage : (booru.baseURL! + thumbImage);
 
-      // Uses retarded tag scheme: "tag with multiple words|next tag", instead of "tag_with_multiple_words next_tag", convert their scheme to ours here
-      List<String> originalTags = current['tags'] != null ? [...current['tags']] : [];
-      var fixedTags = originalTags.map((tag) => tag.replaceAll(RegExp(r' '), '_')).toList();
+        // Uses retarded tag scheme: "tag with multiple words|next tag", instead of "tag_with_multiple_words next_tag", convert their scheme to ours here
+        List<String> originalTags = current['tags'] != null ? [...current['tags']] : [];
+        var fixedTags = originalTags.map((tag) => tag.replaceAll(RegExp(r' '), '_')).toList();
 
-      String dateString = current['created'].split('.')[0]; // split off microseconds // use posted or created?
-      BooruItem item = BooruItem(
-        fileURL: bestFile,
-        sampleURL: sampleImage,
-        thumbnailURL: thumbImage,
-        tagsList: fixedTags,
-        postURL: makePostURL(current['id'].toString()),
-        serverId: current['id'].toString(),
-        score: current['views'].toString(), // use views as score, people don't rate stuff here often
-        sources: List<String>.from(current['sources'] ?? []),
-        postDate: dateString, // 2021-06-18T06:09:02.63366 // microseconds?
-        postDateFormat: "yyyy-MM-dd'T'hh:mm:ss"
-      );
+        String dateString = current['created'].split('.')[0]; // split off microseconds // use posted or created?
+        BooruItem item = BooruItem(
+          fileURL: bestFile,
+          sampleURL: sampleImage,
+          thumbnailURL: thumbImage,
+          tagsList: fixedTags,
+          postURL: makePostURL(current['id'].toString()),
+          serverId: current['id'].toString(),
+          score: current['views'].toString(), // use views as score, people don't rate stuff here often
+          sources: List<String>.from(current['sources'] ?? []),
+          postDate: dateString, // 2021-06-18T06:09:02.63366 // microseconds?
+          postDateFormat: "yyyy-MM-dd'T'hh:mm:ss"
+        );
 
-      newItems.add(item);
+        newItems.add(item);
+      } catch (e) {
+        Logger.Inst().log(e.toString(), "WorldXyzHandler", "parseResponse", null);
+      }
     }
 
     int lengthBefore = fetched.length;

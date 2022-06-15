@@ -17,13 +17,13 @@ import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
-/// This class will listen for the value of viewedItem in searchGlobals
+/// This class will listen for the value of viewedItem in searchtabs
 /// It will return an empty container if that item has no file URL.
 /// If the file url isn't empty it will return a current media widget for the fileURL
 ///
 class DesktopImageListener extends StatefulWidget {
-  const DesktopImageListener(this.searchGlobal, {Key? key}) : super(key: key);
-  final SearchTab searchGlobal;
+  const DesktopImageListener(this.searchTab, {Key? key}) : super(key: key);
+  final SearchTab searchTab;
 
   @override
   State<DesktopImageListener> createState() => _DesktopImageListenerState();
@@ -46,13 +46,13 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value) {
     if (value.isImage()) {
-      return ImageViewer(value.key, value, 1, searchHandler.currentTab);
+      return ImageViewer(value.key, value, 1);
     } else if (value.isVideo()) {
       if (Platform.isAndroid || Platform.isIOS) {
-        return VideoViewer(value.key, value, 1, searchHandler.currentTab, true);
+        return VideoViewer(value.key, value, 1, true);
       } else if (Platform.isWindows || Platform.isLinux) {
         // return VideoViewerPlaceholder(item: value, index: 1);
-        return VideoViewerDesktop(value.key, value, 1, searchHandler.currentTab);
+        return VideoViewerDesktop(value.key, value, 1);
       } else {
         return VideoViewerPlaceholder(item: value, index: 1);
       }
@@ -70,7 +70,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   @override
   void didUpdateWidget(DesktopImageListener oldWidget) {
     // force redraw on tab change
-    if (oldWidget.searchGlobal != widget.searchGlobal) {
+    if (oldWidget.searchTab != widget.searchTab) {
       updateListener();
     }
     super.didUpdateWidget(oldWidget);

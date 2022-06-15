@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
@@ -10,18 +9,22 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class VideoViewerPlaceholder extends StatelessWidget {
   const VideoViewerPlaceholder({Key? key, required this.item, required this.index}) : super(key: key);
+
   final BooruItem item;
   final int index;
 
   @override
   Widget build(BuildContext context) {
-    final SearchHandler searchHandler = SearchHandler.instance;
-
     return Center(
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Thumbnail(item, index, searchHandler.currentTab, 1, false),
+          Thumbnail(
+            item: item,
+            index: index,
+            isStandalone: false,
+            ignoreColumnsCount: true,
+          ),
           // Image.network(item.thumbnailURL, fit: BoxFit.fill),
           SizedBox(
             width: MediaQuery.of(context).size.width / 3,

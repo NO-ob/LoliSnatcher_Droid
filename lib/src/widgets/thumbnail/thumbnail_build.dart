@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ThumbnailBuild extends StatelessWidget {
-  const ThumbnailBuild(this.index, this.columnCount, this.searchGlobal, {Key? key}) : super(key: key);
+  const ThumbnailBuild({
+    Key? key,
+    required this.index,
+    required this.item,
+  }) : super(key: key);
+
   final int index;
-  final int columnCount;
-  final SearchTab searchGlobal;
+  final BooruItem item;
 
   @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-    BooruItem item = searchGlobal.booruHandler.filteredFetched[index];
     IconData itemIcon = Tools.getFileIcon(item.mediaType);
 
     List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
@@ -36,7 +37,11 @@ class ThumbnailBuild extends StatelessWidget {
       child: Stack(
         alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
         children: [
-          Thumbnail(item, index, searchGlobal, columnCount, true),
+          Thumbnail(
+            index: index,
+            item: item,
+            isStandalone: true,
+          ),
           // Image(
           //   image: ResizeImage(NetworkImage(item.thumbnailURL), width: (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio / 3).round()),
           //   fit: BoxFit.cover,

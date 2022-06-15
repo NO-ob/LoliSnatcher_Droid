@@ -544,7 +544,7 @@ class SearchHandler extends GetxController {
         // check for parsing errors
         bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
         if(isEntryValid) {
-          // find booru by name and create searchglobal with given tags
+          // find booru by name and create searchtab with given tags
           Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
           if(findBooru.name != null) {
             SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
@@ -625,7 +625,7 @@ class SearchHandler extends GetxController {
       // check for parsing errors
       bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if(isEntryValid) {
-        // find booru by name and create searchglobal with given tags
+        // find booru by name and create searchtab with given tags
         Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
         if(findBooru.name != null) {
           SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
@@ -659,7 +659,7 @@ class SearchHandler extends GetxController {
       // check for parsing errors
       bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if(isEntryValid) {
-        // find booru by name and create searchglobal with given tags
+        // find booru by name and create searchtab with given tags
         Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
         if(findBooru.name != null) {
           SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);

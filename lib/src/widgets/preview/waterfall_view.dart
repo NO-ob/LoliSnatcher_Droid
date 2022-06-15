@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -181,11 +182,11 @@ class _WaterfallViewState extends State<WaterfallView> {
     viewerHandler.dropCurrent();
   }
 
-  void onTap(int index) async {
+  void onTap(int index, BooruItem item) async {
     // Load the image viewer
 
-    BooruItem item = searchHandler.setViewedItem(index);
-    viewerHandler.setCurrent(item.key);
+    BooruItem viewedItem = searchHandler.setViewedItem(index);
+    viewerHandler.setCurrent(viewedItem.key);
 
     if (settingsHandler.appMode.value == AppMode.MOBILE) {
       kbFocusNode.unfocus();
@@ -208,6 +209,36 @@ class _WaterfallViewState extends State<WaterfallView> {
     } else {
       // 
     }
+  }
+
+  void onDoubleTap(int index, BooruItem item) async {
+    if (item.isFavourite.value != null) {
+      ServiceHandler.vibrate();
+
+      item.isFavourite.toggle();
+      settingsHandler.dbHandler.updateBooruItem(item, "local");
+    }
+  }
+
+  void onLongPress(int index, BooruItem item) async {
+    ServiceHandler.vibrate(duration: 5);
+
+    if (searchHandler.currentTab.selected.contains(index)) {
+      searchHandler.currentTab.selected.remove(index);
+    } else {
+      searchHandler.currentTab.selected.add(index);
+    }
+  }
+
+  void onSecondaryTap(int index, BooruItem item) {
+    Clipboard.setData(ClipboardData(text: item.fileURL));
+    FlashElements.showSnackbar(
+      duration: const Duration(seconds: 2),
+      title: const Text("Copied File URL to clipboard!", style: TextStyle(fontSize: 20)),
+      content: Text(item.fileURL, style: const TextStyle(fontSize: 16)),
+      leadingIcon: Icons.copy,
+      sideColor: Colors.green,
+    );
   }
 
   @override
@@ -314,7 +345,19 @@ class _WaterfallViewState extends State<WaterfallView> {
                       : DesktopScrollWrap(
                           controller: searchHandler.gridScrollController,
                           // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
-                          child: isStaggered ? StaggeredBuilder(onTap) : GridBuilder(onTap),
+                          child: isStaggered
+                            ? StaggeredBuilder(
+                                onTap: onTap,
+                                onDoubleTap: onDoubleTap,
+                                onLongPress: onLongPress,
+                                onSecondaryTap: onSecondaryTap,
+                              )
+                            : GridBuilder(
+                                onTap: onTap,
+                                onDoubleTap: onDoubleTap,
+                                onLongPress: onLongPress,
+                                onSecondaryTap: onSecondaryTap,
+                              ),
                         ),
                   );
                 }),

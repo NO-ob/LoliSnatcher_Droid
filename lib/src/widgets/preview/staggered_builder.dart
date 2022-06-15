@@ -9,11 +9,22 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 
 
 class StaggeredBuilder extends StatelessWidget {
-  const StaggeredBuilder(this.onTap, {Key? key}) : super(key: key);
-  final void Function(int) onTap;
+  const StaggeredBuilder({
+    Key? key,
+    this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
+    this.onSecondaryTap,
+  }) : super(key: key);
+
+  final void Function(int, BooruItem)? onTap;
+  final void Function(int, BooruItem)? onDoubleTap;
+  final void Function(int, BooruItem)? onLongPress;
+  final void Function(int, BooruItem)? onSecondaryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +67,22 @@ class StaggeredBuilder extends StatelessWidget {
             // force to use minimum 100 px and max 60% of screen height
             possibleHeight = max(min(itemMaxHeight, possibleHeight), 100);
 
+            final BooruItem item = searchHandler.currentFetched[index];
+
             return SizedBox(
               height: possibleHeight,
               width: possibleWidth,
               // constraints: hasSizeData
               //     ? BoxConstraints(minHeight: possibleHeight, maxHeight: possibleHeight, minWidth: possibleWidth, maxWidth: possibleWidth)
               //     : BoxConstraints(minHeight: possibleWidth, maxHeight: double.infinity, minWidth: possibleWidth, maxWidth: possibleWidth),
-              child: ThumbnailCardBuild(index, columnCount, onTap, searchHandler.currentTab),
+              child: ThumbnailCardBuild(
+                index: index,
+                item: item,
+                onTap: onTap,
+                onDoubleTap: onDoubleTap,
+                onLongPress: onLongPress,
+                onSecondaryTap: onSecondaryTap,
+              ),
             );
           },
         );

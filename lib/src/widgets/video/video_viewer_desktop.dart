@@ -20,10 +20,9 @@ import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class VideoViewerDesktop extends StatefulWidget {
-  const VideoViewerDesktop(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
+  const VideoViewerDesktop(Key? key, this.booruItem, this.index) : super(key: key);
   final BooruItem booruItem;
   final int index;
-  final SearchTab searchGlobal;
 
   @override
   State<VideoViewerDesktop> createState() => VideoViewerDesktopState();
@@ -113,7 +112,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     _cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -142,7 +141,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
     );
@@ -360,7 +359,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
-        extras: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+        extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
@@ -385,14 +384,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         Uri.encodeFull(widget.booruItem.fileURL),
-        extras: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+        extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
 
     videoController = Player(id: widget.index);
-    videoController!.setUserAgent(Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: false).entries.first.value);
+    videoController!.setUserAgent(Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: false).entries.first.value);
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
     //   media!,
@@ -502,7 +501,12 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
             scaleStateController: scaleController,
             child: Stack(
               children: [
-                Thumbnail(widget.booruItem, widget.index, widget.searchGlobal, 1, false),
+                Thumbnail(
+                  item: widget.booruItem,
+                  index: widget.index,
+                  isStandalone: false,
+                  ignoreColumnsCount: true,
+                ),
                 MediaLoading(
                   item: widget.booruItem,
                   hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',

@@ -72,7 +72,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     );
 
     // print("widget index: ${widget.index}");
-    // print("searchglobals index: ${searchHandler.viewedIndex.value}");
+    // print("searchtabs index: ${searchHandler.viewedIndex.value}");
 
     ServiceHandler.disableSleep();
     kbFocusNode.requestFocus();
@@ -195,25 +195,22 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     // print(fileURL);
                     // print('isVideo: '+isVideo.toString());
 
-                    SearchTab tab = searchHandler.currentTab;
-
                     late Widget itemWidget;
                     if(isImage) {
                       itemWidget = ImageViewer(
                         item.key,
                         item,
                         index,
-                        tab,
                       );
                     } else if(isVideo) {
                       if(settingsHandler.disableVideo) {
                         itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
                       } else {
                         if(Platform.isAndroid || Platform.isIOS) {
-                          itemWidget = VideoViewer(item.key, item, index, tab, true);
+                          itemWidget = VideoViewer(item.key, item, index, true);
                         } else if(Platform.isWindows || Platform.isLinux) {
                           // itemWidget = VideoViewerPlaceholder(item: item, index: index);
-                          itemWidget = VideoViewerDesktop(item.key, item, index, tab);
+                          itemWidget = VideoViewerDesktop(item.key, item, index);
                         } else {
                           itemWidget = VideoViewerPlaceholder(item: item, index: index);
                         }

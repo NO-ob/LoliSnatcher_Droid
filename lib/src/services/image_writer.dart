@@ -85,7 +85,20 @@ class ImageWriter {
       } else {
         print("files ext is ${item.fileExt!}");
         print("Ext path override is: ${settingsHandler.extPathOverride}");
-        var writeResp = await ServiceHandler.writeImage(response.bodyBytes, fileName.split(".")[0], item.mediaType, item.fileExt,settingsHandler.extPathOverride);
+        var writeResp = await ServiceHandler.writeImage(
+          response.bodyBytes,
+          fileName.split(".")[0],
+          item.mediaType,
+          item.fileExt,
+          settingsHandler.extPathOverride,
+        );
+        // var writeResp = await compute(ServiceHandler.writeImageCompute, {
+        //   "bytes": response.bodyBytes,
+        //   "fileName": fileName.split(".")[0],
+        //   "mediaType": item.mediaType,
+        //   "fileExt": item.fileExt,
+        //   "extPathOverride": settingsHandler.extPathOverride
+        // });
         if (writeResp != null){
           print("write response: $writeResp");
           item.isSnatched.value = true;

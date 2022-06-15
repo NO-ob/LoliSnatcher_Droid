@@ -93,6 +93,12 @@ class SettingsHandler extends GetxController {
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
 
+  int currentColumnCount(BuildContext context) {
+    return MediaQuery.of(context).orientation == Orientation.portrait
+        ? portraitColumns
+        : landscapeColumns;
+  }
+
   Duration cacheDuration = Duration.zero;
 
   List<List<String>> buttonList = [

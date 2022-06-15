@@ -217,7 +217,10 @@ class _TagViewState extends State<TagView> {
       action: () {
         SettingsPageOpen(
           context: context,
-          page: () => CommentsDialog(searchHandler.viewedItem.value),
+          page: () => CommentsDialog(
+            index:searchHandler.viewedIndex.value,
+            item: searchHandler.viewedItem.value,
+          ),
         ).open();
       },
       drawBottomBorder: false,
