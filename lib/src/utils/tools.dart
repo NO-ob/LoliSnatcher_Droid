@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
@@ -41,7 +42,7 @@ class Tools {
   // unified http headers list generator for dio in thumb/media/video loaders
   static Map<String, String> getFileCustomHeaders(Booru booru, {bool checkForReferer = false}) {
     // a few boorus doesn't work without a browser useragent
-    Map<String,String> headers = {"user-agent": "Mozilla/5.0 (Linux x86_64; rv:86.0) Gecko/20100101 Firefox/86.0"};
+    Map<String,String> headers = {"user-agent": browserUserAgent()};
     // some boorus require referer header
     if(checkForReferer) {
       switch (booru.type) {
@@ -86,4 +87,8 @@ class Tools {
   static String pluralize(String str, int count) {
     return count == 1 ? str : '${str}s';
   }
+
+  // TODO move to separate class (something with the name like "Constants")
+  static String appUserAgent() => "LoliSnatcher_Droid/${SettingsHandler.instance.verStr}";
+  static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
 }

@@ -9,18 +9,18 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
-/// Booru Handler for the gelbooru engine
-class InkBunnyHandler extends BooruHandler{
+// TODO refactor
+// TODO WTF IS ALL THIS????
+
+
+class InkBunnyHandler extends BooruHandler {
+  InkBunnyHandler(Booru booru, int limit) : super(booru, limit);
+
   String resultsID = "";
   String sessionToken = "";
 
   @override
-  bool tagSearchEnabled = false;
-
-  @override
   bool hasSizeData = true;
-
-  InkBunnyHandler(Booru booru, int limit) : super(booru, limit);
 
   Future<bool> setSessionToken() async {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=guest

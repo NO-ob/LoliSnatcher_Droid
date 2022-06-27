@@ -11,19 +11,18 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 
 
 class MergebooruHandler extends BooruHandler{
-  // Dart constructors are weird so it has to call super with the args
   MergebooruHandler(Booru booru, int limit): super(booru, limit);
+
   List<Booru> booruList = [];
   List<BooruHandler> booruHandlers = [];
   List<int> booruHandlerPageNums = [];
+
   int innerLimit = 0;
   bool hasGelbooruV1 = false;
 
   @override
-  bool hasSizeData = true;
-  @override
-  void parseResponse(response){
-  }
+  bool hasSizeData = false;
+
   @override
   Future Search(String tags, int? pageNumCustom) async {
     if (pageNumCustom != null) {
@@ -99,6 +98,7 @@ class MergebooruHandler extends BooruHandler{
     Logger.Inst().log("converting hash to sha1", "MergeBooruHandler", "makeSha1Hash", LogTypes.booruHandlerInfo);
     return digest.toString();
   }
+
   bool hashInFetched(List<BooruItem> fetched, hash, fileURL){
     for (int i = 0; i < fetched.length; i++){
       if (fetched[i].md5String == hash){
@@ -108,8 +108,8 @@ class MergebooruHandler extends BooruHandler{
     }
     return false;
   }
-  @override
-  void setupMerge(List<Booru> boorus){
+
+  void setupMerge(List<Booru> boorus) {
     innerLimit = (limit / boorus.length).ceil();
     booruList.addAll(boorus);
     for (var element in booruList) {
@@ -117,7 +117,7 @@ class MergebooruHandler extends BooruHandler{
       booruHandlers.add(factoryResults[0]);
       booruHandlerPageNums.add(factoryResults[1]);
       Logger.Inst().log("SETUP MERGE ADDING: ${element.name}", "MergeBooruHandler", "setupMerge", LogTypes.booruHandlerInfo);
-      if (element.type == "GelbooruV1"){
+      if (element.type == "GelbooruV1") {
         hasGelbooruV1 = true;
       }
     }
@@ -125,7 +125,7 @@ class MergebooruHandler extends BooruHandler{
 
   @override
   Future tagSearch(String input) async {
-      return booruHandlers[0].tagSearch(input);
+    return booruHandlers[0].tagSearch(input);
   }
 
   @override
@@ -138,5 +138,4 @@ class MergebooruHandler extends BooruHandler{
     totalCount.value = result;
     return;
   }
-
 }

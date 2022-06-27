@@ -9,7 +9,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
-import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 // TODO parse [quote] https://github.com/flexbooru/flexbooru/blob/2084976a1db68c312ec4b9169f88e7425f35a539/android/src/main/java/onlymash/flexbooru/widget/CommentView.kt
 // TODO add support for more boorus
@@ -111,7 +111,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     isLoading = true;
     if (widget.item.serverId != null) {
       setState(() {}); // set state to update the loading indicator
-      List<CommentItem> fetched = await searchHandler.currentBooruHandler.fetchComments(widget.item.serverId!, 0);
+      List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
       comments = fetched;
     } else {
       notSupported = true;
@@ -290,7 +290,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
               maxHeight: 150,
               maxWidth: 100,
             ),
-            child: ThumbnailCardBuild(index: widget.index, item: widget.item),
+            child: ThumbnailBuild(index: widget.index, item: widget.item),
           ),
         ),
       ],

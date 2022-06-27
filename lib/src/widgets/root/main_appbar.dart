@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/page_number_dialog.dart';
@@ -90,17 +91,98 @@ class _MainAppBarState extends State<MainAppBar> {
     }
   }
 
+  Widget lockButton() {
+    return Container();
+    // return Obx(() {
+    //   if (LocalAuthHandler.instance.deviceSupportsBiometrics.value == true) {
+    //     return IconButton(
+    //       icon: const Icon(Icons.lock),
+    //       onPressed: () {
+    //         LocalAuthHandler.instance.logout();
+    //       },
+    //     );
+    //   } else {
+    //     return Container();
+    //   }
+    // });
+  }
+
   Widget pageNumberButton() {
     return IconButton(
       icon: const Icon(Icons.format_list_numbered),
       onPressed: () {
         showDialog(
-            context: context,
-            builder: (context) {
-              return const PageNumberDialog();
-            });
+          context: context,
+          builder: (context) {
+            return const PageNumberDialog();
+          },
+        );
       },
     );
+  }
+
+  Widget devButton() {
+    return IconButton(
+      icon: const Icon(Icons.timelapse),
+      onPressed: () {
+        sinceLastBackup();
+        Tools.forceClearMemoryCache(withLive: true);
+      },
+    );
+  }
+
+  Widget saveButton() {
+    return Obx(() {
+      if (searchHandler.list.isNotEmpty) {
+        return Stack(alignment: Alignment.center, children: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: () {
+              getPerms();
+              // call a function to save the currently viewed image when the save button is pressed
+              if (searchHandler.currentTab.selected.isNotEmpty) {
+                snatchHandler.queue(
+                  searchHandler.currentTab.getSelected(),
+                  searchHandler.currentBooru,
+                  settingsHandler.snatchCooldown,
+                );
+                searchHandler.currentTab.selected.value = [];
+              } else {
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: const Text("No items selected", style: TextStyle(fontSize: 20)),
+                  overrideLeadingIconWidget: const Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
+                );
+              }
+            },
+          ),
+          if (searchHandler.currentTab.selected.isNotEmpty)
+            Positioned(
+              right: 2,
+              bottom: 5,
+              child: Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Center(
+                  child: FittedBox(
+                    child: Text(
+                      '${searchHandler.currentTab.selected.length}',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ]);
+      } else {
+        return const SizedBox.shrink();
+      }
+    });
   }
 
   void sinceLastBackup() {
@@ -122,68 +204,13 @@ class _MainAppBarState extends State<MainAppBar> {
         leading: widget.leading,
         title: const ActiveTitle(),
         actions: [
+          // lockButton(),
+
           pageNumberButton(),
 
-          // IconButton(
-          //   icon: Icon(Icons.timelapse),
-          //   onPressed: () {
-          //     // sinceLastBackup();
+          // devButton(),
 
-          //     // Tools.forceClearMemoryCache(withLive: true);
-          //   },
-          // ),
-
-          Obx(() {
-            if (searchHandler.list.isNotEmpty) {
-              return Stack(alignment: Alignment.center, children: [
-                IconButton(
-                  icon: const Icon(Icons.save),
-                  onPressed: () {
-                    getPerms();
-                    // call a function to save the currently viewed image when the save button is pressed
-                    if (searchHandler.currentTab.selected.isNotEmpty) {
-                      snatchHandler.queue(
-                        searchHandler.currentTab.getSelected(),
-                        searchHandler.currentBooru,
-                        settingsHandler.snatchCooldown,
-                      );
-                      searchHandler.currentTab.selected.value = [];
-                    } else {
-                      FlashElements.showSnackbar(
-                        context: context,
-                        title: const Text("No items selected", style: TextStyle(fontSize: 20)),
-                        overrideLeadingIconWidget: const Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
-                      );
-                    }
-                  },
-                ),
-                if (searchHandler.currentTab.selected.isNotEmpty)
-                  Positioned(
-                    right: 2,
-                    bottom: 5,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.secondary,
-                        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Center(
-                          child: FittedBox(
-                          child: Text(
-                            '${searchHandler.currentTab.selected.length}',
-                            style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ]);
-            } else {
-              return const SizedBox.shrink();
-            }
-          }),
+          saveButton(),
 
           widget.trailing,
         ],

@@ -10,26 +10,34 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
-/// Booru Handler for the gelbooru engine
-class HydrusHandler extends BooruHandler{
-  @override
-  bool tagSearchEnabled = false;
-  var _fileIDs;
-  // Dart constructors are weird so it has to call super with the args
-  HydrusHandler(Booru booru,int limit): super(booru,limit);
+// TODO refactor
 
-  /// This function will call a http get request using the tags and pagenumber parsed to it
-  /// it will then create a list of booruItems
+class HydrusHandler extends BooruHandler {
+  HydrusHandler(Booru booru, int limit) : super(booru, limit);
+
+  var _fileIDs;
+
+  @override
+  Map<String, String> getHeaders() {
+    return {"Accept": "text/html,application/xml", "user-agent": Tools.appUserAgent(),"Hydrus-Client-API-Access-Key": booru.apiKey!,};
+  }
+
+  @override
+  Future<List> parseListFromResponse(response) async {
+    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    if (parsedResponse['file_ids'] != null) {
+      _fileIDs = parsedResponse['file_ids'];
+      return await getResultsPage(pageNum);
+    } else {
+      return [];
+    }
+  }
+
   @override
   Future Search(String tags, int? pageNumCustom) async {
-    List tagList = [];
-  
-    if (limit > 20){
-      limit = 20;
-    }
-
     if (prevTags != tags){
       fetched.value = [];
       prevTags = tags;
@@ -41,7 +49,7 @@ class HydrusHandler extends BooruHandler{
     if (_fileIDs == null) {
       try {
         Uri uri = Uri.parse(url);
-        final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
+        final response = await http.get(uri,headers: getHeaders());
         if (response.statusCode == 200) {
           Map<String, dynamic> parsedResponse = jsonDecode(response.body);
           if (parsedResponse['file_ids'] != null) {
@@ -60,7 +68,9 @@ class HydrusHandler extends BooruHandler{
     }
   }
 
-  Future getResultsPage(int pageNum) async{
+  Future getResultsPage(int pageNum) async {
+    limit = limit > 20 ? 20 : limit;
+
     try {
       int pageMax = (_fileIDs.length > limit ? (_fileIDs.length / limit).ceil() : 1);
       if (pageNum >= pageMax) {
@@ -76,7 +86,7 @@ class HydrusHandler extends BooruHandler{
         fileIDString += ']';
         String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
         Uri uri = Uri.parse(url);
-        final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
+        final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent": Tools.appUserAgent(),"Hydrus-Client-API-Access-Key" : booru.apiKey!});
         if (response.statusCode == 200) {
           var parsedResponse = jsonDecode(response.body);
           Logger.Inst().log(response.body, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
@@ -188,7 +198,7 @@ class HydrusHandler extends BooruHandler{
     Logger.Inst().log("Requesting key: $url", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent":"LoliSnatcher_Droid/$verStr","Hydrus-Client-API-Access-Key" : booru.apiKey!});
+      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent": Tools.appUserAgent(), "Hydrus-Client-API-Access-Key" : booru.apiKey!});
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
         Logger.Inst().log("Key Request Successful: ${parsedResponse['access_key']}", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
@@ -203,7 +213,6 @@ class HydrusHandler extends BooruHandler{
     return "";
   }
 
-  // This will create a url for the http request
   @override
   String makeURL(String tags) {
     String tag;
@@ -218,8 +227,7 @@ class HydrusHandler extends BooruHandler{
   }
 
   @override
-  String makeTagURL(String input){
+  String makeTagURL(String input) {
     return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10";
   }
-
 }

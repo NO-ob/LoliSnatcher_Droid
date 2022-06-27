@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
-class ShiverList extends StatelessWidget {
-  const ShiverList({Key? key}) : super(key: key);
+class ShimmerWrap extends StatelessWidget {
+  const ShimmerWrap({Key? key, required this.child}) : super(key: key);
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +15,19 @@ class ShiverList extends StatelessWidget {
         Color.lerp(Theme.of(context).colorScheme.onBackground, Theme.of(context).colorScheme.background, 0.75)!,
         Color.lerp(Theme.of(context).colorScheme.background, Theme.of(context).colorScheme.onBackground, 0.15)!,
       ),
+      child: child,
+    );
+  }
+}
+
+class ShiverList extends StatelessWidget {
+  const ShiverList({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ShimmerWrap(
       child: LayoutBuilder(
         builder: ((BuildContext layoutContext, BoxConstraints constraints) {
-          final SearchHandler searchHandler = SearchHandler.instance;
           final SettingsHandler settingsHandler = SettingsHandler.instance;
           final String displayType = settingsHandler.previewDisplay;
           final bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
@@ -55,17 +65,24 @@ class ShiverList extends StatelessWidget {
 }
 
 class ShimmerCard extends StatelessWidget {
-  const ShimmerCard({Key? key}) : super(key: key);
+  const ShimmerCard({
+    Key? key,
+    this.isLoading = true,
+    this.child,
+  }) : super(key: key);
+  final bool isLoading;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return ShimmerLoading(
-      isLoading: true,
-      child: Container(
-        width: double.maxFinite,
-        height: double.maxFinite,
-        color: Theme.of(context).colorScheme.surface,
-      ),
+      isLoading: isLoading,
+      child: child ??
+          Container(
+            width: double.maxFinite,
+            height: double.maxFinite,
+            color: Theme.of(context).colorScheme.surface,
+          ),
     );
   }
 }
@@ -126,9 +143,17 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
         transform: _SlidingGradientTransform(slidePercent: _shimmerController.value),
       );
 
-  bool get isSized => (context.findRenderObject() as RenderBox).hasSize;
+  bool get isSized {
+    RenderObject? renderObj = context.findRenderObject();
+    RenderBox? box = renderObj != null ? renderObj as RenderBox : null;
+    return box?.hasSize ?? false;
+  }
 
-  Size get size => (context.findRenderObject() as RenderBox).size;
+  Size get size {
+    RenderObject? renderObj = context.findRenderObject();
+    RenderBox? box = renderObj != null ? renderObj as RenderBox : null;
+    return box?.size ?? const Size(0, 0);
+  }
 
   Offset getDescendantOffset({
     required RenderBox descendant,
@@ -181,13 +206,9 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_shimmerChanges != null) {
-      _shimmerChanges!.removeListener(_onShimmerChange);
-    }
+    _shimmerChanges?.removeListener(_onShimmerChange);
     _shimmerChanges = Shimmer.of(context)?.shimmerChanges;
-    if (_shimmerChanges != null) {
-      _shimmerChanges!.addListener(_onShimmerChange);
-    }
+    _shimmerChanges?.addListener(_onShimmerChange);
   }
 
   @override
@@ -206,36 +227,46 @@ class _ShimmerLoadingState extends State<ShimmerLoading> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isLoading) {
-      return widget.child;
-    }
+    // if (!widget.isLoading) {
+    //   return widget.child;
+    // }
 
     // Collect ancestor shimmer info.
-    final shimmer = Shimmer.of(context)!;
-    if (!shimmer.isSized) {
+    final shimmer = Shimmer.of(context);
+    final RenderObject? renderObj = context.findRenderObject();
+    if (shimmer == null || !shimmer.isSized || renderObj == null) {
       // The ancestor Shimmer widget has not laid
       // itself out yet. Return an empty box.
       return const SizedBox();
     }
     final shimmerSize = shimmer.size;
     final gradient = shimmer.gradient;
+    // TODO exception here after new page loads
     final offsetWithinShimmer = shimmer.getDescendantOffset(
-      descendant: context.findRenderObject() as RenderBox,
+      descendant: renderObj as RenderBox,
     );
 
-    return ShaderMask(
-      blendMode: BlendMode.srcATop,
-      shaderCallback: (bounds) {
-        return gradient.createShader(
-          Rect.fromLTWH(
-            -offsetWithinShimmer.dx,
-            -offsetWithinShimmer.dy,
-            shimmerSize.width,
-            shimmerSize.height,
-          ),
-        );
-      },
-      child: widget.child,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: Container(
+        key: ValueKey<bool>(widget.isLoading),
+        child: widget.isLoading
+            ? ShaderMask(
+                blendMode: BlendMode.srcATop,
+                shaderCallback: (bounds) {
+                  return gradient.createShader(
+                    Rect.fromLTWH(
+                      -offsetWithinShimmer.dx,
+                      -offsetWithinShimmer.dy,
+                      shimmerSize.width,
+                      shimmerSize.height,
+                    ),
+                  );
+                },
+                child: widget.child,
+              )
+            : widget.child,
+      ),
     );
   }
 }

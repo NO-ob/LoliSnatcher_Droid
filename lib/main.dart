@@ -42,6 +42,12 @@ void main() {
     databaseFactory = databaseFactoryFfi;
   }
 
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+
+    Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
+  };
+
   runApp(const MainApp());
 }
 
@@ -59,6 +65,7 @@ class _MainAppState extends State<MainApp> {
   late final ViewerHandler viewerHandler;
   late final NavigationHandler navigationHandler;
   late final TagHandler tagHandler;
+  // late final LocalAuthHandler localAuthHandler;
   int maxFps = 60;
 
   @override
@@ -70,6 +77,7 @@ class _MainAppState extends State<MainApp> {
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
     navigationHandler = Get.put(NavigationHandler(), permanent: true);
+    // localAuthHandler = Get.put(LocalAuthHandler(), permanent: true);
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {
@@ -122,6 +130,7 @@ class _MainAppState extends State<MainApp> {
     Get.delete<SnatchHandler>();
     Get.delete<SearchHandler>();
     Get.delete<TagHandler>();
+    // Get.delete<LocalAuthHandler>();
     Get.delete<SettingsHandler>();
     super.dispose();
   }
@@ -241,10 +250,11 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<Home> with WidgetsBindingObserver {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
+  // final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
 
   Timer? cacheClearTimer;
   Timer? cacheStaleTimer;
@@ -278,6 +288,10 @@ class _HomeState extends State<Home> {
       imageWriter.clearStaleCache();
       imageWriter.clearCacheOverflow();
     });
+
+    // consider app launch as return to the app
+    // WidgetsBinding.instance.addObserver(this);
+    // localAuthHandler.onReturn();
   }
 
   void initDeepLinks() async {
@@ -318,8 +332,22 @@ class _HomeState extends State<Home> {
     cacheClearTimer?.cancel();
     cacheStaleTimer?.cancel();
     appLinksSubscription?.cancel();
+    // WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
+
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   super.didChangeAppLifecycleState(state);
+  //   if (state != AppLifecycleState.resumed) {
+  //     // record time when user left the app
+  //     localAuthHandler.onLeave();
+  //   }
+  //   if (state == AppLifecycleState.resumed) {
+  //     // check if app needs to be locked when user returns to the app
+  //     localAuthHandler.onReturn();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -330,5 +358,18 @@ class _HomeState extends State<Home> {
         return const DesktopHome();
       }
     });
+
+    // with lockscreen:
+    // return Obx(() {
+    //   if(localAuthHandler.isLoggedIn.value == true) {
+    //     if (settingsHandler.appMode.value == AppMode.MOBILE) {
+    //       return const MobileHome();
+    //     } else {
+    //       return const DesktopHome();
+    //     }
+    //   } else {
+    //     return const LockScreen();
+    //   }
+    // });
   }
 }

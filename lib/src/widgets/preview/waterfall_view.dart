@@ -345,19 +345,21 @@ class _WaterfallViewState extends State<WaterfallView> {
                       : DesktopScrollWrap(
                           controller: searchHandler.gridScrollController,
                           // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
-                          child: isStaggered
-                            ? StaggeredBuilder(
-                                onTap: onTap,
-                                onDoubleTap: onDoubleTap,
-                                onLongPress: onLongPress,
-                                onSecondaryTap: onSecondaryTap,
-                              )
-                            : GridBuilder(
-                                onTap: onTap,
-                                onDoubleTap: onDoubleTap,
-                                onLongPress: onLongPress,
-                                onSecondaryTap: onSecondaryTap,
-                              ),
+                          child: ShimmerWrap(
+                            child: isStaggered
+                              ? StaggeredBuilder(
+                                  onTap: onTap,
+                                  onDoubleTap: onDoubleTap,
+                                  onLongPress: onLongPress,
+                                  onSecondaryTap: onSecondaryTap,
+                                )
+                              : GridBuilder(
+                                  onTap: onTap,
+                                  onDoubleTap: onDoubleTap,
+                                  onLongPress: onLongPress,
+                                  onSecondaryTap: onSecondaryTap,
+                                ),
+                          ),
                         ),
                   );
                 }),

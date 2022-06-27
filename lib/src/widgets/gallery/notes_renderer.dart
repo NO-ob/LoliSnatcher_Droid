@@ -110,7 +110,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       return;
     }
 
-    item.notes.value = await searchHandler.currentBooruHandler.fetchNotes(item.serverId!);
+    item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
 
     triggerCalculations();
 

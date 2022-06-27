@@ -1,93 +1,95 @@
 import 'dart:math';
 
 import 'package:xml/xml.dart';
-import 'package:http/http.dart' as http;
 
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
-/// Booru Handler for the gelbooru engine only difference do gelbooru is the search/api url all the returned data is the same
-class MoebooruHandler extends GelbooruHandler {
+class MoebooruHandler extends BooruHandler {
   MoebooruHandler(Booru booru, int limit) : super(booru, limit);
+  
+  @override
+  bool hasSizeData = true;
 
   @override
-  String className = 'MoebooruHandler';
+  Map<String, TagType> tagTypeMap = {
+    "5": TagType.meta,
+    "3": TagType.copyright,
+    "4": TagType.character,
+    "1": TagType.artist,
+    "0": TagType.none,
+  };
+
+  @override
+  List parseListFromResponse(response) {
+    var parsedResponse = XmlDocument.parse(response.body);
+    try {
+      int? count = int.tryParse(parsedResponse.findAllElements('posts').first.getAttribute('count') ?? '0');
+      totalCount.value = count ?? 0;
+    } catch (e) {
+      Logger.Inst().log('$e', className, "searchCount", LogTypes.exception);
+    }
+
+    return parsedResponse.findAllElements('post').toList();
+  }
 
   // TODO change to json
   // can probably use the same method as gelbooru when the individual BooruItem is moved to separate method
   @override
-  void parseResponse(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
-    /**
-     * This creates a list of xml elements 'post' to extract only the post elements which contain
-     * all the data needed about each image
-     */
-    var posts = parsedResponse.findAllElements('post');
+  BooruItem? parseItemFromResponse(responseItem, int index) {
+    var current = responseItem;
 
-    // Create a BooruItem for each post in the list
-    List<BooruItem> newItems = [];
-    for (int i = 0; i < posts.length; i++) {
-      var current = posts.elementAt(i);
-      Logger.Inst().log(current.toString(), "MoebooruHandler", "parseResponse", LogTypes.booruHandlerRawFetched);
-      /**
-       * Add a new booruitem to the list .getAttribute will get the data assigned to a particular tag in the xml object
-       */
-      if (current.getAttribute("file_url") != null) {
-        // Fix for bleachbooru
-        String fileURL = "", sampleURL = "", previewURL = "";
-        fileURL += current.getAttribute("file_url")!.toString();
-        sampleURL += current.getAttribute("sample_url")!.toString();
-        previewURL += current.getAttribute("preview_url")!.toString();
-        if (!fileURL.contains("http")) {
-          fileURL = booru.baseURL! + fileURL;
-          sampleURL = booru.baseURL! + sampleURL;
-          previewURL = booru.baseURL! + previewURL;
-        }
-        BooruItem item = BooruItem(
-          fileURL: fileURL,
-          sampleURL: sampleURL,
-          thumbnailURL: previewURL,
-          tagsList: current.getAttribute("tags")!.split(" "),
-          postURL: makePostURL(current.getAttribute("id")!),
-          fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
-          fileHeight: double.tryParse(current.getAttribute('height') ?? ''),
-          sampleWidth: double.tryParse(current.getAttribute('sample_width') ?? ''),
-          sampleHeight: double.tryParse(current.getAttribute('sample_height') ?? ''),
-          previewWidth: double.tryParse(current.getAttribute('preview_width') ?? ''),
-          previewHeight: double.tryParse(current.getAttribute('preview_height') ?? ''),
-          serverId: current.getAttribute("id"),
-          rating: current.getAttribute("rating"),
-          score: current.getAttribute("score"),
-          sources: [current.getAttribute("source") == null ? "" : current.getAttribute("source")!],
-          md5String: current.getAttribute("md5"),
-          postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
-          postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
-        );
-
-        newItems.add(item);
+    if (current.getAttribute("file_url") != null) {
+      // Fix for bleachbooru
+      String fileURL = "", sampleURL = "", previewURL = "";
+      fileURL += current.getAttribute("file_url")!.toString();
+      sampleURL += current.getAttribute("sample_url")!.toString();
+      previewURL += current.getAttribute("preview_url")!.toString();
+      if (!fileURL.contains("http")) {
+        fileURL = booru.baseURL! + fileURL;
+        sampleURL = booru.baseURL! + sampleURL;
+        previewURL = booru.baseURL! + previewURL;
       }
-    }
 
-    int lengthBefore = fetched.length;
-    fetched.addAll(newItems);
-    setMultipleTrackedValues(lengthBefore, fetched.length);
-  }
+      BooruItem item = BooruItem(
+        fileURL: fileURL,
+        sampleURL: sampleURL,
+        thumbnailURL: previewURL,
+        tagsList: current.getAttribute("tags")!.split(" "),
+        postURL: makePostURL(current.getAttribute("id")!),
+        fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
+        fileHeight: double.tryParse(current.getAttribute('height') ?? ''),
+        sampleWidth: double.tryParse(current.getAttribute('sample_width') ?? ''),
+        sampleHeight: double.tryParse(current.getAttribute('sample_height') ?? ''),
+        previewWidth: double.tryParse(current.getAttribute('preview_width') ?? ''),
+        previewHeight: double.tryParse(current.getAttribute('preview_height') ?? ''),
+        serverId: current.getAttribute("id"),
+        rating: current.getAttribute("rating"),
+        score: current.getAttribute("score"),
+        sources: [current.getAttribute("source") == null ? "" : current.getAttribute("source")!],
+        md5String: current.getAttribute("md5"),
+        postDate: current.getAttribute("created_at"), // Fri Jun 18 02:13:45 -0500 2021
+        postDateFormat: "unix", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
+      );
 
-  @override
-  // This will create a url for the http request
-  String makeURL(String tags, {bool forceXML=false}) {
-    int cappedPage = max(1, pageNum);
-    if (booru.apiKey == "") {
-      return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
+      return item;
     } else {
-      return "${booru.baseURL}/post.xml?login=${booru.userID}&api_key=${booru.apiKey}&tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}";
+      return null;
     }
   }
 
   @override
-  // This will create a url to goto the images page in the browser
+  String makeURL(String tags, {bool forceXML = false}) {
+    int cappedPage = max(1, pageNum);
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&login=${booru.userID}&api_key=${booru.apiKey}' : '';
+
+    return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}$apiKey";
+  }
+
+  @override
   String makePostURL(String id) {
     return "${booru.baseURL}/post/show/$id/";
   }
@@ -98,28 +100,24 @@ class MoebooruHandler extends GelbooruHandler {
   }
 
   @override
-  Future tagSearch(String input) async {
-    List<String> searchTags = [];
-    String url = makeTagURL(input);
+  List parseTagSuggestionsList(response) {
+    var parsedResponse = XmlDocument.parse(response.body);
+    return parsedResponse.findAllElements("tag").toList();
+  }
 
-    try {
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: {"Accept": "text/html,application/xml", "user-agent": "LoliSnatcher_Droid/$verStr"});
-      // 200 is the success http response code
-      if (response.statusCode == 200) {
-        var parsedResponse = XmlDocument.parse(response.body);
-        var tags = parsedResponse.findAllElements("tag");
-        if (tags.isNotEmpty) {
-          for (int i = 0; i < tags.length; i++) {
-            searchTags.add(tags.elementAt(i).getAttribute("name")!.trim());
-          }
-        }
-      }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
+  @override
+  String? parseTagSuggestion(responseItem, int index) {
+    final String tagStr = responseItem.getAttribute("name")?.trim() ?? "";
+    if (tagStr.isEmpty) return null;
+
+    // record tag data for future use
+    final String rawTagType = responseItem.getAttribute("type")?.toString() ?? "";
+    TagType tagType = TagType.none;
+    if (tagTypeMap.containsKey(rawTagType)) {
+      tagType = (tagTypeMap[rawTagType] ?? TagType.none);
     }
-
-    return searchTags;
+    addTagsWithType([tagStr], tagType);
+    return tagStr;
   }
 
   // TODO parse comments from html

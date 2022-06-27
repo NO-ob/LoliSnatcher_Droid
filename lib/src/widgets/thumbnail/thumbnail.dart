@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-
 import 'package:get/get.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +14,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
 import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
+import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -354,12 +354,17 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   Widget renderImages(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double iconSize = (screenWidth / columnsCount()) * 0.55;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double iconSize = (screenWidth / columnsCount()) * 0.55;
+
+    final bool showShimmer = mainProvider == null && !isFailed;
 
     return Stack(
       alignment: Alignment.center,
       children: [
+        if(widget.isStandalone)
+          ShimmerCard(isLoading: showShimmer, child: showShimmer ? null : Container()),
+
         if(isThumbQuality == false && !widget.item.isHated.value) // fetch thumbnail from network while loading a sample
           AnimatedSwitcher( // fade in image
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),

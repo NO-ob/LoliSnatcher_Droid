@@ -3,20 +3,29 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
-class FavouritesHandler extends BooruHandler{
-  FavouritesHandler(Booru booru,int limit): super(booru,limit);
+class FavouritesHandler extends BooruHandler {
+  FavouritesHandler(Booru booru, int limit) : super(booru, limit);
 
   @override
   Future Search(String tags, int? pageNumCustom) async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-    int length = fetched.length;
-    if (prevTags != tags) {
-      fetched.value = [];
+    // set custom page number
+    if (pageNumCustom != null) {
+      pageNum = pageNumCustom;
     }
 
-    fetched.addAll(await settingsHandler.dbHandler.searchDB(tags, (pageNum * limit).toString(), limit.toString(), "DESC", "Favourites"));
-    print("dbhandler fetched length is ${fetched.length}");
+    // validate tags
+    tags = validateTags(tags);
+
+    // if tags are different than previous tags, reset fetched
+    if (prevTags != tags) {
+      fetched.value = [];
+      totalCount.value = 0;
+    }
+
+    // get amount of items before fetching
+    int length = fetched.length;
+
+    fetched.addAll(await SettingsHandler.instance.dbHandler.searchDB(tags, (pageNum * limit).toString(), limit.toString(), "DESC", "Favourites"));
     prevTags = tags;
 
     if (fetched.isEmpty || fetched.length == length) {
@@ -29,16 +38,13 @@ class FavouritesHandler extends BooruHandler{
 
   @override
   Future<List<String>> tagSearch(String input) async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    List<String> tags = [];
-    tags = await settingsHandler.dbHandler.getTags(input, limit);
+    List<String> tags = await SettingsHandler.instance.dbHandler.getTags(input, limit);
     return tags;
   }
 
   @override
   Future<void> searchCount(String input) async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-    totalCount.value = await settingsHandler.dbHandler.searchDBCount(input);
+    totalCount.value = await SettingsHandler.instance.dbHandler.searchDBCount(input);
     return;
   }
 }
