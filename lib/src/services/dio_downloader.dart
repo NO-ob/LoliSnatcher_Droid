@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 class DioDownloader {
   DioDownloader(
@@ -212,6 +213,7 @@ class DioDownloader {
         return;
       }
     } catch (e) {
+      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
@@ -288,6 +290,7 @@ class DioDownloader {
         return;
       }
     } catch (e) {
+      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
@@ -324,6 +327,7 @@ class DioDownloader {
       dispose();
       return;
     } catch (e) {
+      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {

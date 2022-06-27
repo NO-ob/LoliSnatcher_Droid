@@ -40,9 +40,11 @@ import java.util.*
 import java.net.Inet4Address
 import java.net.NetworkInterface
 
-
-
-
+// TODO currently shelved the idea of lock screen, needs more testing, possibly will lead to bugs, because fragment is not considered as good practice
+// For local_auth:
+// import io.flutter.embedding.android.FlutterFragmentActivity
+// class MainActivity: FlutterFragmentActivity() {
+// replace all context with applicationContext
 
 class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -411,7 +413,7 @@ class MainActivity: FlutterActivity() {
             thisMediaType = "image";
         }
         if (extPathOverride != null && extPathOverride.isNotEmpty()){
-            val doc = DocumentFile.fromTreeUri(context,Uri.parse(extPathOverride))
+            val doc = DocumentFile.fromTreeUri(context, Uri.parse(extPathOverride))
             if (doc != null) {
                 if (doc.canWrite()){
                     doc.createFile("$thisMediaType/$fileExt","$name.$fileExt")?.uri?.let {

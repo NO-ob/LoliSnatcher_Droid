@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 // TODO parse [quote] https://github.com/flexbooru/flexbooru/blob/2084976a1db68c312ec4b9169f88e7425f35a539/android/src/main/java/onlymash/flexbooru/widget/CommentView.kt
 // TODO add support for more boorus
@@ -16,7 +17,13 @@ import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 // Others - don't have api / broken api (e621) / I don't care enough to do them
 
 class CommentsDialog extends StatefulWidget {
-  const CommentsDialog(this.item, {Key? key}) : super(key: key);
+  const CommentsDialog({
+    Key? key,
+    required this.index,
+    required this.item,
+  }) : super(key: key);
+
+  final int index;
   final BooruItem item;
 
   @override
@@ -104,7 +111,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
     isLoading = true;
     if (widget.item.serverId != null) {
       setState(() {}); // set state to update the loading indicator
-      List<CommentItem> fetched = await searchHandler.currentBooruHandler.fetchComments(widget.item.serverId!, 0);
+      List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
       comments = fetched;
     } else {
       notSupported = true;
@@ -145,7 +152,17 @@ class _CommentsDialogState extends State<CommentsDialog> {
               onRefresh: () async {
                 getComments();
               },
-              child: areThereErrors ? errorsBuild() : listBuild(),
+              child: DesktopScrollWrap(
+                controller: scrollController,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(5),
+                  controller: scrollController,
+                  physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                  itemCount: areThereErrors ? 2 : comments.length + 1,
+                  scrollDirection: Axis.vertical,
+                  itemBuilder: areThereErrors ? errorEntryBuild : listEntryBuild,
+                ),
+              ),
             ),
           ),
         ),
@@ -153,21 +170,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
     );
   }
 
-  Widget listBuild() {
-    return DesktopScrollWrap(
-      controller: scrollController,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(5),
-        controller: scrollController,
-        physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-        itemCount: comments.length,
-        scrollDirection: Axis.vertical,
-        itemBuilder: listEntryBuild,
-      ),
-    );
-  }
-
   Widget listEntryBuild(BuildContext context, int index) {
+    if(index == 0) {
+      return listHeader();
+    }
+
+    index = index - 1;
+
     CommentItem currentEntry = comments[index];
 
     Widget entryRow = Container(
@@ -271,11 +280,29 @@ class _CommentsDialogState extends State<CommentsDialog> {
     ]);
   }
 
-  Widget errorsBuild() {
-    return ListView(
-      padding: const EdgeInsets.all(5),
-      controller: scrollController,
-      physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+  Widget listHeader() {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            constraints: const BoxConstraints(
+              maxHeight: 150,
+              maxWidth: 100,
+            ),
+            child: ThumbnailBuild(index: widget.index, item: widget.item),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget errorEntryBuild(BuildContext context, int index) {
+    if(index == 0) {
+      return listHeader();
+    }
+
+    return Column(
       children: [
         if (isLoading)
           const Center(
@@ -308,6 +335,12 @@ class _CommentsDialogState extends State<CommentsDialog> {
       title: const Text('Comments'),
       content: mainBuild(),
       actions: [
+        IconButton(
+          onPressed: () {
+            getComments();
+          },
+          icon: const Icon(Icons.refresh),
+        ),
         if (widget.item.postURL.isNotEmpty)
           IconButton(
             onPressed: () {

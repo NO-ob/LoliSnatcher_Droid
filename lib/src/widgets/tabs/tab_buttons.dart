@@ -47,7 +47,7 @@ class TabButtons extends StatelessWidget {
           icon: const Icon(Icons.remove_circle_outline),
           color: iconColor,
           onPressed: () {
-            // Remove selected searchglobal from list and apply nearest to search bar
+            // Remove selected searchtab from list and apply nearest to search bar
             searchHandler.removeTabAt();
           },
         ),

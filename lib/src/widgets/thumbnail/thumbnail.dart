@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-
 import 'package:get/get.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:flutter/material.dart';
@@ -15,17 +14,25 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
 import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
+import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 
 class Thumbnail extends StatefulWidget {
-  final BooruItem booruItem;
+  const Thumbnail({
+    Key? key,
+    required this.item,
+    required this.index,
+    required this.isStandalone,
+    this.ignoreColumnsCount = false,
+  }) : super(key: key);
+
+  final BooruItem item;
   final int index;
-  final int columnCount;
-  final SearchTab searchGlobal;
-  final bool isStandalone; // set to true when used in gallery preview to enable hero animation
-  const Thumbnail(this.booruItem, this.index, this.searchGlobal, this.columnCount, this.isStandalone, {Key? key}) : super(key: key);
+  /// set to true when used in gallery preview to enable hero animation
+  final bool isStandalone;
+  final bool ignoreColumnsCount;
 
   @override
   State<Thumbnail> createState() => _ThumbnailState();
@@ -33,6 +40,7 @@ class Thumbnail extends StatefulWidget {
 
 class _ThumbnailState extends State<Thumbnail> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _restartedCount = 0;
@@ -57,17 +65,25 @@ class _ThumbnailState extends State<Thumbnail> {
   @override
   void didUpdateWidget(Thumbnail oldWidget) {
     // force redraw on tab change
-    if(oldWidget.booruItem != widget.booruItem) {
+    if(oldWidget.item != widget.item) {
       restartLoading();
     }
     super.didUpdateWidget(oldWidget);
   }
 
+  int columnsCount() {
+    if(widget.ignoreColumnsCount) {
+      return 1;
+    }
+
+    return settingsHandler.currentColumnCount(context);
+  }
+
   Future<void> downloadThumb(bool isMain) async {
     _dioCancelToken = CancelToken();
     DioDownloader newClient = DioDownloader(
-      isMain ? thumbURL : widget.booruItem.thumbnailURL,
-      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      isMain ? thumbURL : widget.item.thumbnailURL,
+      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -101,7 +117,7 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   ImageProvider getImageProvider(Uint8List bytes, String url) {
-    if(widget.booruItem.isHated.value) {
+    if(widget.item.isHated.value) {
       // pixelate hated images
       return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
     }
@@ -117,9 +133,9 @@ class _ThumbnailState extends State<Thumbnail> {
     if (mounted) {
       // mediaquery will throw an exception if we try to read it after disposing => check if mounted
       final MediaQueryData mQuery = MediaQuery.of(context);
-      final double widthLimit = (mQuery.size.width / widget.columnCount) * mQuery.devicePixelRatio * 1;
+      final double widthLimit = (mQuery.size.width / columnsCount()) * mQuery.devicePixelRatio * 1;
       double thumbRatio = 1;
-      bool hasSizeData = widget.booruItem.fileHeight != null && widget.booruItem.fileWidth != null;
+      bool hasSizeData = widget.item.fileHeight != null && widget.item.fileWidth != null;
 
       if(widget.isStandalone) {
         thumbWidth = widthLimit;
@@ -129,7 +145,7 @@ class _ThumbnailState extends State<Thumbnail> {
           case 'Staggered':
             // thumbRatio = 16 / 9;
             if (hasSizeData) { // if api gives size data
-              thumbRatio = widget.booruItem.fileWidth! / widget.booruItem.fileHeight!;
+              thumbRatio = widget.item.fileWidth! / widget.item.fileHeight!;
               if(thumbRatio < 1) { // vertical image - resize to width
                 thumbWidth = widthLimit;
               } else { // horizontal image - resize to height
@@ -192,7 +208,7 @@ class _ThumbnailState extends State<Thumbnail> {
       if (_restartedCount < 5) {
         // attempt to reload 5 times with a second delay
         Debounce.debounce(
-          tag: 'thumbnail_reload_${widget.searchGlobal.id.toString()}#${widget.index.toString()}',
+          tag: 'thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}',
           callback: () {
             restartLoading();
             _restartedCount++;
@@ -234,14 +250,14 @@ class _ThumbnailState extends State<Thumbnail> {
     _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
-    final bool isGifSampleNotAllowed = widget.booruItem.mediaType == 'animation' && (settingsHandler.disableImageScaling ? widget.booruItem.isHated.value : true);
+    final bool isGifSampleNotAllowed = widget.item.mediaType == 'animation' && (settingsHandler.disableImageScaling ? widget.item.isHated.value : true);
 
-    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (isGifSampleNotAllowed || widget.booruItem.mediaType == 'video') || (!widget.isStandalone && widget.booruItem.fileURL == widget.booruItem.sampleURL);
-    thumbURL = isThumbQuality == true ? widget.booruItem.thumbnailURL : widget.booruItem.sampleURL;
+    isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (isGifSampleNotAllowed || widget.item.mediaType == 'video') || (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
+    thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
 
     // restart loading if item was marked as hated
-    hateListener = widget.booruItem.isHated.listen((bool value) {
+    hateListener = widget.item.isHated.listen((bool value) {
       if(value == true) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           restartLoading();
@@ -251,7 +267,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     Debounce.debounce(
-      tag: 'thumbnail_start_${widget.searchGlobal.id.toString()}#${widget.index.toString()}',
+      tag: 'thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}',
       callback: () {
         startDownloading(isThumbQuality);
       },
@@ -261,7 +277,7 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   void startDownloading(isThumbQuality) {
-    if(isThumbQuality == false && !widget.booruItem.isHated.value) {
+    if(isThumbQuality == false && !widget.item.isHated.value) {
       Future.wait([
         downloadThumb(false),
         downloadThumb(true)
@@ -328,8 +344,8 @@ class _ThumbnailState extends State<Thumbnail> {
     extraProvider?.evict();
     extraProvider = null;
 
-    Debounce.cancel('thumbnail_start_${widget.searchGlobal.id.toString()}#${widget.index.toString()}');
-    Debounce.cancel('thumbnail_reload_${widget.searchGlobal.id.toString()}#${widget.index.toString()}');
+    Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
+    Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
 
     if (!(_dioCancelToken.isCancelled)){
       _dioCancelToken.cancel();
@@ -338,13 +354,18 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   Widget renderImages(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double iconSize = (screenWidth / widget.columnCount) * 0.55;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double iconSize = (screenWidth / columnsCount()) * 0.55;
+
+    final bool showShimmer = mainProvider == null && !isFailed;
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        if(isThumbQuality == false && !widget.booruItem.isHated.value) // fetch thumbnail from network while loading a sample
+        if(widget.isStandalone)
+          ShimmerCard(isLoading: showShimmer, child: showShimmer ? null : Container()),
+
+        if(isThumbQuality == false && !widget.item.isHated.value) // fetch thumbnail from network while loading a sample
           AnimatedSwitcher( // fade in image
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),
             child: extraProvider != null
@@ -355,7 +376,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 width: double.infinity, // widget.isStandalone ? double.infinity : null,
                 height: double.infinity, // widget.isStandalone ? double.infinity : null,
                 errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                  print('failed to load thumb: ${widget.booruItem.thumbnailURL}');
+                  print('failed to load thumb: ${widget.item.thumbnailURL}');
                   return const Icon(Icons.broken_image, size: 30);
                 },
               )
@@ -376,7 +397,7 @@ class _ThumbnailState extends State<Thumbnail> {
               width: double.infinity,
               height: double.infinity,
               errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                print('failed to load sample: ${widget.booruItem.sampleURL}');
+                print('failed to load sample: ${widget.item.sampleURL}');
                 _onError(exception as Exception, delayed: true);
                 return const Icon(Icons.broken_image, size: 30);
               },
@@ -389,7 +410,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
         if(widget.isStandalone)
           ThumbnailLoading(
-            item: widget.booruItem,
+            item: widget.item,
             hasProgress: true,
             isFromCache: isFromCache,
             isDone: mainProvider != null && !isFailed,
@@ -404,7 +425,7 @@ class _ThumbnailState extends State<Thumbnail> {
             },
           ),
 
-        if(widget.booruItem.isHated.value)
+        if(widget.item.isHated.value)
           Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(

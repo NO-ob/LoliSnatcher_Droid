@@ -13,19 +13,23 @@ import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+
+// TODO better naming for some functions (i.e. Search => getSearch or smth like that)
 
 abstract class BooruHandler {
   // pagenum = -1 as "didn't load anything yet" state
   // gets set to higher number for special cases in handler factory
-  String className = 'BooruHandler';
+  // TODO get rid of that logic and add pageOffset variable for special cases
   int pageNum = -1;
   int limit = 20;
   String prevTags = "";
   bool locked = false;
   Booru booru;
-  String verStr = SettingsHandler.instance.verStr;
-  RxList<BooruItem> fetched = RxList<BooruItem>([]);
+  
   String errorString = '';
+  List failedItems = [];
+
   Map<String, TagType> tagTypeMap = {};
   Map<String,String> tagModifierMap = {
     "rating:" : "R",
@@ -33,43 +37,72 @@ abstract class BooruHandler {
     "order:" : "O",
     "sort:" : "S",
   };
+
+  RxList<BooruItem> fetched = RxList<BooruItem>([]);
   List<BooruItem> get filteredFetched => fetched.where((el) => SettingsHandler.instance.filterHated ? !el.isHated.value : true).toList();
 
-  bool tagSearchEnabled = true;
+  String get className => runtimeType.toString();
+
   bool hasSizeData = false;
+
   BooruHandler(this.booru, this.limit);
 
-  /// This function will call a http get request using the tags and pagenumber parsed to it
+  /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
   Future Search(String tags, int? pageNumCustom) async {
+    // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
     }
+
+    // validate tags (usually just convert empty string to current booru "search all" query)
     tags = validateTags(tags);
+
+    // if tags are different than previous tags, reset fetched
     if (prevTags != tags) {
       fetched.value = [];
+      totalCount.value = 0;
     }
 
-    String? url = makeURL(tags);
-    Logger.Inst().log(url!, className, "Search", LogTypes.booruHandlerSearchURL);
+    // get amount of items before fetching
+    int length = fetched.length;
+
+    // create url
+    final String url = makeURL(tags);
+    if(url.isEmpty) return fetched;
+
+    Uri uri;
     try {
-      int length = fetched.length;
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: getHeaders());
+      uri = Uri.parse(Uri.encodeFull(url));
+    } catch (e) {
+      Logger.Inst().log('invalid url: $url', className, "Search", LogTypes.booruHandlerFetchFailed);
+      errorString = "Invalid URL ($url)";
+      return fetched;
+    }
+    Logger.Inst().log('$url ${uri.toString()}', className, "Search", LogTypes.booruHandlerSearchURL);
+
+    final dynamic response;
+    try {
+      response = await fetchSearch(uri);
       if (response.statusCode == 200) {
-        parseResponse(response);
+        // parse response data
+        await parseResponse(response);
+
+        // save tags for check on next search
         prevTags = tags;
+
+        // if amount of items didn't change after fetching, then we consider that there are no more pages and lock future fetches
         if (fetched.length == length) {
           locked = true;
         }
       } else {
-        Logger.Inst().log("$className status is: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("$className url is: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("$className url response is: ${response.body}", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.body}", className, "Search", LogTypes.booruHandlerFetchFailed);
         errorString = response.statusCode.toString();
       }
     } catch (e) {
-      Logger.Inst().log(e.toString(), className, "Search", LogTypes.exception);
+      Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
       errorString = e.toString();
     }
 
@@ -77,56 +110,298 @@ abstract class BooruHandler {
     return fetched;
   }
 
-  void parseResponse(response) {
-    return;
+  Future fetchSearch(Uri uri) async {
+    return http.get(uri, headers: getHeaders());
+  }
+
+  FutureOr<void> parseResponse(response) async {
+    List posts = [];
+    try {
+      posts = await parseListFromResponse(response);
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
+    }
+    
+    List<BooruItem> newItems = [];
+    if (posts.isNotEmpty) {
+      for (int i = 0; i < posts.length; i++) {
+        var post = posts.elementAt(i);
+        try {
+          BooruItem? item = await parseItemFromResponse(post, i);
+          if(item != null) {
+            newItems.add(item);
+          }
+        } catch (e) {
+          Logger.Inst().log('$e $post', className, "parseItemFromResponse", LogTypes.booruHandlerRawFetched);
+          failedItems.add([post, e]);
+        }
+      }
+    }
+
+    afterParseResponse(newItems);
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  /// 
+  /// parse raw response into a list of posts,
+  /// here you should also parse any other info included with the response (i.e. totalcount)
+  FutureOr<List> parseListFromResponse(response) {
+    return [];
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<BooruItem?> parseItemFromResponse(responseItem, int index) {
+    return BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
+  }
+
+  void afterParseResponse(List<BooruItem> newItems) {
+    final int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    setMultipleTrackedValues(lengthBefore, fetched.length);
+    // TODO
+    // notifyAboutFailed();
+    failedItems.clear();
   }
 
   String validateTags(String tags) {
     return tags;
   }
 
-  String? makePostURL(String id) {
-    return null;
+  /// [SHOULD BE OVERRIDDEN]
+  String makeURL(String tags) {
+    return '';
   }
-  String? makeURL(String tags) {
-    return null;
-  }
-  String? makeTagURL(String input) {
-    return null;
-  }
-  String? makeDirectTagURL(List<String> tags) {
-    return null;
-  }
+
+  ////////////////////////////////////////////////////////////////////////
+  
+  // TODO rename to getTagSuggestions
+  // Future<List<String>>
   Future tagSearch(String input) async {
+    List<String> tags = [];
+
+    String url = makeTagURL(input);
+    if(url.isEmpty) return tags;
+    Uri uri;
+    try {
+      uri = Uri.parse(Uri.encodeFull(url));
+    } catch (e) {
+      Logger.Inst().log('invalid url: $url', className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+      return tags;
+    }
+    Logger.Inst().log('$url ${uri.toString()}', className, "tagSearch", LogTypes.booruHandlerSearchURL);
+
+    final dynamic response;
+    try {
+      response = await fetchTagSuggestions(uri, input);
+      if (response.statusCode == 200) {
+        var rawTags = await parseTagSuggestionsList(response);
+        for (int i = 0; i < rawTags.length; i++) {
+          final rawTag = rawTags[i];
+          try {
+            String parsedTag = await parseTagSuggestion(rawTag, i) ?? '';
+            if (parsedTag.isNotEmpty) {
+              // TODO add tag to taghandler before adding it to list
+              // addTagsWithType(parsedTag, tagType);
+              tags.add(parsedTag);
+            }
+          } catch (e) {
+            Logger.Inst().log('${e.toString()} $rawTag', className, "parseTagSuggestion", LogTypes.booruHandlerRawFetched);
+          }
+        }
+      } else {
+        Logger.Inst().log("error fetching url: $url", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("status: ${response.statusCode}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.body}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+    }
+    return tags;
+  }
+
+  Future fetchTagSuggestions(Uri uri, String input) {
+    return http.get(uri, headers: getHeaders());
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<List> parseTagSuggestionsList(response) {
     return [];
   }
+
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<String?> parseTagSuggestion(responseItem, int index) {
+    return '';
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  String makeTagURL(String input) {
+    return '';
+  }
+
+  String makeDirectTagURL(List<String> tags) {
+    return '';
+  }
+
+  ////////////////////////////////////////////////////////////////////////
 
   bool hasCommentsSupport = false;
-  Future<List<CommentItem>> fetchComments(String postID, int pageNum) async {
+  Future<List<CommentItem>> getComments(String postID, int pageNum) async {
+    List<CommentItem> comments = [];
+
+    String url = makeCommentsURL(postID, pageNum);
+    if(url.isEmpty) return comments;
+    Uri uri;
+    try {
+      uri = Uri.parse(Uri.encodeFull(url));
+    } catch (e) {
+      Logger.Inst().log('invalid url: $url', className, "getComments", LogTypes.booruHandlerFetchFailed);
+      return comments;
+    }
+    Logger.Inst().log('$url ${uri.toString()}', className, "getComments", LogTypes.booruHandlerSearchURL);
+
+    final dynamic response;
+    try {
+      response = await fetchComments(uri);
+      if (response.statusCode == 200) {
+        var rawComments = await parseCommentsList(response);
+        for (int i = 0; i < rawComments.length; i++) {
+          final rawComment = rawComments[i];
+          try {
+            CommentItem? parsedComment = await parseComment(rawComment, i);
+            if (parsedComment != null) comments.add(parsedComment);
+          } catch (e) {
+            Logger.Inst().log('${e.toString()} $rawComment', className, "parseCommentsList", LogTypes.booruHandlerRawFetched);
+          }
+        }
+      } else {
+        Logger.Inst().log("error fetching url: $url", className, "getComments", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("status: ${response.statusCode}", className, "getComments", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.body}", className, "getComments", LogTypes.booruHandlerFetchFailed);
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, "getComments", LogTypes.booruHandlerFetchFailed);
+    }
+    return comments;
+  }
+
+  Future fetchComments(Uri uri) {
+    return http.get(uri, headers: getHeaders());
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<List> parseCommentsList(response) {
     return [];
   }
 
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<CommentItem?> parseComment(responseItem, int index) {
+    return CommentItem();
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  String makeCommentsURL(String postID, int pageNum) {
+    return '';
+  }
+
+
+
+  ////////////////////////////////////////////////////////////////////////
+
   // TODO
-  bool hasUpdateItemSupport = false;
-  Future updateItem(BooruItem item) async {
+  bool hasLoadItemSupport = false;
+  Future loadItem(BooruItem item) async {
     return null;
   }
 
+  ////////////////////////////////////////////////////////////////////////
+
   bool hasNotesSupport = false;
-  Future<List<NoteItem>> fetchNotes(String postID) async {
+  Future<List<NoteItem>> getNotes(String postID) async {
+    List<NoteItem> notes = [];
+
+    String url = makeNotesURL(postID);
+    if(url.isEmpty) return notes;
+    Uri uri;
+    try {
+      uri = Uri.parse(Uri.encodeFull(url));
+    } catch (e) {
+      Logger.Inst().log('invalid url: $url', className, "getNotes", LogTypes.booruHandlerFetchFailed);
+      return notes;
+    }
+    Logger.Inst().log('$url ${uri.toString()}', className, "getNotes", LogTypes.booruHandlerSearchURL);
+
+    final dynamic response;
+    try {
+      response = await fetchNotes(uri);
+      if (response.statusCode == 200) {
+        var rawNotes = await parseNotesList(response);
+        for (int i = 0; i < rawNotes.length; i++) {
+          final rawNote = rawNotes[i];
+          try {
+            NoteItem? parsedNote = await parseNote(rawNote, i);
+            if (parsedNote != null) notes.add(parsedNote);
+          } catch (e) {
+            Logger.Inst().log('${e.toString()} $rawNote', className, "parseNotesList", LogTypes.booruHandlerRawFetched);
+          }
+        }
+      } else {
+        Logger.Inst().log("error fetching url: $url", className, "getNotes", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("status: ${response.statusCode}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.body}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, "getNotes", LogTypes.booruHandlerFetchFailed);
+    }
+    return notes;
+  }
+
+  Future fetchNotes(Uri uri) async {
+    return http.get(uri, headers: getHeaders());
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<List> parseNotesList(response) {
     return [];
   }
 
+  /// [SHOULD BE OVERRIDDEN]
+  FutureOr<NoteItem?> parseNote(responseItem, int index) {
+    return NoteItem(
+      id: '',
+      postID: '',
+      content: '',
+      height: 0,
+      width: 0,
+      posX: 0,
+      posY: 0,
+    );
+  }
+
+  /// [SHOULD BE OVERRIDDEN]
+  String makeNotesURL(String postID) {
+    return '';
+  }
+
+  ////////////////////////////////////////////////////////////////////////
+
   RxInt totalCount = 0.obs;
+  // TODO for boorus where api doesn't give amount outright and we have to calculate it based on smth (last page*items per page, for example) - show "~" symbol to indicate that
+  bool countIsQuestionable = false;
   Future<void> searchCount(String input) async {
     totalCount.value = 0;
     return;
   }
 
+  ////////////////////////////////////////////////////////////////////////
+
+  String makePostURL(String id) {
+    return '';
+  }
+
   Map<String, String> getHeaders() {
     return {
       "Accept": "text/html,application/xml,application/json",
-      "user-agent": "LoliSnatcher_Droid/$verStr"
+      "user-agent": Tools.appUserAgent(),
     };
   }
 
@@ -168,8 +443,6 @@ abstract class BooruHandler {
   List<String> searchModifiers() {
     return [];
   }
-
-  void setupMerge(List<Booru> boorus) {}
 
   //set the isSnatched and isFavourite booleans for a BooruItem in fetched
   Future<void> setTrackedValues(int fetchedIndex) async {

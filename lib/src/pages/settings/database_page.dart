@@ -96,7 +96,7 @@ class _DatabasePageState extends State<DatabasePage> {
     for (BooruItem item in updatingItems) {
       if (isUpdating) {
         await Future.delayed(const Duration(milliseconds: 100));
-        List result = await sankakuHandler.updateItem(item);
+        List result = await sankakuHandler.loadItem(item);
         if (result[1] == false) {
           setState(() {
             updatingFailed += 1;

@@ -1,63 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ThumbnailCardBuild extends StatelessWidget {
-  ThumbnailCardBuild(this.index, this.columnCount, this.onTap, this.tab, {Key? key}) : super(key: key);
+  const ThumbnailCardBuild({
+    Key? key,
+    required this.index,
+    required this.item,
+    this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
+    this.onSecondaryTap,
+    
+  }) : super(key: key);
+
   final int index;
-  final int columnCount;
-  final SearchTab tab;
-  final void Function(int) onTap;
-
-  final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
-
-  void onDoubleTap(int index) async {
-    BooruItem item = tab.booruHandler.filteredFetched[index];
-    if (item.isFavourite.value != null) {
-      ServiceHandler.vibrate();
-
-      item.isFavourite.toggle();
-      settingsHandler.dbHandler.updateBooruItem(item, "local");
-    }
-  }
-
-  void onLongPress(int index) async {
-    ServiceHandler.vibrate(duration: 5);
-
-    if (tab.selected.contains(index)) {
-      tab.selected.remove(index);
-    } else {
-      tab.selected.add(index);
-    }
-  }
-
-  void onSecondaryTap(int index) {
-    BooruItem item = tab.booruHandler.filteredFetched[index];
-    Clipboard.setData(ClipboardData(text: item.fileURL));
-    FlashElements.showSnackbar(
-      duration: const Duration(seconds: 2),
-      title: const Text("Copied File URL to clipboard!", style: TextStyle(fontSize: 20)),
-      content: Text(item.fileURL, style: const TextStyle(fontSize: 16)),
-      leadingIcon: Icons.copy,
-      sideColor: Colors.green,
-    );
-  }
+  final BooruItem item;
+  final void Function(int, BooruItem)? onTap;
+  final void Function(int, BooruItem)? onDoubleTap;
+  final void Function(int, BooruItem)? onLongPress;
+  final void Function(int, BooruItem)? onSecondaryTap;
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SearchHandler searchHandler = SearchHandler.instance;
+
     // print('ThumbnailCardBuild: $index');
     return Obx(() {
-      bool isSelected = tab.selected.contains(index);
+      bool isSelected = searchHandler.currentTab.selected.contains(index);
       bool isCurrent = settingsHandler.appMode.value == AppMode.DESKTOP && (searchHandler.viewedIndex.value == index);
 
       // print('ThumbnailCardBuild obx: $index');
@@ -80,7 +57,7 @@ class ThumbnailCardBuild extends StatelessWidget {
                 : null,
             child: GestureDetector(
               onSecondaryTap: () {
-                onSecondaryTap(index);
+                onSecondaryTap?.call(index, item);
               },
               child: InkResponse(
                 enableFeedback: true,
@@ -88,15 +65,15 @@ class ThumbnailCardBuild extends StatelessWidget {
                 containedInkWell: false,
                 highlightColor: Theme.of(context).colorScheme.secondary,
                 splashColor: Colors.pink,
-                child: ThumbnailBuild(index, columnCount, tab),
+                child: ThumbnailBuild(index: index, item: item),
                 onTap: () {
-                  onTap(index);
+                  onTap?.call(index, item);
                 },
                 onDoubleTap: () {
-                  onDoubleTap(index);
+                  onDoubleTap?.call(index, item);
                 },
                 onLongPress: () {
-                  onLongPress(index);
+                  onLongPress?.call(index, item);
                 },
               ),
             ),

@@ -93,6 +93,12 @@ class SettingsHandler extends GetxController {
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
 
+  int currentColumnCount(BuildContext context) {
+    return MediaQuery.of(context).orientation == Orientation.portrait
+        ? portraitColumns
+        : landscapeColumns;
+  }
+
   Duration cacheDuration = Duration.zero;
 
   List<List<String>> buttonList = [
@@ -1093,10 +1099,6 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             File booruFile = files[i] as File;
             Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            // if (booruFromFile.baseURL!.contains("realbooru.com") && booruFromFile.type == "Gelbooru"){
-            //   booruFromFile.type = "Realbooru";
-            //   saveBooru(booruFromFile,onlySave: true);
-            // }
             tempList.add(booruFromFile);
 
             if (booruFromFile.type == "Hydrus") {

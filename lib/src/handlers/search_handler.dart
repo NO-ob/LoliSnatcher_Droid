@@ -336,20 +336,6 @@ class SearchHandler extends GetxController {
     // clear image emory cache
     Tools.forceClearMemoryCache(withLive: true);
 
-    // UOOOOOHHHHH
-    if (text.toLowerCase().contains("loli")) {
-      FlashElements.showSnackbar(
-        duration: const Duration(seconds: 2),
-        title: const Text(
-          "UOOOOOOOHHH",
-          style: TextStyle(fontSize: 20)
-        ),
-        // TODO replace with image asset to avoid system-to-system font differences
-        overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
-        sideColor: Colors.pink,
-      );
-    }
-
     // set new tab data
     if(list.isEmpty) {
       if(settingsHandler.booruList.isNotEmpty) {
@@ -369,6 +355,8 @@ class SearchHandler extends GetxController {
       list[currentIndex] = newTab;
     }
 
+    searchReactions(text, newBooru ?? currentBooru);
+
     // reset viewed item
     setViewedItem(-1);
     // run search
@@ -381,6 +369,63 @@ class SearchHandler extends GetxController {
         currentBooru.type!,
         currentBooru.name!
       );
+    }
+  }
+
+  void searchReactions(String text, Booru booru) {
+    // UOOOOOHHHHH
+    if (text.toLowerCase().contains("loli")) {
+      FlashElements.showSnackbar(
+        duration: const Duration(seconds: 2),
+        title: const Text(
+          "UOOOOOOOHHH",
+          style: TextStyle(fontSize: 20)
+        ),
+        // TODO replace with image asset to avoid system-to-system font differences
+        overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
+        sideColor: Colors.pink,
+      );
+    }
+
+    // Notify about ratings change on gelbooru and danbooru
+    if(text.contains('rating:safe')) {
+      bool isOnBooruWhereRatingsChanged = (booru.type == 'Gelbooru' && booru.baseURL!.contains('gelbooru.com')) || booru.type == 'Danbooru';
+      if(isOnBooruWhereRatingsChanged) {
+        FlashElements.showSnackbar(
+          duration: null,
+          title: const Text(
+            "Ratings changed",
+            style: TextStyle(fontSize: 20)
+          ),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text.rich(
+                TextSpan(
+                  style: const TextStyle(fontSize: 16),
+                  children: [
+                    TextSpan(text: 'On ${booru.type} '),
+                    const TextSpan(text: '[rating:safe]', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' is now replaced with '),
+                    const TextSpan(text: '[rating:general]', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' and '),
+                    const TextSpan(text: '[rating:sensitive]', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                style: const TextStyle(fontSize: 16),
+              ),
+              const Text(''),
+              const Text(
+                "Consider fixing this in your future queries",
+                style: TextStyle(fontSize: 18),
+              ),
+            ],
+          ),
+          leadingIcon: Icons.warning_amber,
+          leadingIconColor: Colors.yellow,
+          sideColor: Colors.red,
+        );
+      }
     }
   }
 
@@ -544,7 +589,7 @@ class SearchHandler extends GetxController {
         // check for parsing errors
         bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
         if(isEntryValid) {
-          // find booru by name and create searchglobal with given tags
+          // find booru by name and create searchtab with given tags
           Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
           if(findBooru.name != null) {
             SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
@@ -625,7 +670,7 @@ class SearchHandler extends GetxController {
       // check for parsing errors
       bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if(isEntryValid) {
-        // find booru by name and create searchglobal with given tags
+        // find booru by name and create searchtab with given tags
         Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
         if(findBooru.name != null) {
           SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
@@ -659,7 +704,7 @@ class SearchHandler extends GetxController {
       // check for parsing errors
       bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if(isEntryValid) {
-        // find booru by name and create searchglobal with given tags
+        // find booru by name and create searchtab with given tags
         Booru findBooru = settingsHandler.booruList.firstWhere((booru) => booru.name == booruAndTags[0], orElse: () => Booru(null, null, null, null, null));
         if(findBooru.name != null) {
           SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);

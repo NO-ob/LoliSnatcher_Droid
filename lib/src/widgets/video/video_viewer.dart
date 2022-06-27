@@ -25,10 +25,9 @@ import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class VideoViewer extends StatefulWidget {
-  const VideoViewer(Key? key, this.booruItem, this.index, this.searchGlobal, this.enableFullscreen) : super(key: key);
+  const VideoViewer(Key? key, this.booruItem, this.index, this.enableFullscreen) : super(key: key);
   final BooruItem booruItem;
   final int index;
-  final SearchTab searchGlobal;
   final bool enableFullscreen;
 
   @override
@@ -103,7 +102,7 @@ class VideoViewerState extends State<VideoViewer> {
     _cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -132,7 +131,7 @@ class VideoViewerState extends State<VideoViewer> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
     );
@@ -389,7 +388,7 @@ class VideoViewerState extends State<VideoViewer> {
       videoController = VideoPlayerController.network(
         widget.booruItem.fileURL,
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
-        httpHeaders: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+        httpHeaders: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       );
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
@@ -531,11 +530,10 @@ class VideoViewerState extends State<VideoViewer> {
               child: initialized
                   ? Container()
                   : Thumbnail(
-                      widget.booruItem,
-                      widget.index,
-                      widget.searchGlobal,
-                      1,
-                      false,
+                      item: widget.booruItem,
+                      index: widget.index,
+                      isStandalone: false,
+                      ignoreColumnsCount: true,
                     ),
             ),
             AnimatedSwitcher(

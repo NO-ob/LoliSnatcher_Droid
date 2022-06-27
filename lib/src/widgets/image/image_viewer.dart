@@ -20,10 +20,9 @@ import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ImageViewer extends StatefulWidget {
-  const ImageViewer(Key? key, this.booruItem, this.index, this.searchGlobal) : super(key: key);
+  const ImageViewer(Key? key, this.booruItem, this.index) : super(key: key);
   final BooruItem booruItem;
   final int index;
-  final SearchTab searchGlobal;
 
   @override
   State<ImageViewer> createState() => ImageViewerState();
@@ -64,7 +63,7 @@ class ImageViewerState extends State<ImageViewer> {
     _dioCancelToken = CancelToken();
     client = DioDownloader(
       imageURL,
-      headers: Tools.getFileCustomHeaders(widget.searchGlobal.selectedBooru.value, checkForReferer: true),
+      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
@@ -338,11 +337,10 @@ class ImageViewerState extends State<ImageViewer> {
           children: [
             // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
             Thumbnail(
-              widget.booruItem,
-              widget.index,
-              widget.searchGlobal,
-              1,
-              false,
+              item: widget.booruItem,
+              index: widget.index,
+              isStandalone: false,
+              ignoreColumnsCount: true,
             ),
             //
             MediaLoading(

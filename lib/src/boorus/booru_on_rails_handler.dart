@@ -1,27 +1,25 @@
-import 'dart:async';
 import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/utils/logger.dart';
+
+// TODO autoreplace both ways all that special symbol crap (see tag suggestions) to normal format for user
+// TODO fix file names like we do with shimmie, probably should move file name encode/decode process to boorus themselves instead of image writer
 
 class BooruOnRailsHandler extends BooruHandler {
-  @override
-  bool tagSearchEnabled = true;
+  BooruOnRailsHandler(Booru booru, int limit) : super(booru,limit);
 
-  BooruOnRailsHandler(Booru booru,int limit) : super(booru,limit);
-
-  // This will create a url to goto the images page in the browser
   @override
-  String makePostURL(String id){
+  bool hasSizeData = true;
+
+  @override
+  String makePostURL(String id) {
     return "${booru.baseURL}/$id";
   }
 
   @override
-  String validateTags(String tags){
+  String validateTags(String tags) {
     if (tags == "" || tags == " "){
       return "*";
     } else {
@@ -30,113 +28,100 @@ class BooruOnRailsHandler extends BooruHandler {
   }
 
   @override
-  void parseResponse(response) {
+  List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    var posts = parsedResponse['posts'];
-    // Create a BooruItem for each post in the list
-    List<BooruItem> newItems = [];
-    for (int i =0; i < posts.length; i++) {
-      var current = posts[i];
-      Logger.Inst().log(current.toString(), "BooruOnRailsHandler", "parsedResponse", LogTypes.booruHandlerRawFetched);
-      List<String> currentTags = [];
-      for (int x = 0; x < current['tags'].length; x++){
-        if (current['tags'][x].contains(" ")){
-          currentTags.add(current['tags'][x].toString().replaceAll(" ", "+"));
-        }
-      }
-      if (current['representations']['full'] != null && current['representations']['medium'] != null && current['representations']['large'] != null) {
-        String sampleURL = current['representations']['large'], thumbURL = current['representations']['medium'];
-        if(current["mime_type"].toString().contains("video")) {
-          String tmpURL = "${sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1)}thumb.gif";
-          sampleURL = tmpURL;
-          thumbURL = tmpURL;
-        }
-        String fileURL = current['representations']['full'];
-        if (!fileURL.contains("http")){
-          sampleURL = booru.baseURL! + sampleURL;
-          thumbURL = booru.baseURL! + thumbURL;
-          fileURL = booru.baseURL! + fileURL;
-        }
-
-        BooruItem item = BooruItem(
-          fileURL: fileURL,
-          fileWidth: current['width'].toDouble(),
-          fileHeight: current['height'].toDouble(),
-          sampleURL: sampleURL,
-          thumbnailURL: thumbURL,
-          tagsList: currentTags,
-          postURL: makePostURL(current['id'].toString()),
-          serverId: current['id'].toString(),
-          score: current['score'].toString(),
-          sources: [current['source_url'].toString()],
-          rating: currentTags[0][0],
-          postDate: current['created_at'], // 2021-06-13T02:09:45.138-04:00
-          postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
-        );
-
-        newItems.add(item);
-      } else {
-        Logger.Inst().log("post $i skipped", "BooruOnRailsHandler", "parseResponse", LogTypes.booruHandlerInfo);
-      }
-    }
-
-    int lengthBefore = fetched.length;
-    fetched.addAll(newItems);
-    setMultipleTrackedValues(lengthBefore, fetched.length);
+    return parsedResponse['posts'] as List;
   }
 
-  // This will create a url for the http request
   @override
-  String makeURL(String tags){
-    //https://twibooru.org/search.json?&key=&q=*&perpage=5&page=1
+  BooruItem? parseItemFromResponse(responseItem, int index) {
+    List<String> currentTags = [];
+    for (int x = 0; x < responseItem['tags'].length; x++){
+      // if (responseItem['tags'][x].contains(" ")){ // TODO why this? with this most tags are skipped
+      currentTags.add(responseItem['tags'][x].toString().replaceAll(" ", "+"));
+      // }
+    }
+    if (responseItem['representations']['full'] != null && responseItem['representations']['medium'] != null && responseItem['representations']['large'] != null) {
+      String id = responseItem['id']?.toString() ?? "";
+      String fileURL = responseItem['representations']['full'] ?? responseItem['representations']['large'];
+      String sampleURL = responseItem['representations']['large'];
+      String thumbURL = responseItem['representations']['medium'];
+      if(responseItem["mime_type"].toString().contains("video")) {
+        String tmpURL = "${sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1)}thumb.gif";
+        sampleURL = tmpURL;
+        thumbURL = tmpURL;
+      }
+      if (!fileURL.contains("http")) {
+        fileURL = '${booru.baseURL!}$fileURL';
+        sampleURL = '${booru.baseURL!}$sampleURL';
+        thumbURL = '${booru.baseURL!}$thumbURL';
+      }
+      // TODO caching broken because names are the same for every image
+      fileURL = '$fileURL?$id';
+      sampleURL = '$sampleURL?$id';
+      thumbURL = '$thumbURL?$id';
+
+      BooruItem item = BooruItem(
+        fileURL: fileURL,
+        fileWidth: responseItem['width']?.toDouble(),
+        fileHeight: responseItem['height']?.toDouble(),
+        fileExt: responseItem['format']?.toString(),
+        sampleURL: sampleURL,
+        thumbnailURL: thumbURL,
+        tagsList: currentTags,
+        postURL: makePostURL(id.toString()),
+        serverId: id.toString(),
+        score: responseItem['score']?.toString(),
+        sources: [responseItem['source_url']?.toString() ?? ""],
+        rating: currentTags[0][0],
+        postDate: responseItem['created_at'], // 2021-06-13T02:09:45.138-04:00
+        postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+      );
+      return item;
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  String makeURL(String tags) {
     final String tagsWithCommas = tags.replaceAll(" ", ",");
     final String limitStr = limit.toString();
     final String pageStr = pageNum.toString();
     final String apiKeyStr = ((booru.apiKey?.isEmpty ?? '') == '') ? "" : "key=${booru.apiKey}&";
 
+    // EXAMPLE: https://twibooru.org/api/v3/search/posts?q=*&perpage=10&page=1
     return "${booru.baseURL}/api/v3/search/posts?${apiKeyStr}q=$tagsWithCommas&perpage=$limitStr&page=$pageStr";
   }
 
   @override
-  String makeTagURL(String input){
+  String makeTagURL(String input) {
+    // EXAMPLE: https://twibooru.org/api/v3/search/tags?q=*rai*
     return "${booru.baseURL}/api/v3/search/tags?q=*$input*";
   }
 
   @override
-  Future tagSearch(String input) async {
-    List<String> searchTags = [];
-    if (input == ""){
-      input = "*";
+  List parseTagSuggestionsList(response) {
+    List<dynamic> parsedResponse = jsonDecode(response.body)['tags'];
+    return parsedResponse;
+  }
+
+  static List<List<String>> tagStringReplacements = [
+    ["-colon-",":"],
+    ["-dash-","-"],
+    ["-fwslash-","/"],
+    ["-bwslash-","\\"],
+    ["-dot-","."],
+    ["-plus-","+"]
+  ];
+
+  @override
+  String? parseTagSuggestion(responseItem, int index) {
+    String tag = responseItem['slug'].toString();
+    for (int x = 0; x < tagStringReplacements.length; x++){
+      tag = tag.replaceAll(tagStringReplacements[x][0], tagStringReplacements[x][1]);
     }
-    String url = makeTagURL(input);
-    try {
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: getHeaders());
-      // 200 is the success http response code
-      if (response.statusCode == 200) {
-        List<dynamic> parsedResponse = jsonDecode(response.body)['tags'];
-        List tagStringReplacements = [
-          ["-colon-",":"],
-          ["-dash-","-"],
-          ["-fwslash-","/"],
-          ["-bwslash-","\\"],
-          ["-dot-","."],
-          ["-plus-","+"]
-        ];
-        if (parsedResponse.isNotEmpty){
-          for (int i=0; i < 10; i++) {
-            String tag = parsedResponse[i]['slug'].toString();
-            for (int x = 0; x < tagStringReplacements.length; x++){
-              tag = tag.replaceAll(tagStringReplacements[x][0],tagStringReplacements[x][1]);
-            }
-            searchTags.add(tag);
-          }
-        }
-      }
-    } catch(e) {
-      Logger.Inst().log(e.toString(), "BooruOnRailsHandler", "tagSearch", LogTypes.exception);
-    }
-    return searchTags;
+    return tag;
   }
 }
 

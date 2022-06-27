@@ -379,6 +379,16 @@ class ServiceHandler{
     return result;
   }
 
+  static Future<String?> writeImageCompute(Map<String, dynamic> argsMap) async{
+    String? result;
+    try{
+      result = await platform.invokeMethod("writeImageCompute",{"imageData": argsMap['bytes'], "fileName": argsMap['fileName'], "mediaType": argsMap['mediaType'], "fileExt": argsMap['fileExt'],"extPathOverride": argsMap['extPathOverride']});
+    } catch(e){
+      print(e);
+    }
+    return result;
+  }
+
   static void vibrate({
     bool flutterWay = false,
     int duration = 10,
