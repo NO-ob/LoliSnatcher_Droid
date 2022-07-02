@@ -14,7 +14,7 @@ class BooruItem{
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
   RxBool isHated = false.obs, isNoScale = false.obs;
 
-  String? fileExt, serverId, rating, score, md5String, postDate, postDateFormat;
+  String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
   List<String>? sources;
   RxList<NoteItem> notes = RxList([]);
   bool? hasNotes, hasComments;
@@ -42,6 +42,8 @@ class BooruItem{
     this.serverId,
     this.rating, // safe, explicit...
     this.score,
+    this.uploaderName,
+    this.description,
     this.sources,
     this.md5String,
     this.postDate,

@@ -471,15 +471,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
     // TODO move controls outside, to exclude them from zoom
 
-    VideoDimensions? dimensions = videoController?.videoDimensions;
-    bool areDimensionsValid = dimensions != null && dimensions.width != 0 && dimensions.height != 0;
-    double aspectRatio = areDimensionsValid ? (dimensions.width / dimensions.height) : 16/9;
-    double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
-    Size childSize = Size(
-      aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
-      aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
-    );
-
     return Hero(
       tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
       child: Material(
@@ -493,7 +484,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,
-            childSize: childSize, // areDimensionsValid ? childSize : null,
             enableRotation: false,
             basePosition: Alignment.center,
             controller: viewController,

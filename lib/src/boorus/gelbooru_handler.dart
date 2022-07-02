@@ -108,6 +108,14 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
+  void afterParseResponse(List<BooruItem> newItems) {
+    int lengthBefore = fetched.length;
+    fetched.addAll(newItems);
+    populateTagHandler(newItems); // difference from default afterParse
+    setMultipleTrackedValues(lengthBefore, fetched.length);
+  }
+
+  @override
   String makePostURL(String id) {
     // EXAMPLE: https://gelbooru.com/index.php?page=post&s=view&id=7296350
     return "${booru.baseURL}/index.php?page=post&s=view&id=$id";
