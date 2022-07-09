@@ -7,7 +7,6 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 enum Positions {
   bottom,
@@ -47,7 +46,7 @@ class FlashElements {
     // therefore causing an exception, because this context is not available anymore
     ThemeData themeData = Theme.of(contextToUse);
 
-    bool isDesktop = SettingsHandler.instance.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux;
+    bool isDesktop = SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux;
     bool isDark = themeData.brightness == Brightness.dark;
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;

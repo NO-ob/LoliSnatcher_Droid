@@ -6,7 +6,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ThumbnailCardBuild extends StatelessWidget {
   const ThumbnailCardBuild({
@@ -35,7 +34,7 @@ class ThumbnailCardBuild extends StatelessWidget {
     // print('ThumbnailCardBuild: $index');
     return Obx(() {
       bool isSelected = searchHandler.currentTab.selected.contains(index);
-      bool isCurrent = settingsHandler.appMode.value == AppMode.DESKTOP && (searchHandler.viewedIndex.value == index);
+      bool isCurrent = settingsHandler.appMode.value.isDesktop && (searchHandler.viewedIndex.value == index);
 
       // print('ThumbnailCardBuild obx: $index');
 

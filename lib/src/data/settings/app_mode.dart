@@ -1,13 +1,15 @@
+import 'dart:io';
+
 enum AppMode {
-  DESKTOP,
-  MOBILE;
+  Desktop,
+  Mobile;
 
   @override
   String toString() {
     switch (this) {
-      case AppMode.DESKTOP:
+      case AppMode.Desktop:
         return 'Desktop';
-      case AppMode.MOBILE:
+      case AppMode.Mobile:
         return 'Mobile';
     }
   }
@@ -15,10 +17,22 @@ enum AppMode {
   static AppMode fromString(String name) {
     switch (name) {
       case 'Desktop':
-        return AppMode.DESKTOP;
+        return AppMode.Desktop;
       case 'Mobile':
-        return AppMode.MOBILE;
+        return AppMode.Mobile;
     }
-    return AppMode.MOBILE;
+    return AppMode.Mobile;
+  }
+
+  bool get isDesktop {
+    return this == AppMode.Desktop;
+  }
+
+  bool get isMobile {
+    return this == AppMode.Mobile;
+  }
+
+  static AppMode get defaultValue {
+    return (Platform.isWindows || Platform.isLinux) ? AppMode.Desktop : AppMode.Mobile;
   }
 }

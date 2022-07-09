@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class ActiveTitle extends StatelessWidget {
   const ActiveTitle({Key? key}) : super(key: key);
@@ -23,6 +24,8 @@ class ActiveTitle extends StatelessWidget {
         if (searchHandler.list.isEmpty) {
           return const Text('LoliSnatcher');
         } else {
+          return const TabSelector(topMode: true);
+
           return GestureDetector(
             onTap: () {
               searchHandler.openAndFocusSearch();

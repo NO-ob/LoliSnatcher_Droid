@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/data/settings/hand_side.dart';
 
 class UserInterfacePage extends StatefulWidget {
   const UserInterfacePage({Key? key}) : super(key: key);
@@ -22,6 +23,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
 
   late String previewMode, previewDisplay;
   late AppMode appMode;
+  late HandSide handSide;
 
   @override
   void initState(){
@@ -29,6 +31,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     columnsPortraitController.text = settingsHandler.portraitColumns.toString();
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
     appMode = settingsHandler.appMode.value;
+    handSide = settingsHandler.handSide.value;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
   }
@@ -36,6 +39,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     settingsHandler.appMode.value = appMode;
+    settingsHandler.handSide.value = handSide;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
     if (int.parse(columnsLandscapeController.text) < 1){
@@ -86,6 +90,33 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             Text("[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs."),
                             Text("If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json"),
                             Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
+                          ]
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              SettingsDropdown(
+                value: handSide,
+                items: HandSide.values,
+                onChanged: (HandSide? newValue){
+                  setState((){
+                    handSide = newValue!;
+                  });
+                },
+                title: 'Hand Side',
+                trailingIcon: IconButton(
+                  icon: const Icon(Icons.back_hand_outlined),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('Hand Side'),
+                          contentItems: [
+                            // TODO describe what changes are made when changing hand side
+                            Text("[TODO]"),
                           ]
                         );
                       },

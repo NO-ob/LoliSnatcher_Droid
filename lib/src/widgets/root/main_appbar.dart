@@ -15,9 +15,14 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/page_number_dialog.dart';
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
-  const MainAppBar({Key? key, required this.leading, required this.trailing}) : super(key: key);
-  final Widget leading;
-  final Widget trailing;
+  const MainAppBar({
+    Key? key,
+    this.leading,
+    this.trailing,
+  }) : super(key: key);
+
+  final Widget? leading;
+  final Widget? trailing;
 
   final double defaultHeight = kToolbarHeight; //56.0
 
@@ -194,11 +199,13 @@ class _MainAppBarState extends State<MainAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final double barHeight = _scrollOffset * (widget.defaultHeight + MediaQuery.of(context).padding.top);
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       curve: Curves.linear,
       color: Colors.transparent,
-      height: _scrollOffset * (widget.defaultHeight + MediaQuery.of(context).padding.top),
+      height: barHeight,
       child: AppBar(
         automaticallyImplyLeading: true,
         leading: widget.leading,
@@ -212,7 +219,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
           saveButton(),
 
-          widget.trailing,
+          widget.trailing ?? const SizedBox.shrink(),
         ],
       ),
     );

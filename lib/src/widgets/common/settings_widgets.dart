@@ -10,7 +10,6 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 const double borderWidth = 1;
 
@@ -116,7 +115,7 @@ class SettingsPageOpen {
     SettingsHandler settingsHandler = SettingsHandler.instance;
 
     bool isTooNarrow = MediaQuery.of(context).size.width < 550;
-    bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
     bool useDesktopMode = !isTooNarrow && isDesktop;
 
     bool result = false;

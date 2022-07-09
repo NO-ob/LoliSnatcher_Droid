@@ -17,7 +17,6 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ImageViewer extends StatefulWidget {
   const ImageViewer(Key? key, this.booruItem, this.index) : super(key: key);
@@ -144,14 +143,14 @@ class ImageViewerState extends State<ImageViewer> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
+    isViewed = settingsHandler.appMode.value.isMobile
         ? searchHandler.viewedIndex.value == widget.index
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;
@@ -367,7 +366,7 @@ class ImageViewerState extends State<ImageViewer> {
             ),
             //
             AnimatedSwitcher(
-              duration: Duration(milliseconds: settingsHandler.appMode.value == AppMode.DESKTOP ? 50 : 300),
+              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
               child: mainProvider == null ? Container() : Listener(
                 onPointerSignal: (pointerSignal) {
                   if (pointerSignal is PointerScrollEvent) {

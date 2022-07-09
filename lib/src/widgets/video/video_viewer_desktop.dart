@@ -17,7 +17,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class VideoViewerDesktop extends StatefulWidget {
   const VideoViewerDesktop(Key? key, this.booruItem, this.index) : super(key: key);
@@ -213,14 +212,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
+    isViewed = settingsHandler.appMode.value.isMobile
       ? searchHandler.viewedIndex.value == widget.index
       : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;

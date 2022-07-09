@@ -6,11 +6,15 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_manager_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
-
 
 class TabSelector extends StatelessWidget {
-  const TabSelector({Key? key}) : super(key: key);
+  const TabSelector({
+    Key? key,
+    this.topMode = false,
+  }) : super(key: key);
+
+  /// If this widget is placed in ActiveTitle, true - disable colored border and change padding a bit
+  final bool topMode;
 
   Future<bool> openTabsDialog(context) async {
     return await SettingsPageOpen(
@@ -26,9 +30,19 @@ class TabSelector extends StatelessWidget {
 
     // print('tabbox build');
 
+    final bool isDesktop = settingsHandler.appMode.value.isDesktop;
+    final EdgeInsetsGeometry padding = topMode
+        ? const EdgeInsets.fromLTRB(2, 10, 2, 0)
+        : (isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8));
+    final EdgeInsetsGeometry contentPadding = topMode
+        ? const EdgeInsets.symmetric(horizontal: 4, vertical: 8)
+        : EdgeInsets.symmetric(horizontal: 12, vertical: isDesktop ? 2 : 8);
+
+    final Color borderColor = topMode ? Colors.transparent : Theme.of(context).colorScheme.secondary;
+
     return Container(
-      // constraints: settingsHandler.appMode.value == AppMode.DESKTOP ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
-      padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
+      // constraints: isDesktop ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
+      padding: padding,
       child: Obx(() {
         List<SearchTab> list = searchHandler.list;
         int index = searchHandler.currentIndex;
@@ -47,9 +61,19 @@ class TabSelector extends StatelessWidget {
             itemHeight: kMinInteractiveDimension,
             decoration: InputDecoration(
               labelText: 'Tab (${searchHandler.currentIndex + 1}/${searchHandler.total})',
-              contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
-                  ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
-                  : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              contentPadding: contentPadding,
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor, width: 1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: borderColor, width: 2),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onChanged: (SearchTab? newValue) {
               if (newValue != null) {
@@ -70,13 +94,13 @@ class TabSelector extends StatelessWidget {
               return DropdownMenuItem<SearchTab>(
                 value: value,
                 child: Container(
-                  padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                  padding: isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
                   decoration: isCurrent
-                    ? BoxDecoration(
-                        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                        borderRadius: BorderRadius.circular(5),
-                      )
-                    : null,
+                      ? BoxDecoration(
+                          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
+                          borderRadius: BorderRadius.circular(5),
+                        )
+                      : null,
                   child: TabRow(key: ValueKey(value), tab: value),
                 ),
               );
