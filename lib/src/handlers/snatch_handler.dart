@@ -184,7 +184,7 @@ class SnatchHandler extends GetxController {
     );
 
     while (count < int.parse(amount) && !booruHandler.locked) {
-      booruItems = (await booruHandler.Search(tags, null) ?? []);
+      booruItems = (await booruHandler.search(tags, null) ?? []);
       booruHandler.pageNum++;
       count = booruItems.length;
       print(count);

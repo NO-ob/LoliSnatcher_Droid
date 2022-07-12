@@ -49,7 +49,7 @@ abstract class BooruHandler {
 
   /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
-  Future Search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom) async {
     // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
