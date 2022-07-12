@@ -7,7 +7,7 @@ class FavouritesHandler extends BooruHandler {
   FavouritesHandler(Booru booru, int limit) : super(booru, limit);
 
   @override
-  Future Search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom) async {
     // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;

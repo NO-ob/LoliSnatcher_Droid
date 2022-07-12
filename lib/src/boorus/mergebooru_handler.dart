@@ -24,7 +24,7 @@ class MergebooruHandler extends BooruHandler{
   bool hasSizeData = false;
 
   @override
-  Future Search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom) async {
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
     }

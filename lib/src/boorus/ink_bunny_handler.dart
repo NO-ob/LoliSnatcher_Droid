@@ -68,7 +68,7 @@ class InkBunnyHandler extends BooruHandler {
   /// This function will call a http get request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
   @override
-  Future Search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom) async {
     if (sessionToken.isEmpty){
       bool gotToken = await setSessionToken();
       if (!gotToken){

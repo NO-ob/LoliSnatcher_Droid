@@ -37,7 +37,7 @@ class HydrusHandler extends BooruHandler {
   }
 
   @override
-  Future Search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom) async {
     if (prevTags != tags){
       fetched.value = [];
       prevTags = tags;

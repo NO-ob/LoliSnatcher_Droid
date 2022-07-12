@@ -137,6 +137,7 @@ class SettingsHandler extends GetxController {
   bool enableDrawerMascot = false;
   bool allowSelfSignedCerts = false;
   bool wakeLockEnabled = true;
+  bool tagTypeFetchEnabled = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -382,6 +383,10 @@ class SettingsHandler extends GetxController {
       "default": false,
     },
     "wakeLockEnabled": {
+      "type": "bool",
+      "default": true,
+    },
+    "tagTypeFetchEnabled": {
       "type": "bool",
       "default": true,
     },
@@ -754,7 +759,8 @@ class SettingsHandler extends GetxController {
         return lastSyncPort;
       case 'wakeLockEnabled':
         return wakeLockEnabled;
-
+      case 'tagTypeFetchEnabled':
+        return tagTypeFetchEnabled;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -938,6 +944,9 @@ class SettingsHandler extends GetxController {
       case 'wakeLockEnabled':
         wakeLockEnabled = validatedValue;
         break;
+      case 'tagTypeFetchEnabled':
+        tagTypeFetchEnabled = validatedValue;
+        break;
       default:
         break;
     }
@@ -1002,6 +1011,7 @@ class SettingsHandler extends GetxController {
       "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
       "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
+      "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
       "version": verStr,
       // TODO split into two variables - system name and system version/sdk number
       // "SDK": SDKVer,

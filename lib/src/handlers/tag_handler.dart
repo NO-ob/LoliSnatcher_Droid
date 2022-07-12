@@ -78,38 +78,40 @@ class TagHandler extends GetxController {
   }
 
   Future getTagTypes(UntypedCollection untyped) async {
-    Logger.Inst().log("Snatching tags: ${untyped.tags}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
-    tagFetchActive.value = true;
-    List temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
-    BooruHandler booruHandler = temp[0];
-    int tagCounter = 0;
-    while (untyped.tags.isNotEmpty) {
-      List<String> workingTags = [];
-      int tagMaxLimit = 100;
-      int tagMax = (untyped.tags.length > tagMaxLimit) ? tagMaxLimit : untyped.tags.length;
+    if (SettingsHandler.instance.tagTypeFetchEnabled){
+      Logger.Inst().log("Snatching tags: ${untyped.tags}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
+      tagFetchActive.value = true;
+      List temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
+      BooruHandler booruHandler = temp[0];
+      int tagCounter = 0;
+      while (untyped.tags.isNotEmpty) {
+        List<String> workingTags = [];
+        int tagMaxLimit = 100;
+        int tagMax = (untyped.tags.length > tagMaxLimit) ? tagMaxLimit : untyped.tags.length;
 
-      for (int i = 0; i < tagMax; i++) {
-        if (untyped.tags.isNotEmpty) {
-          String tag = untyped.tags.removeLast();
-          if (!hasTag(tag) && !workingTags.contains(tag)) {
-            workingTags.add(tag);
-            // print("adding $tag");
+        for (int i = 0; i < tagMax; i++) {
+          if (untyped.tags.isNotEmpty) {
+            String tag = untyped.tags.removeLast();
+            if (!hasTag(tag) && !workingTags.contains(tag)) {
+              workingTags.add(tag);
+              // print("adding $tag");
+            }
           }
         }
-      }
 
-      if (workingTags.isNotEmpty) {
-        List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
-        for (Tag tag in newTags) {
-          putTag(tag);
-          //TODO write tag to database
-          tagCounter ++;
+        if (workingTags.isNotEmpty) {
+          List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
+          for (Tag tag in newTags) {
+            putTag(tag);
+            //TODO write tag to database
+            tagCounter ++;
+          }
+          await Future.delayed(Duration(milliseconds: untyped.cooldown), () async{});
         }
-        await Future.delayed(Duration(milliseconds: untyped.cooldown), () async{});
       }
+      Logger.Inst().log("Got $tagCounter tag types, untyped list length was: ${untyped.tags.length}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
+      tagFetchActive.value = false;
     }
-    Logger.Inst().log("Got $tagCounter tag types, untyped list length was: ${untyped.tags.length}", "TagHandler", "getTagTypes", LogTypes.tagHandlerInfo);
-    tagFetchActive.value = false;
     tryGetTagTypes();
   }
 

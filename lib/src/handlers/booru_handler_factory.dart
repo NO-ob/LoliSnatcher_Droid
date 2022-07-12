@@ -117,7 +117,7 @@ class BooruHandlerFactory {
           booruHandler = AGNPHHandler(booru, limit);
           break;
         case("NyanPals"):
-          pageNum = -1;
+          pageNum = 0;
           booruHandler = NyanPalsHandler(booru, limit);
           break;
         default:

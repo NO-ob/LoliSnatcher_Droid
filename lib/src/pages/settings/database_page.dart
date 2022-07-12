@@ -21,7 +21,7 @@ class DatabasePage extends StatefulWidget {
 class _DatabasePageState extends State<DatabasePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false;
+  bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false, tagTypeFetchEnabled = true;
   int updatingFailed = 0, updatingDone = 0;
   List<BooruItem> updatingItems = [];
   List<String> failedURLs = [];
@@ -30,6 +30,7 @@ class _DatabasePageState extends State<DatabasePage> {
   void initState() {
     dbEnabled = settingsHandler.dbEnabled;
     searchHistoryEnabled = settingsHandler.searchHistoryEnabled;
+    tagTypeFetchEnabled = settingsHandler.tagTypeFetchEnabled;
     super.initState();
   }
 
@@ -38,6 +39,7 @@ class _DatabasePageState extends State<DatabasePage> {
     // Set settingshandler values here
     settingsHandler.dbEnabled = dbEnabled;
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;
+    settingsHandler.tagTypeFetchEnabled = tagTypeFetchEnabled;
     bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
@@ -208,6 +210,32 @@ class _DatabasePageState extends State<DatabasePage> {
                             Text("Long press any history entry for additional actions (Delete, Set as Favourite...)"),
                             Text("Favourited entries are pinned to the top of the list and will not be counted towards item limit."),
                             Text("Records last 5000 search queries."),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              SettingsToggle(
+                value: tagTypeFetchEnabled,
+                onChanged: (newValue) {
+                  setState(() {
+                    tagTypeFetchEnabled = newValue;
+                  });
+                },
+                title: 'Enable Tag Type Fetching',
+                trailingIcon: IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('Tag Type Fetching'),
+                          contentItems: [
+                            Text("Will search for tag types on supported boorus"),
+                            Text("This could lead to rate limiting"),
                           ],
                         );
                       },
