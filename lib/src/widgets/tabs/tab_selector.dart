@@ -32,7 +32,7 @@ class TabSelector extends StatelessWidget {
 
     final bool isDesktop = settingsHandler.appMode.value.isDesktop;
     final EdgeInsetsGeometry padding = topMode
-        ? const EdgeInsets.fromLTRB(2, 10, 2, 0)
+        ? const EdgeInsets.fromLTRB(5, 10, 2, 0)
         : (isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8));
     final EdgeInsetsGeometry contentPadding = topMode
         ? const EdgeInsets.symmetric(horizontal: 4, vertical: 8)

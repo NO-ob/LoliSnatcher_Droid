@@ -207,7 +207,7 @@ class _MainAppBarState extends State<MainAppBar> {
       color: Colors.transparent,
       height: barHeight,
       child: AppBar(
-        automaticallyImplyLeading: true,
+        automaticallyImplyLeading: false,
         leading: widget.leading,
         title: const ActiveTitle(),
         actions: [

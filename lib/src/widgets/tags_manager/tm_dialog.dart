@@ -58,7 +58,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     if (filterSearchController.text != '') {
       filteredTags = tags.where((t) {
         final String filter = filterSearchController.text.toLowerCase();
-        final bool textFilter = t.displayString.toLowerCase().contains(filter) || t.fullString.toLowerCase().contains(filter);
+        final bool textFilter = t.fullString.toLowerCase().contains(filter);
         final bool typeFilter = t.tagType.toString().toLowerCase().contains(filter);
         return textFilter || typeFilter;
       }).toList();
@@ -71,7 +71,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
 
   int compareTags(Tag a, Tag b) {
     if (a.tagType == b.tagType) {
-      return a.displayString.compareTo(b.displayString);
+      return a.fullString.compareTo(b.fullString);
     } else {
       return a.tagType.index.compareTo(b.tagType.index);
     }

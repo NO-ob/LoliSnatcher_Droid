@@ -183,12 +183,11 @@ class GelbooruHandler extends BooruHandler {
               LogTypes.booruHandlerTagInfo);
           for (int i = 0; i < parsedResponse.length; i++) {
             String fullString = parseFragment(parsedResponse.elementAt(i)["name"]).text!;
-            String displayString = getTagDisplayString(fullString);
             String typeKey = parsedResponse.elementAt(i)["type"].toString();
             TagType tagType = TagType.none;
             if (tagTypeMap.containsKey(typeKey)) tagType = (tagTypeMap[typeKey] ?? TagType.none);
-            if (fullString.isNotEmpty && displayString.isNotEmpty) {
-              tagObjects.add(Tag(displayString, fullString, tagType));
+            if (fullString.isNotEmpty) {
+              tagObjects.add(Tag(fullString, tagType: tagType));
             }
           }
         }

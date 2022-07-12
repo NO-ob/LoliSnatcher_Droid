@@ -523,14 +523,16 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                 if(isViewed && initialized)
                   Video(
                     player: videoController,
-                    playlistLength: 1,
                     scale: 1.0,
-                    showControls: true,
                     progressBarInactiveColor: Colors.grey,
                     progressBarActiveColor: accentColor,
                     progressBarThumbColor: accentColor,
                     volumeThumbColor: accentColor,
                     volumeActiveColor: accentColor,
+                    showControls: true,
+                    showFullscreenButton: true,
+                    filterQuality: FilterQuality.medium,
+                    showTimeLeft: true,
                   ),
               ],
             ),

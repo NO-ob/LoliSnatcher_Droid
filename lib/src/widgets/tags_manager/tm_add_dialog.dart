@@ -48,8 +48,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
             if (tagName.isNotEmpty) {
               Navigator.of(context).pop(Tag(
                 tagName,
-                tagName,
-                _type,
+                tagType: _type,
               ));
             } else {
               Navigator.of(context).pop(null);

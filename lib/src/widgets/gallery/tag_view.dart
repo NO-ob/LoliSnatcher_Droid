@@ -550,7 +550,7 @@ class _TagViewState extends State<TagView> {
               title: Row(children: [
                 MarqueeText(
                   key: ValueKey(currentTag),
-                  text: tagHandler.getTag(currentTag).displayString,
+                  text: tagHandler.getTag(currentTag).fullString,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   isExpanded: true,
