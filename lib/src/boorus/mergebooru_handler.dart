@@ -38,7 +38,7 @@ class MergebooruHandler extends BooruHandler{
             .replaceAll(RegExp(r"\d+#"),"").trim();
       Logger.Inst().log("TAGS FOR #$i are: $currentTags", "MergeBooruHandler", "Search", LogTypes.booruHandlerInfo);
       booruHandlers[i].pageNum = pageNum + booruHandlerPageNums[i];
-      List<BooruItem> tmpFetched = (await booruHandlers[i].Search(currentTags, null)) ?? [];
+      List<BooruItem> tmpFetched = (await booruHandlers[i].search(currentTags, null)) ?? [];
       tmpFetchedList.add(tmpFetched);
       if (booruHandlers[i].booru.type == "GelbooruV1"){
         isGelbooruV1List.add(true);

@@ -18,7 +18,6 @@ import 'package:lolisnatcher/src/widgets/preview/staggered_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class WaterfallView extends StatefulWidget {
   const WaterfallView({Key? key}) : super(key: key);
@@ -38,7 +37,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
   bool isStaggered = false;
 
-  bool get isMobile => settingsHandler.appMode.value == AppMode.MOBILE;
+  bool get isMobile => settingsHandler.appMode.value.isMobile;
 
   @override
   void initState() {
@@ -188,7 +187,7 @@ class _WaterfallViewState extends State<WaterfallView> {
     BooruItem viewedItem = searchHandler.setViewedItem(index);
     viewerHandler.setCurrent(viewedItem.key);
 
-    if (settingsHandler.appMode.value == AppMode.MOBILE) {
+    if (isMobile) {
       kbFocusNode.unfocus();
       viewerHandler.inViewer.value = true;
 

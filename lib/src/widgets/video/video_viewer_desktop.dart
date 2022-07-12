@@ -17,7 +17,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class VideoViewerDesktop extends StatefulWidget {
   const VideoViewerDesktop(Key? key, this.booruItem, this.index) : super(key: key);
@@ -213,14 +212,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
+    isViewed = settingsHandler.appMode.value.isMobile
       ? searchHandler.viewedIndex.value == widget.index
       : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;
@@ -471,15 +470,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
     // TODO move controls outside, to exclude them from zoom
 
-    VideoDimensions? dimensions = videoController?.videoDimensions;
-    bool areDimensionsValid = dimensions != null && dimensions.width != 0 && dimensions.height != 0;
-    double aspectRatio = areDimensionsValid ? (dimensions.width / dimensions.height) : 16/9;
-    double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
-    Size childSize = Size(
-      aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
-      aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
-    );
-
     return Hero(
       tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
       child: Material(
@@ -493,7 +483,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
             minScale: PhotoViewComputedScale.contained,
             maxScale: PhotoViewComputedScale.covered * 8,
             initialScale: PhotoViewComputedScale.contained,
-            childSize: childSize, // areDimensionsValid ? childSize : null,
             enableRotation: false,
             basePosition: Alignment.center,
             controller: viewController,
@@ -534,14 +523,16 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                 if(isViewed && initialized)
                   Video(
                     player: videoController,
-                    playlistLength: 1,
                     scale: 1.0,
-                    showControls: true,
                     progressBarInactiveColor: Colors.grey,
                     progressBarActiveColor: accentColor,
                     progressBarThumbColor: accentColor,
                     volumeThumbColor: accentColor,
                     volumeActiveColor: accentColor,
+                    showControls: true,
+                    showFullscreenButton: true,
+                    filterQuality: FilterQuality.medium,
+                    showTimeLeft: true,
                   ),
               ],
             ),

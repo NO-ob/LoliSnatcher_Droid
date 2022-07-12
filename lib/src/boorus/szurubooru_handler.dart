@@ -96,11 +96,7 @@ class SzurubooruHandler extends BooruHandler {
   @override
   List parseTagSuggestionsList(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    if (parsedResponse.isNotEmpty) {
-      return parsedResponse["results"];
-    } else {
-      return [];
-    }
+    return parsedResponse["results"] ?? [];
   }
 
   @override

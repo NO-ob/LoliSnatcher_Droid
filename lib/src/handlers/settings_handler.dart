@@ -21,6 +21,7 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/data/update_info.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
+import 'package:lolisnatcher/src/data/settings/hand_side.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
@@ -71,7 +72,8 @@ class SettingsHandler extends GetxController {
   String previewDisplay = "Square";
   String galleryMode = "Full Res";
   String shareAction = "Ask";
-  Rx<AppMode> appMode = Rx((Platform.isWindows || Platform.isLinux) ? AppMode.DESKTOP : AppMode.MOBILE);
+  Rx<AppMode> appMode = AppMode.defaultValue.obs;
+  Rx<HandSide> handSide = HandSide.defaultValue.obs;
   String galleryBarPosition = 'Top';
   String galleryScrollDirection = 'Horizontal';
   String extPathOverride = "";
@@ -160,7 +162,7 @@ class SettingsHandler extends GetxController {
     'thumbnailCache', 'mediaCache',
     'dbEnabled', 'searchHistoryEnabled',
     'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
-    'prefBooru', 'appMode', 'extPathOverride',
+    'prefBooru', 'appMode', 'handSide', 'extPathOverride',
     'lastSyncIp', 'lastSyncPort',
     'theme', 'themeMode', 'isAmoled',
     'customPrimaryColor', 'customAccentColor',
@@ -223,7 +225,7 @@ class SettingsHandler extends GetxController {
     },
 
     // string
-    "deftags": {
+    "defTags": {
       "type": "string",
       "default": "rating:safe",
     },
@@ -416,8 +418,13 @@ class SettingsHandler extends GetxController {
     // theme
     "appMode": {
       "type": "appMode",
-      "default": (Platform.isWindows || Platform.isLinux) ? AppMode.DESKTOP : AppMode.MOBILE,
+      "default": AppMode.defaultValue,
       "options": AppMode.values,
+    },
+    "handSide": {
+      "type": "handSide",
+      "default": HandSide.defaultValue,
+      "options": HandSide.values,
     },
     "theme": {
       "type": "theme",
@@ -531,6 +538,19 @@ class SettingsHandler extends GetxController {
             if(value is String) {
               // string to rxobject
               return AppMode.fromString(value);
+            } else {
+              return settingParams["default"];
+            }
+          }
+
+        case 'handSide':
+          if(toJSON) {
+            // rxobject to string
+            return value.value.toString();
+          } else {
+            if(value is String) {
+              // string to rxobject
+              return HandSide.fromString(value);
             } else {
               return settingParams["default"];
             }
@@ -738,6 +758,8 @@ class SettingsHandler extends GetxController {
       // theme stuff
       case 'appMode':
         return appMode;
+      case 'handSide':
+        return handSide;
       case 'theme':
         return theme;
       case 'themeMode':
@@ -889,6 +911,9 @@ class SettingsHandler extends GetxController {
       case 'appMode':
         appMode.value = validatedValue;
         break;
+      case 'handSide':
+        handSide.value = validatedValue;
+        break;
       case 'theme':
         theme.value = validatedValue;
         break;
@@ -964,6 +989,7 @@ class SettingsHandler extends GetxController {
 
       "prefBooru": validateValue("prefBooru", null, toJSON: true),
       "appMode": validateValue("appMode", null, toJSON: true),
+      "handSide": validateValue("handSide", null, toJSON: true),
       "extPathOverride": validateValue("extPathOverride", null, toJSON: true),
       "lastSyncIp": validateValue("lastSyncIp", null, toJSON: true),
       "lastSyncPort": validateValue("lastSyncPort", null, toJSON: true),

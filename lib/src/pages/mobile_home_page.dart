@@ -176,7 +176,10 @@ class _MobileHomeState extends State<MobileHome> {
                 child: Stack(
                   children: [
                     const MediaPreviews(),
-                    MainAppBar(leading: menuButton(InnerDrawerDirection.start), trailing: menuButton(InnerDrawerDirection.end)),
+                    Obx(() => MainAppBar(
+                      leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : null,
+                      trailing: settingsHandler.handSide.value.isRight ? menuButton(InnerDrawerDirection.end) : null,
+                    )),
                   ],
                 ),
               ),

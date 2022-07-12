@@ -8,16 +8,17 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 // import 'package:lolisnatcher/libBooru/DBHandler.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class UntypedCollection {
+  UntypedCollection(this.tags, this.cooldown, this.booru);
   final List<String> tags;
   final int cooldown;
   final Booru booru;
-  UntypedCollection(this.tags, this.cooldown, this.booru);
 }
 
 class TagHandler extends GetxController {
@@ -30,26 +31,41 @@ class TagHandler extends GetxController {
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
 
-  TagHandler (){
+  TagHandler() {
     untypedQueue.listen((List<UntypedCollection> list) {
       tryGetTagTypes();
     });
   }
 
-  bool hasTag(String tagString){
+  bool hasTag(String tagString) {
     return _tagMap.containsKey(tagString);
   }
 
-  Tag getTag(String tagString){
+  /// Check if tag is in the tag map and if it is - check if it is outdated
+  bool isTagStale(String tagString, {int cooldown = Constants.tagStaleTime}) {
+    final bool isPresent = hasTag(tagString);
+    if (!isPresent) {
+      return true;
+    } else {
+      return _tagMap[tagString]!.updatedAt < DateTime.now().millisecondsSinceEpoch - cooldown;
+    }
+  }
+
+  Tag getTag(String tagString) {
     Tag? tag;
     if (hasTag(tagString)) {
       tag = _tagMap[tagString];
     }
-    tag ??= Tag(tagString,tagString,TagType.none);
+    tag ??= Tag(tagString, tagType: TagType.none);
     return tag;
   }
 
-  void putTag(Tag tag){
+  void putTag(Tag tag) {
+    // TODO sanitize tagString?
+    if(tag.fullString.isEmpty) {
+      return;
+    }
+
     _tagMap[tag.fullString] = tag;
   }
 
@@ -73,16 +89,16 @@ class TagHandler extends GetxController {
       int tagMax = (untyped.tags.length > tagMaxLimit) ? tagMaxLimit : untyped.tags.length;
 
       for (int i = 0; i < tagMax; i++) {
-        if (untyped.tags.isNotEmpty){
+        if (untyped.tags.isNotEmpty) {
           String tag = untyped.tags.removeLast();
-          if (!hasTag(tag) && !workingTags.contains(tag)){
+          if (!hasTag(tag) && !workingTags.contains(tag)) {
             workingTags.add(tag);
             // print("adding $tag");
           }
         }
       }
 
-      if (workingTags.isNotEmpty){
+      if (workingTags.isNotEmpty) {
         List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
         for (Tag tag in newTags) {
           putTag(tag);
@@ -97,13 +113,14 @@ class TagHandler extends GetxController {
     tryGetTagTypes();
   }
 
+  /// Stores given tags list with given type, if tag is already in the tag map - update it's type, but only if the type was "none"
   void addTagsWithType(List<String> tags, TagType type) async {
-    for(String tag in tags){
-      if (!hasTag(tag)){
-        putTag(Tag(tag, tag,type));
-      } else if (type != TagType.none){
-        if (getTag(tag).tagType == TagType.none){
-          putTag(Tag(tag, tag, type));
+    for(String tag in tags) {
+      if (!hasTag(tag)) {
+        putTag(Tag(tag, tagType: type));
+      } else if (type != TagType.none) {
+        if (getTag(tag).tagType == TagType.none) {
+          putTag(Tag(tag, tagType: type));
         }
       }
     }
@@ -117,11 +134,20 @@ class TagHandler extends GetxController {
   }
 
   Future<void> initialize() async {
-      if (SettingsHandler.instance.path.isNotEmpty){
-        await loadTags();
-      }
-      return;
+    if (SettingsHandler.instance.path.isNotEmpty) {
+      await loadTags();
+    }
+    return;
   }
+
+  Future<bool> loadTags() async {
+    // TODO load tags from database
+    if (await checkForTagsFile()) {
+      await loadTagsFile();
+    }
+    return true;
+  }
+
   Future<bool> checkForTagsFile() async {
     File tagFile = File("${SettingsHandler.instance.path}tags.json");
     return await tagFile.exists();
@@ -131,36 +157,35 @@ class TagHandler extends GetxController {
     File tagFile = File("${SettingsHandler.instance.path}tags.json");
     String settings = await tagFile.readAsString();
     // print('loadJSON $settings');
-    loadFromJSON(settings);
+    await loadFromJSON(settings);
     return;
   }
 
-  Future<bool> loadTags() async {
-      //TODO load tags from database
-      if(await checkForTagsFile()) {
-        await loadTagsFile();
+  Future<bool> loadFromJSON(String jsonString) async {
+    try {
+      List jsonList = jsonDecode(jsonString);
+      for (Map<String, dynamic> rawTag in jsonList) {
+        try {
+          Tag tagObject = Tag.fromJson(rawTag);
+          putTag(tagObject);
+        } catch (e) {
+          Logger.Inst().log("Error parsing tag: $rawTag", "TagHandler", "loadFromJSON", LogTypes.exception);
+        }
       }
       return true;
-  }
-
-  Future<bool> loadFromJSON(String jsonString) async {
-    List<Tag> tagList = (json.decode(jsonString) as List)
-        .map((tagData) => Tag.fromJson(tagData))
-        .toList();
-    Logger.Inst().log("TagHandler got tags: ${tagList.length}", "TagHandler", "loadFromJSON", LogTypes.tagHandlerInfo);
-    for (int i = 0; i < tagList.length; i++){
-      _tagMap[tagList[i].fullString] = tagList[i];
+    } catch (e) {
+      Logger.Inst().log("Error loading tags from JSON: $e", "TagHandler", "loadFromJSON", LogTypes.exception);
+      return false;
     }
-    return true;
   }
 
-  List<Tag> toList(){
+  List<Tag> toList() {
     List<Tag> tagList = [];
     _tagMap.forEach((key,value) => tagList.add(value));
     return tagList;
   }
 
-  void removeTag(Tag tag){
+  void removeTag(Tag tag) {
     _tagMap.remove(tag.fullString);
   }
 

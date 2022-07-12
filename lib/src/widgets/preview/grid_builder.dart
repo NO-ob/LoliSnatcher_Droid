@@ -5,7 +5,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_card_build.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 
 class GridBuilder extends StatelessWidget {
@@ -31,7 +30,7 @@ class GridBuilder extends StatelessWidget {
       int columnCount =
           (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-      bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
+      bool isDesktop = settingsHandler.appMode.value.isDesktop;
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,

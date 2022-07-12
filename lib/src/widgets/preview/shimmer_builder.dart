@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class ShimmerWrap extends StatelessWidget {
   const ShimmerWrap({Key? key, required this.child}) : super(key: key);
@@ -30,7 +29,7 @@ class ShiverList extends StatelessWidget {
         builder: ((BuildContext layoutContext, BoxConstraints constraints) {
           final SettingsHandler settingsHandler = SettingsHandler.instance;
           final String displayType = settingsHandler.previewDisplay;
-          final bool isDesktop = settingsHandler.appMode.value == AppMode.DESKTOP;
+          final bool isDesktop = settingsHandler.appMode.value.isDesktop;
           final int previewCount = settingsHandler.limit;
           final int columnCount =
               MediaQuery.of(layoutContext).orientation == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;

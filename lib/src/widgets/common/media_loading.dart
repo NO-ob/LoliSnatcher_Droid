@@ -90,8 +90,8 @@ class _MediaLoadingState extends State<MediaLoading> {
     });
 
     _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(const Duration(seconds: 1), (timer) {
-      // force restate every second to refresh all timers/indicators, even when loading has stopped
+    _checkInterval = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      // force restate every second to refresh all timers/indicators, even when loading has stopped/stalled/etc.
       if (!widget.isDone) {
         updateState();
       }

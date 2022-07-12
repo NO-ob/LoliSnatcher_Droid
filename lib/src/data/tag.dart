@@ -1,29 +1,36 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 
 class Tag {
-  String displayString = "", fullString = "";
+  Tag(this.fullString, {this.tagType = TagType.none, this.updatedAt = 0}) {
+    if (updatedAt == 0) {
+       updatedAt = DateTime.now().millisecondsSinceEpoch;
+    }
+  }
+  String fullString = "";
   TagType tagType = TagType.none;
-  Tag(this.displayString, this.fullString, this.tagType);
+  int updatedAt = 0;
 
   Map<String, dynamic> toJson() {
     return {
-      "displayString": displayString,
       "fullString": fullString,
+      "updatedAt": updatedAt,
       "tagType": tagType.name,
     };
   }
 
   Tag.fromJson(Map<String, dynamic> json) {
-    displayString = json["displayString"].toString();
-    fullString = json["fullString"].toString();
-    tagType = TagType.values.byName(json["tagType"].toString());
+    fullString = json["fullString"]?.toString() ?? "unknown";
+    // if no updatedAt is stored, set it to the current time minus 3 days (will make it stale)
+    updatedAt = json["updatedAt"] ?? (DateTime.now().millisecondsSinceEpoch - Constants.tagStaleTime);
+    tagType = TagType.values.byName(json["tagType"]?.toString() ?? "none");
   }
 
   @override
   String toString() {
-    return ("displayString: $displayString, fullString: $fullString, tagType: ${tagType.name}");
+    return ("fullString: $fullString, updatedAt: $updatedAt, tagType: ${tagType.name}");
   }
 
   Color getColour() {

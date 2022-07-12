@@ -7,7 +7,6 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/gallery/change_page_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/zoom_button.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class GalleryButtons extends StatefulWidget {
   const GalleryButtons(this.controller, {Key? key}) : super(key: key);
@@ -32,9 +31,9 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     // place higher when toolbar is on the bottom, to avoid conflicts with video controls
     bottomOffset = kToolbarHeight * (settingsHandler.galleryBarPosition == 'Top' ? 2 : 3);
 
-    isVisible = settingsHandler.appMode.value == AppMode.MOBILE && viewerHandler.displayAppbar.value;
+    isVisible = settingsHandler.appMode.value.isMobile && viewerHandler.displayAppbar.value;
     appbarListener = viewerHandler.displayAppbar.listen((bool value) {
-      if (settingsHandler.appMode.value == AppMode.MOBILE) {
+      if (settingsHandler.appMode.value.isMobile) {
         isVisible = value;
       }
       updateState();

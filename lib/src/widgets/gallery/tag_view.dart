@@ -22,7 +22,6 @@ import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class TagView extends StatefulWidget {
   const TagView({Key? key}) : super(key: key);
@@ -551,7 +550,7 @@ class _TagViewState extends State<TagView> {
               title: Row(children: [
                 MarqueeText(
                   key: ValueKey(currentTag),
-                  text: tagHandler.getTag(currentTag).displayString,
+                  text: tagHandler.getTag(currentTag).fullString,
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                   isExpanded: true,
@@ -577,7 +576,7 @@ class _TagViewState extends State<TagView> {
                 GestureDetector(
                   onLongPress: () async {
                     ServiceHandler.vibrate();
-                    if (settingsHandler.appMode.value == AppMode.MOBILE && viewerHandler.inViewer.value) {
+                    if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
                       Navigator.of(context).pop(true); // exit drawer
                       Navigator.of(context).pop(true); // exit viewer
                     }

@@ -533,7 +533,7 @@ class _BooruEditState extends State<BooruEdit> {
       test.pageNum = temp[1];
       test.pageNum++;
       
-      testFetched = (await test.Search(" ", null)) ?? [];
+      testFetched = (await test.search(" ", null)) ?? [];
 
       if(test.errorString.isNotEmpty) {
         errorString = test.errorString;

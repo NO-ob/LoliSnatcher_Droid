@@ -29,7 +29,6 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/theme_handler.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -217,7 +216,7 @@ class Preloader extends StatelessWidget {
           ServiceHandler.setSystemUiVisibility(true);
 
           // force landscape orientation if enabled desktop mode on mobile device
-          if (settingsHandler.appMode.value == AppMode.DESKTOP) {
+          if (settingsHandler.appMode.value.isDesktop) {
             SystemChrome.setPreferredOrientations([
               DeviceOrientation.landscapeRight,
               DeviceOrientation.landscapeLeft,
@@ -352,7 +351,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (settingsHandler.appMode.value == AppMode.MOBILE) {
+      if (settingsHandler.appMode.value.isMobile) {
         return const MobileHome();
       } else {
         return const DesktopHome();
@@ -362,7 +361,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     // with lockscreen:
     // return Obx(() {
     //   if(localAuthHandler.isLoggedIn.value == true) {
-    //     if (settingsHandler.appMode.value == AppMode.MOBILE) {
+    //     if (settingsHandler.appMode.value.isMobile) {
     //       return const MobileHome();
     //     } else {
     //       return const DesktopHome();

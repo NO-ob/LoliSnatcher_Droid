@@ -28,16 +28,17 @@ class Logger {
         .forEach((String? str) => debugPrint("$preText$str"));
 
     if (settingsHandler.ignoreLogTypes.any((val) => logType == val)) {
-      // Ignore
+      // Ignore unselected log types
+      return;
+    }
+
+    if (kDebugMode) {
+      // don't print app name on debug builds
+      // print("$callerClass::$callerFunction::$logType::$logStr");
+      printWrapped(logStr, "$callerClass::$callerFunction::$logType::");
     } else {
-      if (kDebugMode) {
-        // don't print app name on debug builds
-        // print("$callerClass::$callerFunction::$logType::$logStr");
-        printWrapped(logStr, "$callerClass::$callerFunction::$logType::");
-      } else {
-        // debugPrint("[$appName]::$callerClass::$callerFunction::$logType::$logStr");
-        printWrapped(logStr, "[$appName]::$callerClass::$callerFunction::$logType::");
-      }
+      // debugPrint("[$appName]::$callerClass::$callerFunction::$logType::$logStr");
+      printWrapped(logStr, "[$appName]::$callerClass::$callerFunction::$logType::");
     }
   }
 }

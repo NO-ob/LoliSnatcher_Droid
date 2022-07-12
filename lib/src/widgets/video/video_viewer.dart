@@ -22,7 +22,6 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/video/loli_controls.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class VideoViewer extends StatefulWidget {
   const VideoViewer(Key? key, this.booruItem, this.index, this.enableFullscreen) : super(key: key);
@@ -203,14 +202,14 @@ class VideoViewerState extends State<VideoViewer> {
     viewController..outputStateStream.listen(onViewStateChanged);
     scaleController..outputScaleStateStream.listen(onScaleStateChanged);
 
-    isViewed = settingsHandler.appMode.value == AppMode.MOBILE
+    isViewed = settingsHandler.appMode.value.isMobile
         ? searchHandler.viewedIndex.value == widget.index
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      if (settingsHandler.appMode.value == AppMode.MOBILE ? isCurrentIndex : isCurrentItem) {
+      if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
         isViewed = false;
@@ -566,7 +565,7 @@ class VideoViewerState extends State<VideoViewer> {
             ),
             //
             AnimatedSwitcher(
-              duration: Duration(milliseconds: settingsHandler.appMode.value == AppMode.DESKTOP ? 50 : 200),
+              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 200),
               child: initialized
                   ? Listener(
                       onPointerSignal: (pointerSignal) {

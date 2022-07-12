@@ -229,7 +229,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   } else {
                     // TODO need to update dir picker to work on desktop
                     // String? value;
-                    // if(settingsHandler.appMode.value == AppMode.DESKTOP) {
+                    // if(settingsHandler.appMode.value.isDesktop) {
                     //   value = await showDialog(
                     //     context: context,
                     //     builder: (BuildContext context) {

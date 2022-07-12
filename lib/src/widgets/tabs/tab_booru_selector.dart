@@ -7,7 +7,6 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
-import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 
 class TabBooruSelector extends StatelessWidget {
   const TabBooruSelector(this.isPrimary, {Key? key}) : super(key: key);
@@ -58,7 +57,7 @@ class TabBooruSelector extends StatelessWidget {
       // dropdown for secondary boorus
       if (!isPrimary) {
         return Container(
-          padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
+          padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
           child: Obx(() => DropdownSearch<Booru>.multiSelection(
               // showSearchBox: true,
               items: settingsHandler.booruList,
@@ -94,7 +93,7 @@ class TabBooruSelector extends StatelessWidget {
                 dropdownSearchDecoration: InputDecoration(
                   labelText: "Secondary Boorus",
                   hintText: "Secondary Boorus",
-                  contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
+                  contentPadding: settingsHandler.appMode.value.isDesktop
                       ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                       : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
@@ -123,8 +122,8 @@ class TabBooruSelector extends StatelessWidget {
 
       // dropdown for primary booru
       return Container(
-        // constraints: settingsHandler.appMode.value == AppMode.DESKTOP ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
-        padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
+        // constraints: settingsHandler.appMode.value.isDesktop ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
+        padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
         child: Obx(() {
           Booru? selectedBooru = searchHandler.currentBooru;
           // protection from exceptions when somehow selected booru is not on the list
@@ -140,7 +139,7 @@ class TabBooruSelector extends StatelessWidget {
             decoration: InputDecoration(
               labelText: 'Booru',
               hintText: 'Booru',
-              contentPadding: settingsHandler.appMode.value == AppMode.DESKTOP
+              contentPadding: settingsHandler.appMode.value.isDesktop
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
@@ -172,7 +171,7 @@ class TabBooruSelector extends StatelessWidget {
               return DropdownMenuItem<Booru>(
                 value: value,
                 child: Container(
-                  padding: settingsHandler.appMode.value == AppMode.DESKTOP ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
+                  padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
                   decoration: isCurrent
                       ? BoxDecoration(
                           border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),

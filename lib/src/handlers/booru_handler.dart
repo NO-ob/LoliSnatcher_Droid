@@ -49,7 +49,7 @@ abstract class BooruHandler {
 
   /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
-  Future Search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom) async {
     // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
@@ -309,6 +309,10 @@ abstract class BooruHandler {
 
   // TODO
   bool hasLoadItemSupport = false;
+
+  // TODO fetch and overwrite current item data when entering tag view with a newer / more complete data
+  bool shouldUpdateIteminTagView = false;
+
   Future loadItem(BooruItem item) async {
     return null;
   }
@@ -415,8 +419,8 @@ abstract class BooruHandler {
       for (int i = 0; i < items[x].tagsList.length; i++) {
         final String tag = items[x].tagsList[i];
 
-        final bool alreadyStored = TagHandler.instance.hasTag(tag);
-        if (!alreadyStored) {
+        final bool alreadyStoredAndNotStale = TagHandler.instance.isTagStale(tag); //TagHandler.instance.hasTag(tag);
+        if (!alreadyStoredAndNotStale) {
           final bool isPresent = unTyped.contains(tag);
           if(!isPresent) {
             unTyped.add(tag);
@@ -424,7 +428,10 @@ abstract class BooruHandler {
         }
       }
     }
-    if (unTyped.isNotEmpty) TagHandler.instance.queue(unTyped, booru, 200);
+
+    if (unTyped.isNotEmpty) {
+      TagHandler.instance.queue(unTyped, booru, 200);
+    }
   }
 
   String getTagDisplayString(String tag){

@@ -471,7 +471,7 @@ class SearchHandler extends GetxController {
     }
 
     // fetch new items, but get results from booruHandler and not search itself
-    await currentBooruHandler.Search(currentTab.tags, null);
+    await currentBooruHandler.search(currentTab.tags, null);
     // print('FINISHED SEARCH: ${booruhandler.filteredFetched.length}');
 
     // lock new loads if handler detected last page
