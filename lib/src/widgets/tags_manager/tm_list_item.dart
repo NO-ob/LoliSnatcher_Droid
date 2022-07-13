@@ -20,6 +20,9 @@ class TagsManagerListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isStale = tag.updatedAt < DateTime.now().subtract(const Duration(days: 3)).millisecondsSinceEpoch;
+    String staleText = isStale ? " (stale)" : "";
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       child: ListTile(
@@ -54,7 +57,7 @@ class TagsManagerListItem extends StatelessWidget {
           fontWeight: FontWeight.bold,
           isExpanded: false,
         ),
-        subtitle: Text(tag.tagType.toString()),
+        subtitle: Text('${tag.tagType.toString()} $staleText'.trim()),
       ),
     );
   }

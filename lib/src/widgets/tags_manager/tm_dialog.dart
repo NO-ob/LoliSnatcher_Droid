@@ -94,6 +94,18 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
               filterTags();
             }
           },
+          onSetStale: () {
+            item.updatedAt = 100;
+            filterTags();
+          },
+          onResetStale: () {
+            item.updatedAt = DateTime.now().millisecondsSinceEpoch;
+            filterTags();
+          },
+          onSetUnstaleable: () {
+            item.updatedAt = DateTime.now().millisecondsSinceEpoch * 10;
+            filterTags();
+          },
         );
       },
     );

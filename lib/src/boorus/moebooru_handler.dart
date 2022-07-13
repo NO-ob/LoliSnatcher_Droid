@@ -113,7 +113,7 @@ class MoebooruHandler extends BooruHandler {
     // record tag data for future use
     final String rawTagType = responseItem.getAttribute("type")?.toString() ?? "";
     TagType tagType = TagType.none;
-    if (tagTypeMap.containsKey(rawTagType)) {
+    if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
       tagType = (tagTypeMap[rawTagType] ?? TagType.none);
     }
     addTagsWithType([tagStr], tagType);

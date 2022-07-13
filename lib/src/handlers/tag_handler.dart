@@ -41,13 +41,13 @@ class TagHandler extends GetxController {
     return _tagMap.containsKey(tagString);
   }
 
-  /// Check if tag is in the tag map and if it is - check if it is outdated
-  bool isTagStale(String tagString, {int cooldown = Constants.tagStaleTime}) {
-    final bool isPresent = hasTag(tagString);
-    if (!isPresent) {
-      return true;
+  /// Check if tag is in the tag map and if it is - check if it is not outdated/stale
+  bool hasTagAndNotStale(String tagString, {int staleTime = Constants.tagStaleTime}) {
+    if (hasTag(tagString)) {
+      final bool isNotStale = _tagMap[tagString]!.updatedAt >= (DateTime.now().millisecondsSinceEpoch - staleTime);
+      return isNotStale;
     } else {
-      return _tagMap[tagString]!.updatedAt < DateTime.now().millisecondsSinceEpoch - cooldown;
+      return false;
     }
   }
 
@@ -92,7 +92,7 @@ class TagHandler extends GetxController {
         for (int i = 0; i < tagMax; i++) {
           if (untyped.tags.isNotEmpty) {
             String tag = untyped.tags.removeLast();
-            if (!hasTag(tag) && !workingTags.contains(tag)) {
+            if (!hasTagAndNotStale(tag) && !workingTags.contains(tag)) {
               workingTags.add(tag);
               // print("adding $tag");
             }
@@ -118,7 +118,7 @@ class TagHandler extends GetxController {
   /// Stores given tags list with given type, if tag is already in the tag map - update it's type, but only if the type was "none"
   void addTagsWithType(List<String> tags, TagType type) async {
     for(String tag in tags) {
-      if (!hasTag(tag)) {
+      if (!hasTagAndNotStale(tag)) {
         putTag(Tag(tag, tagType: type));
       } else if (type != TagType.none) {
         if (getTag(tag).tagType == TagType.none) {

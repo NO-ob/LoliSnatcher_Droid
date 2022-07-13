@@ -419,7 +419,7 @@ abstract class BooruHandler {
       for (int i = 0; i < items[x].tagsList.length; i++) {
         final String tag = items[x].tagsList[i];
 
-        final bool alreadyStoredAndNotStale = TagHandler.instance.isTagStale(tag); //TagHandler.instance.hasTag(tag);
+        final bool alreadyStoredAndNotStale = TagHandler.instance.hasTagAndNotStale(tag); //TagHandler.instance.hasTag(tag);
         if (!alreadyStoredAndNotStale) {
           final bool isPresent = unTyped.contains(tag);
           if(!isPresent) {

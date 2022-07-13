@@ -276,6 +276,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
+      // TODO possible performance problem if you have too many tags?
       tagHandler.saveTags();
     });
 
@@ -297,7 +298,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     if (Platform.isAndroid || Platform.isIOS) {
       appLinks = AppLinks();
 
-      // check if there is a link on start
+      // check if there is a deep link on app start
       final Uri? initialLink = await appLinks!.getInitialAppLink();
       if (initialLink != null) {
         openAppLink(initialLink.toString());

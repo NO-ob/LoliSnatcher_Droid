@@ -381,7 +381,7 @@ class _WaterfallViewState extends State<WaterfallView> {
                   // print('isScreenFilled: $isScreenFilled');
                   // print('isNotAtStart: $isNotAtStart');
                   // print('isAtOrNearEdge: $isAtOrNearEdge');
-                  // TODO extra search could trigger when changing tabs
+                  // TODO could trigger extra search when changing tabs
                   // print('!! scroll triggered search !!');
                   searchHandler.runSearch();
                 }

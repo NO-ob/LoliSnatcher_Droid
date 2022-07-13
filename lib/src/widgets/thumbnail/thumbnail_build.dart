@@ -19,15 +19,16 @@ class ThumbnailBuild extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    IconData itemIcon = Tools.getFileIcon(item.mediaType);
+    final IconData itemIcon = Tools.getFileIcon(item.mediaType);
 
-    List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
-    bool isHated = parsedTags[0].isNotEmpty;
-    bool isLoved = parsedTags[1].isNotEmpty;
-    bool isSound = parsedTags[2].isNotEmpty;
-    bool isNoted = item.hasNotes == true;
+    final List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
+    final bool isHated = parsedTags[0].isNotEmpty;
+    final bool isLoved = parsedTags[1].isNotEmpty;
+    final bool isSound = parsedTags[2].isNotEmpty;
+    final bool hasNotes = item.hasNotes == true;
+    final bool hasComments = item.hasComments == true;
 
-    // reset the isHated value since we already check for it on every render
+    // reset the isHated value since we already re-check it on every render
     item.isHated.value = isHated;
 
     // print('ThumbnailBuild $index');
@@ -101,12 +102,19 @@ class ThumbnailBuild extends StatelessWidget {
                           size: 14,
                         ),
 
-                      if (isNoted)
+                      if (hasNotes)
                         const Icon(
                           Icons.note_add,
                           color: Colors.white,
                           size: 14,
                         ),
+                      
+                      // if (hasComments)
+                      //   const Icon(
+                      //     Icons.comment,
+                      //     color: Colors.white,
+                      //     size: 14,
+                      //   ),
 
                       Icon(
                         itemIcon,

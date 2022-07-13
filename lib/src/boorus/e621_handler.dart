@@ -127,7 +127,7 @@ class e621Handler extends BooruHandler {
     // record tag data for future use
     final String rawTagType = responseItem["category"]?.toString() ?? "";
     TagType tagType = TagType.none;
-    if (tagTypeMap.containsKey(rawTagType)) {
+    if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
       tagType = (tagTypeMap[rawTagType] ?? TagType.none);
     }
     addTagsWithType([tagStr], tagType);
