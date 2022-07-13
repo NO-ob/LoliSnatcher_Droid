@@ -197,11 +197,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
                     late Widget itemWidget;
                     if(isImage) {
-                      itemWidget = ImageViewer(
-                        item.key,
-                        item,
-                        index,
-                      );
+                      itemWidget = ImageViewer(item.key, item, index);
                     } else if(isVideo) {
                       if(settingsHandler.disableVideo) {
                         itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));

@@ -416,7 +416,7 @@ class SearchHandler extends GetxController {
               ),
               const Text(''),
               const Text(
-                "Consider fixing this in your future queries",
+                "App fixed the rating automatically, but consider changing to correct rating in your future queries",
                 style: TextStyle(fontSize: 18),
               ),
             ],

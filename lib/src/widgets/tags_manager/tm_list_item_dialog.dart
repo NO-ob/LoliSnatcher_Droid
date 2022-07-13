@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
@@ -15,33 +16,48 @@ class TagsManagerListItemDialog extends StatefulWidget {
     required this.tag,
     required this.onDelete,
     required this.onChangedType,
+    required this.onSetStale,
+    required this.onResetStale,
+    required this.onSetUnstaleable,
   }) : super(key: key);
 
   final Tag tag;
   final void Function() onDelete;
   final void Function(TagType?) onChangedType;
+  final void Function() onSetStale;
+  final void Function() onResetStale;
+  final void Function() onSetUnstaleable;
 
   @override
   State<TagsManagerListItemDialog> createState() => _TagsManagerListItemDialogState();
 }
 
 class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
-  void _onChangedType(TagType? value) {
-    widget.onChangedType(value);
+  void callbackWithSetState(Function callback) {
+    callback();
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    String staleText = DateTime.fromMillisecondsSinceEpoch(widget.tag.updatedAt).add(const Duration(milliseconds: Constants.tagStaleTime)).toString();
+
     return SettingsDialog(
       contentItems: <Widget>[
         SizedBox(width: double.maxFinite, child: TagsManagerListItem(tag: widget.tag)),
         //
         const SizedBox(height: 10),
+        Text('Stale after: $staleText'),
+        //
+        const SizedBox(height: 10),
         SettingsDropdown(
           value: widget.tag.tagType,
           items: TagType.values,
-          onChanged: _onChangedType,
+          onChanged: (TagType? newValue) {
+            callbackWithSetState(() {
+              widget.onChangedType(newValue);
+            });
+          },
           title: 'Type',
           drawBottomBorder: false,
         ),
@@ -101,6 +117,39 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           onTap: widget.onDelete,
           leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
           title: const Text('Delete'),
+        ),
+        // 
+        const SizedBox(height: 10),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () => callbackWithSetState(widget.onSetStale),
+          leading: const Icon(Icons.timer_off),
+          title: const Text('Set Stale'),
+        ),
+        // 
+        const SizedBox(height: 10),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () => callbackWithSetState(widget.onResetStale),
+          leading: const Icon(Icons.restore),
+          title: const Text('Reset Stale'),
+        ),
+        // 
+        const SizedBox(height: 10),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () => callbackWithSetState(widget.onSetUnstaleable),
+          leading: const Icon(Icons.lock_clock),
+          title: const Text('Make Unstaleable'),
         ),
       ],
     );

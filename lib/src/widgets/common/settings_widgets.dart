@@ -95,7 +95,8 @@ class SettingsButton extends StatelessWidget {
   }
 }
 
-// class used to unify the opening of settings pages logic
+/// class used to unify the opening of settings pages logic
+/// TODO get rid of this if possible after implementing proper routing
 class SettingsPageOpen {
   SettingsPageOpen({
     required this.page,

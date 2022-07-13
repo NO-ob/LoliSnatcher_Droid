@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -14,27 +15,40 @@ class UnknownViewerPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Thumbnail(
-            item: item,
-            index: index,
-            isStandalone: false,
-            ignoreColumnsCount: true,
-          ),
-          SizedBox(
-            width: MediaQuery.of(context).size.width / 3,
-            child: SettingsButton(
-              name: 'Unknown file format, click here to open in browser',
-              action: () {
-                ServiceHandler.launchURL(item.postURL);
-              },
-              icon: const Icon(CupertinoIcons.question),
-              drawTopBorder: true,
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Thumbnail(
+              item: item,
+              index: index,
+              isStandalone: false,
+              ignoreColumnsCount: true,
             ),
-          ),
-        ],
+            LayoutBuilder(
+              builder: (BuildContext layoutContext, BoxConstraints constraints) {
+                return Container(
+                  color: Colors.black87,
+                  width: constraints.maxWidth / 2,
+                  height: 200,
+                  child: Center(
+                    child: SizedBox(
+                      child: SettingsButton(
+                        name: 'Unknown file format, click here to open in browser',
+                        action: () {
+                          ServiceHandler.launchURL(item.postURL);
+                        },
+                        icon: const Icon(CupertinoIcons.question),
+                        drawTopBorder: true,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

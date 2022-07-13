@@ -42,7 +42,7 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String validateTags(String tags) {
-    if(tags.toLowerCase().contains('rating:safe')) {
+    if (tags.toLowerCase().contains('rating:safe')) {
       tags = tags.toLowerCase().replaceAll('rating:safe', 'rating:general');
     }
     return tags;
@@ -123,13 +123,11 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
+    // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=rating:general%20order:score&limit=20&pid=0&json=1
     int cappedPage = max(0, pageNum);
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}&user_id=${booru.userID}' : '';
 
-    if (booru.apiKey == "") {
-      return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1";
-    } else {
-      return "${booru.baseURL}/index.php?api_key=${booru.apiKey}&user_id=${booru.userID}&page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1";
-    }
+    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1$apiKey";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -154,7 +152,7 @@ class GelbooruHandler extends BooruHandler {
     // record tag data for future use
     final String rawTagType = responseItem["type"]?.toString() ?? "";
     TagType tagType = TagType.none;
-    if (tagTypeMap.containsKey(rawTagType)) {
+    if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
       tagType = (tagTypeMap[rawTagType] ?? TagType.none);
     }
     addTagsWithType([tagStr], tagType);

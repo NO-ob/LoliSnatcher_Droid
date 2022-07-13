@@ -13,6 +13,15 @@ class DanbooruHandler extends BooruHandler {
   DanbooruHandler(Booru booru, int limit) : super(booru, limit);
 
   @override
+  Map<String, TagType> tagTypeMap = {
+    "5": TagType.meta,
+    "3": TagType.copyright,
+    "4": TagType.character,
+    "1": TagType.artist,
+    "0": TagType.none,
+  };
+
+  @override
   bool hasSizeData = true;
 
   @override
@@ -23,7 +32,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   String validateTags(String tags) {
-    if(tags.toLowerCase().contains('rating:safe')) {
+    if (tags.toLowerCase().contains('rating:safe')) {
       tags = tags.toLowerCase().replaceAll('rating:safe', 'rating:general');
     }
     return tags;
@@ -87,6 +96,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
+    // EXAMPLE: https://danbooru.donmai.us/posts.json?tags=rating:safe%20order:rank&limit=20&page=1
     final String apiStr = (booru.apiKey?.isNotEmpty ?? false) ? "" : "&login=${booru.userID}&api_key=${booru.apiKey}";
     return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$apiStr";
   }
@@ -114,8 +124,16 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   String? parseTagSuggestion(responseItem, int index) {
-    // return responseItem['name'];
-    return responseItem['antecedent'] ?? responseItem['value'];
+    final String tagStr = (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? "";
+    if (tagStr.isEmpty) return null;
+
+    final String rawTagType = responseItem["category"]?.toString() ?? "";
+    TagType tagType = TagType.none;
+    if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
+      tagType = (tagTypeMap[rawTagType] ?? TagType.none);
+    }
+    addTagsWithType([tagStr], tagType);
+    return tagStr;
   }
 
   @override
@@ -140,7 +158,6 @@ class DanbooruHandler extends BooruHandler {
       createDateFormat: "yyyy-MM-dd't'HH:mm:ss'.'SSS",
     );
   }
-
 
   @override
   String makeNotesURL(String postID) {
