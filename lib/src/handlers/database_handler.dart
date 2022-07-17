@@ -1,16 +1,21 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
+import '../data/tag.dart';
+
 
 ///////////////////////////////////////////////////////////////
 /// WARNING:
-/// On desktop releases you need to add sqlite3.dll for windows and ??? for linux(?)
+/// On desktop releases you need to add sqlite3.dll for windows and have sqlite3 installed for linux
 /// https://www.sqlite.org/download.html
+/// https://archlinux.org/packages/core/x86_64/sqlite/
 /// https://pub.dev/packages/sqflite_common_ffi
 ///////////////////////////////////////////////////////////////
 
@@ -55,6 +60,8 @@ class DBHandler{
     await db?.execute("CREATE TABLE IF NOT EXISTS Tag ("
         "id INTEGER PRIMARY KEY,"
         "name TEXT"
+        "tagType TEXT"
+        "updatedAt INTEGER"
         ")");
     await db?.execute("CREATE TABLE IF NOT EXISTS ImageTag ("
         "tagID INTEGER,"
@@ -73,12 +80,36 @@ class DBHandler{
         "restore TEXT"
         ")");
     try{
-      // add new column, try-catch to ignore the "already added" error
-      await db?.execute("ALTER TABLE SearchHistory ADD COLUMN isFavourite INTEGER;");
+
+      if (!await columnExists('SearchHistory', 'isFavourite')){
+        print('creating isFavourite');
+        await db?.execute("ALTER TABLE SearchHistory ADD COLUMN isFavourite INTEGER;");
+      }
+      if (!await columnExists('Tag', 'tagType'))  {
+        print('creating tagType');
+        await db?.execute("ALTER TABLE Tag ADD COLUMN tagType TEXT;");
+      }
+      if(!await columnExists('Tag', 'updatedAt')){
+        print('creating updatedAt');
+        await db?.execute("ALTER TABLE Tag ADD COLUMN updatedAt INTEGER;");
+      }
+
     } catch(e) {
-      // print(e);
+      //print(e);
     }
     return true;
+  }
+
+  Future<bool> columnExists(String tableName, String columnName) async{
+    List<Map<String, Object?>>? result = await db?.rawQuery(
+        "SELECT COUNT(*) AS count FROM pragma_table_info('$tableName') WHERE name='$columnName'")
+    ;
+    if (result != null && result.isNotEmpty) {
+      if ((result[0]['count'] ?? 0) == 1){
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<bool> createIndexes() async {
@@ -290,6 +321,22 @@ class DBHandler{
     return result;
   }
 
+  //Gets a list of tags related to given posts ids
+  Future<List<Tag>> getAllTags() async {
+    List? result = await db?.rawQuery(
+        "SELECT name, tagType, updatedAt FROM Tag");
+    List<Tag> tags = [];
+    if (result != null && result.isNotEmpty) {
+      for(int i=0; i < result.length; i++){
+        var currentItem = result[i];
+        if(currentItem != null && currentItem.isNotEmpty) {
+          tags.add(Tag.fromJson(currentItem));
+        }
+      }
+    }
+    return tags;
+  }
+
   //Gets amount of BooruItems from the database
   Future<int> searchDBCount(String searchTagsString) async {
     List<String> searchTags = [];
@@ -371,6 +418,21 @@ class DBHandler{
       }
       await db?.rawInsert("INSERT INTO ImageTag(tagID, booruItemID) VALUES(?,?)", [id,itemID]);
     }
+  }
+
+  //Adds tags for a BooruItem to the database
+  Future<void> updateTagsFromObjects(List<Tag> tags) async{
+    String? id = "";
+    for (var tag in tags) {
+      id = await getTagID(tag.fullString);
+      if (id.isEmpty) {
+        var result = await db?.rawInsert("INSERT INTO Tag(name, tagType, updatedAt) VALUES(?,?,?)", [tag.fullString, tag.tagType.name, tag.updatedAt]);
+        id = result?.toString();
+      } else {
+        await db?.rawUpdate("UPDATE Tag SET tagType = ?,updatedAt = ? WHERE id = ?", [tag.tagType.name,tag.updatedAt,id]);
+      }
+    }
+    return;
   }
 
   //Gets a tag id from the database

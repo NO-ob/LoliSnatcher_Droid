@@ -60,13 +60,18 @@ class TagHandler extends GetxController {
     return tag;
   }
 
-  void putTag(Tag tag) {
+  Future<void> putTag(Tag tag, {bool useDB = true}) async{
     // TODO sanitize tagString?
     if(tag.fullString.isEmpty) {
       return;
     }
 
     _tagMap[tag.fullString] = tag;
+
+    if (SettingsHandler.instance.dbEnabled && useDB){
+      await SettingsHandler.instance.dbHandler.updateTagsFromObjects([tag]);
+    }
+    return;
   }
 
   void tryGetTagTypes() {
@@ -102,7 +107,8 @@ class TagHandler extends GetxController {
         if (workingTags.isNotEmpty) {
           List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
           for (Tag tag in newTags) {
-            putTag(tag);
+            await putTag(tag);
+
             //TODO write tag to database
             tagCounter ++;
           }
@@ -119,10 +125,10 @@ class TagHandler extends GetxController {
   void addTagsWithType(List<String> tags, TagType type) async {
     for(String tag in tags) {
       if (!hasTagAndNotStale(tag)) {
-        putTag(Tag(tag, tagType: type));
+        await putTag(Tag(tag, tagType: type));
       } else if (type != TagType.none) {
         if (getTag(tag).tagType == TagType.none) {
-          putTag(Tag(tag, tagType: type));
+          await putTag(Tag(tag, tagType: type));
         }
       }
     }
@@ -143,10 +149,17 @@ class TagHandler extends GetxController {
   }
 
   Future<bool> loadTags() async {
-    // TODO load tags from database
-    if (await checkForTagsFile()) {
-      await loadTagsFile();
+    if (SettingsHandler.instance.dbEnabled){
+      List<Tag> tags = await SettingsHandler.instance.dbHandler.getAllTags();
+      for (Tag tag in tags){
+        await putTag(tag, useDB: false);
+      }
+    } else {
+      if (await checkForTagsFile()) {
+        await loadTagsFile();
+      }
     }
+
     return true;
   }
 
@@ -163,22 +176,28 @@ class TagHandler extends GetxController {
     return;
   }
 
+
+
   Future<bool> loadFromJSON(String jsonString) async {
-    try {
-      List jsonList = jsonDecode(jsonString);
-      for (Map<String, dynamic> rawTag in jsonList) {
-        try {
-          Tag tagObject = Tag.fromJson(rawTag);
-          putTag(tagObject);
-        } catch (e) {
-          Logger.Inst().log("Error parsing tag: $rawTag", "TagHandler", "loadFromJSON", LogTypes.exception);
+      try {
+        List jsonList = jsonDecode(jsonString);
+        for (Map<String, dynamic> rawTag in jsonList) {
+          try {
+            Tag tagObject = Tag.fromJson(rawTag);
+            await putTag(tagObject);
+          } catch (e) {
+            Logger.Inst().log(
+                "Error parsing tag: $rawTag", "TagHandler", "loadFromJSON",
+                LogTypes.exception);
+          }
         }
+        return true;
+      } catch (e) {
+        Logger.Inst().log(
+            "Error loading tags from JSON: $e", "TagHandler", "loadFromJSON",
+            LogTypes.exception);
+        return false;
       }
-      return true;
-    } catch (e) {
-      Logger.Inst().log("Error loading tags from JSON: $e", "TagHandler", "loadFromJSON", LogTypes.exception);
-      return false;
-    }
   }
 
   List<Tag> toList() {
@@ -191,16 +210,21 @@ class TagHandler extends GetxController {
     _tagMap.remove(tag.fullString);
   }
 
-  Future<bool> saveTags() async {
+  Future<void> saveTags() async {
     SettingsHandler settings = SettingsHandler.instance;
     await getPerms();
-    if (settings.path == "") await settings.setConfigDir();
-    await Directory(settings.path).create(recursive:true);
-    File settingsFile = File("${settings.path}tags.json");
-    var writer = settingsFile.openWrite();
-    writer.write(jsonEncode(toList()));
-    writer.close();
-    return true;
+    if(settings.dbEnabled){
+      //await settings.dbHandler.updateTagsFromObjects(toList());
+    } else {
+      if (settings.path == "") await settings.setConfigDir();
+      await Directory(settings.path).create(recursive:true);
+      File settingsFile = File("${settings.path}tags.json");
+      var writer = settingsFile.openWrite();
+      writer.write(jsonEncode(toList()));
+      writer.close();
+    }
+
+    return;
   }
 }
 

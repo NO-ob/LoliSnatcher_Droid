@@ -410,7 +410,7 @@ abstract class BooruHandler {
   }
 
   void addTagsWithType(List<String> tags, TagType type) {
-    TagHandler.instance.addTagsWithType(tags, type);
+     TagHandler.instance.addTagsWithType(tags, type);
   }
 
   void populateTagHandler(List<BooruItem> items) async{

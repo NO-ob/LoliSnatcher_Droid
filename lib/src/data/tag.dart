@@ -22,7 +22,7 @@ class Tag {
   }
 
   Tag.fromJson(Map<String, dynamic> json) {
-    fullString = json["fullString"]?.toString() ?? "unknown";
+    fullString = json["fullString"]?.toString() ?? json["name"]?.toString() ?? "unknown";
     // if no updatedAt is stored, set it to the current time minus 3 days (will make it stale)
     updatedAt = json["updatedAt"] ?? (DateTime.now().millisecondsSinceEpoch - Constants.tagStaleTime);
     tagType = TagType.values.byName(json["tagType"]?.toString() ?? "none");
