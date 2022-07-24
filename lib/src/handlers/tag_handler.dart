@@ -238,7 +238,7 @@ class TagHandler extends GetxController {
       Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
     }catch(e){
       Logger.Inst().log("FAILED TO WRITE TAG FILE", "TagHandler", "saveTags", LogTypes.exception,);
-      Logger.Inst().log("e.toString()", "TagHandler", "saveTags", LogTypes.exception,);
+      Logger.Inst().log(e.toString(), "TagHandler", "saveTags", LogTypes.exception,);
     }}
     tagSaveActive = false;
     return;
