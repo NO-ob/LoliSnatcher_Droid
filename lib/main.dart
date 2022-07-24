@@ -277,7 +277,10 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
       // TODO possible performance problem if you have too many tags?
-      tagHandler.saveTags();
+      if(!tagHandler.tagSaveActive){
+        tagHandler.saveTags();
+      }
+
     });
 
     imageWriter.clearStaleCache();

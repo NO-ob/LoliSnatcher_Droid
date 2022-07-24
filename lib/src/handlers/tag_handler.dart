@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -24,13 +25,13 @@ class UntypedCollection {
 class TagHandler extends GetxController {
   static TagHandler get instance => Get.find<TagHandler>();
 
-
+  int prevLength = 0;
   final Map<String, Tag> _tagMap = {};
   Map<String, Tag> get tagMap => _tagMap;
 
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
-
+  bool tagSaveActive = false;
   TagHandler() {
     untypedQueue.listen((List<UntypedCollection> list) {
       tryGetTagTypes();
@@ -170,9 +171,9 @@ class TagHandler extends GetxController {
 
   Future<void> loadTagsFile() async {
     File tagFile = File("${SettingsHandler.instance.path}tags.json");
-    String settings = await tagFile.readAsString();
+    String jsonString = await tagFile.readAsString();
     // print('loadJSON $settings');
-    await loadFromJSON(settings);
+    await loadFromJSON(jsonString);
     return;
   }
 
@@ -211,19 +212,35 @@ class TagHandler extends GetxController {
   }
 
   Future<void> saveTags() async {
+    tagSaveActive = true;
     SettingsHandler settings = SettingsHandler.instance;
+    SearchHandler searchHandler = SearchHandler.instance;
     await getPerms();
+    Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    Logger.Inst().log("BOORU: ${searchHandler.currentBooruHandler.booru.name}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    Logger.Inst().log("FETCHED COUNT: ${searchHandler.currentBooruHandler.fetched.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    Logger.Inst().log("PREVIOUS TAG COUNT: $prevLength", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    Logger.Inst().log("TAG COUNT BEFORE SAVE: ${tagMap.entries.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    prevLength = tagMap.entries.length;
     if(settings.dbEnabled){
       //await settings.dbHandler.updateTagsFromObjects(toList());
-    } else {
+    } else {try{
       if (settings.path == "") await settings.setConfigDir();
       await Directory(settings.path).create(recursive:true);
-      File settingsFile = File("${settings.path}tags.json");
-      var writer = settingsFile.openWrite();
+      File tagFile = File("${settings.path}tags.json");
+      var writer = tagFile.openWrite();
       writer.write(jsonEncode(toList()));
-      writer.close();
-    }
-
+      await writer.flush();
+      await writer.close();
+      if(!settings.ignoreLogTypes.contains(LogTypes.tagHandlerInfo)){
+        Logger.Inst().log("TAG.JSON SIZE: ${File("${SettingsHandler.instance.path}tags.json").lengthSync() / 1024} KB", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+      }
+      Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    }catch(e){
+      Logger.Inst().log("FAILED TO WRITE TAG FILE", "TagHandler", "saveTags", LogTypes.exception,);
+      Logger.Inst().log("e.toString()", "TagHandler", "saveTags", LogTypes.exception,);
+    }}
+    tagSaveActive = false;
     return;
   }
 }
