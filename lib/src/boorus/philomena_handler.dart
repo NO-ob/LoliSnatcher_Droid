@@ -19,7 +19,7 @@ class PhilomenaHandler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['images'];
+    return (parsedResponse['images'] ?? []) as List;
   }
 
   @override

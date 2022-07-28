@@ -12,28 +12,6 @@ class TabBooruSelector extends StatelessWidget {
   const TabBooruSelector(this.isPrimary, {Key? key}) : super(key: key);
   final bool isPrimary;
 
-  Widget buildRow(Booru? value) {
-    if (value == null) {
-      return const Text('???');
-    }
-
-    String name = " ${value.name}";
-
-    return Row(
-      children: <Widget>[
-        //Booru Icon
-        value.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(value.faviconURL!),
-        //Booru name
-        MarqueeText(
-          key: ValueKey(name),
-          text: name,
-          fontSize: 16,
-        ),
-        // Text(name),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
@@ -74,9 +52,13 @@ class TabBooruSelector extends StatelessWidget {
               },
               popupProps: PopupPropsMultiSelection.menu(
                 itemBuilder: (BuildContext context, Booru? value, bool isSelected) {
+                  if (value == null) {
+                    return const Text('???');
+                  }
+
                   return Padding(
                     padding: const EdgeInsets.all(12),
-                    child: buildRow(value),
+                    child: TabBooruSelectorItem(booru: value),
                   );
                 },
                 selectionWidget: (BuildContext context, Booru item, bool isSelected) {
@@ -111,7 +93,7 @@ class TabBooruSelector extends StatelessWidget {
                   children: selectedItems.map((value) {
                     return Padding(
                       padding: const EdgeInsets.all(4),
-                      child: buildRow(value),
+                      child: TabBooruSelectorItem(booru: value),
                     );
                   }).toList(),
                 );
@@ -153,9 +135,7 @@ class TabBooruSelector extends StatelessWidget {
               return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
                 return DropdownMenuItem<Booru>(
                   value: value,
-                  child: Container(
-                    child: buildRow(value),
-                  ),
+                  child: TabBooruSelectorItem(booru: value),
                 );
               }).toList();
             },
@@ -178,7 +158,7 @@ class TabBooruSelector extends StatelessWidget {
                           borderRadius: BorderRadius.circular(5),
                         )
                       : null,
-                  child: buildRow(value),
+                  child: TabBooruSelectorItem(booru: value),
                 ),
               );
             }).toList(),
@@ -186,5 +166,33 @@ class TabBooruSelector extends StatelessWidget {
         }),
       );
     });
+  }
+}
+
+class TabBooruSelectorItem extends StatelessWidget {
+  const TabBooruSelectorItem({
+    Key? key,
+    required this.booru,
+  }) : super(key: key);
+
+  final Booru booru;
+
+  @override
+  Widget build(BuildContext context) {
+    String name = " ${booru.name}";
+
+    return Row(
+      children: <Widget>[
+        //Booru Icon
+        booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru.faviconURL!),
+        //Booru name
+        MarqueeText(
+          key: ValueKey(name),
+          text: name,
+          fontSize: 16,
+        ),
+        // Text(name),
+      ],
+    );
   }
 }

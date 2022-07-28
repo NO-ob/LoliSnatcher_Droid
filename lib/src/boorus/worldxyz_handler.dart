@@ -33,7 +33,7 @@ class WorldXyzHandler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['items'];
+    return (parsedResponse['items'] ?? []) as List;
   }
 
   @override

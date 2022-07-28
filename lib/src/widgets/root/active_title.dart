@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class ActiveTitle extends StatelessWidget {
@@ -24,18 +23,7 @@ class ActiveTitle extends StatelessWidget {
         if (searchHandler.list.isEmpty) {
           return const Text('LoliSnatcher');
         } else {
-          return const TabSelector(topMode: true);
-
-          return GestureDetector(
-            onTap: () {
-              searchHandler.openAndFocusSearch();
-            },
-            child: TabRow(
-              tab: searchHandler.currentTab,
-              color: Theme.of(context).colorScheme.onPrimary,
-              fontWeight: Theme.of(context).appBarTheme.titleTextStyle!.fontWeight!,
-            ),
-          );
+          return const TabSelectorHeader();
         }
       }
     });

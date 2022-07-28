@@ -24,7 +24,7 @@ class e621Handler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['posts'] as List;
+    return (parsedResponse['posts'] ?? []) as List;
   }
 
   @override

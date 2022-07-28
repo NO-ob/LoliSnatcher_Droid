@@ -20,7 +20,7 @@ class SzurubooruHandler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['results'];
+    return (parsedResponse['results'] ?? []) as List;
   }
 
   @override

@@ -81,7 +81,7 @@ class SettingsPage extends StatelessWidget {
               SettingsButton(
                 name: 'Tag Filters',
                 icon: const Icon(CupertinoIcons.tag),
-                page: () => const FiltersEdit(),
+                page: () => const TagsFiltersPage(),
               ),
               SettingsButton(
                 name: 'Database',

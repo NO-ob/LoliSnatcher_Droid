@@ -120,6 +120,8 @@ abstract class BooruHandler {
       posts = await parseListFromResponse(response);
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
+      errorString = e.toString();
+      rethrow;
     }
     
     List<BooruItem> newItems = [];

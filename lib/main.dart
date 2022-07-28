@@ -29,6 +29,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/theme_handler.dart';
+import 'package:lolisnatcher/src/handlers/notify_handler.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,30 @@ void main() {
     Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
   };
 
+  // TODO
+  // AwesomeNotifications().initialize(
+  //   // set the icon to null if you want to use the default app icon
+  //   null,
+  //   [
+  //     NotificationChannel(
+  //       channelGroupKey: 'basic_channel_group',
+  //       channelKey: 'basic_channel',
+  //       channelName: 'Basic notifications',
+  //       channelDescription: 'Notification channel for basic tests',
+  //       defaultColor: Colors.pink[600],
+  //       ledColor: Colors.white,
+  //     )
+  //   ],
+  //   // Channel groups are only visual and are not required
+  //   channelGroups: [
+  //     NotificationChannelGroup(
+  //       channelGroupKey: 'basic_channel_group',
+  //       channelGroupName: 'Basic group',
+  //     ),
+  //   ],
+  //   debug: true,
+  // );
+
   runApp(const MainApp());
 }
 
@@ -64,6 +89,7 @@ class _MainAppState extends State<MainApp> {
   late final ViewerHandler viewerHandler;
   late final NavigationHandler navigationHandler;
   late final TagHandler tagHandler;
+  late final NotifyHandler notifyHandler;
   // late final LocalAuthHandler localAuthHandler;
   int maxFps = 60;
 
@@ -76,6 +102,7 @@ class _MainAppState extends State<MainApp> {
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
     navigationHandler = Get.put(NavigationHandler(), permanent: true);
+    notifyHandler = Get.put(NotifyHandler(), permanent: true);
     // localAuthHandler = Get.put(LocalAuthHandler(), permanent: true);
     initHandlers();
 
@@ -87,6 +114,24 @@ class _MainAppState extends State<MainApp> {
         updateState();
       };
     }
+
+    // TODO
+    // AwesomeNotifications().setListeners(
+    //   onActionReceivedMethod: NotifyHandler.onActionReceivedMethod,
+    //   onNotificationCreatedMethod: NotifyHandler.onNotificationCreatedMethod,
+    //   onNotificationDisplayedMethod: NotifyHandler.onNotificationDisplayedMethod,
+    //   onDismissActionReceivedMethod: NotifyHandler.onDismissActionReceivedMethod,
+    // );
+
+    // AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    //   if (!isAllowed) {
+    //     // TODO
+    //     // This is just a basic example. For real apps, you must show some
+    //     // friendly dialog box before call the request method.
+    //     // This is very important to not harm the user experience
+    //     AwesomeNotifications().requestPermissionToSendNotifications();
+    //   }
+    // });
 
     setMaxFPS();
   }
@@ -124,6 +169,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
+    Get.delete<NotifyHandler>();
     Get.delete<NavigationHandler>();
     Get.delete<ViewerHandler>();
     Get.delete<SnatchHandler>();
@@ -159,16 +205,14 @@ class _MainAppState extends State<MainApp> {
       //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       //   statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemStatusBarContrastEnforced: true,
-        
+
       //   systemNavigationBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
       //   systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemNavigationBarContrastEnforced: true,
       //   systemNavigationBarDividerColor: Colors.transparent,
       // ));
 
-
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
-
 
       return StatsFl(
         isEnabled: settingsHandler.isDebug.value && settingsHandler.showFPS.value, //Toggle on/off

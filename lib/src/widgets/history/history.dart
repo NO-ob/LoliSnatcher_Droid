@@ -336,56 +336,45 @@ class _HistoryListState extends State<HistoryList> {
   Widget filterBuild() {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 2, 10, 2),
-      width: double.infinity,
       child: Row(
-        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Expanded(
-            child: SizedBox(
-              // height: 45,
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: SettingsTextInput(
-                      onlyInput: true,
-                      controller: filterSearchController,
-                      onChanged: (String? input) {
-                        filterHistory();
-                      },
-                      title: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
-                      hintText: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
-                      inputType: TextInputType.text,
-                      clearable: true,
-                      margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
-                    ),
-                  ),
-                  Stack(
-                    children: <Widget>[
-                      Center(
-                        child: IconButton(
-                          padding: const EdgeInsets.fromLTRB(0, 2, 0, 15),
-                          icon: const Icon(Icons.favorite, size: 40, color: Colors.red),
-                          onPressed: () {},
-                        ),
-                      ),
-                      Center(
-                        child: IconButton(
-                          padding: const EdgeInsets.fromLTRB(0, 7, 0, 15),
-                          icon: Icon(
-                            showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
-                            color: showFavourites ? Colors.white : Colors.white60,
-                          ),
-                          onPressed: () {
-                            showFavourites = !showFavourites;
-                            filterHistory();
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                ],
-              ),
+            child: SettingsTextInput(
+              onlyInput: true,
+              controller: filterSearchController,
+              onChanged: (String? input) {
+                filterHistory();
+              },
+              title: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
+              hintText: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
+              inputType: TextInputType.text,
+              clearable: true,
+              margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
+          ),
+          Stack(
+            children: <Widget>[
+              Center(
+                child: IconButton(
+                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 15),
+                  icon: const Icon(Icons.favorite, size: 40, color: Colors.red),
+                  onPressed: () {},
+                ),
+              ),
+              Center(
+                child: IconButton(
+                  padding: const EdgeInsets.fromLTRB(0, 11, 0, 15),
+                  icon: Icon(
+                    showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                    color: showFavourites ? Colors.white : Colors.white60,
+                  ),
+                  onPressed: () {
+                    showFavourites = !showFavourites;
+                    filterHistory();
+                  },
+                ),
+              )
+            ],
           ),
         ],
       ),

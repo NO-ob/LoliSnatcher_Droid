@@ -60,10 +60,10 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     super.dispose();
   }
 
-  Widget buildDivider(bool isForVertical) {
+  Widget buildDivider(bool isVerticalDirection) {
     return SizedBox(
-      width: isForVertical ? 20 : 1,
-      height: isForVertical ? 1 : 20,
+      width: isVerticalDirection ? 20 : 1,
+      height: isVerticalDirection ? 1 : 20,
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
@@ -75,7 +75,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     );
   }
 
-  List<Widget> getButtons(bool isVertical, bool isLeft) {
+  List<Widget> getButtons(bool isVerticalDirection, bool isLeft) {
     final String side = isLeft ? 'Left' : 'Right';
 
     final bool isZoomHere = settingsHandler.zoomButtonPosition == side;
@@ -83,13 +83,13 @@ class _GalleryButtonsState extends State<GalleryButtons> {
 
     return [
       if(isZoomHere) const ZoomButton(),
-      if(isZoomHere && isPagesHere) buildDivider(isVertical),
+      if(isZoomHere && isPagesHere) buildDivider(isVerticalDirection),
 
       if(isPagesHere) ChangePageButtons(
         controller: widget.controller,
         isPrev: true,
       ),
-      if(isPagesHere) buildDivider(isVertical),
+      if(isPagesHere) buildDivider(isVerticalDirection),
       if(isPagesHere) ChangePageButtons(
         controller: widget.controller,
         isPrev: false,
@@ -99,7 +99,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isVertical = MediaQuery.of(context).orientation == Orientation.portrait;
+    final bool isVerticalDirection = MediaQuery.of(context).orientation == Orientation.portrait;
     final double distanceFromSide = MediaQuery.of(context).size.width * 0.05;
 
     return AnimatedOpacity(
@@ -117,14 +117,14 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         color: Theme.of(context).colorScheme.background.withOpacity(0.33),
-                        child: isVertical
+                        child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVertical, true),
+                                children: getButtons(isVerticalDirection, true),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVertical, true),
+                                children: getButtons(isVerticalDirection, true),
                               ),
                       ),
                     ),
@@ -137,14 +137,14 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         color: Theme.of(context).colorScheme.background.withOpacity(0.33),
-                        child: isVertical
+                        child: isVerticalDirection
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVertical, false),
+                                children: getButtons(isVerticalDirection, false),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: getButtons(isVertical, false),
+                                children: getButtons(isVerticalDirection, false),
                               ),
                       ),
                     ),

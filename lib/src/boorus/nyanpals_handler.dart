@@ -11,7 +11,7 @@ class NyanPalsHandler extends BooruHandler {
   List parseListFromResponse(response) {
     var parsedResponse = jsonDecode(response.body);
     totalCount.value = parsedResponse["total"]!;
-    return parsedResponse['rows'];
+    return (parsedResponse['rows'] ?? []) as List;
   }
 
   @override

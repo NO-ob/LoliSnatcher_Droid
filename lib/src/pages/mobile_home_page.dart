@@ -174,6 +174,7 @@ class _MobileHomeState extends State<MobileHome> {
                   return _onBackPressed(context);
                 },
                 child: Stack(
+                  alignment: Alignment.topCenter,
                   children: [
                     const MediaPreviews(),
                     Obx(() => MainAppBar(
