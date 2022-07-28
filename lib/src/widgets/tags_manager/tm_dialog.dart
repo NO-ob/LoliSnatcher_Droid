@@ -91,19 +91,23 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
           onChangedType: (TagType? newValue) {
             if (newValue != null && item.tagType != newValue) {
               item.tagType = newValue;
+              tagHandler.putTag(item);
               filterTags();
             }
           },
           onSetStale: () {
             item.updatedAt = 100;
+            tagHandler.putTag(item);
             filterTags();
           },
           onResetStale: () {
             item.updatedAt = DateTime.now().millisecondsSinceEpoch;
+            tagHandler.putTag(item);
             filterTags();
           },
           onSetUnstaleable: () {
             item.updatedAt = DateTime.now().millisecondsSinceEpoch * 10;
+            tagHandler.putTag(item);
             filterTags();
           },
         );
