@@ -5,19 +5,14 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ImageStats extends StatefulWidget {
-  ImageStats(
-    {
+  const ImageStats({
       Key? key,
       required this.child,
       this.width = 120,
       this.height = 40,
       this.isEnabled = true,
       this.align
-    }
-  ) : super(key: key) {
-    assert(width >= 80, "width must be >= 80px");
-    assert((height >= 8), "height must be >= 8px");
-  }
+  }) : super(key: key);
 
   /// Toggle the stats on/off, there should be no performance cost when the widget is off.
   final bool isEnabled;

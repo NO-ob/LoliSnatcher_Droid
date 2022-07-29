@@ -21,6 +21,7 @@ import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
 
 class WaterfallView extends StatefulWidget {
   const WaterfallView({Key? key}) : super(key: key);
+
   @override
   State<WaterfallView> createState() => _WaterfallViewState();
 }

@@ -268,7 +268,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                 )),
 
                 NotesRenderer(controller),
-                GalleryButtons(controller),
+                GalleryButtons(pageController: controller),
                 const ViewerTutorial(),
               ]),
             ),

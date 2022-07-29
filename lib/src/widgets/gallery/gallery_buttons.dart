@@ -9,8 +9,8 @@ import 'package:lolisnatcher/src/widgets/gallery/change_page_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/zoom_button.dart';
 
 class GalleryButtons extends StatefulWidget {
-  const GalleryButtons(this.controller, {Key? key}) : super(key: key);
-  final PreloadPageController? controller;
+  const GalleryButtons({Key? key, this.pageController}) : super(key: key);
+  final PreloadPageController? pageController;
 
   @override
   State<GalleryButtons> createState() => _GalleryButtonsState();
@@ -86,12 +86,12 @@ class _GalleryButtonsState extends State<GalleryButtons> {
       if(isZoomHere && isPagesHere) buildDivider(isVerticalDirection),
 
       if(isPagesHere) ChangePageButtons(
-        controller: widget.controller,
+        controller: widget.pageController,
         isPrev: true,
       ),
       if(isPagesHere) buildDivider(isVerticalDirection),
       if(isPagesHere) ChangePageButtons(
-        controller: widget.controller,
+        controller: widget.pageController,
         isPrev: false,
       ),
     ];

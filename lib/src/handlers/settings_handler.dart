@@ -2,26 +2,27 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
-import 'package:lolisnatcher/src/services/get_perms.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
-import 'package:lolisnatcher/src/data/theme_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/database_handler.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/utils/http_overrides.dart';
-import 'package:lolisnatcher/src/data/update_info.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
+import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/data/update_info.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/http_overrides.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
@@ -50,6 +51,7 @@ class SettingsHandler extends GetxController {
   bool hasHydrus = false;
   RxBool mergeEnabled = RxBool(false);
   List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
+  Rx<String> discordURL = Rx(Constants.discordURL);
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;
@@ -1319,6 +1321,14 @@ class SettingsHandler extends GetxController {
         storePackage: json["store_package"] ?? '',
         githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
+
+      String? discordFromGithub = json["discord_url"];
+      if(discordFromGithub != null && discordFromGithub.isNotEmpty) {
+        // overwrite included discord url if it's not the same as the one in update info
+        if(discordFromGithub != discordURL.value) {
+          discordURL.value = discordFromGithub;
+        }
+      }
 
       if(buildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
         if(EnvironmentConfig.isFromStore) { // installed from store

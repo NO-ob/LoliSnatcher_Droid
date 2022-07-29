@@ -1,22 +1,22 @@
+import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter_inner_drawer/inner_drawer.dart';
 
-import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
-import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
-import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
 import 'package:lolisnatcher/src/widgets/root/main_appbar.dart';
+import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
+import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class MobileHome extends StatefulWidget {
   const MobileHome({Key? key}) : super(key: key);
@@ -320,9 +320,7 @@ class MainDrawer extends StatelessWidget {
 }
 
 class MergeBooruToggle extends StatefulWidget {
-  const MergeBooruToggle({
-    Key? key,
-  }) : super(key: key);
+  const MergeBooruToggle({Key? key}) : super(key: key);
 
   @override
   State<MergeBooruToggle> createState() => _MergeBooruToggleState();

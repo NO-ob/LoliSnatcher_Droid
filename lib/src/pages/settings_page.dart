@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
 import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
 import 'package:lolisnatcher/src/pages/settings/filter_tags_page.dart';
+import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
 import 'package:lolisnatcher/src/pages/settings/backup_restore_page.dart';
@@ -110,6 +111,7 @@ class SettingsPage extends StatelessWidget {
                       },
                 page: settingsHandler.dbEnabled ? () => const LoliSyncPage() : null,
               ),
+              const DiscordButton(),
               SettingsButton(
                 name: 'About',
                 icon: const Icon(Icons.info_outline),

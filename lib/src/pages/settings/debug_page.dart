@@ -3,11 +3,12 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -23,7 +24,7 @@ class DebugPage extends StatefulWidget {
 class _DebugPageState extends State<DebugPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   bool allowSelfSignedCerts = false;
-  
+
   double vDuration = 0;
   double vAmplitude = -1;
   bool vFlutterway = false;
@@ -45,7 +46,7 @@ class _DebugPageState extends State<DebugPage> {
   Future<bool> _onWillPop() async {
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     bool result = await settingsHandler.saveSettings(restate: false);
-    if (allowSelfSignedCerts){
+    if (allowSelfSignedCerts) {
       HttpOverrides.global = MyHttpOverrides();
     } else {
       HttpOverrides.global = null;
@@ -72,7 +73,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showPerf.value = newValue;
                   });
                 },
-                title: 'Show Performance graph'
+                title: 'Show Performance graph',
               ),
               SettingsToggle(
                 value: settingsHandler.showFPS.value,
@@ -81,7 +82,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showFPS.value = newValue;
                   });
                 },
-                title: 'Show FPS graph'
+                title: 'Show FPS graph',
               ),
               SettingsToggle(
                 value: settingsHandler.showImageStats.value,
@@ -90,7 +91,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showImageStats.value = newValue;
                   });
                 },
-                title: 'Show Image Stats'
+                title: 'Show Image Stats',
               ),
               SettingsToggle(
                 value: settingsHandler.disableImageScaling,
@@ -99,7 +100,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.disableImageScaling = newValue;
                   });
                 },
-                title: "Don't scale images"
+                title: "Don't scale images",
               ),
               SettingsToggle(
                 value: settingsHandler.disableImageIsolates,
@@ -108,7 +109,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.disableImageIsolates = newValue;
                   });
                 },
-                title: "Disable Isolates"
+                title: "Disable Isolates",
               ),
               SettingsToggle(
                 value: settingsHandler.showURLOnThumb,
@@ -117,16 +118,16 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.showURLOnThumb = newValue;
                   });
                 },
-                title: 'Show URL on thumb'
+                title: 'Show URL on thumb',
               ),
               SettingsToggle(
-                  value: allowSelfSignedCerts,
-                  onChanged: (newValue) {
-                    setState(() {
-                      allowSelfSignedCerts = newValue;
-                    });
-                  },
-                  title: 'Enable Self Signed SSL Certificates'
+                value: allowSelfSignedCerts,
+                onChanged: (newValue) {
+                  setState(() {
+                    allowSelfSignedCerts = newValue;
+                  });
+                },
+                title: 'Enable Self Signed SSL Certificates',
               ),
               SettingsToggle(
                 value: settingsHandler.desktopListsDrag,
@@ -135,7 +136,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.desktopListsDrag = newValue;
                   });
                 },
-                title: "Enable drag scroll on lists [Desktop only]"
+                title: "Enable drag scroll on lists [Desktop only]",
               ),
 
               SettingsButton(
@@ -145,11 +146,11 @@ class _DebugPageState extends State<DebugPage> {
                   const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20];
                   int currentIndex = speeds.indexOf(timeDilation);
                   int newIndex = 0;
-                  if((currentIndex + 1) <= (speeds.length - 1)) {
+                  if ((currentIndex + 1) <= (speeds.length - 1)) {
                     newIndex = currentIndex + 1;
                   }
                   timeDilation = speeds[newIndex];
-                  setState(() { });
+                  setState(() {});
                 },
               ),
 
@@ -173,7 +174,7 @@ class _DebugPageState extends State<DebugPage> {
                       child: const Text('-1'),
                       onPressed: () {
                         setState(() {
-                          if((vDuration - 1) <= 0) {
+                          if ((vDuration - 1) <= 0) {
                             vDuration = 0;
                           } else {
                             vDuration -= 1;
@@ -202,7 +203,7 @@ class _DebugPageState extends State<DebugPage> {
                       child: const Text('+1'),
                       onPressed: () {
                         setState(() {
-                          if((vDuration + 1) >= 500) {
+                          if ((vDuration + 1) >= 500) {
                             vDuration = 500;
                           } else {
                             vDuration += 1;
@@ -225,7 +226,7 @@ class _DebugPageState extends State<DebugPage> {
                       child: const Text('-1'),
                       onPressed: () {
                         setState(() {
-                          if((vAmplitude - 1) <= -1) {
+                          if ((vAmplitude - 1) <= -1) {
                             vAmplitude = -1;
                           } else {
                             vAmplitude -= 1;
@@ -254,7 +255,7 @@ class _DebugPageState extends State<DebugPage> {
                       child: const Text('+1'),
                       onPressed: () {
                         setState(() {
-                          if((vAmplitude + 1) >= 255) {
+                          if ((vAmplitude + 1) >= 255) {
                             vAmplitude = 255;
                           } else {
                             vAmplitude += 1;
@@ -294,6 +295,21 @@ class _DebugPageState extends State<DebugPage> {
                 icon: const Icon(Icons.print),
                 page: () => const LoggerPage(),
               ),
+
+              // dummy button to use at least one icon from fontawesome regular and solid packs (brands pack is used in discord button)
+              // this is required because flutter doesn't tree-shake resources correctly if they are not used at all
+              // more on that here: https://pub.dev/packages/font_awesome_flutter#faq
+              const Opacity(
+                opacity: 0,
+                child: SettingsButton(
+                  name: '',
+                  enabled: false,
+                  icon: FaIcon(FontAwesomeIcons.addressBook),
+                  trailingIcon: FaIcon(FontAwesomeIcons.solidAddressBook),
+                  drawTopBorder: false,
+                  drawBottomBorder: false,
+                ),
+              ),
             ],
           ),
         ),
@@ -301,4 +317,3 @@ class _DebugPageState extends State<DebugPage> {
     );
   }
 }
-
