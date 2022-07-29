@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/services/image_writer.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
 class SnatchItem {
   final List<BooruItem> booruItems;

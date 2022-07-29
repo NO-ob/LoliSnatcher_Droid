@@ -1,16 +1,16 @@
-import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 
 // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
 // Future<void> writeBytesIsolate(Map<String, dynamic> map) async {

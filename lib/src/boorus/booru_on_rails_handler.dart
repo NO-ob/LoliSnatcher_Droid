@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
 
 // TODO autoreplace both ways all that special symbol crap (see tag suggestions) to normal format for user
 // TODO fix file names like we do with shimmie, probably should move file name encode/decode process to boorus themselves instead of image writer

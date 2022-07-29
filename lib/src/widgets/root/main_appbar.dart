@@ -10,8 +10,8 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   const MainAppBar({

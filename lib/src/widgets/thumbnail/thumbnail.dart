@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:dio/dio.dart';
 
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
-import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
-import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 
 
 class Thumbnail extends StatefulWidget {

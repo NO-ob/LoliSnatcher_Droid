@@ -1,9 +1,9 @@
-import 'package:lolisnatcher/src/handlers/theme_handler.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 
 class ThemeBuilder extends StatelessWidget {
   const ThemeBuilder({Key? key, required this.child}) : super(key: key);

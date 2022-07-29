@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 
 class TagsManagerListItemDialog extends StatefulWidget {
   const TagsManagerListItemDialog({

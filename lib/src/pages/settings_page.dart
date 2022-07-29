@@ -3,23 +3,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/about_page.dart';
-import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
+import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
+import 'package:lolisnatcher/src/pages/settings/backup_restore_page.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_page.dart';
 import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
-import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
-import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
 import 'package:lolisnatcher/src/pages/settings/filter_tags_page.dart';
-import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
-import 'package:lolisnatcher/src/pages/settings/backup_restore_page.dart';
+import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
+import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
+import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
+import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 /// Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
 class SettingsPage extends StatelessWidget {

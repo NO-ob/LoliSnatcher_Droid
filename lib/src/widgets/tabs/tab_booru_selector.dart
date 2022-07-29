@@ -2,11 +2,11 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 
 class TabBooruSelector extends StatelessWidget {
   const TabBooruSelector(this.isPrimary, {Key? key}) : super(key: key);

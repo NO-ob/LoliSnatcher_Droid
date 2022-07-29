@@ -2,8 +2,8 @@ import 'dart:core';
 
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 

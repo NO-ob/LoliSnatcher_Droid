@@ -1,19 +1,19 @@
-import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 
 
 // TODO split in smaller widgets

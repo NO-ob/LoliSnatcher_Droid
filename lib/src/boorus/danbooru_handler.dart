@@ -1,13 +1,11 @@
 import 'dart:convert';
 
-import 'package:lolisnatcher/src/data/note_item.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
-
-// TODO tagTypeMap + tag suggestions parsing (see gelbooru)
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class DanbooruHandler extends BooruHandler {
   DanbooruHandler(Booru booru, int limit) : super(booru, limit);

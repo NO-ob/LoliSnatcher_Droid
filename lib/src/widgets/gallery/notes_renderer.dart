@@ -4,15 +4,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/html_parse.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/utils/html_parse.dart';
-import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 

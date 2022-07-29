@@ -1,15 +1,16 @@
 import 'dart:async';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
-import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-// Experimental: attempot to do chrome-like tabs list for desktop view
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+
+// Experimental: attempt to do chrome-like tabs list for desktop view
 
 class DesktopTabs extends StatefulWidget {
   const DesktopTabs({Key? key}) : super(key: key);

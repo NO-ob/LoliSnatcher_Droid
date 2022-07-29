@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_image_listener.dart';
-import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
-import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
-import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
-import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/desktop/desktop_image_listener.dart';
 import 'package:lolisnatcher/src/widgets/desktop/resizable_split_view.dart';
+import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
+import 'package:lolisnatcher/src/widgets/preview/media_previews.dart';
+import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
+import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class DesktopHome extends StatelessWidget {
   const DesktopHome({Key? key}) : super(key: key);

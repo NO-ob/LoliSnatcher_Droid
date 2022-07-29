@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
-
-import '../data/tag.dart';
 
 
 ///////////////////////////////////////////////////////////////
@@ -23,7 +21,7 @@ class DBHandler{
   Database? db;
   DBHandler();
 
-  //Connects to the database file and create the database if the tables dont exist
+  /// Connects to the database file and create the database if the tables dont exist
   Future<bool> dbConnect(String path) async {
     // await Sqflite.devSetDebugModeOn(true);
     if(Platform.isAndroid || Platform.isIOS){
@@ -139,7 +137,7 @@ class DBHandler{
     return true;
   }
 
-  //Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
+  /// Inserts a new booruItem or updates the isSnatched and isFavourite values of an existing BooruItem in the database
   Future<String?> updateBooruItem(BooruItem item, String mode) async {
     Logger.Inst().log("updateBooruItem called fileURL is: ${item.fileURL}", "DBHandler", "updateBooruItem", LogTypes.booruHandlerInfo);
     String? itemID = await getItemID(item.postURL);
@@ -190,7 +188,7 @@ class DBHandler{
   }
 
 
-  //Gets a BooruItem id from the database based on a fileurl
+  /// Gets a BooruItem id from the database based on a fileurl
   Future<String?> getItemID(String postURL) async {
     List? result;
     result = await db?.rawQuery("SELECT id FROM BooruItem WHERE postURL = ?", [postURL]);
@@ -241,7 +239,7 @@ class DBHandler{
     return items;
   }
 
-  //Gets a list of BooruItem from the database
+  /// Gets a list of BooruItem from the database
   Future<List<BooruItem>> searchDB(String searchTagsString, String offset, String limit, String order, String mode) async {
     // TODO multiple tags in search can lead to wrong results
     List<String> searchTags;
@@ -311,7 +309,7 @@ class DBHandler{
     }
   }
 
-  //Gets a list of tags related to given posts ids
+  /// Gets a list of tags related to given posts ids
   Future<dynamic> getTagsList(List<int> postIDs) async {
     List<String> postIDsString = postIDs.map((id) => "'$id'").toList();
     List? result = await db?.rawQuery(
@@ -321,7 +319,7 @@ class DBHandler{
     return result;
   }
 
-  //Gets a list of tags related to given posts ids
+  /// Gets a list of tags related to given posts ids
   Future<List<Tag>> getAllTags() async {
     List? result = await db?.rawQuery(
         "SELECT name, tagType, updatedAt FROM Tag");
@@ -337,7 +335,7 @@ class DBHandler{
     return tags;
   }
 
-  //Gets amount of BooruItems from the database
+  /// Gets amount of BooruItems from the database
   Future<int> searchDBCount(String searchTagsString) async {
     List<String> searchTags = [];
     List? result;
@@ -381,7 +379,7 @@ class DBHandler{
     }
   }
 
-  //Gets the favourites count from db
+  /// Gets the favourites count from db
   Future<int> getFavouritesCount() async {
     List? result;
     result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE isFavourite = 1");
@@ -406,7 +404,7 @@ class DBHandler{
     deleteUntracked();
   }
 
-  //Adds tags for a BooruItem to the database
+  /// Adds tags for a BooruItem to the database
   void updateTags(List tags, String? itemID) async{
     if(itemID == null) return;
     String? id = "";
@@ -420,7 +418,7 @@ class DBHandler{
     }
   }
 
-  //Adds tags for a BooruItem to the database
+  /// Adds tags for a BooruItem to the database
   Future<void> updateTagsFromObjects(List<Tag> tags) async{
     String? id = "";
     for (var tag in tags) {
@@ -435,7 +433,7 @@ class DBHandler{
     return;
   }
 
-  //Gets a tag id from the database
+  /// Gets a tag id from the database
   Future<String> getTagID(String tagName) async{
     var result = await db?.rawQuery("SELECT id FROM Tag WHERE name IN (?)", [tagName]);
     if (result != null && result.isNotEmpty){
@@ -444,7 +442,7 @@ class DBHandler{
       return "";
     }
   }
-  //Get a list of tags from the database based on an input
+  /// Get a list of tags from the database based on an input
   Future<List<String>> getTags(String queryStr, int limit) async{
     List<String> tags = [];
     var result = await db?.rawQuery("SELECT DISTINCT name FROM Tag WHERE lower(name) LIKE (?) LIMIT $limit",["${queryStr.toLowerCase()}%"]);
@@ -456,7 +454,7 @@ class DBHandler{
     return tags;
   }
 
-  // functions related to tab backup logic:
+  /// functions related to tab backup logic:
   Future<void> addTabRestore(String restore) async {
     var result = await db?.rawQuery("SELECT id FROM TabRestore ORDER BY id DESC LIMIT 1");
     if(result != null && result.isNotEmpty) {
@@ -494,7 +492,7 @@ class DBHandler{
   }
   ///////
 
-  // Remove duplicates and add every new search to history table
+  /// Remove duplicates and add every new search to history table
   void updateSearchHistory(String searchText, String? booruType, String? booruName) async{
     // trim extra spaces
     searchText = searchText.trim();
@@ -514,7 +512,7 @@ class DBHandler{
     await db?.rawDelete("DELETE FROM SearchHistory WHERE $notFavouriteQuery AND id NOT IN (SELECT id FROM SearchHistory WHERE $notFavouriteQuery ORDER BY id DESC LIMIT 5000);");
   }
 
-  // Get search history entries
+  /// Get search history entries
   Future<List<Map<String, dynamic>>> getSearchHistory() async{
     var metaData = await db?.rawQuery("SELECT * FROM SearchHistory GROUP BY searchText, booruName ORDER BY id DESC");
     List<Map<String, dynamic>> result = [];
@@ -542,7 +540,7 @@ class DBHandler{
     return tags;
   }
 
-  // Delete entry from search history (if no id given - clears everything)
+  /// Delete entry from search history (if no id given - clears everything)
   Future<void> deleteFromSearchHistory(int? id) async{
     if(id != null) {
       await db?.rawDelete("DELETE FROM SearchHistory WHERE id IN (?)", [id]);
@@ -552,13 +550,13 @@ class DBHandler{
     return;
   }
 
-  // Set/unset search history entry as favourite
+  /// Set/unset search history entry as favourite
   Future<void> setFavouriteSearchHistory(int id, bool isFavourite) async{
     await db?.rawUpdate("UPDATE SearchHistory SET isFavourite = ? WHERE id = ?", [Tools.boolToInt(isFavourite), id]);
     return;
   }
 
-  //Return a list of boolean for isSnatched and isFavourite
+  /// Return a list of boolean for isSnatched and isFavourite
   Future<List<bool>> getTrackedValues(BooruItem item) async {
     List<bool> values = [false,false];
     List? result;
@@ -580,7 +578,7 @@ class DBHandler{
     return values;
   }
 
-  // FAILED EXPERIMENT: Return a list of lists of boolean for isSnatched and isFavourite, attempt to make a bulk fetcher
+  /// Return a list of lists of boolean for isSnatched and isFavourite, attempt to make a bulk fetcher
   Future<List<List<bool>>> getMultipleTrackedValues(List<BooruItem> items) async {
     List<List<bool>> values = [];
 
@@ -629,7 +627,7 @@ class DBHandler{
     return values;
   }
 
-  // Deletes booruItems which are no longer favourited or snatched
+  /// Deletes booruItems which are no longer favourited or snatched
   Future<bool> deleteUntracked() async {
     var result = await db?.rawQuery("SELECT id FROM BooruItem WHERE isFavourite = 0 and isSnatched = 0");
     if (result != null && result.isNotEmpty) {
@@ -638,7 +636,7 @@ class DBHandler{
     return true;
   }
 
-  //Deletes a BooruItem and its tags from the database
+  /// Deletes a BooruItem and its tags from the database
   void deleteItem(List<String> itemIDs) async {
     Logger.Inst().log("DBHandler deleting: $itemIDs", "DBHandler", "deleteItem", LogTypes.booruHandlerInfo);
     String questionMarks = List.generate(itemIDs.length, (_) => '?').join(',');

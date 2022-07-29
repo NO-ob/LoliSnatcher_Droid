@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class VideoViewerPlaceholder extends StatelessWidget {
   const VideoViewerPlaceholder({Key? key, required this.item, required this.index}) : super(key: key);

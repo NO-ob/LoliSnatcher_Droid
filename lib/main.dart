@@ -1,35 +1,35 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:get/get.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:statsfl/statsfl.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:app_links/app_links.dart';
+import 'package:get/get.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:statsfl/statsfl.dart';
 
-import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/handlers/notify_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/pages/desktop_home_page.dart';
 import 'package:lolisnatcher/src/pages/mobile_home_page.dart';
-import 'package:lolisnatcher/src/data/theme_item.dart';
-import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
-import 'package:lolisnatcher/src/services/image_writer.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/handlers/tag_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
-import 'package:lolisnatcher/src/handlers/theme_handler.dart';
-import 'package:lolisnatcher/src/handlers/notify_handler.dart';
+import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
+import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

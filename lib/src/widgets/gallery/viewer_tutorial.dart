@@ -1,5 +1,6 @@
-import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 import 'package:flutter/material.dart';
+
+import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 
 class ViewerTutorial extends StatefulWidget {
   const ViewerTutorial({Key? key}) : super(key: key);

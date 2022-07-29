@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';

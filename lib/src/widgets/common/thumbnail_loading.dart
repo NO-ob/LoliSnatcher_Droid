@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
 
 class ThumbnailLoading extends StatefulWidget {
   const ThumbnailLoading({
