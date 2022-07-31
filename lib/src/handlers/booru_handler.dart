@@ -47,12 +47,21 @@ abstract class BooruHandler {
 
   BooruHandler(this.booru, this.limit);
 
+  Future<bool> searchSetup() async {
+    return true;
+  }
   /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
   Future search(String tags, int? pageNumCustom) async {
     // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
+    }
+    // Any setup that needs to happen before the url is created
+    if(!await searchSetup()){
+      Logger.Inst().log('Search setup failed for booru: $booru', className, "Search", LogTypes.booruHandlerFetchFailed);
+      locked = true;
+      return fetched;
     }
 
     // validate tags (usually just convert empty string to current booru "search all" query)

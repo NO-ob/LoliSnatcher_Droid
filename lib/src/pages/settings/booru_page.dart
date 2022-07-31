@@ -135,36 +135,37 @@ class _BooruPageState extends State<BooruPage> {
                 ),
 
                 const SettingsButton(name: '', enabled: false),
-                SettingsBooruDropdown(
-                  value: selectedBooru ?? settingsHandler.booruList[0],
-                  onChanged: (Booru? newValue) {
-                    final bool isNewValuePresent = settingsHandler.booruList.contains(newValue);
-                    setState((){
-                      selectedBooru = isNewValuePresent ? newValue : settingsHandler.booruList[0];
-                      settingsHandler.prefBooru = selectedBooru?.name ?? '';
-                      settingsHandler.sortBooruList();
-                    });
-                  },
-                  title: 'Booru',
-                  trailingIcon: IconButton(
-                    icon: const Icon(Icons.help_outline),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return const SettingsDialog(
-                            title: Text('Booru'),
-                            contentItems: <Widget>[
-                              Text("The Booru selected here will be set as default after saving."),
-                              Text(''),
-                              Text("The default Booru will be first to appear in the dropdown boxes."),
-                            ],
-                          );
-                        }
-                      );
+                if(settingsHandler.booruList.isNotEmpty)
+                  ...[SettingsBooruDropdown(
+                    value: selectedBooru ?? settingsHandler.booruList[0],
+                    onChanged: (Booru? newValue) {
+                      final bool isNewValuePresent = settingsHandler.booruList.contains(newValue);
+                      setState((){
+                        selectedBooru = isNewValuePresent ? newValue : settingsHandler.booruList[0];
+                        settingsHandler.prefBooru = selectedBooru?.name ?? '';
+                        settingsHandler.sortBooruList();
+                      });
                     },
+                    title: 'Booru',
+                    trailingIcon: IconButton(
+                      icon: const Icon(Icons.help_outline),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return const SettingsDialog(
+                              title: Text('Booru'),
+                              contentItems: <Widget>[
+                                Text("The Booru selected here will be set as default after saving."),
+                                Text(''),
+                                Text("The default Booru will be first to appear in the dropdown boxes."),
+                              ],
+                            );
+                          }
+                        );
+                      },
+                    ),
                   ),
-                ),
                 if(selectedBooru != null)
                   SettingsButton(
                     name: 'Share selected',
@@ -366,6 +367,7 @@ class _BooruPageState extends State<BooruPage> {
                     );
                   },
                 ),
+                ],
                 SettingsButton(
                   name: 'Add new Booru',
                   icon: const Icon(Icons.add),

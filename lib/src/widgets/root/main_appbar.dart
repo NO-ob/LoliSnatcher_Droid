@@ -113,17 +113,17 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   Widget pageNumberButton() {
-    return IconButton(
-      icon: const Icon(Icons.format_list_numbered),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (context) {
+    return  searchHandler.list.isNotEmpty ?
+    IconButton(
+        icon: const Icon(Icons.format_list_numbered),
+        onPressed: () {
+          showDialog(context: context,builder: (context) {
             return const PageNumberDialog();
           },
         );
       },
-    );
+    ): SizedBox.shrink();
+
   }
 
   Widget devButton() {

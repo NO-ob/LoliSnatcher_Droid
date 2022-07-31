@@ -9,8 +9,10 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 
 class LoliSync{
   String ip = "127.0.0.1";
@@ -48,6 +50,9 @@ class LoliSync{
           break;
         case("/lolisync/tabs"):
           yield await storeTabs(req, settingsHandler);
+          break;
+        case("/lolisync/tags"):
+          yield await storeTags(req, settingsHandler);
           break;
         case("/lolisync/test"):
           yield 'Test';
@@ -241,6 +246,40 @@ class LoliSync{
     }
   }
 
+  Future<String> storeTags(var req, SettingsHandler settingsHandler) async {
+    final TagHandler tagHandler = TagHandler.instance;
+
+    if (req.method == 'POST') {
+      try {
+        Logger.Inst().log("request to update tags recieved", "LoliSync", "storeTags", LogTypes.loliSyncInfo);
+        String content = await utf8.decoder.bind(req).join(); /*2*/
+        String mode = req.uri.queryParameters["mode"]!;
+        List<dynamic> tags = jsonDecode(content);
+        Logger.Inst().log("Received ${tags.length} tags", "LoliSync", "storeTags", LogTypes.loliSyncInfo);
+        if(tags.isNotEmpty) {
+          if(mode == 'Overwrite') {
+            tagHandler.loadFromJSON(content, preferTagTypeIfNone: false);
+          } else if(mode == 'PreferTypeIfNone') {
+            tagHandler.loadFromJSON(content, preferTagTypeIfNone: true);
+          }
+        }
+
+        req.response.statusCode = 200;
+        req.response.write("Tags Sent");
+        return "Tags Saved";
+      } catch (e) {
+        Logger.Inst().log(e.toString(), "LoliSync", "storeTags", LogTypes.exception);
+        req.response.statusCode = 404;
+        req.response.write("Invalid Query");
+        return "Something went wrong ${e.toString()}";
+      }
+    } else {
+      req.response.statusCode = 404;
+      req.response.write("Invalid Query");
+      return "Invalid Query";
+    }
+  }
+
 
 
 
@@ -315,6 +354,18 @@ class LoliSync{
     return responseStr;
   }
 
+  Future<String> sendTags(List<Tag> tagList, String mode) async {
+    Logger.Inst().log("Sending tags: ${tagList.length}", "LoliSync", "sendTags", LogTypes.loliSyncInfo);
+    HttpClientRequest request = await HttpClient().post(ip, port, "/lolisync/tags?mode=$mode")
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode(
+       tagList
+      ));
+    HttpClientResponse response = await request.close();
+    String responseStr = await utf8.decoder.bind(response).join();
+    return responseStr;
+  }
+
   // TODO add timeout
   Future<String> sendTest() async {
     Logger.Inst().log("Sending test", "LoliSync", "sendTest", LogTypes.loliSyncInfo);
@@ -375,10 +426,10 @@ class LoliSync{
     }
   }
 
-  Stream<String> startSync(String ipOverride, String portOverride, List<String> toSync, int favSkip, String tabsMode) async* {
+  Stream<String> startSync(String ipOverride, String portOverride, List<String> toSync, int favSkip, String tabsMode, String tagsMode) async* {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final SearchHandler searchHandler = SearchHandler.instance;
-
+    final TagHandler tagHandler = TagHandler.instance;
     ip = ipOverride;
     port = int.tryParse(portOverride) ?? 8080;
     final String address = '$ip:$port';
@@ -493,6 +544,12 @@ class LoliSync{
           yield "Sync Starting $address";
           yield "Preparing test data";
           String resp = await sendTest();
+          yield resp;
+          break;
+        case "Tags":
+          yield "Sync Starting $address";
+          yield "Preparing tag data";
+          String resp = await sendTags(tagHandler.toList(), tagsMode);
           yield resp;
           break;
       }
