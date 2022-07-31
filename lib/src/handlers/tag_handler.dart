@@ -61,12 +61,19 @@ class TagHandler extends GetxController {
     return tag;
   }
 
-  Future<void> putTag(Tag tag, {bool useDB = true}) async{
+  Future<void> putTag(Tag tag, {bool useDB = true, bool preferTypeIfNone = false}) async{
     // TODO sanitize tagString?
     if(tag.fullString.isEmpty) {
       return;
     }
-
+    if (preferTypeIfNone){
+      if(hasTag(tag.fullString) && getTag(tag.fullString).tagType != TagType.none && tag.tagType == TagType.none){
+        Logger.Inst().log(
+            "Skipped tag ${tag.fullString}", "TagHandler", "putTag",
+            LogTypes.tagHandlerInfo);
+        return;
+      }
+    }
     _tagMap[tag.fullString] = tag;
 
     if (SettingsHandler.instance.dbEnabled && useDB){
@@ -179,13 +186,13 @@ class TagHandler extends GetxController {
 
 
 
-  Future<bool> loadFromJSON(String jsonString) async {
+  Future<bool> loadFromJSON(String jsonString, {bool preferTagTypeIfNone = false}) async {
       try {
         List jsonList = jsonDecode(jsonString);
         for (Map<String, dynamic> rawTag in jsonList) {
           try {
             Tag tagObject = Tag.fromJson(rawTag);
-            await putTag(tagObject);
+            await putTag(tagObject, preferTypeIfNone: preferTagTypeIfNone);
           } catch (e) {
             Logger.Inst().log(
                 "Error parsing tag: $rawTag", "TagHandler", "loadFromJSON",
@@ -216,11 +223,13 @@ class TagHandler extends GetxController {
     SettingsHandler settings = SettingsHandler.instance;
     SearchHandler searchHandler = SearchHandler.instance;
     await getPerms();
-    Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    Logger.Inst().log("BOORU: ${searchHandler.currentBooruHandler.booru.name}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    Logger.Inst().log("FETCHED COUNT: ${searchHandler.currentBooruHandler.fetched.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    Logger.Inst().log("PREVIOUS TAG COUNT: $prevLength", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    Logger.Inst().log("TAG COUNT BEFORE SAVE: ${tagMap.entries.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    if (searchHandler.list.isNotEmpty){
+      Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+      Logger.Inst().log("BOORU: ${searchHandler.currentBooruHandler.booru.name}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+      Logger.Inst().log("FETCHED COUNT: ${searchHandler.currentBooruHandler.fetched.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+      Logger.Inst().log("PREVIOUS TAG COUNT: $prevLength", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+      Logger.Inst().log("TAG COUNT BEFORE SAVE: ${tagMap.entries.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    }
     prevLength = tagMap.entries.length;
     if(settings.dbEnabled){
       //await settings.dbHandler.updateTagsFromObjects(toList());

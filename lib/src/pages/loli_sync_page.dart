@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/handlers/loli_sync_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/pages/loli_sync_progress_page.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -30,6 +31,7 @@ class LoliSyncPage extends StatefulWidget {
 class _LoliSyncPageState extends State<LoliSyncPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
 
   final TextEditingController ipController = TextEditingController();
   final TextEditingController portController = TextEditingController();
@@ -40,10 +42,13 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   SyncSide syncSide = SyncSide.none;
 
-  bool favourites = false, favouritesv2 = false, settings = false, booru = false, tabs = false;
+  bool favourites = false, favouritesv2 = false, settings = false, booru = false, tabs = false, tags=false;
   int favToggleCount = 0;
   String tabsMode = 'Merge';
+  String tagsMode = 'PreferTypeIfNone';
   List<String> tabsModesList = ['Merge', 'Replace'];
+  // TODO: Will change all these string to enum at some point, also for booru type
+  List<String> tagsModesList = ['Overwrite', 'PreferTypeIfNone'];
   int? favCount;
 
   List<NetworkInterface> ipList = [];
@@ -107,7 +112,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     }
 
     testSync.killSync();
-    Stream<String> stream = testSync.startSync(ipController.text, portController.text, ["Test"], 0, 'Merge');
+    Stream<String> stream = testSync.startSync(ipController.text, portController.text, ["Test"], 0, 'Merge', 'PreferTypeIfNone');
     StreamSubscription<String> sub = stream.listen(
       (data) {
         // print(data);
@@ -307,6 +312,51 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 )
               : Container(),
         ),
+        SettingsToggle(
+          value: tags,
+          onChanged: (newValue) {
+            setState(() {
+              tags = newValue;
+            });
+          },
+          title: 'Send Tags',
+          subtitle: Text('Tags: ${tagHandler.tagMap.entries.length}'),
+          drawBottomBorder: tags == true ? false : true,
+        ),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: tags
+              ? SettingsDropdown(
+            value: tagsMode,
+            items: tagsModesList,
+            onChanged: (String? newValue) {
+              setState(() {
+                tagsMode = newValue!;
+              });
+            },
+            title: 'Tags Sync Mode',
+            trailingIcon: IconButton(
+              icon: const Icon(Icons.help_outline),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return const SettingsDialog(
+                      title: Text('Tabs Sync Mode'),
+                      contentItems: <Widget>[
+                        Text("PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped"),
+                        Text(''),
+                        Text(
+                            'Overwrite: Tags will be added, if a tag and tag type exists on the other device it will be overwritten'),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          )
+              : Container(),
+        ),
         const SettingsButton(name: '', enabled: false),
         SettingsButton(
           name: 'Test Connection',
@@ -337,7 +387,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           icon: const Icon(Icons.send_to_mobile),
           action: () async {
             bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
-            bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs;
+            bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs || tags;
             bool syncAllowed = isAddressEntered && isAnySyncSelected;
 
             if (syncAllowed) {
@@ -354,6 +404,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                   booru: booru,
                   tabs: tabs,
                   tabsMode: tabsMode,
+                  tags: tags,
+                  tagsMode: tagsMode,
                 ),
               ).open();
               updateState();

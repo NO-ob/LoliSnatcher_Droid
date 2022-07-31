@@ -20,11 +20,13 @@ class LoliSyncProgressPage extends StatefulWidget {
     this.booru = false,
     this.tabs = false,
     this.tabsMode = "Merge",
+    this.tags = false,
+    this.tagsMode = "PreferTypeIfNone",
   });
 
-  final String type, port, tabsMode;
+  final String type, port, tabsMode, tagsMode;
   final String? ip;
-  final bool favourites, favouritesv2, settings, booru, tabs;
+  final bool favourites, favouritesv2, settings, booru, tabs, tags;
   final int favSkip;
 
   @override
@@ -72,8 +74,11 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       if (widget.tabs) {
         toSync.add("Tabs");
       }
+      if (widget.tags) {
+        toSync.add("Tags");
+      }
 
-      progressStream = loliSync.startSync(widget.ip!, widget.port, toSync, widget.favSkip, widget.tabsMode);
+      progressStream = loliSync.startSync(widget.ip!, widget.port, toSync, widget.favSkip, widget.tabsMode, widget.tagsMode);
     } else {
       progressStream = loliSync.startServer(widget.ip, widget.port);
     }

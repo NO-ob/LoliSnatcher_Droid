@@ -9,22 +9,21 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
-// TODO refactor
-// TODO WTF IS ALL THIS????
-
+// This booru works weird, once you get a session id and do a search itll give you results with only partial data and a results id
+// We then need to get the is and do a search to get full info for all results from the search
 
 class InkBunnyHandler extends BooruHandler {
   InkBunnyHandler(Booru booru, int limit) : super(booru, limit);
 
-  String resultsID = "";
   String sessionToken = "";
-
+  bool _gettingToken = false;
   @override
   bool hasSizeData = true;
 
   Future<bool> setSessionToken() async {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=guest
     //https://inkbunny.net/api_login.php?output_mode=xml&username=myusername&password=mypassword
+    _gettingToken = true;
     String url = "${booru.baseURL}/api_login.php?output_mode=json";
     if (booru.apiKey!.isEmpty && booru.userID!.isEmpty){
         url += "&username=guest";
@@ -32,7 +31,7 @@ class InkBunnyHandler extends BooruHandler {
       url += "&username=${booru.userID}&password=${Uri.encodeComponent(booru.apiKey!)}";
     }
     try{
-      final response = await http.get(Uri.parse(url),headers: getHeaders());
+      final response = await fetchSearch(Uri.parse(url));
       Map<String, dynamic> parsedResponse = jsonDecode(response.body);
       if (parsedResponse["sid"] != null){
         sessionToken = parsedResponse["sid"].toString();
@@ -44,168 +43,142 @@ class InkBunnyHandler extends BooruHandler {
     } catch (e){
       Logger.Inst().log("Exception getting session token: $url $e", "InkBunnyHandler", "getSessionToken", LogTypes.booruHandlerInfo);
     }
+    _gettingToken = false;
     return sessionToken.isEmpty ? false : true;
   }
 
+  // This sets ratings for the session so that all images are returned from the api
   Future<bool> setRatingOptions() async {
     String url = "${booru.baseURL}/api_userrating.php?output_mode=json&sid=$sessionToken&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes";
     try{
-      final response = await http.get(Uri.parse(url),headers: getHeaders());
+      final response = await fetchSearch(Uri.parse(url));
       Map<String, dynamic> parsedResponse = jsonDecode(response.body);
       if (parsedResponse["sid"] != null){
         if (sessionToken == parsedResponse["sid"]){
-          Logger.Inst().log("Inkbunny set ratings", "InkBunnyHandler", "setRatingOptions", LogTypes.booruHandlerInfo);
+          Logger.Inst().log("Inkbunny set ratings", className, "setRatingOptions", LogTypes.booruHandlerInfo);
         }
       } else {
-        Logger.Inst().log("Inkbunny failed to set ratings", "InkBunnyHandler", "setRatingOptions", LogTypes.booruHandlerInfo);
+        Logger.Inst().log("Inkbunny failed to set ratings", className, "setRatingOptions", LogTypes.booruHandlerInfo);
       }
     } catch (e){
-      Logger.Inst().log("Exception setting ratings $e", "InkBunnyHandler", "setRatingOptions", LogTypes.booruHandlerInfo);
+      Logger.Inst().log("Exception setting ratings $e", className, "setRatingOptions", LogTypes.booruHandlerInfo);
     }
     return true;
   }
 
-  /// This function will call a http get request using the tags and pagenumber parsed to it
-  /// it will then create a list of booruItems
   @override
-  Future search(String tags, int? pageNumCustom) async {
-    if (sessionToken.isEmpty){
-      bool gotToken = await setSessionToken();
-      if (!gotToken){
-        return fetched;
-      }
-    }
-    tags = validateTags(tags);
-    if (prevTags != tags){
-      fetched.value = [];
-      resultsID = "";
-    }
-
-    String? url = makeURL(tags);
-    Logger.Inst().log(url, "InkBunnyHandler", "Search", LogTypes.booruHandlerSearchURL);
-    try {
-      int length = fetched.length;
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: getHeaders());
-      if (response.statusCode == 200) {
-        if (totalCount.value > 0 && (pageNum * 30) > totalCount.value){
-          if (fetched.length == length) {
-            locked = true;
-          }
-        } else {
-          parseResponse(await getSubmissionResponse(response));
-          prevTags = tags;
-        }
-        if (fetched.length == length) {
-          locked = true;
-        }
-      } else {
-        Logger.Inst().log("InkBunnyHandler status is: ${response.statusCode}", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("InkBunnyHandler url is: $url", "BooruHandler", "Search", LogTypes.booruHandlerFetchFailed);
-        errorString = response.statusCode.toString();
-      }
-    } catch(e) {
-      Logger.Inst().log(e.toString(), "InkBunnyHandler", "Search", LogTypes.exception);
-      errorString = e.toString();
-    }
-
-    return fetched;
+  Future fetchSearch(Uri uri) async {
+    return http.get(uri, headers: getHeaders());
   }
 
-  Future getSubmissionResponse(response) async{
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+  // The api doesn't give much information about the posts so we need to get their ids and then do another query to get all the data
+  Future getSubmissionResponse(parsedResponse) async{
     totalCount.value = int.parse(parsedResponse["results_count_all"]);
-    resultsID = parsedResponse["rid"];
-    String ids = "";
+    List<String> ids = [];
     for (int i =0; i < parsedResponse["submissions"].length; i++){
       var current = parsedResponse["submissions"][i];
-      ids += current["submission_id"].toString();
-      if (i < parsedResponse["submissions"].length - 1){
-        ids += ",";
-      }
+      ids.add(current["submission_id"].toString());
     }
-    Logger.Inst().log("Got submission ids: $ids", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerInfo);
+    Logger.Inst().log("Got submission ids: $ids", className, "getSubmissionResponse", LogTypes.booruHandlerInfo);
     try {
-      Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=$ids");
-      var response = await http.get(uri,headers: getHeaders());
-      Logger.Inst().log("Getting submission data: ${uri.toString()}", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
+      Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}");
+      var response = await fetchSearch(uri);
+      Logger.Inst().log("Getting submission data: ${uri.toString()}", className, "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
-        Logger.Inst().log(response.body, "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
-        return response;
+        Logger.Inst().log(response.body, className, "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
+        return response.body;
       } else {
-        Logger.Inst().log("InkBunnyHandler failed to get submissions", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("InkBunnyHandler failed to get submissions", className, "getSubmissionResponse", LogTypes.booruHandlerFetchFailed);
       }
     } catch(e) {
-      Logger.Inst().log(e.toString(), "InkBunnyHandler", "getSubmissionResponse", LogTypes.exception);
+      Logger.Inst().log(e.toString(), className, "getSubmissionResponse", LogTypes.exception);
     }
-    Logger.Inst().log("returning null", "InkBunnyHandler", "getSubmissionResponse", LogTypes.booruHandlerInfo);
-    return null;
+    Logger.Inst().log("returning null", className, "getSubmissionResponse", LogTypes.booruHandlerInfo);
+    return {};
   }
 
   @override
-  void parseResponse(submissionResponse) async{
-    if (submissionResponse != null){
-      Map<String, dynamic> parsedResponse = jsonDecode(submissionResponse.body);
-
-      // Loop backwards because the api order the results the wrong way
-      List<BooruItem> newItems = [];
-      for (int i = parsedResponse["submissions"].length - 1; i >= 0; i--) {
-        var current = parsedResponse["submissions"][i];
-        Logger.Inst().log(current.toString(), "InkBunnyHandler","parseResponse", LogTypes.booruHandlerRawFetched);
-        List<String> currentTags = [];
-        currentTags.add("artist:" + current["username"]);
-        var tags = current["keywords"];
-        for (int i = 0; i < tags.length; i++){
-          currentTags.add(tags[i]["keyword_name"].replaceAll(" ", "_"));
-        }
-
-        // A submission can have multiple files so a booru item must be made for each of them
-        var files = current["files"];
-
-        for (int i = 0; i < files.length; i++) {
-          String sampleURL = files[i]["file_url_screen"],
-              thumbURL = files[i]["file_url_preview"],
-              fileURL = files[i]["file_url_full"];
-          if (fileURL.endsWith(".mp4") && files[i].containsKey("thumbnail_url_huge")){
-            thumbURL = files[i]["thumbnail_url_huge"];
-            sampleURL = thumbURL;
-          } else if (i > 0 && !files[0]["file_url_full"].endsWith(".mp4")) {
-            sampleURL = files[0]["file_url_screen"];
-            thumbURL = files[0]["file_url_preview"];
-          }
-          BooruItem item = BooruItem(
-            fileURL: fileURL,
-            sampleURL: sampleURL,
-            thumbnailURL: thumbURL,
-            fileWidth: double.tryParse(files[i]["full_size_x"] ?? ""),
-            fileHeight: double.tryParse(files[i]["full_size_y"] ?? ""),
-            sampleWidth: double.tryParse(files[i]["screen_size_x"] ?? ""),
-            sampleHeight: double.tryParse(files[i]["screen_size_y"] ?? ""),
-            previewWidth: double.tryParse(files[i]["preview_size_x"] ?? ""),
-            previewHeight: double.tryParse(files[i]["preview_size_y"] ?? ""),
-            md5String: files[i]["full_file_md5"],
-            tagsList: currentTags,
-            postURL: makePostURL(current["submission_id"].toString()),
-            serverId: current["submission_id"].toString(),
-            score: current["favorites_count"],
-            postDate: current["create_datetime"].split(".")[0],
-            rating: normalizeRating(current["rating_name"]),
-            postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
-          );
-
-          newItems.add(item);
-        }
-      }
-
-      int lengthBefore = fetched.length;
-      fetched.addAll(newItems);
-      setMultipleTrackedValues(lengthBefore, fetched.length);
+  Future<List> parseListFromResponse(response) async{
+    // The api will keep loading pages with the same results as the last page if pagenum is bigger than the max
+    var parsedResponse = jsonDecode(response.body);
+    int maxPageCount = parsedResponse["pages_count"];
+    if(pageNum > 1 && pageNum > maxPageCount){
+      return [];
     }
+    var parsedSubmissionResponse = jsonDecode(await getSubmissionResponse(parsedResponse));
+    return parseItemsFromResponse(parsedSubmissionResponse);
   }
 
-  String normalizeRating(String rating){
-    //current.getAttribute("rating")
-    return "";
+  @override
+  Future<bool> searchSetup() async{
+    if (sessionToken.isEmpty && !_gettingToken){
+      bool gotToken = await setSessionToken();
+      if (!gotToken){
+        return false;
+      }
+    }
+    return true;
+  }
+
+  // Inkbunny can have multiple images per posts so the response cannot be parsed like the other boorus
+  List<BooruItem> parseItemsFromResponse(parsedResponse){
+    // Api orders the results the wrong way
+    List rawItems = (parsedResponse["submissions"] ?? []).reversed.toList();
+    List<BooruItem> items = [];
+    for(int i = 0; i < rawItems.length; i++){
+      var current = rawItems[i];
+      Logger.Inst().log(current.toString(), className,"parseResponse", LogTypes.booruHandlerRawFetched);
+      List<String> currentTags = [];
+      currentTags.add("artist:${current["username"]}");
+      var tags = current["keywords"] ?? [];
+
+      for (int i = 0; i < tags.length; i++){
+        currentTags.add(tags[i]["keyword_name"].replaceAll(" ", "_"));
+      }
+      // A submission can have multiple files so a booru item must be made for each of them
+      var files = current["files"];
+
+      for (int i = 0; i < files.length; i++) {
+        String sampleURL = files[i]["file_url_screen"],
+            thumbURL = files[i]["file_url_preview"],
+            fileURL = files[i]["file_url_full"];
+        if (fileURL.endsWith(".mp4") && files[i].containsKey("thumbnail_url_huge")){
+          thumbURL = files[i]["thumbnail_url_huge"];
+          sampleURL = thumbURL;
+        } else if (i > 0 && !files[0]["file_url_full"].endsWith(".mp4")) {
+          sampleURL = files[0]["file_url_screen"];
+          thumbURL = files[0]["file_url_preview"];
+        }
+        BooruItem item = BooruItem(
+          fileURL: fileURL,
+          sampleURL: sampleURL,
+          thumbnailURL: thumbURL,
+          fileWidth: double.tryParse(files[i]["full_size_x"] ?? ""),
+          fileHeight: double.tryParse(files[i]["full_size_y"] ?? ""),
+          sampleWidth: double.tryParse(files[i]["screen_size_x"] ?? ""),
+          sampleHeight: double.tryParse(files[i]["screen_size_y"] ?? ""),
+          previewWidth: double.tryParse(files[i]["preview_size_x"] ?? ""),
+          previewHeight: double.tryParse(files[i]["preview_size_y"] ?? ""),
+          md5String: files[i]["full_file_md5"],
+          tagsList: currentTags,
+          postURL: makePostURL(current["submission_id"].toString()),
+          serverId: current["submission_id"].toString(),
+          score: current["favorites_count"],
+          postDate: current["create_datetime"].split(".")[0],
+          rating: current["rating_name"],
+          postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        );
+
+        items.add(item);
+      }
+    }
+    return items;
+
+  }
+
+  @override
+  FutureOr<BooruItem?> parseItemFromResponse(responseItem, int index) {
+    return responseItem;
   }
 
   // This will create a url to goto the images page in the browser
@@ -232,47 +205,46 @@ class InkBunnyHandler extends BooruHandler {
         tagStr += "${tagList[i]},";
       }
     }
-    //https://inkbunny.net/api_search.php?output_mode=xml&sid=AiMAejQkj7tg5R6Lvff9y3CSMRGTCDtSJDdWku3UMMczHK2Io8mq7fStANk2QsCRBzHcZ7mIaLvXYjVitonv03&text=dragon&get_rid=yes
-    if (resultsID.isEmpty){
-      return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr&username=$artist&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes";
-    } else {
-      return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&rid=$resultsID&page=$pageNum";
-    }
+
+    //Each search generates a results id, this is then needed to page through the results without running the search again every time because its faster,
+    //You can go through the results without a results id like normal but this is how they show it on their api docs: https://wiki.inkbunny.net/wiki/API
+    //I have removed the code that was using the results id before we will see how this is without using that.
+
+    //The type variable filters by file type so we only fetch those that are supported by the app
+    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr&username=$artist&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes";
   }
 
   @override
   String makeTagURL(String input){
-    Logger.Inst().log("inkbunny tag search $input ", "InkBunnyHandler", "makeTagURL", LogTypes.booruHandlerInfo);
-    return "${booru.baseURL}/api_search_autosuggest.php?keyword=${input.replaceAll("_", "+")}&ratingsmask=11111";
+    Logger.Inst().log("inkbunny tag search $input ", className, "makeTagURL", LogTypes.booruHandlerInfo);
+    return "${booru.baseURL}/api_search_autosuggest.php?output_mode=json&keyword=${input.replaceAll("_", "+")}&ratingsmask=11111";
   }
 
-  // Doesn't work for some reasons does in browser. Is dodgy anyway and doesn't return many results
   @override
   Future tagSearch(String input) async {
     List<String> searchTags = [];
     String url = makeTagURL(input);
     try {
       Uri uri = Uri.parse(url);
-      var response = await http.get(uri,headers: getHeaders());
-      // 200 is the success http response code
-      Logger.Inst().log("$url ", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
-      Logger.Inst().log(response.body, "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
+      var response = await fetchSearch(uri);
+      Logger.Inst().log("$url ", className, "tagSearch", LogTypes.booruHandlerInfo);
+      Logger.Inst().log(response.body, className, "tagSearch", LogTypes.booruHandlerInfo);
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
         if (parsedResponse.containsKey("results")){
           var tagObjects = parsedResponse["results"];
           if (tagObjects.length > 0){
             for (int i=0; i < tagObjects.length; i++){
-              Logger.Inst().log("tag $i = ${tagObjects[i]["value"]}", "InkBunnyHandler", "tagSearch", LogTypes.booruHandlerInfo);
+              Logger.Inst().log("tag $i = ${tagObjects[i]["value"]}", className, "tagSearch", LogTypes.booruHandlerInfo);
               searchTags.add(tagObjects[i]["value"].replaceAll(" ", "_"));
             }
           }
         }
       } else {
-        Logger.Inst().log(e.toString(), "InkBunnyHandler", "tagSearch", LogTypes.exception);
+        Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
       }
     } catch(e) {
-      Logger.Inst().log(e.toString(), "InkBunnyHandler", "tagSearch", LogTypes.exception);
+      Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.exception);
     }
     return searchTags;
   }

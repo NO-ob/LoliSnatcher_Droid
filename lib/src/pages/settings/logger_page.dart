@@ -35,19 +35,34 @@ class _LoggerPageState extends State<LoggerPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool allLogTypesEnabled = ignoreLogTypes.toSet().intersection(LogTypes.values.toSet()).isEmpty;
     return WillPopScope(
       onWillPop: _onWillPop,
       child:Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: const Text("Logger"),
-        ),
+          actions: [
+            Switch(
+              value: allLogTypesEnabled,
+              onChanged: (bool newValue) {
+                setState(() {
+                  if (newValue) {
+                    ignoreLogTypes = [];
+                  } else {
+                    ignoreLogTypes = LogTypes.values;
+                  }
+                });
+              }
+            ),
+              ],
+            ),
         body: Center(
           child: ListView.builder(
             itemCount: LogTypes.values.length,
             itemBuilder: (context, index) {
               return SettingsToggle(
-              value: !ignoreLogTypes.contains(LogTypes.values[index]),
+                value: !ignoreLogTypes.contains(LogTypes.values[index]),
                 onChanged: (newValue) {
                   setState(() {
                     if (ignoreLogTypes.contains(LogTypes.values[index])){
@@ -57,7 +72,7 @@ class _LoggerPageState extends State<LoggerPage> {
                     }
                   });
                 },
-              title: LogTypes.values[index].toString().split('.').last,
+                title: LogTypes.values[index].toString().split('.').last,
               );
             },
           ),
