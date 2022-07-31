@@ -214,7 +214,6 @@ class _BooruPageState extends State<BooruPage> {
                               title: const Text('Booru sharing'),
                               contentItems: <Widget>[
                                 // TODO more explanations about booru sharing
-                                const Text("...................."),
                                 const Text(''),
                                 if (Platform.isAndroid) ...[
                                   const Text("How to automatically open booru config links in the app on Android 12 and higher:"),

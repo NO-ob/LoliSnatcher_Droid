@@ -81,8 +81,6 @@ class _ThemePageState extends State<ThemePage> {
     // instantly do local restate
     setState(() { });
 
-    // TODO fix theme not updating update on desktop pages, there settings pages use dialogs, which don't change with the global state
-
     // set global restate to happen only after X ms after last update happens
     Debounce.debounce(
       tag: 'theme_change',
