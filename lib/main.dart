@@ -31,7 +31,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
 import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
@@ -47,6 +47,10 @@ void main() {
 
     Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
   };
+
+  // load settings before first render to get theme data early
+  final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
+  await settingsHandler.initialize();
 
   // TODO
   // AwesomeNotifications().initialize(
@@ -96,7 +100,7 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    settingsHandler = Get.put(SettingsHandler(), permanent: true);
+    settingsHandler = Get.find<SettingsHandler>();
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
@@ -137,8 +141,6 @@ class _MainAppState extends State<MainApp> {
   }
 
   void initHandlers() async {
-    await settingsHandler.initialize();
-
     // should init earlier than tabs so tags color properly on first render of search box
     // TODO but this possibly could lead to bad preformance on start if tag storage is too big?
     await tagHandler.initialize();
@@ -254,7 +256,7 @@ class Preloader extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return Obx(() {
-      if (settingsHandler.isInit.value) {
+      if (settingsHandler.isInit.value) { // TODO get rid of this IF, since now we init settings before first render
         if (Platform.isAndroid || Platform.isIOS) {
           // set system ui mode
           ServiceHandler.setSystemUiVisibility(true);
