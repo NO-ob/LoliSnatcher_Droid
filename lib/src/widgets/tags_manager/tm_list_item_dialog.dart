@@ -108,16 +108,17 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           title: const Text('Copy'),
         ),
         //
-        const SizedBox(height: 10),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-          ),
-          onTap: widget.onDelete,
-          leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
-          title: const Text('Delete'),
-        ),
+        // TODO probably don't nned this since we shouldn't delete tags from sqlite
+        // const SizedBox(height: 10),
+        // ListTile(
+        //   shape: RoundedRectangleBorder(
+        //     borderRadius: BorderRadius.circular(5),
+        //     side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+        //   ),
+        //   onTap: widget.onDelete,
+        //   leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
+        //   title: const Text('Delete'),
+        // ),
         // 
         const SizedBox(height: 10),
         ListTile(
