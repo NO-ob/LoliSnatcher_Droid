@@ -192,7 +192,7 @@ class DioDownloader {
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
-          options: Options(responseType: ResponseType.bytes, headers: {...headers??{}, 'Cookie': await getCookies()}, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+          options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress,
         );
@@ -272,7 +272,7 @@ class DioDownloader {
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
-          options: Options(responseType: ResponseType.bytes, headers: {...headers??{}, 'Cookie': await getCookies()}, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+          options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress,
         );
@@ -327,7 +327,7 @@ class DioDownloader {
       currentClient = _httpClient;
       final Response response = await currentClient!.head(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: {...headers??{}, 'Cookie': await getCookies()}, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
         cancelToken: cancelToken,
       );
 
