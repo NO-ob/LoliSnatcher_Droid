@@ -62,20 +62,12 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   Map<String, String> getHeaders() {
-    if (booru.apiKey!.isNotEmpty) {
-      return {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "user-agent": Tools.appUserAgent(),
-        "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"
-      };
-    } else {
-      return {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "user-agent": Tools.browserUserAgent(),
-      };
-    }
+    return {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "User-Agent": Tools.browserUserAgent(),
+      if (booru.apiKey!.isNotEmpty) "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"
+    };
   }
 
   @override

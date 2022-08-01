@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
@@ -120,7 +121,15 @@ abstract class BooruHandler {
   }
 
   Future fetchSearch(Uri uri) async {
-    return http.get(uri, headers: getHeaders());
+    final String cookies = await getCookies() ?? "";
+    final Map<String, String> headers = {
+      ...getHeaders(),
+      if(cookies.isNotEmpty) 'Cookie': cookies,
+    };
+
+    Logger.Inst().log('fetching: $uri with headers: $headers', className, "Search", LogTypes.booruHandlerSearchURL);
+
+    return http.get(uri, headers: headers);
   }
 
   FutureOr<void> parseResponse(response) async {
@@ -230,8 +239,14 @@ abstract class BooruHandler {
     return tags;
   }
 
-  Future fetchTagSuggestions(Uri uri, String input) {
-    return http.get(uri, headers: getHeaders());
+  Future fetchTagSuggestions(Uri uri, String input) async {
+    final String cookies = await getCookies() ?? "";
+    final Map<String, String> headers = {
+      ...getHeaders(),
+      if(cookies.isNotEmpty) 'Cookie': cookies,
+    };
+
+    return http.get(uri, headers: headers);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -295,8 +310,14 @@ abstract class BooruHandler {
     return comments;
   }
 
-  Future fetchComments(Uri uri) {
-    return http.get(uri, headers: getHeaders());
+  Future fetchComments(Uri uri) async {
+    final String cookies = await getCookies() ?? "";
+    final Map<String, String> headers = {
+      ...getHeaders(),
+      if(cookies.isNotEmpty) 'Cookie': cookies,
+    };
+
+    return http.get(uri, headers: headers);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -371,7 +392,13 @@ abstract class BooruHandler {
   }
 
   Future fetchNotes(Uri uri) async {
-    return http.get(uri, headers: getHeaders());
+    final String cookies = await getCookies() ?? "";
+    final Map<String, String> headers = {
+      ...getHeaders(),
+      if(cookies.isNotEmpty) 'Cookie': cookies,
+    };
+
+    return http.get(uri, headers: headers);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -416,8 +443,33 @@ abstract class BooruHandler {
   Map<String, String> getHeaders() {
     return {
       "Accept": "text/html,application/xml,application/json",
-      "user-agent": Tools.appUserAgent(),
+      // "User-Agent": Tools.appUserAgent(),
+      "User-Agent": Tools.browserUserAgent(),
     };
+  }
+
+  Future<String?> getCookies() async {
+    String cookieString = '';
+    try {
+      final CookieManager cookieManager = CookieManager();
+      final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
+      for (Cookie cookie in cookies) {
+        cookieString += '${cookie.name}=${cookie.value}; ';
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, "getCookies", LogTypes.exception);
+    }
+
+    Map<String, String> headers = getHeaders();
+    if(headers['Cookie']?.isNotEmpty ?? false) {
+      cookieString += headers['Cookie']!;
+    }
+
+    Logger.Inst().log('${booru.baseURL}: $cookieString', className, "getCookies", LogTypes.booruHandlerSearchURL);
+
+    cookieString = cookieString.trim();
+
+    return cookieString;
   }
 
   void addTagsWithType(List<String> tags, TagType type) {

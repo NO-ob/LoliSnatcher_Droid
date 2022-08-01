@@ -45,15 +45,20 @@ class BooruHandlerFactory {
           // current gelbooru is v.0.2.5, while safe and others are 0.2.0, but sice we had them under the same type from the start
           // we should keep them like that, but change sub-handler depending on the link
           // TODO are there only these 4 sites, or possible more?
-          const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'realbooru.com'];
+          const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'realbooru.com', 'furry.booru.org'];
 
           if(booru.baseURL!.contains("gelbooru.com")) {
             booruHandler = GelbooruHandler(booru, limit);
           } else if(gelbooruAlikes.any((element) => booru.baseURL!.contains(element))) {
             booruHandler = GelbooruAlikesHandler(booru, limit);
           } else {
-            booruHandler = GelbooruHandler(booru, limit);
+            // fallback to alikes handler since probably no one else has latest version of gelbooru
+            booruHandler = GelbooruAlikesHandler(booru, limit);
           }
+          break;
+        case("GelbooruAlike"):
+          // this type is not available in type selector
+          booruHandler = GelbooruAlikesHandler(booru, limit);
           break;
         case("Danbooru"):
           pageNum = 0;
@@ -115,6 +120,7 @@ class BooruHandlerFactory {
           booruHandler = AGNPHHandler(booru, limit);
           break;
         case("NyanPals"):
+          // this type is not available in type selector
           pageNum = 0;
           booruHandler = NyanPalsHandler(booru, limit);
           break;

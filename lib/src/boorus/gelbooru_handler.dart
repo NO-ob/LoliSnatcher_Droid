@@ -14,7 +14,6 @@ import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 
 class GelbooruHandler extends BooruHandler {
   GelbooruHandler(Booru booru, int limit) : super(booru, limit);
@@ -34,8 +33,7 @@ class GelbooruHandler extends BooruHandler {
   @override
   Map<String, String> getHeaders() {
     return {
-      "Accept": "text/html,application/xml,application/json",
-      "user-agent": Tools.appUserAgent(),
+      ...super.getHeaders(),
       "Cookie": "fringeBenefits=yup;" // unlocks restricted content (but it's probably not necessary)
     };
   }
@@ -188,7 +186,7 @@ class GelbooruHandler extends BooruHandler {
     Logger.Inst().log("DirectTagURL: $url", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
     Uri uri = Uri.parse(url);
     try {
-      final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": Tools.appUserAgent()});
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = (jsonDecode(response.body)["tag"]) ?? [];

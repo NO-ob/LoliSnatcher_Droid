@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
@@ -13,6 +14,7 @@ import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_dialog.dart';
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class DebugPage extends StatefulWidget {
   const DebugPage({Key? key}) : super(key: key);
@@ -294,6 +296,18 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Logger',
                 icon: const Icon(Icons.print),
                 page: () => const LoggerPage(),
+              ),
+
+              SettingsButton(
+                name: 'Webview',
+                icon: const Icon(Icons.public),
+                page: () => const InAppWebviewView(initialUrl: 'gelbooru.com'),
+              ),
+              SettingsButton(
+                name: 'Delete All Cookies',
+                action: () async {
+                  await CookieManager().deleteAllCookies();
+                }
               ),
 
               // dummy button to use at least one icon from fontawesome regular and solid packs (brands pack is used in discord button)

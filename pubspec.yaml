@@ -44,6 +44,7 @@ dependencies:
   flex_color_picker: ^2.5.0
   flutter_displaymode: ^0.4.0
   flutter_improved_scrolling: ^0.0.3
+  flutter_inappwebview: ^5.4.3+7
   flutter_inner_drawer:
     git:
       url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"

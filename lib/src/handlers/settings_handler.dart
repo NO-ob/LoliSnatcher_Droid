@@ -51,7 +51,7 @@ class SettingsHandler extends GetxController {
   bool hasHydrus = false;
   RxBool mergeEnabled = RxBool(false);
   List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
-  Rx<String> discordURL = Rx(Constants.discordURL);
+  RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
   RxBool isDebug = (kDebugMode || false).obs;

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 // import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
@@ -137,6 +138,23 @@ class DioDownloader {
     d.send(file);
   }
 
+  Future<String> getCookies() async {
+    String cookieString = '';
+    try {
+      final CookieManager cookieManager = CookieManager();
+      final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
+      for (Cookie cookie in cookies) {
+        cookieString += '${cookie.name}=${cookie.value}; ';
+      }
+    } catch (e) {
+      // 
+    }
+
+    cookieString = cookieString.trim();
+
+    return cookieString;
+  }
+
   Future<void> runRequestIsolate() async {
     try {
       final String resolved = Uri.base.resolve(url).toString();
@@ -174,7 +192,7 @@ class DioDownloader {
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
-          options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+          options: Options(responseType: ResponseType.bytes, headers: {...headers??{}, 'Cookie': await getCookies()}, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress,
         );
@@ -254,7 +272,7 @@ class DioDownloader {
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
-          options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+          options: Options(responseType: ResponseType.bytes, headers: {...headers??{}, 'Cookie': await getCookies()}, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress,
         );
@@ -309,7 +327,7 @@ class DioDownloader {
       currentClient = _httpClient;
       final Response response = await currentClient!.head(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: {...headers??{}, 'Cookie': await getCookies()}, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
         cancelToken: cancelToken,
       );
 
