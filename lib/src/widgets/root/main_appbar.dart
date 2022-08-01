@@ -10,9 +10,8 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/widgets/dialogs/page_number_dialog.dart';
+import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   const MainAppBar({
@@ -112,20 +111,6 @@ class _MainAppBarState extends State<MainAppBar> {
     // });
   }
 
-  Widget pageNumberButton() {
-    return  searchHandler.list.isNotEmpty ?
-    IconButton(
-        icon: const Icon(Icons.format_list_numbered),
-        onPressed: () {
-          showDialog(context: context,builder: (context) {
-            return const PageNumberDialog();
-          },
-        );
-      },
-    ): SizedBox.shrink();
-
-  }
-
   Widget devButton() {
     return IconButton(
       icon: const Icon(Icons.timelapse),
@@ -209,16 +194,12 @@ class _MainAppBarState extends State<MainAppBar> {
       child: AppBar(
         automaticallyImplyLeading: false,
         leading: widget.leading,
+        // toolbarHeight: barHeight,
         title: const ActiveTitle(),
         actions: [
           // lockButton(),
-
-          pageNumberButton(),
-
           // devButton(),
-
           saveButton(),
-
           widget.trailing ?? const SizedBox.shrink(),
         ],
       ),

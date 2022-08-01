@@ -7,20 +7,21 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
-import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
-import 'package:lolisnatcher/src/widgets/preview/staggered_builder.dart';
-import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
+import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
+import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
+import 'package:lolisnatcher/src/widgets/preview/staggered_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_error_buttons.dart';
 
 class WaterfallView extends StatefulWidget {
   const WaterfallView({Key? key}) : super(key: key);
+
   @override
   State<WaterfallView> createState() => _WaterfallViewState();
 }
@@ -340,7 +341,7 @@ class _WaterfallViewState extends State<WaterfallView> {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: isLoadingOrNoItems
-                      ? const ShiverList()
+                      ? ShimmerList(controller: searchHandler.gridScrollController)
                       : DesktopScrollWrap(
                           controller: searchHandler.gridScrollController,
                           // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably

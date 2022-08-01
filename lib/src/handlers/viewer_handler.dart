@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 
 // TODO media actions, video pause/mute... global controller
 

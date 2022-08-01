@@ -2,16 +2,16 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flex_color_picker/flex_color_picker.dart';
 
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
-import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class ThemePage extends StatefulWidget {
   const ThemePage({Key? key}) : super(key: key);
@@ -80,8 +80,6 @@ class _ThemePageState extends State<ThemePage> {
   void updateTheme() async {
     // instantly do local restate
     setState(() { });
-
-    // TODO fix theme not updating update on desktop pages, there settings pages use dialogs, which don't change with the global state
 
     // set global restate to happen only after X ms after last update happens
     Debounce.debounce(

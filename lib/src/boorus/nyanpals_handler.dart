@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class NyanPalsHandler extends BooruHandler {
   NyanPalsHandler(Booru booru, int limit) : super(booru, limit);
@@ -11,7 +11,7 @@ class NyanPalsHandler extends BooruHandler {
   List parseListFromResponse(response) {
     var parsedResponse = jsonDecode(response.body);
     totalCount.value = parsedResponse["total"]!;
-    return parsedResponse['rows'];
+    return (parsedResponse['rows'] ?? []) as List;
   }
 
   @override

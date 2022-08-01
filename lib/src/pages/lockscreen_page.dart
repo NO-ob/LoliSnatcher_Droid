@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 // import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 
 class LockScreen extends StatelessWidget {

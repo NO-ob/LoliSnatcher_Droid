@@ -6,11 +6,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
 // TODO refactor
@@ -22,7 +21,10 @@ class HydrusHandler extends BooruHandler {
 
   @override
   Map<String, String> getHeaders() {
-    return {"Accept": "text/html,application/xml", "user-agent": Tools.appUserAgent(),"Hydrus-Client-API-Access-Key": booru.apiKey!,};
+    return {
+      ...super.getHeaders(),
+      "Hydrus-Client-API-Access-Key": booru.apiKey!,
+    };
   }
 
   @override
@@ -86,7 +88,10 @@ class HydrusHandler extends BooruHandler {
         fileIDString += ']';
         String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
         Uri uri = Uri.parse(url);
-        final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent": Tools.appUserAgent(),"Hydrus-Client-API-Access-Key" : booru.apiKey!});
+        final response = await http.get(uri, headers: {
+          ...super.getHeaders(),
+          "Hydrus-Client-API-Access-Key" : booru.apiKey!,
+        });
         if (response.statusCode == 200) {
           var parsedResponse = jsonDecode(response.body);
           Logger.Inst().log(response.body, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
@@ -198,7 +203,10 @@ class HydrusHandler extends BooruHandler {
     Logger.Inst().log("Requesting key: $url", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri,headers: {"Accept": "text/html,application/xml", "user-agent": Tools.appUserAgent(), "Hydrus-Client-API-Access-Key" : booru.apiKey!});
+      final response = await http.get(uri, headers: {
+        ...super.getHeaders(),
+        "Hydrus-Client-API-Access-Key" : booru.apiKey!,
+      });
       if (response.statusCode == 200) {
         var parsedResponse = jsonDecode(response.body);
         Logger.Inst().log("Key Request Successful: ${parsedResponse['access_key']}", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);

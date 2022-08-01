@@ -6,7 +6,6 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ShimmieHandler extends BooruHandler {
   ShimmieHandler(Booru booru, int limit) : super(booru, limit);
@@ -21,14 +20,6 @@ class ShimmieHandler extends BooruHandler {
     } else {
       return tags;
     }
-  }
-
-  @override
-  Map<String, String> getHeaders() {
-    return {
-      "Accept": "text/html,application/xml,application/json",
-      "user-agent": Tools.browserUserAgent(),
-    };
   }
 
   @override

@@ -1,19 +1,18 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:html/parser.dart';
+import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class GelbooruHandler extends BooruHandler {
@@ -34,8 +33,7 @@ class GelbooruHandler extends BooruHandler {
   @override
   Map<String, String> getHeaders() {
     return {
-      "Accept": "text/html,application/xml,application/json",
-      "user-agent": Tools.appUserAgent(),
+      ...super.getHeaders(),
       "Cookie": "fringeBenefits=yup;" // unlocks restricted content (but it's probably not necessary)
     };
   }
@@ -50,7 +48,18 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var parsedResponse = jsonDecode(response.body);
+    var parsedResponse;
+    try {
+      parsedResponse = jsonDecode(response.body);
+    } catch(e) {
+      // gelbooru returns xml response if request was denied for some reason
+      // i.e. user hit a rate limit because he didn't include api key
+      parsedResponse = XmlDocument.parse(response.body) ;
+      String? errorMessage = (parsedResponse as XmlDocument).getElement('response')?.getAttribute('reason')?.toString();
+      if (errorMessage != null) {
+        throw Exception(errorMessage);
+      }
+    }
 
     try {
       parseSearchCount(parsedResponse);
@@ -58,7 +67,7 @@ class GelbooruHandler extends BooruHandler {
       Logger.Inst().log("Error parsing search count: $e", className, 'parseListFromResponse::parseSearchCount', LogTypes.exception);
     }
 
-    return parsedResponse["post"];
+    return (parsedResponse["post"] ?? []) as List;
   }
 
   @override
@@ -125,9 +134,10 @@ class GelbooruHandler extends BooruHandler {
   String makeURL(String tags) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=rating:general%20order:score&limit=20&pid=0&json=1
     int cappedPage = max(0, pageNum);
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}&user_id=${booru.userID}' : '';
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
+    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
 
-    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1$apiKey";
+    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1$apiKey$userId";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -135,7 +145,9 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=10&json=1
-    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1";
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
+    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1$apiKey$userId";
   }
 
   @override
@@ -161,7 +173,9 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String makeDirectTagURL(List<String> tags) {
-    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=500&json=1";
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
+    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=500&json=1$apiKey$userId";
   }
 
   @override
@@ -172,7 +186,7 @@ class GelbooruHandler extends BooruHandler {
     Logger.Inst().log("DirectTagURL: $url", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
     Uri uri = Uri.parse(url);
     try {
-      final response = await http.get(uri, headers: {"Accept": "application/json", "user-agent": Tools.appUserAgent()});
+      final response = await http.get(uri, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = (jsonDecode(response.body)["tag"]) ?? [];
@@ -211,7 +225,9 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=comment&q=index&post_id=7296350
-    return "${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID";
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
+    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID$apiKey$userId";
   }
 
   @override
@@ -248,7 +264,9 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeNotesURL(String postID) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=note&q=index&post_id=6512262
-    return "${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID";
+    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
+    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID$apiKey$userId";
   }
 
   @override

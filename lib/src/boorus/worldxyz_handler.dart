@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(Booru booru, int limit) : super(booru, limit);
@@ -22,18 +21,9 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   @override
-  Map<String, String> getHeaders() {
-    return {
-      "Accept": "text/html,application/xml,application/json",
-      "Content-Type": "application/json",
-      "User-Agent": Tools.appUserAgent(),
-    };
-  }
-
-  @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['items'];
+    return (parsedResponse['items'] ?? []) as List;
   }
 
   @override
@@ -141,7 +131,7 @@ class WorldXyzHandler extends BooruHandler {
 
   //   try {
   //     Uri uri = Uri.parse(url);
-  //     final response = await http.get(uri, headers: {"Accept": "application/xml", "user-agent": Tools.browserUserAgent()});
+  //     final response = await http.get(uri, headers: {"Accept": "application/xml", "User-Agent": Tools.browserUserAgent()});
   //     // 200 is the success http response code
   //     if (response.statusCode == 200) {
   //       Map<String, dynamic> parsedResponse = jsonDecode(response.body);

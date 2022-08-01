@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
 
 class PhilomenaHandler extends BooruHandler {
   PhilomenaHandler(Booru booru, int limit) : super(booru, limit);
@@ -19,7 +19,7 @@ class PhilomenaHandler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['images'];
+    return (parsedResponse['images'] ?? []) as List;
   }
 
   @override

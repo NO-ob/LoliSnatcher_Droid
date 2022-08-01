@@ -1,8 +1,7 @@
-
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 
 class TagsManagerListItem extends StatelessWidget {
   const TagsManagerListItem({

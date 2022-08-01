@@ -4,9 +4,9 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 // This booru works weird, once you get a session id and do a search itll give you results with only partial data and a results id

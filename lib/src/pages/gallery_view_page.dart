@@ -2,40 +2,38 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:preload_page_view/preload_page_view.dart';
-import 'package:flutter/cupertino.dart';
 
+import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/timed_progress_controller.dart';
-
-
-import 'package:lolisnatcher/src/widgets/common/restartable_progress_indicator.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
-import 'package:lolisnatcher/src/widgets/gallery/hideable_appbar.dart';
-import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
-import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/restartable_progress_indicator.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
-import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
-import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/gallery/gallery_buttons.dart';
+import 'package:lolisnatcher/src/widgets/gallery/hideable_appbar.dart';
+import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
+import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
+import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 
 /// The image page is what is dispalyed when an iamge is clicked it shows a full resolution
 /// version of an image and allows scrolling left and right through the currently loaded booruItems
@@ -268,7 +266,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                 )),
 
                 NotesRenderer(controller),
-                GalleryButtons(controller),
+                GalleryButtons(pageController: controller),
                 const ViewerTutorial(),
               ]),
             ),

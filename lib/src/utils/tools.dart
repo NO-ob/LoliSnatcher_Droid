@@ -42,15 +42,15 @@ class Tools {
   // unified http headers list generator for dio in thumb/media/video loaders
   static Map<String, String> getFileCustomHeaders(Booru booru, {bool checkForReferer = false}) {
     // a few boorus doesn't work without a browser useragent
-    Map<String,String> headers = {"user-agent": browserUserAgent()};
+    Map<String,String> headers = {"User-Agent": browserUserAgent()};
     // some boorus require referer header
     if(checkForReferer) {
       switch (booru.type) {
         case 'World':
           if(booru.baseURL!.contains('rule34.xyz')) {
-            headers["referer"] = "https://rule34xyz.b-cdn.net";
+            headers["Referer"] = "https://rule34xyz.b-cdn.net";
           } else if(booru.baseURL!.contains('rule34.world')) {
-            headers["referer"] = "https://rule34storage.b-cdn.net";
+            headers["Referer"] = "https://rule34storage.b-cdn.net";
           }
           break;
 

@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:flutter/material.dart';
+
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 
 class LongPressRepeater extends StatefulWidget {
   /// This widget detects long press on [child] and repeats given action every [tick] milliseconds.

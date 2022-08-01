@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 /// This is the booru editor page.
 class BooruEdit extends StatefulWidget {
@@ -54,6 +55,22 @@ class _BooruEditState extends State<BooruEdit> {
     "World",
   ];
 
+  // TODO make standalone / move to handlers themselves
+  String convertSiteUrlToApi() {
+    String url = booruURLController.text;
+
+    if (url.contains("chan.sankakucomplex.com")) {
+      // Sankaku api override
+      return "https://capi-v2.sankakucomplex.com";
+      // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
+    } else if (url.contains("idol.sankakucomplex.com")) {
+      return "https://iapi.sankakucomplex.com";
+      // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
+    }
+
+    return url;
+  }
+
   bool isTesting = false;
 
   @override
@@ -87,6 +104,7 @@ class _BooruEditState extends State<BooruEdit> {
         child: ListView(
           children: <Widget>[
             testButton(),
+            webviewButton(),
             saveButton(),
             const SettingsButton(name: '', enabled: false),
             SettingsTextInput(
@@ -257,6 +275,25 @@ class _BooruEditState extends State<BooruEdit> {
     }
   }
 
+  Widget webviewButton() {
+    return SettingsButton(
+      name: 'Open url to get cookies [BETA]',
+      icon: const Icon(Icons.public),
+      action: () {
+        if(booruURLController.text.isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => InAppWebviewView(
+                initialUrl: booruURLController.text,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
   Widget testButton() {
     return SettingsButton(
       name: 'Test Booru',
@@ -278,6 +315,7 @@ class _BooruEditState extends State<BooruEdit> {
           );
           return;
         }
+
         if(booruURLController.text == "") {
           FlashElements.showSnackbar(
             context: context,
@@ -290,29 +328,23 @@ class _BooruEditState extends State<BooruEdit> {
             sideColor: Colors.red,
           );
           return;
-        } else {
-          // add https if not specified
-          if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
-            booruURLController.text = "https://${booruURLController.text}";
-          }
-          // autofill favicon if not specified
-          if(booruFaviconController.text == ""){
-            booruFaviconController.text = "${booruURLController.text}/favicon.ico";
-          }
-          // TODO make a list of default favicons for boorus where ^default^ one won't work
-          if (booruURLController.text.contains("agn.ph")){
-            booruFaviconController.text = "https://agn.ph/skin/Retro/favicon.ico";
-          }
         }
 
-        // Sankaku api override
-        if(booruURLController.text.contains("chan.sankakucomplex.com")){
-          booruURLController.text = "https://capi-v2.sankakucomplex.com";
-          // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
-        } else if(booruURLController.text.contains("idol.sankakucomplex.com")){
-          booruURLController.text = "https://iapi.sankakucomplex.com";
-          // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
+        // add https if not specified
+        if(!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")){
+          booruURLController.text = "https://${booruURLController.text}";
         }
+        // autofill favicon if not specified
+        if(booruFaviconController.text == ""){
+          booruFaviconController.text = "${booruURLController.text}/favicon.ico";
+        }
+        // TODO make a list of default favicons for boorus where ^default^ one won't work
+        if (booruURLController.text.contains("agn.ph")){
+          booruFaviconController.text = "https://agn.ph/skin/Retro/favicon.ico";
+        }
+
+        // some boorus have their api url different from main host
+        booruURLController.text = convertSiteUrlToApi();
 
         //Call the booru test
         Booru testBooru;

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:fast_marquee/fast_marquee.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:fast_marquee/fast_marquee.dart';
+import 'package:flutter/material.dart';
 
 // Based on code from: https://github.com/nt4f04uNd/nt4f04unds_widgets/blob/f14e448d23d347f17c05549972e638d61cf300b4/lib/src/widgets/marquee.dart
 

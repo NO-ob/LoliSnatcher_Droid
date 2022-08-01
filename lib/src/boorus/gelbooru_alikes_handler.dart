@@ -1,19 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:async';
 
-import 'package:http/http.dart' as http;
 import 'package:html/parser.dart';
+import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 // TODO json parser? (add &json=1 to urls)
 // rule34.xxx, safebooru.org, realbooru.com
@@ -35,14 +35,6 @@ class GelbooruAlikesHandler extends BooruHandler {
     "1": TagType.artist,
     "0": TagType.none
   };
-
-  @override
-  Map<String, String> getHeaders() {
-    return {
-      "Accept": "text/html,application/xml,application/json",
-      "user-agent": Tools.appUserAgent(),
-    };
-  }
 
   @override
   List parseListFromResponse(response) {
@@ -84,6 +76,10 @@ class GelbooruAlikesHandler extends BooruHandler {
         // sampleURL = "${booru.baseURL}/${isSample ? "samples" : "images"}/$directory/${isSample ? "sample_" : ""}$hash.$sampleExt";
 
         previewURL = "${booru.baseURL}/thumbnails/$directory/thumbnail_$hash.jpg";
+      }
+      if(booru.baseURL!.contains('furry.booru.org')) {
+        previewURL = previewURL.replaceFirst('.png', '.jpg');
+        if(sampleURL != fileURL && sampleURL.contains('samples')) sampleURL = sampleURL.replaceFirst('.png', '.jpg');
       }
 
 
@@ -130,10 +126,16 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=rating:safe+sort:score+translated&limit=50&pid=0
+    String baseUrl = booru.baseURL!;
+    if(baseUrl.contains('rule34.xxx')) {
+      // because requests to default url are protected by a captcha
+      baseUrl = 'https://api.rule34.xxx';
+    }
+
     int cappedPage = max(0, pageNum);
     String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? "&api_key=${booru.apiKey}&user_id=${booru.userID}" : "";
 
-    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$apiKey";
+    return "$baseUrl/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$apiKey";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -144,7 +146,11 @@ class GelbooruAlikesHandler extends BooruHandler {
     // "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=nagato%&limit=10&order=count&direction=desc"
 
     // EXAMPLE: https://safebooru.org/autocomplete.php?q=naga
-    return "${booru.baseURL}/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
+    String baseUrl = booru.baseURL!;
+    if(baseUrl.contains('rule34.xxx')) {
+      baseUrl = 'https://api.rule34.xxx';
+    }
+    return "$baseUrl/autocomplete.php?q=$input"; // doesn't allow limit, but sorts by popularity
   }
 
   @override
@@ -166,9 +172,15 @@ class GelbooruAlikesHandler extends BooruHandler {
     // gelbooru json has count in @attributes, but there is no count data on r34xxx json, so we switch back to xml
     String url = makeURL(input);
 
+    final String cookies = await getCookies() ?? "";
+    final Map<String, String> headers = {
+      ...getHeaders(),
+      if(cookies.isNotEmpty) 'Cookie': cookies,
+    };
+
     try {
       Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: getHeaders());
+      final response = await http.get(uri, headers: headers);
       // 200 is the success http response code
       if (response.statusCode == 200) {
         var parsedResponse = XmlDocument.parse(response.body);
@@ -192,7 +204,12 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=comment&q=index&post_id=1
-    return "${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID";
+    String baseUrl = booru.baseURL!;
+    if(baseUrl.contains('rule34.xxx')) {
+      baseUrl = 'https://api.rule34.xxx';
+    }
+
+    return "$baseUrl/index.php?page=dapi&s=comment&q=index&post_id=$postID";
   }
 
   @override
@@ -225,7 +242,12 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   String makeNotesURL(String postID) {
     // EXAMPLE: https://safebooru.org/index.php?page=dapi&s=note&q=index&post_id=645243
-    return "${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID";
+    String baseUrl = booru.baseURL!;
+    if(baseUrl.contains('rule34.xxx')) {
+      baseUrl = 'https://api.rule34.xxx';
+    }
+
+    return "$baseUrl/index.php?page=dapi&s=note&q=index&post_id=$postID";
   }
 
   @override

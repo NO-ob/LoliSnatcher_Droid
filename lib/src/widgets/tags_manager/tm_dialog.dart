@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_add_dialog.dart';
-import 'package:lolisnatcher/src/widgets/tags_manager/tm_list.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_bottom.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_filter.dart';
-import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
-import 'package:lolisnatcher/src/data/tag_type.dart';
-import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list.dart';
 
 class TagsManagerDialog extends StatefulWidget {
   const TagsManagerDialog({Key? key}) : super(key: key);
@@ -91,19 +91,23 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
           onChangedType: (TagType? newValue) {
             if (newValue != null && item.tagType != newValue) {
               item.tagType = newValue;
+              tagHandler.putTag(item);
               filterTags();
             }
           },
           onSetStale: () {
             item.updatedAt = 100;
+            tagHandler.putTag(item);
             filterTags();
           },
           onResetStale: () {
             item.updatedAt = DateTime.now().millisecondsSinceEpoch;
+            tagHandler.putTag(item);
             filterTags();
           },
           onSetUnstaleable: () {
             item.updatedAt = DateTime.now().millisecondsSinceEpoch * 10;
+            tagHandler.putTag(item);
             filterTags();
           },
         );

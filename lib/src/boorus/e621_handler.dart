@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class e621Handler extends BooruHandler {
   e621Handler(Booru booru, int limit) : super(booru, limit);
@@ -24,7 +24,7 @@ class e621Handler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['posts'] as List;
+    return (parsedResponse['posts'] ?? []) as List;
   }
 
   @override

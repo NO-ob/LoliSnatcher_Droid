@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/widgets/history/history.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/dialogs/page_number_dialog.dart';
+import 'package:lolisnatcher/src/widgets/history/history.dart';
 
 class TabButtons extends StatelessWidget {
   const TabButtons(this.withArrows, this.alignment, {Key? key}) : super(key: key);
@@ -24,71 +26,87 @@ class TabButtons extends StatelessWidget {
 
     final Color iconColor = Theme.of(context).colorScheme.secondary;
 
-    return Wrap(
-      alignment: alignment ?? WrapAlignment.spaceEvenly,
-      children: [
-        const SizedBox(width: 25),
+    return Obx(() {
+      if (searchHandler.list.isEmpty) {
+        return const SizedBox.shrink();
+      }
 
-        if (withArrows)
+      return Wrap(
+        alignment: alignment ?? WrapAlignment.spaceEvenly,
+        children: [
+          // Prev tab
+          if (withArrows)
+            IconButton(
+              icon: const Icon(Icons.arrow_upward),
+              color: iconColor,
+              onPressed: () {
+                // switch to the prev tab, loop if reached the first
+                if ((searchHandler.currentIndex - 1) < 0) {
+                  searchHandler.changeTabIndex(searchHandler.total - 1);
+                } else {
+                  searchHandler.changeTabIndex(searchHandler.currentIndex - 1);
+                }
+              },
+            ),
+          // Remove current tab
           IconButton(
-            icon: const Icon(Icons.arrow_upward),
+            icon: const Icon(Icons.remove_circle_outline),
             color: iconColor,
             onPressed: () {
-              // switch to the prev tab, loop if reached the first
-              if ((searchHandler.currentIndex - 1) < 0) {
-                searchHandler.changeTabIndex(searchHandler.total - 1);
-              } else {
-                searchHandler.changeTabIndex(searchHandler.currentIndex - 1);
-              }
+              // Remove selected searchtab from list and apply nearest to search bar
+              searchHandler.removeTabAt();
             },
           ),
-
-        IconButton(
-          icon: const Icon(Icons.remove_circle_outline),
-          color: iconColor,
-          onPressed: () {
-            // Remove selected searchtab from list and apply nearest to search bar
-            searchHandler.removeTabAt();
-          },
-        ),
-
-        IconButton(
-          icon: const Icon(Icons.history),
-          color: iconColor,
-          onPressed: () async {
-            await showHistory(context);
-          },
-        ),
-
-        IconButton(
-          icon: const Icon(Icons.add_circle_outline),
-          color: iconColor,
-          onPressed: () {
-            // add new tab and switch to it
-            searchHandler.searchTextController.text = settingsHandler.defTags;
-            searchHandler.addTabByString(settingsHandler.defTags, switchToNew: true);
-
-            // add new tab to the list end
-            // searchHandler.addTabByString(settingsHandler.defTags);
-          },
-        ),
-
-        if (withArrows)
+          // Show search history
           IconButton(
-            icon: const Icon(Icons.arrow_downward),
+            icon: const Icon(Icons.history),
+            color: iconColor,
+            onPressed: () async {
+              await showHistory(context);
+            },
+          ),
+          // Show page number dialog
+          IconButton(
+            icon: const Icon(Icons.format_list_numbered),
             color: iconColor,
             onPressed: () {
-              // switch to the next tab, loop if reached the last
-              if ((searchHandler.currentIndex + 1) > (searchHandler.total - 1)) {
-                searchHandler.changeTabIndex(0);
-              } else {
-                searchHandler.changeTabIndex(searchHandler.currentIndex + 1);
-              }
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return const PageNumberDialog();
+                },
+              );
             },
           ),
+          // Add new tab
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            color: iconColor,
+            onPressed: () {
+              // add new tab and switch to it
+              searchHandler.searchTextController.text = settingsHandler.defTags;
+              searchHandler.addTabByString(settingsHandler.defTags, switchToNew: true);
 
-        const SizedBox(width: 25),
-      ],
-    );
+              // add new tab to the list end
+              // searchHandler.addTabByString(settingsHandler.defTags);
+            },
+          ),
+          // Next tab
+          if (withArrows)
+            IconButton(
+              icon: const Icon(Icons.arrow_downward),
+              color: iconColor,
+              onPressed: () {
+                // switch to the next tab, loop if reached the last
+                if ((searchHandler.currentIndex + 1) > (searchHandler.total - 1)) {
+                  searchHandler.changeTabIndex(0);
+                } else {
+                  searchHandler.changeTabIndex(searchHandler.currentIndex + 1);
+                }
+              },
+            ),
+        ],
+      );
+    });
   }
 }

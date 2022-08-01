@@ -1,8 +1,8 @@
 import 'package:html/parser.dart';
 
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class GelbooruV1Handler extends BooruHandler {
   GelbooruV1Handler(Booru booru, int limit) : super(booru, limit);
@@ -25,11 +25,14 @@ class GelbooruV1Handler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(responseItem, int index) {
-    if (responseItem.children[0].firstChild!.attributes["src"] != null) {
-      String id = responseItem.children[0].attributes["id"]!.substring(1);
-      String thumbURL = responseItem.children[0].firstChild!.attributes["src"]!;
+    var linkItem = responseItem.firstChild!;
+    var imgItem = linkItem.firstChild!;
+
+    if (imgItem.attributes["src"] != null) {
+      String id = linkItem.attributes["id"]!.substring(1);
+      String thumbURL = imgItem.attributes["src"]!;
       String fileURL = thumbURL.replaceFirst("thumbs", "img").replaceFirst("thumbnails", "images").replaceFirst("thumbnail_", "");
-      List<String> tags = responseItem.children[0].firstChild!.attributes["title"]!.split(" ");
+      List<String> tags = imgItem.attributes["title"]!.split(" ");
       BooruItem item = BooruItem(
         fileURL: fileURL,
         sampleURL: fileURL,

@@ -8,13 +8,62 @@ import 'package:lolisnatcher/src/widgets/tabs/tab_manager_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
 
 class TabSelector extends StatelessWidget {
-  const TabSelector({
+  const TabSelector({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+    final bool isDesktop = settingsHandler.appMode.value.isDesktop;
+    final EdgeInsetsGeometry padding = isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8);
+    final EdgeInsetsGeometry contentPadding = EdgeInsets.symmetric(horizontal: 12, vertical: isDesktop ? 2 : 8);
+
+    return TabSelectorRender(
+      isDesktop: isDesktop,
+      padding: padding,
+      contentPadding: contentPadding,
+    );
+  }
+}
+
+class TabSelectorHeader extends StatelessWidget {
+  const TabSelectorHeader({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+
+    final bool isDesktop = settingsHandler.appMode.value.isDesktop;
+    const EdgeInsetsGeometry padding = EdgeInsets.fromLTRB(5, 10, 2, 0);
+    const EdgeInsetsGeometry contentPadding = EdgeInsets.symmetric(horizontal: 4, vertical: 8);
+    const Color borderColor = Colors.transparent;
+    final Color textColor = Theme.of(context).colorScheme.onPrimary;
+
+    return TabSelectorRender(
+      isDesktop: isDesktop,
+      padding: padding,
+      contentPadding: contentPadding,
+      borderColor: borderColor,
+      textColor: textColor,
+    );
+  }
+}
+
+class TabSelectorRender extends StatelessWidget {
+  const TabSelectorRender({
     Key? key,
-    this.topMode = false,
+    required this.isDesktop,
+    required this.padding,
+    required this.contentPadding,
+    this.borderColor,
+    this.textColor,
   }) : super(key: key);
 
-  /// If this widget is placed in ActiveTitle, true - disable colored border and change padding a bit
-  final bool topMode;
+  final bool isDesktop;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry contentPadding;
+  final Color? borderColor;
+  final Color? textColor;
 
   Future<bool> openTabsDialog(context) async {
     return await SettingsPageOpen(
@@ -26,22 +75,10 @@ class TabSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final SearchHandler searchHandler = SearchHandler.instance;
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     // print('tabbox build');
 
-    final bool isDesktop = settingsHandler.appMode.value.isDesktop;
-    final EdgeInsetsGeometry padding = topMode
-        ? const EdgeInsets.fromLTRB(5, 10, 2, 0)
-        : (isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8));
-    final EdgeInsetsGeometry contentPadding = topMode
-        ? const EdgeInsets.symmetric(horizontal: 4, vertical: 8)
-        : EdgeInsets.symmetric(horizontal: 12, vertical: isDesktop ? 2 : 8);
-
-    final Color borderColor = topMode ? Colors.transparent : Theme.of(context).colorScheme.secondary;
-
     return Container(
-      // constraints: isDesktop ? BoxConstraints(maxHeight: 40, minHeight: 20, minWidth: 100) : null,
       padding: padding,
       child: Obx(() {
         List<SearchTab> list = searchHandler.list;
@@ -51,27 +88,32 @@ class TabSelector extends StatelessWidget {
           return const SizedBox();
         }
 
+        Color currentBorderColor = borderColor ?? Theme.of(context).colorScheme.secondary;
+
         return GestureDetector(
           onLongPress: () => openTabsDialog(context),
           onSecondaryTap: () => openTabsDialog(context),
           child: DropdownButtonFormField<SearchTab>(
             isExpanded: true,
             value: list[index],
-            icon: const Icon(Icons.arrow_drop_down),
+            icon: Icon(Icons.arrow_drop_down, color: textColor),
             itemHeight: kMinInteractiveDimension,
             decoration: InputDecoration(
-              labelText: 'Tab (${searchHandler.currentIndex + 1}/${searchHandler.total})',
+              labelText: 'Tab | ${searchHandler.currentIndex + 1}/${searchHandler.total}',
+              labelStyle: Theme.of(context).inputDecorationTheme.labelStyle!.copyWith(
+                    color: textColor ?? Theme.of(context).inputDecorationTheme.labelStyle!.color,
+                  ),
               contentPadding: contentPadding,
               border: OutlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 1),
+                borderSide: BorderSide(color: currentBorderColor, width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
               enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 1),
+                borderSide: BorderSide(color: currentBorderColor, width: 1),
                 borderRadius: BorderRadius.circular(8),
               ),
               focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 2),
+                borderSide: BorderSide(color: currentBorderColor, width: 2),
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
@@ -84,7 +126,7 @@ class TabSelector extends StatelessWidget {
               return list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
                 return DropdownMenuItem<SearchTab>(
                   value: value,
-                  child: TabRow(key: ValueKey(value), tab: value),
+                  child: TabRow(key: ValueKey(value), tab: value, color: textColor),
                 );
               }).toList();
             },

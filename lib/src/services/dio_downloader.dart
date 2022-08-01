@@ -4,10 +4,11 @@ import 'dart:typed_data';
 
 // import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-import 'package:lolisnatcher/src/services/image_writer.dart';
-import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class DioDownloader {
@@ -137,6 +138,23 @@ class DioDownloader {
     d.send(file);
   }
 
+  Future<String> getCookies() async {
+    String cookieString = '';
+    try {
+      final CookieManager cookieManager = CookieManager();
+      final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
+      for (Cookie cookie in cookies) {
+        cookieString += '${cookie.name}=${cookie.value}; ';
+      }
+    } catch (e) {
+      // 
+    }
+
+    cookieString = cookieString.trim();
+
+    return cookieString;
+  }
+
   Future<void> runRequestIsolate() async {
     try {
       final String resolved = Uri.base.resolve(url).toString();
@@ -213,11 +231,12 @@ class DioDownloader {
         return;
       }
     } catch (e) {
-      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.exception);
+      bool isCancelError = e is DioError && e.type == DioErrorType.cancel;
+      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
-        print('Exception: $e');
+        // print('Exception: $e');
       }
       dispose();
     }
@@ -290,11 +309,12 @@ class DioDownloader {
         return;
       }
     } catch (e) {
-      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.exception);
+      bool isCancelError = e is DioError && e.type == DioErrorType.cancel;
+      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
-        print('Exception: $e');
+        // print('Exception: $e');
       }
       dispose();
     }
@@ -327,11 +347,12 @@ class DioDownloader {
       dispose();
       return;
     } catch (e) {
-      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.exception);
+      bool isCancelError = e is DioError && e.type == DioErrorType.cancel;
+      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
-        print('Exception: $e');
+        // print('Exception: $e');
       }
       dispose();
     }

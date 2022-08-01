@@ -1,5 +1,6 @@
-import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
+
+import 'package:permission_handler/permission_handler.dart';
 
 // TODO expand to have more control over permissions
 

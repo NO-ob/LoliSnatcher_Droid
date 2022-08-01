@@ -1,36 +1,37 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:dart_vlc/dart_vlc.dart';
-import 'package:get/get.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'package:statsfl/statsfl.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:app_links/app_links.dart';
+import 'package:get/get.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:statsfl/statsfl.dart';
 
-import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/theme_item.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/handlers/notify_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/pages/desktop_home_page.dart';
 import 'package:lolisnatcher/src/pages/mobile_home_page.dart';
-import 'package:lolisnatcher/src/data/theme_item.dart';
-import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
-import 'package:lolisnatcher/src/services/image_writer.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
+import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/handlers/tag_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
-import 'package:lolisnatcher/src/handlers/theme_handler.dart';
+import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
+import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
@@ -46,6 +47,34 @@ void main() {
 
     Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
   };
+
+  // load settings before first render to get theme data early
+  final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
+  await settingsHandler.initialize();
+
+  // TODO
+  // AwesomeNotifications().initialize(
+  //   // set the icon to null if you want to use the default app icon
+  //   null,
+  //   [
+  //     NotificationChannel(
+  //       channelGroupKey: 'basic_channel_group',
+  //       channelKey: 'basic_channel',
+  //       channelName: 'Basic notifications',
+  //       channelDescription: 'Notification channel for basic tests',
+  //       defaultColor: Colors.pink[600],
+  //       ledColor: Colors.white,
+  //     )
+  //   ],
+  //   // Channel groups are only visual and are not required
+  //   channelGroups: [
+  //     NotificationChannelGroup(
+  //       channelGroupKey: 'basic_channel_group',
+  //       channelGroupName: 'Basic group',
+  //     ),
+  //   ],
+  //   debug: true,
+  // );
 
   runApp(const MainApp());
 }
@@ -64,18 +93,20 @@ class _MainAppState extends State<MainApp> {
   late final ViewerHandler viewerHandler;
   late final NavigationHandler navigationHandler;
   late final TagHandler tagHandler;
+  late final NotifyHandler notifyHandler;
   // late final LocalAuthHandler localAuthHandler;
   int maxFps = 60;
 
   @override
   void initState() {
     super.initState();
-    settingsHandler = Get.put(SettingsHandler(), permanent: true);
+    settingsHandler = Get.find<SettingsHandler>();
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     viewerHandler = Get.put(ViewerHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
     navigationHandler = Get.put(NavigationHandler(), permanent: true);
+    notifyHandler = Get.put(NotifyHandler(), permanent: true);
     // localAuthHandler = Get.put(LocalAuthHandler(), permanent: true);
     initHandlers();
 
@@ -88,12 +119,28 @@ class _MainAppState extends State<MainApp> {
       };
     }
 
+    // TODO
+    // AwesomeNotifications().setListeners(
+    //   onActionReceivedMethod: NotifyHandler.onActionReceivedMethod,
+    //   onNotificationCreatedMethod: NotifyHandler.onNotificationCreatedMethod,
+    //   onNotificationDisplayedMethod: NotifyHandler.onNotificationDisplayedMethod,
+    //   onDismissActionReceivedMethod: NotifyHandler.onDismissActionReceivedMethod,
+    // );
+
+    // AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    //   if (!isAllowed) {
+    //     // TODO
+    //     // This is just a basic example. For real apps, you must show some
+    //     // friendly dialog box before call the request method.
+    //     // This is very important to not harm the user experience
+    //     AwesomeNotifications().requestPermissionToSendNotifications();
+    //   }
+    // });
+
     setMaxFPS();
   }
 
   void initHandlers() async {
-    await settingsHandler.initialize();
-
     // should init earlier than tabs so tags color properly on first render of search box
     // TODO but this possibly could lead to bad preformance on start if tag storage is too big?
     await tagHandler.initialize();
@@ -124,6 +171,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
+    Get.delete<NotifyHandler>();
     Get.delete<NavigationHandler>();
     Get.delete<ViewerHandler>();
     Get.delete<SnatchHandler>();
@@ -159,16 +207,14 @@ class _MainAppState extends State<MainApp> {
       //   statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       //   statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemStatusBarContrastEnforced: true,
-        
+
       //   systemNavigationBarColor: Theme.of(context).colorScheme.background.withOpacity(0.5),
       //   systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       //   systemNavigationBarContrastEnforced: true,
       //   systemNavigationBarDividerColor: Colors.transparent,
       // ));
 
-
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
-
 
       return StatsFl(
         isEnabled: settingsHandler.isDebug.value && settingsHandler.showFPS.value, //Toggle on/off
@@ -210,7 +256,7 @@ class Preloader extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return Obx(() {
-      if (settingsHandler.isInit.value) {
+      if (settingsHandler.isInit.value) { // TODO get rid of this IF, since now we init settings before first render
         if (Platform.isAndroid || Platform.isIOS) {
           // set system ui mode
           ServiceHandler.setSystemUiVisibility(true);

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class SzurubooruHandler extends BooruHandler {
@@ -20,7 +20,7 @@ class SzurubooruHandler extends BooruHandler {
   @override
   List parseListFromResponse(response) {
     Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return parsedResponse['results'];
+    return (parsedResponse['results'] ?? []) as List;
   }
 
   @override
@@ -62,20 +62,12 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   Map<String, String> getHeaders() {
-    if (booru.apiKey!.isNotEmpty) {
-      return {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "user-agent": Tools.appUserAgent(),
-        "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"
-      };
-    } else {
-      return {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "user-agent": Tools.browserUserAgent(),
-      };
-    }
+    return {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "User-Agent": Tools.browserUserAgent(),
+      if (booru.apiKey!.isNotEmpty) "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"
+    };
   }
 
   @override

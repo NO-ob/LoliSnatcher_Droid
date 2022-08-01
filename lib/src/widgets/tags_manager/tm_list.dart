@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:huge_listview/huge_listview.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
 
 class TagsManagerList extends StatelessWidget {
   const TagsManagerList({

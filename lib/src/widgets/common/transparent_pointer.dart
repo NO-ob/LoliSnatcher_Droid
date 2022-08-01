@@ -68,7 +68,7 @@ class TransparentPointer extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderTransparentPointer renderObject) {
-    renderObject..transparent = transparent;
+    renderObject.transparent = transparent;
   }
 
   @override
