@@ -231,11 +231,12 @@ class DioDownloader {
         return;
       }
     } catch (e) {
-      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.exception);
+      bool isCancelError = e is DioError && e.type == DioErrorType.cancel;
+      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
-        print('Exception: $e');
+        // print('Exception: $e');
       }
       dispose();
     }
@@ -308,11 +309,12 @@ class DioDownloader {
         return;
       }
     } catch (e) {
-      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.exception);
+      bool isCancelError = e is DioError && e.type == DioErrorType.cancel;
+      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
-        print('Exception: $e');
+        // print('Exception: $e');
       }
       dispose();
     }
@@ -345,11 +347,12 @@ class DioDownloader {
       dispose();
       return;
     } catch (e) {
-      Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.exception);
+      bool isCancelError = e is DioError && e.type == DioErrorType.cancel;
+      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.exception);
       if(e is Exception) {
         onError?.call(e);
       } else {
-        print('Exception: $e');
+        // print('Exception: $e');
       }
       dispose();
     }

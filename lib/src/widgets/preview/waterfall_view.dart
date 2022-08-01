@@ -341,7 +341,7 @@ class _WaterfallViewState extends State<WaterfallView> {
                   return AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: isLoadingOrNoItems
-                      ? const ShiverList()
+                      ? ShimmerList(controller: searchHandler.gridScrollController)
                       : DesktopScrollWrap(
                           controller: searchHandler.gridScrollController,
                           // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
