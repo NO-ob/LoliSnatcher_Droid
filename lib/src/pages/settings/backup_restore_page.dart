@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -22,6 +23,7 @@ class BackupRestorePage extends StatefulWidget {
 
 class _BackupRestorePageState extends State<BackupRestorePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
   String backupPath = "";
 
   void showSnackbar(BuildContext context, String text, bool isError) {
@@ -256,6 +258,48 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   }
                 },
               ),
+                  SettingsButton(
+                    name: 'Backup Tags',
+                    action: () async {
+                      try {
+                        print(json.encode(settingsHandler.booruList));
+                        if(backupPath.isNotEmpty) {
+                          await ServiceHandler.writeImage(utf8.encode(json.encode(tagHandler.toList())), "tags", "text", "json", backupPath);
+                          showSnackbar(context, 'Tags saved to tags.json', false);
+                        } else {
+                          showSnackbar(context, 'No Access to backup folder!', true);
+                        }
+                      } catch (e) {
+                        showSnackbar(context, 'Error while saving tags! $e', true);
+                        print(e);
+                      }
+                    },
+                  ),
+                  SettingsButton(
+                    name: 'Restore Tags',
+                    subtitle: const Text('tags.json'),
+                    action: () async {
+
+                      try {
+                        if(backupPath.isNotEmpty) {
+                          Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"tags.json");
+                          String tagJSONString = "";
+                          if (tagFileBytes != null){
+                            tagJSONString = String.fromCharCodes(tagFileBytes);
+                          }
+                          if(tagJSONString.isNotEmpty) {
+                            await tagHandler.loadFromJSON(tagJSONString);
+                            showSnackbar(context, 'Tags restored from backup!', false);
+                          }
+                        } else {
+                          showSnackbar(context, 'No Access to backup folder!', true);
+                        }
+                      } catch (e) {
+                        showSnackbar(context, 'Error while restoring tags! $e', true);
+                        print(e);
+                      }
+                    },
+                  ),
               ]:[])
           ),
         ),

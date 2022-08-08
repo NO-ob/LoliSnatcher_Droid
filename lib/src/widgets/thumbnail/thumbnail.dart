@@ -83,6 +83,7 @@ class _ThumbnailState extends State<Thumbnail> {
     _dioCancelToken = CancelToken();
     DioDownloader newClient = DioDownloader(
       isMain ? thumbURL : widget.item.thumbnailURL,
+      fileNameExtras: widget.item.fileNameExtras,
       headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _dioCancelToken,
       onProgress: _onBytesAdded,

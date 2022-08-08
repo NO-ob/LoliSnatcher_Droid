@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/services/image_writer.dart';
 
+import '../../utils/logger.dart';
+
 
 // memoryimage but with url added in attempt to not load extra copies of already loaded images
 class MemoryImageTest extends ImageProvider<MemoryImageTest> {
@@ -166,6 +168,7 @@ class LoliImage extends ImageProvider<LoliImage> {
       this.headers = const <String, dynamic>{},
       this.cancelToken,
       this.onProgress,
+      required this.fileNameExtras,
       required this.cacheEnabled,
       required this.cacheFolder,
     }
@@ -184,6 +187,8 @@ class LoliImage extends ImageProvider<LoliImage> {
   final bool cacheEnabled;
 
   final String cacheFolder;
+
+  final String fileNameExtras;
 
   @override
   Future<LoliImage> obtainKey(ImageConfiguration configuration) {
@@ -236,9 +241,10 @@ class LoliImage extends ImageProvider<LoliImage> {
 
       final ImageWriter imageWriter = ImageWriter();
 
-      final String? filePath = await imageWriter.getCachePath(resolved, cacheFolder);
-      // print('path found: $filePath');
+      final String? filePath = await imageWriter.getCachePath(resolved, cacheFolder, fileNameExtras: fileNameExtras);
+      Logger.Inst().log("path found: $filePath for: $resolved", "LoliImage", "_loadAsync", LogTypes.imageInfo);
       if (filePath != null) {
+        Logger.Inst().log("image found at: $filePath for $resolved", "LoliImage", "_loadAsync", LogTypes.imageInfo);
         // read from cache
         final File file = File(filePath);
         // meme number to differtiate it from any other request
@@ -252,6 +258,7 @@ class LoliImage extends ImageProvider<LoliImage> {
         }
         bytes = await file.readAsBytes();
       } else {
+        Logger.Inst().log("image not found for: $resolved", "LoliImage", "_loadAsync", LogTypes.imageInfo);
         // load from network and cache if enabled
         final Response response = await _httpClient.get(
           resolved.toString(),
@@ -277,7 +284,7 @@ class LoliImage extends ImageProvider<LoliImage> {
           throw LoliImageLoadException(url: resolved, message: "File didn't load");
         }
 
-        if(cacheEnabled) imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder);
+        if(cacheEnabled) imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder, fileNameExtras: fileNameExtras);
 
         bytes = response.data as Uint8List;
       }

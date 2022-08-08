@@ -424,7 +424,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
   void shareFileAction() async {
     BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
-    String? path = await imageWriter.getCachePath(item.fileURL, 'media');
+    String? path = await imageWriter.getCachePath(item.fileURL, 'media', fileNameExtras: item.fileNameExtras);
 
     // TODO rewrite to DioDownloader
     // TODO delete from cache after share window closes
@@ -458,7 +458,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       var request = await HttpClient().getUrl(Uri.parse(item.fileURL));
       var response = await request.close();
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-      final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media');
+      final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media', fileNameExtras: item.fileNameExtras);
       if(cacheFile != null) {
         path = cacheFile.path;
         await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');

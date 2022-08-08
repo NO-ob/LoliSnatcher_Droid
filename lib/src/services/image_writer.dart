@@ -36,9 +36,9 @@ class ImageWriter {
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
     String fileName = "";
     if (booru.type == ("BooruOnRails") || booru.type == "Philomena"){
-      fileName = booru.name! + '_' + item.serverId! + "." + item.fileExt!;
+      fileName = "${item.fileNameExtras}.${item.fileExt!}";
     } else if (booru.type == "Hydrus"){
-      fileName = "Hydrus_${item.md5String}.${item.fileExt}";
+      fileName = "${item.fileNameExtras}_${item.md5String}.${item.fileExt}";
     } else if (booru.baseURL!.contains("yande.re")) {
       fileName = "yandere_${item.md5String}.${item.fileExt}";
     } else {
@@ -141,7 +141,7 @@ class ImageWriter {
     };
   }
 
-  Future writeCache(String fileURL, String typeFolder) async{
+  Future writeCache(String fileURL, String typeFolder,{required String fileNameExtras}) async{
     String? cachePath;
     Uri fileURI = Uri.parse(fileURL);
     try {
@@ -150,7 +150,7 @@ class ImageWriter {
       cachePath = "${cacheRootPath!}$typeFolder/";
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = sanitizeName(parseThumbUrlToName(fileURL));
+      String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
       File image = File(cachePath+fileName);
       await image.writeAsBytes(response.bodyBytes, flush: true);
     } catch (e){
@@ -159,7 +159,7 @@ class ImageWriter {
     return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }
 
-  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true}) async{
+  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true, required String fileNameExtras}) async{
     File? image;
     try {
       await setPaths();
@@ -167,7 +167,7 @@ class ImageWriter {
       // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
+      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       await image.writeAsBytes(bytes, flush: true);
 
@@ -182,11 +182,11 @@ class ImageWriter {
 
   // Deletes file from given cache folder
   // returns true if successful, false if there was an exception and null if file didn't exist
-  Future deleteFileFromCache(String fileURL, String typeFolder) async {
+  Future deleteFileFromCache(String fileURL, String typeFolder, {required String fileNameExtras}) async {
     try {
       await setPaths();
       String cachePath = "${cacheRootPath!}$typeFolder/";
-      String fileName = sanitizeName(parseThumbUrlToName(fileURL));
+      String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
       File file = File(cachePath + fileName);
       if (await file.exists()) {
         file.delete();
@@ -217,13 +217,13 @@ class ImageWriter {
     }
   }
 
-  Future<String?> getCachePath(String fileURL, String typeFolder, {bool clearName = true}) async{
+  Future<String?> getCachePath(String fileURL, String typeFolder, {bool clearName = true, required String fileNameExtras}) async{
     String cachePath;
     try {
       await setPaths();
       cachePath = "${cacheRootPath!}$typeFolder/";
 
-      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
+      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       File cacheFile = File(cachePath+fileName);
       if (await cacheFile.exists()){
         if(await cacheFile.length() > 0) {
@@ -364,19 +364,23 @@ class ImageWriter {
     return result;
   }
 
-  String sanitizeName(String fileName, {String replacement = ''}) {
+  String sanitizeName(String fileName, {String replacement = '',required String fileNameExtras}) {
     RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
     RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
     RegExp reservedRe = RegExp(r'^\.+$');
     RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
     RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
 
-    return fileName
-      .replaceAll(illegalRe, replacement)
-      .replaceAll(controlRe, replacement)
-      .replaceAll(reservedRe, replacement)
-      .replaceAll(windowsReservedRe, replacement)
-      .replaceAll(windowsTrailingRe, replacement);
+    return "${fileNameExtras.replaceAll(illegalRe, replacement)
+        .replaceAll(controlRe, replacement)
+        .replaceAll(reservedRe, replacement)
+        .replaceAll(windowsReservedRe, replacement)
+        .replaceAll(windowsTrailingRe, replacement)}${fileName
+        .replaceAll(illegalRe, replacement)
+        .replaceAll(controlRe, replacement)
+        .replaceAll(reservedRe, replacement)
+        .replaceAll(windowsReservedRe, replacement)
+        .replaceAll(windowsTrailingRe, replacement).replaceAll("%20", "_")}";
     // TODO truncate to 255 symbols for windows?
   }
 

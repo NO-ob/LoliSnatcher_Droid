@@ -58,4 +58,5 @@ enum LogTypes {
   exception,
   loliSyncInfo,
   networkError,
+  imageInfo,
 }

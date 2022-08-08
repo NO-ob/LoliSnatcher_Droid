@@ -60,6 +60,7 @@ class PhilomenaHandler extends BooruHandler {
         sources: [current['source_url'].toString()],
         postDate: current['created_at'],
         postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        fileNameExtras: "${booru.name}_${current['id']}_"
       );
 
       return item;

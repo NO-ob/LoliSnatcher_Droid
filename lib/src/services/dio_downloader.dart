@@ -25,10 +25,12 @@ class DioDownloader {
       this.cacheEnabled = false,
       this.cacheFolder = 'other',
       this.timeoutTime,
+      required this.fileNameExtras,
     }
   );
 
   final String url;
+  final String fileNameExtras;
   final Map<String, dynamic>? headers;
   final CancelToken? cancelToken;
   final void Function(int, int)? onProgress;
@@ -80,6 +82,7 @@ class DioDownloader {
           'fileURL': url,
           'bytes': bytes,
           'typeFolder': cacheFolder,
+          'fileNameExtras': fileNameExtras,
         });
       } else {
         callback(data);
@@ -103,7 +106,8 @@ class DioDownloader {
       config.fileURL,
       config.bytes, 
       config.typeFolder,
-      clearName: config.typeFolder == 'favicons' ? false : true
+      clearName: config.typeFolder == 'favicons' ? false : true,
+      fileNameExtras: config.fileNameExtras,
     ));
     d.send(file);
   }
@@ -118,7 +122,8 @@ class DioDownloader {
     ).readFileFromCache(
       config.fileURL,
       config.typeFolder,
-      clearName: config.typeFolder == 'favicons' ? false : true
+      clearName: config.typeFolder == 'favicons' ? false : true,
+      fileNameExtras: config.fileNameExtras,
     ));
     d.send(file);
   }
@@ -133,7 +138,8 @@ class DioDownloader {
     ).readBytesFromCache(
       config.fileURL,
       config.typeFolder,
-      clearName: config.typeFolder == 'favicons' ? false : true
+      clearName: config.typeFolder == 'favicons' ? false : true,
+      fileNameExtras: config.fileNameExtras,
     ));
     d.send(file);
   }
@@ -159,7 +165,7 @@ class DioDownloader {
     try {
       final String resolved = Uri.base.resolve(url).toString();
 
-      final String? filePath = await ImageWriter().getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
+      final String? filePath = await ImageWriter().getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
       // print('path found: $filePath');
       if (filePath != null) {
         // read from cache
@@ -248,7 +254,7 @@ class DioDownloader {
 
       final ImageWriter imageWriter = ImageWriter();
 
-      final String? filePath = await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
+      final String? filePath = await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
       // print('path found: $filePath');
       if (filePath != null) {
         // read from cache
@@ -292,7 +298,7 @@ class DioDownloader {
 
         File? tempFile;
         if (cacheEnabled) {
-          tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true);
+          tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
           if(tempFile != null) {
             // onEvent?.call('isFromCache');
           }
@@ -378,13 +384,15 @@ class IsolateCacheConfig {
   final String fileURL;
   final List<int> bytes;
   final String typeFolder;
+  final String fileNameExtras;
 
-  IsolateCacheConfig({required this.cacheRootPath, required this.fileURL, required this.bytes, required this.typeFolder});
+  IsolateCacheConfig({required this.cacheRootPath, required this.fileURL, required this.bytes, required this.typeFolder, required this.fileNameExtras});
 
   IsolateCacheConfig.fromHost(dynamic data)
     : cacheRootPath = data['cacheRootPath'] as String,
       fileURL = data['fileURL'] as String,
       bytes = data['bytes'] as List<int>? ?? [],
-      typeFolder = data['typeFolder'] as String;
+      typeFolder = data['typeFolder'] as String,
+      fileNameExtras = data['fileNameExtras'] as String;
 
 }

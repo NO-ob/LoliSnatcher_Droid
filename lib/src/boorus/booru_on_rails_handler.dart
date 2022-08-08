@@ -75,7 +75,8 @@ class BooruOnRailsHandler extends BooruHandler {
         sources: [responseItem['source_url']?.toString() ?? ""],
         rating: currentTags[0][0],
         postDate: responseItem['created_at'], // 2021-06-13T02:09:45.138-04:00
-        postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", // when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+        postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        fileNameExtras: "${booru.name}_${id.toString()}_"// when timezone support added: "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
       );
       return item;
     } else {

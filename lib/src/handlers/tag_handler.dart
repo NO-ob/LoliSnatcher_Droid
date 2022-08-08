@@ -66,8 +66,8 @@ class TagHandler extends GetxController {
     if(tag.fullString.isEmpty) {
       return;
     }
-    if (preferTypeIfNone){
-      if(hasTag(tag.fullString) && getTag(tag.fullString).tagType != TagType.none && tag.tagType == TagType.none){
+    if (preferTypeIfNone && hasTag(tag.fullString)){
+      if(getTag(tag.fullString).tagType != TagType.none && tag.tagType == TagType.none){
         Logger.Inst().log(
             "Skipped tag ${tag.fullString}", "TagHandler", "putTag",
             LogTypes.tagHandlerInfo);

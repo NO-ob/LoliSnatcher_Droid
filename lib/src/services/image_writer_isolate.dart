@@ -2,19 +2,23 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import '../utils/logger.dart';
+
 class ImageWriterIsolate {
   final String cacheRootPath;
 
   ImageWriterIsolate(this.cacheRootPath);
 
-  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true}) async{
+  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true, required String fileNameExtras}) async{
     File? image;
     try {
       String cachePath = "$cacheRootPath$typeFolder/";
       await Directory(cachePath).create(recursive:true);
 
-      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
+      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
+      Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readFileFromCache", LogTypes.imageInfo);
+      print("Image Writer Isolate Exception :: read bytes cache :: ");
       await image.writeAsBytes(bytes, flush: true);
     } catch (e) {
       print("Image Writer Isolate Exception :: cache write bytes :: $e");
@@ -23,13 +27,15 @@ class ImageWriterIsolate {
     return image;
   }
 
-  Future<File?> readFileFromCache(String fileURL, String typeFolder, {bool clearName = true}) async {
+  Future<File?> readFileFromCache(String fileURL, String typeFolder, {bool clearName = true,required String fileNameExtras}) async {
     File? image;
     try {
       String cachePath = "$cacheRootPath$typeFolder/";
-      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
+      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       // TODO is readBytes required here?
+      Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readFileFromCache", LogTypes.imageInfo);
+      print("Image Writer Isolate Exception :: read bytes cache :: ");
       if(await image.exists()) {
         await image.readAsBytes();
       }
@@ -40,14 +46,20 @@ class ImageWriterIsolate {
     return image;
   }
 
-  Future<Uint8List?> readBytesFromCache(String fileURL, String typeFolder, {bool clearName = true}) async {
+  Future<Uint8List?> readBytesFromCache(String fileURL, String typeFolder, {bool clearName = true, required String fileNameExtras}) async {
     Uint8List? imageBytes;
     try {
       String cachePath = "$cacheRootPath$typeFolder/";
-      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL);
+      String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       File image = File(cachePath + fileName);
+
       if(await image.exists()) {
         imageBytes = await image.readAsBytes();
+        Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readBytesFromCache", LogTypes.imageInfo);
+        print("Image Writer Isolate Exception :: read bytes cache :: ");
+      } else {
+        Logger.Inst().log("couldn't find image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readBytesFromCache", LogTypes.imageInfo);
+        print("Image Writer Isolate Exception :: read bytes cache ::");
       }
     } catch (e){
       print("Image Writer Isolate Exception :: read bytes cache :: $e");
@@ -64,7 +76,9 @@ class ImageWriterIsolate {
       String unthumbedURL = thumbURL.replaceAll('/thumb', '');
       result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
     }
+    Logger.Inst().log("thumbUrlName: $result, thumbUrl: $thumbURL", "ImageWriterIsolate", "parseThumbUrlToName", LogTypes.imageInfo);
     return result;
+
   }
 
   // calculates cache (total or by type) size and file count
@@ -97,19 +111,23 @@ class ImageWriterIsolate {
     };
   }
 
-  String sanitizeName(String fileName, {String replacement = ''}) {
+  String sanitizeName(String fileName, {String replacement = '', required String fileNameExtras}) {
     RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
     RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
     RegExp reservedRe = RegExp(r'^\.+$');
     RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
     RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
 
-    return fileName
+    return "${fileNameExtras.replaceAll(illegalRe, replacement)
+        .replaceAll(controlRe, replacement)
+        .replaceAll(reservedRe, replacement)
+        .replaceAll(windowsReservedRe, replacement)
+        .replaceAll(windowsTrailingRe, replacement)}${fileName
       .replaceAll(illegalRe, replacement)
       .replaceAll(controlRe, replacement)
       .replaceAll(reservedRe, replacement)
       .replaceAll(windowsReservedRe, replacement)
-      .replaceAll(windowsTrailingRe, replacement);
+      .replaceAll(windowsTrailingRe, replacement).replaceAll("%20", "_")}";
     // TODO truncate to 255 symbols for windows?
   }
 }

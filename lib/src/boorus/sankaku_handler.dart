@@ -80,6 +80,8 @@ class SankakuHandler extends BooruHandler {
       for (int i = 0; i < tagMap.entries.length; i++) {
         addTagsWithType(tagMap.entries.elementAt(i).value, tagMap.entries.elementAt(i).key);
       }
+
+
       // String fileExt = current["file_type"].split("/")[1]; // image/jpeg
       BooruItem item = BooruItem(
         fileURL: current["file_url"],
@@ -104,7 +106,14 @@ class SankakuHandler extends BooruHandler {
         postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
         postDateFormat: "unix",
       );
-
+      if(current["id"].toString() == "31348173"){
+        print(current["width"].toDouble());
+        print(current["height"].toDouble());
+        print(current["width"].toDouble());
+        print(current["height"].toDouble());
+        print(current["width"].toDouble());
+        print(current["height"].toDouble());
+      }
       return item;
     } else {
       return null;

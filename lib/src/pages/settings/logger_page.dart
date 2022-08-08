@@ -49,8 +49,10 @@ class _LoggerPageState extends State<LoggerPage> {
                 setState(() {
                   if (newValue) {
                     ignoreLogTypes = [];
+                    Logger.Inst().log("Enabled all log types", "LoggerPage", "build", LogTypes.settingsLoad);
                   } else {
-                    ignoreLogTypes = LogTypes.values;
+                    ignoreLogTypes = [...LogTypes.values];
+                    Logger.Inst().log("Disabled all log types", "LoggerPage", "build", LogTypes.settingsLoad);
                   }
                 });
               }
@@ -67,8 +69,10 @@ class _LoggerPageState extends State<LoggerPage> {
                   setState(() {
                     if (ignoreLogTypes.contains(LogTypes.values[index])){
                       ignoreLogTypes.remove(LogTypes.values[index]);
+                      Logger.Inst().log("Enabled logging for ${LogTypes.values[index]}", "LoggerPage", "build", LogTypes.settingsLoad);
                     } else {
                       ignoreLogTypes.add(LogTypes.values[index]);
+                      Logger.Inst().log("Disabled logging for ${LogTypes.values[index]}", "LoggerPage", "build", LogTypes.settingsLoad);
                     }
                   });
                 },

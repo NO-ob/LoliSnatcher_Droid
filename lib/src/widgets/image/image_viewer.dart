@@ -74,6 +74,7 @@ class ImageViewerState extends State<ImageViewer> {
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: imageFolder,
+      fileNameExtras: widget.booruItem.fileNameExtras
     );
     // client.runRequest();
     if (settingsHandler.disableImageIsolates) {

@@ -15,6 +15,7 @@ class BooruItem{
   RxBool isHated = false.obs, isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
+  String fileNameExtras;
   List<String>? sources;
   RxList<NoteItem> notes = RxList([]);
   bool? hasNotes, hasComments;
@@ -28,7 +29,7 @@ class BooruItem{
     required this.tagsList,
     required this.postURL,
     this.fileExt,
-
+    this.fileNameExtras = '',
     this.fileSize,
     this.fileWidth,
     this.fileHeight,

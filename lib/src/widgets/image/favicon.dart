@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
 
+import '../../utils/logger.dart';
+
 class Favicon extends StatefulWidget {
   final String faviconURL;
   const Favicon(this.faviconURL, {Key? key}) : super(key: key);
@@ -48,6 +50,7 @@ class _FaviconState extends State<Favicon> {
       cacheEnabled: true,
       cacheFolder: 'favicons',
       timeoutTime: 5000,
+      fileNameExtras: 'favicon_'
     );
     client!.runRequest();
     // client!.runRequestIsolate();
@@ -158,7 +161,7 @@ class _FaviconState extends State<Favicon> {
                     width: iconSize,
                     height: iconSize,
                     errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                      print('failed to load favicon: ${widget.faviconURL}');
+                      Logger.Inst().log("Failed to load favicon: ${widget.faviconURL}", "Favicon", "build", LogTypes.imageInfo);
                       isFailed = true;
                       return loadingElementBuilder(context);
                       // return const Icon(Icons.broken_image, size: iconSize);

@@ -129,6 +129,7 @@ class HydrusHandler extends BooruHandler {
                   fileHeight: parsedResponse['metadata'][i]['height'].toDouble(),
                   md5String: parsedResponse['metadata'][i]['hash'],
                   sources: knownUrls,
+                  fileNameExtras: "Hydrus_"
                 );
 
                 newItems.add(item);

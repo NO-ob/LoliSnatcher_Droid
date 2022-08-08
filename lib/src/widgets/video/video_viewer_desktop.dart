@@ -126,6 +126,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: 'media',
+      fileNameExtras: widget.booruItem.fileNameExtras
     );
     // client!.runRequest();
     if(settingsHandler.disableImageIsolates) {
@@ -143,6 +144,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
+      fileNameExtras: widget.booruItem.fileNameExtras
     );
     sizeClient!.runRequestSize();
     return;
