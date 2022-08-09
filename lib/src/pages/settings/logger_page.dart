@@ -14,12 +14,12 @@ class LoggerPage extends StatefulWidget {
 
 class _LoggerPageState extends State<LoggerPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  List<LogTypes> ignoreLogTypes = [];
+  List<LogTypes> enabledLogTypes = [];
 
   @override
   void initState() {
     super.initState();
-    ignoreLogTypes = settingsHandler.ignoreLogTypes;
+    enabledLogTypes = [...settingsHandler.enabledLogTypes];
   }
 
   @override
@@ -29,13 +29,14 @@ class _LoggerPageState extends State<LoggerPage> {
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
-    settingsHandler.ignoreLogTypes = ignoreLogTypes;
+    settingsHandler.enabledLogTypes.value = enabledLogTypes;
     return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    bool allLogTypesEnabled = ignoreLogTypes.toSet().intersection(LogTypes.values.toSet()).isEmpty;
+    bool allLogTypesEnabled = enabledLogTypes.toSet().toList().length == LogTypes.values.length;
+
     return WillPopScope(
       onWillPop: _onWillPop,
       child:Scaffold(
@@ -48,10 +49,10 @@ class _LoggerPageState extends State<LoggerPage> {
               onChanged: (bool newValue) {
                 setState(() {
                   if (newValue) {
-                    ignoreLogTypes = [];
+                    enabledLogTypes = [...LogTypes.values];
                     Logger.Inst().log("Enabled all log types", "LoggerPage", "build", LogTypes.settingsLoad);
                   } else {
-                    ignoreLogTypes = [...LogTypes.values];
+                    enabledLogTypes = [];
                     Logger.Inst().log("Disabled all log types", "LoggerPage", "build", LogTypes.settingsLoad);
                   }
                 });
@@ -63,20 +64,22 @@ class _LoggerPageState extends State<LoggerPage> {
           child: ListView.builder(
             itemCount: LogTypes.values.length,
             itemBuilder: (context, index) {
+              final LogTypes logType = LogTypes.values[index];
+
               return SettingsToggle(
-                value: !ignoreLogTypes.contains(LogTypes.values[index]),
+                value: enabledLogTypes.contains(logType),
                 onChanged: (newValue) {
                   setState(() {
-                    if (ignoreLogTypes.contains(LogTypes.values[index])){
-                      ignoreLogTypes.remove(LogTypes.values[index]);
-                      Logger.Inst().log("Enabled logging for ${LogTypes.values[index]}", "LoggerPage", "build", LogTypes.settingsLoad);
+                    if (enabledLogTypes.contains(logType)){
+                      enabledLogTypes.remove(logType);
+                      Logger.Inst().log("Disabled logging for $logType", "LoggerPage", "build", LogTypes.settingsLoad);
                     } else {
-                      ignoreLogTypes.add(LogTypes.values[index]);
-                      Logger.Inst().log("Disabled logging for ${LogTypes.values[index]}", "LoggerPage", "build", LogTypes.settingsLoad);
+                      enabledLogTypes.add(logType);
+                      Logger.Inst().log("Enabled logging for $logType", "LoggerPage", "build", LogTypes.settingsLoad);
                     }
                   });
                 },
-                title: LogTypes.values[index].toString().split('.').last,
+                title: logType.toString().split('.').last,
               );
             },
           ),

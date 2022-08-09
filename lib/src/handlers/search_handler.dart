@@ -355,7 +355,7 @@ class SearchHandler extends GetxController {
       if(settingsHandler.booruList.isNotEmpty) {
         SearchTab newTab = SearchTab(
           settingsHandler.booruList[0].obs,
-          settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
+          currentTab.secondaryBoorus,
           text
         );
         list.add(newTab);
@@ -363,7 +363,7 @@ class SearchHandler extends GetxController {
     } else {
       SearchTab newTab = SearchTab(
         (newBooru ?? currentBooru).obs,
-        settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
+        currentTab.secondaryBoorus,
         text
       );
       list[currentIndex] = newTab;
@@ -447,12 +447,8 @@ class SearchHandler extends GetxController {
   void mergeAction(List<Booru>? secondaryBoorus) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    bool canAddSecondary = settingsHandler.mergeEnabled.value && (secondaryBoorus != null || currentTab.secondaryBoorus == null) && settingsHandler.booruList.length > 1;
-    RxList<Booru>? secondary = canAddSecondary
-      ? (secondaryBoorus == null
-        ? [settingsHandler.booruList[1]].obs
-        : secondaryBoorus.obs)
-      : null;
+    bool canAddSecondary = secondaryBoorus != null && settingsHandler.booruList.length > 1;
+    RxList<Booru>? secondary = canAddSecondary ? secondaryBoorus.obs : null;
 
     SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
     list[currentIndex] = newTab;

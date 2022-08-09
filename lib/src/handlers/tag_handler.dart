@@ -241,7 +241,7 @@ class TagHandler extends GetxController {
       writer.write(jsonEncode(toList()));
       await writer.flush();
       await writer.close();
-      if(!settings.ignoreLogTypes.contains(LogTypes.tagHandlerInfo)){
+      if(settings.enabledLogTypes.contains(LogTypes.tagHandlerInfo)){
         Logger.Inst().log("TAG.JSON SIZE: ${File("${SettingsHandler.instance.path}tags.json").lengthSync() / 1024} KB", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
       }
       Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);

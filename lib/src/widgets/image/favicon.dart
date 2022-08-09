@@ -127,7 +127,6 @@ class _FaviconState extends State<Favicon> {
             ],
           ),
           onTap: () {
-            isFailed = false;
             restartLoading();
           },
         ),

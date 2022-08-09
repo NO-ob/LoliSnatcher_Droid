@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:lolisnatcher/src/utils/logger.dart';
-
 class ImageWriterIsolate {
   final String cacheRootPath;
 
@@ -17,8 +15,6 @@ class ImageWriterIsolate {
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
-      Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readFileFromCache", LogTypes.imageInfo);
-      print("Image Writer Isolate Exception :: read bytes cache :: ");
       await image.writeAsBytes(bytes, flush: true);
     } catch (e) {
       print("Image Writer Isolate Exception :: cache write bytes :: $e");
@@ -34,8 +30,6 @@ class ImageWriterIsolate {
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       // TODO is readBytes required here?
-      Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readFileFromCache", LogTypes.imageInfo);
-      print("Image Writer Isolate Exception :: read bytes cache :: ");
       if(await image.exists()) {
         await image.readAsBytes();
       }
@@ -55,11 +49,7 @@ class ImageWriterIsolate {
 
       if(await image.exists()) {
         imageBytes = await image.readAsBytes();
-        Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readBytesFromCache", LogTypes.imageInfo);
-        print("Image Writer Isolate Exception :: read bytes cache :: ");
       } else {
-        Logger.Inst().log("couldn't find image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readBytesFromCache", LogTypes.imageInfo);
-        print("Image Writer Isolate Exception :: read bytes cache ::");
       }
     } catch (e){
       print("Image Writer Isolate Exception :: read bytes cache :: $e");
@@ -76,7 +66,6 @@ class ImageWriterIsolate {
       String unthumbedURL = thumbURL.replaceAll('/thumb', '');
       result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
     }
-    Logger.Inst().log("thumbUrlName: $result, thumbUrl: $thumbURL", "ImageWriterIsolate", "parseThumbUrlToName", LogTypes.imageInfo);
     return result;
 
   }

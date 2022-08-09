@@ -124,9 +124,11 @@ class TabSelectorRender extends StatelessWidget {
             },
             selectedItemBuilder: (BuildContext context) {
               return list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
+                bool isCurrent = list.indexOf(value) == index;
+
                 return DropdownMenuItem<SearchTab>(
                   value: value,
-                  child: TabRow(key: ValueKey(value), tab: value, color: textColor),
+                  child: TabRow(key: ValueKey(value), tab: value, color: textColor, withFavicon: isCurrent),
                 );
               }).toList();
             },

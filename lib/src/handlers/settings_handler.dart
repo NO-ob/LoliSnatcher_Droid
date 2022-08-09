@@ -41,8 +41,7 @@ class SettingsHandler extends GetxController {
 
   // runtime settings vars
   bool hasHydrus = false;
-  RxBool mergeEnabled = RxBool(false);
-  List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
+  RxList<LogTypes> enabledLogTypes = RxList.from([]);
   RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
@@ -167,7 +166,7 @@ class SettingsHandler extends GetxController {
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showFPS', 'showPerf', 'showImageStats',
     'isDebug', 'showURLOnThumb', 'disableImageIsolates',
-    'mergeEnabled', 'desktopListsDrag'
+    'desktopListsDrag'
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -254,6 +253,10 @@ class SettingsHandler extends GetxController {
     "lovedTags": {
       "type": "stringList",
       "default": <String>[],
+    },
+    "enabledLogTypes": {
+      "type": "logTypesList",
+      "default": <LogTypes>[],
     },
 
     // int
@@ -522,7 +525,7 @@ class SettingsHandler extends GetxController {
         case 'rxbool':
           if (toJSON) {
             // rxbool to bool
-            return value.value;
+            return (value as RxBool).value;
           } else {
             // bool to rxbool
             if(value is RxBool) {
@@ -537,7 +540,7 @@ class SettingsHandler extends GetxController {
         case 'appMode':
           if(toJSON) {
             // rxobject to string
-            return value.value.toString();
+            return (value as Rx<AppMode>).value.toString();
           } else {
             if(value is String) {
               // string to rxobject
@@ -550,7 +553,7 @@ class SettingsHandler extends GetxController {
         case 'handSide':
           if(toJSON) {
             // rxobject to string
-            return value.value.toString();
+            return (value as Rx<HandSide>).value.toString();
           } else {
             if(value is String) {
               // string to rxobject
@@ -559,11 +562,24 @@ class SettingsHandler extends GetxController {
               return settingParams["default"];
             }
           }
+        
+        case 'logTypesList':
+          if(toJSON) {
+            // rxobject to list<string>
+            return (value as RxList<LogTypes>).map((el) => el.toString()).toList();
+          } else {
+            if(value is List) {
+              // list<string> to list<LogTypes>
+              return List<String>.from(value).map((el) => LogTypes.fromString(el)).toList();
+            } else {
+              return settingParams["default"];
+            }
+          }
 
         case 'theme':
           if(toJSON) {
             // rxobject to string
-            return value.value.name;
+            return (value as Rx<ThemeItem>).value.name;
           } else {
             if(value is String) {
               // string to rxobject
@@ -577,7 +593,7 @@ class SettingsHandler extends GetxController {
         case 'themeMode':
           if (toJSON) {
             // rxobject to string
-            return value.value.toString().split('.')[1]; // ThemeMode.dark => dark
+            return (value as Rx<ThemeMode>).value.toString().split('.')[1]; // ThemeMode.dark => dark
           } else {
             if (value is String) {
               // string to rxobject
@@ -597,7 +613,7 @@ class SettingsHandler extends GetxController {
         case 'rxcolor':
           if (toJSON) {
             // rxobject to int
-            return value.value.value; // Color => int
+            return (value as Rx<Color?>).value?.value ?? Colors.pink.value; // Color => int
           } else {
             // int to rxobject
             if (value is int) {
@@ -609,7 +625,7 @@ class SettingsHandler extends GetxController {
 
         case 'duration':
           if (toJSON) {
-            return value.inSeconds; // Duration => int
+            return (value as Duration).inSeconds; // Duration => int
           } else {
             if (value is Duration) {
               return value;
@@ -627,7 +643,7 @@ class SettingsHandler extends GetxController {
       }
     } catch(err) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", LogTypes.settingsError);
+      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", null);
       return settingParams["default"];
     }
   }
@@ -743,6 +759,8 @@ class SettingsHandler extends GetxController {
         return cacheSize;
       case 'allowSelfSignedCerts':
         return allowSelfSignedCerts;
+      case 'enabledLogTypes':
+        return enabledLogTypes;
 
       case 'prefBooru':
         return prefBooru;
@@ -915,6 +933,10 @@ class SettingsHandler extends GetxController {
       case 'allowSelfSignedCerts':
         allowSelfSignedCerts = validatedValue;
         break;
+      case 'enabledLogTypes':
+        enabledLogTypes.value = validatedValue;
+        break;
+
       // theme stuff
       case 'appMode':
         appMode.value = validatedValue;
@@ -993,6 +1015,7 @@ class SettingsHandler extends GetxController {
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
       "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
+      "enabledLogTypes": validateValue("enabledLogTypes", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
@@ -1448,6 +1471,10 @@ class SettingsHandler extends GetxController {
 
 
   Future<void> initialize() async {
+    if(isInit.value == true) {
+      return;
+    }
+
     try {
       await getPerms();
       await loadSettings();
