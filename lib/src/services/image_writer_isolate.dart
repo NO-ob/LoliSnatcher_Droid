@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import '../utils/logger.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 class ImageWriterIsolate {
   final String cacheRootPath;

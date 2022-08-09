@@ -46,18 +46,19 @@ class Logger {
 
 // TODO more types
 enum LogTypes {
-  settingsLoad,
-  settingsError,
-  booruItemLoad,
-  booruHandlerSearchURL,
   booruHandlerFetchFailed,
+  booruHandlerInfo,
   booruHandlerParseFailed,
   booruHandlerRawFetched,
-  booruHandlerInfo,
+  booruHandlerSearchURL,
   booruHandlerTagInfo,
-  tagHandlerInfo,
+  booruItemLoad,
   exception,
+  imageInfo,
+  imageLoadingError,
   loliSyncInfo,
   networkError,
-  imageInfo,
+  settingsError,
+  settingsLoad,
+  tagHandlerInfo,
 }

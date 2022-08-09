@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/services/image_writer.dart';
-
-import '../../utils/logger.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 
 
 // memoryimage but with url added in attempt to not load extra copies of already loaded images
