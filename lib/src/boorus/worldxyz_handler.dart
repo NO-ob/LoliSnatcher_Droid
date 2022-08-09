@@ -89,7 +89,7 @@ class WorldXyzHandler extends BooruHandler {
         .map((tag) => tag.replaceAll(RegExp(r'_'), '+').replaceAll(RegExp(r'^-'), ''))
         .toList()
         .join('|');
-    // ignores custom limits
+    // ignores custom limit if search is empty, otherwise it works
     //
     int skip = (pageNum * limit) < 0 ? 0 : (pageNum * limit);
     return "${booru.baseURL}/api/post/Search?IncludeLinks=true&Tag=$includeTags&ExcludeTag=$excludeTags&OrderBy=0&Skip=${skip.toString()}&Take=${limit.toString()}&DisableTotal=false";

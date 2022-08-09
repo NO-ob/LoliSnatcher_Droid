@@ -35,15 +35,6 @@ class DBHandler{
     return true;
   }
 
-  Future<bool> dbConnectReadOnly(String path) async {
-    if(Platform.isAndroid || Platform.isIOS){
-      db = await openDatabase("${path}store.db", version: 1, singleInstance: false);
-    } else if(Platform.isWindows || Platform.isLinux) {
-      db = await databaseFactory.openDatabase("${path}store.db");
-    }
-    return true;
-  }
-
   Future<bool> updateTable() async{
     await db?.execute("CREATE TABLE IF NOT EXISTS BooruItem"
         "(id INTEGER PRIMARY KEY,"

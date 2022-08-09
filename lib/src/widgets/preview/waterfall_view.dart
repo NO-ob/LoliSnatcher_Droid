@@ -212,12 +212,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void onDoubleTap(int index, BooruItem item) async {
-    if (item.isFavourite.value != null) {
-      ServiceHandler.vibrate();
-
-      item.isFavourite.toggle();
-      settingsHandler.dbHandler.updateBooruItem(item, "local");
-    }
+    searchHandler.toggleItemFavourite(index);
   }
 
   void onLongPress(int index, BooruItem item) async {

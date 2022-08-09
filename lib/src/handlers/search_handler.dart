@@ -12,6 +12,7 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -323,6 +324,19 @@ class SearchHandler extends GetxController {
     // print('old $oldIndex | new $newIndex index \n new item ${newItem.toString()}');
 
     return newItem;
+  }
+
+
+
+  Future<bool?> toggleItemFavourite(int itemIndex) async {
+    final BooruItem item = currentFetched[itemIndex];
+    if(item.isFavourite.value != null) {
+      ServiceHandler.vibrate();
+
+      item.isFavourite.value = item.isFavourite.value == true ? false : true;
+      await SettingsHandler.instance.dbHandler.updateBooruItem(item, "local");
+    }
+    return item.isFavourite.value;
   }
 
 

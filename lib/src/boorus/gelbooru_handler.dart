@@ -117,11 +117,11 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
-  void afterParseResponse(List<BooruItem> newItems) {
+  Future<void> afterParseResponse(List<BooruItem> newItems) async {
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
     populateTagHandler(newItems); // difference from default afterParse
-    setMultipleTrackedValues(lengthBefore, fetched.length);
+    await setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
   @override

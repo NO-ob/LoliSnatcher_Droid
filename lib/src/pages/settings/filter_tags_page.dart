@@ -25,7 +25,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   List<String> hatedList = [];
   List<String> lovedList = [];
-  bool filterHated = false;
+  bool filterHated = false, filterFavourites = false;
 
   @override
   void initState() {
@@ -33,6 +33,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     hatedList = settingsHandler.hatedTags;
     lovedList = settingsHandler.lovedTags;
     filterHated = settingsHandler.filterHated;
+    filterFavourites = settingsHandler.filterFavourites;
 
     tabController = TabController(vsync: this, length: 3)..addListener(updateState);
   }
@@ -54,6 +55,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
+    settingsHandler.filterFavourites = filterFavourites;
     bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
@@ -207,6 +209,11 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
               filterHated: filterHated,
               onFilterHatedChanged: (bool newValue) {
                 filterHated = newValue;
+                updateState();
+              },
+              filterFavourites: filterFavourites,
+              onFilterFavouritesChanged: (bool newValue) {
+                filterFavourites = newValue;
                 updateState();
               },
             ),

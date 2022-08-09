@@ -40,7 +40,21 @@ abstract class BooruHandler {
   };
 
   RxList<BooruItem> fetched = RxList<BooruItem>([]);
-  List<BooruItem> get filteredFetched => fetched.where((el) => SettingsHandler.instance.filterHated ? !el.isHated.value : true).toList();
+  List<BooruItem> get filteredFetched => fetched.where((el) {
+    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+
+    final bool filterHated = settingsHandler.filterHated;
+    if (filterHated && el.isHated.value) {
+      return false;
+    }
+
+    final bool filterFavourites = settingsHandler.filterFavourites && booru.type != 'Favourites';
+    if (filterFavourites && el.isFavourite.value == true) {
+      return false;
+    }
+
+    return true;
+  }).toList();
 
   String get className => runtimeType.toString();
 
@@ -96,7 +110,8 @@ abstract class BooruHandler {
       response = await fetchSearch(uri);
       if (response.statusCode == 200) {
         // parse response data
-        await parseResponse(response);
+        List<BooruItem> newItems = await parseResponse(response);
+        await afterParseResponse(newItems);
 
         // save tags for check on next search
         prevTags = tags;
@@ -132,7 +147,7 @@ abstract class BooruHandler {
     return http.get(uri, headers: headers);
   }
 
-  FutureOr<void> parseResponse(response) async {
+  FutureOr<List<BooruItem>> parseResponse(response) async {
     List posts = [];
     try {
       posts = await parseListFromResponse(response);
@@ -158,7 +173,7 @@ abstract class BooruHandler {
       }
     }
 
-    afterParseResponse(newItems);
+    return newItems;
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -174,10 +189,10 @@ abstract class BooruHandler {
     return BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
   }
 
-  void afterParseResponse(List<BooruItem> newItems) {
+  Future<void> afterParseResponse(List<BooruItem> newItems) async {
     final int lengthBefore = fetched.length;
     fetched.addAll(newItems);
-    setMultipleTrackedValues(lengthBefore, fetched.length);
+    await setMultipleTrackedValues(lengthBefore, fetched.length);
     // TODO
     // notifyAboutFailed();
     failedItems.clear();
@@ -476,7 +491,7 @@ abstract class BooruHandler {
      TagHandler.instance.addTagsWithType(tags, type);
   }
 
-  void populateTagHandler(List<BooruItem> items) async{
+  void populateTagHandler(List<BooruItem> items) async {
     List<String> unTyped = [];
     for(int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
@@ -518,9 +533,9 @@ abstract class BooruHandler {
   Future<void> setTrackedValues(int fetchedIndex) async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    if (settingsHandler.favDbHandler.db != null) {
+    if (settingsHandler.dbHandler.db != null) {
       // TODO make this work in batches, not calling it on every single item ???
-      List<bool> values = await settingsHandler.favDbHandler.getTrackedValues(fetched[fetchedIndex]);
+      List<bool> values = await settingsHandler.dbHandler.getTrackedValues(fetched[fetchedIndex]);
       fetched[fetchedIndex].isSnatched.value = values[0];
       fetched[fetchedIndex].isFavourite.value = values[1];
     }
@@ -548,8 +563,8 @@ abstract class BooruHandler {
     final List<int> fetchedIndexes = List.generate(diff, (index) => beforePos + index);
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    if (settingsHandler.favDbHandler.db != null && diff > 0) {
-      List<List<bool>> valuesList = await settingsHandler.favDbHandler
+    if (settingsHandler.dbHandler.db != null && diff > 0) {
+      List<List<bool>> valuesList = await settingsHandler.dbHandler
           .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last)); //.map((e) => e.fileURL).toList()
 
       valuesList.asMap().forEach((index, values) {

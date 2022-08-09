@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -29,7 +28,6 @@ class SettingsHandler extends GetxController {
   static SettingsHandler get instance => Get.find<SettingsHandler>();
 
   DBHandler dbHandler = DBHandler();
-  DBHandler favDbHandler = DBHandler();
 
   // service vars
   RxBool isInit = false.obs;
@@ -37,12 +35,6 @@ class SettingsHandler extends GetxController {
   String path = "";
   String boorusPath = "";
 
-  // TODO don't forget to update these on every new release
-  // version vars
-  String appName = "LoliSnatcher";
-  String packageName = "com.noaisu.loliSnatcher";
-  String verStr = "2.2.5";
-  int buildNumber = 172;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
@@ -88,7 +80,7 @@ class SettingsHandler extends GetxController {
   List<String> hatedTags = [];
   List<String> lovedTags = [];
 
-  int limit = 20;
+  int limit = Constants.defaultItemLimit;
   int portraitColumns = 2;
   int landscapeColumns = 4;
   int preloadCount = 1;
@@ -133,6 +125,7 @@ class SettingsHandler extends GetxController {
   bool dbEnabled = true;
   bool searchHistoryEnabled = true;
   bool filterHated = false;
+  bool filterFavourites = false;
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
@@ -266,7 +259,7 @@ class SettingsHandler extends GetxController {
     // int
     "limit": {
       "type": "int",
-      "default": 20,
+      "default": Constants.defaultItemLimit,
       "upperLimit": 100,
       "lowerLimit": 10,
     },
@@ -349,6 +342,10 @@ class SettingsHandler extends GetxController {
       "default": true,
     },
     "filterHated": {
+      "type": "bool",
+      "default": false,
+    },
+    "filterFavourites": {
       "type": "bool",
       "default": false,
     },
@@ -647,10 +644,8 @@ class SettingsHandler extends GetxController {
 
     if (dbEnabled) {
       await dbHandler.dbConnect(path);
-      await favDbHandler.dbConnectReadOnly(path);
     } else {
       dbHandler = DBHandler();
-      favDbHandler = DBHandler();
     }
     return true;
   }
@@ -718,6 +713,8 @@ class SettingsHandler extends GetxController {
         return searchHistoryEnabled;
       case 'filterHated':
         return filterHated;
+      case 'filterFavourites':
+        return filterFavourites;
       case 'useVolumeButtonsForScroll':
         return useVolumeButtonsForScroll;
       case 'volumeButtonsScrollSpeed':
@@ -861,6 +858,9 @@ class SettingsHandler extends GetxController {
       case 'filterHated':
         filterHated = validatedValue;
         break;
+      case 'filterFavourites':
+        filterFavourites = validatedValue;
+        break;
       case 'useVolumeButtonsForScroll':
         useVolumeButtonsForScroll = validatedValue;
         break;
@@ -979,6 +979,7 @@ class SettingsHandler extends GetxController {
       "dbEnabled" : validateValue("dbEnabled", null, toJSON: true),
       "searchHistoryEnabled" : validateValue("searchHistoryEnabled", null, toJSON: true),
       "filterHated" : validateValue("filterHated", null, toJSON: true),
+      "filterFavourites" : validateValue("filterFavourites", null, toJSON: true),
       "useVolumeButtonsForScroll" : validateValue("useVolumeButtonsForScroll", null, toJSON: true),
       "volumeButtonsScrollSpeed" : validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
       "disableVideo" : validateValue("disableVideo", null, toJSON: true),
@@ -1014,7 +1015,8 @@ class SettingsHandler extends GetxController {
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
       "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
       "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
-      "version": verStr,
+      "version": Constants.appVersion,
+      "build": Constants.appBuildNumber,
       // TODO split into two variables - system name and system version/sdk number
       // "SDK": SDKVer,
     };
@@ -1330,7 +1332,7 @@ class SettingsHandler extends GetxController {
         }
       }
 
-      if(buildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
+      if(Constants.appBuildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
         if(EnvironmentConfig.isFromStore) { // installed from store
           if(updateInfo.value!.isInStore) { // app is still in store
             showUpdate(withMessage || updateInfo.value!.isImportant);
@@ -1389,7 +1391,7 @@ class SettingsHandler extends GetxController {
           return SettingsDialog(
             title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
             contentItems: [
-              Text('Currently Installed: $verStr+$buildNumber'),
+              Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
               const Text(''),
               Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const Text(''),
@@ -1456,22 +1458,6 @@ class SettingsHandler extends GetxController {
       if (allowSelfSignedCerts){
         HttpOverrides.global = MyHttpOverrides();
       }
-
-      if(Platform.isAndroid || Platform.isIOS) {
-        PackageInfo packageInfo = await PackageInfo.fromPlatform();
-        packageName = packageInfo.packageName;
-      }
-
-      // if(Platform.isAndroid || Platform.isIOS) {
-      //   // TODO on desktop flutter doesnt't use version data from pubspec
-      //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      //   appName = packageInfo.appName;
-      //   verStr = packageInfo.version;
-
-      //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
-      //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
-      //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
-      // }
 
       print('isFromStore: ${EnvironmentConfig.isFromStore}');
 

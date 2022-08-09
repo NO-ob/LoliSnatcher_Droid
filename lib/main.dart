@@ -240,50 +240,10 @@ class _MainAppState extends State<MainApp> {
 
             themeMode: themeMode,
             navigatorKey: navigationHandler.navigatorKey,
-            home: const Preloader(),
+            home: const Home(),
           ),
         ),
       );
-    });
-  }
-}
-
-class Preloader extends StatelessWidget {
-  const Preloader({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-    return Obx(() {
-      if (settingsHandler.isInit.value) { // TODO get rid of this IF, since now we init settings before first render
-        if (Platform.isAndroid || Platform.isIOS) {
-          // set system ui mode
-          ServiceHandler.setSystemUiVisibility(true);
-
-          // force landscape orientation if enabled desktop mode on mobile device
-          if (settingsHandler.appMode.value.isDesktop) {
-            SystemChrome.setPreferredOrientations([
-              DeviceOrientation.landscapeRight,
-              DeviceOrientation.landscapeLeft,
-            ]);
-          } else {
-            SystemChrome.setPreferredOrientations(DeviceOrientation.values);
-          }
-        }
-
-        return const Home();
-      } else {
-        // no custom theme data here yet, fallback to black bg + pink loading spinner
-        return Container(
-          color: Colors.black,
-          child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.pink),
-            ),
-          ),
-        );
-      }
     });
   }
 }
@@ -400,6 +360,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isAndroid || Platform.isIOS) {
+      // set system ui mode
+      ServiceHandler.setSystemUiVisibility(true);
+
+      // force landscape orientation if enabled desktop mode on mobile device
+      if (SettingsHandler.instance.appMode.value.isDesktop) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
+      } else {
+        SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+      }
+    }
+
     return Obx(() {
       if (settingsHandler.appMode.value.isMobile) {
         return const MobileHome();

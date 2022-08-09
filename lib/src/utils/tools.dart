@@ -1,10 +1,11 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
@@ -89,6 +90,8 @@ class Tools {
   }
 
   // TODO move to separate class (something with the name like "Constants")
-  static String appUserAgent() => "LoliSnatcher_Droid/${SettingsHandler.instance.verStr}";
+  static String appUserAgent() => "LoliSnatcher_Droid/${Constants.appVersion}";
   static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
+
+  static bool isTestMode() => Platform.environment.containsKey('FLUTTER_TEST');
 }

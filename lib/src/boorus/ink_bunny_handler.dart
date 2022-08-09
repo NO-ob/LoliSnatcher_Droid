@@ -127,7 +127,7 @@ class InkBunnyHandler extends BooruHandler {
     List<BooruItem> items = [];
     for(int i = 0; i < rawItems.length; i++){
       var current = rawItems[i];
-      Logger.Inst().log(current.toString(), className,"parseResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(current.toString(), className, "parseItemsFromResponse", LogTypes.booruHandlerRawFetched);
       List<String> currentTags = [];
       currentTags.add("artist:${current["username"]}");
       var tags = current["keywords"] ?? [];

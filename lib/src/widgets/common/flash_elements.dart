@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flash/flash.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 enum Positions {
@@ -14,7 +16,7 @@ enum Positions {
 }
 
 class FlashElements {
-  static Future<void> showSnackbar({
+  static FutureOr<void> showSnackbar({
     BuildContext? context, // current build context, if no given - get it from navigatorKey
     required Widget title, // title widget - required
     Widget content = const SizedBox(height: 20),
@@ -29,14 +31,17 @@ class FlashElements {
     bool allowInViewer = true, // should tip open when user is in viewer
     Positions position = Positions.bottom,
     bool asDialog = false,
-  }) {
+  }) async {
+    // do nothing if in test mode
+    if (Tools.isTestMode()) return;
+
     bool inViewer = ViewerHandler.instance.inViewer.value;
     if(!allowInViewer && inViewer) {
-      return Future.value();
+      return;
     }
 
     if(context == null && NavigationHandler.instance.navigatorKey.currentContext == null) {
-      return Future.value();
+      return;
     }
 
     BuildContext contextToUse = context ?? NavigationHandler.instance.navigatorKey.currentContext!;

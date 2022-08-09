@@ -161,6 +161,12 @@ class DioDownloader {
     return cookieString;
   }
 
+  Future<Map<String, dynamic>> getHeaders() async {
+    final Map<String, dynamic> resultHeaders = headers ?? {};
+    resultHeaders['cookie'] = await getCookies();
+    return resultHeaders;
+  }
+
   Future<void> runRequestIsolate() async {
     try {
       final String resolved = Uri.base.resolve(url).toString();
@@ -198,7 +204,7 @@ class DioDownloader {
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
-          options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+          options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress,
         );
@@ -279,7 +285,7 @@ class DioDownloader {
         currentClient = _httpClient;
         final Response response = await currentClient!.get(
           resolved.toString(),
-          options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+          options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
           cancelToken: cancelToken,
           onReceiveProgress: onProgress,
         );
@@ -335,7 +341,7 @@ class DioDownloader {
       currentClient = _httpClient;
       final Response response = await currentClient!.head(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: headers, sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
         cancelToken: cancelToken,
       );
 
