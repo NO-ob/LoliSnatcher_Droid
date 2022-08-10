@@ -71,7 +71,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
 
   int compareTags(Tag a, Tag b) {
     if (a.tagType == b.tagType) {
-      return a.fullString.compareTo(b.fullString);
+      return a.fullString.toLowerCase().compareTo(b.fullString.toLowerCase());
     } else {
       return a.tagType.index.compareTo(b.tagType.index);
     }

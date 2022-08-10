@@ -18,7 +18,7 @@ class Logger {
     if (!Tools.isTestMode()) {
       //  don't call handlers when in test mode
       // don't check which types are ignored in test mode and output everything
-      if (logType != null && !SettingsHandler.instance.enabledLogTypes.contains(logType)) {
+      if (logType != null && SettingsHandler.instance.enabledLogTypes.contains(logType)) {
         // Ignore unselected log types
         return;
       }

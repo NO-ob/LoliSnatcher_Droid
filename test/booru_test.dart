@@ -9,12 +9,14 @@ import 'package:lolisnatcher/src/boorus/e621_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_alikes_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooruv1_handler.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/ink_bunny_handler.dart';
 import 'package:lolisnatcher/src/boorus/moebooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/nyanpals_handler.dart';
 import 'package:lolisnatcher/src/boorus/philomena_handler.dart';
 // import 'package:lolisnatcher/src/boorus/r34us_handler.dart';
 import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/worldxyz_handler.dart';
@@ -27,6 +29,13 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 
 // TODO: Create a bunch of fake accounts for testing auth
+
+// Test config:
+const bool runWithImages = false;
+const int itemLimit = Constants.defaultItemLimit;
+const int imageLimit = 5;
+//
+
 Future<void> main() async {
   // prepare/init handlers and stuff
   final SettingsHandler settingsHandler = Get.put(SettingsHandler());
@@ -34,7 +43,7 @@ Future<void> main() async {
   TagHandler tagHandler = Get.put(TagHandler());
   await tagHandler.initialize();
   SettingsHandler.instance.tagTypeFetchEnabled = false;
-  SettingsHandler.instance.limit = Constants.defaultItemLimit;
+  SettingsHandler.instance.limit = itemLimit;
 
   group("booru tests", () {
     test('BooruOnRailsHandler', () async {
@@ -60,6 +69,7 @@ Future<void> main() async {
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
       test('Realbooru', () async {
+        // TODO first page doesn't give correct amount of items? api side problem?
         BooruHandler booruHandler = await testBooru(Booru("realbooru", "Gelbooru", "", "https://realbooru.com", ""));
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
@@ -89,6 +99,7 @@ Future<void> main() async {
       expect(booruHandler, isA<PhilomenaHandler>());
     });
     test('R34HentaiHandler', () async {
+      // requires USA proxy
       BooruHandler booruHandler = await testBooru(Booru("r34hentai", "R34Hentai", "", "https://r34hentai.com", ""));
       expect(booruHandler, isA<PhilomenaHandler>());
     });
@@ -97,7 +108,15 @@ Future<void> main() async {
       BooruHandler booruHandler = await testBooru(Booru("r34US", "R34US","","https://rule34.us",""));
       expect(booruHandler, isA<R34USHandler>());
     });*/
-
+    test('SankakuHandler', () async {
+      // TODO doesn't parse all items correctly?
+      BooruHandler booruHandler = await testBooru(Booru("sankaku", "Sankaku", "", "https://capi-v2.sankakucomplex.com", ""));
+      expect(booruHandler, isA<SankakuHandler>());
+    });
+    test('IdolSankakuHandler', () async {
+      BooruHandler booruHandler = await testBooru(Booru("idolsankaku", "IdolSankaku", "", "https://iapi.sankakucomplex.com", ""));
+      expect(booruHandler, isA<IdolSankakuHandler>());
+    });
     test('ShimmieHandler', () async {
       BooruHandler booruHandler = await testBooru(Booru("r34 paheal", "Shimmie", "", "https://rule34.paheal.net", ""));
       expect(booruHandler, isA<ShimmieHandler>());
@@ -133,15 +152,19 @@ Future<BooruHandler> testBooru(
   Booru booru, {
   bool hardFetchedLength = true,
   bool timeoutBeforeTagCheck = false,
-  bool withImages = false,
+  bool withImages = runWithImages,
 }) async {
   final List temp = BooruHandlerFactory().getBooruHandler([booru], null);
   final BooruHandler booruHandler = temp[0] as BooruHandler;
-  booruHandler.pageNum = temp[1] as int;
+  booruHandler.pageNum = (temp[1] as int) + 1;
 
   List<BooruItem> fetched = await booruHandler.search("", booruHandler.pageNum);
+  if (booruHandler.errorString.isNotEmpty) {
+    print("Error: ${booruHandler.errorString}");
+  }
+  print('fetched length: ${fetched.length}');
   if (hardFetchedLength) {
-    expect(fetched.length, equals(Constants.defaultItemLimit));
+    expect(fetched.length, equals(itemLimit));
   } else {
     expect(fetched.isNotEmpty, equals(true));
   }
@@ -150,8 +173,12 @@ Future<BooruHandler> testBooru(
     if (timeoutBeforeTagCheck) {
       await Future.delayed(const Duration(seconds: 5));
     }
-    for (int i = 0; i < (hardFetchedLength ? Constants.defaultItemLimit : fetched.length); i++) {
+    //
+    // for (int i = 0; i < (hardFetchedLength ? itemLimit : fetched.length); i++) {
+    for (int i = 0; i < imageLimit; i++) {
       BooruItem item = fetched[i];
+      print('Fetching images for ${item.postURL}');
+      print('${item.fileURL} ${item.sampleURL} ${item.thumbnailURL}');
       // file
       var resp = await http.head(Uri.parse(item.fileURL));
       expect(resp.statusCode, equals(200));
@@ -164,6 +191,7 @@ Future<BooruHandler> testBooru(
       await http.head(Uri.parse(item.thumbnailURL));
       expect(resp.statusCode, equals(200));
       // tags
+      print('tags: ${item.tagsList}');
       expect(item.tagsList.isNotEmpty, equals(true));
     }
   }
