@@ -1,5 +1,6 @@
-import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';

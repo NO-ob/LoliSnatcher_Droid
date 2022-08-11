@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 // TODO autoreplace both ways all that special symbol crap (see tag suggestions) to normal format for user

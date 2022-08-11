@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_add_dialog.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_bottom.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_filter.dart';
-import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
-import 'package:lolisnatcher/src/widgets/tags_manager/tm_list.dart';
+import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 
 class TagsManagerDialog extends StatefulWidget {
   const TagsManagerDialog({Key? key}) : super(key: key);

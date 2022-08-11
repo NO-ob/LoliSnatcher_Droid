@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/material.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_navigation_controls.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_navigation_menu.dart';
 
