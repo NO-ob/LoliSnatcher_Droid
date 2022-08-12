@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
 
-extension FlutterUI on Widget {
-  Widget withBorder({Color? color, double? strokeWidth}) => Container(
+extension UIExtras on Widget {
+  Widget withBorder({Color? color, double? strokeWidth, BorderRadius? borderRadius}) => Container(
         decoration: BoxDecoration(
           border: Border.all(color: color ?? Colors.black, width: strokeWidth ?? 1),
-        ),
-        child: this,
-      );
-
-  Widget withBorderRadius(double radius) => Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(radius),
+          borderRadius: borderRadius,
         ),
         child: this,
       );
