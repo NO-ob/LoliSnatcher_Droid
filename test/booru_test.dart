@@ -28,6 +28,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 
 // TODO: Create a bunch of fake accounts for testing auth
+// TODO hydrus?
 
 // Test config:
 const bool runWithImages = false;
@@ -124,9 +125,15 @@ Future<void> main() async {
       BooruHandler booruHandler = await testBooru(Booru("lewdtuber", "Szurubooru", "", "https://booru.lewdtuber.com", ""));
       expect(booruHandler, isA<SzurubooruHandler>());
     });
-    test('WorldXyzHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("r34world", "World", "", "https://rule34.world", ""), hardFetchedLength: false);
-      expect(booruHandler, isA<WorldXyzHandler>());
+    group('WorldXyzHandler', () {
+      test('World', () async {
+        BooruHandler booruHandler = await testBooru(Booru("r34world", "World", "", "https://rule34.world", ""), hardFetchedLength: false);
+        expect(booruHandler, isA<WorldXyzHandler>());
+      });
+      test('Xyz', () async {
+        BooruHandler booruHandler = await testBooru(Booru("r3xyz", "World", "", "https://rule34.xyz", ""), hardFetchedLength: false);
+        expect(booruHandler, isA<WorldXyzHandler>());
+      });
     });
   });
   // Sometimes this fails maybe its giving the thumb urls but they aren't generated yet
@@ -155,6 +162,7 @@ Future<BooruHandler> testBooru(
 }) async {
   final List temp = BooruHandlerFactory().getBooruHandler([booru], null);
   final BooruHandler booruHandler = temp[0] as BooruHandler;
+  // +1 because starting page number is out of range
   booruHandler.pageNum = (temp[1] as int) + 1;
 
   List<BooruItem> fetched = await booruHandler.search("", booruHandler.pageNum);
@@ -173,8 +181,8 @@ Future<BooruHandler> testBooru(
       await Future.delayed(const Duration(seconds: 5));
     }
     //
-    // for (int i = 0; i < (hardFetchedLength ? itemLimit : fetched.length); i++) {
-    for (int i = 0; i < imageLimit; i++) {
+    const int imageTestLimit = imageLimit; // hardFetchedLength ? itemLimit : fetched.length
+    for (int i = 0; i < imageTestLimit; i++) {
       BooruItem item = fetched[i];
       print('Fetching images for ${item.postURL}');
       print('${item.fileURL} ${item.sampleURL} ${item.thumbnailURL}');
