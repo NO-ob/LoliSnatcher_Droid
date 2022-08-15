@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tag_filters_add_dialog.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_edit_dialog.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_list.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_settings_list.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_add_dialog.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_edit_dialog.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_list.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_settings_list.dart';
 
 class TagsFiltersPage extends StatefulWidget {
   const TagsFiltersPage({Key? key}) : super(key: key);

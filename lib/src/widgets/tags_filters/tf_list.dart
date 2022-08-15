@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_list_item.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersList extends StatelessWidget {
   const TagsFiltersList({
