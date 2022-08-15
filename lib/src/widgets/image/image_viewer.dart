@@ -75,7 +75,7 @@ class ImageViewerState extends State<ImageViewer> {
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: imageFolder,
-      fileNameExtras: widget.booruItem.fileNameExtras
+      fileNameExtras: widget.booruItem.fileNameExtras,
     );
     // client.runRequest();
     if (settingsHandler.disableImageIsolates) {
@@ -369,29 +369,31 @@ class ImageViewerState extends State<ImageViewer> {
             //
             AnimatedSwitcher(
               duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-              child: mainProvider == null ? Container() : Listener(
-                onPointerSignal: (pointerSignal) {
-                  if (pointerSignal is PointerScrollEvent) {
-                    scrollZoomImage(pointerSignal.scrollDelta.dy);
-                  }
-                },
-                child: PhotoView(
-                  //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-                  imageProvider: mainProvider!, // ?? MemoryImage(kTransparentImage),
-                  gaplessPlayback: true,
-                  // loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
-                  // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                  filterQuality: FilterQuality.medium,
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 8,
-                  initialScale: PhotoViewComputedScale.contained,
-                  enableRotation: false,
-                  basePosition: Alignment.center,
-                  controller: viewController,
-                  // tightMode: true,
-                  scaleStateController: scaleController,
-                ),
-              ),
+              child: mainProvider == null
+                  ? Container()
+                  : Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (pointerSignal is PointerScrollEvent) {
+                          scrollZoomImage(pointerSignal.scrollDelta.dy);
+                        }
+                      },
+                      child: PhotoView(
+                        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+                        imageProvider: mainProvider!, // ?? MemoryImage(kTransparentImage),
+                        gaplessPlayback: true,
+                        // loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
+                        // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                        filterQuality: FilterQuality.medium,
+                        minScale: PhotoViewComputedScale.contained,
+                        maxScale: PhotoViewComputedScale.covered * 8,
+                        initialScale: PhotoViewComputedScale.contained,
+                        enableRotation: false,
+                        basePosition: Alignment.center,
+                        controller: viewController,
+                        // tightMode: true,
+                        scaleStateController: scaleController,
+                      ),
+                    ),
             ),
           ],
         ),
