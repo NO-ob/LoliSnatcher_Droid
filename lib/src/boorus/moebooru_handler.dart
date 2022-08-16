@@ -55,7 +55,7 @@ class MoebooruHandler extends BooruHandler {
       }
 
       BooruItem item = BooruItem(
-        fileURL: fileURL,
+        fileURL: fileURL.replaceAll(' ', '%20'),
         sampleURL: sampleURL,
         thumbnailURL: previewURL,
         tagsList: current.getAttribute("tags")!.split(" "),
