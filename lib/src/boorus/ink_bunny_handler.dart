@@ -145,10 +145,12 @@ class InkBunnyHandler extends BooruHandler {
         if (fileURL.endsWith(".mp4") && files[i].containsKey("thumbnail_url_huge")){
           thumbURL = files[i]["thumbnail_url_huge"];
           sampleURL = thumbURL;
-        } else if (i > 0 && !files[0]["file_url_full"].endsWith(".mp4")) {
+        }
+        // Not sure why this was here but all images have wrong thumbs with this will leave commented
+        /*else if (i > 0 && !files[0]["file_url_full"].endsWith(".mp4")) {
           sampleURL = files[0]["file_url_screen"];
           thumbURL = files[0]["file_url_preview"];
-        }
+        }*/
         BooruItem item = BooruItem(
           fileURL: fileURL,
           sampleURL: sampleURL,
@@ -161,12 +163,13 @@ class InkBunnyHandler extends BooruHandler {
           previewHeight: double.tryParse(files[i]["preview_size_y"] ?? ""),
           md5String: files[i]["full_file_md5"],
           tagsList: currentTags,
-          postURL: makePostURL(current["submission_id"].toString()),
+          postURL: getPostURL(current["submission_id"].toString(), i),
           serverId: current["submission_id"].toString(),
           score: current["favorites_count"],
           postDate: current["create_datetime"].split(".")[0],
           rating: current["rating_name"],
           postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+          fileNameExtras: (i > 0) ? "p${i+1}_" : "",
         );
 
         items.add(item);
@@ -182,14 +185,14 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   // This will create a url to goto the images page in the browser
-  @override
-  String makePostURL(String id){
-    return "${booru.baseURL}/s/$id";
+  String getPostURL(String id, int fileNum){
+    return "${booru.baseURL}/s/$id${fileNum > 0 ? "-p${fileNum + 1}-" : ""}";
   }
 
   // This will create a url for the http request
   @override
   String makeURL(String tags){
+    String order = "";
     String artist = "";
     bool random = false;
     List<String> tagList = tags.split(" ");
@@ -200,6 +203,11 @@ class InkBunnyHandler extends BooruHandler {
       } else if (tagList[i].contains("order:")){
         if (tagList[i] == "order:random"){
           random = true;
+        } else {
+          // views, favs
+          if (tagList[i].split(":").length > 1){
+            order = tagList[i].split(":")[1];
+          }
         }
       }else {
         tagStr += "${tagList[i]},";
@@ -211,7 +219,7 @@ class InkBunnyHandler extends BooruHandler {
     //I have removed the code that was using the results id before we will see how this is without using that.
 
     //The type variable filters by file type so we only fetch those that are supported by the app
-    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr&username=$artist&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes";
+    return "${booru.baseURL}/api_search.php?output_mode=json&sid=$sessionToken&text=$tagStr&username=$artist&get_rid=yes&type=1,2,3,8,9,13,14&random=${random ? "yes" : "no"}&submission_ids_only=yes&orderby=$order&page=$pageNum";
   }
 
   @override
