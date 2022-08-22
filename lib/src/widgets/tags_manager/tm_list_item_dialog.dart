@@ -108,7 +108,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           title: const Text('Copy'),
         ),
         //
-        // TODO probably don't nned this since we shouldn't delete tags from sqlite
+        // TODO probably don't need this since we shouldn't delete tags from sqlite
         // const SizedBox(height: 10),
         // ListTile(
         //   shape: RoundedRectangleBorder(

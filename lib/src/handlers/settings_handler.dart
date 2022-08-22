@@ -1310,7 +1310,10 @@ class SettingsHandler extends GetxController {
   }
 
   List<String> cleanTagsList(List<String> tags) {
-    return tags.where((tag) => tag != "").map((tag) => tag.trim().toLowerCase()).toList();
+    List<String> cleanTags = [];
+    cleanTags = tags.where((tag) => tag.isNotEmpty).map((tag) => tag.trim().toLowerCase()).toList();
+    cleanTags.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return cleanTags;
   }
 
   void checkUpdate({bool withMessage = false}) async {

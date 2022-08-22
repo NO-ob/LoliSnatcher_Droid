@@ -31,7 +31,9 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void initState() {
     super.initState();
     hatedList = settingsHandler.hatedTags;
+    hatedList.sort(sortTags);
     lovedList = settingsHandler.lovedTags;
+    lovedList.sort(sortTags);
     filterHated = settingsHandler.filterHated;
     filterFavourites = settingsHandler.filterFavourites;
 
@@ -70,6 +72,10 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     return tagsList;
   }
 
+  int sortTags(String a, String b) {
+    return a.toLowerCase().compareTo(b.toLowerCase());
+  }
+
   void addTag(String newTag, String type) {
     if(newTag.isEmpty) {
       return;
@@ -80,6 +86,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       duplicateMessage(newTag, type);
     } else {
       changedList.add(newTag);
+      changedList.sort(sortTags);
       updateState();
     }
   }
@@ -95,6 +102,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     } else {
       int index = changedList.indexOf(oldTag);
       changedList[index] = newTag;
+      changedList.sort(sortTags);
       updateState();
     }
   }
@@ -102,6 +110,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void deleteTag(String tag, String type) {
     List<String> changedList = getTagsList(type);
     changedList.remove(tag);
+    changedList.sort(sortTags);
     updateState();
   }
 

@@ -30,16 +30,16 @@ dependencies:
   # dart_vlc: ^0.3.0
   dart_vlc:
     git:
-      # 0.3.0 - synced with original, but bumped vlc lib to last version to fix certificate errors, submodules are removed
+      # 0.3.0 - synced with original github repo, they now use higher version of vlclib
       url: "https://github.com/NANI-SORE/dart_vlc.git"
-      ref: b01e41fc092ee1fb20bf2427555ec0904422c4b9
+      ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
   dio: ^4.0.5
   dropdown_search: ^5.0.2
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original
       url: "https://github.com/NANI-SORE/fast_marquee.git"
-      ref: 62cf0021640b4e67f1e889fcbeebd9b0104ff6d0 # master - forked to fix for flutter 3.0
+      ref: 713412ce49bdc1f927dd39497a06c3c156a30443 # master - forked to fix for flutter 3.0
   flash: ^2.0.3+3
   flex_color_picker: ^2.5.0
   flutter_displaymode: ^0.4.0
@@ -76,7 +76,7 @@ dependencies:
   transparent_image: ^2.0.0
   uuid: ^3.0.6
   vibration: ^1.7.5
-  video_player: ^2.4.5
+  video_player: ^2.4.7
   waterfall_flow: ^3.0.2
   xml: ^6.1.0
 

@@ -26,7 +26,7 @@ class TagHandler extends GetxController {
 
   int prevLength = 0;
   final Map<String, Tag> _tagMap = {};
-  Map<String, Tag> get tagMap => _tagMap;
+  Map<String, Tag> get tagMap => _tagMap; // TODO read only (or is it?)
 
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
@@ -38,13 +38,13 @@ class TagHandler extends GetxController {
   }
 
   bool hasTag(String tagString) {
-    return _tagMap.containsKey(tagString);
+    return tagMap.containsKey(tagString.toLowerCase());
   }
 
   /// Check if tag is in the tag map and if it is - check if it is not outdated/stale
   bool hasTagAndNotStale(String tagString, {int staleTime = Constants.tagStaleTime}) {
     if (hasTag(tagString)) {
-      final bool isNotStale = _tagMap[tagString]!.updatedAt >= (DateTime.now().millisecondsSinceEpoch - staleTime);
+      final bool isNotStale = getTag(tagString).updatedAt >= (DateTime.now().millisecondsSinceEpoch - staleTime);
       return isNotStale;
     } else {
       return false;
@@ -52,9 +52,10 @@ class TagHandler extends GetxController {
   }
 
   Tag getTag(String tagString) {
+    tagString = tagString.toLowerCase();
     Tag? tag;
     if (hasTag(tagString)) {
-      tag = _tagMap[tagString];
+      tag = tagMap[tagString];
     }
     tag ??= Tag(tagString, tagType: TagType.none);
     return tag;
@@ -65,6 +66,7 @@ class TagHandler extends GetxController {
     if(tag.fullString.isEmpty) {
       return;
     }
+    tag.fullString = tag.fullString.toLowerCase();
     if (preferTypeIfNone && hasTag(tag.fullString)){
       if(getTag(tag.fullString).tagType != TagType.none && tag.tagType == TagType.none){
         Logger.Inst().log(
@@ -209,7 +211,7 @@ class TagHandler extends GetxController {
 
   List<Tag> toList() {
     List<Tag> tagList = [];
-    _tagMap.forEach((key,value) => tagList.add(value));
+    tagMap.forEach((key,value) => tagList.add(value));
     return tagList;
   }
 
