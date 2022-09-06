@@ -97,7 +97,7 @@ class _MobileHomeState extends State<MobileHome> {
       onLongPress: _onMenuLongTap,
       onSecondaryTap: _onMenuLongTap,
       child: IconButton(
-        icon: const Icon(Icons.menu),
+        icon: Icon(Icons.menu, color: Theme.of(context).appBarTheme.iconTheme!.color!),
         onPressed: () {
           _toggleDrawer(direction);
 

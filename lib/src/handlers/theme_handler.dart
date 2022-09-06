@@ -144,9 +144,8 @@ class ThemeHandler {
 
   ElevatedButtonThemeData elevatedButtonTheme() => ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          primary: theme.accent!,
-          onPrimary: accentIsDark ? Colors.white : Colors.black,
-          onSurface: isDark ? Colors.white : Colors.black,
+          backgroundColor: theme.accent!,
+          foregroundColor: accentIsDark ? Colors.white : Colors.black, disabledForegroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.38), disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
           textStyle: TextStyle(
             color: accentIsDark ? Colors.white : Colors.black,
             fontSize: 18,
@@ -169,6 +168,12 @@ class ThemeHandler {
         ),
         backgroundColor: theme.primary,
         foregroundColor: primaryIsDark ? Colors.white : Colors.black,
+        actionsIconTheme: IconThemeData(
+          color: primaryIsDark ? Colors.white : Colors.black,
+        ),
+        iconTheme: IconThemeData(
+          color: primaryIsDark ? Colors.white : Colors.black,
+        ),
       );
 
   ButtonThemeData buttonTheme() => ButtonThemeData(

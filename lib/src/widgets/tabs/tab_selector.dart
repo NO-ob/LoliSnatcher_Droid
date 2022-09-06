@@ -38,7 +38,7 @@ class TabSelectorHeader extends StatelessWidget {
     const EdgeInsetsGeometry padding = EdgeInsets.fromLTRB(5, 10, 2, 0);
     const EdgeInsetsGeometry contentPadding = EdgeInsets.symmetric(horizontal: 4, vertical: 8);
     const Color borderColor = Colors.transparent;
-    final Color textColor = Theme.of(context).colorScheme.onPrimary;
+    final Color textColor = Theme.of(context).appBarTheme.titleTextStyle!.color!;
 
     return TabSelectorRender(
       isDesktop: isDesktop,
