@@ -15,6 +15,7 @@ class ImageWriterIsolate {
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
+      print("found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readFileFromCache");
       await image.writeAsBytes(bytes, flush: true);
     } catch (e) {
       print("Image Writer Isolate Exception :: cache write bytes :: $e");
@@ -30,6 +31,7 @@ class ImageWriterIsolate {
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       // TODO is readBytes required here?
+      print("found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate /:: readFileFromCache");
       if(await image.exists()) {
         await image.readAsBytes();
       }
@@ -49,7 +51,9 @@ class ImageWriterIsolate {
 
       if(await image.exists()) {
         imageBytes = await image.readAsBytes();
+        print("found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache");
       } else {
+        print("couldn't find image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache");
       }
     } catch (e){
       print("Image Writer Isolate Exception :: read bytes cache :: $e");

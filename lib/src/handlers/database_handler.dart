@@ -282,7 +282,7 @@ class DBHandler{
       List<dynamic>? tags = await getTagsList(List<int>.from(result.map((e) => e["dbid"])));
 
       List<BooruItem> items = result.map((r) {
-        List<String> itemTags = List<String>.from(tags?.where((el) => el["booruItemID"] == r["dbid"]).map((el) => el["name"]) ?? []);
+        List<String> itemTags = List<String>.from(tags?.where((el) => el["booruItemID"] == r["dbid"]).map((el) => el["name"].toString()) ?? []);
         BooruItem item = BooruItem.fromDBRow(r, itemTags);
         if (mode == "loliSyncFav") {
           item.isSnatched.value = false;
