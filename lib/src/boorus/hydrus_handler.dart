@@ -224,15 +224,71 @@ class HydrusHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    String tag;
-    if (tags.isEmpty){
-      tag = "[]";
-    } else if (tags.contains(",")){
-      tag = jsonEncode(tags.split(","));
-    } else {
-      tag = "[${jsonEncode(tags)}]";
+    List<String> tagList = tags.split(",");
+    int sortType = -1;
+    bool ascending = false;
+    for (int i = tagList.length - 1; i >= 0; i--){
+      print(tagList[i]);
+      if(tagList[i].contains("sort:")) {
+        sortType = getSortType(tagList[i].split(":")[1]);
+        tagList.remove(tagList[i].trim().toLowerCase());
+      } else if(tagList[i].contains("order:asc")) {
+        ascending = true;
+        tagList.remove(tagList[i].trim().toLowerCase());
+      } else if(tagList[i].contains("order:desc")) {
+        ascending = false;
+        tagList.remove(tagList[i].trim().toLowerCase());
+      }
     }
-    return "${booru.baseURL}/get_files/search_files?tags=$tag";
+
+    return "${booru.baseURL}/get_files/search_files?tags=${jsonEncode(tagList)}${sortType > -1 ? "&file_sort_type=$sortType":""}&file_sort_asc=$ascending";
+  }
+
+  int getSortType(String orderString){
+    switch(orderString){
+      case "filesize":
+        return 0;
+      case "duration":
+        return 1;
+      case "importtime":
+        return 2;
+      case "filetype":
+        return 3;
+      case "random":
+        return 4;
+      case "width":
+        return 5;
+      case "height":
+        return 6;
+      case "ratio":
+        return 7;
+      case "numpixels":
+        return 8;
+      case "numtags":
+        return 9;
+      case "numviews":
+        return 10;
+      case "totalviewtime":
+        return 11;
+      case "bitrate":
+        return 12;
+      case "hasaudio":
+        return 13;
+      case "modifiedtime":
+        return 14;
+      case "framerate":
+        return 15;
+      case "framecount":
+        return 16;
+      case "lastviewed":
+        return 17;
+      case "archivetime":
+        return 18;
+      case "hashhex":
+        return 19;
+      default:
+        return -1;
+    }
   }
 
   @override
