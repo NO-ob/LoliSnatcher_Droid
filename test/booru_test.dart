@@ -34,6 +34,7 @@ import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 const bool runWithImages = false;
 const int itemLimit = Constants.defaultItemLimit;
 const int imageLimit = 5;
+const bool withTagSuggestions = true;
 //
 
 Future<void> main() async {
@@ -122,7 +123,7 @@ Future<void> main() async {
       expect(booruHandler, isA<ShimmieHandler>());
     });
     test('SzurubooruHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("lewdtuber", "Szurubooru", "", "https://booru.lewdtuber.com", ""));
+      BooruHandler booruHandler = await testBooru(Booru("xivbooru", "Szurubooru", "", "http://xivbooru.com", ""), customSuggestionsInput: 'tat'); // tat[too]
       expect(booruHandler, isA<SzurubooruHandler>());
     });
     group('WorldXyzHandler', () {
@@ -131,7 +132,7 @@ Future<void> main() async {
         expect(booruHandler, isA<WorldXyzHandler>());
       });
       test('Xyz', () async {
-        BooruHandler booruHandler = await testBooru(Booru("r3xyz", "World", "", "https://rule34.xyz", ""), hardFetchedLength: false);
+        BooruHandler booruHandler = await testBooru(Booru("r34xyz", "World", "", "https://rule34.xyz", ""), hardFetchedLength: false);
         expect(booruHandler, isA<WorldXyzHandler>());
       });
     });
@@ -159,6 +160,7 @@ Future<BooruHandler> testBooru(
   bool hardFetchedLength = true,
   bool timeoutBeforeTagCheck = false,
   bool withImages = runWithImages,
+  String? customSuggestionsInput,
 }) async {
   final List temp = BooruHandlerFactory().getBooruHandler([booru], null);
   final BooruHandler booruHandler = temp[0] as BooruHandler;
@@ -203,5 +205,17 @@ Future<BooruHandler> testBooru(
     }
   }
 
+  if(withTagSuggestions) {
+    await testSuggestions(booruHandler, customInput: customSuggestionsInput);
+  }
+
   return booruHandler;
+}
+
+Future<void> testSuggestions(BooruHandler booruHandler, {String? customInput}) async {
+  print ("Testing suggestions for ${booruHandler.booru.name}");
+  String input = customInput ?? "ani"; // ani[mated]
+  List<String> suggestions = await booruHandler.tagSearch(input);
+  expect(suggestions.isNotEmpty, equals(true));
+  expect(suggestions.length, equals(10));
 }

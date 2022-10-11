@@ -364,24 +364,8 @@ class ImageWriter {
     return result;
   }
 
-  String sanitizeName(String fileName, {String replacement = '',required String fileNameExtras}) {
-    RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
-    RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
-    RegExp reservedRe = RegExp(r'^\.+$');
-    RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
-    RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
-
-    return "${fileNameExtras.replaceAll(illegalRe, replacement)
-        .replaceAll(controlRe, replacement)
-        .replaceAll(reservedRe, replacement)
-        .replaceAll(windowsReservedRe, replacement)
-        .replaceAll(windowsTrailingRe, replacement)}${fileName
-        .replaceAll(illegalRe, replacement)
-        .replaceAll(controlRe, replacement)
-        .replaceAll(reservedRe, replacement)
-        .replaceAll(windowsReservedRe, replacement)
-        .replaceAll(windowsTrailingRe, replacement).replaceAll("%20", "_")}";
-    // TODO truncate to 255 symbols for windows?
+  String sanitizeName(String fileName, {required String fileNameExtras}) {
+    return "${Tools.sanitize(fileNameExtras)}${Tools.sanitize(fileName)}";
   }
 
   Future<String> writeMascotImage(String contentUri) async{

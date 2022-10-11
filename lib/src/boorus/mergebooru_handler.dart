@@ -124,7 +124,7 @@ class MergebooruHandler extends BooruHandler{
   }
 
   @override
-  Future tagSearch(String input) async {
+  Future<List<String>> tagSearch(String input) async {
     return booruHandlers[0].tagSearch(input);
   }
 

@@ -210,8 +210,7 @@ abstract class BooruHandler {
   ////////////////////////////////////////////////////////////////////////
   
   // TODO rename to getTagSuggestions
-  // Future<List<String>>
-  Future tagSearch(String input) async {
+  Future<List<String>> tagSearch(String input) async {
     List<String> tags = [];
 
     String url = makeTagURL(input);

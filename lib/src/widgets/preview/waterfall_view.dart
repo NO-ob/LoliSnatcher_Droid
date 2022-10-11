@@ -332,13 +332,11 @@ class _WaterfallViewState extends State<WaterfallView> {
                 onRefresh: () async {
                   searchHandler.searchAction(searchHandler.currentTab.tags, null);
                 },
-                child: Obx((){
+                child: Obx(() {
                   final bool isLoadingOrNoItems = searchHandler.isLoading.value && searchHandler.currentFetched.isEmpty;
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: isLoadingOrNoItems
-                      ? ShimmerList(controller: searchHandler.gridScrollController)
-                      : DesktopScrollWrap(
+                  return Stack(
+                    children: [
+                      DesktopScrollWrap(
                           controller: searchHandler.gridScrollController,
                           // if staggered - fallback to grid if booru doesn't give image sizes in api, otherwise layout will lag and jump around uncontrollably
                           child: ShimmerWrap(
@@ -357,6 +355,13 @@ class _WaterfallViewState extends State<WaterfallView> {
                                 ),
                           ),
                         ),
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: isLoadingOrNoItems
+                            ? const ShimmerList()
+                            : const SizedBox.shrink(),
+                        ),
+                    ],
                   );
                 }),
               ),

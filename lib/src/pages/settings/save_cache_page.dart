@@ -28,7 +28,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController cacheSizeController = TextEditingController();
   
   late String videoCacheMode, extPathOverride;
-  bool jsonWrite = false, thumbnailCache = true, mediaCache = false;
+  bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true;
   
   final List<Map<String, String?>> cacheTypes = [
     {'folder': null, 'label': 'Total'},
@@ -57,6 +57,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
       return dur["value"].inSeconds == cacheDuration.inSeconds;
     });
     cacheSizeController.text = settingsHandler.cacheSize.toString();
+    downloadNotifications = settingsHandler.downloadNotifications;
 
     getCacheStats();
   }
@@ -109,6 +110,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.cacheDuration = cacheDuration;
     settingsHandler.cacheSize = int.parse(cacheSizeController.text);
     settingsHandler.extPathOverride = extPathOverride;
+    settingsHandler.downloadNotifications = downloadNotifications;
     bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
@@ -202,6 +204,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     return null;
                   }
                 }
+              ),
+              SettingsToggle(
+                value: downloadNotifications,
+                onChanged: (newValue) {
+                  setState(() {
+                    downloadNotifications = newValue;
+                  });
+                },
+                title: 'Show Download Notifications',
               ),
               SettingsToggle(
                 value: jsonWrite,

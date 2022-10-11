@@ -205,8 +205,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 action: () async {
                   try {
                     print(json.encode(settingsHandler.booruList));
+                    List<Booru> booruList = settingsHandler.booruList.where((e) => e.type != 'Favourites').toList();
                     if(backupPath.isNotEmpty) {
-                      await ServiceHandler.writeImage(utf8.encode(json.encode(settingsHandler.booruList)), "boorus", "text", "json", backupPath);
+                      await ServiceHandler.writeImage(utf8.encode(json.encode(booruList)), "boorus", "text", "json", backupPath);
                       showSnackbar(context, 'Boorus saved to boorus.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -237,7 +238,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           for (int i = 0; i < json.length; i++) {
                               Booru booru = Booru.fromJsonObject(json[i]);
                               bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
-                              if(!alreadyExists) {
+                              bool isAllowed = booru.type != 'Favourites';
+                              if(!alreadyExists && isAllowed) {
                                 File booruFile = File("${configBoorusDir.path}${booru.name}.json");
                                 var writer = booruFile.openWrite();
                                 writer.write(jsonEncode(booru.toJson()));

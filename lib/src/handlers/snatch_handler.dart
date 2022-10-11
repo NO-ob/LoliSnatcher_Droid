@@ -6,6 +6,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -76,22 +77,24 @@ class SnatchHandler extends GetxController {
         if (exists != null && failed != null && queuedList.isEmpty) {
           // last yield in stream will send exists and failed counts
           // but show this message only when queue is empty => snatching is complete
-          FlashElements.showSnackbar(
-            duration: const Duration(seconds: 2),
-            position: Positions.top,
-            title: const Text("Snatching Complete", style: TextStyle(fontSize: 20)),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text("Snatched: ${snatchProgress.value} ${Tools.pluralize('item', snatchProgress.value)}"),
-                if (exists > 0) Text('$exists ${Tools.pluralize('file', exists)} ${exists == 1 ? 'was' : 'were'} already snatched'),
-                if (failed > 0) Text('Failed to snatch $failed ${Tools.pluralize('file', exists)}'),
-              ],
-            ),
-            leadingIcon: Icons.done_all,
-            sideColor: (exists > 0 || failed > 0) ? Colors.yellow : Colors.green,
-            //TODO restart/retry buttons for failed items?
-          );
+          if(SettingsHandler.instance.downloadNotifications) {
+            FlashElements.showSnackbar(
+              duration: const Duration(seconds: 2),
+              position: Positions.top,
+              title: const Text("Snatching Complete", style: TextStyle(fontSize: 20)),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Snatched: ${snatchProgress.value} ${Tools.pluralize('item', snatchProgress.value)}"),
+                  if (exists > 0) Text('$exists ${Tools.pluralize('file', exists)} ${exists == 1 ? 'was' : 'were'} already snatched'),
+                  if (failed > 0) Text('Failed to snatch $failed ${Tools.pluralize('file', exists)}'),
+                ],
+              ),
+              leadingIcon: Icons.done_all,
+              sideColor: (exists > 0 || failed > 0) ? Colors.yellow : Colors.green,
+              //TODO restart/retry buttons for failed items?
+            );
+          }
         }
       },
       onDone: () {
@@ -122,34 +125,38 @@ class SnatchHandler extends GetxController {
       queuedList.add(item);
 
       if (booruItems.length > 1) {
-        FlashElements.showSnackbar(
-          title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
-          position: Positions.top,
-          duration: const Duration(seconds: 2),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Amount: ${booruItems.length}'),
-              Text('Position: ${queuedList.length}'),
-            ],
-          ),
-          leadingIcon: Icons.info_outline,
-          sideColor: Colors.green,
-        );
+        if(SettingsHandler.instance.downloadNotifications) {
+          FlashElements.showSnackbar(
+            title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
+            position: Positions.top,
+            duration: const Duration(seconds: 2),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Amount: ${booruItems.length}'),
+                Text('Position: ${queuedList.length}'),
+              ],
+            ),
+            leadingIcon: Icons.info_outline,
+            sideColor: Colors.green,
+          );
+        }
       } else {
-        FlashElements.showSnackbar(
-          title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
-          position: Positions.top,
-          duration: const Duration(seconds: 2),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Position: ${queuedList.length}'),
-            ],
-          ),
-          leadingIcon: Icons.info_outline,
-          sideColor: Colors.green,
-        );
+        if(SettingsHandler.instance.downloadNotifications) {
+          FlashElements.showSnackbar(
+            title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
+            position: Positions.top,
+            duration: const Duration(seconds: 2),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Position: ${queuedList.length}'),
+              ],
+            ),
+            leadingIcon: Icons.info_outline,
+            sideColor: Colors.green,
+          );
+        }
       }
     }
   }

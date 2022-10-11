@@ -145,7 +145,9 @@ class ThemeHandler {
   ElevatedButtonThemeData elevatedButtonTheme() => ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: theme.accent!,
-          foregroundColor: accentIsDark ? Colors.white : Colors.black, disabledForegroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.38), disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
+          foregroundColor: accentIsDark ? Colors.white : Colors.black,
+          disabledForegroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.38),
+          disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
           textStyle: TextStyle(
             color: accentIsDark ? Colors.white : Colors.black,
             fontSize: 18,
@@ -328,7 +330,7 @@ class ThemeHandler {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
 
-    SwitchThemeData switchTheme() => SwitchThemeData(
+  SwitchThemeData switchTheme() => SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((states) {
           bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {

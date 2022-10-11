@@ -517,12 +517,13 @@ class LoliSync{
         case "Booru":
           yield "Sync Starting $address";
           yield "Preparing booru data";
-          int booruCount = settingsHandler.booruList.length;
-          if (booruCount > 0){
-            for (int i = 0; i < booruCount; i++){
-              if (!syncKilled){
-                if (i < booruCount){
-                  String resp = await sendBooru(settingsHandler.booruList.elementAt(i), booruCount, i);
+          List<Booru> booruList = settingsHandler.booruList.where((e) => e.type != 'Favourites').toList();
+          int booruCount = booruList.length;
+          if (booruCount > 0) {
+            for (int i = 0; i < booruCount; i++) {
+              if (!syncKilled) {
+                if (i < booruCount) {
+                  String resp = await sendBooru(booruList.elementAt(i), booruCount, i);
                   yield "$i / $booruCount - $resp";
                 } else {
                   Logger.Inst().log("skipping", "LoliSync", "startSync", LogTypes.loliSyncInfo);

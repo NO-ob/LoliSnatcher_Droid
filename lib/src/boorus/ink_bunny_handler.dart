@@ -229,7 +229,7 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   @override
-  Future tagSearch(String input) async {
+  Future<List<String>> tagSearch(String input) async {
     List<String> searchTags = [];
     String url = makeTagURL(input);
     try {

@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
@@ -295,6 +296,12 @@ class _BooruEditState extends State<BooruEdit> {
     );
   }
 
+  void sanitizeBooruName() {
+    // sanitize booru name to avoid conflicts with file paths
+    booruNameController.text = Tools.sanitize(booruNameController.text).trim();
+    setState(() {});
+  }
+
   Widget testButton() {
     return SettingsButton(
       name: 'Test Booru',
@@ -302,6 +309,8 @@ class _BooruEditState extends State<BooruEdit> {
         ? const CircularProgressIndicator()
         : const Icon(Icons.public),
       action: () async {
+        sanitizeBooruName();
+
         // name and url are required
         if(booruNameController.text == "") {
           FlashElements.showSnackbar(
@@ -422,6 +431,8 @@ class _BooruEditState extends State<BooruEdit> {
       name: "Save Booru${widget.booruType == '' ? ' (Run Test First)' : ''}",
       icon: Icon(Icons.save, color: widget.booruType == '' ? Colors.red : Colors.green),
       action: () async {
+        sanitizeBooruName();
+
         if(widget.booruType == "") {
           FlashElements.showSnackbar(
             context: context,

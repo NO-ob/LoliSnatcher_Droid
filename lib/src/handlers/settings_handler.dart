@@ -133,6 +133,7 @@ class SettingsHandler extends GetxController {
   bool allowSelfSignedCerts = false;
   bool wakeLockEnabled = true;
   bool tagTypeFetchEnabled = true;
+  bool downloadNotifications = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -390,6 +391,10 @@ class SettingsHandler extends GetxController {
       "default": true,
     },
     "tagTypeFetchEnabled": {
+      "type": "bool",
+      "default": true,
+    },
+    "downloadNotifications": {
       "type": "bool",
       "default": true,
     },
@@ -779,6 +784,8 @@ class SettingsHandler extends GetxController {
         return wakeLockEnabled;
       case 'tagTypeFetchEnabled':
         return tagTypeFetchEnabled;
+      case 'downloadNotifications':
+        return downloadNotifications;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -937,6 +944,15 @@ class SettingsHandler extends GetxController {
       case 'enabledLogTypes':
         enabledLogTypes.value = validatedValue;
         break;
+      case 'wakeLockEnabled':
+        wakeLockEnabled = validatedValue;
+        break;
+      case 'tagTypeFetchEnabled':
+        tagTypeFetchEnabled = validatedValue;
+        break;
+      case 'downloadNotifications':
+        downloadNotifications = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -965,12 +981,6 @@ class SettingsHandler extends GetxController {
         break;
       case 'enableDrawerMascot':
         enableDrawerMascot = validatedValue;
-        break;
-      case 'wakeLockEnabled':
-        wakeLockEnabled = validatedValue;
-        break;
-      case 'tagTypeFetchEnabled':
-        tagTypeFetchEnabled = validatedValue;
         break;
       default:
         break;
@@ -1017,6 +1027,9 @@ class SettingsHandler extends GetxController {
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
       "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
       "enabledLogTypes": validateValue("enabledLogTypes", null, toJSON: true),
+      "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
+      "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
+      "downloadNotifications" : validateValue("downloadNotifications", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
@@ -1037,8 +1050,6 @@ class SettingsHandler extends GetxController {
       "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
       "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
-      "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
-      "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
       "version": Constants.appVersion,
       "build": Constants.appBuildNumber,
       // TODO split into two variables - system name and system version/sdk number
@@ -1060,61 +1071,78 @@ class SettingsHandler extends GetxController {
     // TODO add error handling for invalid values
     // (don't allow user to exit the page until the value is correct? or just set to default (current behaviour)? mix of both?)
 
-    dynamic tempBtnOrder = json["buttonOrder"];
-    if(tempBtnOrder is List) {
-      // print('btnorder is a list');
-    } else if(tempBtnOrder is String) {
-      // print('btnorder is a string');
-      tempBtnOrder = tempBtnOrder.split(',');
-    } else {
-      // print('btnorder is a ${tempBtnOrder.runtimeType} type');
-      tempBtnOrder = [];
-    }
-    List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
-      List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
-      return button;
-    }).where((el) => el[0] != 'null').toList();
-    btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
-    buttonOrder = btnOrder;
-
-    dynamic tempHatedTags = json["hatedTags"];
-    if(tempHatedTags is List) {
-      // print('hatedTags is a list');
-    } else if(tempHatedTags is String) {
-      // print('hatedTags is a string');
-      tempHatedTags = tempHatedTags.split(',');
-    } else {
-      // print('hatedTags is a ${tempHatedTags.runtimeType} type');
-      tempHatedTags = [];
-    }
-    List<String> hateTags = List<String>.from(tempHatedTags);
-    for (int i = 0; i < hateTags.length; i++){
-      if (!hatedTags.contains(hateTags.elementAt(i))) {
-        hatedTags.add(hateTags.elementAt(i));
+    try {
+      dynamic tempBtnOrder = json["buttonOrder"];
+      if(tempBtnOrder is List) {
+        // print('btnorder is a list');
+      } else if(tempBtnOrder is String) {
+        // print('btnorder is a string');
+        tempBtnOrder = tempBtnOrder.split(',');
+      } else {
+        // print('btnorder is a ${tempBtnOrder.runtimeType} type');
+        tempBtnOrder = [];
       }
+      List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
+        List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+        return button;
+      }).where((el) => el[0] != 'null').toList();
+      btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
+      buttonOrder = btnOrder;
+    } catch (e) {
+      Logger.Inst().log('Failed to parse button order $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
     }
 
-    dynamic tempLovedTags = json["lovedTags"];
-    if(tempLovedTags is List) {
-      // print('lovedTags is a list');
-    } else if(tempLovedTags is String) {
-      // print('lovedTags is a string');
-      tempLovedTags = tempLovedTags.split(',');
-    } else {
-      // print('lovedTags is a ${tempLovedTags.runtimeType} type');
-      tempLovedTags = [];
-    }
-    List<String> loveTags = List<String>.from(tempLovedTags);
-    for (int i = 0; i < loveTags.length; i++){
-      if (!lovedTags.contains(loveTags.elementAt(i))){
-        lovedTags.add(loveTags.elementAt(i));
+    try {
+      dynamic tempHatedTags = json["hatedTags"];
+      if(tempHatedTags is List) {
+        // print('hatedTags is a list');
+      } else if(tempHatedTags is String) {
+        // print('hatedTags is a string');
+        tempHatedTags = tempHatedTags.split(',');
+      } else {
+        // print('hatedTags is a ${tempHatedTags.runtimeType} type');
+        tempHatedTags = [];
       }
+      List<String> hateTags = List<String>.from(tempHatedTags);
+      for (int i = 0; i < hateTags.length; i++){
+        if (!hatedTags.contains(hateTags.elementAt(i))) {
+          hatedTags.add(hateTags.elementAt(i));
+        }
+      }
+    } catch (e) {
+      Logger.Inst().log('Failed to parse hated tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    }
+
+    try {
+      dynamic tempLovedTags = json["lovedTags"];
+      if(tempLovedTags is List) {
+        // print('lovedTags is a list');
+      } else if(tempLovedTags is String) {
+        // print('lovedTags is a string');
+        tempLovedTags = tempLovedTags.split(',');
+      } else {
+        // print('lovedTags is a ${tempLovedTags.runtimeType} type');
+        tempLovedTags = [];
+      }
+      List<String> loveTags = List<String>.from(tempLovedTags);
+      for (int i = 0; i < loveTags.length; i++){
+        if (!lovedTags.contains(loveTags.elementAt(i))){
+          lovedTags.add(loveTags.elementAt(i));
+        }
+      }
+    } catch (e) {
+      Logger.Inst().log('Failed to parse loved tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
     }
 
     List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
     for(String key in leftoverKeys) {
+      // TODO something causes rare exception which causes settings to reset
+      try {
+        setByString(key, json[key]);
+      } catch (e) {
+        Logger.Inst().log('Failed to set value for key $key', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+      }
       // print('key $key val ${json[key]} type ${json[key].runtimeType}');
-      setByString(key, json[key]);
     }
 
     if(setMissingKeys) {
@@ -1163,7 +1191,12 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             File booruFile = files[i] as File;
             Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            tempList.add(booruFromFile);
+            bool isAllowed = booruFromFile.type != 'Favourites';
+            if(isAllowed) {
+              tempList.add(booruFromFile);
+            } else {
+              await booruFile.delete();
+            }
 
             if (booruFromFile.type == "Hydrus") {
               hasHydrus = true;
@@ -1172,7 +1205,7 @@ class SettingsHandler extends GetxController {
         }
       }
 
-      if (dbEnabled && tempList.isNotEmpty){
+      if (dbEnabled && tempList.isNotEmpty) {
         tempList.add(Booru("Favourites", "Favourites", "", "", ""));
       }
     } catch (e){

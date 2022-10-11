@@ -44,7 +44,7 @@ class ImageViewerState extends State<ImageViewer> {
   ImageProvider? mainProvider;
   late String imageURL;
   late String imageFolder;
-  CancelToken _dioCancelToken = CancelToken();
+  CancelToken? _dioCancelToken;
   DioDownloader? client;
 
   StreamSubscription? noScaleListener, indexListener;
@@ -277,8 +277,8 @@ class ImageViewerState extends State<ImageViewer> {
     noScaleListener?.cancel();
     noScaleListener = null;
 
-    if (!(_dioCancelToken.isCancelled)) {
-      _dioCancelToken.cancel();
+    if (!(_dioCancelToken?.isCancelled ?? true)) {
+      _dioCancelToken?.cancel();
     }
     disposeClient();
   }

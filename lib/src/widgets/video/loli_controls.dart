@@ -581,12 +581,13 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   void toggleToolbar() {
+    // TODO better way to toggle toolbar on videos?
     // toggle toolbar and system ui only when controls are visible and not in fullscreen
     // if the controls are visible buildHitArea and buildDoubleTapMessage listen to taps, otherwise - gestureDetector in the main build
-    print('toggleToolbar $_hideStuff ${chewieController.isFullScreen}');
-    if(_hideStuff && !chewieController.isFullScreen) {
-      viewerHandler.displayAppbar.toggle();
-    }
+    // print('toggleToolbar $_hideStuff ${chewieController.isFullScreen}');
+    // if(_hideStuff && !chewieController.isFullScreen) {
+    //   viewerHandler.displayAppbar.toggle();
+    // }
   }
 
   Future<void> _initialize() async {

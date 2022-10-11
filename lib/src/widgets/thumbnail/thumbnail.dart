@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +49,7 @@ class _ThumbnailState extends State<Thumbnail> {
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isForVideo = false;
-  CancelToken _dioCancelToken = CancelToken();
+  CancelToken? _dioCancelToken;
   DioDownloader? client, extraClient;
 
   bool? isThumbQuality;
@@ -57,9 +58,6 @@ class _ThumbnailState extends State<Thumbnail> {
 
   ImageProvider? mainProvider;
   ImageProvider? extraProvider;
-
-  // required for scrollawareimageprovider
-  DisposableBuildContext? disposableBuildContext;
 
   StreamSubscription? hateListener;
 
@@ -119,10 +117,11 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   ImageProvider getImageProvider(Uint8List bytes, String url) {
-    if(widget.item.isHated.value) {
-      // pixelate hated images
-      return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
-    }
+    // if(widget.item.isHated.value) {
+    //   // pixelate hated images
+    //   // flutter 3.3 broke image pixelazation from very small width memoryimage
+    //   return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
+    // }
 
     if(settingsHandler.disableImageScaling) {
       // if resizing is disabled => huge memory usage
@@ -237,7 +236,6 @@ class _ThumbnailState extends State<Thumbnail> {
   @override
   void initState() {
     super.initState();
-    disposableBuildContext = DisposableBuildContext(this);
     selectThumbProvider();
   }
 
@@ -334,7 +332,6 @@ class _ThumbnailState extends State<Thumbnail> {
   @override
   void dispose() {
     disposables();
-    disposableBuildContext?.dispose();
     super.dispose();
   }
 
@@ -349,15 +346,15 @@ class _ThumbnailState extends State<Thumbnail> {
     Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
     Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
 
-    if (!(_dioCancelToken.isCancelled)){
-      _dioCancelToken.cancel();
+    if (!(_dioCancelToken?.isCancelled ?? true)) {
+      _dioCancelToken?.cancel();
     }
     disposeClients(null);
   }
 
   Widget renderImages(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double iconSize = (screenWidth / columnsCount()) * 0.55;
+    final double iconSize = (screenWidth / columnsCount()) * 0.75;
 
     final bool showShimmer = mainProvider == null && !isFailed;
 
@@ -372,7 +369,7 @@ class _ThumbnailState extends State<Thumbnail> {
             duration: Duration(milliseconds: widget.isStandalone ? 600 : 0),
             child: extraProvider != null
               ? Image(
-                image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: extraProvider!),
+                image: extraProvider!,
                 fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                 isAntiAlias: true,
                 width: double.infinity, // widget.isStandalone ? double.infinity : null,
@@ -391,18 +388,26 @@ class _ThumbnailState extends State<Thumbnail> {
         AnimatedSwitcher( // fade in image
           duration: Duration(milliseconds: widget.isStandalone ? 300 : 0),
           child: mainProvider != null
-            ? Image(
-              image: ScrollAwareImageProvider(context: disposableBuildContext!, imageProvider: mainProvider!),
-              fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-              isAntiAlias: true,
-              filterQuality: FilterQuality.medium,
-              width: double.infinity,
-              height: double.infinity,
-              errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                print('failed to load sample: ${widget.item.sampleURL}');
-                _onError(exception as Exception, delayed: true);
-                return const Icon(Icons.broken_image, size: 30);
-              },
+            ? ImageFiltered(
+              enabled: widget.item.isHated.value,
+              imageFilter: ImageFilter.blur(
+                sigmaX: 10,
+                sigmaY: 10,
+                tileMode: TileMode.decal,
+              ),
+              child: Image(
+                image: mainProvider!,
+                fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                isAntiAlias: true,
+                filterQuality: FilterQuality.medium,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                  print('failed to load sample: ${widget.item.sampleURL}');
+                  _onError(exception as Exception, delayed: true);
+                  return const Icon(Icons.broken_image, size: 30);
+                },
+              ),
             )
             : const SizedBox(
               width: double.infinity,
@@ -431,7 +436,7 @@ class _ThumbnailState extends State<Thumbnail> {
           Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.66),
+              color: Colors.black.withOpacity(0.5),
               borderRadius: BorderRadius.circular(iconSize * 0.1),
             ),
             width: iconSize,

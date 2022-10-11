@@ -22,9 +22,7 @@ class ShimmerWrap extends StatelessWidget {
 }
 
 class ShimmerList extends StatelessWidget {
-  const ShimmerList({Key? key, required this.controller}) : super(key: key);
-
-  final AutoScrollController controller;
+  const ShimmerList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +38,7 @@ class ShimmerList extends StatelessWidget {
 
           return GridView(
             physics: const NeverScrollableScrollPhysics(),
-            controller: controller,
+            primary: false,
             addAutomaticKeepAlives: false,
             cacheExtent: 200,
             shrinkWrap: false,

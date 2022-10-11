@@ -16,41 +16,65 @@ class Tools {
     return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
   }
 
-  static int boolToInt(bool boolean){
+  static int boolToInt(bool boolean) {
     return boolean ? 1 : 0;
   }
-  static bool intToBool(int boolean){
+
+  static bool intToBool(int boolean) {
     return boolean != 0 ? true : false;
   }
-  static bool stringToBool(String boolean){
+
+  static bool stringToBool(String boolean) {
     return boolean == "true" ? true : false;
   }
 
-  static String getFileExt(String fileURL){
-    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+  static String getFileExt(String fileURL) {
+    int queryLastIndex =
+        fileURL.lastIndexOf("?"); // if has GET query parameters
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
     return fileExt;
   }
 
-  static String getFileName(String fileURL){
-    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+  static String getFileName(String fileURL) {
+    int queryLastIndex =
+        fileURL.lastIndexOf("?"); // if has GET query parameters
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
     return fileExt;
   }
 
+  static String sanitize(String str, {String replacement = ''}) {
+    RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
+    RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
+    RegExp reservedRe = RegExp(r'^\.+$');
+    RegExp windowsReservedRe = RegExp(
+        r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$',
+        caseSensitive: false);
+    RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
+
+    // TODO truncate to 255 symbols for windows?
+    return str
+        .replaceAll(illegalRe, replacement)
+        .replaceAll(controlRe, replacement)
+        .replaceAll(reservedRe, replacement)
+        .replaceAll(windowsReservedRe, replacement)
+        .replaceAll(windowsTrailingRe, replacement)
+        .replaceAll("%20", "_");
+  }
+
   // unified http headers list generator for dio in thumb/media/video loaders
-  static Map<String, String> getFileCustomHeaders(Booru booru, {bool checkForReferer = false}) {
+  static Map<String, String> getFileCustomHeaders(Booru booru,
+      {bool checkForReferer = false}) {
     // a few boorus doesn't work without a browser useragent
-    Map<String,String> headers = {"User-Agent": browserUserAgent()};
+    Map<String, String> headers = {"User-Agent": browserUserAgent()};
     // some boorus require referer header
-    if(checkForReferer) {
+    if (checkForReferer) {
       switch (booru.type) {
         case 'World':
-          if(booru.baseURL!.contains('rule34.xyz')) {
+          if (booru.baseURL!.contains('rule34.xyz')) {
             headers["Referer"] = "https://rule34xyz.b-cdn.net";
-          } else if(booru.baseURL!.contains('rule34.world')) {
+          } else if (booru.baseURL!.contains('rule34.world')) {
             headers["Referer"] = "https://rule34storage.b-cdn.net";
           }
           break;
@@ -78,11 +102,10 @@ class Tools {
     }
   }
 
-
   static void forceClearMemoryCache({bool withLive = false}) {
     // clears memory image cache on timer or when changing tabs
     PaintingBinding.instance.imageCache.clear();
-    if(withLive) PaintingBinding.instance.imageCache.clearLiveImages();
+    if (withLive) PaintingBinding.instance.imageCache.clearLiveImages();
   }
 
   static String pluralize(String str, int count) {
@@ -91,7 +114,8 @@ class Tools {
 
   // TODO move to separate class (something with the name like "Constants")
   static String appUserAgent() => "LoliSnatcher_Droid/${Constants.appVersion}";
-  static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
+  static String browserUserAgent() =>
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
 
   static bool isTestMode() => Platform.environment.containsKey('FLUTTER_TEST');
 }
