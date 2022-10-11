@@ -16,6 +16,8 @@ import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
 
+import '../../utils/logger.dart';
+
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
 // - debounce searches [In progress: needs rewrite of tagSearch to dio to use requests cancelling]
@@ -333,13 +335,18 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     ) {
       tmpStartIndex --;
     }
+
     if (cursorPos == input.length){
       lastTag = splitInput.last;
       replaceString = lastTag;
     } else {
       int endIndex = input.indexOf(" ", cursorPos);
       if (searchHandler.currentBooru.type == "Hydrus"){
-        endIndex = input.indexOf(",", tmpStartIndex);
+        if(tmpStartIndex == -1){
+          endIndex = input.length;
+        } else {
+          endIndex = input.indexOf(",", tmpStartIndex);
+        }
       }
       if (endIndex == -1) endIndex = cursorPos;
       lastTag = input.substring((tmpStartIndex == 0 ? tmpStartIndex : tmpStartIndex + 1), cursorPos).trim();
