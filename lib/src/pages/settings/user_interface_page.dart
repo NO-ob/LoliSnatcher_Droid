@@ -115,8 +115,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         return const SettingsDialog(
                           title: Text('Hand Side'),
                           contentItems: [
-                            // TODO describe what changes are made when changing hand side
-                            Text("[TODO]"),
+                            Text("Moves some parts of the UI to the selected side of the screen"),
+                            Text('Currently only changes the position of the main drawer button'),
+                            Text('[This is a WIP feature, will include more changes in the future versions]')
                           ]
                         );
                       },
