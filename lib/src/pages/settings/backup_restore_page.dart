@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
@@ -22,6 +23,7 @@ class BackupRestorePage extends StatefulWidget {
 
 class _BackupRestorePageState extends State<BackupRestorePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
   String backupPath = "";
 
@@ -40,6 +42,30 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       leadingIconColor: isError ? Colors.red : Colors.green,
       sideColor: isError ? Colors.red : Colors.green,
     );
+  }
+
+  Future<bool> detectedDuplicateFile(String fileName) async {
+    bool? res = await showDialog(context: context, builder: (context) {
+      return AlertDialog(
+        title: const Text('Duplicate file detected!'),
+        content: Text('The file "$fileName" already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(true);
+              await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
+            },
+            child: const Text('Yes'),
+          ),
+        ],
+      );
+    });
+
+    return res ?? false;
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
@@ -108,11 +134,19 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 child: const Text('Restore will work only if the files are placed in the same directory.'),
               ),
               ] +
-                (backupPath.isNotEmpty ? [SettingsButton(
+                (backupPath.isNotEmpty ? [
+              SettingsButton(
                 name: 'Backup Settings',
                 action: () async {
                   try {
                     File file = File('${await ServiceHandler.getConfigDir()}settings.json');
+                    if(await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'settings.json')) {
+                      final bool res = await detectedDuplicateFile('settings.json');
+                      if(!res) {
+                        showSnackbar(context, 'Backup cancelled!', true);
+                        return;
+                      }
+                    }
                     if(backupPath.isNotEmpty) {
                       ServiceHandler.writeImage(await file.readAsBytes(), "settings", "text/json", "json", backupPath);
                       showSnackbar(context, 'Settings saved to settings.json', false);
@@ -159,6 +193,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 action: () async {
                   try {
                     File file = File('${await ServiceHandler.getConfigDir()}store.db');
+                    if(await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
+                      final bool res = await detectedDuplicateFile('store.db');
+                      if(!res) {
+                        showSnackbar(context, 'Backup cancelled!', true);
+                        return;
+                      }
+                    }
                     if(backupPath.isNotEmpty) {
                       ServiceHandler.writeImage(await file.readAsBytes(), "store", "application/x-sqlite3", "db", backupPath);
                       showSnackbar(context, 'Database saved to store.db', false);
@@ -182,10 +223,16 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         if (!(await newFile.exists())) {
                           await newFile.create();
                         }
+                        // disable backupping while restoring the db
+                        searchHandler.canBackup.value = false;
+                        // 
                         await newFile.writeAsBytes(dbFileBytes);
                         settingsHandler.dbHandler = DBHandler();
                         await settingsHandler.dbHandler.dbConnect(newFile.path);
-                        showSnackbar(context, 'Database restored from backup!', false);
+                        // 
+                        showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
+                        await Future.delayed(const Duration(seconds: 3));
+                        ServiceHandler.restartApp();
                       } else {
                         showSnackbar(context, 'No Restore File Found!', true);
                       }
@@ -206,6 +253,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   try {
                     print(json.encode(settingsHandler.booruList));
                     List<Booru> booruList = settingsHandler.booruList.where((e) => e.type != 'Favourites').toList();
+                    if(await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
+                      final bool res = await detectedDuplicateFile('boorus.json');
+                      if(!res) {
+                        showSnackbar(context, 'Backup cancelled!', true);
+                        return;
+                      }
+                    }
                     if(backupPath.isNotEmpty) {
                       await ServiceHandler.writeImage(utf8.encode(json.encode(booruList)), "boorus", "text", "json", backupPath);
                       showSnackbar(context, 'Boorus saved to boorus.json', false);
@@ -259,49 +313,59 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   }
                 },
               ),
-                  SettingsButton(
-                    name: 'Backup Tags',
-                    action: () async {
-                      try {
-                        print(json.encode(settingsHandler.booruList));
-                        if(backupPath.isNotEmpty) {
-                          await ServiceHandler.writeImage(utf8.encode(json.encode(tagHandler.toList())), "tags", "text", "json", backupPath);
-                          showSnackbar(context, 'Tags saved to tags.json', false);
-                        } else {
-                          showSnackbar(context, 'No Access to backup folder!', true);
-                        }
-                      } catch (e) {
-                        showSnackbar(context, 'Error while saving tags! $e', true);
-                        print(e);
-                      }
-                    },
-                  ),
-                  SettingsButton(
-                    name: 'Restore Tags',
-                    subtitle: const Text('tags.json'),
-                    action: () async {
 
-                      try {
-                        if(backupPath.isNotEmpty) {
-                          Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"tags.json");
-                          String tagJSONString = "";
-                          if (tagFileBytes != null){
-                            tagJSONString = String.fromCharCodes(tagFileBytes);
-                          }
-                          if(tagJSONString.isNotEmpty) {
-                            await tagHandler.loadFromJSON(tagJSONString);
-                            showSnackbar(context, 'Tags restored from backup!', false);
-                          }
-                        } else {
-                          showSnackbar(context, 'No Access to backup folder!', true);
-                        }
-                      } catch (e) {
-                        showSnackbar(context, 'Error while restoring tags! $e', true);
-                        print(e);
+              const SettingsButton(name: '', enabled: false),
+
+              SettingsButton(
+                name: 'Backup Tags',
+                action: () async {
+                  try {
+                    print(json.encode(settingsHandler.booruList));
+                    if(await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
+                      final bool res = await detectedDuplicateFile('tags.json');
+                      if(!res) {
+                        showSnackbar(context, 'Backup cancelled!', true);
+                        return;
                       }
-                    },
-                  ),
-              ]:[])
+                    }
+                    if(backupPath.isNotEmpty) {
+                      await ServiceHandler.writeImage(utf8.encode(json.encode(tagHandler.toList())), "tags", "text", "json", backupPath);
+                      showSnackbar(context, 'Tags saved to tags.json', false);
+                    } else {
+                      showSnackbar(context, 'No Access to backup folder!', true);
+                    }
+                  } catch (e) {
+                    showSnackbar(context, 'Error while saving tags! $e', true);
+                    print(e);
+                  }
+                },
+              ),
+              SettingsButton(
+                name: 'Restore Tags',
+                subtitle: const Text('tags.json'),
+                action: () async {
+
+                  try {
+                    if(backupPath.isNotEmpty) {
+                      Uint8List? tagFileBytes = await ServiceHandler.getFileFromSAFDirectory(backupPath,"tags.json");
+                      String tagJSONString = "";
+                      if (tagFileBytes != null){
+                        tagJSONString = String.fromCharCodes(tagFileBytes);
+                      }
+                      if(tagJSONString.isNotEmpty) {
+                        await tagHandler.loadFromJSON(tagJSONString);
+                        showSnackbar(context, 'Tags restored from backup!', false);
+                      }
+                    } else {
+                      showSnackbar(context, 'No Access to backup folder!', true);
+                    }
+                  } catch (e) {
+                    showSnackbar(context, 'Error while restoring tags! $e', true);
+                    print(e);
+                  }
+                },
+              ),
+            ]:[])
           ),
         ),
       ),

@@ -521,6 +521,15 @@ class SearchHandler extends GetxController {
     return;
   }
 
+  void reset() {
+    list.clear();
+    index.value = 0;
+    pageNum.value = -1;
+    isLoading.value = true;
+    isLastPage.value = false;
+    errorString.value = '';
+  }
+
 
 
   
@@ -565,6 +574,7 @@ class SearchHandler extends GetxController {
 
   // bool to notify the main build that tab restoratiuon is complete
   RxBool isRestored = false.obs;
+  RxBool canBackup = true.obs;
 
   // keeps track of the last time tabs were backupped
   DateTime lastBackupTime = DateTime.now();
@@ -763,14 +773,18 @@ class SearchHandler extends GetxController {
       return null;
     }
   }
-  void backupTabs() {
+  Future<void> backupTabs() async {
+    if(!canBackup.value) {
+      return;
+    }
+
     String? backupString = getBackupString();
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     // print('backupString: $backupString');
     if(backupString != null) {
-      settingsHandler.dbHandler.addTabRestore(backupString);
+      await settingsHandler.dbHandler.addTabRestore(backupString);
     } else {
-      settingsHandler.dbHandler.clearTabRestore();
+      await settingsHandler.dbHandler.clearTabRestore();
     }
 
     lastBackupTime = DateTime.now();
