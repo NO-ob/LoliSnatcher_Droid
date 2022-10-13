@@ -8,6 +8,7 @@ import 'package:app_links/app_links.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
+import 'package:logger_flutter_fork/logger_flutter_fork.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
@@ -165,7 +166,7 @@ class _MainAppState extends State<MainApp> {
         maxFps = currentMode.refreshRate.round();
         updateState();
       }
-      debugPrint('LoliSnatcher: Set Max FPS $maxFps');
+      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
       // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
     }
   }
@@ -201,6 +202,8 @@ class _MainAppState extends State<MainApp> {
         themeMode: themeMode,
         isAmoled: isAmoled,
       );
+
+      LogConsole.init(bufferSize: 10000);
 
       // TODO fix status bar coloring when in gallery view (AND depending on theme?)
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -241,7 +244,11 @@ class _MainAppState extends State<MainApp> {
 
             themeMode: themeMode,
             navigatorKey: navigationHandler.navigatorKey,
-            home: const Home(),
+            home: LogConsoleOnShake(
+              dark: themeMode == ThemeMode.dark ? true : false,
+              debugOnly: settingsHandler.enabledLogTypes.isEmpty,
+              child: const Home(),
+            ),
           ),
         ),
       );

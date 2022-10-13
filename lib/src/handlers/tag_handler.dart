@@ -9,7 +9,6 @@ import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -108,7 +107,6 @@ class TagHandler extends GetxController {
             String tag = untyped.tags.removeLast();
             if (!hasTagAndNotStale(tag) && !workingTags.contains(tag)) {
               workingTags.add(tag);
-              // print("adding $tag");
             }
           }
         }
@@ -180,7 +178,6 @@ class TagHandler extends GetxController {
   Future<void> loadTagsFile() async {
     File tagFile = File("${SettingsHandler.instance.path}tags.json");
     String jsonString = await tagFile.readAsString();
-    // print('loadJSON $settings');
     await loadFromJSON(jsonString);
     return;
   }
@@ -222,34 +219,23 @@ class TagHandler extends GetxController {
   Future<void> saveTags() async {
     tagSaveActive = true;
     SettingsHandler settings = SettingsHandler.instance;
-    SearchHandler searchHandler = SearchHandler.instance;
     await getPerms();
-    if (searchHandler.list.isNotEmpty){
-      Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("BOORU: ${searchHandler.currentBooruHandler.booru.name}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("FETCHED COUNT: ${searchHandler.currentBooruHandler.fetched.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("PREVIOUS TAG COUNT: $prevLength", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("TAG COUNT BEFORE SAVE: ${tagMap.entries.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    }
     prevLength = tagMap.entries.length;
     if(settings.dbEnabled){
       //await settings.dbHandler.updateTagsFromObjects(toList());
-    } else {try{
-      if (settings.path == "") await settings.setConfigDir();
-      await Directory(settings.path).create(recursive:true);
-      File tagFile = File("${settings.path}tags.json");
-      var writer = tagFile.openWrite();
-      writer.write(jsonEncode(toList()));
-      await writer.flush();
-      await writer.close();
-      if(settings.enabledLogTypes.contains(LogTypes.tagHandlerInfo)){
-        Logger.Inst().log("TAG.JSON SIZE: ${File("${SettingsHandler.instance.path}tags.json").lengthSync() / 1024} KB", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    } else {
+      try {
+        if (settings.path == "") await settings.setConfigDir();
+        await Directory(settings.path).create(recursive:true);
+        File tagFile = File("${settings.path}tags.json");
+        var writer = tagFile.openWrite();
+        writer.write(jsonEncode(toList()));
+        await writer.flush();
+        await writer.close();
+      } catch(e) {
+        Logger.Inst().log("FAILED TO WRITE TAG FILE: $e", "TagHandler", "saveTags", LogTypes.exception);
       }
-      Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    }catch(e){
-      Logger.Inst().log("FAILED TO WRITE TAG FILE", "TagHandler", "saveTags", LogTypes.exception,);
-      Logger.Inst().log(e.toString(), "TagHandler", "saveTags", LogTypes.exception,);
-    }}
+    }
     tagSaveActive = false;
     return;
   }

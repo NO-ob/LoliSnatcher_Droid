@@ -60,7 +60,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
         }
         formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
       } catch (e) {
-        print('$date $format $e');
+        print('formatDate: $date $format $e');
       }
     }
     return formattedDate;

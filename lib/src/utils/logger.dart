@@ -1,6 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:logger_fork/logger_fork.dart' as LogLib;
 
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -25,24 +24,118 @@ class Logger {
       }
     }
 
+    final logger = LogLib.Logger(
+      filter: CustomLogFilter(),
+      printer: LogLib.PrettyPrinter(
+        methodCount: 4,
+        errorMethodCount: 8,
+        lineLength: 120,
+        colors: true,
+        printEmojis: true,
+        printTime: true,
+      ),
+      output: CustomConsoleOutput(),
+    );
+
     // protect from exceptions when logStr is not a stringifiable object
     // TODO still could throw exception for some objects? needs more testing
     logStr = logStr is String ? logStr : '$logStr';
 
-    if (kDebugMode) {
-      // don't print app name on debug builds
-      // print("$callerClass::$callerFunction::$logType::$logStr");
-      printWrapped(logStr, "$callerClass::$callerFunction::$logType::");
+    final logLevel = logType?.logLevel ?? LogLib.Level.wtf;
+    if(logLevel == LogLib.Level.info) {
+      logger.i(logStr, logType);
+    } else if(logLevel == LogLib.Level.error) {
+      logger.e(logStr, logType);
+    } else if(logLevel == LogLib.Level.warning) {
+      logger.w(logStr, logType);
+    } else if(logLevel == LogLib.Level.debug) {
+      logger.d(logStr, logType);
+    } else if(logLevel == LogLib.Level.verbose) {
+      logger.v(logStr, logType);
+    } else if(logLevel == LogLib.Level.wtf) {
+      logger.wtf(logStr, logType);
     } else {
-      // debugPrint("[$Constants.appName]::$callerClass::$callerFunction::$logType::$logStr");
-      printWrapped(logStr, "[${Constants.appName}]::$callerClass::$callerFunction::$logType::");
+      logger.wtf(logStr, logType);
     }
   }
 
-  void printWrapped(String text, String preText) => RegExp('.{1,800}') // print in chunks of 800 chars
-      .allMatches(text)
-      .map((m) => m.group(0))
-      .forEach((String? str) => debugPrint("$preText$str"));
+  /// [m] is the message to be printed, can be anything but should be convertable to string / have toString()
+  /// 
+  /// [e] is the error object / title
+  /// 
+  /// [s] is the stacktrace object
+  /// 
+  /// [t] is the log type, can be null
+  void newLog({
+    required dynamic m,
+    required dynamic e,
+    required StackTrace? s,
+    required LogTypes? t,
+    bool ignoreTypeCheck = false,
+    bool withStack = true,
+  }) {
+    if (!Tools.isTestMode()) {
+      // don't call handlers when in test mode
+      // don't check which types are ignored in test mode and output everything
+      final bool allowedToLog = ignoreTypeCheck || t == null || SettingsHandler.instance.enabledLogTypes.contains(t);
+      if (!allowedToLog) {
+        // Ignore unselected log types
+        return;
+      }
+    }
+
+    final logger = LogLib.Logger(
+      filter: CustomLogFilter(),
+      printer: LogLib.PrettyPrinter(
+        methodCount: 4,
+        errorMethodCount: 8,
+        lineLength: 120,
+        colors: true,
+        printEmojis: true,
+        printTime: true,
+      ),
+      output: CustomConsoleOutput(),
+    );
+
+    final loggerNoStack = LogLib.Logger(
+      filter: CustomLogFilter(),
+      printer: LogLib.PrettyPrinter(
+        methodCount: 0,
+        errorMethodCount: 0,
+        lineLength: 120,
+        colors: true,
+        printEmojis: true,
+        printTime: true,
+      ),
+      output: CustomConsoleOutput(),
+    );
+
+    final logLevel = t?.logLevel ?? LogLib.Level.wtf;
+    final usedLogger = withStack ? logger : loggerNoStack;
+    if(logLevel == LogLib.Level.info) {
+      usedLogger.i(m, '$e :: $t', s);
+    } else if(logLevel == LogLib.Level.error) {
+      usedLogger.e(m, '$e :: $t', s);
+    } else if(logLevel == LogLib.Level.warning) {
+      usedLogger.w(m, '$e :: $t', s);
+    } else if(logLevel == LogLib.Level.debug) {
+      usedLogger.d(m, '$e :: $t', s);
+    } else if(logLevel == LogLib.Level.verbose) {
+      usedLogger.v(m, '$e :: $t', s);
+    } else if(logLevel == LogLib.Level.wtf) {
+      usedLogger.wtf(m, '$e :: $t', s);
+    } else {
+      usedLogger.wtf(m, '$e :: $t', s);
+    }
+
+    // Log Levels (higher include everything from lower)
+    // verbose - detailed data, json contents...
+    // debug - debug messages
+    // info - general info
+    // warning - warnings, errors that can be recovered from
+    // error
+    // wtf - unexpected errors
+  }
 }
 
 // TODO more types
@@ -135,6 +228,66 @@ enum LogTypes {
         return LogTypes.tagHandlerInfo;
       default:
         return LogTypes.exception;
+    }
+  }
+
+  LogLib.Level get logLevel {
+    switch (this) {
+      case LogTypes.booruHandlerFetchFailed:
+        return LogLib.Level.error;
+      case LogTypes.booruHandlerInfo:
+        return LogLib.Level.info;
+      case LogTypes.booruHandlerParseFailed:
+        return LogLib.Level.error;
+      case LogTypes.booruHandlerRawFetched:
+        return LogLib.Level.info;
+      case LogTypes.booruHandlerSearchURL:
+        return LogLib.Level.info;
+      case LogTypes.booruHandlerTagInfo:
+        return LogLib.Level.info;
+      case LogTypes.booruItemLoad:
+        return LogLib.Level.info;
+      case LogTypes.exception:
+        return LogLib.Level.error;
+      case LogTypes.imageInfo:
+        return LogLib.Level.info;
+      case LogTypes.imageLoadingError:
+        return LogLib.Level.error;
+      case LogTypes.loliSyncInfo:
+        return LogLib.Level.info;
+      case LogTypes.networkError:
+        return LogLib.Level.error;
+      case LogTypes.settingsError:
+        return LogLib.Level.error;
+      case LogTypes.settingsLoad:
+        return LogLib.Level.info;
+      case LogTypes.tagHandlerInfo:
+        return LogLib.Level.info;
+      default:
+        return LogLib.Level.wtf;
+    }
+  }
+}
+
+class CustomConsoleOutput extends LogLib.LogOutput {
+  @override
+  void output(LogLib.OutputEvent event) {
+    event.lines.forEach(print);
+  }
+}
+
+class CustomLogFilter extends LogLib.LogFilter {
+  @override
+  bool shouldLog(LogLib.LogEvent event) {
+    if (Tools.isTestMode()) {
+      return event.level.index >= level!.index;
+    } else {
+      final settingsHandler = SettingsHandler.instance;
+      if(settingsHandler.enabledLogTypes.isNotEmpty) {
+        return event.level.index >= level!.index;
+      } else {
+        return false;
+      }
     }
   }
 }

@@ -29,7 +29,6 @@ class _FaviconState extends State<Favicon> {
   void didUpdateWidget(Favicon oldWidget) {
     // force redraw on tab change
     if (oldWidget.faviconURL != widget.faviconURL) {
-      // print('favicon changed');
       restartLoading();
     }
     super.didUpdateWidget(oldWidget);
@@ -64,11 +63,11 @@ class _FaviconState extends State<Favicon> {
   void _onError(Exception error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
-      // print('Canceled by user: $error');
+      //
     } else {
       isFailed = true;
       updateState();
-      // print('Dio request cancelled: $error');
+      //
     }
   }
 
@@ -140,8 +139,6 @@ class _FaviconState extends State<Favicon> {
   @override
   Widget build(BuildContext context) {
     // print('Favicon build ${widget.faviconURL}');
-
-    // return const SizedBox();
 
     return SizedBox(
       width: iconSize,

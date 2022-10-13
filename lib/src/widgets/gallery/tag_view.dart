@@ -55,7 +55,6 @@ class _TagViewState extends State<TagView> {
     parseTags();
     groupTagsList();
     itemSubscription = searchHandler.viewedItem.listen((BooruItem item) {
-      // print('item changed to $item');
       this.item = item;
       tags = [...item.tagsList];
       parseTags();
@@ -100,9 +99,9 @@ class _TagViewState extends State<TagView> {
         tagMap[TagType.none]?.add(tags[i]);
       }
     }
-    tagMap.forEach((key, value) => {
-      //print("Type: $key Tags: $value")
-    });
+    // tagMap.forEach((key, value) => {
+    //   print("Type: $key Tags: $value")
+    // });
     for (var value in tagMap.values) {
       groupedTags.addAll(value);
     }

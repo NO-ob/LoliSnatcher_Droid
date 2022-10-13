@@ -59,7 +59,6 @@ class DioDownloader {
   }
 
   void dispose() {
-    // print('disposed class');
     receivePort.close();
     isolate?.kill(priority: Isolate.immediate);
     isolate = null;
@@ -74,23 +73,21 @@ class DioDownloader {
 
   Future<void> start(Uint8List? bytes, void Function(dynamic) func, void Function(dynamic) callback) async {
     isolate = await Isolate.spawn(func, receivePort.sendPort);
-    receivePort.listen((dynamic data) async {
-      if (data is SendPort) {
-        data.send({
-          'cacheRootPath': await ServiceHandler.getCacheDir(),
-          'fileURL': url,
-          'bytes': bytes,
-          'typeFolder': cacheFolder,
-          'fileNameExtras': fileNameExtras,
-        });
-      } else {
-        callback(data);
-      }
-    },
-    onDone: null
-    // () {
-    //     print("Done!");
-    // }
+    receivePort.listen(
+      (dynamic data) async {
+        if (data is SendPort) {
+          data.send({
+            'cacheRootPath': await ServiceHandler.getCacheDir(),
+            'fileURL': url,
+            'bytes': bytes,
+            'typeFolder': cacheFolder,
+            'fileNameExtras': fileNameExtras,
+          });
+        } else {
+          callback(data);
+        }
+      },
+      onDone: null,
     );
   }
 
@@ -174,7 +171,6 @@ class DioDownloader {
       final String resolved = Uri.base.resolve(url).toString();
 
       final String? filePath = await ImageWriter().getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
-      // print('path found: $filePath');
       if (filePath != null) {
         // read from cache
         final File fileToCache = File(filePath);
@@ -206,7 +202,7 @@ class DioDownloader {
       if(e is Exception) {
         onError?.call(e);
       } else {
-        // print('Exception: $e');
+        //
       }
       // dispose();
     }
@@ -262,7 +258,7 @@ class DioDownloader {
       if(e is Exception) {
         onError?.call(e);
       } else {
-        // print('Exception: $e');
+        //
       }
       dispose();
     }
@@ -274,7 +270,6 @@ class DioDownloader {
       final String resolved = Uri.base.resolve(url).toString();
 
       final String? filePath = await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
-      // print('path found: $filePath');
       if (filePath != null) {
         // read from cache
         final File file = File(filePath);
@@ -298,7 +293,7 @@ class DioDownloader {
       if(e is Exception) {
         onError?.call(e);
       } else {
-        // print('Exception: $e');
+        //
       }
       // dispose();
     }
@@ -350,7 +345,7 @@ class DioDownloader {
       if(e is Exception) {
         onError?.call(e);
       } else {
-        // print('Exception: $e');
+        //
       }
       dispose();
     }
@@ -388,7 +383,7 @@ class DioDownloader {
       if(e is Exception) {
         onError?.call(e);
       } else {
-        // print('Exception: $e');
+        //
       }
       dispose();
     }

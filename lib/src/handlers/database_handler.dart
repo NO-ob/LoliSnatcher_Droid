@@ -84,7 +84,7 @@ class DBHandler{
       }
 
     } catch(e) {
-      //print(e);
+      Logger.Inst().log("Error updating table", "DBHandler", "updateTable",  LogTypes.exception);
     }
     return true;
   }

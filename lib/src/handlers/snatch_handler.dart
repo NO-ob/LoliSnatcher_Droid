@@ -31,9 +31,6 @@ class SnatchHandler extends GetxController {
 
   SnatchHandler() {
     queuedList.listen((List<SnatchItem> list) {
-      // print("queuedList updated");
-      // print(list);
-      // print(list.length);
       trySnatch();
     });
   }
@@ -56,7 +53,6 @@ class SnatchHandler extends GetxController {
   }
 
   Future snatch(SnatchItem item) async {
-    // print("snatching");
     snatchActive.value = true;
     snatchStatus.value = queuedList.isNotEmpty ? "0/${item.booruItems.length}/${queuedList.length}" : "0/${item.booruItems.length}";
 
@@ -195,7 +191,6 @@ class SnatchHandler extends GetxController {
       booruItems = (await booruHandler.search(tags, null) ?? []);
       booruHandler.pageNum++;
       count = booruItems.length;
-      print(count);
       // TODO error handling?
     }
     queue(booruItems, booru, cooldown);

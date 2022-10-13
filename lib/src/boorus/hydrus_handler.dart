@@ -229,7 +229,6 @@ class HydrusHandler extends BooruHandler {
     int sortType = -1;
     bool ascending = false;
     for (int i = tagList.length - 1; i >= 0; i--){
-      print(tagList[i]);
       if(tagList[i].contains("sort:")) {
         sortType = getSortType(tagList[i].split(":")[1]);
         tagList.remove(tagList[i].trim().toLowerCase());

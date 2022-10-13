@@ -89,7 +89,6 @@ class ImageViewerState extends State<ImageViewer> {
   void onSize(int size) {
     // TODO find a way to stop loading based on size when caching is enabled
     const int maxSize = 1024 * 1024 * 200;
-    // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
     } else if ((size > maxSize) && isTooBig != 2) {
@@ -133,10 +132,10 @@ class ImageViewerState extends State<ImageViewer> {
   void _onError(Exception error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
-      // print('Canceled by user: $imageURL | $error');
+      //
     } else {
       killLoading(['Loading Error: $error']);
-      // print('Dio request cancelled: $error');
+      //
     }
   }
 
@@ -242,7 +241,6 @@ class ImageViewerState extends State<ImageViewer> {
 
   @override
   void dispose() {
-    // print('mediaViewer dispose called ${widget.index}');
     disposables();
 
     indexListener?.cancel();
@@ -309,7 +307,6 @@ class ImageViewerState extends State<ImageViewer> {
     // therefore don't clump the value to lower limit if we are zooming in to avoid unnecessary zoom jumps
     final double lowerLimit = value > 0 ? upperLimit : max(0.75, upperLimit);
 
-    // print('ll $lowerLimit $value');
     // if zooming out and zoom is smaller than limit - reset to container size
     // TODO minimal scale to fit can be different from limit
     if (lowerLimit == 0.75 && value < 0) {

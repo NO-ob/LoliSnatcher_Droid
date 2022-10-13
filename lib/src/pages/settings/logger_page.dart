@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'package:logger_flutter_fork/logger_flutter_fork.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -62,9 +65,34 @@ class _LoggerPageState extends State<LoggerPage> {
             ),
         body: Center(
           child: ListView.builder(
-            itemCount: LogTypes.values.length,
+            itemCount: LogTypes.values.length + 2,
             itemBuilder: (context, index) {
-              final LogTypes logType = LogTypes.values[index];
+              if(index == 0) {
+                return SettingsButton(
+                  name: 'Open Logger Output',
+                  action: () {
+                    LogConsole.open(
+                      context,
+                      showCloseButton: true,
+                      showClearButton: true,
+                      dark: Theme.of(context).brightness == Brightness.dark,
+                      onExport: (String text) {
+                        Clipboard.setData(ClipboardData(text: text));
+                      },
+                    );
+                  },
+                  trailingIcon: const Icon(Icons.print),
+                );
+              }
+
+              if(index == 1) {
+                return const SettingsButton(
+                  name: '',
+                  enabled: false,
+                );
+              }
+
+              final LogTypes logType = LogTypes.values[index - 2];
 
               return SettingsToggle(
                 value: enabledLogTypes.contains(logType),

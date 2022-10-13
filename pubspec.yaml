@@ -59,6 +59,8 @@ dependencies:
   image: ^3.2.0
   intl: ^0.17.0
   keyboard_actions: ^4.0.1
+  logger_fork: ^1.2.0
+  logger_flutter_fork: ^1.2.0
   # local_auth: ^2.1.0
   # marquee: ^2.2.2 # replaced with fast_marquee
   path_provider: ^2.0.11

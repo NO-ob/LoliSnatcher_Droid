@@ -106,14 +106,6 @@ class SankakuHandler extends BooruHandler {
         postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
         postDateFormat: "unix",
       );
-      if(current["id"].toString() == "31348173"){
-        print(current["width"].toDouble());
-        print(current["height"].toDouble());
-        print(current["width"].toDouble());
-        print(current["height"].toDouble());
-        print(current["width"].toDouble());
-        print(current["height"].toDouble());
-      }
       return item;
     } else {
       return null;

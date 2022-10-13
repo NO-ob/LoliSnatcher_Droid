@@ -153,7 +153,6 @@ class DesktopHome extends StatelessWidget {
             maxRatio: 1,
             direction: SplitDirection.vertical,
             onRatioChange: (double newRatio) {
-              // print('ratioChanged1 $newRatio');
               // TODO save to settings, but debounce the saving to file
             },
           ),
@@ -162,7 +161,6 @@ class DesktopHome extends StatelessWidget {
           minRatio: 0.2,
           maxRatio: 0.8,
           onRatioChange: (double newRatio) {
-            // print('ratioChanged2 $newRatio');
             // TODO save to settings, but debounce the saving to file
           },
         ),

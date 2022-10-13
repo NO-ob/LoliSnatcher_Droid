@@ -668,7 +668,6 @@ class SearchHandler extends GetxController {
       Booru defaultBooru = Booru(null, null, null, null, null);
       // settingsHandler.getBooru();
       // Set the default booru and tags at the start
-      print('BOORULIST ${settingsHandler.booruList.isNotEmpty}');
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }

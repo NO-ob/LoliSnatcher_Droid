@@ -15,6 +15,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/dio_downloader.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/thumbnail_loading.dart';
 import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
@@ -375,7 +376,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 width: double.infinity, // widget.isStandalone ? double.infinity : null,
                 height: double.infinity, // widget.isStandalone ? double.infinity : null,
                 errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                  print('failed to load thumb: ${widget.item.thumbnailURL}');
+                  Logger.Inst().log('Error loading extra thumbnail: ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
                   return const Icon(Icons.broken_image, size: 30);
                 },
               )
@@ -403,7 +404,7 @@ class _ThumbnailState extends State<Thumbnail> {
                 width: double.infinity,
                 height: double.infinity,
                 errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                  print('failed to load sample: ${widget.item.sampleURL}');
+                  Logger.Inst().log('Error loading thumbnail: ${widget.item.sampleURL} ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
                   _onError(exception as Exception, delayed: true);
                   return const Icon(Icons.broken_image, size: 30);
                 },

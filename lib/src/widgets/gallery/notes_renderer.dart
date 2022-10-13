@@ -64,7 +64,6 @@ class _NotesRendererState extends State<NotesRenderer> {
     loadNotes();
     itemListener = searchHandler.viewedItem.listen((BooruItem item) {
       // TODO doesn't trigger for the first item after changing tabs on desktop
-      // print('item changed to $item');
       this.item = item;
       loading = true;
       updateState();
@@ -101,9 +100,6 @@ class _NotesRendererState extends State<NotesRenderer> {
     final bool hasNotes = item.hasNotes == true;
     final bool alreadyLoaded = item.notes.isNotEmpty;
 
-    // print('Loading notes for ${item.fileURL} ${item.notes.length}');
-    // print('hasSupport: $hasSupport hasNotes: $hasNotes alreadyLoaded: $alreadyLoaded');
-
     if (item.fileURL.isEmpty || !hasSupport || !hasNotes || alreadyLoaded) {
       loading = false;
       updateState();
@@ -133,7 +129,6 @@ class _NotesRendererState extends State<NotesRenderer> {
 
   void doCalculations() {
     // do the calculations depending on the current item here
-    // print('!!!DOING CALCULATIONS ${Random.secure().nextDouble()}!!!');
     imageWidth = item.fileWidth ?? 100;
     imageHeight = item.fileHeight ?? 100;
     imageRatio = imageWidth / imageHeight;
@@ -179,10 +174,6 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     // TODO don't render when out of view
     // ...but is it really needed? that will add extra calculations...
-
-    // print('sW:$screenWidth sH:$screenHeight iW:$imageWidth iH:$imageHeight iR:$imageRatio');
-    // print('rD:$ratioDiff sTOiR:$screenToImageRatio oX:$offsetX oY:$offsetY t:${note.content}');
-    // print('-------');
 
     if(loading) {
       return const SizedBox();

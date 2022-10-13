@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -581,6 +582,7 @@ class _BooruEditState extends State<BooruEdit> {
 
       if(test.errorString.isNotEmpty) {
         errorString = test.errorString;
+        Logger.Inst().log(errorString, 'BooruEdit', 'booruTest', LogTypes.exception);
       }
     }
 

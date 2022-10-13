@@ -58,7 +58,6 @@ class _DesktopTabsState extends State<DesktopTabs> {
   Widget buildRow(SearchTab tab) {
     bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
 
-    // print(value.tags);
     int? totalCount = tab.booruHandler.totalCount.value;
     String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
     String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";

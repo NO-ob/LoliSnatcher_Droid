@@ -1208,17 +1208,14 @@ class SettingsHandler extends GetxController {
       if (dbEnabled && tempList.isNotEmpty) {
         tempList.add(Booru("Favourites", "Favourites", "", "", ""));
       }
-    } catch (e){
-      print('Booru loading error: $e');
+    } catch (e) {
+      Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
     }
 
     booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
 
-    if (tempList.isNotEmpty){
+    if (tempList.isNotEmpty) {
       sortBooruList();
-    } else {
-      print(prefBooru);
-      print(tempList.isNotEmpty);
     }
     return true;
   }
@@ -1532,7 +1529,7 @@ class SettingsHandler extends GetxController {
       checkUpdate(withMessage: false);
       isInit.value = true;
     } catch (e) {
-      print('Settings Init error :: $e');
+      Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
       FlashElements.showSnackbar(
         title: const Text(
           "Initialization Error!",
