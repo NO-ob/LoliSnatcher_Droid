@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:dart_vlc/dart_vlc.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:dart_vlc/dart_vlc.dart';
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 

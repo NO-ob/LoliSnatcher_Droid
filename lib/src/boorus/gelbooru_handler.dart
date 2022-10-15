@@ -6,12 +6,12 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
-import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
@@ -117,11 +117,11 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
-  void afterParseResponse(List<BooruItem> newItems) {
+  Future<void> afterParseResponse(List<BooruItem> newItems) async {
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
     populateTagHandler(newItems); // difference from default afterParse
-    setMultipleTrackedValues(lengthBefore, fetched.length);
+    await setMultipleTrackedValues(lengthBefore, fetched.length);
   }
 
   @override

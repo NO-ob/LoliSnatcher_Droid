@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
+
 import 'package:chewie/src/chewie_player.dart';
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:chewie/src/progress_bar.dart';
-
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
@@ -581,12 +581,13 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   void toggleToolbar() {
+    // TODO better way to toggle toolbar on videos?
     // toggle toolbar and system ui only when controls are visible and not in fullscreen
     // if the controls are visible buildHitArea and buildDoubleTapMessage listen to taps, otherwise - gestureDetector in the main build
-    print('toggleToolbar $_hideStuff ${chewieController.isFullScreen}');
-    if(_hideStuff && !chewieController.isFullScreen) {
-      viewerHandler.displayAppbar.toggle();
-    }
+    // print('toggleToolbar $_hideStuff ${chewieController.isFullScreen}');
+    // if(_hideStuff && !chewieController.isFullScreen) {
+    //   viewerHandler.displayAppbar.toggle();
+    // }
   }
 
   Future<void> _initialize() async {

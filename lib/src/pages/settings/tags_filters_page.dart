@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tag_filters_add_dialog.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_edit_dialog.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_list.dart';
-import 'package:lolisnatcher/src/widgets/tags_filters/tags_filters_settings_list.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_add_dialog.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_edit_dialog.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_list.dart';
+import 'package:lolisnatcher/src/widgets/tags_filters/tf_settings_list.dart';
 
 class TagsFiltersPage extends StatefulWidget {
   const TagsFiltersPage({Key? key}) : super(key: key);
@@ -25,14 +25,17 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   List<String> hatedList = [];
   List<String> lovedList = [];
-  bool filterHated = false;
+  bool filterHated = false, filterFavourites = false;
 
   @override
   void initState() {
     super.initState();
     hatedList = settingsHandler.hatedTags;
+    hatedList.sort(sortTags);
     lovedList = settingsHandler.lovedTags;
+    lovedList.sort(sortTags);
     filterHated = settingsHandler.filterHated;
+    filterFavourites = settingsHandler.filterFavourites;
 
     tabController = TabController(vsync: this, length: 3)..addListener(updateState);
   }
@@ -54,6 +57,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
+    settingsHandler.filterFavourites = filterFavourites;
     bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
@@ -68,6 +72,10 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     return tagsList;
   }
 
+  int sortTags(String a, String b) {
+    return a.toLowerCase().compareTo(b.toLowerCase());
+  }
+
   void addTag(String newTag, String type) {
     if(newTag.isEmpty) {
       return;
@@ -78,6 +86,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       duplicateMessage(newTag, type);
     } else {
       changedList.add(newTag);
+      changedList.sort(sortTags);
       updateState();
     }
   }
@@ -93,6 +102,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     } else {
       int index = changedList.indexOf(oldTag);
       changedList[index] = newTag;
+      changedList.sort(sortTags);
       updateState();
     }
   }
@@ -100,6 +110,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void deleteTag(String tag, String type) {
     List<String> changedList = getTagsList(type);
     changedList.remove(tag);
+    changedList.sort(sortTags);
     updateState();
   }
 
@@ -207,6 +218,11 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
               filterHated: filterHated,
               onFilterHatedChanged: (bool newValue) {
                 filterHated = newValue;
+                updateState();
+              },
+              filterFavourites: filterFavourites,
+              onFilterFavouritesChanged: (bool newValue) {
+                filterFavourites = newValue;
                 updateState();
               },
             ),

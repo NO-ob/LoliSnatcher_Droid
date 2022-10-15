@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/services/dio_downloader.dart';
-import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:dio/dio.dart';
 
-import '../../utils/logger.dart';
+import 'package:lolisnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
 
 class Favicon extends StatefulWidget {
   final String faviconURL;
@@ -29,7 +29,6 @@ class _FaviconState extends State<Favicon> {
   void didUpdateWidget(Favicon oldWidget) {
     // force redraw on tab change
     if (oldWidget.faviconURL != widget.faviconURL) {
-      // print('favicon changed');
       restartLoading();
     }
     super.didUpdateWidget(oldWidget);
@@ -64,11 +63,11 @@ class _FaviconState extends State<Favicon> {
   void _onError(Exception error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
-      // print('Canceled by user: $error');
+      //
     } else {
       isFailed = true;
       updateState();
-      // print('Dio request cancelled: $error');
+      //
     }
   }
 
@@ -128,7 +127,6 @@ class _FaviconState extends State<Favicon> {
             ],
           ),
           onTap: () {
-            isFailed = false;
             restartLoading();
           },
         ),
@@ -141,8 +139,6 @@ class _FaviconState extends State<Favicon> {
   @override
   Widget build(BuildContext context) {
     // print('Favicon build ${widget.faviconURL}');
-
-    // return const SizedBox();
 
     return SizedBox(
       width: iconSize,

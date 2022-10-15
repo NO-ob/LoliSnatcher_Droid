@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/about_page.dart';
@@ -11,11 +13,12 @@ import 'package:lolisnatcher/src/pages/settings/backup_restore_page.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_page.dart';
 import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
-import 'package:lolisnatcher/src/pages/settings/filter_tags_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
 import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
+import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
 import 'package:lolisnatcher/src/pages/settings/user_interface_page.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
@@ -132,6 +135,7 @@ class SettingsPage extends StatelessWidget {
                 },
                 trailingIcon: const Icon(Icons.exit_to_app),
               ),
+              const LogsEnabledWarning(),
               Obx(() {
                 if (settingsHandler.isDebug.value) {
                   return SettingsButton(name: 'Debug', icon: const Icon(Icons.developer_mode), page: () => const DebugPage());
@@ -163,7 +167,7 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String verText = "Version: ${settingsHandler.verStr} (${settingsHandler.buildNumber})";
+    final String verText = "Version: ${Constants.appVersion} (${Constants.appBuildNumber})";
     const String buildTypeText = EnvironmentConfig.isFromStore ? "/ Play" : (kDebugMode ? "/ Debug" : "");
 
     return SettingsButton(
@@ -196,5 +200,36 @@ class _VersionButtonState extends State<VersionButton> {
       },
       drawBottomBorder: false,
     );
+  }
+}
+
+class LogsEnabledWarning extends StatelessWidget {
+  const LogsEnabledWarning({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final List<LogTypes> enabledLogTypes = [...SettingsHandler.instance.enabledLogTypes];
+
+      if (enabledLogTypes.isEmpty) {
+        return const SizedBox();
+      }
+
+      return SettingsButton(
+        name: "You have enabled logging for:",
+        subtitle: Text('${enabledLogTypes.map((e) => e.toString())}', style: const TextStyle(fontSize: 12)),
+        icon: const Icon(Icons.warning_amber, color: Colors.yellow),
+        action: () {
+          FlashElements.showSnackbar(
+            context: context,
+            title: const Text("Logging enabled", style: TextStyle(fontSize: 18)),
+            content: const Text("You can disable logging in the debug settings"),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.yellow,
+            sideColor: Colors.yellow,
+          );
+        },
+      );
+    });
   }
 }

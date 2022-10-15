@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -228,7 +229,6 @@ class HydrusHandler extends BooruHandler {
     int sortType = -1;
     bool ascending = false;
     for (int i = tagList.length - 1; i >= 0; i--){
-      print(tagList[i]);
       if(tagList[i].contains("sort:")) {
         sortType = getSortType(tagList[i].split(":")[1]);
         tagList.remove(tagList[i].trim().toLowerCase());

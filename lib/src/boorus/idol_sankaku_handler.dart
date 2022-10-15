@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 

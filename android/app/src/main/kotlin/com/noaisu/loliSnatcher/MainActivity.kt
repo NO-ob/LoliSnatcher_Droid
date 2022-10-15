@@ -230,6 +230,18 @@ class MainActivity: FlutterActivity() {
                 if (fileName != null && uri != null) {
                     result.success(getFileByName(uri,fileName));
                 }
+            } else if (call.method == "existsFileByName"){
+                val uri: String? = call.argument("uri");
+                val fileName: String? = call.argument("fileName");
+                if (fileName != null && uri != null) {
+                    result.success(existsByName(uri,fileName));
+                }
+            } else if (call.method == "deleteFileByName"){
+                val uri: String? = call.argument("uri");
+                val fileName: String? = call.argument("fileName");
+                if (fileName != null && uri != null) {
+                    result.success(removeByName(uri,fileName));
+                }
             } else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
                 val permissions =
@@ -266,6 +278,9 @@ class MainActivity: FlutterActivity() {
                 Log.i(tag, permissions.toString());
 
 
+            } else if(call.method == "restartApp"){
+                restartApp()
+                result.success("ok")
             }
         }
 
@@ -358,7 +373,7 @@ class MainActivity: FlutterActivity() {
         val documentTree = DocumentFile.fromTreeUri(context, uri)
         if (documentTree != null) {
             for (document in documentTree.listFiles()) {
-                if (document.name.toString() == fileName){
+                if (document.name.toString() == fileName) {
                     val inputStream: InputStream? = contentResolver.openInputStream(document.uri)
                     return inputStream?.readBytes();
                 }
@@ -366,6 +381,44 @@ class MainActivity: FlutterActivity() {
         }
         return null
     }
+
+    private fun existsByName(uriString: String,fileName: String): Boolean{
+        val uri: Uri = Uri.parse(uriString)
+        val documentTree = DocumentFile.fromTreeUri(context, uri)
+        if (documentTree != null) {
+            for (document in documentTree.listFiles()) {
+                if (document.name.toString() == fileName) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private fun removeByName(uriString: String,fileName: String): Boolean{
+        val uri: Uri = Uri.parse(uriString)
+        val documentTree = DocumentFile.fromTreeUri(context, uri)
+        if (documentTree != null) {
+            for (document in documentTree.listFiles()) {
+                if (document.name.toString() == fileName) {
+                    return document.delete()
+                }
+            }
+        }
+        return false
+    }
+
+    private fun restartApp() {
+        context.startActivity(
+            Intent.makeRestartActivityTask(
+                (context.packageManager.getLaunchIntentForPackage(
+                    context.packageName
+                ))!!.component
+            )
+        )
+        Runtime.getRuntime().exit(0)
+    }
+
     /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == RESULT_OK && requestCode == 1) {

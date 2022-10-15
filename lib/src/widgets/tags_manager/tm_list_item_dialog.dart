@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
-import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -108,7 +108,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           title: const Text('Copy'),
         ),
         //
-        // TODO probably don't nned this since we shouldn't delete tags from sqlite
+        // TODO probably don't need this since we shouldn't delete tags from sqlite
         // const SizedBox(height: 10),
         // ListTile(
         //   shape: RoundedRectangleBorder(

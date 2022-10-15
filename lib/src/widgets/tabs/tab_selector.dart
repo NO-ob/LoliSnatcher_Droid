@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -37,7 +38,7 @@ class TabSelectorHeader extends StatelessWidget {
     const EdgeInsetsGeometry padding = EdgeInsets.fromLTRB(5, 10, 2, 0);
     const EdgeInsetsGeometry contentPadding = EdgeInsets.symmetric(horizontal: 4, vertical: 8);
     const Color borderColor = Colors.transparent;
-    final Color textColor = Theme.of(context).colorScheme.onPrimary;
+    final Color textColor = Theme.of(context).appBarTheme.titleTextStyle!.color!;
 
     return TabSelectorRender(
       isDesktop: isDesktop,
@@ -124,9 +125,11 @@ class TabSelectorRender extends StatelessWidget {
             },
             selectedItemBuilder: (BuildContext context) {
               return list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
+                bool isCurrent = list.indexOf(value) == index;
+
                 return DropdownMenuItem<SearchTab>(
                   value: value,
-                  child: TabRow(key: ValueKey(value), tab: value, color: textColor),
+                  child: TabRow(key: ValueKey(value), tab: value, color: textColor, withFavicon: isCurrent),
                 );
               }).toList();
             },

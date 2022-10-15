@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 

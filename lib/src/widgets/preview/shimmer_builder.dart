@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -21,9 +22,7 @@ class ShimmerWrap extends StatelessWidget {
 }
 
 class ShimmerList extends StatelessWidget {
-  const ShimmerList({Key? key, required this.controller}) : super(key: key);
-
-  final AutoScrollController controller;
+  const ShimmerList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +38,7 @@ class ShimmerList extends StatelessWidget {
 
           return GridView(
             physics: const NeverScrollableScrollPhysics(),
-            controller: controller,
+            primary: false,
             addAutomaticKeepAlives: false,
             cacheExtent: 200,
             shrinkWrap: false,

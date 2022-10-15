@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -43,7 +44,7 @@ class ImageViewerState extends State<ImageViewer> {
   ImageProvider? mainProvider;
   late String imageURL;
   late String imageFolder;
-  CancelToken _dioCancelToken = CancelToken();
+  CancelToken? _dioCancelToken;
   DioDownloader? client;
 
   StreamSubscription? noScaleListener, indexListener;
@@ -74,7 +75,7 @@ class ImageViewerState extends State<ImageViewer> {
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: imageFolder,
-      fileNameExtras: widget.booruItem.fileNameExtras
+      fileNameExtras: widget.booruItem.fileNameExtras,
     );
     // client.runRequest();
     if (settingsHandler.disableImageIsolates) {
@@ -88,7 +89,6 @@ class ImageViewerState extends State<ImageViewer> {
   void onSize(int size) {
     // TODO find a way to stop loading based on size when caching is enabled
     const int maxSize = 1024 * 1024 * 200;
-    // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
     } else if ((size > maxSize) && isTooBig != 2) {
@@ -132,10 +132,10 @@ class ImageViewerState extends State<ImageViewer> {
   void _onError(Exception error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
-      // print('Canceled by user: $imageURL | $error');
+      //
     } else {
       killLoading(['Loading Error: $error']);
-      // print('Dio request cancelled: $error');
+      //
     }
   }
 
@@ -241,7 +241,6 @@ class ImageViewerState extends State<ImageViewer> {
 
   @override
   void dispose() {
-    // print('mediaViewer dispose called ${widget.index}');
     disposables();
 
     indexListener?.cancel();
@@ -276,8 +275,8 @@ class ImageViewerState extends State<ImageViewer> {
     noScaleListener?.cancel();
     noScaleListener = null;
 
-    if (!(_dioCancelToken.isCancelled)) {
-      _dioCancelToken.cancel();
+    if (!(_dioCancelToken?.isCancelled ?? true)) {
+      _dioCancelToken?.cancel();
     }
     disposeClient();
   }
@@ -308,7 +307,6 @@ class ImageViewerState extends State<ImageViewer> {
     // therefore don't clump the value to lower limit if we are zooming in to avoid unnecessary zoom jumps
     final double lowerLimit = value > 0 ? upperLimit : max(0.75, upperLimit);
 
-    // print('ll $lowerLimit $value');
     // if zooming out and zoom is smaller than limit - reset to container size
     // TODO minimal scale to fit can be different from limit
     if (lowerLimit == 0.75 && value < 0) {
@@ -368,29 +366,31 @@ class ImageViewerState extends State<ImageViewer> {
             //
             AnimatedSwitcher(
               duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-              child: mainProvider == null ? Container() : Listener(
-                onPointerSignal: (pointerSignal) {
-                  if (pointerSignal is PointerScrollEvent) {
-                    scrollZoomImage(pointerSignal.scrollDelta.dy);
-                  }
-                },
-                child: PhotoView(
-                  //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-                  imageProvider: mainProvider!, // ?? MemoryImage(kTransparentImage),
-                  gaplessPlayback: true,
-                  // loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
-                  // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                  filterQuality: FilterQuality.medium,
-                  minScale: PhotoViewComputedScale.contained,
-                  maxScale: PhotoViewComputedScale.covered * 8,
-                  initialScale: PhotoViewComputedScale.contained,
-                  enableRotation: false,
-                  basePosition: Alignment.center,
-                  controller: viewController,
-                  // tightMode: true,
-                  scaleStateController: scaleController,
-                ),
-              ),
+              child: mainProvider == null
+                  ? Container()
+                  : Listener(
+                      onPointerSignal: (pointerSignal) {
+                        if (pointerSignal is PointerScrollEvent) {
+                          scrollZoomImage(pointerSignal.scrollDelta.dy);
+                        }
+                      },
+                      child: PhotoView(
+                        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+                        imageProvider: mainProvider!, // ?? MemoryImage(kTransparentImage),
+                        gaplessPlayback: true,
+                        // loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
+                        // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                        filterQuality: FilterQuality.medium,
+                        minScale: PhotoViewComputedScale.contained,
+                        maxScale: PhotoViewComputedScale.covered * 8,
+                        initialScale: PhotoViewComputedScale.contained,
+                        enableRotation: false,
+                        basePosition: Alignment.center,
+                        controller: viewController,
+                        // tightMode: true,
+                        scaleStateController: scaleController,
+                      ),
+                    ),
             ),
           ],
         ),

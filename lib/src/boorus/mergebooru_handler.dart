@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 
@@ -124,7 +124,7 @@ class MergebooruHandler extends BooruHandler{
   }
 
   @override
-  Future tagSearch(String input) async {
+  Future<List<String>> tagSearch(String input) async {
     return booruHandlers[0].tagSearch(input);
   }
 

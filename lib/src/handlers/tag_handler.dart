@@ -5,12 +5,10 @@ import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
-import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
-// import 'package:lolisnatcher/src/handlers/database_handler.dart';
-import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -27,7 +25,7 @@ class TagHandler extends GetxController {
 
   int prevLength = 0;
   final Map<String, Tag> _tagMap = {};
-  Map<String, Tag> get tagMap => _tagMap;
+  Map<String, Tag> get tagMap => _tagMap; // TODO read only (or is it?)
 
   RxList<UntypedCollection> untypedQueue = RxList<UntypedCollection>([]);
   RxBool tagFetchActive = false.obs;
@@ -39,13 +37,13 @@ class TagHandler extends GetxController {
   }
 
   bool hasTag(String tagString) {
-    return _tagMap.containsKey(tagString);
+    return tagMap.containsKey(tagString.toLowerCase());
   }
 
   /// Check if tag is in the tag map and if it is - check if it is not outdated/stale
   bool hasTagAndNotStale(String tagString, {int staleTime = Constants.tagStaleTime}) {
     if (hasTag(tagString)) {
-      final bool isNotStale = _tagMap[tagString]!.updatedAt >= (DateTime.now().millisecondsSinceEpoch - staleTime);
+      final bool isNotStale = getTag(tagString).updatedAt >= (DateTime.now().millisecondsSinceEpoch - staleTime);
       return isNotStale;
     } else {
       return false;
@@ -53,9 +51,10 @@ class TagHandler extends GetxController {
   }
 
   Tag getTag(String tagString) {
+    tagString = tagString.toLowerCase();
     Tag? tag;
     if (hasTag(tagString)) {
-      tag = _tagMap[tagString];
+      tag = tagMap[tagString];
     }
     tag ??= Tag(tagString, tagType: TagType.none);
     return tag;
@@ -66,6 +65,7 @@ class TagHandler extends GetxController {
     if(tag.fullString.isEmpty) {
       return;
     }
+    tag.fullString = tag.fullString.toLowerCase();
     if (preferTypeIfNone && hasTag(tag.fullString)){
       if(getTag(tag.fullString).tagType != TagType.none && tag.tagType == TagType.none){
         Logger.Inst().log(
@@ -107,7 +107,6 @@ class TagHandler extends GetxController {
             String tag = untyped.tags.removeLast();
             if (!hasTagAndNotStale(tag) && !workingTags.contains(tag)) {
               workingTags.add(tag);
-              // print("adding $tag");
             }
           }
         }
@@ -179,7 +178,6 @@ class TagHandler extends GetxController {
   Future<void> loadTagsFile() async {
     File tagFile = File("${SettingsHandler.instance.path}tags.json");
     String jsonString = await tagFile.readAsString();
-    // print('loadJSON $settings');
     await loadFromJSON(jsonString);
     return;
   }
@@ -210,7 +208,7 @@ class TagHandler extends GetxController {
 
   List<Tag> toList() {
     List<Tag> tagList = [];
-    _tagMap.forEach((key,value) => tagList.add(value));
+    tagMap.forEach((key,value) => tagList.add(value));
     return tagList;
   }
 
@@ -221,34 +219,23 @@ class TagHandler extends GetxController {
   Future<void> saveTags() async {
     tagSaveActive = true;
     SettingsHandler settings = SettingsHandler.instance;
-    SearchHandler searchHandler = SearchHandler.instance;
     await getPerms();
-    if (searchHandler.list.isNotEmpty){
-      Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("BOORU: ${searchHandler.currentBooruHandler.booru.name}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("FETCHED COUNT: ${searchHandler.currentBooruHandler.fetched.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("PREVIOUS TAG COUNT: $prevLength", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-      Logger.Inst().log("TAG COUNT BEFORE SAVE: ${tagMap.entries.length}", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    }
     prevLength = tagMap.entries.length;
     if(settings.dbEnabled){
       //await settings.dbHandler.updateTagsFromObjects(toList());
-    } else {try{
-      if (settings.path == "") await settings.setConfigDir();
-      await Directory(settings.path).create(recursive:true);
-      File tagFile = File("${settings.path}tags.json");
-      var writer = tagFile.openWrite();
-      writer.write(jsonEncode(toList()));
-      await writer.flush();
-      await writer.close();
-      if(!settings.ignoreLogTypes.contains(LogTypes.tagHandlerInfo)){
-        Logger.Inst().log("TAG.JSON SIZE: ${File("${SettingsHandler.instance.path}tags.json").lengthSync() / 1024} KB", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
+    } else {
+      try {
+        if (settings.path == "") await settings.setConfigDir();
+        await Directory(settings.path).create(recursive:true);
+        File tagFile = File("${settings.path}tags.json");
+        var writer = tagFile.openWrite();
+        writer.write(jsonEncode(toList()));
+        await writer.flush();
+        await writer.close();
+      } catch(e) {
+        Logger.Inst().log("FAILED TO WRITE TAG FILE: $e", "TagHandler", "saveTags", LogTypes.exception);
       }
-      Logger.Inst().log("=============================================================", "TagHandler", "saveTags", LogTypes.tagHandlerInfo,);
-    }catch(e){
-      Logger.Inst().log("FAILED TO WRITE TAG FILE", "TagHandler", "saveTags", LogTypes.exception,);
-      Logger.Inst().log(e.toString(), "TagHandler", "saveTags", LogTypes.exception,);
-    }}
+    }
     tagSaveActive = false;
     return;
   }

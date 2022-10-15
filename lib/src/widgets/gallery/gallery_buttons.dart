@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';

@@ -6,8 +6,8 @@ import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';

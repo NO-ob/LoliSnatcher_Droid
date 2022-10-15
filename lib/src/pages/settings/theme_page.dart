@@ -2,8 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';

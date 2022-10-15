@@ -4,8 +4,8 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
@@ -127,7 +127,7 @@ class InkBunnyHandler extends BooruHandler {
     List<BooruItem> items = [];
     for(int i = 0; i < rawItems.length; i++){
       var current = rawItems[i];
-      Logger.Inst().log(current.toString(), className,"parseResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(current.toString(), className, "parseItemsFromResponse", LogTypes.booruHandlerRawFetched);
       List<String> currentTags = [];
       currentTags.add("artist:${current["username"]}");
       var tags = current["keywords"] ?? [];
@@ -229,7 +229,7 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   @override
-  Future tagSearch(String input) async {
+  Future<List<String>> tagSearch(String input) async {
     List<String> searchTags = [];
     String url = makeTagURL(input);
     try {

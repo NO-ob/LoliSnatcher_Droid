@@ -1,5 +1,6 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
+
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -36,19 +37,15 @@ class TabBooruSelector extends StatelessWidget {
       if (!isPrimary) {
         return Container(
           padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
-          child: Obx(() => DropdownSearch<Booru>.multiSelection(
+          child: Obx(
+            () => DropdownSearch<Booru>.multiSelection(
               // showSearchBox: true,
               items: settingsHandler.booruList,
               onChanged: (List<Booru> newList) {
-                if (newList.isNotEmpty) {
-                  searchHandler.mergeAction(newList);
-                } else {
-                  // if no secondary boorus selected, disable merge mode
-                  settingsHandler.mergeEnabled.value = false;
-                  searchHandler.mergeAction(null);
-                  // TODO add .drawerRestate()
-                  searchHandler.rootRestate();
-                }
+                // if no secondary boorus selected, disable merge mode
+                searchHandler.mergeAction(newList.isNotEmpty ? newList : null);
+                // TODO add .drawerRestate()
+                searchHandler.rootRestate();
               },
               popupProps: PopupPropsMultiSelection.menu(
                 itemBuilder: (BuildContext context, Booru? value, bool isSelected) {
@@ -98,7 +95,9 @@ class TabBooruSelector extends StatelessWidget {
                   }).toList(),
                 );
               },
-              selectedItems: searchHandler.currentTab.secondaryBoorus ?? [])),
+              selectedItems: searchHandler.currentTab.secondaryBoorus ?? [],
+            ),
+          ),
         );
       }
 
@@ -135,7 +134,7 @@ class TabBooruSelector extends StatelessWidget {
               return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
                 return DropdownMenuItem<Booru>(
                   value: value,
-                  child: TabBooruSelectorItem(booru: value),
+                  child: TabBooruSelectorItem(booru: value, withFavicon: searchHandler.currentBooru == value),
                 );
               }).toList();
             },
@@ -173,9 +172,11 @@ class TabBooruSelectorItem extends StatelessWidget {
   const TabBooruSelectorItem({
     Key? key,
     required this.booru,
+    this.withFavicon = true,
   }) : super(key: key);
 
   final Booru booru;
+  final bool withFavicon;
 
   @override
   Widget build(BuildContext context) {
@@ -184,7 +185,7 @@ class TabBooruSelectorItem extends StatelessWidget {
     return Row(
       children: <Widget>[
         //Booru Icon
-        booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru.faviconURL!),
+        if (withFavicon) booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru.faviconURL!),
         //Booru name
         MarqueeText(
           key: ValueKey(name),

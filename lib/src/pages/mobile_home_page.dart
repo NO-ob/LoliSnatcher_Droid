@@ -1,5 +1,6 @@
-import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -41,14 +42,11 @@ class _MobileHomeState extends State<MobileHome> {
     );
   }
 
-
   @override
   void initState() {
     super.initState();
     searchHandler.mainDrawerKey = GlobalKey<InnerDrawerState>();
   }
-
-  
 
   Future<bool> _onBackPressed(BuildContext context) async {
     if (isDrawerOpened) {
@@ -64,7 +62,7 @@ class _MobileHomeState extends State<MobileHome> {
         return SettingsDialog(
           title: const Text('Are you sure?'),
           contentItems: const [
-            Text('Do you want to exit the App?')
+            Text('Do you want to exit the App?'),
           ],
           actionButtons: <Widget>[
             ElevatedButton.icon(
@@ -88,7 +86,7 @@ class _MobileHomeState extends State<MobileHome> {
     return shouldPop ?? false;
   }
 
-  void _onMenuLongTap () {
+  void _onMenuLongTap() {
     ServiceHandler.vibrate();
     // scroll to start on long press of menu buttons
     searchHandler.gridScrollController.jumpTo(0);
@@ -99,7 +97,7 @@ class _MobileHomeState extends State<MobileHome> {
       onLongPress: _onMenuLongTap,
       onSecondaryTap: _onMenuLongTap,
       child: IconButton(
-        icon: const Icon(Icons.menu),
+        icon: Icon(Icons.menu, color: Theme.of(context).appBarTheme.iconTheme!.color!),
         onPressed: () {
           _toggleDrawer(direction);
 
@@ -178,9 +176,9 @@ class _MobileHomeState extends State<MobileHome> {
                   children: [
                     const MediaPreviews(),
                     Obx(() => MainAppBar(
-                      leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : null,
-                      trailing: settingsHandler.handSide.value.isRight ? menuButton(InnerDrawerDirection.end) : null,
-                    )),
+                          leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : null,
+                          trailing: settingsHandler.handSide.value.isRight ? menuButton(InnerDrawerDirection.end) : null,
+                        )),
                   ],
                 ),
               ),
@@ -247,13 +245,15 @@ class MainDrawer extends StatelessWidget {
                       const TabBooruSelector(true),
                       const MergeBooruToggle(),
                       Obx(() {
-                        if (settingsHandler.booruList.length > 1 && settingsHandler.mergeEnabled.value) {
+                        bool hasTabsAndTabHasSecondaryBoorus =
+                            searchHandler.list.isNotEmpty && (searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false);
+                        if (settingsHandler.booruList.length > 1 && hasTabsAndTabHasSecondaryBoorus) {
                           return const TabBooruSelector(false);
                         } else {
                           return const SizedBox.shrink();
                         }
                       }),
-        
+                      //
                       Obx(() {
                         if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                           return SettingsButton(
@@ -266,13 +266,13 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
-        
+                      //
                       SettingsButton(
                         name: "Settings",
                         icon: const Icon(Icons.settings),
                         page: () => const SettingsPage(),
                       ),
-        
+                      //
                       Obx(() {
                         if (settingsHandler.updateInfo.value != null) {
                           return SettingsButton(
@@ -305,7 +305,7 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
-        
+                      //
                       if (settingsHandler.enableDrawerMascot) const MascotImage(),
                     ],
                   ),
@@ -319,50 +319,47 @@ class MainDrawer extends StatelessWidget {
   }
 }
 
-class MergeBooruToggle extends StatefulWidget {
+class MergeBooruToggle extends StatelessWidget {
   const MergeBooruToggle({Key? key}) : super(key: key);
 
   @override
-  State<MergeBooruToggle> createState() => _MergeBooruToggleState();
-}
-
-class _MergeBooruToggleState extends State<MergeBooruToggle> {
-  final SettingsHandler settingsHandler = SettingsHandler.instance;
-  final SearchHandler searchHandler = SearchHandler.instance;
-
-  @override
   Widget build(BuildContext context) {
-    if (settingsHandler.booruList.length < 2) {
-      return const SizedBox.shrink();
-    }
+    return Obx(() {
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      final SearchHandler searchHandler = SearchHandler.instance;
 
-    return SettingsToggle(
-      title: 'Multibooru Mode',
-      value: settingsHandler.mergeEnabled.value,
-      onChanged: (newValue) {
-        if (settingsHandler.booruList.length < 2) {
-          FlashElements.showSnackbar(
-            context: context,
-            title: const Text(
-              "Error!",
-              style: TextStyle(fontSize: 20),
-            ),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('You need at least 2 booru configs to use this feature!'),
-              ],
-            ),
-            leadingIcon: Icons.error,
-            leadingIconColor: Colors.red,
-          );
-        } else {
-          setState(() {
-            settingsHandler.mergeEnabled.value = newValue;
-            searchHandler.mergeAction(null);
-          });
-        }
-      },
-    );
+      if (settingsHandler.booruList.length < 2 || searchHandler.list.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      return SettingsToggle(
+        title: 'Multibooru Mode',
+        value: searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false,
+        onChanged: (newValue) {
+          if (settingsHandler.booruList.length < 2) {
+            FlashElements.showSnackbar(
+              context: context,
+              title: const Text(
+                "Error!",
+                style: TextStyle(fontSize: 20),
+              ),
+              content: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text('You need at least 2 booru configs to use this feature!'),
+                ],
+              ),
+              leadingIcon: Icons.error,
+              leadingIconColor: Colors.red,
+            );
+          } else {
+            var firstAvailableBooru = settingsHandler.booruList.firstWhereOrNull((booru) => booru != searchHandler.currentBooru);
+            if (firstAvailableBooru != null) {
+              searchHandler.mergeAction(newValue ? [firstAvailableBooru] : null);
+            }
+          }
+        },
+      );
+    });
   }
 }

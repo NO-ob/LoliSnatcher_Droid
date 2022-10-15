@@ -4,11 +4,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -106,14 +106,6 @@ class SankakuHandler extends BooruHandler {
         postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
         postDateFormat: "unix",
       );
-      if(current["id"].toString() == "31348173"){
-        print(current["width"].toDouble());
-        print(current["height"].toDouble());
-        print(current["width"].toDouble());
-        print(current["height"].toDouble());
-        print(current["width"].toDouble());
-        print(current["height"].toDouble());
-      }
       return item;
     } else {
       return null;

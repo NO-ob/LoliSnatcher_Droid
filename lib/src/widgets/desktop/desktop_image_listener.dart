@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -13,9 +14,9 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 
 /// This class will listen for the value of viewedItem in searchtabs
 /// It will return an empty container if that item has no file URL.

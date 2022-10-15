@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/note_item.dart';
@@ -19,7 +20,7 @@ class BooruItem{
   List<String>? sources;
   RxList<NoteItem> notes = RxList([]);
   bool? hasNotes, hasComments;
-  double? fileWidth, fileHeight, sampleWidth, sampleHeight, previewWidth, previewHeight;
+  double? fileWidth, fileHeight, fileAspectRatio, sampleWidth, sampleHeight, sampleAspectRatio, previewWidth, previewHeight, previewAspectRatio;
   int? fileSize;
 
   BooruItem({
@@ -58,6 +59,16 @@ class BooruItem{
     }
     fileExt = (fileExt ?? Tools.getFileExt(fileURL)).toLowerCase();
 
+    if (fileWidth != null && fileHeight != null){
+      fileAspectRatio = fileWidth! / fileHeight!;
+    }
+    if (sampleWidth != null && sampleHeight != null){
+      sampleAspectRatio = sampleWidth! / sampleHeight!;
+    }
+    if (previewWidth != null && previewHeight != null){
+      previewAspectRatio = previewWidth! / previewHeight!;
+    }
+
     switch (fileExt) {
       case 'jpg':
       case 'jpeg':
@@ -91,6 +102,10 @@ class BooruItem{
 
   bool isImage() {
     return mediaType == "image" || mediaType == "animation" || mediaType == "not_supported_animation";
+  }
+
+  bool isAnimation() {
+    return mediaType == "animation";
   }
 
   Map<String, dynamic> toJson() {

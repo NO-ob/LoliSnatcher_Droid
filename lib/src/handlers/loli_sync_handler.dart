@@ -4,15 +4,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
 
 class LoliSync{
   String ip = "127.0.0.1";
@@ -517,12 +517,13 @@ class LoliSync{
         case "Booru":
           yield "Sync Starting $address";
           yield "Preparing booru data";
-          int booruCount = settingsHandler.booruList.length;
-          if (booruCount > 0){
-            for (int i = 0; i < booruCount; i++){
-              if (!syncKilled){
-                if (i < booruCount){
-                  String resp = await sendBooru(settingsHandler.booruList.elementAt(i), booruCount, i);
+          List<Booru> booruList = settingsHandler.booruList.where((e) => e.type != 'Favourites').toList();
+          int booruCount = booruList.length;
+          if (booruCount > 0) {
+            for (int i = 0; i < booruCount; i++) {
+              if (!syncKilled) {
+                if (i < booruCount) {
+                  String resp = await sendBooru(booruList.elementAt(i), booruCount, i);
                   yield "$i / $booruCount - $resp";
                 } else {
                   Logger.Inst().log("skipping", "LoliSync", "startSync", LogTypes.loliSyncInfo);

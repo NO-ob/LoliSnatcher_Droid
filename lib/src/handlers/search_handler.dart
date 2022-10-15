@@ -1,17 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
@@ -326,6 +328,19 @@ class SearchHandler extends GetxController {
   }
 
 
+
+  Future<bool?> toggleItemFavourite(int itemIndex) async {
+    final BooruItem item = currentFetched[itemIndex];
+    if(item.isFavourite.value != null) {
+      ServiceHandler.vibrate();
+
+      item.isFavourite.value = item.isFavourite.value == true ? false : true;
+      await SettingsHandler.instance.dbHandler.updateBooruItem(item, "local");
+    }
+    return item.isFavourite.value;
+  }
+
+
   // runs search on current tab
   void searchAction(String text, Booru? newBooru) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
@@ -341,7 +356,7 @@ class SearchHandler extends GetxController {
       if(settingsHandler.booruList.isNotEmpty) {
         SearchTab newTab = SearchTab(
           settingsHandler.booruList[0].obs,
-          settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
+          currentTab.secondaryBoorus,
           text
         );
         list.add(newTab);
@@ -349,7 +364,7 @@ class SearchHandler extends GetxController {
     } else {
       SearchTab newTab = SearchTab(
         (newBooru ?? currentBooru).obs,
-        settingsHandler.mergeEnabled.value ? currentTab.secondaryBoorus : null,
+        currentTab.secondaryBoorus,
         text
       );
       list[currentIndex] = newTab;
@@ -433,12 +448,8 @@ class SearchHandler extends GetxController {
   void mergeAction(List<Booru>? secondaryBoorus) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    bool canAddSecondary = settingsHandler.mergeEnabled.value && (secondaryBoorus != null || currentTab.secondaryBoorus == null) && settingsHandler.booruList.length > 1;
-    RxList<Booru>? secondary = canAddSecondary
-      ? (secondaryBoorus == null
-        ? [settingsHandler.booruList[1]].obs
-        : secondaryBoorus.obs)
-      : null;
+    bool canAddSecondary = secondaryBoorus != null && settingsHandler.booruList.length > 1;
+    RxList<Booru>? secondary = canAddSecondary ? secondaryBoorus.obs : null;
 
     SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
     list[currentIndex] = newTab;
@@ -510,6 +521,15 @@ class SearchHandler extends GetxController {
     return;
   }
 
+  void reset() {
+    list.clear();
+    index.value = 0;
+    pageNum.value = -1;
+    isLoading.value = true;
+    isLastPage.value = false;
+    errorString.value = '';
+  }
+
 
 
   
@@ -554,6 +574,7 @@ class SearchHandler extends GetxController {
 
   // bool to notify the main build that tab restoratiuon is complete
   RxBool isRestored = false.obs;
+  RxBool canBackup = true.obs;
 
   // keeps track of the last time tabs were backupped
   DateTime lastBackupTime = DateTime.now();
@@ -647,7 +668,6 @@ class SearchHandler extends GetxController {
       Booru defaultBooru = Booru(null, null, null, null, null);
       // settingsHandler.getBooru();
       // Set the default booru and tags at the start
-      print('BOORULIST ${settingsHandler.booruList.isNotEmpty}');
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
@@ -752,14 +772,18 @@ class SearchHandler extends GetxController {
       return null;
     }
   }
-  void backupTabs() {
+  Future<void> backupTabs() async {
+    if(!canBackup.value) {
+      return;
+    }
+
     String? backupString = getBackupString();
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     // print('backupString: $backupString');
     if(backupString != null) {
-      settingsHandler.dbHandler.addTabRestore(backupString);
+      await settingsHandler.dbHandler.addTabRestore(backupString);
     } else {
-      settingsHandler.dbHandler.clearTabRestore();
+      await settingsHandler.dbHandler.clearTabRestore();
     }
 
     lastBackupTime = DateTime.now();

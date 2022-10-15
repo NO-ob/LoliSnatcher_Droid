@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';

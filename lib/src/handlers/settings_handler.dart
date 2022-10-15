@@ -4,9 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -29,7 +29,6 @@ class SettingsHandler extends GetxController {
   static SettingsHandler get instance => Get.find<SettingsHandler>();
 
   DBHandler dbHandler = DBHandler();
-  DBHandler favDbHandler = DBHandler();
 
   // service vars
   RxBool isInit = false.obs;
@@ -37,20 +36,13 @@ class SettingsHandler extends GetxController {
   String path = "";
   String boorusPath = "";
 
-  // TODO don't forget to update these on every new release
-  // version vars
-  String appName = "LoliSnatcher";
-  String packageName = "com.noaisu.loliSnatcher";
-  String verStr = "2.2.5";
-  int buildNumber = 172;
   Rx<UpdateInfo?> updateInfo = Rxn(null);
 
   ////////////////////////////////////////////////////
 
   // runtime settings vars
   bool hasHydrus = false;
-  RxBool mergeEnabled = RxBool(false);
-  List<LogTypes> ignoreLogTypes = List.from(LogTypes.values);
+  RxList<LogTypes> enabledLogTypes = RxList.from([]);
   RxString discordURL = RxString(Constants.discordURL);
 
   // debug toggles
@@ -88,7 +80,7 @@ class SettingsHandler extends GetxController {
   List<String> hatedTags = [];
   List<String> lovedTags = [];
 
-  int limit = 20;
+  int limit = Constants.defaultItemLimit;
   int portraitColumns = 2;
   int landscapeColumns = 4;
   int preloadCount = 1;
@@ -133,6 +125,7 @@ class SettingsHandler extends GetxController {
   bool dbEnabled = true;
   bool searchHistoryEnabled = true;
   bool filterHated = false;
+  bool filterFavourites = false;
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
@@ -140,6 +133,7 @@ class SettingsHandler extends GetxController {
   bool allowSelfSignedCerts = false;
   bool wakeLockEnabled = true;
   bool tagTypeFetchEnabled = true;
+  bool downloadNotifications = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -174,7 +168,7 @@ class SettingsHandler extends GetxController {
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showFPS', 'showPerf', 'showImageStats',
     'isDebug', 'showURLOnThumb', 'disableImageIsolates',
-    'mergeEnabled', 'desktopListsDrag'
+    'desktopListsDrag'
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -262,11 +256,15 @@ class SettingsHandler extends GetxController {
       "type": "stringList",
       "default": <String>[],
     },
+    "enabledLogTypes": {
+      "type": "logTypesList",
+      "default": <LogTypes>[],
+    },
 
     // int
     "limit": {
       "type": "int",
-      "default": 20,
+      "default": Constants.defaultItemLimit,
       "upperLimit": 100,
       "lowerLimit": 10,
     },
@@ -352,6 +350,10 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
+    "filterFavourites": {
+      "type": "bool",
+      "default": false,
+    },
     "useVolumeButtonsForScroll": {
       "type": "bool",
       "default": false,
@@ -389,6 +391,10 @@ class SettingsHandler extends GetxController {
       "default": true,
     },
     "tagTypeFetchEnabled": {
+      "type": "bool",
+      "default": true,
+    },
+    "downloadNotifications": {
       "type": "bool",
       "default": true,
     },
@@ -525,7 +531,7 @@ class SettingsHandler extends GetxController {
         case 'rxbool':
           if (toJSON) {
             // rxbool to bool
-            return value.value;
+            return (value as RxBool).value;
           } else {
             // bool to rxbool
             if(value is RxBool) {
@@ -540,7 +546,7 @@ class SettingsHandler extends GetxController {
         case 'appMode':
           if(toJSON) {
             // rxobject to string
-            return value.value.toString();
+            return (value as Rx<AppMode>).value.toString();
           } else {
             if(value is String) {
               // string to rxobject
@@ -553,7 +559,7 @@ class SettingsHandler extends GetxController {
         case 'handSide':
           if(toJSON) {
             // rxobject to string
-            return value.value.toString();
+            return (value as Rx<HandSide>).value.toString();
           } else {
             if(value is String) {
               // string to rxobject
@@ -562,11 +568,24 @@ class SettingsHandler extends GetxController {
               return settingParams["default"];
             }
           }
+        
+        case 'logTypesList':
+          if(toJSON) {
+            // rxobject to list<string>
+            return (value as RxList<LogTypes>).map((el) => el.toString()).toList();
+          } else {
+            if(value is List) {
+              // list<string> to list<LogTypes>
+              return List<String>.from(value).map((el) => LogTypes.fromString(el)).toList();
+            } else {
+              return settingParams["default"];
+            }
+          }
 
         case 'theme':
           if(toJSON) {
             // rxobject to string
-            return value.value.name;
+            return (value as Rx<ThemeItem>).value.name;
           } else {
             if(value is String) {
               // string to rxobject
@@ -580,7 +599,7 @@ class SettingsHandler extends GetxController {
         case 'themeMode':
           if (toJSON) {
             // rxobject to string
-            return value.value.toString().split('.')[1]; // ThemeMode.dark => dark
+            return (value as Rx<ThemeMode>).value.toString().split('.')[1]; // ThemeMode.dark => dark
           } else {
             if (value is String) {
               // string to rxobject
@@ -600,7 +619,7 @@ class SettingsHandler extends GetxController {
         case 'rxcolor':
           if (toJSON) {
             // rxobject to int
-            return value.value.value; // Color => int
+            return (value as Rx<Color?>).value?.value ?? Colors.pink.value; // Color => int
           } else {
             // int to rxobject
             if (value is int) {
@@ -612,7 +631,7 @@ class SettingsHandler extends GetxController {
 
         case 'duration':
           if (toJSON) {
-            return value.inSeconds; // Duration => int
+            return (value as Duration).inSeconds; // Duration => int
           } else {
             if (value is Duration) {
               return value;
@@ -630,7 +649,7 @@ class SettingsHandler extends GetxController {
       }
     } catch(err) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", LogTypes.settingsError);
+      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", null);
       return settingParams["default"];
     }
   }
@@ -647,10 +666,8 @@ class SettingsHandler extends GetxController {
 
     if (dbEnabled) {
       await dbHandler.dbConnect(path);
-      await favDbHandler.dbConnectReadOnly(path);
     } else {
       dbHandler = DBHandler();
-      favDbHandler = DBHandler();
     }
     return true;
   }
@@ -718,6 +735,8 @@ class SettingsHandler extends GetxController {
         return searchHistoryEnabled;
       case 'filterHated':
         return filterHated;
+      case 'filterFavourites':
+        return filterFavourites;
       case 'useVolumeButtonsForScroll':
         return useVolumeButtonsForScroll;
       case 'volumeButtonsScrollSpeed':
@@ -746,6 +765,8 @@ class SettingsHandler extends GetxController {
         return cacheSize;
       case 'allowSelfSignedCerts':
         return allowSelfSignedCerts;
+      case 'enabledLogTypes':
+        return enabledLogTypes;
 
       case 'prefBooru':
         return prefBooru;
@@ -763,6 +784,8 @@ class SettingsHandler extends GetxController {
         return wakeLockEnabled;
       case 'tagTypeFetchEnabled':
         return tagTypeFetchEnabled;
+      case 'downloadNotifications':
+        return downloadNotifications;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -861,6 +884,9 @@ class SettingsHandler extends GetxController {
       case 'filterHated':
         filterHated = validatedValue;
         break;
+      case 'filterFavourites':
+        filterFavourites = validatedValue;
+        break;
       case 'useVolumeButtonsForScroll':
         useVolumeButtonsForScroll = validatedValue;
         break;
@@ -915,6 +941,19 @@ class SettingsHandler extends GetxController {
       case 'allowSelfSignedCerts':
         allowSelfSignedCerts = validatedValue;
         break;
+      case 'enabledLogTypes':
+        enabledLogTypes.value = validatedValue;
+        break;
+      case 'wakeLockEnabled':
+        wakeLockEnabled = validatedValue;
+        break;
+      case 'tagTypeFetchEnabled':
+        tagTypeFetchEnabled = validatedValue;
+        break;
+      case 'downloadNotifications':
+        downloadNotifications = validatedValue;
+        break;
+
       // theme stuff
       case 'appMode':
         appMode.value = validatedValue;
@@ -942,12 +981,6 @@ class SettingsHandler extends GetxController {
         break;
       case 'enableDrawerMascot':
         enableDrawerMascot = validatedValue;
-        break;
-      case 'wakeLockEnabled':
-        wakeLockEnabled = validatedValue;
-        break;
-      case 'tagTypeFetchEnabled':
-        tagTypeFetchEnabled = validatedValue;
         break;
       default:
         break;
@@ -979,6 +1012,7 @@ class SettingsHandler extends GetxController {
       "dbEnabled" : validateValue("dbEnabled", null, toJSON: true),
       "searchHistoryEnabled" : validateValue("searchHistoryEnabled", null, toJSON: true),
       "filterHated" : validateValue("filterHated", null, toJSON: true),
+      "filterFavourites" : validateValue("filterFavourites", null, toJSON: true),
       "useVolumeButtonsForScroll" : validateValue("useVolumeButtonsForScroll", null, toJSON: true),
       "volumeButtonsScrollSpeed" : validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
       "disableVideo" : validateValue("disableVideo", null, toJSON: true),
@@ -992,6 +1026,10 @@ class SettingsHandler extends GetxController {
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
       "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
+      "enabledLogTypes": validateValue("enabledLogTypes", null, toJSON: true),
+      "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
+      "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
+      "downloadNotifications" : validateValue("downloadNotifications", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
@@ -1012,9 +1050,8 @@ class SettingsHandler extends GetxController {
       "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
       "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
-      "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
-      "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
-      "version": verStr,
+      "version": Constants.appVersion,
+      "build": Constants.appBuildNumber,
       // TODO split into two variables - system name and system version/sdk number
       // "SDK": SDKVer,
     };
@@ -1034,61 +1071,78 @@ class SettingsHandler extends GetxController {
     // TODO add error handling for invalid values
     // (don't allow user to exit the page until the value is correct? or just set to default (current behaviour)? mix of both?)
 
-    dynamic tempBtnOrder = json["buttonOrder"];
-    if(tempBtnOrder is List) {
-      // print('btnorder is a list');
-    } else if(tempBtnOrder is String) {
-      // print('btnorder is a string');
-      tempBtnOrder = tempBtnOrder.split(',');
-    } else {
-      // print('btnorder is a ${tempBtnOrder.runtimeType} type');
-      tempBtnOrder = [];
-    }
-    List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
-      List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
-      return button;
-    }).where((el) => el[0] != 'null').toList();
-    btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
-    buttonOrder = btnOrder;
-
-    dynamic tempHatedTags = json["hatedTags"];
-    if(tempHatedTags is List) {
-      // print('hatedTags is a list');
-    } else if(tempHatedTags is String) {
-      // print('hatedTags is a string');
-      tempHatedTags = tempHatedTags.split(',');
-    } else {
-      // print('hatedTags is a ${tempHatedTags.runtimeType} type');
-      tempHatedTags = [];
-    }
-    List<String> hateTags = List<String>.from(tempHatedTags);
-    for (int i = 0; i < hateTags.length; i++){
-      if (!hatedTags.contains(hateTags.elementAt(i))) {
-        hatedTags.add(hateTags.elementAt(i));
+    try {
+      dynamic tempBtnOrder = json["buttonOrder"];
+      if(tempBtnOrder is List) {
+        // print('btnorder is a list');
+      } else if(tempBtnOrder is String) {
+        // print('btnorder is a string');
+        tempBtnOrder = tempBtnOrder.split(',');
+      } else {
+        // print('btnorder is a ${tempBtnOrder.runtimeType} type');
+        tempBtnOrder = [];
       }
+      List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
+        List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+        return button;
+      }).where((el) => el[0] != 'null').toList();
+      btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
+      buttonOrder = btnOrder;
+    } catch (e) {
+      Logger.Inst().log('Failed to parse button order $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
     }
 
-    dynamic tempLovedTags = json["lovedTags"];
-    if(tempLovedTags is List) {
-      // print('lovedTags is a list');
-    } else if(tempLovedTags is String) {
-      // print('lovedTags is a string');
-      tempLovedTags = tempLovedTags.split(',');
-    } else {
-      // print('lovedTags is a ${tempLovedTags.runtimeType} type');
-      tempLovedTags = [];
-    }
-    List<String> loveTags = List<String>.from(tempLovedTags);
-    for (int i = 0; i < loveTags.length; i++){
-      if (!lovedTags.contains(loveTags.elementAt(i))){
-        lovedTags.add(loveTags.elementAt(i));
+    try {
+      dynamic tempHatedTags = json["hatedTags"];
+      if(tempHatedTags is List) {
+        // print('hatedTags is a list');
+      } else if(tempHatedTags is String) {
+        // print('hatedTags is a string');
+        tempHatedTags = tempHatedTags.split(',');
+      } else {
+        // print('hatedTags is a ${tempHatedTags.runtimeType} type');
+        tempHatedTags = [];
       }
+      List<String> hateTags = List<String>.from(tempHatedTags);
+      for (int i = 0; i < hateTags.length; i++){
+        if (!hatedTags.contains(hateTags.elementAt(i))) {
+          hatedTags.add(hateTags.elementAt(i));
+        }
+      }
+    } catch (e) {
+      Logger.Inst().log('Failed to parse hated tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    }
+
+    try {
+      dynamic tempLovedTags = json["lovedTags"];
+      if(tempLovedTags is List) {
+        // print('lovedTags is a list');
+      } else if(tempLovedTags is String) {
+        // print('lovedTags is a string');
+        tempLovedTags = tempLovedTags.split(',');
+      } else {
+        // print('lovedTags is a ${tempLovedTags.runtimeType} type');
+        tempLovedTags = [];
+      }
+      List<String> loveTags = List<String>.from(tempLovedTags);
+      for (int i = 0; i < loveTags.length; i++){
+        if (!lovedTags.contains(loveTags.elementAt(i))){
+          lovedTags.add(loveTags.elementAt(i));
+        }
+      }
+    } catch (e) {
+      Logger.Inst().log('Failed to parse loved tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
     }
 
     List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
     for(String key in leftoverKeys) {
+      // TODO something causes rare exception which causes settings to reset
+      try {
+        setByString(key, json[key]);
+      } catch (e) {
+        Logger.Inst().log('Failed to set value for key $key', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+      }
       // print('key $key val ${json[key]} type ${json[key].runtimeType}');
-      setByString(key, json[key]);
     }
 
     if(setMissingKeys) {
@@ -1137,7 +1191,12 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             File booruFile = files[i] as File;
             Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            tempList.add(booruFromFile);
+            bool isAllowed = booruFromFile.type != 'Favourites';
+            if(isAllowed) {
+              tempList.add(booruFromFile);
+            } else {
+              await booruFile.delete();
+            }
 
             if (booruFromFile.type == "Hydrus") {
               hasHydrus = true;
@@ -1146,20 +1205,17 @@ class SettingsHandler extends GetxController {
         }
       }
 
-      if (dbEnabled && tempList.isNotEmpty){
+      if (dbEnabled && tempList.isNotEmpty) {
         tempList.add(Booru("Favourites", "Favourites", "", "", ""));
       }
-    } catch (e){
-      print('Booru loading error: $e');
+    } catch (e) {
+      Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
     }
 
     booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
 
-    if (tempList.isNotEmpty){
+    if (tempList.isNotEmpty) {
       sortBooruList();
-    } else {
-      print(prefBooru);
-      print(tempList.isNotEmpty);
     }
     return true;
   }
@@ -1284,7 +1340,10 @@ class SettingsHandler extends GetxController {
   }
 
   List<String> cleanTagsList(List<String> tags) {
-    return tags.where((tag) => tag != "").map((tag) => tag.trim().toLowerCase()).toList();
+    List<String> cleanTags = [];
+    cleanTags = tags.where((tag) => tag.isNotEmpty).map((tag) => tag.trim().toLowerCase()).toList();
+    cleanTags.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return cleanTags;
   }
 
   void checkUpdate({bool withMessage = false}) async {
@@ -1330,7 +1389,7 @@ class SettingsHandler extends GetxController {
         }
       }
 
-      if(buildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
+      if(Constants.appBuildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
         if(EnvironmentConfig.isFromStore) { // installed from store
           if(updateInfo.value!.isInStore) { // app is still in store
             showUpdate(withMessage || updateInfo.value!.isImportant);
@@ -1389,7 +1448,7 @@ class SettingsHandler extends GetxController {
           return SettingsDialog(
             title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
             contentItems: [
-              Text('Currently Installed: $verStr+$buildNumber'),
+              Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
               const Text(''),
               Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const Text(''),
@@ -1446,6 +1505,10 @@ class SettingsHandler extends GetxController {
 
 
   Future<void> initialize() async {
+    if(isInit.value == true) {
+      return;
+    }
+
     try {
       await getPerms();
       await loadSettings();
@@ -1457,22 +1520,6 @@ class SettingsHandler extends GetxController {
         HttpOverrides.global = MyHttpOverrides();
       }
 
-      if(Platform.isAndroid || Platform.isIOS) {
-        PackageInfo packageInfo = await PackageInfo.fromPlatform();
-        packageName = packageInfo.packageName;
-      }
-
-      // if(Platform.isAndroid || Platform.isIOS) {
-      //   // TODO on desktop flutter doesnt't use version data from pubspec
-      //   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      //   appName = packageInfo.appName;
-      //   verStr = packageInfo.version;
-
-      //   // in debug build this gives the right number, but in release it adds 2? (162 => 2162)
-      //   buildNumber = int.tryParse(packageInfo.buildNumber) ?? 100;
-      //   // print('packegaInfo: ${packageInfo.version} ${packageInfo.buildNumber} ${packageInfo.buildSignature}');
-      // }
-
       print('isFromStore: ${EnvironmentConfig.isFromStore}');
 
       // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
@@ -1482,7 +1529,7 @@ class SettingsHandler extends GetxController {
       checkUpdate(withMessage: false);
       isInit.value = true;
     } catch (e) {
-      print('Settings Init error :: $e');
+      Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
       FlashElements.showSnackbar(
         title: const Text(
           "Initialization Error!",

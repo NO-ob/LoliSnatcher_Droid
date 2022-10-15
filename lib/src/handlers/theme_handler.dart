@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
+
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
@@ -143,9 +144,10 @@ class ThemeHandler {
 
   ElevatedButtonThemeData elevatedButtonTheme() => ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          primary: theme.accent!,
-          onPrimary: accentIsDark ? Colors.white : Colors.black,
-          onSurface: isDark ? Colors.white : Colors.black,
+          backgroundColor: theme.accent!,
+          foregroundColor: accentIsDark ? Colors.white : Colors.black,
+          disabledForegroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.38),
+          disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
           textStyle: TextStyle(
             color: accentIsDark ? Colors.white : Colors.black,
             fontSize: 18,
@@ -168,6 +170,12 @@ class ThemeHandler {
         ),
         backgroundColor: theme.primary,
         foregroundColor: primaryIsDark ? Colors.white : Colors.black,
+        actionsIconTheme: IconThemeData(
+          color: primaryIsDark ? Colors.white : Colors.black,
+        ),
+        iconTheme: IconThemeData(
+          color: primaryIsDark ? Colors.white : Colors.black,
+        ),
       );
 
   ButtonThemeData buttonTheme() => ButtonThemeData(
@@ -322,7 +330,7 @@ class ThemeHandler {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
 
-    SwitchThemeData switchTheme() => SwitchThemeData(
+  SwitchThemeData switchTheme() => SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((states) {
           bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {

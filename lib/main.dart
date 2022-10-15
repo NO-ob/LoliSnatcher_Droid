@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:app_links/app_links.dart';
 import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:logger_flutter_fork/logger_flutter_fork.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -164,7 +166,7 @@ class _MainAppState extends State<MainApp> {
         maxFps = currentMode.refreshRate.round();
         updateState();
       }
-      debugPrint('LoliSnatcher: Set Max FPS $maxFps');
+      Logger.Inst().log('Set max fps to $maxFps', 'MainApp', 'setMaxFPS', null);
       // FlashElements.showSnackbar(title: Text('Max FPS: $maxFps'));
     }
   }
@@ -200,6 +202,8 @@ class _MainAppState extends State<MainApp> {
         themeMode: themeMode,
         isAmoled: isAmoled,
       );
+
+      LogConsole.init(bufferSize: 10000);
 
       // TODO fix status bar coloring when in gallery view (AND depending on theme?)
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -240,50 +244,14 @@ class _MainAppState extends State<MainApp> {
 
             themeMode: themeMode,
             navigatorKey: navigationHandler.navigatorKey,
-            home: const Preloader(),
+            home: LogConsoleOnShake(
+              dark: themeMode == ThemeMode.dark ? true : false,
+              debugOnly: settingsHandler.enabledLogTypes.isEmpty,
+              child: const Home(),
+            ),
           ),
         ),
       );
-    });
-  }
-}
-
-class Preloader extends StatelessWidget {
-  const Preloader({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-    return Obx(() {
-      if (settingsHandler.isInit.value) { // TODO get rid of this IF, since now we init settings before first render
-        if (Platform.isAndroid || Platform.isIOS) {
-          // set system ui mode
-          ServiceHandler.setSystemUiVisibility(true);
-
-          // force landscape orientation if enabled desktop mode on mobile device
-          if (settingsHandler.appMode.value.isDesktop) {
-            SystemChrome.setPreferredOrientations([
-              DeviceOrientation.landscapeRight,
-              DeviceOrientation.landscapeLeft,
-            ]);
-          } else {
-            SystemChrome.setPreferredOrientations(DeviceOrientation.values);
-          }
-        }
-
-        return const Home();
-      } else {
-        // no custom theme data here yet, fallback to black bg + pink loading spinner
-        return Container(
-          color: Colors.black,
-          child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation(Colors.pink),
-            ),
-          ),
-        );
-      }
     });
   }
 }
@@ -400,6 +368,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isAndroid || Platform.isIOS) {
+      // set system ui mode
+      ServiceHandler.setSystemUiVisibility(true);
+
+      // force landscape orientation if enabled desktop mode on mobile device
+      if (SettingsHandler.instance.appMode.value.isDesktop) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
+      } else {
+        SystemChrome.setPreferredOrientations(DeviceOrientation.values);
+      }
+    }
+
     return Obx(() {
       if (settingsHandler.appMode.value.isMobile) {
         return const MobileHome();

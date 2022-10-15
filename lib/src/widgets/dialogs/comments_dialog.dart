@@ -1,5 +1,6 @@
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:flutter/material.dart';
+
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -59,7 +60,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
         }
         formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
       } catch (e) {
-        print('$date $format $e');
+        print('formatDate: $date $format $e');
       }
     }
     return formattedDate;

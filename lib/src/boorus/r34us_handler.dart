@@ -2,8 +2,8 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
@@ -71,9 +71,6 @@ class R34USHandler extends BooruHandler {
         item.sampleURL = div.attributes["src"]!.toString();
         item.fileHeight = double.tryParse(div.attributes["height"]!.toString());
         item.fileWidth = double.tryParse(div.attributes["width"]!);
-        print(item.fileURL);
-        print(item.thumbnailURL);
-        print(item.postURL);
       } else {
         Logger.Inst().log("$className status is: ${response.statusCode}", className, "getPostData", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("$className url is: ${item.postURL}", className, "getPostData", LogTypes.booruHandlerFetchFailed);
@@ -81,7 +78,6 @@ class R34USHandler extends BooruHandler {
         errorString = response.statusCode.toString();
       }
     } catch (e) {
-      print(e);
       Logger.Inst().log(e.toString(), className, "getPostData", LogTypes.exception);
       errorString = e.toString();
     }

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
-import '../utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ImageWriterIsolate {
   final String cacheRootPath;
@@ -17,7 +17,7 @@ class ImageWriterIsolate {
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
-      Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readFileFromCache", LogTypes.imageInfo);
+      print("found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readFileFromCache");
       await image.writeAsBytes(bytes, flush: true);
     } catch (e) {
       print("Image Writer Isolate Exception :: cache write bytes :: $e");
@@ -33,7 +33,7 @@ class ImageWriterIsolate {
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       // TODO is readBytes required here?
-      Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readFileFromCache", LogTypes.imageInfo);
+      print("found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate /:: readFileFromCache");
       if(await image.exists()) {
         await image.readAsBytes();
       }
@@ -53,9 +53,9 @@ class ImageWriterIsolate {
 
       if(await image.exists()) {
         imageBytes = await image.readAsBytes();
-        Logger.Inst().log("found image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readBytesFromCache", LogTypes.imageInfo);
+        print("found image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache");
       } else {
-        Logger.Inst().log("couldn't find image at: ${cachePath + fileName} for $fileURL", "ImageWriterIsolate", "readBytesFromCache", LogTypes.imageInfo);
+        print("couldn't find image at: ${cachePath + fileName} for $fileURL :: ImageWriterIsolate :: readBytesFromCache");
       }
     } catch (e){
       print("Image Writer Isolate Exception :: read bytes cache :: $e");
@@ -72,7 +72,6 @@ class ImageWriterIsolate {
       String unthumbedURL = thumbURL.replaceAll('/thumb', '');
       result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
     }
-    Logger.Inst().log("thumbUrlName: $result, thumbUrl: $thumbURL", "ImageWriterIsolate", "parseThumbUrlToName", LogTypes.imageInfo);
     return result;
 
   }
@@ -107,23 +106,7 @@ class ImageWriterIsolate {
     };
   }
 
-  String sanitizeName(String fileName, {String replacement = '', required String fileNameExtras}) {
-    RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
-    RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
-    RegExp reservedRe = RegExp(r'^\.+$');
-    RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
-    RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
-
-    return "${fileNameExtras.replaceAll(illegalRe, replacement)
-        .replaceAll(controlRe, replacement)
-        .replaceAll(reservedRe, replacement)
-        .replaceAll(windowsReservedRe, replacement)
-        .replaceAll(windowsTrailingRe, replacement)}${fileName
-      .replaceAll(illegalRe, replacement)
-      .replaceAll(controlRe, replacement)
-      .replaceAll(reservedRe, replacement)
-      .replaceAll(windowsReservedRe, replacement)
-      .replaceAll(windowsTrailingRe, replacement).replaceAll("%20", "_")}";
-    // TODO truncate to 255 symbols for windows?
+  String sanitizeName(String fileName, {required String fileNameExtras}) {
+    return "${Tools.sanitize(fileNameExtras)}${Tools.sanitize(fileName)}";
   }
 }

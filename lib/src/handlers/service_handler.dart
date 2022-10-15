@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 
@@ -18,6 +18,10 @@ class ServiceHandler{
     } catch(e){
       print(e);
     }
+  }
+
+  static Future<void> restartApp() {
+    return platform.invokeMethod("restartApp");
   }
 
   static Future<int> getSDKVersion() async {
@@ -130,6 +134,28 @@ class ServiceHandler{
     try {
       result = await platform.invokeMethod("getFileByName",{"uri":SAFUri,"fileName":fileName});
       print("found file $fileName");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<bool> existsFileFromSAFDirectory(String SAFUri, String fileName) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("existsFileByName",{"uri":SAFUri,"fileName":fileName});
+      print("found file $fileName");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<bool> deleteFileFromSAFDirectory(String SAFUri, String fileName) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("deleteFileByName",{"uri":SAFUri,"fileName":fileName});
+      print("deleted file $fileName");
     } catch (e) {
       print(e);
     }
