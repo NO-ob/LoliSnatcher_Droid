@@ -3,7 +3,7 @@ import 'package:logger_fork/logger_fork.dart' as LogLib;
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
-// TODO save/load selected log types to persistent storage to get logs from the very start of the app
+// TODO move everything to newLog, drop Inst()
 
 class Logger {
   static Logger? _loggerInstance;
@@ -13,60 +13,81 @@ class Logger {
     return _loggerInstance!;
   }
 
-  void log(dynamic logStr, String callerClass, String callerFunction, LogTypes? logType) {
+  void log(dynamic logStr, String callerClass, String callerFunction,
+      LogTypes? logType) {
     if (!Tools.isTestMode()) {
       //  don't call handlers when in test mode
       // don't check which types are ignored in test mode and output everything
-      final bool allowedToLog = logType == null || SettingsHandler.instance.enabledLogTypes.contains(logType);
+      final bool allowedToLog = logType == null ||
+          SettingsHandler.instance.enabledLogTypes.contains(logType);
       if (!allowedToLog) {
         // Ignore unselected log types
         return;
       }
     }
 
-    final logger = LogLib.Logger(
-      filter: CustomLogFilter(),
-      printer: LogLib.PrettyPrinter(
-        methodCount: 4,
-        errorMethodCount: 8,
-        lineLength: 120,
-        colors: true,
-        printEmojis: true,
-        printTime: true,
-      ),
-      output: CustomConsoleOutput(),
-    );
-
     // protect from exceptions when logStr is not a stringifiable object
     // TODO still could throw exception for some objects? needs more testing
     logStr = logStr is String ? logStr : '$logStr';
 
     final logLevel = logType?.logLevel ?? LogLib.Level.wtf;
-    if(logLevel == LogLib.Level.info) {
-      logger.i(logStr, logType);
-    } else if(logLevel == LogLib.Level.error) {
-      logger.e(logStr, logType);
-    } else if(logLevel == LogLib.Level.warning) {
-      logger.w(logStr, logType);
-    } else if(logLevel == LogLib.Level.debug) {
-      logger.d(logStr, logType);
-    } else if(logLevel == LogLib.Level.verbose) {
-      logger.v(logStr, logType);
-    } else if(logLevel == LogLib.Level.wtf) {
-      logger.wtf(logStr, logType);
+    if (logLevel == LogLib.Level.info) {
+      _logger.i(logStr, logType);
+    } else if (logLevel == LogLib.Level.error) {
+      _logger.e(logStr, logType);
+    } else if (logLevel == LogLib.Level.warning) {
+      _logger.w(logStr, logType);
+    } else if (logLevel == LogLib.Level.debug) {
+      _logger.d(logStr, logType);
+    } else if (logLevel == LogLib.Level.verbose) {
+      _logger.v(logStr, logType);
+    } else if (logLevel == LogLib.Level.wtf) {
+      _logger.wtf(logStr, logType);
     } else {
-      logger.wtf(logStr, logType);
+      _logger.wtf(logStr, logType);
     }
   }
 
+  static final _logger = LogLib.Logger(
+    filter: CustomLogFilter(),
+    printer: LogLib.PrettyPrinter(
+      methodCount: 4,
+      errorMethodCount: 8,
+      lineLength: 120,
+      colors: true,
+      printEmojis: true,
+      printTime: true,
+      stackTraceBeginIndex: 1,
+    ),
+    output: CustomConsoleOutput(),
+  );
+
+  static final _loggerNoStack = LogLib.Logger(
+    filter: CustomLogFilter(),
+    printer: LogLib.PrettyPrinter(
+      methodCount: 0,
+      errorMethodCount: 0,
+      lineLength: 120,
+      colors: true,
+      printEmojis: true,
+      printTime: true,
+      stackTraceBeginIndex: 1,
+    ),
+    output: CustomConsoleOutput(),
+  );
+
   /// [m] is the message to be printed, can be anything but should be convertable to string / have toString()
-  /// 
+  ///
   /// [e] is the error object / title
-  /// 
+  ///
   /// [s] is the stacktrace object
-  /// 
+  ///
   /// [t] is the log type, can be null
-  void newLog({
+  ///
+  /// [ignoreTypeCheck] to force log even if given log type is disabled (won't work if there are no enabled log types)
+  ///
+  /// [withStack] should the stacktrace be printed
+  static void newLog({
     required dynamic m,
     required dynamic e,
     required StackTrace? s,
@@ -74,58 +95,44 @@ class Logger {
     bool ignoreTypeCheck = false,
     bool withStack = true,
   }) {
-    if (!Tools.isTestMode()) {
-      // don't call handlers when in test mode
-      // don't check which types are ignored in test mode and output everything
-      final bool allowedToLog = ignoreTypeCheck || t == null || SettingsHandler.instance.enabledLogTypes.contains(t);
-      if (!allowedToLog) {
-        // Ignore unselected log types
-        return;
+    try {
+      if (!Tools.isTestMode()) {
+        // don't call handlers when in test mode
+        // don't check which types are ignored in test mode and output everything
+        final bool allowedToLog = ignoreTypeCheck ||
+            t == null ||
+            SettingsHandler.instance.enabledLogTypes.contains(t);
+        if (!allowedToLog) {
+          // Ignore unselected log types
+          return;
+        }
       }
-    }
 
-    final logger = LogLib.Logger(
-      filter: CustomLogFilter(),
-      printer: LogLib.PrettyPrinter(
-        methodCount: 4,
-        errorMethodCount: 8,
-        lineLength: 120,
-        colors: true,
-        printEmojis: true,
-        printTime: true,
-      ),
-      output: CustomConsoleOutput(),
-    );
+      final logLevel = t?.logLevel ?? LogLib.Level.wtf;
+      final usedLogger = withStack ? _logger : _loggerNoStack;
+      final title = e == null ? '$t' : '$e :: $t';
+      // string/list/map/set can be handled automatically, other objects need to be converted to string
+      final message =
+          (m is String || m is List || m is Map || m is Set) ? m : '$m';
 
-    final loggerNoStack = LogLib.Logger(
-      filter: CustomLogFilter(),
-      printer: LogLib.PrettyPrinter(
-        methodCount: 0,
-        errorMethodCount: 0,
-        lineLength: 120,
-        colors: true,
-        printEmojis: true,
-        printTime: true,
-      ),
-      output: CustomConsoleOutput(),
-    );
-
-    final logLevel = t?.logLevel ?? LogLib.Level.wtf;
-    final usedLogger = withStack ? logger : loggerNoStack;
-    if(logLevel == LogLib.Level.info) {
-      usedLogger.i(m, '$e :: $t', s);
-    } else if(logLevel == LogLib.Level.error) {
-      usedLogger.e(m, '$e :: $t', s);
-    } else if(logLevel == LogLib.Level.warning) {
-      usedLogger.w(m, '$e :: $t', s);
-    } else if(logLevel == LogLib.Level.debug) {
-      usedLogger.d(m, '$e :: $t', s);
-    } else if(logLevel == LogLib.Level.verbose) {
-      usedLogger.v(m, '$e :: $t', s);
-    } else if(logLevel == LogLib.Level.wtf) {
-      usedLogger.wtf(m, '$e :: $t', s);
-    } else {
-      usedLogger.wtf(m, '$e :: $t', s);
+      if (logLevel == LogLib.Level.info) {
+        usedLogger.i(message, title, s);
+      } else if (logLevel == LogLib.Level.error) {
+        usedLogger.e(message, title, s);
+      } else if (logLevel == LogLib.Level.warning) {
+        usedLogger.w(message, title, s);
+      } else if (logLevel == LogLib.Level.debug) {
+        usedLogger.d(message, title, s);
+      } else if (logLevel == LogLib.Level.verbose) {
+        usedLogger.v(message, title, s);
+      } else if (logLevel == LogLib.Level.wtf) {
+        usedLogger.wtf(message, title, s);
+      } else {
+        usedLogger.wtf(message, title, s);
+      }
+    } catch (e, s) {
+      // try/catch to prevent logging errors from affecting the app
+      _logger.wtf(e, 'Failed to log message', s);
     }
 
     // Log Levels (higher include everything from lower)
@@ -134,7 +141,30 @@ class Logger {
     // info - general info
     // warning - warnings, errors that can be recovered from
     // error
-    // wtf - unexpected errors
+    // wtf - unexpected errors, null LogType
+  }
+}
+
+class CustomConsoleOutput extends LogLib.LogOutput {
+  @override
+  void output(LogLib.OutputEvent event) {
+    event.lines.forEach(print);
+  }
+}
+
+class CustomLogFilter extends LogLib.LogFilter {
+  @override
+  bool shouldLog(LogLib.LogEvent event) {
+    if (Tools.isTestMode()) {
+      return event.level.index >= level!.index;
+    } else {
+      final settingsHandler = SettingsHandler.instance;
+      if (settingsHandler.enabledLogTypes.isNotEmpty) {
+        return event.level.index >= level!.index;
+      } else {
+        return false;
+      }
+    }
   }
 }
 
@@ -265,29 +295,6 @@ enum LogTypes {
         return LogLib.Level.info;
       default:
         return LogLib.Level.wtf;
-    }
-  }
-}
-
-class CustomConsoleOutput extends LogLib.LogOutput {
-  @override
-  void output(LogLib.OutputEvent event) {
-    event.lines.forEach(print);
-  }
-}
-
-class CustomLogFilter extends LogLib.LogFilter {
-  @override
-  bool shouldLog(LogLib.LogEvent event) {
-    if (Tools.isTestMode()) {
-      return event.level.index >= level!.index;
-    } else {
-      final settingsHandler = SettingsHandler.instance;
-      if(settingsHandler.enabledLogTypes.isNotEmpty) {
-        return event.level.index >= level!.index;
-      } else {
-        return false;
-      }
     }
   }
 }
