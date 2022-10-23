@@ -50,11 +50,11 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         title: const Text('Duplicate file detected!'),
         content: Text('The file "$fileName" already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.'),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: const Text('No'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop(true);
               await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
