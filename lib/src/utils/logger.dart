@@ -188,77 +188,11 @@ enum LogTypes {
 
   @override
   String toString() {
-    switch (this) {
-      case LogTypes.booruHandlerFetchFailed:
-        return 'booruHandlerFetchFailed';
-      case LogTypes.booruHandlerInfo:
-        return 'booruHandlerInfo';
-      case LogTypes.booruHandlerParseFailed:
-        return 'booruHandlerParseFailed';
-      case LogTypes.booruHandlerRawFetched:
-        return 'booruHandlerRawFetched';
-      case LogTypes.booruHandlerSearchURL:
-        return 'booruHandlerSearchURL';
-      case LogTypes.booruHandlerTagInfo:
-        return 'booruHandlerTagInfo';
-      case LogTypes.booruItemLoad:
-        return 'booruItemLoad';
-      case LogTypes.exception:
-        return 'exception';
-      case LogTypes.imageInfo:
-        return 'imageInfo';
-      case LogTypes.imageLoadingError:
-        return 'imageLoadingError';
-      case LogTypes.loliSyncInfo:
-        return 'loliSyncInfo';
-      case LogTypes.networkError:
-        return 'networkError';
-      case LogTypes.settingsError:
-        return 'settingsError';
-      case LogTypes.settingsLoad:
-        return 'settingsLoad';
-      case LogTypes.tagHandlerInfo:
-        return 'tagHandlerInfo';
-      default:
-        return 'exception';
-    }
+    return name;
   }
 
   static LogTypes fromString(String str) {
-    switch (str) {
-      case 'booruHandlerFetchFailed':
-        return LogTypes.booruHandlerFetchFailed;
-      case 'booruHandlerInfo':
-        return LogTypes.booruHandlerInfo;
-      case 'booruHandlerParseFailed':
-        return LogTypes.booruHandlerParseFailed;
-      case 'booruHandlerRawFetched':
-        return LogTypes.booruHandlerRawFetched;
-      case 'booruHandlerSearchURL':
-        return LogTypes.booruHandlerSearchURL;
-      case 'booruHandlerTagInfo':
-        return LogTypes.booruHandlerTagInfo;
-      case 'booruItemLoad':
-        return LogTypes.booruItemLoad;
-      case 'exception':
-        return LogTypes.exception;
-      case 'imageInfo':
-        return LogTypes.imageInfo;
-      case 'imageLoadingError':
-        return LogTypes.imageLoadingError;
-      case 'loliSyncInfo':
-        return LogTypes.loliSyncInfo;
-      case 'networkError':
-        return LogTypes.networkError;
-      case 'settingsError':
-        return LogTypes.settingsError;
-      case 'settingsLoad':
-        return LogTypes.settingsLoad;
-      case 'tagHandlerInfo':
-        return LogTypes.tagHandlerInfo;
-      default:
-        return LogTypes.exception;
-    }
+    return LogTypes.values.firstWhere((element) => element.name == str,orElse: () => LogTypes.exception);
   }
 
   LogLib.Level get logLevel {

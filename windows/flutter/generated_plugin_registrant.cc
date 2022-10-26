@@ -7,6 +7,7 @@
 #include "generated_plugin_registrant.h"
 
 #include <app_links_windows/app_links_windows_plugin.h>
+#include <awesome_notifications/awesome_notifications_plugin_c_api.h>
 #include <dart_vlc/dart_vlc_plugin.h>
 #include <flutter_native_view/flutter_native_view_plugin.h>
 #include <permission_handler_windows/permission_handler_windows_plugin.h>
@@ -17,6 +18,8 @@
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   AppLinksWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("AppLinksWindowsPlugin"));
+  AwesomeNotificationsPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("AwesomeNotificationsPluginCApi"));
   DartVlcPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DartVlcPlugin"));
   FlutterNativeViewPluginRegisterWithRegistrar(

@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links_windows
+  awesome_notifications
   dart_vlc
   flutter_native_view
   permission_handler_windows
