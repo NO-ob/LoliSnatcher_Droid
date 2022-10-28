@@ -25,6 +25,7 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:exported="true"
             android:windowSoftInputMode="stateVisible">
             <!-- android:launchMode="singleTop" - allows multiple instances of the app (i.e. - opened from a config link) -->
             <intent-filter>
