@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  awesome_notifications
   dart_vlc
   screen_retriever
   url_launcher_linux

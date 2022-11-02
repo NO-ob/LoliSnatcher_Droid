@@ -400,7 +400,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
   void shareTextAction(String text) {
     if (Platform.isWindows || Platform.isLinux) {
-      Clipboard.setData(ClipboardData(text: text));
+      Clipboard.setData(ClipboardData(text: Uri.encodeFull(text)));
       FlashElements.showSnackbar(
         context: context,
         duration: const Duration(seconds: 2),
@@ -408,8 +408,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
           "Copied to clipboard!",
           style: TextStyle(fontSize: 20)
         ),
-        content: Text(
-          text,
+        content: Text(Uri.encodeFull(text),
           style: const TextStyle(fontSize: 16)
         ),
         leadingIcon: Icons.copy,

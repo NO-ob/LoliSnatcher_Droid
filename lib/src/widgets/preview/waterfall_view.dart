@@ -227,11 +227,11 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void onSecondaryTap(int index, BooruItem item) {
-    Clipboard.setData(ClipboardData(text: item.fileURL));
+    Clipboard.setData(ClipboardData(text: Uri.encodeFull(item.fileURL)));
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 2),
       title: const Text("Copied File URL to clipboard!", style: TextStyle(fontSize: 20)),
-      content: Text(item.fileURL, style: const TextStyle(fontSize: 16)),
+      content: Text(Uri.encodeFull(item.fileURL), style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.copy,
       sideColor: Colors.green,
     );

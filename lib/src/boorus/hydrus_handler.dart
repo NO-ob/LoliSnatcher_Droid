@@ -225,6 +225,9 @@ class HydrusHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
+    if(tags.trim().isEmpty){
+      tags = "*";
+    }
     List<String> tagList = tags.split(",");
     int sortType = -1;
     bool ascending = false;
@@ -240,8 +243,7 @@ class HydrusHandler extends BooruHandler {
         tagList.remove(tagList[i].trim().toLowerCase());
       }
     }
-
-    return "${booru.baseURL}/get_files/search_files?tags=${jsonEncode(tagList)}${sortType > -1 ? "&file_sort_type=$sortType":""}&file_sort_asc=$ascending";
+    return "${booru.baseURL}/get_files/search_files?tags=${jsonEncode(tagList).replaceAll("%22", "'")}${sortType > -1 ? "&file_sort_type=$sortType":""}&file_sort_asc=$ascending";
   }
 
   int getSortType(String orderString){
