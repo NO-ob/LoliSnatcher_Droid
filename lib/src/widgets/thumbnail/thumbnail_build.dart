@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
@@ -22,7 +23,10 @@ class ThumbnailBuild extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final IconData itemIcon = Tools.getFileIcon(item.mediaType);
 
-    final List<List<String>> parsedTags = settingsHandler.parseTagsList(item.tagsList, isCapped: false);
+    final List<List<String>> parsedTags = settingsHandler.parseTagsList(
+      item.tagsList,
+      isCapped: false,
+    );
     final bool isHated = parsedTags[0].isNotEmpty;
     final bool isLoved = parsedTags[1].isNotEmpty;
     final bool isSound = parsedTags[2].isNotEmpty;
@@ -37,7 +41,9 @@ class ThumbnailBuild extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(3),
       child: Stack(
-        alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
+        alignment: settingsHandler.previewDisplay == "Square"
+            ? Alignment.center
+            : Alignment.bottomCenter,
         children: [
           Thumbnail(
             index: index,
@@ -58,72 +64,104 @@ class ThumbnailBuild extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                // reserved for elements on the left side
-                const SizedBox(),
-
+                Obx(() {
+                  final selected = SearchHandler.instance.currentTab.selected;
+                  if (selected.isNotEmpty) {
+                    return Checkbox(
+                      value: selected.contains(index),
+                      onChanged: (bool? value) {
+                        if (value != null) {
+                          if (value) {
+                            SearchHandler.instance.currentTab.selected
+                                .add(index);
+                          } else {
+                            SearchHandler.instance.currentTab.selected
+                                .remove(index);
+                          }
+                        }
+                      },
+                    );
+                  } else {
+                    return const SizedBox();
+                  }
+                }),
+                //
                 Container(
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.66),
-                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
+                    borderRadius:
+                        const BorderRadius.only(topLeft: Radius.circular(5)),
                   ),
-                  child: Obx(() => Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
+                  child: Obx(
+                    () => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
 
-                      if (item.isFavourite.value == null) const Text('.'),
+                        if (item.isFavourite.value == null) const Text('.'),
 
-                      AnimatedCrossFade(
-                        duration: const Duration(milliseconds: 200),
-                        crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-                        firstChild: AnimatedSwitcher(
+                        AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
-                          child: Icon(
-                            item.isFavourite.value == true ? Icons.favorite : Icons.star,
-                            color: item.isFavourite.value == true ? Colors.red : Colors.grey,
-                            key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
+                          crossFadeState:
+                              (item.isFavourite.value == true || isLoved)
+                                  ? CrossFadeState.showFirst
+                                  : CrossFadeState.showSecond,
+                          firstChild: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 200),
+                            child: Icon(
+                              item.isFavourite.value == true
+                                  ? Icons.favorite
+                                  : Icons.star,
+                              color: item.isFavourite.value == true
+                                  ? Colors.red
+                                  : Colors.grey,
+                              key: ValueKey<Color>(
+                                  item.isFavourite.value == true
+                                      ? Colors.red
+                                      : Colors.grey),
+                              size: 14,
+                            ),
+                          ),
+                          secondChild: const SizedBox(),
+                        ),
+
+                        if (item.isSnatched.value == true)
+                          const Icon(
+                            Icons.save_alt,
+                            color: Colors.white,
                             size: 14,
                           ),
-                        ),
-                        secondChild: const SizedBox(),
-                      ),
 
-                      if (item.isSnatched.value == true)
-                        const Icon(
-                          Icons.save_alt,
+                        if (isSound)
+                          const Icon(
+                            Icons.volume_up_rounded,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+
+                        if (hasNotes)
+                          const Icon(
+                            Icons.note_add,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+
+                        // if (hasComments)
+                        //   const Icon(
+                        //     Icons.comment,
+                        //     color: Colors.white,
+                        //     size: 14,
+                        //   ),
+
+                        Icon(
+                          itemIcon,
                           color: Colors.white,
                           size: 14,
                         ),
-
-                      if (isSound)
-                        const Icon(
-                          Icons.volume_up_rounded,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-
-                      if (hasNotes)
-                        const Icon(
-                          Icons.note_add,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                      
-                      // if (hasComments)
-                      //   const Icon(
-                      //     Icons.comment,
-                      //     color: Colors.white,
-                      //     size: 14,
-                      //   ),
-
-                      Icon(
-                        itemIcon,
-                        color: Colors.white,
-                        size: 14,
-                      ),
-                    ],
-                  )),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),

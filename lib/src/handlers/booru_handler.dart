@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:html/parser.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -232,7 +233,7 @@ abstract class BooruHandler {
         for (int i = 0; i < rawTags.length; i++) {
           final rawTag = rawTags[i];
           try {
-            String parsedTag = await parseTagSuggestion(rawTag, i) ?? '';
+            String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '');
             if (parsedTag.isNotEmpty) {
               // TODO add tag to taghandler before adding it to list
               // addTagsWithType(parsedTag, tagType);
