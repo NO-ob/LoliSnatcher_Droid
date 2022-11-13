@@ -466,7 +466,7 @@ abstract class BooruHandler {
   Future<String?> getCookies() async {
     String cookieString = '';
     try {
-      final CookieManager cookieManager = CookieManager();
+      final CookieManager cookieManager = CookieManager.instance();
       final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
       for (Cookie cookie in cookies) {
         cookieString += '${cookie.name}=${cookie.value}; ';

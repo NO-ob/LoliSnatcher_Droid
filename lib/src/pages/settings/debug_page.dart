@@ -307,7 +307,7 @@ class _DebugPageState extends State<DebugPage> {
               SettingsButton(
                 name: 'Delete All Cookies',
                 action: () async {
-                  await CookieManager().deleteAllCookies();
+                  await CookieManager.instance().deleteAllCookies();
                 }
               ),
 

@@ -143,7 +143,7 @@ class DioDownloader {
   Future<String> getCookies() async {
     String cookieString = '';
     try {
-      final CookieManager cookieManager = CookieManager();
+      final CookieManager cookieManager = CookieManager.instance();
       final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
       for (Cookie cookie in cookies) {
         cookieString += '${cookie.name}=${cookie.value}; ';
