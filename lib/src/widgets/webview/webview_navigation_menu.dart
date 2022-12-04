@@ -26,7 +26,7 @@ class WebviewNavigationMenu extends StatefulWidget {
 }
 
 class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
-  final CookieManager cookieManager = CookieManager();
+  final CookieManager cookieManager = CookieManager.instance();
   final TextEditingController _urlController = TextEditingController();
 
   Future<void> _onGoToInitial(InAppWebViewController controller) async {

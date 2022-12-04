@@ -18,7 +18,7 @@ class GelbooruV1Handler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var document = parse(response.body);
+    var document = parse(response.data);
     var spans = document.getElementsByClassName("thumb");
     return spans;
   }

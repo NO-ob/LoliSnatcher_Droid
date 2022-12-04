@@ -25,7 +25,7 @@ class MoebooruHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     try {
       int? count = int.tryParse(parsedResponse.findAllElements('posts').first.getAttribute('count') ?? '0');
       totalCount.value = count ?? 0;
@@ -83,10 +83,11 @@ class MoebooruHandler extends BooruHandler {
 
   @override
   String makeURL(String tags, {bool forceXML = false}) {
-    int cappedPage = max(1, pageNum);
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&login=${booru.userID}&api_key=${booru.apiKey}' : '';
+    final int cappedPage = max(1, pageNum);
+    final String loginStr = booru.userID?.isNotEmpty == true ? '&login=${booru.userID}' : "";
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
 
-    return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}$apiKey";
+    return "${booru.baseURL}/post.xml?tags=$tags&limit=${limit.toString()}&page=${cappedPage.toString()}$loginStr$apiKeyStr";
   }
 
   @override
@@ -101,7 +102,7 @@ class MoebooruHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements("tag").toList();
   }
 

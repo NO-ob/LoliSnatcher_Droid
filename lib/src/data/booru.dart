@@ -19,23 +19,11 @@ class Booru {
 
   Booru.fromJSON(String jsonString) {
     Map<String, dynamic> json = jsonDecode(jsonString);
-    name = json["name"].toString();
-    type = json["type"].toString();
-    faviconURL = json["faviconURL"].toString();
-    baseURL = json["baseURL"].toString();
-    defTags = json["defTags"].toString();
-    apiKey = json["apiKey"].toString();
-    userID = json["userID"].toString();
+    setFromMap(json);
   }
 
-  Booru.fromJsonObject(Map<String, dynamic> json) {
-    name = json["name"].toString();
-    type = json["type"].toString();
-    faviconURL = json["faviconURL"].toString();
-    baseURL = json["baseURL"].toString();
-    defTags = json["defTags"].toString();
-    apiKey = json["apiKey"].toString();
-    userID = json["userID"].toString();
+  Booru.fromMap(Map<String, dynamic> json) {
+    setFromMap(json);
   }
 
   String toLink(bool withSensitiveData) {
@@ -52,13 +40,17 @@ class Booru {
   Booru.fromLink(String link) {
     String jsonString = String.fromCharCodes(base64Decode(link.split("?")[1]));
     Map<String, dynamic> json = jsonDecode(jsonString);
-    name = json["name"].toString();
-    type = json["type"].toString();
-    faviconURL = json["faviconURL"]?.toString() ?? "";
-    baseURL = json["baseURL"].toString();
-    defTags = json["defTags"]?.toString() ?? "";
-    apiKey = json["apiKey"]?.toString() ?? "";
-    userID = json["userID"]?.toString() ?? "";
+    setFromMap(json);
+  }
+
+  void setFromMap(Map<String,dynamic> json) {
+    name = json["name"]?.toString();
+    type = json["type"]?.toString();
+    faviconURL = json["faviconURL"]?.toString();
+    baseURL = json["baseURL"]?.toString();
+    defTags = json["defTags"]?.toString();
+    apiKey = json["apiKey"]?.toString();
+    userID = json["userID"]?.toString();
   }
 
   @override

@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 
 //Slow piece of shit
 class RainbooruHandler extends BooruHandler {
@@ -23,7 +22,7 @@ class RainbooruHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var document = parse(response.body);
+    var document = parse(response.data);
     return document.getElementsByClassName("thumbnail");
   }
 
@@ -33,10 +32,9 @@ class RainbooruHandler extends BooruHandler {
     var urlElem = responseItem.firstChild!;
     thumbURL += urlElem.firstChild!.attributes["src"]!;
     String url = makePostURL(urlElem.attributes["href"]!.split("img/")[1]);
-    Uri uri = Uri.parse(url);
-    final responseInner = await http.get(uri, headers: getHeaders());
+    final responseInner = await DioNetwork.get(url, headers: getHeaders());
     if (responseInner.statusCode == 200) {
-      var document = parse(responseInner.body);
+      var document = parse(responseInner.data);
       var post = document.getElementById("immainpage");
       if (post != null) {
         var postsURLs = post.querySelector("div#immainpage > a");
@@ -88,7 +86,7 @@ class RainbooruHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 

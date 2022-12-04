@@ -34,7 +34,7 @@ class FlashElements {
     bool asDialog = false,
   }) async {
     // do nothing if in test mode
-    if (Tools.isTestMode()) return;
+    if (Tools.isTestMode) return;
 
     bool inViewer = ViewerHandler.instance.inViewer.value;
     if(!allowInViewer && inViewer) {

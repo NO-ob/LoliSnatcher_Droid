@@ -13,7 +13,7 @@ class BooruItem{
   List<String> tagsList;
   late String mediaType;
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
-  RxBool isHated = false.obs, isNoScale = false.obs;
+  RxBool isHated = false.obs, isLoved = false.obs, isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
   String fileNameExtras;
@@ -135,6 +135,10 @@ class BooruItem{
 
   static BooruItem fromJSON(String jsonString){
     Map<String, dynamic> json = jsonDecode(jsonString);
+    return BooruItem.fromMap(json);
+  }
+
+  static BooruItem fromMap(Map<String, dynamic> json) {
     List<String> tags = [];
     List tagz = json["tags"];
     for (int i = 0; i < tagz.length; i++){

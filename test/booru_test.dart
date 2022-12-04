@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/boorus/agnph_handler.dart';
 import 'package:lolisnatcher/src/boorus/booru_on_rails_handler.dart';
@@ -26,6 +25,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 
 // TODO: Create a bunch of fake accounts for testing auth
 // TODO hydrus?
@@ -34,7 +34,8 @@ import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 const bool runWithImages = false;
 const int itemLimit = Constants.defaultItemLimit;
 const int imageLimit = 5;
-const bool withTagSuggestions = true;
+const bool withTagSuggestions = false;
+const String defaultInput = '';
 //
 
 Future<void> main() async {
@@ -71,7 +72,7 @@ Future<void> main() async {
       });
       test('Realbooru', () async {
         // TODO first page doesn't give correct amount of items? api side problem?
-        BooruHandler booruHandler = await testBooru(Booru("realbooru", "Gelbooru", "", "https://realbooru.com", ""));
+        BooruHandler booruHandler = await testBooru(Booru("realbooru", "Gelbooru", "", "https://realbooru.com", ""), hardFetchedLength: false);
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
     });
@@ -167,7 +168,7 @@ Future<BooruHandler> testBooru(
   // +1 because starting page number is out of range
   booruHandler.pageNum = (temp[1] as int) + 1;
 
-  List<BooruItem> fetched = await booruHandler.search("", booruHandler.pageNum);
+  List<BooruItem> fetched = await booruHandler.search(defaultInput, booruHandler.pageNum);
   if (booruHandler.errorString.isNotEmpty) {
     print("Error: ${booruHandler.errorString}");
   }
@@ -189,15 +190,15 @@ Future<BooruHandler> testBooru(
       print('Fetching images for ${item.postURL}');
       print('${item.fileURL} ${item.sampleURL} ${item.thumbnailURL}');
       // file
-      var resp = await http.head(Uri.parse(item.fileURL));
+      var resp = await DioNetwork.head(item.fileURL);
       expect(resp.statusCode, equals(200));
       // sample
       if (item.fileURL != item.sampleURL && item.sampleURL != item.thumbnailURL) {
-        await http.head(Uri.parse(item.sampleURL));
+        await DioNetwork.head(item.sampleURL);
         expect(resp.statusCode, equals(200));
       }
       // thumbnail
-      await http.head(Uri.parse(item.thumbnailURL));
+      await DioNetwork.head(item.thumbnailURL);
       expect(resp.statusCode, equals(200));
       // tags
       print('tags: ${item.tagsList}');
@@ -206,15 +207,15 @@ Future<BooruHandler> testBooru(
   }
 
   if(withTagSuggestions) {
-    await testSuggestions(booruHandler, customInput: customSuggestionsInput);
+    await testSuggestions(booruHandler, customSuggestionsInput: customSuggestionsInput);
   }
 
   return booruHandler;
 }
 
-Future<void> testSuggestions(BooruHandler booruHandler, {String? customInput}) async {
+Future<void> testSuggestions(BooruHandler booruHandler, {String? customSuggestionsInput}) async {
   print ("Testing suggestions for ${booruHandler.booru.name}");
-  String input = customInput ?? "ani"; // ani[mated]
+  String input = customSuggestionsInput ?? "ani"; // ani[mated]
   List<String> suggestions = await booruHandler.tagSearch(input);
   expect(suggestions.isNotEmpty, equals(true));
   expect(suggestions.length, equals(10));

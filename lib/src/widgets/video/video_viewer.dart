@@ -192,7 +192,11 @@ class VideoViewerState extends State<VideoViewer> {
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $imageURL | $error');
     } else {
-      killLoading(['Loading Error: $error']);
+      if(error is DioError) {
+        killLoading(['Loading Error: ${error.message}']);
+      } else {
+        killLoading(['Loading Error: $error']);
+      }
       // print('Dio request cancelled: $error');
     }
   }
@@ -426,7 +430,7 @@ class VideoViewerState extends State<VideoViewer> {
       systemOverlaysOnEnterFullScreen: [],
       systemOverlaysAfterFullScreen: SystemUiOverlay.values,
       errorBuilder: (context, errorMessage) {
-        _onError(Exception([errorMessage]));
+        _onError(Exception(errorMessage));
 
         return Center(
           child: Text(errorMessage, style: const TextStyle(color: Colors.white)),

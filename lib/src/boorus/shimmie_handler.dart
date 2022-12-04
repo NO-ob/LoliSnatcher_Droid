@@ -1,5 +1,5 @@
 import 'package:html/parser.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -24,7 +24,7 @@ class ShimmieHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var parsedResponse = xml.XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     try {
       parseSearchCount(parsedResponse);
     } catch (e) {
@@ -76,7 +76,7 @@ class ShimmieHandler extends BooruHandler {
     }
   }
 
-  void parseSearchCount(xml.XmlDocument response) {
+  void parseSearchCount(XmlDocument response) {
     var parsedResponse = response.findAllElements('posts').toList()[0];
     int? count = int.tryParse(parsedResponse.getAttribute('count') ?? '0') ?? 0;
     totalCount.value = count;
@@ -106,7 +106,7 @@ class ShimmieHandler extends BooruHandler {
   @override
   List parseTagSuggestionsList(response) {
     // TODO explain why this
-    return response.body.substring(1, (response.body.length - 1)).replaceAll(RegExp('(:.([0-9])+)'), "").replaceAll("\"", "").split(",");
+    return response.data.substring(1, (response.data.length - 1)).replaceAll(RegExp('(:.([0-9])+)'), "").replaceAll("\"", "").split(",");
   }
 
   @override
@@ -125,7 +125,7 @@ class ShimmieHandler extends BooruHandler {
 
   @override
   List parseCommentsList(response) {
-    var document = parse(response.body);
+    var document = parse(response.data);
     return document.querySelectorAll(".comment:not(.comment_add)");
   }
 

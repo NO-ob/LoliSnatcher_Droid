@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class TextExpander extends StatefulWidget {
   const TextExpander({Key? key, required this.title, required this.bodyList}) : super(key: key);
   final String title;
-  final List<Text> bodyList;
+  final List<Widget> bodyList;
 
   @override
   State<TextExpander> createState() => _TextExpanderState();

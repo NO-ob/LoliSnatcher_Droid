@@ -233,7 +233,7 @@ class DBHandler{
   /// Gets a list of BooruItem from the database
   Future<List<BooruItem>> searchDB(String searchTagsString, String offset, String limit, String order, String mode) async {
     // TODO multiple tags in search can lead to wrong results
-    List<String> searchTags;
+    List<String> searchTags = [], excludeTags = [];
     List? result;
 
     Logger.Inst().log("Searching DB for tags $searchTagsString", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
@@ -248,6 +248,14 @@ class DBHandler{
       searchTags.remove(siteSearch);
       siteSearch = siteSearch.replaceAll("site:", "");
       siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
+    }
+
+    if(searchTags.where((element) => element.startsWith("-")).isNotEmpty){
+      excludeTags = searchTags.where((element) => element.startsWith("-")).toList();
+      excludeTags = excludeTags.map((tag) => tag.replaceAll("-", "")).toList();
+      searchTags = searchTags.where((element) => !element.startsWith("-")).toList();
+    } else {
+      excludeTags = [];
     }
 
     // benchmark reqest time
@@ -288,6 +296,12 @@ class DBHandler{
           item.isSnatched.value = false;
         }
         return item;
+      }).where((item) {
+        if (excludeTags.isNotEmpty) {
+          return !excludeTags.any((tag) => item.tagsList.contains(tag));
+        } else {
+          return true;
+        }
       }).toList();
 
       // end = DateTime.now();
@@ -328,7 +342,7 @@ class DBHandler{
 
   /// Gets amount of BooruItems from the database
   Future<int> searchDBCount(String searchTagsString) async {
-    List<String> searchTags = [];
+    List<String> searchTags = [], excludeTags = [];
     List? result;
 
     searchTagsString = searchTagsString.trim();
@@ -343,12 +357,26 @@ class DBHandler{
       siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
     }
 
+    if(searchTags.where((element) => element.startsWith("-")).isNotEmpty){
+      excludeTags = searchTags.where((element) => element.startsWith("-")).toList();
+      excludeTags = excludeTags.map((tag) => tag.replaceAll("-", "")).toList();
+      searchTags = searchTags.where((element) => !element.startsWith("-")).toList();
+    } else {
+      excludeTags = [];
+    }
+
+    // TODO temprorary disable count when search has exluded tags until a better query is done
+    if(excludeTags.isNotEmpty) {
+      return 0;
+    }
+
     if (searchTags.isNotEmpty){
       result = await db?.rawQuery(
           "SELECT COUNT(*) as count FROM BooruItem "
               "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
               "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE $siteQuery Tag.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) AND isFavourite = 1 GROUP BY BooruItem.id "
+              "WHERE $siteQuery Tag.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+              "AND isFavourite = 1 GROUP BY BooruItem.id "
               "HAVING COUNT(DISTINCT Tag.name) = ${searchTags.length}", searchTags);
     } else {
       result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE $siteQuery isFavourite = 1");

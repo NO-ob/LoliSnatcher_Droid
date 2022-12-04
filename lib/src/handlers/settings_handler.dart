@@ -5,8 +5,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:alice/alice.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -19,8 +19,10 @@ import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -29,6 +31,8 @@ class SettingsHandler extends GetxController {
   static SettingsHandler get instance => Get.find<SettingsHandler>();
 
   DBHandler dbHandler = DBHandler();
+
+  late Alice alice;
 
   // service vars
   RxBool isInit = false.obs;
@@ -664,10 +668,12 @@ class SettingsHandler extends GetxController {
       await saveSettings(restate: true);
     }
 
-    if (dbEnabled) {
-      await dbHandler.dbConnect(path);
-    } else {
-      dbHandler = DBHandler();
+    if(!Tools.isTestMode) {
+      if (dbEnabled) {
+        await dbHandler.dbConnect(path);
+      } else {
+        dbHandler = DBHandler();
+      }
     }
     return true;
   }
@@ -1347,6 +1353,10 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
+    if(Tools.isTestMode) {
+      return;
+    }
+
     const String changelog = r"""Changelog""";
     Map<String, dynamic> fakeUpdate = {
       "version_name": "2.2.0",
@@ -1363,8 +1373,8 @@ class SettingsHandler extends GetxController {
 
     try {
       const String updateFileName = EnvironmentConfig.isFromStore ? "update_store.json" : "update.json";
-      final response = await http.get(Uri.parse('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName'));
-      final json = jsonDecode(response.body);
+      final response = await DioNetwork.get('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName');
+      final json = response.data;
       // final json = jsonDecode(jsonEncode(fakeUpdate));
 
       // use this and fakeUpdate to generate json file
@@ -1513,21 +1523,12 @@ class SettingsHandler extends GetxController {
       await getPerms();
       await loadSettings();
 
-      if (booruList.isEmpty){
+      if (booruList.isEmpty) {
         await loadBoorus();
       }
-      if (allowSelfSignedCerts){
+      if (allowSelfSignedCerts) {
         HttpOverrides.global = MyHttpOverrides();
       }
-
-      print('isFromStore: ${EnvironmentConfig.isFromStore}');
-
-      // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
-      // print(toJSON());
-      // print(jsonEncode(toJSON()));
-
-      checkUpdate(withMessage: false);
-      isInit.value = true;
     } catch (e) {
       Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
       FlashElements.showSnackbar(
@@ -1543,6 +1544,20 @@ class SettingsHandler extends GetxController {
         leadingIconColor: Colors.red,
       );
     }
+    print('isFromStore: ${EnvironmentConfig.isFromStore}');
+
+    // print('=-=-=-=-=-=-=-=-=-=-=-=-=');
+    // print(toJSON());
+    // print(jsonEncode(toJSON()));
+
+    alice = Alice(
+      showNotification: false,
+      showInspectorOnShake: false,
+      darkTheme: false, // TODO on true - throws theme exception when opening inspector?
+    );
+
+    checkUpdate(withMessage: false);
+    isInit.value = true;
     return;
   }
 }

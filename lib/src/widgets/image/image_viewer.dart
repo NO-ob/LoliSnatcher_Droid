@@ -134,7 +134,11 @@ class ImageViewerState extends State<ImageViewer> {
     if (error is DioError && CancelToken.isCancel(error)) {
       //
     } else {
-      killLoading(['Loading Error: $error']);
+      if(error is DioError) {
+        killLoading(['Loading Error: ${error.message}']);
+      } else {
+        killLoading(['Loading Error: $error']);
+      }
       //
     }
   }

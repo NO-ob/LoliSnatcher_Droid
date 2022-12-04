@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -11,7 +9,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   List parseListFromResponse(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -88,7 +86,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   List parseCommentsList(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 

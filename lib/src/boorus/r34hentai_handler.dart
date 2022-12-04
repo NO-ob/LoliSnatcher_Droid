@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
@@ -16,7 +14,7 @@ class R34HentaiHandler extends ShimmieHandler {
   Map<String, String> getHeaders() {
     Map<String, String> headers = {
       ...super.getHeaders(),
-      if(booru.apiKey?.isNotEmpty ?? false) 'Cookie': "${booru.apiKey};",
+      if(booru.apiKey?.isNotEmpty == true) 'Cookie': "${booru.apiKey};",
     };
 
     return headers;
@@ -33,7 +31,7 @@ class R34HentaiHandler extends ShimmieHandler {
 
   @override
   List parseListFromResponse(response) {
-    var document = parse(response.body);
+    var document = parse(response.data);
     return document.getElementsByClassName("thumb");
   }
 
@@ -97,7 +95,7 @@ class R34HentaiHandlerOld extends R34HentaiHandler {
 
   @override
   List parseListFromResponse(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse; // Limit doesn't work with this api
   }
 

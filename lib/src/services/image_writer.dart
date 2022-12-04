@@ -4,12 +4,14 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
@@ -60,15 +62,21 @@ class ImageWriter {
     // if (fileExists) return null;
     if (fileExists || item.isSnatched.value == true) return null;
     try {
-      Uri fileURI = Uri.parse(item.fileURL);
-      var response = await http.get(fileURI,headers: Tools.getFileCustomHeaders(booru,checkForReferer: true));
+      var response = await DioNetwork.get(
+        item.fileURL,
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: Tools.getFileCustomHeaders(booru,checkForReferer: true),
+        ),
+      );
+
       if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
         await Directory(path!).create(recursive:true);
-        await image.writeAsBytes(response.bodyBytes, flush: true);
+        await image.writeAsBytes(response.data, flush: true);
         print("Image written: ${path!}$fileName");
         if (settingsHandler.jsonWrite){
-          File json = File("${path!}${fileName.split(".")[0]}.json");
-          await json.writeAsString(jsonEncode(item.toJson()), flush: true);
+          File jsonFile = File("${path!}${fileName.split(".")[0]}.json");
+          await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
         }
         item.isSnatched.value = true;
         if (settingsHandler.dbEnabled){
@@ -86,7 +94,7 @@ class ImageWriter {
         print("files ext is ${item.fileExt!}");
         print("Ext path override is: ${settingsHandler.extPathOverride}");
         var writeResp = await ServiceHandler.writeImage(
-          response.bodyBytes,
+          response.data,
           fileName.split(".")[0],
           item.mediaType,
           item.fileExt,
@@ -108,8 +116,8 @@ class ImageWriter {
           return (fileName);
         }
       }
-    } catch (e){
-      print("Image Writer Exception :: write :: $e");
+    } catch (e, s) {
+      Logger.newLog(m: 'Image Writer Exception', e: e, s: s, t: LogTypes.imageInfo);
       return e;
     }
     return (fileName);
@@ -143,18 +151,17 @@ class ImageWriter {
 
   Future writeCache(String fileURL, String typeFolder,{required String fileNameExtras}) async{
     String? cachePath;
-    Uri fileURI = Uri.parse(fileURL);
     try {
-      var response = await http.get(fileURI);
+      var response = await DioNetwork.get(fileURL, options: Options(responseType: ResponseType.bytes));
       await setPaths();
       cachePath = "${cacheRootPath!}$typeFolder/";
       await Directory(cachePath).create(recursive:true);
 
       String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
       File image = File(cachePath+fileName);
-      await image.writeAsBytes(response.bodyBytes, flush: true);
-    } catch (e){
-      print("Image Writer Exception :: cache write :: $e");
+      await image.writeAsBytes(response.data, flush: true);
+    } catch (e, s){
+      Logger.newLog(m: 'Image Writer Exception', e: e, s: s, t: LogTypes.imageInfo);
     }
     return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
   }

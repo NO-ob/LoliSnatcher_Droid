@@ -34,6 +34,10 @@ class CommentItem {
 
   static CommentItem fromJSON(String jsonString) {
     Map<String, dynamic> json = jsonDecode(jsonString);
+    return CommentItem.fromMap(json);
+  }
+
+  static CommentItem fromMap(Map<String, dynamic> json) {
     return CommentItem(
       id: json['id'] as String,
       title: json['title'] as String?,

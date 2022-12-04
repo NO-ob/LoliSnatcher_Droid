@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -29,8 +27,8 @@ class BooruOnRailsHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
-    return (parsedResponse['posts'] ?? []) as List;
+    Map<String, dynamic> parsedResponse = response.data;
+    return (parsedResponse['posts'] as List?) ?? [];
   }
 
   @override
@@ -89,7 +87,7 @@ class BooruOnRailsHandler extends BooruHandler {
     final String tagsWithCommas = tags.replaceAll(" ", ",");
     final String limitStr = limit.toString();
     final String pageStr = pageNum.toString();
-    final String apiKeyStr = ((booru.apiKey?.isEmpty ?? '') == '') ? "" : "key=${booru.apiKey}&";
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? "key=${booru.apiKey}&" : "";
 
     // EXAMPLE: https://twibooru.org/api/v3/search/posts?q=*&perpage=10&page=1
     return "${booru.baseURL}/api/v3/search/posts?${apiKeyStr}q=$tagsWithCommas&perpage=$limitStr&page=$pageStr";
@@ -103,7 +101,7 @@ class BooruOnRailsHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body)['tags'];
+    List<dynamic> parsedResponse = response.data['tags'];
     return parsedResponse;
   }
 

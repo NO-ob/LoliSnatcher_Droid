@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -18,7 +16,7 @@ class PhilomenaHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['images'] ?? []) as List;
   }
 
@@ -81,7 +79,7 @@ class PhilomenaHandler extends BooruHandler {
     if (booru.baseURL!.contains("derpibooru")) {
       filter = "56027";
     }
-    if (booru.apiKey == "") {
+    if (booru.apiKey?.isEmpty ?? true) {
       return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=${tags.replaceAll(" ", ",")}&per_page=${limit.toString()}&page=${pageNum.toString()}";
     } else {
       return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q=${tags.replaceAll(" ", ",")}&per_page=${limit.toString()}&page=${pageNum.toString()}";
@@ -98,7 +96,7 @@ class PhilomenaHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data;
     return parsedResponse['tags'];
   }
 

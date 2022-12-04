@@ -1,9 +1,9 @@
-import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 // TODO improve tag fecthing, add data from it to tag handler?
@@ -19,7 +19,7 @@ class AGNPHHandler extends BooruHandler {
   /// Makes results show on screen faster than waiting on getDataByID
   @override
   List parseListFromResponse(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     totalCount.value = int.tryParse(parsedResponse.getElement("posts")?.getAttribute("count") ?? '0') ?? 0;
     return parsedResponse.findAllElements("post").toList();
   }
@@ -63,12 +63,11 @@ class AGNPHHandler extends BooruHandler {
 
   void getTagsLater(String postID, int fetchedIndex) async {
     try {
-      Uri uri = Uri.parse("${booru.baseURL}/gallery/post/show/$postID/?api=xml");
-      var response = await http.get(uri, headers: getHeaders());
+      var response = await DioNetwork.get("${booru.baseURL}/gallery/post/show/$postID/?api=xml", headers: getHeaders());
       Logger.Inst().log("Getting post data: $postID", className, "getTagsLater", LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
         Logger.Inst().log("Got data for: $postID", className, "getTagsLater", LogTypes.booruHandlerRawFetched);
-        var parsedResponse = XmlDocument.parse(response.body);
+        var parsedResponse = XmlDocument.parse(response.data);
         var post = parsedResponse.getElement('post');
         String tagStr = post!.getElement("tags")?.innerText ?? "";
         if (post.getElement("tags")!.innerText.isNotEmpty) {
@@ -105,7 +104,7 @@ class AGNPHHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements("tag").toList();
   }
 
