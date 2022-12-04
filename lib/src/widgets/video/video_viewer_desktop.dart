@@ -202,7 +202,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $imageURL | $error');
     } else {
-      killLoading(['Loading Error: $error']);
+      if(error is DioError) {
+        killLoading(['Loading Error: ${error.message}']);
+      } else {
+        killLoading(['Loading Error: $error']);
+      }
       // print('Dio request cancelled: $error');
     }
   }

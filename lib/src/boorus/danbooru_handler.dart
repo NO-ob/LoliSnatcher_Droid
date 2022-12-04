@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
@@ -38,7 +36,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    List parsedResponse = jsonDecode(response.body);
+    List parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -95,8 +93,9 @@ class DanbooruHandler extends BooruHandler {
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://danbooru.donmai.us/posts.json?tags=rating:safe%20order:rank&limit=20&page=1
-    final String apiStr = (booru.apiKey?.isNotEmpty ?? false) ? "" : "&login=${booru.userID}&api_key=${booru.apiKey}";
-    return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$apiStr";
+    final String loginStr = booru.userID?.isNotEmpty == true ? "&login=${booru.userID}" : "";
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? "&api_key=${booru.apiKey}" : "";
+    return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$loginStr$apiKeyStr";
   }
 
   @override
@@ -116,7 +115,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -136,7 +135,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   List parseCommentsList(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -165,7 +164,7 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   List parseNotesList(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 

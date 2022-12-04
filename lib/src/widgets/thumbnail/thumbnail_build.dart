@@ -33,8 +33,9 @@ class ThumbnailBuild extends StatelessWidget {
     final bool hasNotes = item.hasNotes == true;
     final bool hasComments = item.hasComments == true;
 
-    // reset the isHated value since we already re-check it on every render
+    // reset the isHated and isLoved values since we already re-check them on every render
     item.isHated.value = isHated;
+    item.isLoved.value = isLoved;
 
     // print('ThumbnailBuild $index');
 

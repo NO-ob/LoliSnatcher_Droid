@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -14,6 +15,7 @@ import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -44,8 +46,7 @@ abstract class BooruHandler {
   List<BooruItem> get filteredFetched => fetched.where((el) {
     SettingsHandler settingsHandler = Get.find<SettingsHandler>();
 
-    final bool filterHated = settingsHandler.filterHated;
-    if (filterHated && el.isHated.value) {
+    if (settingsHandler.filterHated && el.isHated.value) {
       return false;
     }
 
@@ -98,7 +99,7 @@ abstract class BooruHandler {
 
     Uri uri;
     try {
-      uri = Uri.parse(Uri.encodeFull(url));
+      uri = Uri.parse(url);
     } catch (e) {
       Logger.Inst().log('invalid url: $url', className, "Search", LogTypes.booruHandlerFetchFailed);
       errorString = "Invalid URL ($url)";
@@ -124,12 +125,16 @@ abstract class BooruHandler {
       } else {
         Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.body}", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.data}", className, "Search", LogTypes.booruHandlerFetchFailed);
         errorString = response.statusCode.toString();
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
-      errorString = e.toString();
+      if(e is DioError) {
+        errorString = e.message;
+      } else {
+        errorString = e.toString();
+      }
     }
 
     // print('Fetched: ${filteredFetched.length}');
@@ -145,7 +150,7 @@ abstract class BooruHandler {
 
     Logger.Inst().log('fetching: $uri with headers: $headers', className, "Search", LogTypes.booruHandlerSearchURL);
 
-    return http.get(uri, headers: headers);
+    return DioNetwork.get(uri.toString(), headers: headers);
   }
 
   FutureOr<List<BooruItem>> parseResponse(response) async {
@@ -154,6 +159,8 @@ abstract class BooruHandler {
       posts = await parseListFromResponse(response);
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(response.data, className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(response.data.runtimeType, className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
       errorString = e.toString();
       rethrow;
     }
@@ -165,6 +172,9 @@ abstract class BooruHandler {
         try {
           BooruItem? item = await parseItemFromResponse(post, i);
           if(item != null) {
+            final List<List<String>> hatedAndLovedTags = SettingsHandler.instance.parseTagsList(item.tagsList);
+            item.isHated.value = hatedAndLovedTags[0].isNotEmpty;
+            item.isLoved.value = hatedAndLovedTags[1].isNotEmpty;
             newItems.add(item);
           }
         } catch (e) {
@@ -218,7 +228,7 @@ abstract class BooruHandler {
     if(url.isEmpty) return tags;
     Uri uri;
     try {
-      uri = Uri.parse(Uri.encodeFull(url));
+      uri = Uri.parse(url);
     } catch (e) {
       Logger.Inst().log('invalid url: $url', className, "tagSearch", LogTypes.booruHandlerFetchFailed);
       return tags;
@@ -226,18 +236,22 @@ abstract class BooruHandler {
     Logger.Inst().log('$url ${uri.toString()}', className, "tagSearch", LogTypes.booruHandlerSearchURL);
 
     final dynamic response;
+    const int limit = 10;
     try {
       response = await fetchTagSuggestions(uri, input);
       if (response.statusCode == 200) {
+        Logger.Inst().log("fetchTagSuggestions response: ${response.data}", className, "tagSearch", null);
         var rawTags = await parseTagSuggestionsList(response);
         for (int i = 0; i < rawTags.length; i++) {
           final rawTag = rawTags[i];
           try {
-            String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '');
-            if (parsedTag.isNotEmpty) {
-              // TODO add tag to taghandler before adding it to list
-              // addTagsWithType(parsedTag, tagType);
-              tags.add(parsedTag);
+            if(tags.length < limit) {
+              String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '').trim();
+              if (parsedTag.isNotEmpty) {
+                // TODO add tag to taghandler before adding it to list
+                // addTagsWithType(parsedTag, tagType);
+                tags.add(parsedTag);
+              }
             }
           } catch (e) {
             Logger.Inst().log('${e.toString()} $rawTag', className, "parseTagSuggestion", LogTypes.booruHandlerRawFetched);
@@ -246,7 +260,7 @@ abstract class BooruHandler {
       } else {
         Logger.Inst().log("error fetching url: $url", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.body}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.data}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.booruHandlerFetchFailed);
@@ -261,7 +275,7 @@ abstract class BooruHandler {
       if(cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return http.get(uri, headers: headers);
+    return DioNetwork.get(uri.toString(), headers: headers);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -293,7 +307,7 @@ abstract class BooruHandler {
     if(url.isEmpty) return comments;
     Uri uri;
     try {
-      uri = Uri.parse(Uri.encodeFull(url));
+      uri = Uri.parse(url);
     } catch (e) {
       Logger.Inst().log('invalid url: $url', className, "getComments", LogTypes.booruHandlerFetchFailed);
       return comments;
@@ -317,7 +331,7 @@ abstract class BooruHandler {
       } else {
         Logger.Inst().log("error fetching url: $url", className, "getComments", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "getComments", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.body}", className, "getComments", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.data}", className, "getComments", LogTypes.booruHandlerFetchFailed);
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "getComments", LogTypes.booruHandlerFetchFailed);
@@ -332,7 +346,7 @@ abstract class BooruHandler {
       if(cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return http.get(uri, headers: headers);
+    return DioNetwork.get(uri.toString(), headers: headers);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -374,7 +388,7 @@ abstract class BooruHandler {
     if(url.isEmpty) return notes;
     Uri uri;
     try {
-      uri = Uri.parse(Uri.encodeFull(url));
+      uri = Uri.parse(url);
     } catch (e) {
       Logger.Inst().log('invalid url: $url', className, "getNotes", LogTypes.booruHandlerFetchFailed);
       return notes;
@@ -398,7 +412,7 @@ abstract class BooruHandler {
       } else {
         Logger.Inst().log("error fetching url: $url", className, "getNotes", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.body}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("response: ${response.data}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "getNotes", LogTypes.booruHandlerFetchFailed);
@@ -413,7 +427,7 @@ abstract class BooruHandler {
       if(cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return http.get(uri, headers: headers);
+    return DioNetwork.get(uri.toString(), headers: headers);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -465,14 +479,16 @@ abstract class BooruHandler {
 
   Future<String?> getCookies() async {
     String cookieString = '';
-    try {
-      final CookieManager cookieManager = CookieManager.instance();
-      final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
-      for (Cookie cookie in cookies) {
-        cookieString += '${cookie.name}=${cookie.value}; ';
+    if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
+      try {
+        final CookieManager cookieManager = CookieManager.instance();
+        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
+        for (Cookie cookie in cookies) {
+          cookieString += '${cookie.name}=${cookie.value}; ';
+        }
+      } catch (e) {
+        Logger.Inst().log(e.toString(), className, "getCookies", LogTypes.exception);
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, "getCookies", LogTypes.exception);
     }
 
     Map<String, String> headers = getHeaders();
@@ -539,8 +555,8 @@ abstract class BooruHandler {
       fetched[fetchedIndex].isSnatched.value = values[0];
       fetched[fetchedIndex].isFavourite.value = values[1];
     }
-    List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList);
-    fetched[fetchedIndex].isHated.value = tagLists[0].isNotEmpty;
+    // List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList);
+    // fetched[fetchedIndex].isHated.value = tagLists[0].isNotEmpty;
     // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
     return;
   }
@@ -572,8 +588,9 @@ abstract class BooruHandler {
         fetched[fetchedIndexes[index]].isFavourite.value = values[1];
 
         // TODO probably leads to worse performance on page loads, change to isolate or async maybe?
-        List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndexes[index]].tagsList);
-        fetched[fetchedIndexes[index]].isHated.value = tagLists[0].isNotEmpty;
+        // TODO causes freezes on page load, currently moved directly to where item is created, but could cause performance issues there too?
+        // List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndexes[index]].tagsList);
+        // fetched[fetchedIndexes[index]].isHated.value = tagLists[0].isNotEmpty;
         // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
       });
     }

@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
-
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -25,14 +22,14 @@ class InkBunnyHandler extends BooruHandler {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=myusername&password=mypassword
     _gettingToken = true;
     String url = "${booru.baseURL}/api_login.php?output_mode=json";
-    if (booru.apiKey!.isEmpty && booru.userID!.isEmpty){
+    if ((booru.apiKey?.isEmpty ?? true) && (booru.userID?.isEmpty ?? true)){
         url += "&username=guest";
     } else {
-      url += "&username=${booru.userID}&password=${Uri.encodeComponent(booru.apiKey!)}";
+      url += "&username=${booru.userID}&password=${booru.apiKey!}";
     }
     try{
       final response = await fetchSearch(Uri.parse(url));
-      Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+      Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse["sid"] != null){
         sessionToken = parsedResponse["sid"].toString();
         Logger.Inst().log("Inkbunny session token found: $sessionToken", "InkBunnyHandler", "getSessionToken", LogTypes.booruHandlerInfo);
@@ -52,7 +49,7 @@ class InkBunnyHandler extends BooruHandler {
     String url = "${booru.baseURL}/api_userrating.php?output_mode=json&sid=$sessionToken&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes";
     try{
       final response = await fetchSearch(Uri.parse(url));
-      Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+      Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse["sid"] != null){
         if (sessionToken == parsedResponse["sid"]){
           Logger.Inst().log("Inkbunny set ratings", className, "setRatingOptions", LogTypes.booruHandlerInfo);
@@ -64,11 +61,6 @@ class InkBunnyHandler extends BooruHandler {
       Logger.Inst().log("Exception setting ratings $e", className, "setRatingOptions", LogTypes.booruHandlerInfo);
     }
     return true;
-  }
-
-  @override
-  Future fetchSearch(Uri uri) async {
-    return http.get(uri, headers: getHeaders());
   }
 
   // The api doesn't give much information about the posts so we need to get their ids and then do another query to get all the data
@@ -85,8 +77,8 @@ class InkBunnyHandler extends BooruHandler {
       var response = await fetchSearch(uri);
       Logger.Inst().log("Getting submission data: ${uri.toString()}", className, "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
-        Logger.Inst().log(response.body, className, "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
-        return response.body;
+        Logger.Inst().log(response.data, className, "getSubmissionResponse", LogTypes.booruHandlerRawFetched);
+        return response.data;
       } else {
         Logger.Inst().log("InkBunnyHandler failed to get submissions", className, "getSubmissionResponse", LogTypes.booruHandlerFetchFailed);
       }
@@ -100,12 +92,12 @@ class InkBunnyHandler extends BooruHandler {
   @override
   Future<List> parseListFromResponse(response) async{
     // The api will keep loading pages with the same results as the last page if pagenum is bigger than the max
-    var parsedResponse = jsonDecode(response.body);
+    var parsedResponse = response.data;
     int maxPageCount = parsedResponse["pages_count"];
     if(pageNum > 1 && pageNum > maxPageCount){
       return [];
     }
-    var parsedSubmissionResponse = jsonDecode(await getSubmissionResponse(parsedResponse));
+    var parsedSubmissionResponse = await getSubmissionResponse(parsedResponse);
     return parseItemsFromResponse(parsedSubmissionResponse);
   }
 
@@ -236,9 +228,9 @@ class InkBunnyHandler extends BooruHandler {
       Uri uri = Uri.parse(url);
       var response = await fetchSearch(uri);
       Logger.Inst().log("$url ", className, "tagSearch", LogTypes.booruHandlerInfo);
-      Logger.Inst().log(response.body, className, "tagSearch", LogTypes.booruHandlerInfo);
+      Logger.Inst().log(response.data, className, "tagSearch", LogTypes.booruHandlerInfo);
       if (response.statusCode == 200) {
-        var parsedResponse = jsonDecode(response.body);
+        var parsedResponse = response.data;
         if (parsedResponse.containsKey("results")){
           var tagObjects = parsedResponse["results"];
           if (tagObjects.length > 0){

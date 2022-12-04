@@ -8,6 +8,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class DioDownloader {
@@ -44,19 +45,6 @@ class DioDownloader {
   Isolate? isolate;
   ReceivePort receivePort = ReceivePort();
   Dio? currentClient;
-
-  static Dio get _httpClient {
-    Dio client = Dio();
-    // TODO bad certificate ignore, FIX AND REMOVE LATER
-    // https://stackoverflow.com/questions/54285172/how-to-solve-flutter-certificate-verify-failed-error-while-performing-a-post-req
-    // (client.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-    // (HttpClient client) {
-    //   client.badCertificateCallback =
-    //       (X509Certificate cert, String host, int port) => true;
-    //   return client;
-    // };
-    return client;
-  }
 
   void dispose() {
     receivePort.close();
@@ -142,14 +130,16 @@ class DioDownloader {
 
   Future<String> getCookies() async {
     String cookieString = '';
-    try {
-      final CookieManager cookieManager = CookieManager.instance();
-      final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
-      for (Cookie cookie in cookies) {
-        cookieString += '${cookie.name}=${cookie.value}; ';
+    if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
+      try {
+        final CookieManager cookieManager = CookieManager.instance();
+        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
+        for (Cookie cookie in cookies) {
+          cookieString += '${cookie.name}=${cookie.value}; ';
+        }
+      } catch (e) {
+        Logger.Inst().log(e.toString(), 'DioDownloader', "getCookies", LogTypes.exception);
       }
-    } catch (e) {
-      // 
     }
 
     cookieString = cookieString.trim();
@@ -212,7 +202,7 @@ class DioDownloader {
 
       // load from network and cache if enabled
       onEvent?.call('isFromNetwork', null);
-      currentClient = _httpClient;
+      currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved.toString(),
         options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
@@ -302,7 +292,7 @@ class DioDownloader {
       final String resolved = Uri.base.resolve(url).toString();
       // load from network and cache if enabled
       onEvent?.call('isFromNetwork', null);
-      currentClient = _httpClient;
+      currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved.toString(),
         options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
@@ -357,7 +347,7 @@ class DioDownloader {
     try {
       final String resolved = Uri.base.resolve(url).toString();
 
-      currentClient = _httpClient;
+      currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.head(
         resolved.toString(),
         options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),

@@ -4,12 +4,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-import 'package:dio/dio.dart';
-import 'package:http/http.dart' as http;
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
@@ -30,7 +28,7 @@ class HydrusHandler extends BooruHandler {
 
   @override
   Future<List> parseListFromResponse(response) async {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data is String ? jsonDecode(response.data) : response.data;
     if (parsedResponse['file_ids'] != null) {
       _fileIDs = parsedResponse['file_ids'];
       return await getResultsPage(pageNum);
@@ -51,10 +49,9 @@ class HydrusHandler extends BooruHandler {
 
     if (_fileIDs == null) {
       try {
-        Uri uri = Uri.parse(url);
-        final response = await http.get(uri,headers: getHeaders());
+        final response = await DioNetwork.get(url, headers: getHeaders());
         if (response.statusCode == 200) {
-          Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+          Map<String, dynamic> parsedResponse = response.data is String ? jsonDecode(response.data) : response.data;
           if (parsedResponse['file_ids'] != null) {
             _fileIDs = parsedResponse['file_ids'];
             return await getResultsPage(pageNum);
@@ -88,14 +85,14 @@ class HydrusHandler extends BooruHandler {
         }
         fileIDString += ']';
         String url = "${booru.baseURL}/get_files/file_metadata?file_ids=$fileIDString";
-        Uri uri = Uri.parse(url);
-        final response = await http.get(uri, headers: {
-          ...super.getHeaders(),
-          "Hydrus-Client-API-Access-Key" : booru.apiKey!,
-        });
+        final response = await DioNetwork.get(url, headers: {
+            ...super.getHeaders(),
+            "Hydrus-Client-API-Access-Key" : booru.apiKey!,
+          },
+        );
         if (response.statusCode == 200) {
-          var parsedResponse = jsonDecode(response.body);
-          Logger.Inst().log(response.body, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
+          var parsedResponse = response.data;
+          Logger.Inst().log(response.data, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
 
           List<BooruItem> newItems = [];
           for (int i = 0; i < parsedResponse['metadata'].length; i++) {
@@ -154,11 +151,9 @@ class HydrusHandler extends BooruHandler {
   Future addURL(BooruItem item) async{
     try {
       String url = "${booru.baseURL}/add_urls/add_url";
-      Uri uri = Uri.parse(url);
       Logger.Inst().log(url, "HydrusHandler", "addURL", LogTypes.booruHandlerInfo);
       Logger.Inst().log(booru.apiKey!, "HydrusHandler", "addURL", LogTypes.booruHandlerInfo);
       // Uses dio because darts http post doesn't send the content type header correctly and the post doesn't work
-      var dio = Dio();
       List<String> tags = [];
       String tagString = '';
       for (var element in item.tagsList) {
@@ -166,14 +161,14 @@ class HydrusHandler extends BooruHandler {
         tagString += '"$element",';
       }
       tagString = tagString.substring(0,tagString.length -1);
-      Response dioResponse = await dio.post(url,
-        options: Options(headers: {
+      await DioNetwork.post(url,
+        headers: {
           HttpHeaders.contentTypeHeader: "application/json",
           "Hydrus-Client-API-Access-Key":booru.apiKey!
-        }),
-        data: jsonEncode({"url": item.fileURL,
+        },
+        data: {"url": item.fileURL,
           "filterable_tags":item.tagsList
-        }),
+        },
       );
     } catch(e) {
       FlashElements.showSnackbar(
@@ -204,18 +199,18 @@ class HydrusHandler extends BooruHandler {
     String url = "${booru.baseURL}/request_new_permissions?name=LoliSnatcher&basic_permissions=[3,0,2]";
     Logger.Inst().log("Requesting key: $url", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
     try {
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: {
-        ...super.getHeaders(),
-        "Hydrus-Client-API-Access-Key" : booru.apiKey!,
-      });
+      final response = await DioNetwork.get(url, headers: {
+          ...super.getHeaders(),
+          "Hydrus-Client-API-Access-Key" : booru.apiKey!,
+        },
+      );
       if (response.statusCode == 200) {
-        var parsedResponse = jsonDecode(response.body);
+        var parsedResponse = response.data;
         Logger.Inst().log("Key Request Successful: ${parsedResponse['access_key']}", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
         return parsedResponse['access_key'].toString();
       } else {
         Logger.Inst().log("Key Request Failed: ${response.statusCode}", "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
-        Logger.Inst().log(response.body, "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
+        Logger.Inst().log(response.data, "HydrusHandler", "getAccessKey", LogTypes.booruHandlerInfo);
       }
     } catch (e){
       Logger.Inst().log(e.toString(), "HydrusHandler", "getAccessKey", LogTypes.exception);

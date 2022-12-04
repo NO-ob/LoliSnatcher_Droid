@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -13,6 +11,7 @@ import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 class GelbooruHandler extends BooruHandler {
@@ -50,11 +49,11 @@ class GelbooruHandler extends BooruHandler {
   List parseListFromResponse(response) {
     var parsedResponse;
     try {
-      parsedResponse = jsonDecode(response.body);
+      parsedResponse = response.data;
     } catch(e) {
       // gelbooru returns xml response if request was denied for some reason
       // i.e. user hit a rate limit because he didn't include api key
-      parsedResponse = XmlDocument.parse(response.body) ;
+      parsedResponse = XmlDocument.parse(response.data) ;
       String? errorMessage = (parsedResponse as XmlDocument).getElement('response')?.getAttribute('reason')?.toString();
       if (errorMessage != null) {
         throw Exception(errorMessage);
@@ -134,10 +133,10 @@ class GelbooruHandler extends BooruHandler {
   String makeURL(String tags) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=post&q=index&tags=rating:general%20order:score&limit=20&pid=0&json=1
     int cappedPage = max(0, pageNum);
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
-    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
+    String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+    String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
 
-    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1$apiKey$userId";
+    return "${booru.baseURL}/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}&json=1$apiKeyStr$userIdStr";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -145,14 +144,14 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeTagURL(String input) {
     // EXAMPLE https://gelbooru.com/index.php?page=dapi&s=tag&q=index&name_pattern=nagat%25&limit=10&json=1
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
-    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
-    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1$apiKey$userId";
+    String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+    String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10&json=1$apiKeyStr$userIdStr";
   }
 
   @override
   List parseTagSuggestionsList(response) {
-    var parsedResponse = jsonDecode(response.body)["tag"] ?? [];
+    var parsedResponse = response.data["tag"] ?? [];
     return parsedResponse;
   }
 
@@ -173,9 +172,9 @@ class GelbooruHandler extends BooruHandler {
 
   @override
   String makeDirectTagURL(List<String> tags) {
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
-    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
-    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=500&json=1$apiKey$userId";
+    String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+    String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=500&json=1$apiKeyStr$userIdStr";
   }
 
   @override
@@ -184,12 +183,11 @@ class GelbooruHandler extends BooruHandler {
     Logger.Inst().log("Got tag list: $tags", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
     String url = makeDirectTagURL(tags);
     Logger.Inst().log("DirectTagURL: $url", className, "genTagObjects", LogTypes.booruHandlerTagInfo);
-    Uri uri = Uri.parse(url);
     try {
-      final response = await http.get(uri, headers: getHeaders());
+      final response = await DioNetwork.get(url, headers: getHeaders());
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        var parsedResponse = (jsonDecode(response.body)["tag"]) ?? [];
+        var parsedResponse = (response.data["tag"]) ?? [];
         if (parsedResponse?.isNotEmpty ?? false) {
           Logger.Inst().log("Tag response length: ${parsedResponse.length},Tag list length: ${tags.length}", className, "genTagObjects",
               LogTypes.booruHandlerTagInfo);
@@ -225,14 +223,14 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeCommentsURL(String postID, int pageNum) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=comment&q=index&post_id=7296350
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
-    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
-    return "${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID$apiKey$userId";
+    String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+    String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=comment&q=index&post_id=$postID$apiKeyStr$userIdStr";
   }
 
   @override
   List parseCommentsList(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements("comment").toList();
   }
 
@@ -264,14 +262,14 @@ class GelbooruHandler extends BooruHandler {
   @override
   String makeNotesURL(String postID) {
     // EXAMPLE: https://gelbooru.com/index.php?page=dapi&s=note&q=index&post_id=6512262
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? '&api_key=${booru.apiKey}' : '';
-    String userId = (booru.userID?.isNotEmpty ?? false) ? '&user_id=${booru.userID}' : '';
-    return "${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID$apiKey$userId";
+    String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+    String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
+    return "${booru.baseURL}/index.php?page=dapi&s=note&q=index&post_id=$postID$apiKeyStr$userIdStr";
   }
 
   @override
   List parseNotesList(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements("note").toList();
   }
 

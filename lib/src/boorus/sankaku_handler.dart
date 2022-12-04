@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -9,6 +6,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -41,7 +39,7 @@ class SankakuHandler extends BooruHandler {
   @override
   Future<dynamic> fetchSearch(Uri uri) async {
     try {
-      if (authToken == "" && booru.userID != "" && booru.apiKey != "") {
+      if (authToken == "" && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
         authToken = await getAuthToken();
         Logger.Inst().log("Got authtoken: $authToken", className, "fetchSearch", LogTypes.booruHandlerInfo);
       }
@@ -49,12 +47,12 @@ class SankakuHandler extends BooruHandler {
       Logger.Inst().log("Failed to get authtoken: $e", className, "fetchSearch", LogTypes.booruHandlerInfo);
     }
 
-    return http.get(uri, headers: getHeaders());
+    return DioNetwork.get(uri.toString(), headers: getHeaders());
   }
 
   @override
   List parseListFromResponse(response) {
-    List<dynamic> parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -115,14 +113,14 @@ class SankakuHandler extends BooruHandler {
   @override
   Future<List> loadItem(BooruItem item) async {
     try {
-      if (authToken == "" && booru.userID != "" && booru.apiKey != "") {
+      if (authToken == "" && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
         authToken = await getAuthToken();
       }
-      http.Response response = await http.get(Uri.parse(makeApiPostURL(item.postURL.split("/").last)), headers: getHeaders());
+      var response = await DioNetwork.get(makeApiPostURL(item.postURL.split("/").last), headers: getHeaders());
       if (response.statusCode != 200) {
         return [item, false, 'Invalid status code ${response.statusCode}'];
       } else {
-        var current = jsonDecode(response.body);
+        Map<String, dynamic> current = response.data;
         Logger.Inst().log(current.toString(), className, "updateFavourite", LogTypes.booruHandlerRawFetched);
         if (current["file_url"] != null) {
           item.fileURL = current["file_url"];
@@ -172,19 +170,19 @@ class SankakuHandler extends BooruHandler {
 
   Future<String> getAuthToken() async {
     String token = "";
-    Uri uri = Uri.parse("${booru.baseURL}/auth/token?lang=english");
-    final response = await http.post(
-      uri,
+    final response = await DioNetwork.post(
+      "${booru.baseURL}/auth/token",
+      queryParameters: {"lang": "english"},
       headers: {
         "Content-Type": "application/json",
         "User-Agent": Tools.browserUserAgent(),
       },
-      body: jsonEncode({"login": booru.userID, "password": booru.apiKey}),
-      encoding: Encoding.getByName("utf-8"),
+      data: {"login": booru.userID, "password": booru.apiKey},
+      // encoding: Encoding.getByName("utf-8"),
     );
 
     if (response.statusCode == 200) {
-      var parsedResponse = jsonDecode(response.body);
+      Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse["success"]) {
         Logger.Inst().log("Sankaku auth token loaded", className, "getAuthToken", LogTypes.booruHandlerInfo);
         token = "${parsedResponse["token_type"]} ${parsedResponse["access_token"]}";
@@ -204,7 +202,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    var parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -232,7 +230,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseCommentsList(response) {
-    var parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -261,7 +259,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseNotesList(response) {
-    var parsedResponse = jsonDecode(response.body);
+    List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 

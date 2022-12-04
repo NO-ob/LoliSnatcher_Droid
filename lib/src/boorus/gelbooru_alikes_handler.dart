@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -12,6 +11,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -38,7 +38,7 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     // <post file_url="..." />
     return parsedResponse.findAllElements('post').toList();
   }
@@ -132,10 +132,11 @@ class GelbooruAlikesHandler extends BooruHandler {
       baseUrl = 'https://api.rule34.xxx';
     }
 
-    int cappedPage = max(0, pageNum);
-    String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? "&api_key=${booru.apiKey}&user_id=${booru.userID}" : "";
+    final int cappedPage = max(0, pageNum);
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? "&api_key=${booru.apiKey}" : "";
+    final String userIdStr = booru.userID?.isNotEmpty == true ? "&user_id=${booru.userID}" : "";
 
-    return "$baseUrl/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$apiKey";
+    return "$baseUrl/index.php?page=dapi&s=post&q=index&tags=${tags.replaceAll(" ", "+")}&limit=${limit.toString()}&pid=${cappedPage.toString()}$apiKeyStr$userIdStr";
   }
 
   // ----------------- Tag suggestions and tag handler stuff
@@ -155,8 +156,7 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    var parsedResponse = jsonDecode(response.body) ?? [];
-    return parsedResponse;
+    return jsonDecode(response.data) ?? [];
   }
 
   @override
@@ -179,11 +179,10 @@ class GelbooruAlikesHandler extends BooruHandler {
     };
 
     try {
-      Uri uri = Uri.parse(url);
-      final response = await http.get(uri, headers: headers);
+      final response = await DioNetwork.get(url, headers: headers);
       // 200 is the success http response code
       if (response.statusCode == 200) {
-        var parsedResponse = XmlDocument.parse(response.body);
+        var parsedResponse = XmlDocument.parse(response.data);
         var root = parsedResponse.findAllElements('posts').toList();
         if (root.length == 1) {
           result = int.parse(root[0].getAttribute('count') ?? '0');
@@ -214,7 +213,7 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   List parseCommentsList(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements("comment").toList();
   }
 
@@ -252,7 +251,7 @@ class GelbooruAlikesHandler extends BooruHandler {
 
   @override
   List parseNotesList(response) {
-    var parsedResponse = XmlDocument.parse(response.body);
+    var parsedResponse = XmlDocument.parse(response.data);
     return parsedResponse.findAllElements("note").toList();
   }
 

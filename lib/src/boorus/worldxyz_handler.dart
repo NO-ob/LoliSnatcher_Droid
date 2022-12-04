@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 
 class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(Booru booru, int limit) : super(booru, limit);
@@ -22,7 +21,7 @@ class WorldXyzHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['items'] ?? []) as List;
   }
 
@@ -122,25 +121,23 @@ class WorldXyzHandler extends BooruHandler {
 
   @override
   Future fetchTagSuggestions(Uri uri, String input) {
-    String requestBody = jsonEncode({
-      "searchText": input.replaceAll(RegExp(r'^-'), ''),
-      "skip": 0,
-      "take": 10,
-    });
-
-    return http.post(
-      uri,
+    return DioNetwork.post(
+      uri.toString(),
       headers: {
         ...getHeaders(),
         'Content-Type': 'application/json',
       },
-      body: requestBody,
+      data: {
+        "searchText": input.replaceAll(RegExp(r'^-'), ''),
+        "skip": 0,
+        "take": 10,
+      },
     );
   }
 
   @override
   List parseTagSuggestionsList(response) {
-    var parsedResponse = jsonDecode(response.body);
+    var parsedResponse = response.data;
     return parsedResponse["items"] ?? [];
   }
 
@@ -156,11 +153,10 @@ class WorldXyzHandler extends BooruHandler {
   //   String url = makeURL(input);
   //   url = url.replaceAll(RegExp(r''), '');
   //   try {
-  //     Uri uri = Uri.parse(url);
-  //     final response = await http.get(uri, headers: getHeaders());
+  //     final response = await DioNetwork.get(url, headers: getHeaders());
   //     // 200 is the success http response code
   //     if (response.statusCode == 200) {
-  //       Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+  //       Map<String, dynamic> parsedResponse = response.data;
   //       result = parsedResponse['totalCount'];
   //     } else {
   //       Logger.Inst().log(response.statusCode.toString(), "WorldXyzHandler", "searchCount", LogTypes.booruHandlerInfo);

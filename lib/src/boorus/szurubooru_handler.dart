@@ -19,7 +19,7 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['results'] ?? []) as List;
   }
 
@@ -66,7 +66,7 @@ class SzurubooruHandler extends BooruHandler {
       "Content-Type": "application/json",
       "Accept": "application/json",
       "User-Agent": Tools.browserUserAgent(),
-      if (booru.apiKey!.isNotEmpty) "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"
+      if (booru.apiKey?.isNotEmpty == true) "Authorization": "Token ${base64Encode(utf8.encode("${booru.userID}:${booru.apiKey}"))}"
     };
   }
 
@@ -87,7 +87,7 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data;
     return parsedResponse["results"] ?? [];
   }
 

@@ -16,8 +16,6 @@ import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
 
-import '../../utils/logger.dart';
-
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
 // - debounce searches [In progress: needs rewrite of tagSearch to dio to use requests cancelling]
@@ -359,7 +357,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void searchBooru() async {
     booruResults.value = [[' ', 'loading']];
     // TODO cancel previous search when new starts
-    List<String?>? getFromBooru = [];
+    List<String?> getFromBooru = [];
     if (multiIndex != -1){
       MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
       getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag);
@@ -367,10 +365,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
     }
 
-    booruResults.value = getFromBooru?.map((tag){
+    booruResults.value = getFromBooru.map((tag){
       final String tagTemp = tag ?? '';
       return [tagTemp, 'booru'];
-    }).toList() ?? [];
+    }).toList();
   }
 
   void searchHistory() async {

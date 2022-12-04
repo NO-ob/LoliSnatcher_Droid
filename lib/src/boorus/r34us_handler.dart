@@ -1,10 +1,10 @@
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
 // TODO finish if possible
@@ -23,7 +23,7 @@ class R34USHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    var document = parse(response.body);
+    var document = parse(response.data);
     return document.querySelectorAll("div.thumbail-container > div");
   }
 
@@ -62,10 +62,9 @@ class R34USHandler extends BooruHandler {
   // TODO convert to loadItem
   Future<BooruItem> getPostData(BooruItem item, String id) async {
     try {
-      Uri uri = Uri.parse(item.postURL);
-      final response = await http.get(uri, headers: getHeaders());
+      final response = await DioNetwork.get(item.postURL, headers: getHeaders());
       if (response.statusCode == 200) {
-        var document = parse(response.body);
+        var document = parse(response.data);
         dom.Element? div = document.querySelector("div.content_push > img");
         item.fileURL = div!.attributes["src"]!.toString();
         item.sampleURL = div.attributes["src"]!.toString();
@@ -74,7 +73,7 @@ class R34USHandler extends BooruHandler {
       } else {
         Logger.Inst().log("$className status is: ${response.statusCode}", className, "getPostData", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("$className url is: ${item.postURL}", className, "getPostData", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("$className url response is: ${response.body}", className, "getPostData", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log("$className url response is: ${response.data}", className, "getPostData", LogTypes.booruHandlerFetchFailed);
         errorString = response.statusCode.toString();
       }
     } catch (e) {

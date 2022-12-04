@@ -28,6 +28,10 @@ class NoteItem {
 
   static NoteItem fromJSON(String jsonString) {
     Map<String, dynamic> json = jsonDecode(jsonString);
+    return NoteItem.fromMap(json);
+  }
+
+  static NoteItem fromMap(Map<String, dynamic> json) {
     return NoteItem(
       id: json['id'] as String,
       postID: json['postID'] as String,

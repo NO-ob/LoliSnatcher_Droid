@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -23,7 +21,7 @@ class e621Handler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = jsonDecode(response.body);
+    Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['posts'] ?? []) as List;
   }
 
@@ -103,9 +101,10 @@ class e621Handler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    final String apiKey = (booru.apiKey?.isNotEmpty ?? false) ? "&login=${booru.userID}&api_key=${booru.apiKey}" : '';
+    final String loginStr = booru.userID?.isNotEmpty == true ? "&login=${booru.userID}" : "";
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? "&api_key=${booru.apiKey}" : '';
 
-    return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$apiKey";
+    return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$loginStr$apiKeyStr";
   }
 
   @override
@@ -115,7 +114,7 @@ class e621Handler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    List parsedResponse = jsonDecode(response.body);
+    List parsedResponse = response.data;
     return parsedResponse;
   }
 

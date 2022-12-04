@@ -148,6 +148,8 @@ class _MainAppState extends State<MainApp> {
     await tagHandler.initialize();
 
     await searchHandler.restoreTabs();
+
+    settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
   }
 
   void setMaxFPS() async {
@@ -241,14 +243,9 @@ class _MainAppState extends State<MainApp> {
             scrollBehavior: const CustomScrollBehavior(),
             theme: themeHandler.lightTheme(),
             darkTheme: themeHandler.darkTheme(),
-
             themeMode: themeMode,
             navigatorKey: navigationHandler.navigatorKey,
-            home: LogConsoleOnShake(
-              dark: themeMode == ThemeMode.dark ? true : false,
-              debugOnly: settingsHandler.enabledLogTypes.isEmpty,
-              child: const Home(),
-            ),
+            home: const Home(),
           ),
         ),
       );
