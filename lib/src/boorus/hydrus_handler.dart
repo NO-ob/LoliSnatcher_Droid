@@ -111,7 +111,6 @@ class HydrusHandler extends BooruHandler {
           for (int i = 0; i < parsedResponse['metadata'].length; i++) {
               List<String> tagList = [];
               List responseTags = [];
-              Logger.Inst().log(parsedResponse['metadata'][0], "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
 
               Map<String,dynamic>? tagsMap = parsedResponse['metadata'][i]['tags'];
               if (tagsMap != null){
