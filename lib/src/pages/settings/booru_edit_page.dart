@@ -566,6 +566,14 @@ class _BooruEditState extends State<BooruEdit> {
     List<BooruItem> testFetched = [];
     booru.type = userBooruType;
 
+    if (userBooruType == "Hydrus") {
+      HydrusHandler hydrusHandler = HydrusHandler(booru, 20);
+      if(await hydrusHandler.verifyApiAccess()){
+        return [userBooruType, ''];
+      }
+      return ['', 'Failed to verify api access for Hydrus'];
+    }
+
     if (userBooruType == "AutoDetect") {
       for(int i = 1; i < booruTypes.length; i++){
         if (booruType == ""){

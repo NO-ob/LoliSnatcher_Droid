@@ -37,6 +37,19 @@ class HydrusHandler extends BooruHandler {
     }
   }
 
+  Future<bool> verifyApiAccess() async{
+    Logger.Inst().log("Verifying access", "HydrusHandler", "verifyApiAccess", LogTypes.booruHandlerInfo);
+    try {
+      final response = await DioNetwork.head("${booru.baseURL}/verify_access_key", headers: getHeaders());
+      if(response.statusCode == 200){
+        return true;
+      }
+    } catch(e) {
+      Logger.Inst().log(e.toString(), "HydrusHandler", "verifyApiAccess", LogTypes.exception);
+    }
+    return false;
+  }
+
   @override
   Future search(String tags, int? pageNumCustom) async {
     if (prevTags != tags){
@@ -92,19 +105,23 @@ class HydrusHandler extends BooruHandler {
         );
         if (response.statusCode == 200) {
           var parsedResponse = response.data;
-          Logger.Inst().log(response.data, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
+          //Logger.Inst().log(response.data, "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
 
           List<BooruItem> newItems = [];
           for (int i = 0; i < parsedResponse['metadata'].length; i++) {
               List<String> tagList = [];
               List responseTags = [];
-              //@seniorm0ment
-              if (parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags'] != null) {
-                responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_display_tags']['all known tags']['0'];
-              }
-              if(parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags'] != null && responseTags == null){
-                responseTags = (parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'] == null) ? parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['1'] : parsedResponse['metadata'][i]['service_names_to_statuses_to_tags']['all known tags']['0'];
-              }
+              Logger.Inst().log(parsedResponse['metadata'][0], "HydrusHandler", "getResultsPage", LogTypes.booruHandlerRawFetched);
+
+              Map<String,dynamic>? tagsMap = parsedResponse['metadata'][i]['tags'];
+              if (tagsMap != null){
+                for (MapEntry entry in tagsMap.entries){
+                    if(entry.value["name"] == "all known tags"){
+                      responseTags = entry.value["display_tags"]["0"] ?? [];
+                    }
+                  }
+                }
+
               for (int x = 0; x < responseTags.length; x++){
                 tagList.add(responseTags[x].toString());
               }
