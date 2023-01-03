@@ -105,14 +105,20 @@ class SettingsPage extends StatelessWidget {
                     : () {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: const Text("Error!", style: TextStyle(fontSize: 20)),
-                          content: const Text("Database must be enabled to use LoliSync"),
+                          title: const Text(
+                            "Error!",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          content: const Text(
+                              "Database must be enabled to use LoliSync"),
                           leadingIcon: Icons.error_outline,
                           leadingIconColor: Colors.red,
                           sideColor: Colors.red,
                         );
                       },
-                page: settingsHandler.dbEnabled ? () => const LoliSyncPage() : null,
+                page: settingsHandler.dbEnabled
+                    ? () => const LoliSyncPage()
+                    : null,
               ),
               const DiscordButton(),
               SettingsButton(
@@ -131,14 +137,19 @@ class SettingsPage extends StatelessWidget {
                 name: 'Help',
                 icon: const Icon(Icons.help_center_outlined),
                 action: () {
-                  ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
+                  ServiceHandler.launchURL(
+                      "https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
                 },
                 trailingIcon: const Icon(Icons.exit_to_app),
               ),
               const LogsEnabledWarning(),
               Obx(() {
                 if (settingsHandler.isDebug.value) {
-                  return SettingsButton(name: 'Debug', icon: const Icon(Icons.developer_mode), page: () => const DebugPage());
+                  return SettingsButton(
+                    name: 'Debug',
+                    icon: const Icon(Icons.developer_mode),
+                    page: () => const DebugPage(),
+                  );
                 } else {
                   return const SizedBox();
                 }
@@ -167,8 +178,11 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String verText = "Version: ${Constants.appVersion} (${Constants.appBuildNumber})";
-    const String buildTypeText = EnvironmentConfig.isFromStore ? "/ Play" : (kDebugMode ? "/ Debug" : "");
+    final String verText =
+        "Version: ${Constants.appVersion} (${Constants.appBuildNumber})";
+    const String buildTypeText = EnvironmentConfig.isFromStore
+        ? "/ Play"
+        : (kDebugMode ? "/ Debug" : "");
 
     return SettingsButton(
       name: "$verText $buildTypeText".trim(),
@@ -177,7 +191,8 @@ class _VersionButtonState extends State<VersionButton> {
         if (settingsHandler.isDebug.value) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text("Debug mode is already enabled!", style: TextStyle(fontSize: 18)),
+            title: const Text("Debug mode is already enabled!",
+                style: TextStyle(fontSize: 18)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,
@@ -188,7 +203,8 @@ class _VersionButtonState extends State<VersionButton> {
             settingsHandler.isDebug.value = true;
             FlashElements.showSnackbar(
               context: context,
-              title: const Text("Debug mode is enabled!", style: TextStyle(fontSize: 18)),
+              title: const Text("Debug mode is enabled!",
+                  style: TextStyle(fontSize: 18)),
               leadingIcon: Icons.warning_amber,
               leadingIconColor: Colors.green,
               sideColor: Colors.green,
@@ -197,6 +213,22 @@ class _VersionButtonState extends State<VersionButton> {
         }
 
         setState(() {});
+      },
+      onLongPress: () {
+        if (!settingsHandler.isDebug.value) return;
+        //
+        debugTaps = 0;
+        settingsHandler.isDebug.value = false;
+        FlashElements.showSnackbar(
+          context: context,
+          title: const Text(
+            "Debug mode is disabled!",
+            style: TextStyle(fontSize: 18),
+          ),
+          leadingIcon: Icons.warning_amber,
+          leadingIconColor: Colors.yellow,
+          sideColor: Colors.yellow,
+        );
       },
       drawBottomBorder: false,
     );
@@ -209,7 +241,9 @@ class LogsEnabledWarning extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final List<LogTypes> enabledLogTypes = [...SettingsHandler.instance.enabledLogTypes];
+      final List<LogTypes> enabledLogTypes = [
+        ...SettingsHandler.instance.enabledLogTypes,
+      ];
 
       if (enabledLogTypes.isEmpty) {
         return const SizedBox();
@@ -217,13 +251,20 @@ class LogsEnabledWarning extends StatelessWidget {
 
       return SettingsButton(
         name: "You have enabled logging for:",
-        subtitle: Text('${enabledLogTypes.map((e) => e.toString())}', style: const TextStyle(fontSize: 12)),
+        subtitle: Text(
+          '${enabledLogTypes.map((e) => e.toString())}',
+          style: const TextStyle(fontSize: 12),
+        ),
         icon: const Icon(Icons.warning_amber, color: Colors.yellow),
         action: () {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text("Logging enabled", style: TextStyle(fontSize: 18)),
-            content: const Text("You can disable logging in the debug settings"),
+            title: const Text(
+              "Logging enabled",
+              style: TextStyle(fontSize: 18),
+            ),
+            content:
+                const Text("You can disable logging in the debug settings"),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,

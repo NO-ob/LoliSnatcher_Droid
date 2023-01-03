@@ -10,9 +10,9 @@ class DioNetwork {
   static Dio getClient({String? baseUrl}) {
     final dio = Dio();
     dio.options.baseUrl = baseUrl ?? '';
-    dio.options.connectTimeout = 10000;
-    dio.options.receiveTimeout = 30000;
-    dio.options.sendTimeout = 10000;
+    // dio.options.connectTimeout = 10000;
+    // dio.options.receiveTimeout = 30000;
+    // dio.options.sendTimeout = 10000;
     // dio.interceptors.add(CustomPrettyDioLogger(
     //   request: true,
     //   requestBody: true,

@@ -24,6 +24,8 @@ class ThumbnailLoading extends StatefulWidget {
     required this.startedAt,
 
     required this.restartAction,
+
+    this.errorCode,
   }) : super(key: key);
 
   final BooruItem item;
@@ -36,6 +38,8 @@ class ThumbnailLoading extends StatefulWidget {
   final RxInt total;
   final RxInt received;
   final RxInt startedAt;
+
+  final String? errorCode;
 
   final void Function()? restartAction;
 
@@ -152,9 +156,9 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.broken_image),
-                BorderedText(
+              children: [
+                const Icon(Icons.broken_image),
+                const BorderedText(
                   strokeWidth: 2,
                   child: Text(
                     'ERROR',
@@ -164,7 +168,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
                     ),
                   ),
                 ),
-                BorderedText(
+                const BorderedText(
                   strokeWidth: 2,
                   child: Text(
                     'Tap to retry!',
@@ -174,6 +178,17 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
                     ),
                   ),
                 ),
+                if(widget.errorCode?.isNotEmpty == true)
+                  BorderedText(
+                    strokeWidth: 2,
+                    child: Text(
+                      widget.errorCode!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

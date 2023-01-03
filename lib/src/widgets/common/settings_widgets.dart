@@ -61,8 +61,8 @@ class SettingsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if(iconOnly) {
       return GestureDetector(
-        onLongPress: () => {
-          onLongPress?.call()
+        onLongPress: onLongPress == null ? null : () => {
+          onLongPress!()
         },
         child: IconButton(
           icon: icon ?? const Icon(null),
@@ -83,8 +83,8 @@ class SettingsButton extends StatelessWidget {
       onTap: () {
         onTapAction(context);
       },
-      onLongPress: () {
-        onLongPress?.call();
+      onLongPress: onLongPress == null ? null : () {
+        onLongPress!();
       },
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile

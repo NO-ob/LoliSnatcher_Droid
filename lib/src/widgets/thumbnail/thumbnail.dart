@@ -50,6 +50,7 @@ class _ThumbnailState extends State<Thumbnail> {
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isForVideo = false;
+  String? errorCode;
   CancelToken? _dioCancelToken;
   DioDownloader? client, extraClient;
 
@@ -220,6 +221,11 @@ class _ThumbnailState extends State<Thumbnail> {
       } else {
         //show error
         isFailed = true;
+        if(error is DioError) {
+          errorCode = error.response?.statusCode?.toString();
+        } else {
+          errorCode = null;
+        }
         if(delayed) {
           // _onError can happen while widget restates, which will cause an exception, this will delay the restate until the other one is done
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -429,8 +435,10 @@ class _ThumbnailState extends State<Thumbnail> {
             restartAction: () {
               _restartedCount = 0;
               isFailed = false;
+              errorCode = null;
               restartLoading();
             },
+            errorCode: errorCode,
           ),
 
         if(widget.item.isHated.value)

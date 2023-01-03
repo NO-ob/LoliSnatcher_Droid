@@ -44,6 +44,7 @@ class ThemeHandler {
       elevatedButtonTheme: elevatedButtonTheme(),
 
       useMaterial3: true,
+      splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
       // TODO fill as much objects here as possible
@@ -89,6 +90,7 @@ class ThemeHandler {
       elevatedButtonTheme: elevatedButtonTheme(),
 
       useMaterial3: true,
+      splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
       // TODO fill as much objects here as possible
@@ -154,6 +156,7 @@ class ThemeHandler {
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          splashFactory: InkSparkle.splashFactory,
         ),
       );
 
