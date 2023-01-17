@@ -51,6 +51,7 @@ void main() async {
   };
 
   // load settings before first render to get theme data early
+  Get.put(ViewerHandler(), permanent: true);
   final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
   await settingsHandler.initialize();
 
@@ -92,7 +93,6 @@ class _MainAppState extends State<MainApp> {
   late final SettingsHandler settingsHandler;
   late final SearchHandler searchHandler;
   late final SnatchHandler snatchHandler;
-  late final ViewerHandler viewerHandler;
   late final NavigationHandler navigationHandler;
   late final TagHandler tagHandler;
   late final NotifyHandler notifyHandler;
@@ -105,7 +105,6 @@ class _MainAppState extends State<MainApp> {
     settingsHandler = Get.find<SettingsHandler>();
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
-    viewerHandler = Get.put(ViewerHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
     navigationHandler = Get.put(NavigationHandler(), permanent: true);
     notifyHandler = Get.put(NotifyHandler(), permanent: true);

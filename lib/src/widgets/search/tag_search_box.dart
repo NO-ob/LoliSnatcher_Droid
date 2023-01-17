@@ -46,6 +46,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   String replaceString = "";
   int startIndex = 0;
   int multiIndex = -1;
+  int cursorPos = 0;
   List<String> splitInput = [];
 
   RxList<List<String>> booruResults = RxList([]);
@@ -320,7 +321,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   void setSelectedTag(String input){
-    int cursorPos = searchHandler.searchTextController.selection.baseOffset;
+    cursorPos = searchHandler.searchTextController.selection.baseOffset;
     if (cursorPos < 0) cursorPos = 0;
     int tmpStartIndex = cursorPos - 1;
     while(
@@ -523,7 +524,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
                           String newInput = "";
                           if (startIndex >= 0 && replaceString.isNotEmpty){
-                            newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, startIndex);
+                            //newInput = searchHandler.searchTextController.text.replaceRange(start, end, replacement)
+                            newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, cursorPos - replaceString.length);
                           } else if (startIndex == -1){
                             newInput = newTag + (searchHandler.currentBooru.type == "Hydrus" ? "," : " ") + searchHandler.searchTextController.text;
                           } else {
