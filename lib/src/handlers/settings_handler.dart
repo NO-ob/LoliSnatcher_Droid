@@ -1374,7 +1374,7 @@ class SettingsHandler extends GetxController {
     try {
       const String updateFileName = EnvironmentConfig.isFromStore ? "update_store.json" : "update.json";
       final response = await DioNetwork.get('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName');
-      final json = response.data;
+      final json = jsonDecode(response.data);
       // final json = jsonDecode(jsonEncode(fakeUpdate));
 
       // use this and fakeUpdate to generate json file
