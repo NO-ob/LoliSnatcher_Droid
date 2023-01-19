@@ -5,7 +5,7 @@ class Constants {
   // TODO don't forget to update on every new release
   // TODO take these from smth like .env?
   static String appVersion = "2.3.1";
-  static int appBuildNumber = 179;
+  static int appBuildNumber = 181;
   //
 
   static const int defaultItemLimit = 20;
