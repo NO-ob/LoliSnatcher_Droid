@@ -223,7 +223,7 @@ class _MainAppState extends State<MainApp> {
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
 
       return StatsFl(
-        isEnabled: settingsHandler.isDebug.value && settingsHandler.showFPS.value, //Toggle on/off
+        isEnabled: settingsHandler.showFPS.value, //Toggle on/off
         width: 400, //Set size
         height: 50, //
         maxFps: maxFps, // Support custom FPS target (default is 60)
@@ -232,14 +232,14 @@ class _MainAppState extends State<MainApp> {
         totalTime: 10, //Total length of timeline, in seconds.
         align: Alignment.bottomLeft, //Alignment of statsbox
         child: ImageStats(
-          isEnabled: settingsHandler.isDebug.value && settingsHandler.showImageStats.value,
+          isEnabled: settingsHandler.showImageStats.value,
           width: 110,
           height: 80,
           align: Alignment.centerLeft,
           child: MaterialApp(
             title: 'LoliSnatcher',
             debugShowCheckedModeBanner: false, // hide debug banner in the corner
-            showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
+            showPerformanceOverlay: settingsHandler.showPerf.value,
             scrollBehavior: const CustomScrollBehavior(),
             theme: themeHandler.lightTheme(),
             darkTheme: themeHandler.darkTheme(),
