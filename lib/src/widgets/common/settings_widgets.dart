@@ -135,7 +135,7 @@ class SettingsPageOpen {
         barrierDismissible: barrierDismissible,
       ) ?? false;
     } else {
-      result = await Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page())) ?? false;
+      result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => page())) ?? false;
     }
     return result;
   }
@@ -616,12 +616,6 @@ class SettingsPageDialog extends StatelessWidget {
       // extendBody: true,
       // resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back),
-        //   onPressed: () {
-        //     Navigator.of(context).pop();
-        //   },
-        // ),
         title: title,
         actions: [
           if((actions?.length ?? 0) > 0)

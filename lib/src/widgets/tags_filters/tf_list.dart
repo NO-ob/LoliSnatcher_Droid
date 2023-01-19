@@ -41,13 +41,10 @@ class TagsFiltersList extends StatelessWidget {
       borderRadius: BorderRadius.circular(5),
       child: Column(
         children: [
-          Container(
-            color: Theme.of(context).colorScheme.background,
-            child: SettingsTextInput(
-              controller: tagSearchController,
-              title: 'Search Tags (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
-              onChanged: onSearchTextChanged,
-            ),
+          SettingsTextInput(
+            controller: tagSearchController,
+            title: 'Search Tags (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
+            onChanged: onSearchTextChanged,
           ),
           //
           if (filteredTagsList.isEmpty)

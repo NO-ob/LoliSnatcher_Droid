@@ -22,36 +22,36 @@ class DioNetwork {
     //   logPrint: (Object object) {
     //     if(Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
     //       return print(object);
-    //     } 
+    //     }
     //   }
     // ));
-    if(!Tools.isTestMode && SettingsHandler.instance.isDebug.value) {
+    if (!Tools.isTestMode && SettingsHandler.instance.isDebug.value) {
       dio.interceptors.add(SettingsHandler.instance.alice.getDioInterceptor());
     }
     return dio;
   }
 
   static Options mergeOptions(Options? options, Map<String, dynamic>? headers) {
-    return (options ?? defaultOptions).copyWith(
-      headers: headers != null ? {
-        ...defaultOptions.headers!,
-        ...headers, 
-      } : null,
+    final usedOptions = options ?? defaultOptions;
+    return usedOptions.copyWith(
+      headers: {
+        ...(headers ?? usedOptions.headers ?? defaultOptions.headers!),
+      },
     );
   }
 
   /// used to force alice to intercept query params, because if they are not separate from the url - dio doesn't give them to alice
   static Map<String, dynamic> separateUrlAndQueryParams(String url, Map<String, dynamic>? givenQueryParams) {
     final temp = Uri.tryParse(url);
-    if(temp == null) {
+    if (temp == null) {
       throw Exception('Url parsing failed: $url');
     }
 
     final String cleanUrl = temp.replace(queryParameters: {}).toString();
     final Map<String, dynamic> queryParams = {
-        ...temp.queryParameters,
-        ...(givenQueryParams ?? {}),
-      };
+      ...temp.queryParameters,
+      ...(givenQueryParams ?? {}),
+    };
 
     // TODO create a separate class for this?
     return {
@@ -68,8 +68,6 @@ class DioNetwork {
     final options = Options(
       responseType: ResponseType.json,
       contentType: 'application/json',
-      sendTimeout: 10000,
-      receiveTimeout: 0,
       headers: {
         'Content-Type': 'application/json',
       },

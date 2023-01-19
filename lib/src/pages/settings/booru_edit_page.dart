@@ -536,6 +536,7 @@ class _BooruEditState extends State<BooruEdit> {
           if(searchHandler.list.isEmpty) {
             // force first tab creation after creating first booru
             searchHandler.addTabByString(settingsHandler.defTags, customBooru: newBooru);
+            searchHandler.runSearch();
           }
 
           if(searchHandler.list.firstWhereOrNull((tab) => tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL) != null) {

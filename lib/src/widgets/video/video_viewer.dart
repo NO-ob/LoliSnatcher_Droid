@@ -463,24 +463,25 @@ class VideoViewerState extends State<VideoViewer> {
     return AnimatedBuilder(
       animation: animation,
       builder: (BuildContext context, Widget? child) {
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          body: Container(
-            alignment: Alignment.center,
-            color: Colors.black,
-            child: Stack(
-              children: [
-                controllerProvider,
-                TransparentPointer(
-                  child: SafeArea(
-                    child: LoliControls(outsideController: controllerProvider.controller),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
+        return child!;
       },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(
+          alignment: Alignment.center,
+          color: Colors.black,
+          child: Stack(
+            children: [
+              controllerProvider,
+              TransparentPointer(
+                child: SafeArea(
+                  child: LoliControls(outsideController: controllerProvider.controller),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

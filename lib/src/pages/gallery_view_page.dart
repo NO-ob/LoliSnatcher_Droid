@@ -120,6 +120,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       key: viewerScaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
+      resizeToAvoidBottomInset: false,
       appBar: settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(getTitle(), appBarActions()) : null,
       bottomNavigationBar: settingsHandler.galleryBarPosition == 'Bottom' ? HideableAppBar(getTitle(), appBarActions()) : null,
       backgroundColor: Colors.transparent,

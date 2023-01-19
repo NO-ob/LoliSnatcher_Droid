@@ -206,7 +206,7 @@ Future<BooruHandler> testBooru(
     }
   }
 
-  if(withTagSuggestions) {
+  if (withTagSuggestions) {
     await testSuggestions(booruHandler, customSuggestionsInput: customSuggestionsInput);
   }
 
@@ -214,7 +214,7 @@ Future<BooruHandler> testBooru(
 }
 
 Future<void> testSuggestions(BooruHandler booruHandler, {String? customSuggestionsInput}) async {
-  print ("Testing suggestions for ${booruHandler.booru.name}");
+  print("Testing suggestions for ${booruHandler.booru.name}");
   String input = customSuggestionsInput ?? "ani"; // ani[mated]
   List<String> suggestions = await booruHandler.tagSearch(input);
   expect(suggestions.isNotEmpty, equals(true));

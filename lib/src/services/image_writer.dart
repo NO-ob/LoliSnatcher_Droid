@@ -66,8 +66,13 @@ class ImageWriter {
         item.fileURL,
         options: Options(
           responseType: ResponseType.bytes,
-          headers: Tools.getFileCustomHeaders(booru,checkForReferer: true),
+          contentType: "*/*",
         ),
+        headers: {
+          'Accept': '*/*',
+          'Content-Type': '*/*',
+          ...Tools.getFileCustomHeaders(booru,checkForReferer: true),
+        },
       );
 
       if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
@@ -152,7 +157,10 @@ class ImageWriter {
   Future writeCache(String fileURL, String typeFolder,{required String fileNameExtras}) async{
     String? cachePath;
     try {
-      var response = await DioNetwork.get(fileURL, options: Options(responseType: ResponseType.bytes));
+      var response = await DioNetwork.get(
+        fileURL,
+        options: Options(responseType: ResponseType.bytes),
+      );
       await setPaths();
       cachePath = "${cacheRootPath!}$typeFolder/";
       await Directory(cachePath).create(recursive:true);
@@ -402,7 +410,7 @@ class ImageWriter {
       cacheRootPath = await ServiceHandler.getCacheDir();
     }
     // print('path: $path');
-    // print(cache'path: $cacheRootPath');
+    // print('cache path: $cacheRootPath');
     return true;
   }
 }

@@ -340,7 +340,6 @@ class _BooruPageState extends State<BooruPage> {
                 booru.name = '${booru.name!} (duplicate)';
               }
               Navigator.of(context).push(MaterialPageRoute(
-                fullscreenDialog: true,
                 builder: (BuildContext context) => BooruEdit(booru),
               ));
             }

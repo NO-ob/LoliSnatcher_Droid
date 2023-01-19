@@ -33,17 +33,19 @@ class ThemeHandler {
   }
 
   ThemeData lightTheme() {
+    final ColorScheme lightColorScheme = colorScheme();
+
     return ThemeData.light().copyWith(
       brightness: Brightness.light,
       primaryColor: theme.primary,
       appBarTheme: appBarTheme(),
 
-      colorScheme: colorScheme(),
+      colorScheme: lightColorScheme,
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(),
       elevatedButtonTheme: elevatedButtonTheme(),
 
-      useMaterial3: true,
+      // useMaterial3: true,
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -52,17 +54,15 @@ class ThemeHandler {
 
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(),
-      cardColor: colorScheme().background,
-      // dividerColor: colorScheme().onBackground,
-      dialogBackgroundColor: colorScheme().background,
-      errorColor: colorScheme().error,
+      cardColor: lightColorScheme.background,
+      // dividerColor: lightColorScheme.onBackground,
+      dialogBackgroundColor: lightColorScheme.background,
+      errorColor: lightColorScheme.error,
       floatingActionButtonTheme: floatingActionButtonTheme(),
       iconTheme: iconTheme(),
       inputDecorationTheme: inputDecorationTheme(),
       primaryIconTheme: iconTheme(),
       primaryTextTheme: textTheme(),
-      primaryColorDark: colorScheme().onBackground,
-      primaryColorLight: colorScheme().onBackground,
       buttonBarTheme: buttonBarTheme(),
       bannerTheme: bannerTheme(),
       cardTheme: cardTheme(),
@@ -75,6 +75,8 @@ class ThemeHandler {
   }
 
   ThemeData darkTheme() {
+    final ColorScheme darkColorScheme = colorScheme();
+
     return ThemeData.dark().copyWith(
       brightness: Brightness.dark,
       primaryColor: theme.primary,
@@ -84,12 +86,12 @@ class ThemeHandler {
       backgroundColor: isAmoled ? Colors.black : null,
       canvasColor: isAmoled ? Colors.black : null,
 
-      colorScheme: colorScheme(),
+      colorScheme: darkColorScheme,
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(),
       elevatedButtonTheme: elevatedButtonTheme(),
 
-      useMaterial3: true,
+      // useMaterial3: true,
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -98,17 +100,15 @@ class ThemeHandler {
 
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(),
-      cardColor: colorScheme().background,
-      // dividerColor: colorScheme().onBackground,
-      dialogBackgroundColor: colorScheme().background,
-      errorColor: colorScheme().error,
+      cardColor: darkColorScheme.background,
+      // dividerColor: darkColorScheme.onBackground,
+      dialogBackgroundColor: darkColorScheme.background,
+      errorColor: darkColorScheme.error,
       floatingActionButtonTheme: floatingActionButtonTheme(),
       iconTheme: iconTheme(),
       inputDecorationTheme: inputDecorationTheme(),
       primaryIconTheme: iconTheme(),
       primaryTextTheme: textTheme(),
-      primaryColorDark: colorScheme().onBackground,
-      primaryColorLight: colorScheme().onBackground,
       buttonBarTheme: buttonBarTheme(),
       bannerTheme: bannerTheme(),
       cardTheme: cardTheme(),
@@ -128,7 +128,7 @@ class ThemeHandler {
       onSecondary: accentIsDark ? Colors.white : Colors.black,
       surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
       onSurface: isDark ? Colors.white : Colors.black,
-      background: isDark ? Colors.black : Colors.white,
+      background: isDark ? (isAmoled ? Colors.black : Colors.grey[900]!) : Colors.white,
       onBackground: isDark ? Colors.white : Colors.black,
       error: Colors.redAccent,
       onError: Colors.white,
