@@ -212,7 +212,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void onDoubleTap(int index, BooruItem item) async {
-    searchHandler.toggleItemFavourite(index);
+    await searchHandler.toggleItemFavourite(index);
   }
 
   void onLongPress(int index, BooruItem item) async {

@@ -120,7 +120,7 @@ class GelbooruHandler extends BooruHandler {
     int lengthBefore = fetched.length;
     fetched.addAll(newItems);
     populateTagHandler(newItems); // difference from default afterParse
-    await setMultipleTrackedValues(lengthBefore, fetched.length);
+    unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
   }
 
   @override

@@ -148,7 +148,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       }
                     }
                     if(backupPath.isNotEmpty) {
-                      ServiceHandler.writeImage(await file.readAsBytes(), "settings", "text/json", "json", backupPath);
+                      await ServiceHandler.writeImage(await file.readAsBytes(), "settings", "text/json", "json", backupPath);
                       showSnackbar(context, 'Settings saved to settings.json', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -172,7 +172,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           await newFile.create();
                         }
                         await newFile.writeAsBytes(settingsFileBytes);
-                        settingsHandler.loadSettingsJson();
+                        await settingsHandler.loadSettingsJson();
                         showSnackbar(context, 'Settings restored from backup!', false);
                       } else {
                         showSnackbar(context, 'No Restore File Found!', true);
@@ -201,7 +201,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                       }
                     }
                     if(backupPath.isNotEmpty) {
-                      ServiceHandler.writeImage(await file.readAsBytes(), "store", "application/x-sqlite3", "db", backupPath);
+                      await ServiceHandler.writeImage(await file.readAsBytes(), "store", "application/x-sqlite3", "db", backupPath);
                       showSnackbar(context, 'Database saved to store.db', false);
                     } else {
                       showSnackbar(context, 'No Access to backup folder!', true);
@@ -232,7 +232,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         // 
                         showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
                         await Future.delayed(const Duration(seconds: 3));
-                        ServiceHandler.restartApp();
+                        unawaited(ServiceHandler.restartApp());
                       } else {
                         showSnackbar(context, 'No Restore File Found!', true);
                       }
@@ -297,10 +297,10 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 File booruFile = File("${configBoorusDir.path}${booru.name}.json");
                                 var writer = booruFile.openWrite();
                                 writer.write(jsonEncode(booru.toJson()));
-                                writer.close();
+                                await writer.close();
                               }
                           }
-                          settingsHandler.loadBoorus();
+                          await settingsHandler.loadBoorus();
                           showSnackbar(context, 'Boorus restored from backup!', false);
                         }
                       }

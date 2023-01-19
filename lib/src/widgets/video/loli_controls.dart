@@ -430,7 +430,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         );
 
         if (chosenSpeed != null) {
-          controller.setPlaybackSpeed(chosenSpeed);
+          await controller.setPlaybackSpeed(chosenSpeed);
         }
 
         if (_latestValue.isPlaying) {

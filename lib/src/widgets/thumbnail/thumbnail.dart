@@ -107,13 +107,13 @@ class _ThumbnailState extends State<Thumbnail> {
       client = newClient;
 
       if(settingsHandler.disableImageIsolates) {
-        client!.runRequest();
+        unawaited(client!.runRequest());
       } else {
-        client!.runRequestIsolate();
+        unawaited(client!.runRequestIsolate());
       }
     } else {
       extraClient = newClient;
-      extraClient!.runRequest();
+      unawaited(extraClient!.runRequest());
     }
     return;
   }

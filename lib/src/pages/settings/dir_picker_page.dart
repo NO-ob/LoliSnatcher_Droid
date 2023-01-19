@@ -126,7 +126,7 @@ class _DirPickerState extends State<DirPicker> {
   Future<List<String>> getDirs() async{
     List<String> dirs = [];
     var dir = Directory(path);
-    dir.list(recursive: false).forEach((file) {
+    await dir.list(recursive: false).forEach((file) {
       if (file is Directory){
         dirs.add(file.path.replaceAll(path,""));
       }

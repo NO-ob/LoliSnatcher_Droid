@@ -51,7 +51,7 @@ class _FaviconState extends State<Favicon> {
       timeoutTime: 5000,
       fileNameExtras: 'favicon_'
     );
-    client!.runRequest();
+    unawaited(client!.runRequest());
     // client!.runRequestIsolate();
     return;
   }

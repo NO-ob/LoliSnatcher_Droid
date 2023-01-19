@@ -79,9 +79,9 @@ class ImageViewerState extends State<ImageViewer> {
     );
     // client.runRequest();
     if (settingsHandler.disableImageIsolates) {
-      client!.runRequest();
+      unawaited(client!.runRequest());
     } else {
-      client!.runRequestIsolate();
+      unawaited(client!.runRequestIsolate());
     }
     return;
   }
@@ -171,8 +171,8 @@ class ImageViewerState extends State<ImageViewer> {
     });
 
     // debug output
-    viewController..outputStateStream.listen(onViewStateChanged);
-    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+    viewController.outputStateStream.listen(onViewStateChanged);
+    scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     initViewer(false);
   }

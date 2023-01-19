@@ -81,7 +81,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
     final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? Uri.parse('https://flutter.dev'));
     if (!mounted) return;
 
-    showDialog(context: context, builder: (BuildContext context) {
+    await showDialog(context: context, builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Cookies'),
         content: SingleChildScrollView(

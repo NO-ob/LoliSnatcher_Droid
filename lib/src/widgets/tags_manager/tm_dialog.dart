@@ -124,7 +124,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     );
 
     if (tag != null && !tagHandler.hasTag(tag.fullString)) {
-      tagHandler.putTag(tag);
+      await tagHandler.putTag(tag);
       tags.add(tag);
       filterTags();
     }

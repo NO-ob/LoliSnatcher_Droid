@@ -52,7 +52,7 @@ class _ThemePageState extends State<ThemePage> {
     super.dispose();
   }
 
-  //called when page is closed, sets settingshandler variables and then writes settings to disk
+  //called when page is closed or to debounce theme change, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
@@ -86,7 +86,7 @@ class _ThemePageState extends State<ThemePage> {
     Debounce.debounce(
       tag: 'theme_change',
       callback: () async {
-        _onWillPop();
+        await _onWillPop();
         setState(() { });
       },
       duration: const Duration(milliseconds: 500),

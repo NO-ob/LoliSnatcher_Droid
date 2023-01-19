@@ -169,7 +169,7 @@ class DioDownloader {
         onProgress?.call(fileSize, fileSize);
 
         if(onDoneFile != null) {
-          start(null, readFileFromCache, (dynamic file) async {
+          await start(null, readFileFromCache, (dynamic file) async {
             if(file != null) {
               onEvent?.call('loaded', null);
               onDoneFile?.call(file as File, url);
@@ -177,7 +177,7 @@ class DioDownloader {
             dispose();
           });
         } else if (onDone != null) {
-          start(null, readBytesFromCache, (dynamic bytes) async {
+          await start(null, readBytesFromCache, (dynamic bytes) async {
             if(bytes != null) {
               onEvent?.call('loaded', null);
               onDone?.call(bytes as Uint8List, url);
@@ -228,7 +228,7 @@ class DioDownloader {
           onEvent?.call('loaded', null);
           onDone?.call(response.data as Uint8List, url);
         }
-        start(response.data as Uint8List?, writeToCache, (dynamic file) {
+        await start(response.data as Uint8List?, writeToCache, (dynamic file) {
           if(file != null) {
             // onEvent?.call('isFromCache');
             onEvent?.call('loaded', null);

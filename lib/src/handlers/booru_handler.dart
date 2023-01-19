@@ -203,7 +203,7 @@ abstract class BooruHandler {
   Future<void> afterParseResponse(List<BooruItem> newItems) async {
     final int lengthBefore = fetched.length;
     fetched.addAll(newItems);
-    await setMultipleTrackedValues(lengthBefore, fetched.length);
+    unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
     // TODO
     // notifyAboutFailed();
     failedItems.clear();

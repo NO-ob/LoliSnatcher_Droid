@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -107,7 +108,7 @@ class _DatabasePageState extends State<DatabasePage> {
           print("something went wrong updating favourites: ${result[2]}");
         } else {
           item = result[0];
-          settingsHandler.dbHandler.updateBooruItem(item, "urlUpdate");
+          unawaited(settingsHandler.dbHandler.updateBooruItem(item, "urlUpdate"));
           setState(() {
             updatingDone += 1;
           });

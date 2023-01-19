@@ -85,7 +85,7 @@ class ImageWriter {
         }
         item.isSnatched.value = true;
         if (settingsHandler.dbEnabled){
-          settingsHandler.dbHandler.updateBooruItem(item,"local");
+          await settingsHandler.dbHandler.updateBooruItem(item,"local");
         }
         try {
           if(Platform.isAndroid){
@@ -116,7 +116,7 @@ class ImageWriter {
           print("write response: $writeResp");
           item.isSnatched.value = true;
           if (settingsHandler.dbEnabled){
-            settingsHandler.dbHandler.updateBooruItem(item,"local");
+            await settingsHandler.dbHandler.updateBooruItem(item,"local");
           }
           return (fileName);
         }
@@ -204,7 +204,7 @@ class ImageWriter {
       String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
       File file = File(cachePath + fileName);
       if (await file.exists()) {
-        file.delete();
+        await file.delete();
         return true;
       } else {
         return null;
@@ -221,7 +221,7 @@ class ImageWriter {
       String cachePath = "${cacheRootPath!}$typeFolder/";
       Directory folder = Directory(cachePath);
       if (await folder.exists()) {
-        folder.delete(recursive: true);
+        await folder.delete(recursive: true);
         return true;
       } else {
         return null;
@@ -245,7 +245,7 @@ class ImageWriter {
           return cachePath+fileName;
         } else {
           // somehow some files can save with zero bytes - we remove them
-          cacheFile.delete();
+          await cacheFile.delete();
           return null;
         }
       } else {
@@ -303,7 +303,7 @@ class ImageWriter {
             final DateTime lastModified = await file.lastModified();
             final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < DateTime.now().millisecondsSinceEpoch;
             if (isNotExcludedExt && isStale) {
-              file.delete();
+              await file.delete();
             }
           }
         }
@@ -357,7 +357,7 @@ class ImageWriter {
     // print(toDelete);
     // print(toDeleteSize);
     for (var file in toDelete) {
-      file.delete();
+      await file.delete();
     }
     return;
   }
@@ -390,7 +390,7 @@ class ImageWriter {
       String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
         if (fileBytes != null && fileExt.isNotEmpty){
           String path = await ServiceHandler.getConfigDir();
-          File("${path}mascot.$fileExt").writeAsBytes(fileBytes);
+          await File("${path}mascot.$fileExt").writeAsBytes(fileBytes);
           return ("${path}mascot.$fileExt");
         }
     }

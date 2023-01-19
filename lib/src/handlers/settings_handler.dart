@@ -686,7 +686,7 @@ class SettingsHandler extends GetxController {
     File settingsFile = File("${path}settings.json");
     String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
-    loadFromJSON(settings, true);
+    await loadFromJSON(settings, true);
     return;
   }
 
@@ -1172,7 +1172,7 @@ class SettingsHandler extends GetxController {
     File settingsFile = File("${path}settings.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
-    writer.close();
+    await writer.close();
 
     if(restate) {
       SearchHandler.instance.rootRestate(); // force global state update to redraw stuff
@@ -1269,7 +1269,7 @@ class SettingsHandler extends GetxController {
     File booruFile = File("$boorusPath${booru.name}.json");
     var writer = booruFile.openWrite();
     writer.write(jsonEncode(booru.toJson()));
-    writer.close();
+    await writer.close();
 
     if(!onlySave) {
       // used only to avoid duplication after migration to json format
@@ -1285,7 +1285,7 @@ class SettingsHandler extends GetxController {
     await booruFile.delete();
     if (prefBooru == booru.name){
       prefBooru = "";
-      saveSettings(restate: true);
+      await saveSettings(restate: true);
     }
     booruList.remove(booru);
     sortBooruList();

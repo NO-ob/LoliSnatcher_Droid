@@ -416,11 +416,11 @@ class DBHandler{
 
   void clearSnatched() async{
     await db?.rawUpdate("UPDATE BooruItem SET isSnatched = 0");
-    deleteUntracked();
+    unawaited(deleteUntracked());
   }
   void clearFavourites() async{
     await db?.rawUpdate("UPDATE BooruItem SET isFavourite = 0");
-    deleteUntracked();
+    unawaited(deleteUntracked());
   }
 
   /// Adds tags for a BooruItem to the database

@@ -217,7 +217,7 @@ class _HistoryListState extends State<HistoryList> {
                 side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
-                Clipboard.setData(ClipboardData(text: entry.searchText));
+                await Clipboard.setData(ClipboardData(text: entry.searchText));
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
@@ -240,7 +240,7 @@ class _HistoryListState extends State<HistoryList> {
               ),
               onTap: () async {
                 selectedEntries.removeWhere((e) => e.id == entry.id);
-                deleteEntry(entry);
+                await deleteEntry(entry);
                 Navigator.of(context).pop(true);
               },
               leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),

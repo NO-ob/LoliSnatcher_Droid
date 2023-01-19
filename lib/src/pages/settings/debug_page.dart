@@ -336,7 +336,7 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Get Session String',
                 action: () async {
                   final str = SearchHandler.instance.getBackupString() ?? '';
-                  Clipboard.setData(ClipboardData(text: str));
+                  await Clipboard.setData(ClipboardData(text: str));
                   FlashElements.showSnackbar(
                     context: context,
                     duration: const Duration(seconds: 2),

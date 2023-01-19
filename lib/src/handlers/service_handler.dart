@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -421,10 +422,10 @@ class ServiceHandler{
   }) async {
     if (Platform.isAndroid || Platform.isIOS) {
       if(flutterWay) {
-        HapticFeedback.vibrate();
+        unawaited(HapticFeedback.vibrate());
       } else {
         if (await Vibration.hasVibrator() ?? false) {
-          Vibration.vibrate(duration: duration, amplitude: amplitude);
+          unawaited(Vibration.vibrate(duration: duration, amplitude: amplitude));
         }
       }
     }

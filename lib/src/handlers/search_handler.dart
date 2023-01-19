@@ -519,7 +519,7 @@ class SearchHandler extends GetxController {
 
     // request total image count if not already loaded
     if(currentBooruHandler.totalCount.value == 0) {
-      currentBooruHandler.searchCount(currentTab.tags);
+      unawaited(currentBooruHandler.searchCount(currentTab.tags));
     }
     
     // delay every new page load

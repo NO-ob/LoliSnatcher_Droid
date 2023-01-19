@@ -148,7 +148,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                 side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () async {
-                Clipboard.setData(ClipboardData(text: data.tags));
+                await Clipboard.setData(ClipboardData(text: data.tags));
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),

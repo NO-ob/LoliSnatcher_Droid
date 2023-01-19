@@ -86,8 +86,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
     if(!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
-      initPlayer();
-      getSize();
+      unawaited(initPlayer());
+      unawaited(getSize());
       return;
     }
     switch (settingsHandler.videoCacheMode) {
@@ -98,14 +98,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       case 'Stream+Cache':
         // Load and stream from default player network request, cache to device from custom request
         // TODO: change video handler to allow viewing and caching from single network request
-        initPlayer();
+        unawaited(initPlayer());
         break;
 
       case 'Stream':
       default:
         // Only stream, notice the return
-        initPlayer();
-        getSize();
+        unawaited(initPlayer());
+        unawaited(getSize());
         return;
     }
 
@@ -117,11 +117,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
       onError: _onError,
-      onDoneFile: (File file, String url) {
+      onDoneFile: (File file, String url) async {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
         if(videoController == null && !isLoaded) {
-          initPlayer();
+          unawaited(initPlayer());
           updateState();
         }
       },
@@ -131,9 +131,9 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     );
     // client!.runRequest();
     if(settingsHandler.disableImageIsolates) {
-      client!.runRequest();
+      unawaited(client!.runRequest());
     } else {
-      client!.runRequestIsolate();
+      unawaited(client!.runRequestIsolate());
     }
     return;
   }
@@ -147,7 +147,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       onEvent: _onEvent,
       fileNameExtras: widget.booruItem.fileNameExtras
     );
-    sizeClient!.runRequestSize();
+    unawaited(sizeClient!.runRequestSize());
     return;
   }
 
@@ -216,8 +216,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     super.initState();
     viewerHandler.addViewed(widget.key);
 
-    viewController..outputStateStream.listen(onViewStateChanged);
-    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+    viewController.outputStateStream.listen(onViewStateChanged);
+    scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     isViewed = settingsHandler.appMode.value.isMobile
       ? searchHandler.viewedIndex.value == widget.index

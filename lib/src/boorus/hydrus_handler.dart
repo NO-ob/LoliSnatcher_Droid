@@ -152,7 +152,7 @@ class HydrusHandler extends BooruHandler {
 
           int lengthBefore = fetched.length;
           fetched.addAll(newItems);
-          setMultipleTrackedValues(lengthBefore, fetched.length);
+          unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
           return fetched;
         } else {
           Logger.Inst().log("Getting metadata failed", "HydrusHandler", "getResultsPage", LogTypes.booruHandlerInfo);

@@ -168,7 +168,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
                     // favorite on F
                     if (settingsHandler.dbEnabled) {
-                      searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
+                      await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
                     }
                   } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
                     // exit on escape if in focus
@@ -805,7 +805,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         autoScrollState(!autoScroll);
         break;
       case("snatch"):
-        getPerms();
+        await getPerms();
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
           [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
@@ -814,7 +814,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         );
         break;
       case("favourite"):
-        searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
+        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
 
         // set viewed item again in case favourites filter is enabled
         WidgetsBinding.instance.addPostFrameCallback((_) {

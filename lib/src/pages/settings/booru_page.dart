@@ -339,7 +339,7 @@ class _BooruPageState extends State<BooruPage> {
                 // Rename config if its already in the list
                 booru.name = '${booru.name!} (duplicate)';
               }
-              Navigator.of(context).push(MaterialPageRoute(
+              await Navigator.of(context).push(MaterialPageRoute(
                 builder: (BuildContext context) => BooruEdit(booru),
               ));
             }

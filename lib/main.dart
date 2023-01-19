@@ -37,7 +37,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
-    DartVLC.initialize();
+    await DartVLC.initialize();
 
     // Init db stuff
     sqfliteFfiInit();
@@ -336,7 +336,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           // Rename config if its already in the list
           booru.name = '${booru.name!} (duplicate)';
         }
-        SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
+        await SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
       }
     }
   }
