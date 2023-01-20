@@ -201,7 +201,7 @@ class _MediaLoadingState extends State<MediaLoading> {
     String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
-    bool isVideo = widget.item.isVideo();
+    bool isVideo = widget.item.isVideo;
 
     String percentDoneText = '';
     if (hasProgressData) {

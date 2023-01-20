@@ -82,7 +82,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     // enable volume buttons if opened page is a video AND appbar is visible
     BooruItem item = searchHandler.currentFetched[widget.index];
-    bool isVideo = item.isVideo();
+    bool isVideo = item.isVideo;
     bool isHated = item.isHated.value;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
@@ -106,7 +106,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     }
 
     // enable volume buttons if current page is a video AND appbar is set to visible
-    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
+    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
@@ -196,8 +196,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     itemBuilder: (context, index) {
                       BooruItem item = searchHandler.currentFetched[index];
                       // String fileURL = item.fileURL;
-                      bool isVideo = item.isVideo();
-                      bool isImage = item.isImage();
+                      bool isVideo = item.isVideo;
+                      bool isImage = item.isImage;
                       // print(fileURL);
                       // print('isVideo: '+isVideo.toString());
 
@@ -264,7 +264,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       }
 
                       // enable volume buttons if new page is a video AND appbar is visible
-                      bool isVideo = searchHandler.currentFetched[index].isVideo();
+                      bool isVideo = searchHandler.currentFetched[index].isVideo;
                       bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
                       ServiceHandler.setVolumeButtons(isVolumeAllowed);
                       // print('Page changed ' + index.toString());
@@ -438,7 +438,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     if(path != null) {
       // File is already in cache - share from there
-      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -467,7 +467,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media', fileNameExtras: item.fileNameExtras);
       if(cacheFile != null) {
         path = cacheFile.path;
-        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
             context: context,
@@ -575,7 +575,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         return false;
       }
 
-      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage();
+      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage;
       bool isScaleButton = btn[0] == 'reloadnoscale';
       bool isScaleAllowed = isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
 

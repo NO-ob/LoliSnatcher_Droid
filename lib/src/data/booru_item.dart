@@ -96,15 +96,15 @@ class BooruItem{
     }
   }
 
-  bool isVideo() {
+  bool get isVideo {
     return mediaType == "video";
   }
 
-  bool isImage() {
+  bool get isImage {
     return mediaType == "image" || mediaType == "animation" || mediaType == "not_supported_animation";
   }
 
-  bool isAnimation() {
+  bool get isAnimation {
     return mediaType == "animation";
   }
 

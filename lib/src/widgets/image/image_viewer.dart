@@ -214,8 +214,15 @@ class ImageViewerState extends State<ImageViewer> {
 
   ImageProvider getImageProvider(Uint8List bytes, String url) {
     if (settingsHandler.disableImageScaling || widget.booruItem.isNoScale.value) {
-      return MemoryImageTest(bytes, imageUrl: url);
+      if(widget.booruItem.isAnimation) {
+        return MemoryImage(bytes);
+      } else {
+        return MemoryImageTest(bytes, imageUrl: url);
+      }
     } else {
+      if(widget.booruItem.isAnimation) {
+        return MemoryImage(bytes);
+      }
       int? widthLimit = settingsHandler.disableImageScaling ? null : (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio * 2).round();
       return ResizeImage(
         MemoryImageTest(bytes, imageUrl: url),

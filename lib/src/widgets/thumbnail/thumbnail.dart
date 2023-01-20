@@ -257,7 +257,7 @@ class _ThumbnailState extends State<Thumbnail> {
     _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
-    final bool isGifSampleNotAllowed = widget.item.mediaType == 'animation' && (settingsHandler.disableImageScaling ? widget.item.isHated.value : true);
+    final bool isGifSampleNotAllowed = widget.item.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated.value : true);
 
     isThumbQuality = settingsHandler.previewMode == "Thumbnail" || (isGifSampleNotAllowed || widget.item.mediaType == 'video') || (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
     thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;

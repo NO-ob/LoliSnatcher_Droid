@@ -56,6 +56,7 @@ class SettingsHandler extends GetxController {
   RxBool showImageStats = false.obs;
   bool showURLOnThumb = false;
   bool disableImageScaling = false;
+  bool gifsAsThumbnails = false;
   // disable isolates on debug builds, because they cause lags in emulator
   bool disableImageIsolates = kDebugMode || false;
   bool desktopListsDrag = false;
@@ -167,7 +168,7 @@ class SettingsHandler extends GetxController {
     'lastSyncIp', 'lastSyncPort',
     'theme', 'themeMode', 'isAmoled',
     'customPrimaryColor', 'customAccentColor',
-    'version', 'SDK', 'disableImageScaling',
+    'version', 'SDK', 'disableImageScaling', 'gifsAsThumbnails',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showFPS', 'showPerf', 'showImageStats',
@@ -379,6 +380,10 @@ class SettingsHandler extends GetxController {
       "default": false,
     },
     "disableImageScaling": {
+      "type": "bool",
+      "default": false,
+    },
+    "gifsAsThumbnails": {
       "type": "bool",
       "default": false,
     },
@@ -761,6 +766,8 @@ class SettingsHandler extends GetxController {
         return changePageButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
+      case 'gifsAsThumbnails':
+        return gifsAsThumbnails;
       case 'disableImageIsolates':
         return disableImageIsolates;
       case 'desktopListsDrag':
@@ -920,6 +927,9 @@ class SettingsHandler extends GetxController {
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
+      case 'gifsAsThumbnails':
+        gifsAsThumbnails = validatedValue;
+        break;
       case 'disableImageIsolates':
         disableImageIsolates = validatedValue;
         break;
@@ -1027,6 +1037,7 @@ class SettingsHandler extends GetxController {
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
       "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
+      "gifsAsThumbnails" : validateValue("gifsAsThumbnails", null, toJSON: true),
       "disableImageIsolates" : validateValue("disableImageIsolates", null, toJSON: true),
       "desktopListsDrag" : validateValue("desktopListsDrag", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),

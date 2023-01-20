@@ -46,9 +46,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value) {
-    if (value.isImage()) {
+    if (value.isImage) {
       return ImageViewer(value.key, value, 1);
-    } else if (value.isVideo()) {
+    } else if (value.isVideo) {
       if (Platform.isAndroid || Platform.isIOS) {
         return VideoViewer(value.key, value, 1, true);
       } else if (Platform.isWindows || Platform.isLinux) {

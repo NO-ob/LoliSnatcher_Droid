@@ -113,6 +113,16 @@ class _DebugPageState extends State<DebugPage> {
                 title: "Don't scale images",
               ),
               SettingsToggle(
+                value: settingsHandler.gifsAsThumbnails,
+                onChanged: (newValue) {
+                  setState(() {
+                    settingsHandler.gifsAsThumbnails = newValue;
+                  });
+                },
+                title: "GIF thumbnails",
+                subtitle: const Text('Requires "Don\'t scale images"'),
+              ),
+              SettingsToggle(
                 value: settingsHandler.disableImageIsolates,
                 onChanged: (newValue) {
                   setState(() {
