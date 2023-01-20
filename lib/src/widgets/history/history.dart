@@ -1,8 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
+import 'package:huge_listview/huge_listview.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
@@ -10,10 +14,10 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 
 
@@ -31,7 +35,7 @@ class _HistoryListState extends State<HistoryList> {
   final SearchHandler searchHandler = SearchHandler.instance;
 
   List<HistoryItem> history = [], filteredHistory = [], selectedEntries = [];
-  final ScrollController scrollController = ScrollController();
+  final ItemScrollController itemScrollController = ItemScrollController();
   final TextEditingController filterSearchController = TextEditingController();
   bool isLoading = true, showFavourites = true;
 
@@ -95,6 +99,14 @@ class _HistoryListState extends State<HistoryList> {
     setState(() {});
   }
 
+  Future<List<HistoryItem>> _loadPage(int page, int pageSize) async {
+    final int start = page * pageSize;
+    final int end = start + pageSize;
+    final List<HistoryItem> pageTags = filteredHistory.sublist(start, min(filteredHistory.length, end));
+
+    return pageTags;
+  }
+
   int compareFavourites(HistoryItem a, HistoryItem b) {
     // first sort favourited ones
     if (a.isFavourite && !b.isFavourite) {
@@ -107,9 +119,9 @@ class _HistoryListState extends State<HistoryList> {
     }
   }
 
-  void showHistoryEntryActions(Widget row, HistoryItem entry, Booru? booru) {
+  String formatDate(String timestamp, {bool withTime = true}) {
     final Duration timeZone = DateTime.now().timeZoneOffset;
-    final DateTime searchDate = DateTime.parse(entry.timestamp).add(timeZone);
+    final DateTime searchDate = DateTime.parse(timestamp).add(timeZone);
 
     final String dayStr = searchDate.day.toString().padLeft(2, '0');
     final String monthStr = searchDate.month.toString().padLeft(2, '0');
@@ -117,15 +129,18 @@ class _HistoryListState extends State<HistoryList> {
     final String hourStr = searchDate.hour.toString().padLeft(2, '0');
     final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
     final String secondStr = searchDate.second.toString().padLeft(2, '0');
-    final String searchDateStr = "$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr";
+    final String searchDateStr = withTime ? "$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr" : "$dayStr.$monthStr.$yearStr";
+    return searchDateStr;
+  }
 
+  void showHistoryEntryActions(Widget row, HistoryItem entry, Booru? booru) {
     showDialog(
       context: context,
       builder: (context) {
         return SettingsDialog(
           contentItems: <Widget>[
             SizedBox(width: double.maxFinite, child: row),
-            Text("Last searched on: $searchDateStr", textAlign: TextAlign.center),
+            Text("Last searched on: ${formatDate(entry.timestamp)}", textAlign: TextAlign.center),
             // 
             const SizedBox(height: 20),
             ListTile(
@@ -253,17 +268,30 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   Widget listBuild() {
-    return DesktopScrollWrap(
-      controller: scrollController,
-      child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-        controller: scrollController,
-        physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-        shrinkWrap: false,
-        itemCount: filteredHistory.length,
-        scrollDirection: Axis.vertical,
-        itemBuilder: listEntryBuild,
-      ),
+    final pageSize = MediaQuery.of(context).size.height ~/ 70;
+
+    return HugeListView(
+      controller: itemScrollController,
+      totalCount: filteredHistory.length,
+      itemBuilder: (context, index, _) => listEntryBuild(context, index),
+      placeholderBuilder: (BuildContext context, int index) {
+        return const LinearProgressIndicator();
+      },
+      pageFuture: (page) => _loadPage(page, pageSize),
+      pageSize: pageSize,
+      thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index) {
+        HistoryItem item = filteredHistory[index];
+        return CustomScrollBarThumb(
+          backgroundColor: backgroundColor,
+          drawColor: drawColor,
+          height: height * 1.2, // 48
+          title: '${formatDate(item.timestamp, withTime: false)} ${item.isFavourite ? '❤' : ''}',
+        );
+      },
+      thumbBackgroundColor: Theme.of(context).colorScheme.surface,
+      thumbDrawColor: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+      startIndex: 0,
+      padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 10),
     );
   }
 
@@ -300,6 +328,7 @@ class _HistoryListState extends State<HistoryList> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+      height: 66,
       child: ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -385,7 +414,7 @@ class _HistoryListState extends State<HistoryList> {
   Widget errorsBuild() {
     return ListView(
       padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-      controller: scrollController,
+      controller: ScrollController(),
       physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       children: [
         if (areThereErrors)
@@ -514,19 +543,7 @@ class _HistoryListState extends State<HistoryList> {
       child: Material(
         child: SizedBox(
           width: double.maxFinite,
-          child: Scrollbar(
-            controller: scrollController,
-            child: RefreshIndicator(
-              triggerMode: RefreshIndicatorTriggerMode.anywhere,
-              displacement: 80,
-              strokeWidth: 4,
-              color: Theme.of(context).colorScheme.secondary,
-              onRefresh: () async {
-                getHistory();
-              },
-              child: areThereErrors ? errorsBuild() : listBuild(),
-            ),
-          ),
+          child: areThereErrors ? errorsBuild() : listBuild(),
         ),
       ),
     );

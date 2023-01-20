@@ -218,9 +218,6 @@ class _DebugPageState extends State<DebugPage> {
                             max: 500,
                             divisions: 500,
                             label: '$vDuration',
-                            activeColor: Theme.of(context).colorScheme.secondary,
-                            thumbColor: Theme.of(context).colorScheme.secondary,
-                            inactiveColor: Theme.of(context).colorScheme.surface,
                           ),
                         ),
                         ElevatedButton(
@@ -270,9 +267,6 @@ class _DebugPageState extends State<DebugPage> {
                             max: 255,
                             divisions: 256,
                             label: '$vAmplitude',
-                            activeColor: Theme.of(context).colorScheme.secondary,
-                            thumbColor: Theme.of(context).colorScheme.secondary,
-                            inactiveColor: Theme.of(context).colorScheme.surface,
                           ),
                         ),
                         ElevatedButton(

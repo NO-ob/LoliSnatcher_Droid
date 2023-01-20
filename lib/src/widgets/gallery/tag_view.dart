@@ -543,8 +543,8 @@ class _TagViewState extends State<TagView> {
       delegate: SliverChildBuilderDelegate(
         tagsItemBuilder,
         addAutomaticKeepAlives: false,
-        // add empty items to fill the screen when < 12 tags (to avoid search input going too low)
-        childCount: filteredTags.length + (filteredTags.length < 12 ? 12 : 0),
+        // add empty items to allow a bit of overscroll for easier reachability
+        childCount: filteredTags.length + 6,
       ),
     );
   }

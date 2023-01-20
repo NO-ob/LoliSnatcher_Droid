@@ -71,6 +71,7 @@ class ThemeHandler {
       progressIndicatorTheme: progressIndicatorTheme(),
       checkboxTheme: checkboxTheme(),
       switchTheme: switchTheme(),
+      sliderTheme: sliderTheme(),
     );
   }
 
@@ -117,6 +118,7 @@ class ThemeHandler {
       progressIndicatorTheme: progressIndicatorTheme(),
       checkboxTheme: checkboxTheme(),
       switchTheme: switchTheme(),
+      sliderTheme: sliderTheme(),
     );
   }
 
@@ -356,4 +358,10 @@ class ThemeHandler {
         }),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
+  
+  SliderThemeData sliderTheme() => SliderThemeData(
+    activeTrackColor: theme.accent!,
+    thumbColor: theme.accent!,
+    inactiveTrackColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
+  );
 }
