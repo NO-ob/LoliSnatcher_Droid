@@ -23,6 +23,10 @@ class BooruItem{
   double? fileWidth, fileHeight, fileAspectRatio, sampleWidth, sampleHeight, sampleAspectRatio, previewWidth, previewHeight, previewAspectRatio;
   int? fileSize;
 
+  bool get isLong {
+    return fileAspectRatio != null && fileAspectRatio! < 0.3;
+  }
+
   BooruItem({
     required this.fileURL,
     required this.sampleURL,

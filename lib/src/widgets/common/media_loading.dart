@@ -109,12 +109,14 @@ class _MediaLoadingState extends State<MediaLoading> {
     _total = total ?? _total;
 
     final bool isDone = _total > 0 && _received >= _total;
-    Debounce.debounce(
+    Debounce.delay(
       tag: 'loading_media_progress_${widget.item.fileURL}',
       callback: () {
         updateState();
       },
-      duration: Duration(milliseconds: isDone ? 0 : 100),
+      // triiger restate only after a small delay, so we don't spam restate on every single byte
+      // if done - send immediately (but still with a delay to let flutter build the parent)
+      duration: Duration(milliseconds: isDone ? 1 : 100),
     );
   }
 
@@ -345,7 +347,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             value: percentDone,
             animationDuration: const Duration(milliseconds: 150),
             indicatorStyle: IndicatorStyle.linear,
-            valueColor: Theme.of(context).progressIndicatorTheme.color!.withOpacity(0.66),
+            valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
             minHeight: 6,
           );
 

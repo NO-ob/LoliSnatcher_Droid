@@ -107,6 +107,6 @@ class _MediaPreviewsState extends State<MediaPreviews> {
     }
 
     // render thumbnails grid
-    return const RepaintBoundary(child: WaterfallView());
+    return const WaterfallView();
   }
 }

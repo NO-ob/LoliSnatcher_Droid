@@ -57,8 +57,6 @@ class SettingsHandler extends GetxController {
   bool showURLOnThumb = false;
   bool disableImageScaling = false;
   bool gifsAsThumbnails = false;
-  // disable isolates on debug builds, because they cause lags in emulator
-  bool disableImageIsolates = kDebugMode || false;
   bool desktopListsDrag = false;
 
   ////////////////////////////////////////////////////
@@ -155,6 +153,8 @@ class SettingsHandler extends GetxController {
   Rx<Color?> customAccentColor = Colors.pink[600].obs;
 
   Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
+  RxBool useMaterial3 = false.obs;
+  RxBool useDynamicColor = false.obs;
   RxBool isAmoled = false.obs;
   ////////////////////////////////////////////////////
 
@@ -166,13 +166,13 @@ class SettingsHandler extends GetxController {
     'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
     'prefBooru', 'appMode', 'handSide', 'extPathOverride',
     'lastSyncIp', 'lastSyncPort',
-    'theme', 'themeMode', 'isAmoled',
+    'theme', 'themeMode', 'isAmoled', 'useMaterial3', 'useDynamicColor',
     'customPrimaryColor', 'customAccentColor',
     'version', 'SDK', 'disableImageScaling', 'gifsAsThumbnails',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showFPS', 'showPerf', 'showImageStats',
-    'isDebug', 'showURLOnThumb', 'disableImageIsolates',
+    'isDebug', 'showURLOnThumb',
     'desktopListsDrag'
   ];
   // default values and possible options map for validation
@@ -387,10 +387,6 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
-    "disableImageIsolates": {
-      "type": "bool",
-      "default": false,
-    },
     "desktopListsDrag": {
       "type": "bool",
       "default": false,
@@ -465,6 +461,14 @@ class SettingsHandler extends GetxController {
       "type": "themeMode",
       "default": ThemeMode.dark,
       "options": ThemeMode.values,
+    },
+    "useMaterial3": {
+      "type": "rxbool",
+      "default": false.obs,
+    },
+    "useDynamicColor": {
+      "type": "rxbool",
+      "default": false.obs,
     },
     "isAmoled": {
       "type": "rxbool",
@@ -768,8 +772,6 @@ class SettingsHandler extends GetxController {
         return disableImageScaling;
       case 'gifsAsThumbnails':
         return gifsAsThumbnails;
-      case 'disableImageIsolates':
-        return disableImageIsolates;
       case 'desktopListsDrag':
         return desktopListsDrag;
       case 'cacheDuration':
@@ -808,6 +810,10 @@ class SettingsHandler extends GetxController {
         return theme;
       case 'themeMode':
         return themeMode;
+      case 'useMaterial3':
+        return useMaterial3;
+      case 'useDynamicColor':
+        return useDynamicColor;
       case 'isAmoled':
         return isAmoled;
       case 'customPrimaryColor':
@@ -930,9 +936,6 @@ class SettingsHandler extends GetxController {
       case 'gifsAsThumbnails':
         gifsAsThumbnails = validatedValue;
         break;
-      case 'disableImageIsolates':
-        disableImageIsolates = validatedValue;
-        break;
       case 'desktopListsDrag':
         desktopListsDrag = validatedValue;
         break;
@@ -982,6 +985,12 @@ class SettingsHandler extends GetxController {
         break;
       case 'themeMode':
         themeMode.value = validatedValue;
+        break;
+      case 'useMaterial3':
+        useMaterial3 = validatedValue;
+        break;
+      case 'useDynamicColor':
+        useDynamicColor = validatedValue;
         break;
       case 'isAmoled':
         isAmoled = validatedValue;
@@ -1038,7 +1047,6 @@ class SettingsHandler extends GetxController {
       "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
       "gifsAsThumbnails" : validateValue("gifsAsThumbnails", null, toJSON: true),
-      "disableImageIsolates" : validateValue("disableImageIsolates", null, toJSON: true),
       "desktopListsDrag" : validateValue("desktopListsDrag", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
@@ -1062,6 +1070,8 @@ class SettingsHandler extends GetxController {
 
       "theme": validateValue("theme", null, toJSON: true),
       "themeMode": validateValue("themeMode", null, toJSON: true),
+      "useMaterial3": validateValue("useMaterial3", null, toJSON: true),
+      "useDynamicColor": validateValue("useDynamicColor", null, toJSON: true),
       "isAmoled": validateValue("isAmoled", null, toJSON: true),
       "enableDrawerMascot" : validateValue("enableDrawerMascot", null, toJSON: true),
       "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),

@@ -134,7 +134,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   AnimatedOpacity _buildBottomBar(
     BuildContext context,
   ) {
-    final iconColor = Theme.of(context).textTheme.button!.color;
+    final iconColor = Theme.of(context).textTheme.labelLarge?.color;
 
     // Don't draw progress bar if shorter than 2 seconds, moves too fast on short durations
     bool isTooShort = controller.value.duration.inSeconds <= 2;
@@ -269,12 +269,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      right: 8,
-                      left: 8,
-                      bottom: 8,
-                    ),
+                    padding: const EdgeInsets.all(8),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
                     child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
                   )
@@ -288,12 +283,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      right: 8,
-                      left: 8,
-                      bottom: 8,
-                    ),
+                    padding: const EdgeInsets.all(8),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
                     child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
                   )

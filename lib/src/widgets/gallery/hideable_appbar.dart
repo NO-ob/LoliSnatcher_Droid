@@ -62,6 +62,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           backgroundColor: Colors.transparent,
           foregroundColor: Colors.white,
           shadowColor: Colors.black54,
+          surfaceTintColor: Colors.transparent,
           leading: IconButton(
             // to ignore icon change
             icon: const Icon(Icons.arrow_back, color: Colors.white),

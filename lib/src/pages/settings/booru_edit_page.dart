@@ -188,7 +188,7 @@ class _BooruEditState extends State<BooruEdit> {
                                 style: TextStyle(fontSize: 20)
                               ),
                               content: const Text(
-                                'Click okay on hydrus then apply. You can test afterwards',
+                                'Tap okay on hydrus then apply. You can test afterwards',
                                 style: TextStyle(fontSize: 16)
                               ),
                               leadingIcon: Icons.warning_amber,
@@ -398,7 +398,7 @@ class _BooruEditState extends State<BooruEdit> {
               style: const TextStyle(fontSize: 20)
             ),
             content: const Text(
-              'Click the Save button to save this config',
+              'Tap the Save button to save this config',
               style: TextStyle(fontSize: 16)
             ),
             leadingIcon: Icons.done,

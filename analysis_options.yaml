@@ -39,7 +39,7 @@ linter:
     file_names: true # .dart files should use 'lowercase_with_underscores' naming scheme
     always_use_package_imports: true
     unawaited_futures: true
-    use_build_context_synchronously: true
+    use_build_context_synchronously: false
 
 # analyzer:
 #   language:

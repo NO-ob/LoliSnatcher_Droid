@@ -215,7 +215,7 @@ class _BooruPageState extends State<BooruPage> {
   Widget deleteButton() {
     return SettingsButton(
       name: 'Delete Selected Booru',
-      icon: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
+      icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
       action: () {
         // do nothing if no selected or selected "Favourites" or there are tabs with it
         if (selectedBooru == null) {

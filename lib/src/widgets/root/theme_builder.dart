@@ -23,13 +23,12 @@ class ThemeBuilder extends StatelessWidget {
               accent: settingsHandler.customAccentColor.value,
             )
           : settingsHandler.theme.value;
-      ThemeMode themeMode = settingsHandler.themeMode.value;
-      bool isAmoled = settingsHandler.isAmoled.value;
 
       final ThemeHandler themeHandler = ThemeHandler(
         theme: theme,
-        themeMode: themeMode,
-        isAmoled: isAmoled,
+        themeMode: settingsHandler.themeMode.value,
+        useMaterial3: settingsHandler.useMaterial3.value,
+        isAmoled: settingsHandler.isAmoled.value,
       );
 
       return Theme(

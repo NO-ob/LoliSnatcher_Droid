@@ -120,7 +120,7 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   @override
-  Future fetchTagSuggestions(Uri uri, String input) {
+  fetchTagSuggestions(Uri uri, String input) {
     return DioNetwork.post(
       uri.toString(),
       headers: {

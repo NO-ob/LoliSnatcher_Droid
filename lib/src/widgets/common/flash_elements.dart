@@ -87,6 +87,7 @@ class FlashElements {
                 ),
               ),
             ),
+            actionButtons: null,
           );
         },
       );

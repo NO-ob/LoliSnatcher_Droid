@@ -376,7 +376,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
               SettingsButton(
                 name: 'Clear cache completely',
-                icon: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
+                icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                 action: () async {
                   FlashElements.showSnackbar(
                     context: context,

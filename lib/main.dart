@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'package:app_links/app_links.dart';
 import 'package:dart_vlc/dart_vlc.dart';
+import 'package:dio/dio.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
@@ -45,6 +47,10 @@ void main() async {
   }
 
   FlutterError.onError = (FlutterErrorDetails details) {
+    if (details.exception is DioError && (details.exception as DioError).type == DioErrorType.cancel) {
+      // ignore exceptions caused by cancelling dio requests (mostly for image loading)
+      return;
+    }
     FlutterError.presentError(details);
 
     Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
@@ -193,15 +199,18 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
+      final ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
           ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
           : settingsHandler.theme.value;
-      ThemeMode themeMode = settingsHandler.themeMode.value;
-      bool isAmoled = settingsHandler.isAmoled.value;
+      final ThemeMode themeMode = settingsHandler.themeMode.value;
+      final bool useMaterial3 = settingsHandler.useMaterial3.value;
+      final bool useDynamicColor = settingsHandler.useDynamicColor.value;
+      final bool isAmoled = settingsHandler.isAmoled.value;
 
       ThemeHandler themeHandler = ThemeHandler(
         theme: theme,
         themeMode: themeMode,
+        useMaterial3: useMaterial3,
         isAmoled: isAmoled,
       );
 
@@ -236,17 +245,24 @@ class _MainAppState extends State<MainApp> {
           width: 110,
           height: 80,
           align: Alignment.centerLeft,
-          child: MaterialApp(
-            title: 'LoliSnatcher',
-            debugShowCheckedModeBanner: false, // hide debug banner in the corner
-            showPerformanceOverlay: settingsHandler.showPerf.value,
-            scrollBehavior: const CustomScrollBehavior(),
-            theme: themeHandler.lightTheme(),
-            darkTheme: themeHandler.darkTheme(),
-            themeMode: themeMode,
-            navigatorKey: navigationHandler.navigatorKey,
-            home: const Home(),
-          ),
+          child: DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
+            themeHandler.setDynamicColors(
+              useDynamicColor ? lightDynamic : null,
+              useDynamicColor ? darkDynamic : null,
+            );
+
+            return MaterialApp(
+              title: 'LoliSnatcher',
+              debugShowCheckedModeBanner: false, // hide debug banner in the corner
+              showPerformanceOverlay: settingsHandler.showPerf.value,
+              scrollBehavior: const CustomScrollBehavior(),
+              theme: themeHandler.lightTheme(),
+              darkTheme: themeHandler.darkTheme(),
+              themeMode: themeMode,
+              navigatorKey: navigationHandler.navigatorKey,
+              home: const Home(),
+            );
+          }),
         ),
       );
     });
@@ -288,10 +304,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
       // TODO possible performance problem if you have too many tags?
-      if(!tagHandler.tagSaveActive){
+      if (!tagHandler.tagSaveActive) {
         tagHandler.saveTags();
       }
-
     });
 
     imageWriter.clearStaleCache();

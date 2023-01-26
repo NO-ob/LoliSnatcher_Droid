@@ -13,18 +13,14 @@ class ThumbnailLoading extends StatefulWidget {
   const ThumbnailLoading({
     Key? key,
     required this.item,
-
     required this.hasProgress,
     required this.isFromCache,
     required this.isDone,
     required this.isFailed,
-
     required this.total,
     required this.received,
     required this.startedAt,
-
     required this.restartAction,
-
     this.errorCode,
   }) : super(key: key);
 
@@ -84,12 +80,12 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     _total = total ?? _total;
 
     final bool isDone = _total > 0 && _received >= _total;
-    Debounce.debounce(
+    Debounce.delay(
       tag: 'loading_thumbnail_progress_${widget.item.thumbnailURL}',
       callback: () {
         updateState();
       },
-      duration: Duration(milliseconds: isDone ? 0 : 250),
+      duration: Duration(milliseconds: isDone ? 0 : 100),
     );
   }
 
@@ -178,7 +174,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
                     ),
                   ),
                 ),
-                if(widget.errorCode?.isNotEmpty == true)
+                if (widget.errorCode?.isNotEmpty == true)
                   BorderedText(
                     strokeWidth: 2,
                     child: Text(
@@ -217,39 +213,27 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
           width: 1,
           child: RotatedBox(
             quarterTurns: -1,
-            child: LinearProgressIndicator(
-              value: percentDone == 0 ? null : percentDone,
+            child: Opacity(
+              opacity: 0.66,
+              child: LinearProgressIndicator(
+                value: percentDone == 0 ? null : percentDone,
+              ),
             ),
           ),
         ),
-
+        // 
         SizedBox(
           width: 1,
           child: RotatedBox(
             quarterTurns: percentDone != 0 ? -1 : 1,
-            child: LinearProgressIndicator(
-              value: percentDone == 0 ? null : percentDone,
+            child: Opacity(
+              opacity: 0.66,
+              child: LinearProgressIndicator(
+                value: percentDone == 0 ? null : percentDone,
+              ),
             ),
           ),
         ),
-        // SizedBox(
-        //   height: 100 / widget.columnCount,
-        //   width: 100 / widget.columnCount,
-        //   child: CircularProgressIndicator(
-        //     strokeWidth: 14 / widget.columnCount,
-        //     value: percentDone,
-        //   ),
-        // ),
-        // if(widget.columnCount < 5 && percentDoneText != null) // Text element overflows if too many thumbnails are shown
-        //   ...[
-        //     Padding(padding: EdgeInsets.only(bottom: 10)),
-        //     Text(
-        //       percentDoneText,
-        //       style: TextStyle(
-        //         fontSize: 12,
-        //       ),
-        //     ),
-        //   ],
       ],
     );
   }

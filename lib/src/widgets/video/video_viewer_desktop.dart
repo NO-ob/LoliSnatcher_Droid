@@ -55,7 +55,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   @override
   void didUpdateWidget(VideoViewerDesktop oldWidget) {
     // force redraw on item data change
-    if(oldWidget.booruItem != widget.booruItem) {
+    if (oldWidget.booruItem != widget.booruItem) {
       // reset stuff here
       firstViewFix = false;
       resetZoom();
@@ -84,7 +84,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     isStopped = false;
     _startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
-    if(!settingsHandler.mediaCache) {
+    if (!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
       unawaited(initPlayer());
       unawaited(getSize());
@@ -112,29 +112,24 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     _cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _cancelToken,
       onProgress: _onBytesAdded,
       onEvent: _onEvent,
       onError: _onError,
-      onDoneFile: (File file, String url) async {
+      onDoneFile: (File file) async {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if(videoController == null && !isLoaded) {
+        if (videoController == null && !isLoaded) {
           unawaited(initPlayer());
           updateState();
         }
       },
       cacheEnabled: settingsHandler.mediaCache,
       cacheFolder: 'media',
-      fileNameExtras: widget.booruItem.fileNameExtras
+      fileNameExtras: widget.booruItem.fileNameExtras,
     );
-    // client!.runRequest();
-    if(settingsHandler.disableImageIsolates) {
-      unawaited(client!.runRequest());
-    } else {
-      unawaited(client!.runRequestIsolate());
-    }
+    unawaited(client!.runRequest());
     return;
   }
 
@@ -142,10 +137,10 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     _sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(
       widget.booruItem.fileURL,
-      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       cancelToken: _sizeCancelToken,
       onEvent: _onEvent,
-      fileNameExtras: widget.booruItem.fileNameExtras
+      fileNameExtras: widget.booruItem.fileNameExtras,
     );
     unawaited(sizeClient!.runRequestSize());
     return;
@@ -155,7 +150,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     // TODO find a way to stop loading based on size when caching is enabled
     const int maxSize = 1024 * 1024 * 200;
     // print('onSize: $size $maxSize ${size > maxSize}');
-    if(size == 0) {
+    if (size == 0) {
       killLoading(['File is zero bytes']);
     } else if ((size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
@@ -181,7 +176,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   void _onEvent(String event, dynamic data) {
     switch (event) {
       case 'loaded':
-        // 
+        //
         break;
       case 'size':
         onSize(data as int);
@@ -202,7 +197,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $imageURL | $error');
     } else {
-      if(error is DioError) {
+      if (error is DioError) {
         killLoading(['Loading Error: ${error.message}']);
       } else {
         killLoading(['Loading Error: $error']);
@@ -220,8 +215,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     isViewed = settingsHandler.appMode.value.isMobile
-      ? searchHandler.viewedIndex.value == widget.index
-      : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
+        ? searchHandler.viewedIndex.value == widget.index
+        : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == widget.index;
@@ -245,8 +240,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   void updateState() {
-    if(mounted) {
-      setState(() { });
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -305,15 +300,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     videoController?.dispose();
     videoController = null;
 
-    if (!(_cancelToken != null && _cancelToken!.isCancelled)){
+    if (!(_cancelToken != null && _cancelToken!.isCancelled)) {
       _cancelToken?.cancel();
     }
-    if (!(_sizeCancelToken != null && _sizeCancelToken!.isCancelled)){
+    if (!(_sizeCancelToken != null && _sizeCancelToken!.isCancelled)) {
       _sizeCancelToken?.cancel();
     }
     disposeClient();
   }
-
 
   // debug functions
   void onScaleStateChanged(PhotoViewScaleState scaleState) {
@@ -341,7 +335,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     // print('ll $lowerLimit $value');
     // if zooming out and zoom is smaller than limit - reset to container size
     // TODO minimal scale to fit can be different from limit
-    if(lowerLimit == 0.75 && value < 0) {
+    if (lowerLimit == 0.75 && value < 0) {
       scaleController.scaleState = PhotoViewScaleState.initial;
     } else {
       viewController.scale = lowerLimit;
@@ -354,7 +348,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   Future<void> changeNetworkVideo() async {
-    if(_video != null) { // if (settingsHandler.mediaCache || _video != null) {
+    if (_video != null) {
+      // if (settingsHandler.mediaCache || _video != null) {
       // Start from cache if was already cached or only caching is allowed
       media = Media.file(
         _video!,
@@ -365,7 +360,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
-        extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+        extras: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
@@ -378,7 +373,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   Future<void> initPlayer() async {
-    if(_video != null) { // if (settingsHandler.mediaCache || _video != null) {
+    if (_video != null) {
+      // if (settingsHandler.mediaCache || _video != null) {
       // Start from cache if was already cached or only caching is allowed
       media = Media.file(
         _video!,
@@ -390,14 +386,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         Uri.encodeFull(widget.booruItem.fileURL),
-        extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+        extras: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
 
     videoController = Player(id: widget.index);
-    videoController!.setUserAgent(Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: false).entries.first.value);
+    videoController!.setUserAgent(Tools.browserUserAgent());
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
     //   media!,
@@ -408,20 +404,19 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // dart_vlc has loop logic integrated into playlists, but it is not working?
       // this will force restart videos on completion
 
-      if(state.isPlaying) {
-        if(state.isCompleted) {
+      if (state.isPlaying) {
+        if (state.isCompleted) {
           videoController!.play();
         }
       }
     });
 
-    
     videoController!.generalStream.listen((GeneralState state) {
       viewerHandler.videoVolume = state.volume;
     });
 
     videoController!.errorStream.listen((String error) {
-      if(error.isNotEmpty) {
+      if (error.isNotEmpty) {
         killLoading(['Error:', error]);
       }
     });
@@ -433,7 +428,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   @override
   Widget build(BuildContext context) {
     // print('!!! Build video desktop ${widget.index}!!!');
-    
+
     bool initialized = isLoaded; // videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
@@ -443,11 +438,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     if (initialized) {
       if (isViewed) {
         // Reset video time if came into view
-        if(needsRestart) {
+        if (needsRestart) {
           videoController!.seek(Duration.zero);
         }
 
-        if(!firstViewFix) {
+        if (!firstViewFix) {
           videoController!.open(
             media!,
             autoStart: settingsHandler.autoPlayEnabled,
@@ -458,7 +453,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
         // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-            videoController!.play();
+          videoController!.play();
         } else {
           videoController!.pause();
         }
@@ -471,7 +466,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       }
     }
 
-    if(needsRestart) {
+    if (needsRestart) {
       _lastViewedIndex = viewedIndex;
     }
 
@@ -482,7 +477,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       child: Material(
         child: Listener(
           onPointerSignal: (pointerSignal) {
-            if(pointerSignal is PointerScrollEvent) {
+            if (pointerSignal is PointerScrollEvent) {
               scrollZoomImage(pointerSignal.scrollDelta.dy);
             }
           },
@@ -516,7 +511,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                   received: _received,
                   startedAt: _startedAt,
                   startAction: () {
-                    if(isTooBig == 1) {
+                    if (isTooBig == 1) {
                       isTooBig = 2;
                     }
                     initVideo(true);
@@ -526,8 +521,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                     killLoading(['Stopped by User']);
                   },
                 ),
-
-                if(isViewed && initialized)
+                if (isViewed && initialized)
                   Video(
                     player: videoController,
                     scale: 1.0,
@@ -543,9 +537,9 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                   ),
               ],
             ),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }

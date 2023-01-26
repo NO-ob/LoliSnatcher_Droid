@@ -240,6 +240,7 @@ class SettingsDropdown<T> extends StatelessWidget {
             labelText: title,
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
+          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return items.map<DropdownMenuItem<T>>((T item) {
               return DropdownMenuItem<T>(
@@ -321,7 +322,7 @@ class SettingsBooruDropdown extends StatelessWidget {
             children: <Widget>[
               (booru.type == "Favourites"
                   ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                  : Favicon(booru.faviconURL!)
+                  : Favicon(booru)
               ),
               Text(" ${booru.name!}"),
             ],
@@ -581,7 +582,7 @@ class SettingsDialog extends StatelessWidget {
         )
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
-      actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
+      actions: actionButtons?.isNotEmpty == true ? actionButtons : null,
 
       titlePadding: titlePadding,
       contentPadding: contentPadding,

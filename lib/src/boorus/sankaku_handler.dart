@@ -37,7 +37,7 @@ class SankakuHandler extends BooruHandler {
   bool hasItemUpdateSupport = true;
 
   @override
-  Future<dynamic> fetchSearch(Uri uri) async {
+  fetchSearch(Uri uri) async {
     try {
       if (authToken == "" && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
         authToken = await getAuthToken();

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
+import 'package:flutter/services.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
@@ -11,22 +12,39 @@ class ThemeHandler {
   ThemeHandler({
     required this.theme,
     required this.themeMode,
+    required this.useMaterial3,
     required this.isAmoled,
   }) {
     isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && SchedulerBinding.instance.window.platformBrightness == Brightness.dark);
 
-    Brightness primaryBrightness = ThemeData.estimateBrightnessForColor(theme.primary!);
+    Brightness primaryBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
     primaryIsDark = primaryBrightness == Brightness.dark;
-    Brightness accentBrightness = ThemeData.estimateBrightnessForColor(theme.accent!);
+    Brightness accentBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
     accentIsDark = accentBrightness == Brightness.dark;
   }
 
   final ThemeItem theme;
   final ThemeMode themeMode;
+  final bool useMaterial3;
   final bool isAmoled;
-  late bool isDark;
-  late bool primaryIsDark;
-  late bool accentIsDark;
+  ColorScheme? lightDynamic;
+  ColorScheme? darkDynamic;
+
+  bool isDark = true;
+  bool primaryIsDark = true;
+  bool accentIsDark = true;
+
+  void setDynamicColors(ColorScheme? light, ColorScheme? dark) {
+    lightDynamic = light;
+    darkDynamic = dark;
+
+    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && SchedulerBinding.instance.window.platformBrightness == Brightness.dark);
+
+    Brightness primaryBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
+    primaryIsDark = primaryBrightness == Brightness.dark;
+    Brightness accentBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
+    accentIsDark = accentBrightness == Brightness.dark;
+  }
 
   ThemeData getTheme() {
     return isDark ? darkTheme() : lightTheme();
@@ -37,15 +55,14 @@ class ThemeHandler {
 
     return ThemeData.light().copyWith(
       brightness: Brightness.light,
-      primaryColor: theme.primary,
-      appBarTheme: appBarTheme(),
+      appBarTheme: appBarTheme(lightColorScheme),
 
       colorScheme: lightColorScheme,
       textTheme: textTheme(),
-      textSelectionTheme: textSelectionTheme(),
-      elevatedButtonTheme: elevatedButtonTheme(),
+      textSelectionTheme: textSelectionTheme(lightColorScheme),
+      elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
 
-      // useMaterial3: true,
+      useMaterial3: useMaterial3,
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -53,25 +70,27 @@ class ThemeHandler {
       // TODO maybe add custom extensions, since google added them in flutter3?
 
       applyElevationOverlayColor: true,
-      buttonTheme: buttonTheme(),
+      buttonTheme: buttonTheme(lightColorScheme),
       cardColor: lightColorScheme.background,
       // dividerColor: lightColorScheme.onBackground,
       dialogBackgroundColor: lightColorScheme.background,
-      errorColor: lightColorScheme.error,
-      floatingActionButtonTheme: floatingActionButtonTheme(),
-      iconTheme: iconTheme(),
-      inputDecorationTheme: inputDecorationTheme(),
-      primaryIconTheme: iconTheme(),
+      floatingActionButtonTheme: floatingActionButtonTheme(lightColorScheme),
+      iconTheme: iconTheme(lightColorScheme),
+      inputDecorationTheme: inputDecorationTheme(lightColorScheme),
+      primaryIconTheme: iconTheme(lightColorScheme),
       primaryTextTheme: textTheme(),
       buttonBarTheme: buttonBarTheme(),
       bannerTheme: bannerTheme(),
-      cardTheme: cardTheme(),
+      cardTheme: cardTheme(lightColorScheme),
       pageTransitionsTheme: pageTransitionsTheme(),
-      scrollbarTheme: scrollbarTheme(),
-      progressIndicatorTheme: progressIndicatorTheme(),
-      checkboxTheme: checkboxTheme(),
-      switchTheme: switchTheme(),
-      sliderTheme: sliderTheme(),
+      scrollbarTheme: scrollbarTheme(lightColorScheme),
+      progressIndicatorTheme: progressIndicatorTheme(lightColorScheme),
+      checkboxTheme: checkboxTheme(lightColorScheme),
+      switchTheme: switchTheme(lightColorScheme),
+      sliderTheme: sliderTheme(lightColorScheme),
+      drawerTheme: drawerTheme(lightColorScheme),
+      tabBarTheme: tabBarTheme(lightColorScheme),
+      dropdownMenuTheme: dropdownMenuTheme(lightColorScheme),
     );
   }
 
@@ -80,19 +99,17 @@ class ThemeHandler {
 
     return ThemeData.dark().copyWith(
       brightness: Brightness.dark,
-      primaryColor: theme.primary,
-      appBarTheme: appBarTheme(),
+      appBarTheme: appBarTheme(darkColorScheme),
 
       scaffoldBackgroundColor: isAmoled ? Colors.black : null,
-      backgroundColor: isAmoled ? Colors.black : null,
-      canvasColor: isAmoled ? Colors.black : null,
+      // canvasColor: isAmoled ? Colors.black : null,
 
       colorScheme: darkColorScheme,
       textTheme: textTheme(),
-      textSelectionTheme: textSelectionTheme(),
-      elevatedButtonTheme: elevatedButtonTheme(),
+      textSelectionTheme: textSelectionTheme(darkColorScheme),
+      elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
 
-      // useMaterial3: true,
+      useMaterial3: useMaterial3,
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -100,29 +117,51 @@ class ThemeHandler {
       // TODO maybe add custom extensions, since google added them in flutter3?
 
       applyElevationOverlayColor: true,
-      buttonTheme: buttonTheme(),
+      buttonTheme: buttonTheme(darkColorScheme),
       cardColor: darkColorScheme.background,
-      // dividerColor: darkColorScheme.onBackground,
+      // // dividerColor: darkColorScheme.onBackground,
       dialogBackgroundColor: darkColorScheme.background,
-      errorColor: darkColorScheme.error,
-      floatingActionButtonTheme: floatingActionButtonTheme(),
-      iconTheme: iconTheme(),
-      inputDecorationTheme: inputDecorationTheme(),
-      primaryIconTheme: iconTheme(),
+      floatingActionButtonTheme: floatingActionButtonTheme(darkColorScheme),
+      iconTheme: iconTheme(darkColorScheme),
+      inputDecorationTheme: inputDecorationTheme(darkColorScheme),
+      primaryIconTheme: iconTheme(darkColorScheme),
       primaryTextTheme: textTheme(),
       buttonBarTheme: buttonBarTheme(),
       bannerTheme: bannerTheme(),
-      cardTheme: cardTheme(),
+      cardTheme: cardTheme(darkColorScheme),
       pageTransitionsTheme: pageTransitionsTheme(),
-      scrollbarTheme: scrollbarTheme(),
-      progressIndicatorTheme: progressIndicatorTheme(),
-      checkboxTheme: checkboxTheme(),
-      switchTheme: switchTheme(),
-      sliderTheme: sliderTheme(),
+      scrollbarTheme: scrollbarTheme(darkColorScheme),
+      progressIndicatorTheme: progressIndicatorTheme(darkColorScheme),
+      checkboxTheme: checkboxTheme(darkColorScheme),
+      switchTheme: switchTheme(darkColorScheme),
+      sliderTheme: sliderTheme(darkColorScheme),
+      drawerTheme: drawerTheme(darkColorScheme),
+      tabBarTheme: tabBarTheme(darkColorScheme),
+      dropdownMenuTheme: dropdownMenuTheme(darkColorScheme),
     );
   }
 
   ColorScheme colorScheme() {
+    if (isDark) {
+      if (darkDynamic != null) {
+        return darkDynamic!;
+      }
+    } else {
+      if (lightDynamic != null) {
+        return lightDynamic!;
+      }
+    }
+
+    if (useMaterial3) {
+      return ColorScheme.fromSeed(
+        seedColor: theme.accent!,
+        primary: theme.primary!,
+        secondary: theme.accent!,
+        brightness: isDark ? Brightness.dark : Brightness.light,
+        error: Colors.redAccent,
+      );
+    }
+
     return ColorScheme(
       primary: theme.primary!,
       onPrimary: primaryIsDark ? Colors.white : Colors.black,
@@ -140,15 +179,15 @@ class ThemeHandler {
 
   TextTheme textTheme() => GoogleFonts.notoSansTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme);
 
-  TextSelectionThemeData textSelectionTheme() => TextSelectionThemeData(
-        cursorColor: theme.accent,
+  TextSelectionThemeData textSelectionTheme(ColorScheme colorScheme) => TextSelectionThemeData(
+        cursorColor: colorScheme.secondary,
         selectionColor: Colors.blue.withOpacity(0.66),
-        selectionHandleColor: theme.accent,
+        selectionHandleColor: colorScheme.secondary,
       );
 
-  ElevatedButtonThemeData elevatedButtonTheme() => ElevatedButtonThemeData(
+  ElevatedButtonThemeData elevatedButtonTheme(ColorScheme colorScheme) => ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.accent!,
+          backgroundColor: colorScheme.secondary,
           foregroundColor: accentIsDark ? Colors.white : Colors.black,
           disabledForegroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.38),
           disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
@@ -162,7 +201,7 @@ class ThemeHandler {
         ),
       );
 
-  AppBarTheme appBarTheme() => AppBarTheme(
+  AppBarTheme appBarTheme(ColorScheme colorScheme) => AppBarTheme(
         titleTextStyle: TextStyle(
           color: primaryIsDark ? Colors.white : Colors.black,
           fontSize: 18,
@@ -173,7 +212,7 @@ class ThemeHandler {
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
-        backgroundColor: theme.primary,
+        backgroundColor: colorScheme.primary,
         foregroundColor: primaryIsDark ? Colors.white : Colors.black,
         actionsIconTheme: IconThemeData(
           color: primaryIsDark ? Colors.white : Colors.black,
@@ -181,27 +220,33 @@ class ThemeHandler {
         iconTheme: IconThemeData(
           color: primaryIsDark ? Colors.white : Colors.black,
         ),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: (isDark ? Colors.black : Colors.white).withOpacity(0.25),
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        ),
       );
 
-  ButtonThemeData buttonTheme() => ButtonThemeData(
-        buttonColor: theme.primary!,
+  ButtonThemeData buttonTheme(ColorScheme colorScheme) => ButtonThemeData(
+        buttonColor: colorScheme.primary,
         textTheme: ButtonTextTheme.primary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
 
-  FloatingActionButtonThemeData floatingActionButtonTheme() => FloatingActionButtonThemeData(
-        backgroundColor: theme.accent!,
+  FloatingActionButtonThemeData floatingActionButtonTheme(ColorScheme colorScheme) => FloatingActionButtonThemeData(
+        backgroundColor: colorScheme.secondary,
         foregroundColor: accentIsDark ? Colors.white : Colors.black,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       );
 
-  IconThemeData iconTheme() => IconThemeData(
-        color: colorScheme().onBackground,
+  IconThemeData iconTheme(ColorScheme colorScheme) => IconThemeData(
+        color: colorScheme.onBackground,
+        opacity: 1,
         size: 24,
       );
 
-  InputDecorationTheme inputDecorationTheme() => InputDecorationTheme(
+  InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(
         fillColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
         filled: false,
         labelStyle: TextStyle(
@@ -217,23 +262,23 @@ class ThemeHandler {
         alignLabelWithHint: false,
         // contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: theme.accent!, width: 1),
+          borderSide: BorderSide(color: colorScheme.secondary, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: theme.accent!, width: 2),
+          borderSide: BorderSide(color: colorScheme.secondary, width: 2),
           borderRadius: BorderRadius.circular(8),
         ),
         errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme().error, width: 2),
+          borderSide: BorderSide(color: colorScheme.error, width: 2),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme().error, width: 2),
+          borderSide: BorderSide(color: colorScheme.error, width: 2),
           borderRadius: BorderRadius.circular(8),
         ),
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: theme.accent!, width: 1),
+          borderSide: BorderSide(color: colorScheme.secondary, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
         disabledBorder: OutlineInputBorder(
@@ -254,8 +299,8 @@ class ThemeHandler {
         contentTextStyle: TextStyle(color: Colors.white),
       );
 
-  CardTheme cardTheme() => CardTheme(
-        color: colorScheme().background,
+  CardTheme cardTheme(ColorScheme colorScheme) => CardTheme(
+        color: colorScheme.background,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
@@ -271,7 +316,7 @@ class ThemeHandler {
         },
       );
 
-  ScrollbarThemeData scrollbarTheme() => ScrollbarThemeData(
+  ScrollbarThemeData scrollbarTheme(ColorScheme colorScheme) => ScrollbarThemeData(
         thickness: MaterialStateProperty.resolveWith((states) {
           if (Platform.isAndroid || Platform.isIOS) {
             return 8;
@@ -302,7 +347,7 @@ class ThemeHandler {
         thumbColor: MaterialStateProperty.resolveWith((states) {
           List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
           Color color = isDark ? Colors.grey[300]! : Colors.grey[900]!;
-          color = theme.accent!;
+          color = colorScheme.secondary;
           for (MaterialState state in states) {
             if (goodStates.contains(state)) {
               return color.withOpacity(0.75);
@@ -313,18 +358,18 @@ class ThemeHandler {
         radius: const Radius.circular(10),
       );
 
-  ProgressIndicatorThemeData progressIndicatorTheme() => ProgressIndicatorThemeData(
-        color: theme.accent!,
+  ProgressIndicatorThemeData progressIndicatorTheme(ColorScheme colorScheme) => ProgressIndicatorThemeData(
+        color: colorScheme.secondary,
         circularTrackColor: Colors.transparent,
         linearTrackColor: Colors.transparent,
         refreshBackgroundColor: null,
       );
 
-  CheckboxThemeData checkboxTheme() => CheckboxThemeData(
+  CheckboxThemeData checkboxTheme(ColorScheme colorScheme) => CheckboxThemeData(
         fillColor: MaterialStateProperty.resolveWith((states) {
           bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {
-            Color color = theme.accent!;
+            Color color = colorScheme.secondary;
             color = isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
             return color;
           } else {
@@ -335,11 +380,11 @@ class ThemeHandler {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
 
-  SwitchThemeData switchTheme() => SwitchThemeData(
+  SwitchThemeData switchTheme(ColorScheme colorScheme) => SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((states) {
           bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {
-            Color color = theme.accent!;
+            Color color = colorScheme.secondary;
             color = isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
             return color;
           } else {
@@ -349,7 +394,7 @@ class ThemeHandler {
         trackColor: MaterialStateProperty.resolveWith((states) {
           bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {
-            Color color = Color.lerp(theme.accent!, Colors.white, 0.3)!;
+            Color color = Color.lerp(colorScheme.secondary, Colors.white, 0.3)!;
             color = isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
             return color;
           } else {
@@ -358,10 +403,32 @@ class ThemeHandler {
         }),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       );
-  
-  SliderThemeData sliderTheme() => SliderThemeData(
-    activeTrackColor: theme.accent!,
-    thumbColor: theme.accent!,
-    inactiveTrackColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-  );
+
+  SliderThemeData sliderTheme(ColorScheme colorScheme) => SliderThemeData(
+        activeTrackColor: colorScheme.secondary,
+        thumbColor: colorScheme.secondary,
+        inactiveTrackColor: isDark ? Colors.grey[900]! : Colors.grey[300]!,
+      );
+
+  DrawerThemeData drawerTheme(ColorScheme colorScheme) => DrawerThemeData(
+        elevation: 0,
+        backgroundColor: colorScheme.background,
+        scrimColor: Colors.black.withOpacity(0.5),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+        endShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+      );
+
+  TabBarTheme tabBarTheme(ColorScheme colorScheme) => TabBarTheme(
+        labelColor: colorScheme.secondary,
+        unselectedLabelColor: isDark ? Colors.grey[300]! : Colors.grey[900]!,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400),
+        indicatorSize: TabBarIndicatorSize.tab,
+      );
+
+  DropdownMenuThemeData dropdownMenuTheme(ColorScheme colorScheme) => DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          backgroundColor: MaterialStatePropertyAll(colorScheme.background),
+        ),
+      );
 }

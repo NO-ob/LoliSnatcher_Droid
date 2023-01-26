@@ -216,7 +216,7 @@ class _TagViewState extends State<TagView> {
                 alignment: Alignment.center,
                 transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
                 child: IconButton(
-                  icon: Icon((sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha),
+                  icon: Icon((sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha, color: Theme.of(context).iconTheme.color,),
                   onPressed: () {
                     if (sortTags == true) {
                       sortTags = false;
@@ -246,7 +246,7 @@ class _TagViewState extends State<TagView> {
 
     return SettingsButton(
       name: 'Comments',
-      icon: Icon(icon),
+      icon: Icon(icon, color: Theme.of(context).iconTheme.color,),
       action: () {
         SettingsPageOpen(
           context: context,
@@ -272,7 +272,7 @@ class _TagViewState extends State<TagView> {
       if (item.notes.isNotEmpty) {
         return SettingsButton(
           name: '${viewerHandler.showNotes.value ? 'Hide' : 'Show'} Notes (${item.notes.length})',
-          icon: const Icon(Icons.note_add),
+          icon: Icon(Icons.note_add, color: Theme.of(context).iconTheme.color,),
           action: () {
             viewerHandler.showNotes.toggle();
           },
@@ -289,7 +289,7 @@ class _TagViewState extends State<TagView> {
       } else {
         return SettingsButton(
           name: 'Load notes',
-          icon: const Icon(Icons.note_add),
+          icon: Icon(Icons.note_add, color: Theme.of(context).iconTheme.color,),
           action: () async {
             item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
           },
@@ -310,22 +310,59 @@ class _TagViewState extends State<TagView> {
             children: sources
                 .map(
                   (link) => ListTile(
-                    onLongPress: () {
+                    onLongPress: () async {
                       ServiceHandler.vibrate();
-                      Clipboard.setData(ClipboardData(text: link));
-                      FlashElements.showSnackbar(
+                      await showDialog(
                         context: context,
-                        duration: const Duration(seconds: 2),
-                        title: const Text("Copied source to clipboard!", style: TextStyle(fontSize: 20)),
-                        content: Text(link, style: const TextStyle(fontSize: 16)),
-                        leadingIcon: Icons.copy,
-                        sideColor: Colors.green,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Open source?'),
+                            content: Text(link),
+                            actionsOverflowDirection: VerticalDirection.up,
+                            actions: [
+                              OutlinedButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                label: const Text('Cancel'),
+                                icon: const Icon(Icons.cancel),
+                              ),
+                              OutlinedButton.icon(
+                                onPressed: () async {
+                                  await Clipboard.setData(ClipboardData(text: link));
+                                  FlashElements.showSnackbar(
+                                    context: context,
+                                    duration: const Duration(seconds: 2),
+                                    title: const Text("Copied source to clipboard!", style: TextStyle(fontSize: 20)),
+                                    content: Text(link, style: const TextStyle(fontSize: 16)),
+                                    leadingIcon: Icons.copy,
+                                    sideColor: Colors.green,
+                                  );
+                                  Navigator.of(context).pop();
+                                },
+                                label: const Text('Copy'),
+                                icon: const Icon(Icons.copy),
+                              ),
+                              OutlinedButton.icon(
+                                onPressed: () {
+                                  ServiceHandler.launchURL(link);
+                                  Navigator.of(context).pop();
+                                },
+                                label: const Text('Open'),
+                                icon: const Icon(Icons.open_in_new),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
                     onTap: () {
                       ServiceHandler.launchURL(link);
                     },
-                    title: Text(link, overflow: TextOverflow.ellipsis),
+                    title: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(link, overflow: TextOverflow.fade),
+                    ),
                   ),
                 )
                 .toList(),
@@ -412,7 +449,7 @@ class _TagViewState extends State<TagView> {
             ),
             const SizedBox(height: 10),
             ListTile(
-              leading: const Icon(Icons.copy),
+              leading: Icon(Icons.copy, color: Theme.of(context).iconTheme.color,),
               title: const Text("Copy"),
               onTap: () {
                 Clipboard.setData(ClipboardData(text: tag));
@@ -435,7 +472,7 @@ class _TagViewState extends State<TagView> {
             ),
             if (isInSearch)
               ListTile(
-                leading: const Icon(Icons.remove),
+                leading: Icon(Icons.remove, color: Theme.of(context).iconTheme.color,),
                 title: const Text("Remove from Search"),
                 onTap: () {
                   searchHandler.removeTagFromSearch(tag);
@@ -514,7 +551,7 @@ class _TagViewState extends State<TagView> {
               ),
             if (isLoved)
               ListTile(
-                leading: const Icon(Icons.star),
+                leading: Icon(Icons.star_border, color: Theme.of(context).iconTheme.color,),
                 title: const Text("Remove from Loved"),
                 onTap: () {
                   settingsHandler.removeTagFromList('loved', tag);
@@ -524,7 +561,7 @@ class _TagViewState extends State<TagView> {
               ),
             if (isHated)
               ListTile(
-                leading: const Icon(CupertinoIcons.eye_slash),
+                leading: Icon(CupertinoIcons.eye_slash, color: Theme.of(context).iconTheme.color,),
                 title: const Text("Remove from Hated"),
                 onTap: () {
                   settingsHandler.removeTagFromList('hated', tag);

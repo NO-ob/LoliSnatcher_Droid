@@ -337,7 +337,7 @@ class _HistoryListState extends State<HistoryList> {
         onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
         minLeadingWidth: 20,
         leading: booru != null
-            ? (booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru.faviconURL!))
+            ? (booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru))
             : const Icon(CupertinoIcons.question, size: 18),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,

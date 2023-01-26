@@ -123,15 +123,6 @@ class _DebugPageState extends State<DebugPage> {
                 subtitle: const Text('Requires "Don\'t scale images"'),
               ),
               SettingsToggle(
-                value: settingsHandler.disableImageIsolates,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.disableImageIsolates = newValue;
-                  });
-                },
-                title: "Disable Isolates",
-              ),
-              SettingsToggle(
                 value: settingsHandler.showURLOnThumb,
                 onChanged: (newValue) {
                   setState(() {

@@ -116,7 +116,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     if (searchHandler.searchBoxFocus.hasFocus) {
       // print("textbox is focused");
       if (!_overlayEntry!.mounted) {
-        Overlay.of(context)!.insert(_overlayEntry!);
+        Overlay.of(context).insert(_overlayEntry!);
       } else {
         tagStuff();
         combinedSearch();
@@ -279,11 +279,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               tagStuff();
               combinedSearch();
             },
-            child: const MouseRegion(
+            child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  child: Icon(Icons.cancel, size: 24),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
                 )
             )
         ),
@@ -617,11 +617,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                   )
                 : Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(50)
+                      borderRadius: BorderRadius.circular(10)
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(48.5),
+                      borderRadius: BorderRadius.circular(10),
                       child: Listener(
                         onPointerSignal: (pointerSignal) {
                           if(pointerSignal is PointerScrollEvent) {
@@ -641,8 +641,13 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ...getTagsChips(),
-                              if(input.isNotEmpty)
-                                const SizedBox(width: 60),
+                              if(splitInput.isNotEmpty) ...[
+                                if(splitInput.length < 3)
+                                  const SizedBox(width: 120)
+                                else
+                                  const SizedBox(width: 60),
+                                const Text(''),
+                              ],
                             ],
                           ),
                         )

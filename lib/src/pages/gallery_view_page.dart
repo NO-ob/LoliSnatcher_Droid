@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -203,7 +202,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
                       late Widget itemWidget;
                       if(isImage) {
-                        itemWidget = ImageViewer(item.key, item, index);
+                        itemWidget = ImageViewer(item, index, key: item.key);
                       } else if(isVideo) {
                         if(settingsHandler.disableVideo) {
                           itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
@@ -240,7 +239,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             onLongPress: () {
                               toggleToolbar(true);
                             },
-                            child: RepaintBoundary(child: itemWidget),
+                            child: itemWidget,
                           ),
                         );
                       });
@@ -284,7 +283,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
           // copy existing main app theme, but make background semitransparent
-          canvasColor: Theme.of(context).canvasColor.withOpacity(0.66),
+          drawerTheme: Theme.of(context).drawerTheme.copyWith(
+            backgroundColor: Theme.of(context).canvasColor.withOpacity(0.66),
+          ),
         ),
         child: renderDrawer(),
       )
@@ -386,12 +387,13 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
   Widget renderDrawer() {
     final MediaQueryData mQuery = MediaQuery.of(context);
-    final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.75) : (mQuery.size.height * 0.75);
+    final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.8) : (mQuery.size.height * 0.8);
 
     return SizedBox(
       width: maxWidth,
-      child: const Drawer(
-        child: SafeArea(
+      child: Drawer(
+        width: maxWidth,
+        child: const SafeArea(
           child: TagView(),
         ),
       )
@@ -629,6 +631,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             ),
           ]
         ),
+        color: Theme.of(context).colorScheme.surface,
         itemBuilder: (BuildContext itemBuilder) =>
           overFlowList.map((value) =>
             PopupMenuItem(
@@ -644,11 +647,6 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     Navigator.of(context).pop(); // remove overflow menu
                     buttonClick(value[0]);
                   },
-                  // style: ButtonStyle(
-                  //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
-                  //     alignment: Alignment.centerLeft,
-                  //     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
-                  // ),
                   leading: buildIconButton(value[0], false),
                   title: Text(buttonText(value))
                 ),
@@ -683,7 +681,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
             IconButton(
               icon: buttonIcon(action),
-              color: Colors.white,
+              color: clickable ? Colors.white : Theme.of(context).colorScheme.onSurface,
               onPressed: () {
                 buttonClick(action);
               },

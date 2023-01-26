@@ -283,7 +283,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
     final Widget favicon = isNotEmptyBooru
       ? (tab.selectedBooru.value.type == "Favourites"
           ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-          : Favicon(tab.selectedBooru.value.faviconURL!))
+          : Favicon(tab.selectedBooru.value))
       : const Icon(CupertinoIcons.question, size: 18);
 
     return Container(

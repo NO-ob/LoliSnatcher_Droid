@@ -13,11 +13,13 @@ class InAppWebviewView extends StatefulWidget {
   const InAppWebviewView({
     required this.initialUrl,
     this.userAgent,
+    this.title,
     super.key,
   });
 
   final String initialUrl;
   final String? userAgent;
+  final String? title;
 
   @override
   State<InAppWebviewView> createState() => _InAppWebviewViewState();
@@ -79,7 +81,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('InAppWebview'),
+        title: Text(widget.title ?? 'InAppWebview'),
         actions: [
           WebviewNavigationControls(controller: controller),
           WebviewNavigationMenu(initialUrl: widget.initialUrl, controller: controller),

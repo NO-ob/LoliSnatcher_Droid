@@ -14,12 +14,6 @@ import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
-// move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
-// Future<void> writeBytesIsolate(Map<String, dynamic> map) async {
-//   await map['file'].writeAsBytes(map['bytes']);
-//   return;
-// }
-
 class ImageWriter {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   String? path = "";
@@ -71,18 +65,20 @@ class ImageWriter {
         headers: {
           'Accept': '*/*',
           'Content-Type': '*/*',
-          ...Tools.getFileCustomHeaders(booru,checkForReferer: true),
+          ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
         },
       );
 
+      final fileNameSplit = fileName.split(".");
+      final fileNameWoutExt = fileNameSplit.sublist(0, fileNameSplit.length - 1).join(".");
       if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
         await Directory(path!).create(recursive:true);
         await image.writeAsBytes(response.data, flush: true);
-        print("Image written: ${path!}$fileName");
         if (settingsHandler.jsonWrite){
-          File jsonFile = File("${path!}${fileName.split(".")[0]}.json");
+          File jsonFile = File("${path!}$fileNameWoutExt.json");
           await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
         }
+        print("Image written: ${path!}$fileName");
         item.isSnatched.value = true;
         if (settingsHandler.dbEnabled){
           await settingsHandler.dbHandler.updateBooruItem(item,"local");
@@ -100,14 +96,14 @@ class ImageWriter {
         print("Ext path override is: ${settingsHandler.extPathOverride}");
         var writeResp = await ServiceHandler.writeImage(
           response.data,
-          fileName.split(".")[0],
+          fileNameWoutExt,
           item.mediaType,
           item.fileExt,
           settingsHandler.extPathOverride,
         );
         // var writeResp = await compute(ServiceHandler.writeImageCompute, {
         //   "bytes": response.bodyBytes,
-        //   "fileName": fileName.split(".")[0],
+        //   "fileName": fileNameWoutExt,
         //   "mediaType": item.mediaType,
         //   "fileExt": item.fileExt,
         //   "extPathOverride": settingsHandler.extPathOverride
@@ -185,9 +181,6 @@ class ImageWriter {
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       await image.writeAsBytes(bytes, flush: true);
-
-      // move writing to separate thread, so the app won't hang while it saves - Leads to memory leak!
-      // await compute(writeBytesIsolate, {"file": image, "bytes": bytes});
     } catch (e){
       print("Image Writer Exception :: cache write bytes :: $e");
       return null;
@@ -257,6 +250,15 @@ class ImageWriter {
     }
   }
 
+  Future<String> getCachePathString(String fileURL, String typeFolder, {bool clearName = true, required String fileNameExtras}) async {
+    await setPaths();
+    String cachePath;
+    cachePath = "${cacheRootPath!}$typeFolder/";
+
+    String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
+    return cachePath+fileName;
+  }
+
   // calculates cache (total or by type) size and file count
   Future<Map<String,int>> getCacheStat(String? typeFolder) async {
     String cacheDirPath;
@@ -283,11 +285,15 @@ class ImageWriter {
     return {'fileNum': fileNum, 'totalSize': totalSize};
   }
 
-  // TODO move to isolate
+  // keep files that are 100mb of the cache limit
+  static const double fileSizeToKeep = 100 * 1024 * 1024;
+
+  // TODO move to isolate?
   Future<void> clearStaleCache() async {
-    if(settingsHandler.cacheDuration.inMilliseconds == 0) {
-      return;
-    }
+    final bool isStaleClearActive = settingsHandler.cacheDuration.inMilliseconds > 0;
+
+    final timeNow = DateTime.now().millisecondsSinceEpoch;
+    final timeMonthAgo = DateTime.now().subtract(const Duration(days: 30)).millisecondsSinceEpoch;
 
     String cacheDirPath;
     try {
@@ -301,9 +307,18 @@ class ImageWriter {
           if (file is File) {
             final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
             final DateTime lastModified = await file.lastModified();
-            final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < DateTime.now().millisecondsSinceEpoch;
-            if (isNotExcludedExt && isStale) {
-              await file.delete();
+            if(isStaleClearActive) {
+              final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
+              if (isNotExcludedExt && isStale) {
+                await file.delete();
+              }
+            } else {
+              // delete files that are too big and older than 30 days, even when stale cache clearing is disabled
+              final bool isTooBig = await file.length() > fileSizeToKeep;
+              final bool isMonthOld = lastModified.millisecondsSinceEpoch < timeMonthAgo;
+              if (isNotExcludedExt && isTooBig && isMonthOld) {
+                await file.delete();
+              }
             }
           }
         }
@@ -314,8 +329,10 @@ class ImageWriter {
     return;
   }
 
-  // TODO move to isolate
+  // TODO move to isolate?
   Future<void> clearCacheOverflow() async {
+    // never clear cache overflow if limit is 0
+    // TODO maybe check available space left and ignore that setting if not enough space?
     if(settingsHandler.cacheSize == 0) {
       return;
     }
@@ -344,8 +361,13 @@ class ImageWriter {
             final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
             final bool stillOverflows = toDeleteSize < overflowSize;
             if (isNotExcludedExt && stillOverflows) {
-              toDelete.add(file);
-              toDeleteSize += await file.length();
+              final fileSize = await file.length();
+              if (fileSize <= fileSizeToKeep) {
+                // if file is smaller than fileSizeToKeep, we delete it
+                // otherwise leave it to be deleted by clearStaleCache after a month or manually by user
+                toDelete.add(file);
+                toDeleteSize += fileSize;
+              }
             }
           }
         }
