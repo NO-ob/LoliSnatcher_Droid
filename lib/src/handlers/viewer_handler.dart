@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 // TODO media actions, video pause/mute... global controller
 
@@ -52,7 +54,7 @@ class ViewerHandler extends GetxController {
   RxBool displayAppbar = true.obs; // is gallery toolbar visible
   RxBool isZoomed = false.obs; // is current item zoomed in
   RxBool isLoaded = false.obs; // is current item loaded
-  Rx<PhotoViewControllerValue> viewState = Rx(const PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null)); // current view state
+  Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view state
   RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
   RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
 
@@ -98,6 +100,12 @@ class ViewerHandler extends GetxController {
           isLoaded.value = true;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
+          break;
+        case VideoViewerPlaceholder:
+        case UnknownViewerPlaceholder:
+          isLoaded.value = true;
+          isFullscreen.value = false;
+          viewState.value = null;
           break;
         default: break;
       }

@@ -29,7 +29,10 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryBarPosition = settingsHandler.galleryBarPosition;
     buttonOrder = settingsHandler.buttonOrder;
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
+
     shareAction = settingsHandler.shareAction;
+    if(!settingsHandler.hasHydrus && settingsHandler.shareAction == "Hydrus") shareAction = "Ask";
+
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
     autoPlay = settingsHandler.autoPlayEnabled;
@@ -82,6 +85,8 @@ class _GalleryPageState extends State<GalleryPage> {
     final Color baseColor = Theme.of(context).colorScheme.secondary;
     final Color oddItemColor = baseColor.withOpacity(0.25);
     final Color evenItemColor = baseColor.withOpacity(0.15);
+
+    final bool hasHydrus = settingsHandler.hasHydrus;
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -160,7 +165,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsDropdown(
                 value: shareAction,
-                items: settingsHandler.map['shareAction']!['options'],
+                items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
                 onChanged: (String? newValue){
                   setState((){
                     shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
@@ -173,18 +178,19 @@ class _GalleryPageState extends State<GalleryPage> {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Share Actions'),
+                        return SettingsDialog(
+                          title: const Text('Share Actions'),
                           contentItems: <Widget>[
-                            Text("- Ask - always ask what to share"),
-                            Text("- Post URL"),
-                            Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
-                            Text("- File - shares viewed file itself"),
-                            Text("- Hydrus - sends the post url to Hydrus for import"),
-                            Text(''),
-                            Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
-                            Text(''),
-                            Text("[Tip]: You can open Share Actions Menu by long pressing Share button.")
+                            const Text("- Ask - always ask what to share"),
+                            const Text("- Post URL"),
+                            const Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
+                            const Text("- File - shares viewed file itself"),
+                            if(hasHydrus)
+                              const Text("- Hydrus - sends the post url to Hydrus for import"),
+                            const Text(''),
+                            const Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
+                            const Text(''),
+                            const Text("[Tip]: You can open Share Actions Menu by long pressing Share button.")
                           ],
                         );
                       }

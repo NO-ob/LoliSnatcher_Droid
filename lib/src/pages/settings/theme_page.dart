@@ -69,7 +69,7 @@ class _ThemePageState extends State<ThemePage> {
   }
 
   //called when page is closed or to debounce theme change, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<bool> _onWillPop({bool withRestate = false}) async {
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
     settingsHandler.useMaterial3.value = useMaterial3;
@@ -92,11 +92,11 @@ class _ThemePageState extends State<ThemePage> {
     } else {
       settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
-    bool result = await settingsHandler.saveSettings(restate: false);
+    bool result = await settingsHandler.saveSettings(restate: withRestate);
     return result;
   }
 
-  void updateTheme() async {
+  void updateTheme({bool withRestate = false}) async {
     // instantly do local restate
     setState(() {});
 
@@ -104,7 +104,7 @@ class _ThemePageState extends State<ThemePage> {
     Debounce.debounce(
       tag: 'theme_change',
       callback: () async {
-        await _onWillPop();
+        await _onWillPop(withRestate: withRestate);
         setState(() {});
       },
       duration: const Duration(milliseconds: 500),
@@ -269,7 +269,7 @@ class _ThemePageState extends State<ThemePage> {
                   items: List<String>.from(settingsHandler.map['theme']!['options'].map((e) => e.name).toList()),
                   onChanged: (String? newValue) {
                     theme = settingsHandler.map['theme']!['options'].where((e) => e.name == newValue).toList()[0];
-                    updateTheme();
+                    updateTheme(withRestate: true);
                   },
                   title: 'Theme',
                   itemBuilder: (String value) {

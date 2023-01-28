@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
@@ -173,130 +174,131 @@ class _DebugPageState extends State<DebugPage> {
                 },
               ),
 
-              const SettingsButton(name: '', enabled: false),
+              if (kDebugMode) const SettingsButton(name: '', enabled: false),
 
-              TextExpander(
-                title: 'Vibration',
-                bodyList: [
-                  const SettingsButton(
-                    name: 'Vibration tests',
-                  ),
-                  SettingsButton(
-                    name: 'Duration',
-                    subtitle: Row(
-                      children: [
-                        ElevatedButton(
-                          child: const Text('-1'),
-                          onPressed: () {
-                            setState(() {
-                              if ((vDuration - 1) <= 0) {
-                                vDuration = 0;
-                              } else {
-                                vDuration -= 1;
-                              }
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Slider(
-                            value: vDuration,
-                            onChanged: (newValue) {
+              if (kDebugMode)
+                TextExpander(
+                  title: 'Vibration',
+                  bodyList: [
+                    const SettingsButton(
+                      name: 'Vibration tests',
+                    ),
+                    SettingsButton(
+                      name: 'Duration',
+                      subtitle: Row(
+                        children: [
+                          ElevatedButton(
+                            child: const Text('-1'),
+                            onPressed: () {
                               setState(() {
-                                vDuration = newValue;
+                                if ((vDuration - 1) <= 0) {
+                                  vDuration = 0;
+                                } else {
+                                  vDuration -= 1;
+                                }
                               });
                             },
-                            min: 0,
-                            max: 500,
-                            divisions: 500,
-                            label: '$vDuration',
                           ),
-                        ),
-                        ElevatedButton(
-                          child: const Text('+1'),
-                          onPressed: () {
-                            setState(() {
-                              if ((vDuration + 1) >= 500) {
-                                vDuration = 500;
-                              } else {
-                                vDuration += 1;
-                              }
-                            });
-                          },
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text('$vDuration'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SettingsButton(
-                    name: 'Amplitude',
-                    subtitle: Row(
-                      children: [
-                        ElevatedButton(
-                          child: const Text('-1'),
-                          onPressed: () {
-                            setState(() {
-                              if ((vAmplitude - 1) <= -1) {
-                                vAmplitude = -1;
-                              } else {
-                                vAmplitude -= 1;
-                              }
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Slider(
-                            value: vAmplitude,
-                            onChanged: (newValue) {
+                          Expanded(
+                            child: Slider(
+                              value: vDuration,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  vDuration = newValue;
+                                });
+                              },
+                              min: 0,
+                              max: 500,
+                              divisions: 500,
+                              label: '$vDuration',
+                            ),
+                          ),
+                          ElevatedButton(
+                            child: const Text('+1'),
+                            onPressed: () {
                               setState(() {
-                                vAmplitude = newValue;
+                                if ((vDuration + 1) >= 500) {
+                                  vDuration = 500;
+                                } else {
+                                  vDuration += 1;
+                                }
                               });
                             },
-                            min: -1,
-                            max: 255,
-                            divisions: 256,
-                            label: '$vAmplitude',
                           ),
-                        ),
-                        ElevatedButton(
-                          child: const Text('+1'),
-                          onPressed: () {
-                            setState(() {
-                              if ((vAmplitude + 1) >= 255) {
-                                vAmplitude = 255;
-                              } else {
-                                vAmplitude += 1;
-                              }
-                            });
-                          },
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Text('$vAmplitude'),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text('$vDuration'),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SettingsToggle(
-                    value: vFlutterway,
-                    onChanged: (newValue) {
-                      setState(() {
-                        vFlutterway = newValue;
-                      });
-                    },
-                    title: 'Flutterway',
-                  ),
-                  SettingsButton(
-                    name: 'Vibrate',
-                    action: () {
-                      print('Vibrate $vDuration $vAmplitude');
-                      ServiceHandler.vibrate(flutterWay: vFlutterway, duration: vDuration.round(), amplitude: vAmplitude.round());
-                    },
-                  ),
-                ],
-              ),
+                    SettingsButton(
+                      name: 'Amplitude',
+                      subtitle: Row(
+                        children: [
+                          ElevatedButton(
+                            child: const Text('-1'),
+                            onPressed: () {
+                              setState(() {
+                                if ((vAmplitude - 1) <= -1) {
+                                  vAmplitude = -1;
+                                } else {
+                                  vAmplitude -= 1;
+                                }
+                              });
+                            },
+                          ),
+                          Expanded(
+                            child: Slider(
+                              value: vAmplitude,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  vAmplitude = newValue;
+                                });
+                              },
+                              min: -1,
+                              max: 255,
+                              divisions: 256,
+                              label: '$vAmplitude',
+                            ),
+                          ),
+                          ElevatedButton(
+                            child: const Text('+1'),
+                            onPressed: () {
+                              setState(() {
+                                if ((vAmplitude + 1) >= 255) {
+                                  vAmplitude = 255;
+                                } else {
+                                  vAmplitude += 1;
+                                }
+                              });
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text('$vAmplitude'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SettingsToggle(
+                      value: vFlutterway,
+                      onChanged: (newValue) {
+                        setState(() {
+                          vFlutterway = newValue;
+                        });
+                      },
+                      title: 'Flutterway',
+                    ),
+                    SettingsButton(
+                      name: 'Vibrate',
+                      action: () {
+                        print('Vibrate $vDuration $vAmplitude');
+                        ServiceHandler.vibrate(flutterWay: vFlutterway, duration: vDuration.round(), amplitude: vAmplitude.round());
+                      },
+                    ),
+                  ],
+                ),
 
               const SettingsButton(name: '', enabled: false),
 
@@ -321,24 +323,21 @@ class _DebugPageState extends State<DebugPage> {
                 icon: const Icon(Icons.cookie_outlined),
                 action: () async {
                   await CookieManager.instance().deleteAllCookies();
-                }
+                },
               ),
 
               const SettingsButton(name: '', enabled: false),
 
-
               SettingsButton(
                 name: 'Get Session String',
+                icon: const Icon(Icons.copy),
                 action: () async {
                   final str = SearchHandler.instance.getBackupString() ?? '';
                   await Clipboard.setData(ClipboardData(text: str));
                   FlashElements.showSnackbar(
                     context: context,
                     duration: const Duration(seconds: 2),
-                    title: const Text(
-                      "Copied to clipboard!",
-                      style: TextStyle(fontSize: 20)
-                    ),
+                    title: const Text("Copied to clipboard!", style: TextStyle(fontSize: 20)),
                     content: Text(
                       str,
                       style: const TextStyle(fontSize: 16),
@@ -346,53 +345,53 @@ class _DebugPageState extends State<DebugPage> {
                     leadingIcon: Icons.copy,
                     sideColor: Colors.green,
                   );
-                }
+                },
               ),
               SettingsButton(
                 name: 'Set Session String',
+                icon: const Icon(Icons.restore),
                 action: () async {
-                  await showDialog(context: context, builder: (_) {
-                    return AlertDialog(
-                      content: Column(
-                        children: [
-                          SettingsTextInput(
-                            controller: sessionStrController,
-                            title: 'Session string',
-                            onlyInput: true,
+                  await showDialog(
+                    context: context,
+                    builder: (_) {
+                      return AlertDialog(
+                        content: Column(
+                          children: [
+                            SettingsTextInput(
+                              controller: sessionStrController,
+                              title: 'Session string',
+                              onlyInput: true,
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          const CancelButton(),
+                          ElevatedButton(
+                            onPressed: () async {
+                              if (sessionStrController.text.isNotEmpty) {
+                                SearchHandler.instance.replaceTabs(sessionStrController.text);
+
+                                FlashElements.showSnackbar(
+                                  context: context,
+                                  duration: const Duration(seconds: 2),
+                                  title: const Text("Restored session from string!", style: TextStyle(fontSize: 20)),
+                                  content: Text(
+                                    sessionStrController.text,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  leadingIcon: Icons.copy,
+                                  sideColor: Colors.green,
+                                );
+                              }
+                            },
+                            child: const Text('OK'),
                           ),
                         ],
-                      ),
-                      actions: [
-                        const CancelButton(),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if(sessionStrController.text.isNotEmpty) {
-                              SearchHandler.instance.replaceTabs(sessionStrController.text);
-
-                              FlashElements.showSnackbar(
-                                context: context,
-                                duration: const Duration(seconds: 2),
-                                title: const Text(
-                                  "Restored session from string!",
-                                  style: TextStyle(fontSize: 20)
-                                ),
-                                content: Text(
-                                  sessionStrController.text,
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                leadingIcon: Icons.copy,
-                                sideColor: Colors.green,
-                              );
-                            }
-                          },
-                          child: const Text('OK'),
-                        ),
-                      ],
-                    );
-                  });
-                }
+                      );
+                    },
+                  );
+                },
               ),
-
 
               // dummy button to use at least one icon from fontawesome regular and solid packs (brands pack is used in discord button)
               // this is required because flutter doesn't tree-shake resources correctly if they are not used at all

@@ -40,7 +40,7 @@ class ImageViewerState extends State<ImageViewer> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
 
-  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
+  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
   bool isStopped = false, isFromCache = false, isLoaded = false, isViewed = false, isZoomed = false;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   List<String> stopReason = [];
@@ -50,7 +50,7 @@ class ImageViewerState extends State<ImageViewer> {
   ImageStream? imageStream;
   String imageFolder = 'media';
   int? widthLimit;
-  CancelToken? _dioCancelToken;
+  CancelToken? cancelToken;
 
   StreamSubscription? noScaleListener, indexListener;
 
@@ -83,15 +83,15 @@ class ImageViewerState extends State<ImageViewer> {
     }
   }
 
-  void _onBytesAdded(int received, int? total) {
-    _received.value = received;
-    if (total != null) {
-      _total.value = total;
+  void onBytesAdded(int receivedNew, int? totalNew) {
+    received.value = receivedNew;
+    if (totalNew != null) {
+      total.value = totalNew;
     }
-    onSize(total);
+    onSize(totalNew);
   }
 
-  void _onError(Object error) {
+  void onError(Object error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       //
@@ -162,7 +162,7 @@ class ImageViewerState extends State<ImageViewer> {
 
     isStopped = false;
 
-    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
+    startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     final MediaQueryData mQuery = NavigationHandler.instance.navigatorKey.currentContext!.mediaQuery;
     widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
@@ -182,9 +182,9 @@ class ImageViewerState extends State<ImageViewer> {
         }
       },
       onChunk: (event) {
-        _onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
+        onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
       },
-      onError: (e, stack) => _onError(e),
+      onError: (e, stack) => onError(e),
     );
     imageStream!.addListener(imageListener!);
 
@@ -193,10 +193,10 @@ class ImageViewerState extends State<ImageViewer> {
 
   Future<ImageProvider> getImageProvider() async {
     ImageProvider provider;
-    _dioCancelToken = CancelToken();
+    cancelToken = CancelToken();
     provider = CustomNetworkImage(
       widget.booruItem.fileURL,
-      cancelToken: _dioCancelToken,
+      cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(
         searchHandler.currentBooru,
         checkForReferer: true,
@@ -204,7 +204,7 @@ class ImageViewerState extends State<ImageViewer> {
       withCache: settingsHandler.mediaCache,
       cacheFolder: imageFolder,
       fileNameExtras: widget.booruItem.fileNameExtras,
-      onError: _onError,
+      onError: onError,
       onCacheDetected: (bool didDetectCache) {
         if (didDetectCache) {
           isFromCache = true;
@@ -228,10 +228,10 @@ class ImageViewerState extends State<ImageViewer> {
   void killLoading(List<String> reason) {
     disposables();
 
-    _total.value = 0;
-    _received.value = 0;
+    total.value = 0;
+    received.value = 0;
 
-    _startedAt.value = 0;
+    startedAt.value = 0;
 
     isLoaded = false;
     isFromCache = false;
@@ -261,32 +261,32 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   void disposables() {
-    // evict image from memory cache it it's media type or has scaling enabled
-    if (imageFolder == 'media' || (!widget.booruItem.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value)) {
-      mainProvider?.evict();
-      mainProvider = null;
-    }
-    // mainProvider?.evict().then((bool success) {
-    //   if(success) {
-    //     ServiceHandler.displayToast('main image evicted');
-    //     print('main image evicted');
-    //   } else {
-    //     ServiceHandler.displayToast('main image eviction failed');
-    //     print('main image eviction failed');
-    //   }
-    // });
-
-    noScaleListener?.cancel();
-    noScaleListener = null;
-
     imageStream?.removeListener(imageListener!);
     imageStream = null;
     imageListener = null;
 
-    if (!(_dioCancelToken?.isCancelled ?? true)) {
-      _dioCancelToken?.cancel();
+    if (!(cancelToken?.isCancelled ?? true)) {
+      cancelToken?.cancel();
     }
-    _dioCancelToken = null;
+    cancelToken = null;
+
+    // evict image from memory cache it it's media type or it's an animation and gifsAsThumbnails is disabled
+    if (imageFolder == 'media' || (!widget.booruItem.isAnimation || !settingsHandler.gifsAsThumbnails)) {
+      mainProvider?.evict();
+      // mainProvider?.evict().then((bool success) {
+      //   if(success) {
+      //     ServiceHandler.displayToast('main image evicted');
+      //     print('main image evicted');
+      //   } else {
+      //     ServiceHandler.displayToast('main image eviction failed');
+      //     print('main image eviction failed');
+      //   }
+      // });
+    }
+    mainProvider = null;
+
+    noScaleListener?.cancel();
+    noScaleListener = null;
   }
 
   // debug functions
@@ -358,9 +358,9 @@ class ImageViewerState extends State<ImageViewer> {
               isStopped: isStopped,
               stopReasons: stopReason,
               isViewed: isViewed,
-              total: _total,
-              received: _received,
-              startedAt: _startedAt,
+              total: total,
+              received: received,
+              startedAt: startedAt,
               startAction: () {
                 if (isTooBig == 1) {
                   isTooBig = 2;
@@ -392,7 +392,7 @@ class ImageViewerState extends State<ImageViewer> {
                           },
                           errorBuilder: (context, error, stackTrace) {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              _onError(error);
+                              onError(error);
                             });
                             return const SizedBox.shrink();
                           },

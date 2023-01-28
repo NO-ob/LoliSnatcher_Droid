@@ -85,7 +85,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
       callback: () {
         updateState();
       },
-      duration: Duration(milliseconds: isDone ? 0 : 100),
+      duration: Duration(milliseconds: isDone ? 0 : 250),
     );
   }
 

@@ -295,9 +295,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void tagStuff() {
     input = searchHandler.searchTextController.text;
     if (searchHandler.currentBooru.type == "Hydrus"){
-      splitInput = input.split(",");
+      splitInput = input.trim().split(",");
     } else {
-      splitInput = input.split(" ");
+      splitInput = input.trim().split(" ");
     }
     startIndex = 0;
     setSelectedTag(input);
@@ -641,7 +641,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               ...getTagsChips(),
-                              if(splitInput.isNotEmpty) ...[
+                              if(input.isNotEmpty && splitInput.isNotEmpty) ...[
                                 if(splitInput.length < 3)
                                   const SizedBox(width: 120)
                                 else

@@ -754,16 +754,15 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
           _startHideTimer();
         },
-        barHeight: _hideStuff ? 2 : 5,
-        handleHeight: _hideStuff ? 0 : 6,
+        barHeight: 5,
+        handleHeight: _hideStuff ? 3 : 6,
         drawShadow: true,
-        colors: chewieController.materialProgressColors ??
-            ChewieProgressColors(
-              playedColor: Theme.of(context).colorScheme.secondary,
-              handleColor: Theme.of(context).colorScheme.secondary,
-              bufferedColor: Theme.of(context).backgroundColor,
-              backgroundColor: Theme.of(context).disabledColor,
-            ),
+        colors: ChewieProgressColors(
+          playedColor: (chewieController.materialProgressColors?.playedPaint.color ?? Theme.of(context).colorScheme.secondary).withOpacity(_hideStuff ? 0.66 : 1),
+          handleColor: (chewieController.materialProgressColors?.handlePaint.color ?? Theme.of(context).colorScheme.secondary).withOpacity(_hideStuff ? 0.66 : 1),
+          bufferedColor: chewieController.materialProgressColors?.bufferedPaint.color ?? Theme.of(context).colorScheme.surface,
+          backgroundColor: chewieController.materialProgressColors?.backgroundPaint.color ?? Theme.of(context).disabledColor,
+        ),
       )
     );
   }

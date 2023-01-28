@@ -25,10 +25,10 @@ class Favicon extends StatefulWidget {
 
 class _FaviconState extends State<Favicon> {
   bool isFailed = false, isLoaded = false, manualReloadTapped = false;
-  CancelToken? _dioCancelToken;
+  CancelToken? cancelToken;
   ImageProvider? mainProvider;
-  ImageStream? _imageStream;
-  ImageStreamListener? _imageListener;
+  ImageStream? imageStream;
+  ImageStreamListener? imageListener;
   String? errorCode;
 
   static const double iconSize = 20;
@@ -43,7 +43,7 @@ class _FaviconState extends State<Favicon> {
   }
 
   Future<ImageProvider> getImageProvider() async {
-    _dioCancelToken ??= CancelToken();
+    cancelToken ??= CancelToken();
     return ResizeImage(
       CustomNetworkImage(
         widget.booru.faviconURL!,
@@ -51,17 +51,17 @@ class _FaviconState extends State<Favicon> {
         headers: await Tools.getFileCustomHeaders(widget.booru),
         cacheFolder: 'favicons',
         fileNameExtras: 'favicon_',
-        cancelToken: _dioCancelToken,
+        cancelToken: cancelToken,
         sendTimeout: 5000,
         receiveTimeout: 5000,
-        onError: _onError,
+        onError: onError,
       ),
       width: 200,
       height: 200,
     );
   }
 
-  void _onError(Object error) async {
+  void onError(Object error) async {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       //
@@ -108,9 +108,9 @@ class _FaviconState extends State<Favicon> {
 
     mainProvider ??= await getImageProvider();
 
-    _imageStream?.removeListener(_imageListener!);
-    _imageStream = mainProvider!.resolve(const ImageConfiguration());
-    _imageListener = ImageStreamListener(
+    imageStream?.removeListener(imageListener!);
+    imageStream = mainProvider!.resolve(const ImageConfiguration());
+    imageListener = ImageStreamListener(
       (imageInfo, syncCall) {
         isLoaded = true;
         if (!syncCall) {
@@ -119,10 +119,10 @@ class _FaviconState extends State<Favicon> {
       },
       onError: (e, stack) {
         Logger.Inst().log("Failed to load favicon: ${widget.booru.faviconURL}", "Favicon", "build", null); // LogTypes.imageLoadingError);
-        _onError(e);
+        onError(e);
       },
     );
-    _imageStream!.addListener(_imageListener!);
+    imageStream!.addListener(imageListener!);
 
     updateState();
   }
@@ -134,15 +134,16 @@ class _FaviconState extends State<Favicon> {
   }
 
   void disposables() {
-    mainProvider = null;
-    _imageStream?.removeListener(_imageListener!);
-    _imageStream = null;
-    _imageListener = null;
+    imageStream?.removeListener(imageListener!);
+    imageStream = null;
+    imageListener = null;
 
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)) {
-      _dioCancelToken?.cancel();
+    mainProvider = null;
+
+    if (!(cancelToken != null && cancelToken!.isCancelled)) {
+      cancelToken?.cancel();
     }
-    _dioCancelToken = null;
+    cancelToken = null;
   }
 
   @override

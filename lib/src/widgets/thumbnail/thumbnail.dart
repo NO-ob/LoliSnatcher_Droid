@@ -42,13 +42,13 @@ class _ThumbnailState extends State<Thumbnail> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
 
-  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
-  int _restartedCount = 0;
+  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
+  int restartedCount = 0;
   bool? isFromCache;
   // isFailed - loading error, isVisible - controls fade in
   bool isFailed = false, isLoaded = false, isLoadedExtra = false, failedRendering = false;
   String? errorCode;
-  CancelToken? _dioCancelToken;
+  CancelToken? cancelToken;
 
   bool? isThumbQuality;
   late String thumbURL;
@@ -85,17 +85,17 @@ class _ThumbnailState extends State<Thumbnail> {
     //   return ResizeImage(MemoryImageTest(bytes, imageUrl: url), width: 10);
     // }
 
-    _dioCancelToken ??= CancelToken();
+    cancelToken ??= CancelToken();
     ImageProvider provider = CustomNetworkImage(
       isMain ? thumbURL : widget.item.thumbnailURL,
-      cancelToken: _dioCancelToken,
+      cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       withCache: settingsHandler.thumbnailCache,
       cacheFolder: isMain ? thumbFolder : 'thumbnails',
       fileNameExtras: widget.item.fileNameExtras,
-      sendTimeout: 20000,
-      receiveTimeout: 20000,
-      onError: isMain ? _onError : null,
+      sendTimeout: widget.isStandalone ? 20000 : null,
+      receiveTimeout: widget.isStandalone ? 20000 : null,
+      onError: isMain ? onError : null,
       onCacheDetected: (bool didDetectCache) {
         if (isMain) {
           isFromCache = didDetectCache;
@@ -159,23 +159,23 @@ class _ThumbnailState extends State<Thumbnail> {
     );
   }
 
-  void _onBytesAdded(int received, int? total) {
-    _received.value = received;
-    _total.value = total ?? 0;
+  void onBytesAdded(int receivedNew, int? totalNew) {
+    received.value = receivedNew;
+    total.value = totalNew ?? 0;
   }
 
-  void _onError(Object error, {bool delayed = false}) {
+  void onError(Object error, {bool delayed = false}) {
     /// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
     } else {
-      if (_restartedCount < 5) {
+      if (restartedCount < 5) {
         // attempt to reload 5 times with a second delay
         Debounce.debounce(
           tag: 'thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}',
           callback: () {
             restartLoading();
-            _restartedCount++;
+            restartedCount++;
           },
           duration: const Duration(seconds: 1),
         );
@@ -188,7 +188,7 @@ class _ThumbnailState extends State<Thumbnail> {
           errorCode = null;
         }
         if (delayed) {
-          // _onError can happen while widget restates, which will cause an exception, this will delay the restate until the other one is done
+          // onError can happen while widget restates, which will cause an exception, this will delay the restate until the other one is done
           WidgetsBinding.instance.addPostFrameCallback((_) {
             updateState();
           });
@@ -208,7 +208,7 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   void selectThumbProvider() {
-    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
+    startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
     final bool isGifSampleNotAllowed =
@@ -233,14 +233,14 @@ class _ThumbnailState extends State<Thumbnail> {
     Debounce.debounce(
       tag: 'thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}',
       callback: () {
-        startDownloading(isThumbQuality);
+        startDownloading();
       },
       duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
     );
     return;
   }
 
-  void startDownloading(isThumbQuality) async {
+  void startDownloading() async {
     final bool useExtra = isThumbQuality == false && !widget.item.isHated.value;
 
     mainProvider = await getImageProvider(true);
@@ -254,12 +254,14 @@ class _ThumbnailState extends State<Thumbnail> {
         }
       },
       onChunk: (event) {
-        _onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
+        onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
       },
       onError: (e, stack) {
-        failedRendering = true;
+        if (e is! DioError) {
+          failedRendering = true;
+        }
         Logger.Inst().log('Error loading thumbnail: ${widget.item.sampleURL} ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
-        _onError(e, delayed: true);
+        onError(e, delayed: true);
       },
     );
     mainImageStream!.addListener(mainImageListener!);
@@ -276,7 +278,9 @@ class _ThumbnailState extends State<Thumbnail> {
           }
         },
         onError: (e, stack) {
-          failedRendering = true;
+          if (e is! DioError) {
+            failedRendering = true;
+          }
           Logger.Inst().log('Error loading extra thumbnail: ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
         },
       );
@@ -294,9 +298,9 @@ class _ThumbnailState extends State<Thumbnail> {
 
     disposables();
 
-    _total.value = 0;
-    _received.value = 0;
-    _startedAt.value = 0;
+    total.value = 0;
+    received.value = 0;
+    startedAt.value = 0;
 
     isLoaded = false;
     isLoadedExtra = false;
@@ -335,6 +339,18 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   void disposables() {
+    mainImageStream?.removeListener(mainImageListener!);
+    mainImageListener = null;
+    mainImageStream = null;
+    extraImageStream?.removeListener(extraImageListener!);
+    extraImageListener = null;
+    extraImageStream = null;
+
+    if (!(cancelToken?.isCancelled ?? true)) {
+      cancelToken?.cancel();
+    }
+    cancelToken = null;
+
     // evict from memory cache only when in grid
     if (widget.isStandalone) {
       mainProvider?.evict();
@@ -343,20 +359,8 @@ class _ThumbnailState extends State<Thumbnail> {
       extraProvider = null;
     }
 
-    mainImageStream?.removeListener(mainImageListener!);
-    mainImageListener = null;
-    mainImageStream = null;
-    extraImageStream?.removeListener(extraImageListener!);
-    extraImageListener = null;
-    extraImageStream = null;
-
     Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
     Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
-
-    if (!(_dioCancelToken?.isCancelled ?? true)) {
-      _dioCancelToken?.cancel();
-    }
-    _dioCancelToken = null;
   }
 
   Widget renderImages(BuildContext context) {
@@ -364,14 +368,15 @@ class _ThumbnailState extends State<Thumbnail> {
     final double iconSize = (screenWidth / columnsCount()) * 0.75;
 
     final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
+    final bool useExtra = isThumbQuality == false && !widget.item.isHated.value;
 
     return Stack(
       alignment: Alignment.center,
       children: [
-        if (isThumbQuality == false && !widget.item.isHated.value) // fetch thumbnail from network while loading a sample
+        if (useExtra) // fetch small low quality thumbnail while loading a sample
           AnimatedSwitcher(
             // fade in image
-            duration: Duration(milliseconds: widget.isStandalone ? 300 : 0),
+            duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
             child: extraProvider != null
                 ? ImageFiltered(
                     enabled: widget.item.isHated.value,
@@ -448,11 +453,11 @@ class _ThumbnailState extends State<Thumbnail> {
             isFromCache: isFromCache,
             isDone: isLoaded && !isFailed,
             isFailed: isFailed,
-            total: _total,
-            received: _received,
-            startedAt: _startedAt,
+            total: total,
+            received: received,
+            startedAt: startedAt,
             restartAction: () {
-              _restartedCount = 0;
+              restartedCount = 0;
               restartLoading();
             },
             errorCode: errorCode,
@@ -484,7 +489,11 @@ class _ThumbnailState extends State<Thumbnail> {
         placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
           // keep building the image since the images can be visible in the
           // background of the image gallery
-          return child;
+          return Thumbnail(
+            item: widget.item,
+            index: widget.index,
+            isStandalone: false,
+          );
         },
         child: renderImages(context),
       );

@@ -106,7 +106,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       return;
     }
 
-    if(loading) {
+    if (loading) {
       return;
     }
     loading = true;
@@ -154,7 +154,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       }
     }
 
-    viewScale = viewerHandler.viewState.value.scale ?? 1;
+    viewScale = viewerHandler.viewState.value?.scale ?? 1;
     screenToImageRatio = viewScale == 1 ? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight)) : viewScale;
 
     pageOffset = (((widget.pageController?.page ?? 0) * 10000).toInt() % 10000) / 10000;
@@ -167,8 +167,8 @@ class _NotesRendererState extends State<NotesRenderer> {
     offsetY = (screenHeight / 2) - (imageHeight / 2 * screenToImageRatio);
     offsetY = isVertical ? (offsetY + (pageOffset * screenHeight)) : offsetY;
 
-    viewOffsetX = viewerHandler.viewState.value.position.dx;
-    viewOffsetY = viewerHandler.viewState.value.position.dy;
+    viewOffsetX = viewerHandler.viewState.value?.position.dx ?? 0;
+    viewOffsetY = viewerHandler.viewState.value?.position.dy ?? 0;
   }
 
   @override

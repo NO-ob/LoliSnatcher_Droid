@@ -44,20 +44,18 @@ class VideoViewerState extends State<VideoViewer> {
   VideoPlayerController? videoController;
   ChewieController? chewieController;
 
-  // VideoPlayerValue _latestValue;
-  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
-  int _lastViewedIndex = -1;
+  // VideoPlayerValue latestValue;
+  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
+  int lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false;
   List<String> stopReason = [];
 
   StreamSubscription? indexListener;
 
-  CancelToken? _cancelToken, _sizeCancelToken;
+  CancelToken? cancelToken, sizeCancelToken;
   DioDownloader? client, sizeClient;
-  File? _video;
-
-  Color get accentColor => Theme.of(context).colorScheme.secondary;
+  File? video;
 
   bool get isVideoInited => videoController?.value.isInitialized ?? false;
 
@@ -72,9 +70,9 @@ class VideoViewerState extends State<VideoViewer> {
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<void> _downloadVideo() async {
+  Future<void> downloadVideo() async {
     isStopped = false;
-    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
+    startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     if (!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
@@ -101,16 +99,16 @@ class VideoViewerState extends State<VideoViewer> {
         return;
     }
 
-    _cancelToken = CancelToken();
+    cancelToken = CancelToken();
     client = DioDownloader(
       widget.booruItem.fileURL,
       headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-      cancelToken: _cancelToken,
-      onProgress: _onBytesAdded,
-      onEvent: _onEvent,
-      onError: _onError,
+      cancelToken: cancelToken,
+      onProgress: onBytesAdded,
+      onEvent: onEvent,
+      onError: onError,
       onDoneFile: (File file) async {
-        _video = file;
+        video = file;
         // save video from cache, but restate only if player is not initialized yet
         if (!isVideoInited) {
           unawaited(initPlayer());
@@ -126,11 +124,11 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> getSize() async {
-    _sizeCancelToken = CancelToken();
+    sizeCancelToken = CancelToken();
     sizeClient = DioDownloader(widget.booruItem.fileURL,
         headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-        cancelToken: _sizeCancelToken,
-        onEvent: _onEvent,
+        cancelToken: sizeCancelToken,
+        onEvent: onEvent,
         fileNameExtras: widget.booruItem.fileNameExtras);
     unawaited(sizeClient!.runRequestSize());
     return;
@@ -154,13 +152,13 @@ class VideoViewerState extends State<VideoViewer> {
     }
   }
 
-  void _onBytesAdded(int received, int total) {
-    _received.value = received;
-    _total.value = total;
-    onSize(total);
+  void onBytesAdded(int receivedNew, int totalNew) {
+    received.value = receivedNew;
+    total.value = totalNew;
+    onSize(totalNew);
   }
 
-  void _onEvent(String event, dynamic data) {
+  void onEvent(String event, dynamic data) {
     switch (event) {
       case 'loaded':
         //
@@ -179,7 +177,7 @@ class VideoViewerState extends State<VideoViewer> {
     updateState();
   }
 
-  void _onError(Exception error) {
+  void onError(Exception error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       // print('Canceled by user: $imageURL | $error');
@@ -239,16 +237,16 @@ class VideoViewerState extends State<VideoViewer> {
       List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
     } else {
-      _downloadVideo();
+      downloadVideo();
     }
   }
 
   void killLoading(List<String> reason) {
     disposables();
 
-    _total.value = 0;
-    _received.value = 0;
-    _startedAt.value = 0;
+    total.value = 0;
+    received.value = 0;
+    startedAt.value = 0;
 
     isFromCache = false;
     isStopped = true;
@@ -258,7 +256,7 @@ class VideoViewerState extends State<VideoViewer> {
 
     resetZoom();
 
-    _video = null;
+    video = null;
 
     updateState();
   }
@@ -271,7 +269,7 @@ class VideoViewerState extends State<VideoViewer> {
     indexListener = null;
 
     viewerHandler.removeViewed(widget.key);
-    
+
     super.dispose();
   }
 
@@ -286,17 +284,18 @@ class VideoViewerState extends State<VideoViewer> {
     videoController?.setVolume(0);
     videoController?.pause();
     chewieController?.dispose();
-    videoController?.removeListener(_updateVideoState);
+    videoController?.removeListener(updateVideoState);
     videoController?.dispose();
     chewieController = null;
     videoController = null;
 
-    if (!(_cancelToken != null && _cancelToken!.isCancelled)) {
-      _cancelToken?.cancel();
+    if (!(cancelToken != null && cancelToken!.isCancelled)) {
+      cancelToken?.cancel();
     }
-    if (!(_sizeCancelToken != null && _sizeCancelToken!.isCancelled)) {
-      _sizeCancelToken?.cancel();
+    if (!(sizeCancelToken != null && sizeCancelToken!.isCancelled)) {
+      sizeCancelToken?.cancel();
     }
+
     disposeClient();
   }
 
@@ -341,10 +340,10 @@ class VideoViewerState extends State<VideoViewer> {
     scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
-  void _updateVideoState() {
+  void updateVideoState() {
     // print(videoController?.value);
     // setState(() {
-    //   _latestValue = videoController?.value;
+    //   latestValue = videoController?.value;
     // });
 
     if (chewieController == null) return;
@@ -382,11 +381,10 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   Future<void> initPlayer() async {
-    // Start from cache if was already cached or only caching is allowed
-    if (_video != null) {
-      // if (settingsHandler.mediaCache || _video != null) {
+    if (video != null) {
+      // Start from cache if was already cached or only caching is allowed
       videoController = VideoPlayerController.file(
-        _video!,
+        video!,
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
       );
     } else {
@@ -399,7 +397,10 @@ class VideoViewerState extends State<VideoViewer> {
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
     await Future.wait([videoController!.initialize()]);
-    videoController!.addListener(_updateVideoState);
+    videoController!.addListener(updateVideoState);
+
+    Color accentColor = Theme.of(context).colorScheme.secondary;
+    Color darkenedAceentColor = Color.lerp(accentColor, Colors.black, 0.5)!;
 
     // Player wrapper to allow controls, looping...
     chewieController = ChewieController(
@@ -419,14 +420,14 @@ class VideoViewerState extends State<VideoViewer> {
       // ),
       materialProgressColors: ChewieProgressColors(
         playedColor: accentColor,
-        handleColor: accentColor,
+        handleColor: darkenedAceentColor,
         backgroundColor: Colors.grey,
         bufferedColor: Colors.white.withOpacity(0.66),
       ),
       systemOverlaysOnEnterFullScreen: [],
       systemOverlaysAfterFullScreen: SystemUiOverlay.values,
       errorBuilder: (context, errorMessage) {
-        _onError(Exception(errorMessage));
+        onError(Exception(errorMessage));
 
         return Center(
           child: Text(errorMessage, style: const TextStyle(color: Colors.white)),
@@ -487,7 +488,7 @@ class VideoViewerState extends State<VideoViewer> {
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     int viewedIndex = searchHandler.viewedIndex.value;
-    bool needsRestart = _lastViewedIndex != viewedIndex;
+    bool needsRestart = lastViewedIndex != viewedIndex;
 
     if (isVideoInited) {
       if (isViewed) {
@@ -508,7 +509,7 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     if (needsRestart) {
-      _lastViewedIndex = viewedIndex;
+      lastViewedIndex = viewedIndex;
     }
 
     double aspectRatio = videoController?.value.aspectRatio ?? 16 / 9;
@@ -548,9 +549,9 @@ class VideoViewerState extends State<VideoViewer> {
                       isStopped: isStopped,
                       stopReasons: stopReason,
                       isViewed: isViewed,
-                      total: _total,
-                      received: _received,
-                      startedAt: _startedAt,
+                      total: total,
+                      received: received,
+                      startedAt: startedAt,
                       startAction: () {
                         if (isTooBig == 1) {
                           isTooBig = 2;
