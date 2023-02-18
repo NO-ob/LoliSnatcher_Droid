@@ -351,7 +351,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     cacheDuration = cacheDurationSelected!["value"];
                   });
                 },
-                title: 'Delete Cache older than:',
+                title: 'Delete Cache after:',
               ),
 
               SettingsTextInput(

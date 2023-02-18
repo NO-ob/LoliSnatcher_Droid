@@ -168,7 +168,7 @@ class SettingsHandler extends GetxController {
     'lastSyncIp', 'lastSyncPort',
     'theme', 'themeMode', 'isAmoled', 'useMaterial3', 'useDynamicColor',
     'customPrimaryColor', 'customAccentColor',
-    'version', 'SDK', 'disableImageScaling', 'gifsAsThumbnails',
+    'version', 'disableImageScaling', 'gifsAsThumbnails',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showFPS', 'showPerf', 'showImageStats',
@@ -1079,8 +1079,6 @@ class SettingsHandler extends GetxController {
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
       "version": Constants.appVersion,
       "build": Constants.appBuildNumber,
-      // TODO split into two variables - system name and system version/sdk number
-      // "SDK": SDKVer,
     };
 
     // print('JSON $json');

@@ -8,6 +8,7 @@ import 'package:flutter/painting.dart';
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/services/image_writer.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/widgets/image/abstract_custom_network_image.dart' as custom_network_image;
 
 @immutable
@@ -89,7 +90,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   }
 
   static Dio get _httpClient {
-    Dio client = Dio();
+    Dio client = DioNetwork.getClient();
     return client;
   }
 
@@ -148,7 +149,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
           } else {
             chunkEvents.add(ImageChunkEvent(
               cumulativeBytesLoaded: fileSize,
-              expectedTotalBytes: fileSize,
+              expectedTotalBytes: fileSize <= 0 ? null : fileSize,
             ));
           }
         } else {
@@ -174,7 +175,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 onReceiveProgress: (int count, int total) {
                   chunkEvents.add(ImageChunkEvent(
                     cumulativeBytesLoaded: count,
-                    expectedTotalBytes: total,
+                    expectedTotalBytes: total <= 0 ? null : total,
                   ));
                 },
                 cancelToken: cancelToken,
@@ -190,7 +191,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 onReceiveProgress: (int count, int total) {
                   chunkEvents.add(ImageChunkEvent(
                     cumulativeBytesLoaded: count,
-                    expectedTotalBytes: total,
+                    expectedTotalBytes: total <= 0 ? null : total,
                   ));
                 },
                 cancelToken: cancelToken,
@@ -209,15 +210,15 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
           cacheFile = File(cacheFilePath);
         } else {
           // remove file when download wasn't finished
-          if (cancelToken?.isCancelled == true) {
-            if (!await chunkEvents.stream.isEmpty) {
-              final ImageChunkEvent lastEvent = await chunkEvents.stream.last;
-              if (lastEvent.expectedTotalBytes != 0 && lastEvent.expectedTotalBytes != lastEvent.cumulativeBytesLoaded) {
-                await cacheFile.delete();
-                throw Exception('CustomNetworkImage cancelled: $resolved');
-              }
-            }
-          }
+          // TODO problematic?
+          // if (cancelToken?.isCancelled == true) {
+          //   if (lastChunk != null) {
+          //     if (lastChunk!.expectedTotalBytes != 0 && lastChunk!.expectedTotalBytes != lastChunk!.cumulativeBytesLoaded) {
+          //       await cacheFile.delete();
+          //       throw Exception('CustomNetworkImage cancelled: $resolved');
+          //     }
+          //   }
+          // }
         }
       }
 

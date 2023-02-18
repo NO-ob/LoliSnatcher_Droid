@@ -37,7 +37,9 @@ class _FaviconState extends State<Favicon> {
   void didUpdateWidget(Favicon oldWidget) {
     // force redraw on tab change
     if (oldWidget.booru.faviconURL != widget.booru.faviconURL) {
-      restartLoading();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        restartLoading();
+      });
     }
     super.didUpdateWidget(oldWidget);
   }

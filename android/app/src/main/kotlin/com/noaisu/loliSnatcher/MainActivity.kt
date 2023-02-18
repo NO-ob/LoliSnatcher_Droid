@@ -26,7 +26,6 @@ import android.view.KeyEvent
 import android.view.Window
 import android.view.WindowManager
 import android.webkit.MimeTypeMap
-import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
@@ -39,6 +38,7 @@ import java.io.*
 import java.util.*
 import java.net.Inet4Address
 import java.net.NetworkInterface
+import java.util.concurrent.Executors;
 
 // TODO currently shelved the idea of lock screen, needs more testing, possibly will lead to bugs, because fragment is not considered as good practice
 // For local_auth:
@@ -73,6 +73,8 @@ class MainActivity: FlutterActivity() {
     private var audioManager: AudioManager? = null
     private var SAFUri: String? = "";
     private var methodResult: MethodChannel.Result? = null
+
+    private val activeFiles = mutableMapOf<Uri, OutputStream?>()
 
     @SuppressLint("WrongThread")
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
@@ -145,12 +147,6 @@ class MainActivity: FlutterActivity() {
                     result.success(null);
                 }
 
-            } else if (call.method == "toast"){
-                val toastString: String? = call.argument("toastStr");
-                val toast: Toast = Toast.makeText(this, toastString, Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP or Gravity.CENTER, 0, 30);
-                toast.show();
-
             } else if (call.method == "systemUIMode") {
                 val modeString: String? = call.argument("mode");
                 if (modeString.equals("immersive")) {
@@ -170,18 +166,6 @@ class MainActivity: FlutterActivity() {
                             or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
 
                 }
-            } else if(call.method == "setBrightness") {
-                val brightness: Double? = call.argument("brightness")
-                val layoutParams: WindowManager.LayoutParams = (context as Activity).getWindow().getAttributes()
-                layoutParams.screenBrightness = brightness!!.toFloat();
-                (context as Activity).getWindow().setAttributes(layoutParams)
-                result.success(null)
-            } else if(call.method == "setVolume") {
-                val i: Int? = call.argument("newVol")
-                val showUiFlag: Int? = call.argument("showVolumeUiFlag")
-                if(audioManager == null) audioManager = applicationContext.getSystemService(AUDIO_SERVICE) as AudioManager
-                audioManager!!.setStreamVolume(AudioManager.STREAM_MUSIC, i!!, AudioManager.FLAG_SHOW_UI)
-                result.success(null) //audioManager.getStreamVolume(3))
             } else if(call.method == "setVolumeButtons") {
                 val state: Boolean? = call.argument("setActive")
                 isSinkingVolume = !state!!
@@ -234,13 +218,55 @@ class MainActivity: FlutterActivity() {
                 val uri: String? = call.argument("uri");
                 val fileName: String? = call.argument("fileName");
                 if (fileName != null && uri != null) {
-                    result.success(existsByName(uri,fileName));
+                    Executors.newSingleThreadExecutor().execute {
+                        val exists = existsByName(uri,fileName)
+                        result.success(exists)
+                    }
                 }
             } else if (call.method == "deleteFileByName"){
                 val uri: String? = call.argument("uri");
                 val fileName: String? = call.argument("fileName");
                 if (fileName != null && uri != null) {
                     result.success(removeByName(uri,fileName));
+                }
+            } else if(call.method == "createFileStream"){
+                val fileName = call.argument<String>("fileName");
+                val mediaType = call.argument<String>("mediaType");
+                val fileExt = call.argument<String>("fileExt");
+                val savePath = call.argument<String?>("savePath")
+                if (mediaType != null && fileExt != null && fileName != null && savePath != null){
+                    result.success(createSafFile(fileName,mediaType,fileExt,savePath)?.toString());
+                } else {
+                    result.success(null);
+                }
+            } else if(call.method == "writeFileStream"){
+                val uri = call.argument<String>("uri");
+                var bytes = call.argument<ByteArray>("data");
+                if (uri != null && bytes != null){
+                    result.success(writeSafFileStream(bytes,uri));
+                } else {
+                    result.success(null);
+                }
+            } else if(call.method == "closeStreamToFile"){
+                val uri = call.argument<String>("uri");
+                if (uri != null){
+                    result.success(closeSafFileStream(uri));
+                } else {
+                    result.success(null);
+                }
+            } else if(call.method == "deleteStreamToFile"){
+                val uri = call.argument<String>("uri");
+                if (uri != null){
+                    result.success(deleteSafFile(uri));
+                } else {
+                    result.success(null);
+                }
+            } else if(call.method == "existsStreamToFile"){
+                val uri = call.argument<String>("uri");
+                if (uri != null){
+                    result.success(existsSafFile(uri));
+                } else {
+                    result.success(null);
                 }
             } else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
@@ -372,37 +398,32 @@ class MainActivity: FlutterActivity() {
         val uri: Uri = Uri.parse(uriString)
         val documentTree = DocumentFile.fromTreeUri(context, uri)
         if (documentTree != null) {
-            for (document in documentTree.listFiles()) {
-                if (document.name.toString() == fileName) {
-                    val inputStream: InputStream? = contentResolver.openInputStream(document.uri)
-                    return inputStream?.readBytes();
-                }
+            val file = documentTree.findFile(fileName)
+            if (file != null) {
+                val inputStream: InputStream? = contentResolver.openInputStream(file.uri)
+                return inputStream?.readBytes();
             }
         }
         return null
     }
 
-    private fun existsByName(uriString: String,fileName: String): Boolean{
+    private fun existsByName(uriString: String, fileName: String): Boolean{
         val uri: Uri = Uri.parse(uriString)
         val documentTree = DocumentFile.fromTreeUri(context, uri)
         if (documentTree != null) {
-            for (document in documentTree.listFiles()) {
-                if (document.name.toString() == fileName) {
-                    return true
-                }
-            }
+            val fileExists = documentTree.findFile(fileName) != null
+            return fileExists
         }
         return false
     }
 
-    private fun removeByName(uriString: String,fileName: String): Boolean{
+    private fun removeByName(uriString: String, fileName: String): Boolean{
         val uri: Uri = Uri.parse(uriString)
         val documentTree = DocumentFile.fromTreeUri(context, uri)
         if (documentTree != null) {
-            for (document in documentTree.listFiles()) {
-                if (document.name.toString() == fileName) {
-                    return document.delete()
-                }
+            val file = documentTree.findFile(fileName)
+            if (file != null) {
+                return file.delete()
             }
         }
         return false
@@ -419,15 +440,6 @@ class MainActivity: FlutterActivity() {
         Runtime.getRuntime().exit(0)
     }
 
-    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && requestCode == 1) {
-            data?.data?.also { uri ->
-                print("uri is $uri")
-            }
-
-        }
-    }*/
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == KeyEvent.KEYCODE_VOLUME_UP) && isSinkingVolume)
         {
@@ -437,6 +449,7 @@ class MainActivity: FlutterActivity() {
 
         return super.onKeyDown(keyCode, event)
     }
+
     private fun getIpv4HostAddress(): String {
         NetworkInterface.getNetworkInterfaces()?.toList()?.map { networkInterface ->
             networkInterface.inetAddresses?.toList()?.find {
@@ -453,6 +466,83 @@ class MainActivity: FlutterActivity() {
             return context.dataDir.absolutePath;
         }
 
+    }
+
+    @Throws(IOException::class)
+    private fun createSafFile(fileName: String, mediaType: String, fileExt: String, savePath: String?): Uri? {
+        var thisMediaType: String = mediaType;
+
+        if (thisMediaType == "animation"){
+            thisMediaType = "image";
+        }
+        if (savePath != null && savePath.isNotEmpty()){
+            val doc = DocumentFile.fromTreeUri(context, Uri.parse(savePath))
+            if (doc != null) {
+                if (doc.canWrite()){
+                    val uri = doc.createFile("$thisMediaType/$fileExt","$fileName.$fileExt")?.uri
+                    uri?.let {
+                        activeFiles.put(uri, contentResolver.openOutputStream(it))
+                    }
+                    return uri
+                }
+            }
+        }
+        return null
+    }
+
+    @Throws(IOException::class)
+    private fun deleteSafFile(uriString: String): Boolean {
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            val document = DocumentFile.fromSingleUri(context, uri)
+            if (document != null && document.exists()) {
+                document.delete()
+                Objects.requireNonNull(activeFiles.get(uri))?.close()
+                activeFiles.remove(uri)
+                return true
+            }
+        }
+        return false
+    }
+
+    @Throws(IOException::class)
+    private fun existsSafFile(uriString: String): Boolean {
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            val document = DocumentFile.fromSingleUri(context, uri)
+            if (document != null && document.exists()) {
+                return true
+            }
+        }
+        return false
+    }
+
+    // write bytes to file asynchronously using SAF
+    @Throws(IOException::class)
+    private fun writeSafFileStream(fileBytes: ByteArray, uriString: String): Boolean {
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            val document = DocumentFile.fromSingleUri(context, uri)
+            if (document != null && document.exists()) {
+                Objects.requireNonNull(activeFiles.get(uri))?.write(fileBytes)
+                return true
+            }
+        }
+        return false
+    }
+
+    @Throws(IOException::class)
+    private fun closeSafFileStream(uriString: String): Boolean {
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            val document = DocumentFile.fromSingleUri(context, uri)
+            if (document != null && document.exists()) {
+                Objects.requireNonNull(activeFiles.get(uri))?.close()
+                activeFiles.remove(uri)
+                return true
+            }
+        }
+        return false
     }
 
     @Throws(IOException::class)

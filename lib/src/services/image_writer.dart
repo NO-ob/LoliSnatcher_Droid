@@ -18,7 +18,6 @@ class ImageWriter {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   String? path = "";
   String? cacheRootPath = "";
-  int SDKVer = 0;
 
   ImageWriter() {
     setPaths();
@@ -27,95 +26,82 @@ class ImageWriter {
   /// return null - file already exists
   /// return String - file saved
   /// return Error - something went wrong
-  Future write(BooruItem item, Booru booru) async {
-    int queryLastIndex = item.fileURL.lastIndexOf("?");
-    int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
-    String fileName = "";
-    if (booru.type == ("BooruOnRails") || booru.type == "Philomena"){
-      fileName = "${item.fileNameExtras}.${item.fileExt!}";
-    } else if (booru.type == "Hydrus"){
-      fileName = "${item.fileNameExtras}_${item.md5String}.${item.fileExt}";
-    } else if (booru.baseURL!.contains("yande.re")) {
-      fileName = "yandere_${item.md5String}.${item.fileExt}";
-    } else {
-      fileName = '${booru.name!}_${item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex)}';
-    }
-    print("out file is $fileName");
-    // print(fileName);
+  Future write(
+    BooruItem item,
+    Booru booru,
+    void Function(int, int)? onProgress,
+    bool ignoreExists,
+  ) async {
+    String fileName = getFilename(item, booru);
     await setPaths();
-
-    if(SDKVer == 0){
-        SDKVer = await ServiceHandler.getSDKVersion();
-        print(SDKVer);
-    }
 
     // Don't do anything if file already exists
     File image = File(path! + fileName);
     // print(path! + fileName);
     bool fileExists = await image.exists();
     // if (fileExists) return null;
-    if (fileExists || item.isSnatched.value == true) return null;
+    if (!ignoreExists && (fileExists || item.isSnatched.value == true)) return null;
     try {
-      var response = await DioNetwork.get(
-        item.fileURL,
-        options: Options(
-          responseType: ResponseType.bytes,
-          contentType: "*/*",
-        ),
-        headers: {
-          'Accept': '*/*',
-          'Content-Type': '*/*',
-          ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
-        },
-      );
-
       final fileNameSplit = fileName.split(".");
       final fileNameWoutExt = fileNameSplit.sublist(0, fileNameSplit.length - 1).join(".");
-      if (SDKVer < 30 && settingsHandler.extPathOverride.isEmpty) {
-        await Directory(path!).create(recursive:true);
-        await image.writeAsBytes(response.data, flush: true);
-        if (settingsHandler.jsonWrite){
-          File jsonFile = File("${path!}$fileNameWoutExt.json");
-          await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
-        }
-        print("Image written: ${path!}$fileName");
-        item.isSnatched.value = true;
-        if (settingsHandler.dbEnabled){
-          await settingsHandler.dbHandler.updateBooruItem(item,"local");
-        }
-        try {
-          if(Platform.isAndroid){
+
+      final headers = {
+        'Accept': '*/*',
+        'Content-Type': '*/*',
+        ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
+      };
+
+      if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty) {
+        await DioNetwork.downloadCustom(
+          item.fileURL,
+          '${path!}/',
+          fileNameWoutExt,
+          item.fileExt!,
+          item.mediaType,
+          options: Options(
+            responseType: ResponseType.bytes,
+            contentType: "*/*",
+          ),
+          headers: headers,
+          onReceiveProgress: onProgress,
+        );
+      } else {
+        await DioNetwork.download(
+          item.fileURL,
+          path! + '/' + fileName,
+          options: Options(
+            responseType: ResponseType.bytes,
+            contentType: "*/*",
+          ),
+          headers: headers,
+          onReceiveProgress: onProgress,
+        );
+      }
+
+      if (settingsHandler.jsonWrite) {
+        File jsonFile = File("${path!}$fileNameWoutExt.json");
+        await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
+      }
+      print("Image written: ${path!}$fileName");
+      item.isSnatched.value = true;
+      if (settingsHandler.dbEnabled) {
+        await settingsHandler.dbHandler.updateBooruItem(item, "local");
+      }
+
+      try {
+        if (Platform.isAndroid) {
+          if (settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
+            final bool result = await ServiceHandler.existsFileFromSAFDirectory(path!, fileName);
+            if (!result) {
+              throw Exception('SAF file not found');
+            }
+          } else {
             ServiceHandler.callMediaScanner(image.path);
           }
-        } catch (e){
-          print("Image not found $e");
-          return e;
         }
-      } else {
-        print("files ext is ${item.fileExt!}");
-        print("Ext path override is: ${settingsHandler.extPathOverride}");
-        var writeResp = await ServiceHandler.writeImage(
-          response.data,
-          fileNameWoutExt,
-          item.mediaType,
-          item.fileExt,
-          settingsHandler.extPathOverride,
-        );
-        // var writeResp = await compute(ServiceHandler.writeImageCompute, {
-        //   "bytes": response.bodyBytes,
-        //   "fileName": fileNameWoutExt,
-        //   "mediaType": item.mediaType,
-        //   "fileExt": item.fileExt,
-        //   "extPathOverride": settingsHandler.extPathOverride
-        // });
-        if (writeResp != null){
-          print("write response: $writeResp");
-          item.isSnatched.value = true;
-          if (settingsHandler.dbEnabled){
-            await settingsHandler.dbHandler.updateBooruItem(item,"local");
-          }
-          return (fileName);
-        }
+      } catch (e, s) {
+        Logger.newLog(m: 'Image Writer Image not found after DL', e: e, s: s, t: LogTypes.imageInfo);
+        return e;
       }
     } catch (e, s) {
       Logger.newLog(m: 'Image Writer Exception', e: e, s: s, t: LogTypes.imageInfo);
@@ -124,17 +110,57 @@ class ImageWriter {
     return (fileName);
   }
 
-  Stream<Map<String, int>> writeMultiple(List<BooruItem> snatched, Booru booru, int cooldown) async* {
+  String getFilename(
+    BooruItem item,
+    Booru booru,
+  ) {
+    int queryLastIndex = item.fileURL.lastIndexOf("?");
+    int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
+    String fileName = "";
+    if (booru.type == ("BooruOnRails") || booru.type == "Philomena") {
+      fileName = "${item.fileNameExtras}.${item.fileExt!}";
+    } else if (booru.type == "Hydrus") {
+      fileName = "${item.fileNameExtras}_${item.md5String}.${item.fileExt}";
+    } else if (booru.baseURL!.contains("yande.re")) {
+      fileName = "yandere_${item.md5String}.${item.fileExt}";
+    } else {
+      fileName = '${booru.name!}_${item.fileURL.substring(item.fileURL.lastIndexOf("/") + 1, lastIndex)}';
+    }
+    print("filename is $fileName");
+    return fileName;
+  }
+
+  Future<String> getFilePath(
+    BooruItem item,
+    Booru booru,
+  ) async {
+    await setPaths();
+    String fileName = getFilename(item, booru);
+    return path! + fileName;
+  }
+
+  Stream<Map<String, dynamic>> writeMultiple(
+    List<BooruItem> snatched,
+    Booru booru,
+    int cooldown,
+    void Function(int, int)? onProgress,
+    bool ignoreExists,
+  ) async* {
     int snatchedCounter = 1;
-    List<String> existsList = [];
-    List<String> failedList = [];
-    for (int i = 0; i < snatched.length ; i++){
-      await Future.delayed(Duration(milliseconds: cooldown), () async{
-        var snatchResult = await write(snatched.elementAt(i), booru);
+    List<BooruItem> existsList = [];
+    List<BooruItem> failedList = [];
+    for (int i = 0; i < snatched.length; i++) {
+      await Future.delayed(Duration(milliseconds: cooldown), () async {
+        var snatchResult = await write(
+          snatched.elementAt(i),
+          booru,
+          onProgress,
+          ignoreExists,
+        );
         if (snatchResult == null) {
-          existsList.add(snatched[i].fileURL);
-        } else if (snatchResult is !String) {
-          failedList.add(snatched[i].fileURL);
+          existsList.add(snatched[i]);
+        } else if (snatchResult is! String) {
+          failedList.add(snatched[i]);
         }
       });
       snatchedCounter++;
@@ -145,43 +171,23 @@ class ImageWriter {
 
     yield {
       "snatched": snatchedCounter,
-      "exists": existsList.length,
-      "failed": failedList.length
+      "exists": existsList,
+      "failed": failedList,
     };
   }
 
-  Future writeCache(String fileURL, String typeFolder,{required String fileNameExtras}) async{
-    String? cachePath;
-    try {
-      var response = await DioNetwork.get(
-        fileURL,
-        options: Options(responseType: ResponseType.bytes),
-      );
-      await setPaths();
-      cachePath = "${cacheRootPath!}$typeFolder/";
-      await Directory(cachePath).create(recursive:true);
-
-      String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
-      File image = File(cachePath+fileName);
-      await image.writeAsBytes(response.data, flush: true);
-    } catch (e, s){
-      Logger.newLog(m: 'Image Writer Exception', e: e, s: s, t: LogTypes.imageInfo);
-    }
-    return (cachePath!+fileURL.substring(fileURL.lastIndexOf("/") + 1));
-  }
-
-  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true, required String fileNameExtras}) async{
+  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {bool clearName = true, required String fileNameExtras}) async {
     File? image;
     try {
       await setPaths();
       String cachePath = "${cacheRootPath!}$typeFolder/";
       // print("write cahce from bytes:: cache path is $cachePath");
-      await Directory(cachePath).create(recursive:true);
+      await Directory(cachePath).create(recursive: true);
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       image = File(cachePath + fileName);
       await image.writeAsBytes(bytes, flush: true);
-    } catch (e){
+    } catch (e) {
       print("Image Writer Exception :: cache write bytes :: $e");
       return null;
     }
@@ -202,7 +208,7 @@ class ImageWriter {
       } else {
         return null;
       }
-    } catch (e){
+    } catch (e) {
       print("Image Writer Exception :: delete from cache :: $e");
       return false;
     }
@@ -219,23 +225,23 @@ class ImageWriter {
       } else {
         return null;
       }
-    } catch (e){
+    } catch (e) {
       print("Image Writer Exception :: delete cache folder :: $e");
       return false;
     }
   }
 
-  Future<String?> getCachePath(String fileURL, String typeFolder, {bool clearName = true, required String fileNameExtras}) async{
+  Future<String?> getCachePath(String fileURL, String typeFolder, {bool clearName = true, required String fileNameExtras}) async {
     String cachePath;
     try {
       await setPaths();
       cachePath = "${cacheRootPath!}$typeFolder/";
 
       String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
-      File cacheFile = File(cachePath+fileName);
-      if (await cacheFile.exists()){
-        if(await cacheFile.length() > 0) {
-          return cachePath+fileName;
+      File cacheFile = File(cachePath + fileName);
+      if (await cacheFile.exists()) {
+        if (await cacheFile.length() > 0) {
+          return cachePath + fileName;
         } else {
           // somehow some files can save with zero bytes - we remove them
           await cacheFile.delete();
@@ -244,7 +250,7 @@ class ImageWriter {
       } else {
         return null;
       }
-    } catch (e){
+    } catch (e) {
       print("Image Writer Exception :: get cache path :: $e");
       return null;
     }
@@ -256,11 +262,11 @@ class ImageWriter {
     cachePath = "${cacheRootPath!}$typeFolder/";
 
     String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
-    return cachePath+fileName;
+    return cachePath + fileName;
   }
 
   // calculates cache (total or by type) size and file count
-  Future<Map<String,int>> getCacheStat(String? typeFolder) async {
+  Future<Map<String, int>> getCacheStat(String? typeFolder) async {
     String cacheDirPath;
     int fileNum = 0;
     int totalSize = 0;
@@ -278,7 +284,7 @@ class ImageWriter {
           }
         }
       }
-    } catch (e){
+    } catch (e) {
       print("Image Writer Exception :: get cache stat :: $e");
     }
 
@@ -307,7 +313,7 @@ class ImageWriter {
           if (file is File) {
             final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
             final DateTime lastModified = await file.lastModified();
-            if(isStaleClearActive) {
+            if (isStaleClearActive) {
               final bool isStale = (lastModified.millisecondsSinceEpoch + settingsHandler.cacheDuration.inMilliseconds) < timeNow;
               if (isNotExcludedExt && isStale) {
                 await file.delete();
@@ -323,7 +329,7 @@ class ImageWriter {
           }
         }
       }
-    } catch (e){
+    } catch (e) {
       print("Image Writer Exception :: clear stale cache :: $e");
     }
     return;
@@ -333,7 +339,7 @@ class ImageWriter {
   Future<void> clearCacheOverflow() async {
     // never clear cache overflow if limit is 0
     // TODO maybe check available space left and ignore that setting if not enough space?
-    if(settingsHandler.cacheSize == 0) {
+    if (settingsHandler.cacheSize == 0) {
       return;
     }
 
@@ -354,7 +360,7 @@ class ImageWriter {
 
         final int limitSize = settingsHandler.cacheSize * pow(1024, 3) as int;
         final int overflowSize = currentCacheSize - limitSize;
-        if(overflowSize > 0) {
+        if (overflowSize > 0) {
           files.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
 
           for (File file in files) {
@@ -386,13 +392,14 @@ class ImageWriter {
 
   String parseThumbUrlToName(String thumbURL) {
     String result = "";
-    if (thumbURL.contains("Hydrus-Client")){
+    if (thumbURL.contains("Hydrus-Client")) {
       result = "hydrusThumb_${thumbURL.split("&")[0].split("=")[1]}";
     } else {
       int queryLastIndex = thumbURL.lastIndexOf("?"); // Sankaku fix
       int lastIndex = queryLastIndex != -1 ? queryLastIndex : thumbURL.length;
       result = thumbURL.substring(thumbURL.lastIndexOf("/") + 1, lastIndex);
-      if(result.startsWith('thumb.')) { //Paheal/shimmie(?) fix
+      if (result.startsWith('thumb.')) {
+        //Paheal/shimmie(?) fix
         String unthumbedURL = thumbURL.replaceAll('/thumb', '');
         result = unthumbedURL.substring(unthumbedURL.lastIndexOf("/") + 1);
       }
@@ -405,30 +412,30 @@ class ImageWriter {
     return "${Tools.sanitize(fileNameExtras)}${Tools.sanitize(fileName)}";
   }
 
-  Future<String> writeMascotImage(String contentUri) async{
+  Future<String> writeMascotImage(String contentUri) async {
     await setPaths();
-    if (contentUri.isNotEmpty){
+    if (contentUri.isNotEmpty) {
       Uint8List? fileBytes = await ServiceHandler.getSAFFile(contentUri);
       String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
-        if (fileBytes != null && fileExt.isNotEmpty){
-          String path = await ServiceHandler.getConfigDir();
-          await File("${path}mascot.$fileExt").writeAsBytes(fileBytes);
-          return ("${path}mascot.$fileExt");
-        }
+      if (fileBytes != null && fileExt.isNotEmpty) {
+        String path = await ServiceHandler.getConfigDir();
+        await File("${path}mascot.$fileExt").writeAsBytes(fileBytes);
+        return ("${path}mascot.$fileExt");
+      }
     }
     return "";
   }
 
   Future<bool> setPaths() async {
-    if(path == ""){
-      if (settingsHandler.extPathOverride.isEmpty){
+    if (path == "") {
+      if (settingsHandler.extPathOverride.isEmpty) {
         path = await ServiceHandler.getPicturesDir();
       } else {
         path = settingsHandler.extPathOverride;
       }
     }
 
-    if(cacheRootPath == ""){
+    if (cacheRootPath == "") {
       cacheRootPath = await ServiceHandler.getCacheDir();
     }
     // print('path: $path');

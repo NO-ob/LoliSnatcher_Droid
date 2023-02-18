@@ -162,7 +162,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     snatchHandler.queue(
                       [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
                       searchHandler.currentBooru,
-                      settingsHandler.snatchCooldown
+                      settingsHandler.snatchCooldown,
+                      false,
                     );
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
                     // favorite on F
@@ -744,14 +745,17 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             return Container();
           }
 
-          final bool isSnatched = searchHandler.currentFetched[searchHandler.viewedIndex.value].isSnatched.value == true;
+          final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+          final booru = searchHandler.currentBooru;
+
+          final bool isSnatched = item.isSnatched.value == true;
           if(!isSnatched) {
             return const SizedBox();
           } else {
             return Positioned(
               right: 2,
               bottom: 5,
-              child: Icon(Icons.save_alt, size: Theme.of(context).buttonTheme.height / 2.1),
+              child: SnatchedStatusIcon(item: item, booru: booru),
             );
           }
         });
@@ -808,7 +812,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         snatchHandler.queue(
           [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
           searchHandler.currentBooru,
-          settingsHandler.snatchCooldown
+          settingsHandler.snatchCooldown,
+          false,
         );
         break;
       case("favourite"):
@@ -829,11 +834,65 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
   }
 
   // long tap action
-  void buttonHold(String action) {
+  void buttonHold(String action) async {
     // TODO long press slideshow button to set the timer
     switch(action) {
       case("share"):
         onShareHold();
+        break;
+      case("snatch"):
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
+            return SettingsDialog(
+              title: const Text('Snatch?'),
+              content: Column(
+                children: [
+                  SelectableText(item.fileURL),
+                  const SizedBox(height: 16),
+
+                  if(item.isSnatched.value == true) ...[
+                    ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                      ),
+                      onTap: () async {
+                        item.isSnatched.value = false;
+                        await settingsHandler.dbHandler.updateBooruItem(item, "local");
+                        Navigator.of(context).pop();
+                      },
+                      leading: const Icon(Icons.file_download_off_outlined),
+                      title: const Text('Drop Snatched status'),
+                    ),
+                    const SizedBox(height: 16),
+                  ],                    
+
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                    ),
+                    onTap: () async {
+                      await getPerms();
+                      snatchHandler.queue(
+                        [item],
+                        searchHandler.currentBooru,
+                        settingsHandler.snatchCooldown,
+                        true,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                    leading: const Icon(Icons.file_download_outlined),
+                    title: Text('Snatch ${item.isSnatched.value == true ? '(forced)' : ''}'.trim()),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
         break;
     }
   }
@@ -878,4 +937,60 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     showShareDialog(showTip: false);
   }
 
+}
+
+
+class SnatchedStatusIcon extends StatefulWidget {
+  const SnatchedStatusIcon({required this.item, required this.booru, super.key});
+
+  final BooruItem item;
+  final Booru booru;
+
+  @override
+  State<SnatchedStatusIcon> createState() => _SnatchedStatusIconState();
+}
+
+class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
+  bool fileExists = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fileExistsCheck();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void fileExistsCheck() async {
+    final String extPath = SettingsHandler.instance.extPathOverride;
+    if(extPath.isNotEmpty) {
+      fileExists = await ServiceHandler.existsFileFromSAFDirectory(extPath, ImageWriter().getFilename(widget.item, widget.booru));
+    } else {
+      fileExists = await File(await ImageWriter().getFilePath(widget.item, widget.booru)).exists();
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant SnatchedStatusIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if(oldWidget.item != widget.item) {
+      fileExists = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
+      });
+      fileExistsCheck();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.save_alt, size: Theme.of(context).buttonTheme.height / 2.1, color: fileExists ? Colors.green : Colors.white,);
+  }
 }

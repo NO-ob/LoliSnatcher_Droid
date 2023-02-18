@@ -56,26 +56,28 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   void didUpdateWidget(VideoViewerDesktop oldWidget) {
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
-      // reset stuff here
-      firstViewFix = false;
-      resetZoom();
-      switch (settingsHandler.videoCacheMode) {
-        case 'Cache':
-          // TODO load video in bg without destroying the player object, then replace with a new one
-          killLoading([]);
-          initVideo(false);
-          break;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // reset stuff here
+        firstViewFix = false;
+        resetZoom();
+        switch (settingsHandler.videoCacheMode) {
+          case 'Cache':
+            // TODO load video in bg without destroying the player object, then replace with a new one
+            killLoading([]);
+            initVideo(false);
+            break;
 
-        case 'Stream+Cache':
-          changeNetworkVideo();
-          break;
+          case 'Stream+Cache':
+            changeNetworkVideo();
+            break;
 
-        case 'Stream':
-        default:
-          changeNetworkVideo();
-          break;
-      }
-      updateState();
+          case 'Stream':
+          default:
+            changeNetworkVideo();
+            break;
+        }
+        updateState();
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -473,7 +475,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     // TODO move controls outside, to exclude them from zoom
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
       child: Material(
         child: Listener(
           onPointerSignal: (pointerSignal) {

@@ -156,15 +156,19 @@ class TagHandler extends GetxController {
   }
 
   Future<bool> loadTags() async {
-    if (SettingsHandler.instance.dbEnabled){
-      List<Tag> tags = await SettingsHandler.instance.dbHandler.getAllTags();
-      for (Tag tag in tags){
-        await putTag(tag, useDB: false);
+    try {
+      if (SettingsHandler.instance.dbEnabled){
+        List<Tag> tags = await SettingsHandler.instance.dbHandler.getAllTags();
+        for (Tag tag in tags){
+          await putTag(tag, useDB: false);
+        }
+      } else {
+        if (await checkForTagsFile()) {
+          await loadTagsFile();
+        }
       }
-    } else {
-      if (await checkForTagsFile()) {
-        await loadTagsFile();
-      }
+    } catch (e) {
+      Logger.Inst().log("Error loading tags: $e", "TagHandler", "loadTags", LogTypes.exception);
     }
 
     return true;

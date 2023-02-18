@@ -58,8 +58,10 @@ class ImageViewerState extends State<ImageViewer> {
   void didUpdateWidget(ImageViewer oldWidget) {
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
-      killLoading([]);
-      initViewer(false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        killLoading([]);
+        initViewer(false);
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -275,10 +277,8 @@ class ImageViewerState extends State<ImageViewer> {
       mainProvider?.evict();
       // mainProvider?.evict().then((bool success) {
       //   if(success) {
-      //     ServiceHandler.displayToast('main image evicted');
       //     print('main image evicted');
       //   } else {
-      //     ServiceHandler.displayToast('main image eviction failed');
       //     print('main image eviction failed');
       //   }
       // });
@@ -334,7 +334,7 @@ class ImageViewerState extends State<ImageViewer> {
     // print('!!! Build media ${widget.index} $isViewed !!!');
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
       // without this every text element will have broken styles on first frames
       child: Material(
         color: Colors.black,

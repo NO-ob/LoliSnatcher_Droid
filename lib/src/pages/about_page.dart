@@ -43,7 +43,6 @@ class AboutPage extends StatelessWidget {
               action: () {
                 ServiceHandler.launchURL("mailto:$email");
                 // Clipboard.setData(ClipboardData(text: email));
-                // ServiceHandler.displayToast('Email copied to clipboard!');
               },
             ),
             //

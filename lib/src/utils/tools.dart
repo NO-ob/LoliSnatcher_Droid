@@ -71,6 +71,9 @@ class Tools {
   }) async {
     // a few boorus don't work without a browser useragent
     Map<String, String> headers = {"User-Agent": browserUserAgent()};
+    if(booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
+      headers["User-Agent"] = appUserAgent();
+    }
 
     if (!isTestMode) {
       try {
@@ -145,6 +148,7 @@ class Tools {
           builder: (context) => InAppWebviewView(
             initialUrl: '${uri.scheme}://${uri.host}',
             title: 'Captcha check',
+            subtitle: 'Possible captcha detected, please solve it and press back after that. If there is no captcha then it\'s probably some other authentication issue. [Beta]',
           ),
         ),
       );

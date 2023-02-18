@@ -14,12 +14,14 @@ class InAppWebviewView extends StatefulWidget {
     required this.initialUrl,
     this.userAgent,
     this.title,
+    this.subtitle,
     super.key,
   });
 
   final String initialUrl;
   final String? userAgent;
   final String? title;
+  final String? subtitle;
 
   @override
   State<InAppWebviewView> createState() => _InAppWebviewViewState();
@@ -121,6 +123,42 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
           if (loadingPercentage < 100)
             LinearProgressIndicator(
               value: loadingPercentage / 100.0,
+            ),
+          if (widget.subtitle != null)
+            Positioned(
+              bottom: MediaQuery.of(context).padding.bottom + 8,
+              left: 8,
+              child: Container(
+                width: MediaQuery.of(context).size.width - 16,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.25),
+                      spreadRadius: 0,
+                      blurRadius: 4,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        widget.subtitle!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),

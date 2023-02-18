@@ -136,6 +136,7 @@ class _MainAppBarState extends State<MainAppBar> {
                   searchHandler.currentTab.getSelected(),
                   searchHandler.currentBooru,
                   settingsHandler.snatchCooldown,
+                  false,
                 );
                 searchHandler.currentTab.selected.value = [];
               } else {

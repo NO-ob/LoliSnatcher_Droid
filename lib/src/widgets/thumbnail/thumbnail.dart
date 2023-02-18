@@ -65,7 +65,9 @@ class _ThumbnailState extends State<Thumbnail> {
   void didUpdateWidget(Thumbnail oldWidget) {
     // force redraw on tab change
     if (oldWidget.item != widget.item) {
-      restartLoading();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        restartLoading();
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -374,10 +376,48 @@ class _ThumbnailState extends State<Thumbnail> {
       alignment: Alignment.center,
       children: [
         if (useExtra) // fetch small low quality thumbnail while loading a sample
-          AnimatedSwitcher(
+          AnimatedOpacity(
             // fade in image
+            opacity: !widget.isStandalone ? 1 : (isLoadedExtra ? 1 : 0),
+            duration: const Duration(milliseconds: 200),
+            child: AnimatedSwitcher(
+              duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
+              child: extraProvider != null
+                  ? ImageFiltered(
+                      enabled: widget.item.isHated.value,
+                      imageFilter: ImageFilter.blur(
+                        sigmaX: 10,
+                        sigmaY: 10,
+                        tileMode: TileMode.decal,
+                      ),
+                      child: Image(
+                        image: extraProvider!,
+                        fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
+                        isAntiAlias: true,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
+                          if (widget.isStandalone) {
+                            return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withOpacity(0.5));
+                          } else {
+                            return const SizedBox.shrink();
+                          }
+                        },
+                      ),
+                    )
+                  : const SizedBox(
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+            ),
+          ),
+        AnimatedOpacity(
+          // fade in image
+          opacity: !widget.isStandalone ? 1 : (isLoaded ? 1 : 0),
+          duration: const Duration(milliseconds: 300),
+          child: AnimatedSwitcher(
             duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
-            child: extraProvider != null
+            child: mainProvider != null
                 ? ImageFiltered(
                     enabled: widget.item.isHated.value,
                     imageFilter: ImageFilter.blur(
@@ -386,14 +426,15 @@ class _ThumbnailState extends State<Thumbnail> {
                       tileMode: TileMode.decal,
                     ),
                     child: Image(
-                      image: extraProvider!,
+                      image: mainProvider!,
                       fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
                       isAntiAlias: true,
+                      filterQuality: FilterQuality.medium,
                       width: double.infinity,
                       height: double.infinity,
                       errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
                         if (widget.isStandalone) {
-                          return Icon(Icons.broken_image, size: 30, color: Colors.yellow.withOpacity(0.5));
+                          return Icon(Icons.broken_image, size: 30, color: Colors.white.withOpacity(0.5));
                         } else {
                           return const SizedBox.shrink();
                         }
@@ -405,40 +446,9 @@ class _ThumbnailState extends State<Thumbnail> {
                     height: double.infinity,
                   ),
           ),
-        AnimatedSwitcher(
-          // fade in image
-          duration: Duration(milliseconds: widget.isStandalone ? 300 : 0),
-          child: mainProvider != null
-              ? ImageFiltered(
-                  enabled: widget.item.isHated.value,
-                  imageFilter: ImageFilter.blur(
-                    sigmaX: 10,
-                    sigmaY: 10,
-                    tileMode: TileMode.decal,
-                  ),
-                  child: Image(
-                    image: mainProvider!,
-                    fit: widget.isStandalone ? BoxFit.cover : BoxFit.contain,
-                    isAntiAlias: true,
-                    filterQuality: FilterQuality.medium,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                      if (widget.isStandalone) {
-                        return Icon(Icons.broken_image, size: 30, color: Colors.white.withOpacity(0.5));
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
-                  ),
-                )
-              : const SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
         ),
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 200),
           child: (isLoaded || isLoadedExtra)
               ? const SizedBox.shrink()
               : ShimmerCard(
@@ -485,15 +495,11 @@ class _ThumbnailState extends State<Thumbnail> {
   Widget build(BuildContext context) {
     if (widget.isStandalone) {
       return Hero(
-        tag: 'imageHero${widget.index}',
+        tag: 'imageHero${widget.index}#${widget.item.fileURL}',
         placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
           // keep building the image since the images can be visible in the
           // background of the image gallery
-          return Thumbnail(
-            item: widget.item,
-            index: widget.index,
-            isStandalone: false,
-          );
+          return child;
         },
         child: renderImages(context),
       );

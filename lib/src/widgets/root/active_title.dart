@@ -15,10 +15,14 @@ class ActiveTitle extends StatelessWidget {
     final SnatchHandler snatchHandler = SnatchHandler.instance;
 
     return Obx(() {
-      if (snatchHandler.snatchActive.value) {
+      if (snatchHandler.active.value) {
+        final bool hasProgress = snatchHandler.total.value != 0;
+        final double progress = hasProgress ? (snatchHandler.received.value / snatchHandler.total.value) : 0;
+        final String progressText = progress != 0 ? '(${(progress * 100).toStringAsFixed(1).replaceFirst('100.0', '100')}%)' : '';
+
         return FittedBox(
           fit: BoxFit.fitWidth,
-          child: Text("Snatching: ${snatchHandler.snatchStatus}"),
+          child: Text("Snatching: ${snatchHandler.status} $progressText".trim()),
         );
       } else {
         if (searchHandler.list.isEmpty) {

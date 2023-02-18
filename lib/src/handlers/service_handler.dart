@@ -13,7 +13,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 class ServiceHandler{
   static const platform = MethodChannel("com.noaisu.loliSnatcher/services");
   // Call androids native media scanner on a file path
-  static void callMediaScanner(String path) async{
+  static void callMediaScanner(String path) async {
     try{
       await platform.invokeMethod("scanMedia",{"path": path});
     } catch(e){
@@ -23,22 +23,6 @@ class ServiceHandler{
 
   static Future<void> restartApp() {
     return platform.invokeMethod("restartApp");
-  }
-
-  static Future<int> getSDKVersion() async {
-    if (Platform.isAndroid) {
-      return getAndroidSDKVersion();
-    } else if (Platform.isLinux) {
-      return 1;
-    } else if (Platform.isWindows) {
-      return 2;
-    } else if (Platform.isIOS) {
-      return 9999;
-    } else if (Platform.isMacOS) {
-      return 9998;
-    } else {
-      return -1;
-    }
   }
 
   static Future<int> getAndroidSDKVersion() async{
@@ -145,7 +129,62 @@ class ServiceHandler{
     bool result = false;
     try {
       result = await platform.invokeMethod("existsFileByName",{"uri":SAFUri,"fileName":fileName});
-      print("found file $fileName");
+      print("found file $fileName $result");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<String?> createFileStreamFromSAFDirectory(String fileName, String mediaType, String fileExt, String savePath) async {
+    String? result;
+    try {
+      result = await platform.invokeMethod("createFileStream", {"fileName":fileName,"mediaType":mediaType,"fileExt":fileExt,"savePath":savePath});
+      print("created file $fileName $result");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<bool> writeStreamToFileFromSAFDirectory(String SAFUri, Uint8List data) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("writeFileStream", {"uri":SAFUri, "data":data}) ?? false;
+      // print("wrote file stream $SAFUri");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<bool> closeStreamToFileFromSAFDirectory(String SAFUri) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("closeStreamToFile", {"uri":SAFUri}) ?? false;
+      print("closed file stream $SAFUri");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<bool> deleteStreamToFileFromSAFDirectory(String SAFUri) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("deleteStreamToFile", {"uri":SAFUri}) ?? false;
+      print("deleted file stream $SAFUri");
+    } catch (e) {
+      print(e);
+    }
+    return result;
+  }
+
+  static Future<bool> existsFileStreamFromSAFDirectory(String SAFUri) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("existsStreamToFile",{"uri":SAFUri});
+      print("found file stream $SAFUri");
     } catch (e) {
       print(e);
     }
@@ -271,12 +310,6 @@ class ServiceHandler{
     }
   }
 
-  static void displayToast (String str){
-    if (Platform.isAndroid){
-      platform.invokeMethod("toast",{"toastStr" : str});
-    }
-  }
-
   static void disableSleep ({bool forceEnable = false}){
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     if (Platform.isAndroid && (settingsHandler.wakeLockEnabled || forceEnable)){
@@ -337,13 +370,6 @@ class ServiceHandler{
     }
   }
 
-  static void setBrightness(double brightness) {
-    // TODO WIP
-    if (Platform.isAndroid){
-      platform.invokeMethod("setBrightness",{"brightness": brightness});
-    }
-  }
-
   static Future<String> getIP() async {
     String ip = "";
     // TODO WIP
@@ -360,13 +386,6 @@ class ServiceHandler{
 
   static Future<List<NetworkInterface>> getIPList() async {
     return await NetworkInterface.list(type: InternetAddressType.IPv4);
-  }
-
-  static void setVolume(int volume, int showSystemUI) {
-    // TODO WIP
-    if (Platform.isAndroid){
-      platform.invokeMethod("setVolume",{"volume": volume, "showUI": showSystemUI});
-    }
   }
 
   static void setVolumeButtons(bool setActive) {
@@ -398,17 +417,7 @@ class ServiceHandler{
   static Future<String?> writeImage(var imageData, fileName, mediaType, fileExt, extPathOverride) async{
     String? result;
     try{
-      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt,"extPathOverride":extPathOverride});
-    } catch(e){
-      print(e);
-    }
-    return result;
-  }
-
-  static Future<String?> writeImageCompute(Map<String, dynamic> argsMap) async{
-    String? result;
-    try{
-      result = await platform.invokeMethod("writeImageCompute",{"imageData": argsMap['bytes'], "fileName": argsMap['fileName'], "mediaType": argsMap['mediaType'], "fileExt": argsMap['fileExt'],"extPathOverride": argsMap['extPathOverride']});
+      result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt, "extPathOverride":extPathOverride,});
     } catch(e){
       print(e);
     }

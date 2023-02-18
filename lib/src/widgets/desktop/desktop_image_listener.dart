@@ -141,6 +141,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       [item],
                       searchHandler.currentBooru,
                       0,
+                      false,
                     );
                   },
                   child: const Icon(Icons.save),

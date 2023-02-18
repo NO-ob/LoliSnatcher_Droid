@@ -55,7 +55,7 @@ class _ThemePageState extends State<ThemePage> {
 
   void checkSdk() async {
     if (Platform.isAndroid) {
-      currentSdk = await ServiceHandler.getSDKVersion();
+      currentSdk = await ServiceHandler.getAndroidSDKVersion();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {});
       });

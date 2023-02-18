@@ -63,9 +63,11 @@ class VideoViewerState extends State<VideoViewer> {
   void didUpdateWidget(VideoViewer oldWidget) {
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
-      killLoading([]);
-      initVideo(false);
-      updateState();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        killLoading([]);
+        initVideo(false);
+        updateState();
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -520,7 +522,7 @@ class VideoViewerState extends State<VideoViewer> {
     );
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
       child: Material(
         child: Stack(
           alignment: Alignment.center,

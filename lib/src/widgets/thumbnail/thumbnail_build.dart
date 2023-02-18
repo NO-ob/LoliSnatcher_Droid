@@ -42,9 +42,7 @@ class ThumbnailBuild extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(3),
       child: Stack(
-        alignment: settingsHandler.previewDisplay == "Square"
-            ? Alignment.center
-            : Alignment.bottomCenter,
+        alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
         children: [
           Thumbnail(
             index: index,
@@ -73,11 +71,9 @@ class ThumbnailBuild extends StatelessWidget {
                       onChanged: (bool? value) {
                         if (value != null) {
                           if (value) {
-                            SearchHandler.instance.currentTab.selected
-                                .add(index);
+                            SearchHandler.instance.currentTab.selected.add(index);
                           } else {
-                            SearchHandler.instance.currentTab.selected
-                                .remove(index);
+                            SearchHandler.instance.currentTab.selected.remove(index);
                           }
                         }
                       },
@@ -91,8 +87,7 @@ class ThumbnailBuild extends StatelessWidget {
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.66),
-                    borderRadius:
-                        const BorderRadius.only(topLeft: Radius.circular(5)),
+                    borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
                   ),
                   child: Obx(
                     () => Row(
@@ -104,23 +99,13 @@ class ThumbnailBuild extends StatelessWidget {
 
                         AnimatedCrossFade(
                           duration: const Duration(milliseconds: 200),
-                          crossFadeState:
-                              (item.isFavourite.value == true || isLoved)
-                                  ? CrossFadeState.showFirst
-                                  : CrossFadeState.showSecond,
+                          crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
                           firstChild: AnimatedSwitcher(
                             duration: const Duration(milliseconds: 200),
                             child: Icon(
-                              item.isFavourite.value == true
-                                  ? Icons.favorite
-                                  : Icons.star,
-                              color: item.isFavourite.value == true
-                                  ? Colors.red
-                                  : Colors.grey,
-                              key: ValueKey<Color>(
-                                  item.isFavourite.value == true
-                                      ? Colors.red
-                                      : Colors.grey),
+                              item.isFavourite.value == true ? Icons.favorite : Icons.star,
+                              color: item.isFavourite.value == true ? Colors.red : Colors.grey,
+                              key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
                               size: 14,
                             ),
                           ),
@@ -148,18 +133,38 @@ class ThumbnailBuild extends StatelessWidget {
                             size: 14,
                           ),
 
-                        // if (hasComments)
-                        //   const Icon(
-                        //     Icons.comment,
-                        //     color: Colors.white,
-                        //     size: 14,
-                        //   ),
-
                         Icon(
                           itemIcon,
                           color: Colors.white,
                           size: 14,
                         ),
+
+                        if (settingsHandler.isDebug.value)
+                          Container(
+                            color: Colors.grey,
+                            width: 1,
+                            height: 10,
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                          ),
+
+                        if (settingsHandler.isDebug.value)
+                          Icon(
+                            Icons.crop_original,
+                            color: (item.sampleURL == item.thumbnailURL
+                                    ? Colors.red
+                                    : item.sampleURL == item.fileURL
+                                        ? Colors.green
+                                        : Colors.white)
+                                .withOpacity(0.66),
+                            size: 14,
+                          ),
+
+                        if (settingsHandler.isDebug.value && hasComments)
+                          const Icon(
+                            Icons.comment,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                       ],
                     ),
                   ),
