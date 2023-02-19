@@ -29,7 +29,8 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   String validateTags(String tags) {
-    if (tags.toLowerCase().contains('rating:safe')) {
+    if (tags.toLowerCase().contains('rating:safe') &&
+        booru.baseURL!.contains('danbooru.donmai.us')) {
       tags = tags.toLowerCase().replaceAll('rating:safe', 'rating:general');
     }
     return tags;
@@ -57,16 +58,25 @@ class DanbooruHandler extends BooruHandler {
      */
     if (current.containsKey("file_url")) {
       if ((current["file_url"].length > 0)) {
-        addTagsWithType(current['tag_string_general'].toString().split(" "), TagType.none);
-        addTagsWithType(current['tag_string_character'].toString().split(" "), TagType.character);
-        addTagsWithType(current['tag_string_copyright'].toString().split(" "), TagType.copyright);
-        addTagsWithType(current['tag_string_artist'].toString().split(" "), TagType.artist);
-        addTagsWithType(current['tag_string_meta'].toString().split(" "), TagType.meta);
+        addTagsWithType(
+            current['tag_string_general'].toString().split(" "), TagType.none);
+        addTagsWithType(current['tag_string_character'].toString().split(" "),
+            TagType.character);
+        addTagsWithType(current['tag_string_copyright'].toString().split(" "),
+            TagType.copyright);
+        addTagsWithType(
+            current['tag_string_artist'].toString().split(" "), TagType.artist);
+        addTagsWithType(
+            current['tag_string_meta'].toString().split(" "), TagType.meta);
 
         final bool isZip = current['file_url'].toString().endsWith(".zip");
-        final String? dateStr = current['created_at']?.toString().substring(0, current['created_at']!.toString().length - 6);
+        final String? dateStr = current['created_at']
+            ?.toString()
+            .substring(0, current['created_at']!.toString().length - 6);
         BooruItem item = BooruItem(
-          fileURL: isZip ? current["large_file_url"].toString() : current["file_url"].toString(),
+          fileURL: isZip
+              ? current["large_file_url"].toString()
+              : current["file_url"].toString(),
           sampleURL: current["large_file_url"].toString(),
           thumbnailURL: current["preview_file_url"].toString(),
           tagsList: current["tag_string"].toString().split(" "),
@@ -82,7 +92,8 @@ class DanbooruHandler extends BooruHandler {
           sources: [current["source"].toString()],
           md5String: current["md5"].toString(),
           postDate: dateStr, // 2021-06-17T16:27:45.743-04:00
-          postDateFormat: "yyyy-MM-dd't'HH:mm:ss'.'SSSZ", // when timezone support added: "yyyy-MM-dd't'HH:mm:ssZ",
+          postDateFormat:
+              "yyyy-MM-dd't'HH:mm:ss'.'SSSZ", // when timezone support added: "yyyy-MM-dd't'HH:mm:ssZ",
         );
         return item;
       } else {
@@ -101,8 +112,10 @@ class DanbooruHandler extends BooruHandler {
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://danbooru.donmai.us/posts.json?tags=rating:safe%20order:rank&limit=20&page=1
-    final String loginStr = booru.userID?.isNotEmpty == true ? "&login=${booru.userID}" : "";
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? "&api_key=${booru.apiKey}" : "";
+    final String loginStr =
+        booru.userID?.isNotEmpty == true ? "&login=${booru.userID}" : "";
+    final String apiKeyStr =
+        booru.apiKey?.isNotEmpty == true ? "&api_key=${booru.apiKey}" : "";
     return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$loginStr$apiKeyStr";
   }
 
@@ -129,7 +142,8 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   String? parseTagSuggestion(responseItem, int index) {
-    final String tagStr = (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? "";
+    final String tagStr =
+        (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? "";
     if (tagStr.isEmpty) return null;
 
     final String rawTagType = responseItem["category"]?.toString() ?? "";
@@ -149,7 +163,9 @@ class DanbooruHandler extends BooruHandler {
 
   @override
   CommentItem? parseComment(responseItem, int index) {
-    final String? dateStr = responseItem['created_at']?.toString().substring(0, responseItem['created_at']!.toString().length - 6);
+    final String? dateStr = responseItem['created_at']
+        ?.toString()
+        .substring(0, responseItem['created_at']!.toString().length - 6);
     return CommentItem(
       id: responseItem["id"].toString(),
       title: responseItem["post_id"].toString(),
