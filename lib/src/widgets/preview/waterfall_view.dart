@@ -199,7 +199,6 @@ class _WaterfallViewState extends State<WaterfallView> {
           pageBuilder: (context, anim1, anim2) => 
             // Opacity(opacity: 0.5, child: GalleryViewPage(index)),
             GalleryViewPage(index),
-          fullscreenDialog: false,
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),
           barrierColor: Colors.black26,
@@ -213,7 +212,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   void onDoubleTap(int index, BooruItem item) async {
-    searchHandler.toggleItemFavourite(index);
+    await searchHandler.toggleItemFavourite(index);
   }
 
   void onLongPress(int index, BooruItem item) async {

@@ -56,8 +56,7 @@ class SettingsHandler extends GetxController {
   RxBool showImageStats = false.obs;
   bool showURLOnThumb = false;
   bool disableImageScaling = false;
-  // disable isolates on debug builds, because they cause lags in emulator
-  bool disableImageIsolates = kDebugMode || false;
+  bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
 
   ////////////////////////////////////////////////////
@@ -154,6 +153,8 @@ class SettingsHandler extends GetxController {
   Rx<Color?> customAccentColor = Colors.pink[600].obs;
 
   Rx<ThemeMode> themeMode = ThemeMode.dark.obs; // system, light, dark
+  RxBool useMaterial3 = false.obs;
+  RxBool useDynamicColor = false.obs;
   RxBool isAmoled = false.obs;
   ////////////////////////////////////////////////////
 
@@ -165,13 +166,13 @@ class SettingsHandler extends GetxController {
     'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
     'prefBooru', 'appMode', 'handSide', 'extPathOverride',
     'lastSyncIp', 'lastSyncPort',
-    'theme', 'themeMode', 'isAmoled',
+    'theme', 'themeMode', 'isAmoled', 'useMaterial3', 'useDynamicColor',
     'customPrimaryColor', 'customAccentColor',
-    'version', 'SDK', 'disableImageScaling',
+    'version', 'disableImageScaling', 'gifsAsThumbnails',
     'cacheDuration', 'cacheSize', 'enableDrawerMascot',
     'drawerMascotPathOverride', 'allowSelfSignedCerts',
     'showFPS', 'showPerf', 'showImageStats',
-    'isDebug', 'showURLOnThumb', 'disableImageIsolates',
+    'isDebug', 'showURLOnThumb',
     'desktopListsDrag'
   ];
   // default values and possible options map for validation
@@ -382,7 +383,7 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
-    "disableImageIsolates": {
+    "gifsAsThumbnails": {
       "type": "bool",
       "default": false,
     },
@@ -460,6 +461,14 @@ class SettingsHandler extends GetxController {
       "type": "themeMode",
       "default": ThemeMode.dark,
       "options": ThemeMode.values,
+    },
+    "useMaterial3": {
+      "type": "rxbool",
+      "default": false.obs,
+    },
+    "useDynamicColor": {
+      "type": "rxbool",
+      "default": false.obs,
     },
     "isAmoled": {
       "type": "rxbool",
@@ -686,7 +695,7 @@ class SettingsHandler extends GetxController {
     File settingsFile = File("${path}settings.json");
     String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
-    loadFromJSON(settings, true);
+    await loadFromJSON(settings, true);
     return;
   }
 
@@ -761,8 +770,8 @@ class SettingsHandler extends GetxController {
         return changePageButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
-      case 'disableImageIsolates':
-        return disableImageIsolates;
+      case 'gifsAsThumbnails':
+        return gifsAsThumbnails;
       case 'desktopListsDrag':
         return desktopListsDrag;
       case 'cacheDuration':
@@ -801,6 +810,10 @@ class SettingsHandler extends GetxController {
         return theme;
       case 'themeMode':
         return themeMode;
+      case 'useMaterial3':
+        return useMaterial3;
+      case 'useDynamicColor':
+        return useDynamicColor;
       case 'isAmoled':
         return isAmoled;
       case 'customPrimaryColor':
@@ -920,8 +933,8 @@ class SettingsHandler extends GetxController {
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
-      case 'disableImageIsolates':
-        disableImageIsolates = validatedValue;
+      case 'gifsAsThumbnails':
+        gifsAsThumbnails = validatedValue;
         break;
       case 'desktopListsDrag':
         desktopListsDrag = validatedValue;
@@ -972,6 +985,12 @@ class SettingsHandler extends GetxController {
         break;
       case 'themeMode':
         themeMode.value = validatedValue;
+        break;
+      case 'useMaterial3':
+        useMaterial3 = validatedValue;
+        break;
+      case 'useDynamicColor':
+        useDynamicColor = validatedValue;
         break;
       case 'isAmoled':
         isAmoled = validatedValue;
@@ -1027,7 +1046,7 @@ class SettingsHandler extends GetxController {
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
       "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
       "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
-      "disableImageIsolates" : validateValue("disableImageIsolates", null, toJSON: true),
+      "gifsAsThumbnails" : validateValue("gifsAsThumbnails", null, toJSON: true),
       "desktopListsDrag" : validateValue("desktopListsDrag", null, toJSON: true),
       "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
       "cacheSize" : validateValue("cacheSize", null, toJSON: true),
@@ -1051,6 +1070,8 @@ class SettingsHandler extends GetxController {
 
       "theme": validateValue("theme", null, toJSON: true),
       "themeMode": validateValue("themeMode", null, toJSON: true),
+      "useMaterial3": validateValue("useMaterial3", null, toJSON: true),
+      "useDynamicColor": validateValue("useDynamicColor", null, toJSON: true),
       "isAmoled": validateValue("isAmoled", null, toJSON: true),
       "enableDrawerMascot" : validateValue("enableDrawerMascot", null, toJSON: true),
       "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
@@ -1058,8 +1079,6 @@ class SettingsHandler extends GetxController {
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
       "version": Constants.appVersion,
       "build": Constants.appBuildNumber,
-      // TODO split into two variables - system name and system version/sdk number
-      // "SDK": SDKVer,
     };
 
     // print('JSON $json');
@@ -1172,7 +1191,7 @@ class SettingsHandler extends GetxController {
     File settingsFile = File("${path}settings.json");
     var writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
-    writer.close();
+    await writer.close();
 
     if(restate) {
       SearchHandler.instance.rootRestate(); // force global state update to redraw stuff
@@ -1269,7 +1288,7 @@ class SettingsHandler extends GetxController {
     File booruFile = File("$boorusPath${booru.name}.json");
     var writer = booruFile.openWrite();
     writer.write(jsonEncode(booru.toJson()));
-    writer.close();
+    await writer.close();
 
     if(!onlySave) {
       // used only to avoid duplication after migration to json format
@@ -1285,7 +1304,7 @@ class SettingsHandler extends GetxController {
     await booruFile.delete();
     if (prefBooru == booru.name){
       prefBooru = "";
-      saveSettings(restate: true);
+      await saveSettings(restate: true);
     }
     booruList.remove(booru);
     sortBooruList();

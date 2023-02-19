@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -107,7 +108,7 @@ class _DatabasePageState extends State<DatabasePage> {
           print("something went wrong updating favourites: ${result[2]}");
         } else {
           item = result[0];
-          settingsHandler.dbHandler.updateBooruItem(item, "urlUpdate");
+          unawaited(settingsHandler.dbHandler.updateBooruItem(item, "urlUpdate"));
           setState(() {
             updatingDone += 1;
           });
@@ -246,7 +247,7 @@ class _DatabasePageState extends State<DatabasePage> {
               const SettingsButton(name: '', enabled: false),
               SettingsButton(
                 name: 'Delete Database',
-                icon: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
+                icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                 action: () {
                   showDialog(
                     context: context,
@@ -283,7 +284,7 @@ class _DatabasePageState extends State<DatabasePage> {
               ),
               SettingsButton(
                 name: 'Clear Snatched Items',
-                icon: Icon(Icons.delete_outline, color: Theme.of(context).errorColor),
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                 trailingIcon: const Icon(Icons.save_alt),
                 action: () {
                   showDialog(
@@ -323,7 +324,7 @@ class _DatabasePageState extends State<DatabasePage> {
               ),
               SettingsButton(
                 name: 'Clear Favourited Items',
-                icon: Icon(Icons.delete_outline, color: Theme.of(context).errorColor),
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                 trailingIcon: const Icon(Icons.favorite_outline),
                 action: () {
                   showDialog(
@@ -362,7 +363,7 @@ class _DatabasePageState extends State<DatabasePage> {
               ),
               SettingsButton(
                 name: 'Clear Search History',
-                icon: Icon(Icons.delete_outline, color: Theme.of(context).errorColor),
+                icon: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
                 trailingIcon: const Icon(Icons.history),
                 action: () {
                   showDialog(

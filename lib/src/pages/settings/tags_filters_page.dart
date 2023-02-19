@@ -160,18 +160,18 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
             onTap: (int index) {
               tagSearchController.clear();
             },
-            tabs: const [
-              Tab(
+            tabs: [
+              const Tab(
                 text: 'Hated',
                 icon: Icon(CupertinoIcons.eye_slash, color: Colors.red),
               ),
-              Tab(
+              const Tab(
                 text: 'Loved',
                 icon: Icon(Icons.star, color: Colors.yellow),
               ),
               Tab(
                 text: 'Settings',
-                icon: Icon(Icons.settings),
+                icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onBackground),
               ),
             ],
           ),

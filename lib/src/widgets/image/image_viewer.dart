@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -10,17 +9,22 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/services/dio_downloader.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
-import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class ImageViewer extends StatefulWidget {
-  const ImageViewer(Key? key, this.booruItem, this.index) : super(key: key);
+  const ImageViewer(
+    this.booruItem,
+    this.index, {
+    super.key,
+  });
+
   final BooruItem booruItem;
   final int index;
 
@@ -36,16 +40,17 @@ class ImageViewerState extends State<ImageViewer> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
 
-  final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
-  bool isStopped = false, isFromCache = false, isViewed = false, isZoomed = false;
+  final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
+  bool isStopped = false, isFromCache = false, isLoaded = false, isViewed = false, isZoomed = false;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   List<String> stopReason = [];
 
   ImageProvider? mainProvider;
-  late String imageURL;
-  late String imageFolder;
-  CancelToken? _dioCancelToken;
-  DioDownloader? client;
+  ImageStreamListener? imageListener;
+  ImageStream? imageStream;
+  String imageFolder = 'media';
+  int? widthLimit;
+  CancelToken? cancelToken;
 
   StreamSubscription? noScaleListener, indexListener;
 
@@ -53,43 +58,20 @@ class ImageViewerState extends State<ImageViewer> {
   void didUpdateWidget(ImageViewer oldWidget) {
     // force redraw on item data change
     if (oldWidget.booruItem != widget.booruItem) {
-      killLoading([]);
-      initViewer(false);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        killLoading([]);
+        initViewer(false);
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<void> _downloadImage() async {
-    _dioCancelToken = CancelToken();
-    client = DioDownloader(
-      imageURL,
-      headers: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-      cancelToken: _dioCancelToken,
-      onProgress: _onBytesAdded,
-      onEvent: _onEvent,
-      onError: _onError,
-      onDone: (Uint8List bytes, String url) {
-        mainProvider = getImageProvider(bytes, url);
-        viewerHandler.setLoaded(widget.key, true);
-        updateState();
-      },
-      cacheEnabled: settingsHandler.mediaCache,
-      cacheFolder: imageFolder,
-      fileNameExtras: widget.booruItem.fileNameExtras,
-    );
-    // client.runRequest();
-    if (settingsHandler.disableImageIsolates) {
-      client!.runRequest();
-    } else {
-      client!.runRequestIsolate();
-    }
-    return;
-  }
-
-  void onSize(int size) {
+  void onSize(int? size) {
     // TODO find a way to stop loading based on size when caching is enabled
     const int maxSize = 1024 * 1024 * 200;
-    if (size == 0) {
+    if (size == null) {
+      return;
+    } else if (size == 0) {
       killLoading(['File is zero bytes']);
     } else if ((size > maxSize) && isTooBig != 2) {
       // TODO add check if resolution is too big
@@ -100,46 +82,27 @@ class ImageViewerState extends State<ImageViewer> {
     if (size > 0 && widget.booruItem.fileSize == null) {
       // set item file size if it wasn't received from api
       widget.booruItem.fileSize = size;
-      // updateState();
     }
   }
 
-  void _onBytesAdded(int received, int total) {
-    _received.value = received;
-    _total.value = total;
-    onSize(total);
-  }
-
-  void _onEvent(String event, dynamic data) {
-    switch (event) {
-      case 'loaded':
-        //
-        break;
-      case 'size':
-        onSize(data as int);
-        break;
-      case 'isFromCache':
-        isFromCache = true;
-        break;
-      case 'isFromNetwork':
-        isFromCache = false;
-        break;
-      default:
+  void onBytesAdded(int receivedNew, int? totalNew) {
+    received.value = receivedNew;
+    if (totalNew != null) {
+      total.value = totalNew;
     }
-    updateState();
+    onSize(totalNew);
   }
 
-  void _onError(Exception error) {
+  void onError(Object error) {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       //
     } else {
-      if(error is DioError) {
+      if (error is DioError) {
         killLoading(['Loading Error: ${error.message}']);
       } else {
         killLoading(['Loading Error: $error']);
       }
-      //
     }
   }
 
@@ -171,22 +134,18 @@ class ImageViewerState extends State<ImageViewer> {
     });
 
     // debug output
-    viewController..outputStateStream.listen(onViewStateChanged);
-    scaleController..outputScaleStateStream.listen(onScaleStateChanged);
+    viewController.outputStateStream.listen(onViewStateChanged);
+    scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     initViewer(false);
   }
 
-  void initViewer(bool ignoreTagsCheck) {
-    if ((settingsHandler.galleryMode == "Sample" &&
-            widget.booruItem.sampleURL.isNotEmpty &&
-            widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
+  void initViewer(bool ignoreTagsCheck) async {
+    if ((settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
         widget.booruItem.sampleURL == widget.booruItem.fileURL) {
       // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
-      imageURL = widget.booruItem.sampleURL;
       imageFolder = 'samples';
     } else {
-      imageURL = widget.booruItem.fileURL;
       imageFolder = 'media';
     }
 
@@ -205,33 +164,78 @@ class ImageViewerState extends State<ImageViewer> {
 
     isStopped = false;
 
-    _startedAt.value = DateTime.now().millisecondsSinceEpoch;
+    startedAt.value = DateTime.now().millisecondsSinceEpoch;
+
+    final MediaQueryData mQuery = NavigationHandler.instance.navigatorKey.currentContext!.mediaQuery;
+    widthLimit = settingsHandler.disableImageScaling ? null : (mQuery.size.width * mQuery.devicePixelRatio * 2).round();
+
+    mainProvider ??= await getImageProvider();
+
+    imageStream?.removeListener(imageListener!);
+    imageStream = mainProvider!.resolve(const ImageConfiguration());
+    imageListener = ImageStreamListener(
+      (imageInfo, syncCall) {
+        isLoaded = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          viewerHandler.setLoaded(widget.key, true);
+        });
+        if (!syncCall) {
+          updateState();
+        }
+      },
+      onChunk: (event) {
+        onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
+      },
+      onError: (e, stack) => onError(e),
+    );
+    imageStream!.addListener(imageListener!);
 
     updateState();
-
-    _downloadImage();
   }
 
-  ImageProvider getImageProvider(Uint8List bytes, String url) {
-    if (settingsHandler.disableImageScaling || widget.booruItem.isNoScale.value) {
-      return MemoryImageTest(bytes, imageUrl: url);
-    } else {
-      int? widthLimit = settingsHandler.disableImageScaling ? null : (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio * 2).round();
-      return ResizeImage(
-        MemoryImageTest(bytes, imageUrl: url),
+  Future<ImageProvider> getImageProvider() async {
+    ImageProvider provider;
+    cancelToken = CancelToken();
+    provider = CustomNetworkImage(
+      widget.booruItem.fileURL,
+      cancelToken: cancelToken,
+      headers: await Tools.getFileCustomHeaders(
+        searchHandler.currentBooru,
+        checkForReferer: true,
+      ),
+      withCache: settingsHandler.mediaCache,
+      cacheFolder: imageFolder,
+      fileNameExtras: widget.booruItem.fileNameExtras,
+      onError: onError,
+      onCacheDetected: (bool didDetectCache) {
+        if (didDetectCache) {
+          isFromCache = true;
+          updateState();
+        }
+      },
+    );
+
+    // scale image only if it's not an animation, scaling is allowed and item is not marked as noScale
+    if (!widget.booruItem.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value && (widthLimit ?? 0) > 0) {
+      // resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
+      provider = ResizeImage(
+        provider,
         width: widthLimit,
+        allowUpscaling: false,
       );
     }
+    return provider;
   }
 
   void killLoading(List<String> reason) {
     disposables();
 
-    _total.value = 0;
-    _received.value = 0;
+    total.value = 0;
+    received.value = 0;
 
-    _startedAt.value = 0;
+    startedAt.value = 0;
 
+    isLoaded = false;
     isFromCache = false;
     isStopped = true;
     stopReason = reason;
@@ -258,31 +262,31 @@ class ImageViewerState extends State<ImageViewer> {
     if (mounted) setState(() {});
   }
 
-  void disposeClient() {
-    client?.dispose();
-    client = null;
-  }
-
   void disposables() {
-    mainProvider?.evict();
+    imageStream?.removeListener(imageListener!);
+    imageStream = null;
+    imageListener = null;
+
+    if (!(cancelToken?.isCancelled ?? true)) {
+      cancelToken?.cancel();
+    }
+    cancelToken = null;
+
+    // evict image from memory cache it it's media type or it's an animation and gifsAsThumbnails is disabled
+    if (imageFolder == 'media' || (!widget.booruItem.isAnimation || !settingsHandler.gifsAsThumbnails)) {
+      mainProvider?.evict();
+      // mainProvider?.evict().then((bool success) {
+      //   if(success) {
+      //     print('main image evicted');
+      //   } else {
+      //     print('main image eviction failed');
+      //   }
+      // });
+    }
     mainProvider = null;
-    // mainProvider?.evict().then((bool success) {
-    //   if(success) {
-    //     ServiceHandler.displayToast('main image evicted');
-    //     print('main image evicted');
-    //   } else {
-    //     ServiceHandler.displayToast('main image eviction failed');
-    //     print('main image eviction failed');
-    //   }
-    // });
 
     noScaleListener?.cancel();
     noScaleListener = null;
-
-    if (!(_dioCancelToken?.isCancelled ?? true)) {
-      _dioCancelToken?.cancel();
-    }
-    disposeClient();
   }
 
   // debug functions
@@ -301,7 +305,7 @@ class ImageViewerState extends State<ImageViewer> {
 
   void resetZoom() {
     // Don't zoom until image is loaded
-    if (mainProvider == null) return;
+    if (!isLoaded) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
   }
 
@@ -321,7 +325,7 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   void doubleTapZoom() {
-    if (mainProvider == null) return;
+    if (!isLoaded) return;
     scaleController.scaleState = PhotoViewScaleState.covering;
   }
 
@@ -330,7 +334,7 @@ class ImageViewerState extends State<ImageViewer> {
     // print('!!! Build media ${widget.index} $isViewed !!!');
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : 'ignore'}${widget.index}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
       // without this every text element will have broken styles on first frames
       child: Material(
         color: Colors.black,
@@ -349,14 +353,14 @@ class ImageViewerState extends State<ImageViewer> {
               item: widget.booruItem,
               hasProgress: true,
               isFromCache: isFromCache,
-              isDone: mainProvider != null,
+              isDone: isLoaded,
               isTooBig: isTooBig > 0,
               isStopped: isStopped,
               stopReasons: stopReason,
               isViewed: isViewed,
-              total: _total,
-              received: _received,
-              startedAt: _startedAt,
+              total: total,
+              received: received,
+              startedAt: startedAt,
               startAction: () {
                 if (isTooBig == 1) {
                   isTooBig = 2;
@@ -370,31 +374,41 @@ class ImageViewerState extends State<ImageViewer> {
             //
             AnimatedSwitcher(
               duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-              child: mainProvider == null
-                  ? Container()
-                  : Listener(
+              child: mainProvider != null
+                  ? Listener(
                       onPointerSignal: (pointerSignal) {
                         if (pointerSignal is PointerScrollEvent) {
                           scrollZoomImage(pointerSignal.scrollDelta.dy);
                         }
                       },
-                      child: PhotoView(
-                        //resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
-                        imageProvider: mainProvider!, // ?? MemoryImage(kTransparentImage),
-                        gaplessPlayback: true,
-                        // loadingBuilder: (BuildContext _, ImageChunkEvent? __) => Container(),
-                        // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                        filterQuality: FilterQuality.medium,
-                        minScale: PhotoViewComputedScale.contained,
-                        maxScale: PhotoViewComputedScale.covered * 8,
-                        initialScale: PhotoViewComputedScale.contained,
-                        enableRotation: false,
-                        basePosition: Alignment.center,
-                        controller: viewController,
-                        // tightMode: true,
-                        scaleStateController: scaleController,
+                      child: AnimatedOpacity(
+                        opacity: isLoaded ? 1 : 0,
+                        duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                        child: PhotoView(
+                          imageProvider: mainProvider,
+                          gaplessPlayback: true,
+                          loadingBuilder: (context, event) {
+                            return const SizedBox.shrink();
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              onError(error);
+                            });
+                            return const SizedBox.shrink();
+                          },
+                          // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                          filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                          minScale: PhotoViewComputedScale.contained,
+                          maxScale: PhotoViewComputedScale.covered * 8,
+                          initialScale: PhotoViewComputedScale.contained,
+                          enableRotation: false,
+                          basePosition: Alignment.center,
+                          controller: viewController,
+                          scaleStateController: scaleController,
+                        ),
                       ),
-                    ),
+                    )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),

@@ -22,10 +22,10 @@ dependencies:
     sdk: flutter
 
   alice: ^0.3.2
-  app_links: ^3.3.0
+  app_links: ^3.4.1
   auto_size_text: ^3.0.0
   awesome_notifications: ^0.7.4+1
-  chewie: ^1.3.5
+  chewie: ^1.3.6
   crypto: ^3.0.2
   cupertino_icons: ^1.0.5
   # dart_vlc: ^0.3.0
@@ -35,17 +35,18 @@ dependencies:
       url: "https://github.com/NANI-SORE/dart_vlc.git"
       ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
   dio: ^4.0.5
-  dropdown_search: ^5.0.3
+  dropdown_search: ^5.0.5
+  dynamic_color: ^1.5.4
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original
       url: "https://github.com/NANI-SORE/fast_marquee.git"
-      ref: 713412ce49bdc1f927dd39497a06c3c156a30443 # master - forked to fix for flutter 3.0
+      ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
   flash: ^2.0.5
-  flex_color_picker: ^3.0.0
-  flutter_displaymode: ^0.4.1
+  flex_color_picker: ^3.0.2
+  flutter_displaymode: ^0.5.0
   flutter_improved_scrolling: ^0.0.3
-  flutter_inappwebview: ^5.7.2+2
+  flutter_inappwebview: ^5.7.2+3
   flutter_inner_drawer:
     git:
       url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
@@ -56,7 +57,7 @@ dependencies:
   google_fonts: ^3.0.1
   html: ^0.15.1
   huge_listview: ^2.0.4
-  image: ^3.2.2
+  image: ^4.0.11
   intl: ^0.17.0
   keyboard_actions: ^4.1.0
   logger_fork: ^1.2.0
@@ -72,13 +73,13 @@ dependencies:
   preload_page_view: ^0.1.6
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.5
-  sqflite_common_ffi: ^2.2.0+1
-  sqflite: ^2.2.1
+  sqflite_common_ffi: ^2.2.1
+  sqflite: ^2.2.3
   statsfl: ^2.3.0
   transparent_image: ^2.0.0
   uuid: ^3.0.7
   vibration: ^1.7.5
-  video_player: ^2.4.8
+  video_player: ^2.5.1
   waterfall_flow: ^3.0.2
   xml: ^6.1.0
 

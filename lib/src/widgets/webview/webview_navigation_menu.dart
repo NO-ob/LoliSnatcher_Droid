@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -9,6 +10,8 @@ enum _NavigationMenuOptions {
   enterCustomUrl,
   listCookies,
   clearCookies,
+  getFavicon,
+  copyUrl,
 }
 
 class WebviewNavigationMenu extends StatefulWidget {
@@ -81,7 +84,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
     final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? Uri.parse('https://flutter.dev'));
     if (!mounted) return;
 
-    showDialog(context: context, builder: (BuildContext context) {
+    await showDialog(context: context, builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('Cookies'),
         content: SingleChildScrollView(
@@ -95,7 +98,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
           ),
         ),
         actions: const [
-          CloseButton()
+          CloseButton(),
         ],
       );
     });
@@ -113,6 +116,61 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
         content: Text(message),
       ),
     );
+  }
+
+  Future<void> _onGetFavicon(InAppWebViewController controller) async {
+    final String? html = await controller.getHtml();
+    if (!mounted) return;
+
+    String? favicon;
+    if (html != null) {
+      final RegExp faviconRegex = RegExp(r'<link rel="(?:shortcut icon|icon|)" href="([^"]+)"', caseSensitive: false);
+      final RegExpMatch? match = faviconRegex.firstMatch(html);
+      if (match != null) {
+        favicon = match.group(1);
+      }
+    }
+
+    final Uri? uri = await controller.getUrl();
+
+    await showDialog(context: context, builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Favicon'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              SelectableText(
+                favicon ?? 'No favicon found',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const Text('Host:'),
+              SelectableText(
+                '${uri?.scheme}://${uri?.host}',
+              ),
+              const Text('(text above is selectable)'),
+              const Text(''),
+              const Text('Field to merge texts:'),
+              const TextField(),
+            ],
+          ),
+        ),
+        actions: const [
+          CloseButton(),
+        ],
+      );
+    });
+  }
+
+  Future<void> _onCopyUrl(InAppWebViewController controller) async {
+    final String? url = (await controller.getUrl())?.toString();
+    if (url != null) {
+      await Clipboard.setData(ClipboardData(text: url));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Copied URL to clipboard'),
+        ),
+      );
+    }
   }
 
   @override
@@ -135,6 +193,12 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
               case _NavigationMenuOptions.clearCookies:
                 await _onClearCookies(controller.data!);
                 break;
+              case _NavigationMenuOptions.getFavicon:
+                await _onGetFavicon(controller.data!);
+                break;
+              case _NavigationMenuOptions.copyUrl:
+                await _onCopyUrl(controller.data!);
+                break;
             }
           },
           itemBuilder: (context) => [
@@ -153,6 +217,14 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
             const PopupMenuItem<_NavigationMenuOptions>(
               value: _NavigationMenuOptions.clearCookies,
               child: Text('Clear cookies'),
+            ),
+            const PopupMenuItem<_NavigationMenuOptions>(
+              value: _NavigationMenuOptions.getFavicon,
+              child: Text('Get favicon'),
+            ),
+            const PopupMenuItem<_NavigationMenuOptions>(
+              value: _NavigationMenuOptions.copyUrl,
+              child: Text('Copy URL'),
             ),
           ],
         );

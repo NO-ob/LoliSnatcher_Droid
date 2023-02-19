@@ -79,7 +79,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
           isNotEmptyBooru
               ? (tab.selectedBooru.value.type == "Favourites"
                   ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                  : Favicon(tab.selectedBooru.value.faviconURL!))
+                  : Favicon(tab.selectedBooru.value))
               : const Icon(CupertinoIcons.question, size: 18),
           const SizedBox(width: 3),
           MarqueeText(

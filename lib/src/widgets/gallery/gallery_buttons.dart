@@ -37,14 +37,18 @@ class _GalleryButtonsState extends State<GalleryButtons> {
       if (settingsHandler.appMode.value.isMobile) {
         isVisible = value;
       }
-      updateState();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        updateState();
+      });
     });
 
     isLoaded = viewerHandler.isLoaded.value;
     loadedListener = viewerHandler.isLoaded.listen((bool value) {
       if (isLoaded != value) {
         isLoaded = value;
-        updateState();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          updateState();
+        });
       }
     });
   }
@@ -83,18 +87,19 @@ class _GalleryButtonsState extends State<GalleryButtons> {
     final bool isPagesHere = settingsHandler.changePageButtonsPosition == side;
 
     return [
-      if(isZoomHere) const ZoomButton(),
-      if(isZoomHere && isPagesHere) buildDivider(isVerticalDirection),
-
-      if(isPagesHere) ChangePageButtons(
-        controller: widget.pageController,
-        isPrev: true,
-      ),
-      if(isPagesHere) buildDivider(isVerticalDirection),
-      if(isPagesHere) ChangePageButtons(
-        controller: widget.pageController,
-        isPrev: false,
-      ),
+      if (isZoomHere) const ZoomButton(),
+      if (isZoomHere && isPagesHere) buildDivider(isVerticalDirection),
+      if (isPagesHere)
+        ChangePageButtons(
+          controller: widget.pageController,
+          isPrev: true,
+        ),
+      if (isPagesHere) buildDivider(isVerticalDirection),
+      if (isPagesHere)
+        ChangePageButtons(
+          controller: widget.pageController,
+          isPrev: false,
+        ),
     ];
   }
 
@@ -130,7 +135,6 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                       ),
                     ),
                   ),
-    
                   Positioned(
                     bottom: bottomOffset,
                     right: distanceFromSide,

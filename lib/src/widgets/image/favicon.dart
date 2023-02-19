@@ -1,99 +1,132 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
+import 'package:get/get_connect/http/src/status/http_status.dart';
 
-import 'package:lolisnatcher/src/services/dio_downloader.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/widgets/image/custom_image_provider.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
+import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 
 class Favicon extends StatefulWidget {
-  final String faviconURL;
-  const Favicon(this.faviconURL, {Key? key}) : super(key: key);
+  final Booru booru;
+  const Favicon(
+    this.booru, {
+    this.color,
+    super.key,
+  });
+
+  final Color? color;
 
   @override
   State<Favicon> createState() => _FaviconState();
 }
 
 class _FaviconState extends State<Favicon> {
-  bool isFailed = false;
-  CancelToken? _dioCancelToken;
-  DioDownloader? client;
-  ImageProvider? faviconProvider;
+  bool isFailed = false, isLoaded = false, manualReloadTapped = false;
+  CancelToken? cancelToken;
+  ImageProvider? mainProvider;
+  ImageStream? imageStream;
+  ImageStreamListener? imageListener;
+  String? errorCode;
 
   static const double iconSize = 20;
 
   @override
   void didUpdateWidget(Favicon oldWidget) {
     // force redraw on tab change
-    if (oldWidget.faviconURL != widget.faviconURL) {
-      restartLoading();
+    if (oldWidget.booru.faviconURL != widget.booru.faviconURL) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        restartLoading();
+      });
     }
     super.didUpdateWidget(oldWidget);
   }
 
-  Future<void> downloadFavicon() async {
-    _dioCancelToken = CancelToken();
-    client = DioDownloader(
-      widget.faviconURL,
-      cancelToken: _dioCancelToken,
-      onError: _onError,
-      onDone: (Uint8List bytes, String url) {
-        if (!isFailed) {
-          faviconProvider = getImageProvider(bytes, url);
-          updateState();
-        }
-      },
-      cacheEnabled: true,
-      cacheFolder: 'favicons',
-      timeoutTime: 5000,
-      fileNameExtras: 'favicon_'
+  Future<ImageProvider> getImageProvider() async {
+    cancelToken ??= CancelToken();
+    return ResizeImage(
+      CustomNetworkImage(
+        widget.booru.faviconURL!,
+        withCache: true,
+        headers: await Tools.getFileCustomHeaders(widget.booru),
+        cacheFolder: 'favicons',
+        fileNameExtras: 'favicon_',
+        cancelToken: cancelToken,
+        sendTimeout: 5000,
+        receiveTimeout: 5000,
+        onError: onError,
+      ),
+      width: 200,
+      height: 200,
     );
-    client!.runRequest();
-    // client!.runRequestIsolate();
-    return;
   }
 
-  ImageProvider getImageProvider(Uint8List bytes, String url) {
-    return MemoryImageTest(bytes, imageUrl: url);
-  }
-
-  void _onError(Exception error) {
+  void onError(Object error) async {
     //// Error handling
     if (error is DioError && CancelToken.isCancel(error)) {
       //
     } else {
+      if (error is Exception && (error as dynamic).message == 'Invalid image data') {
+        ((mainProvider as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
+        disposables();
+      }
+      if (error is DioError && error.response != null && error.response!.statusCode != HttpStatus.ok) {
+        if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
+          await Tools.checkForCaptcha(error.response!, error.requestOptions.uri);
+          manualReloadTapped = false;
+        }
+        errorCode = error.response!.statusCode.toString();
+      }
+
       isFailed = true;
-      updateState();
-      //
+      Future.delayed(const Duration(milliseconds: 300), () {
+        updateState();
+      });
     }
   }
 
   @override
   void initState() {
     super.initState();
-    downloadFavicon();
+    restartLoading();
   }
 
   void updateState() {
     if (mounted) setState(() {});
   }
 
-  void restartLoading() {
+  void restartLoading() async {
+    if (mounted) {
+      await mainProvider?.evict();
+    }
     disposables();
 
     isFailed = false;
+    errorCode = null;
 
     updateState();
 
-    downloadFavicon();
-  }
+    mainProvider ??= await getImageProvider();
 
-  void disposeClient() {
-    client?.dispose();
-    client = null;
+    imageStream?.removeListener(imageListener!);
+    imageStream = mainProvider!.resolve(const ImageConfiguration());
+    imageListener = ImageStreamListener(
+      (imageInfo, syncCall) {
+        isLoaded = true;
+        if (!syncCall) {
+          updateState();
+        }
+      },
+      onError: (e, stack) {
+        Logger.Inst().log("Failed to load favicon: ${widget.booru.faviconURL}", "Favicon", "build", null); // LogTypes.imageLoadingError);
+        onError(e);
+      },
+    );
+    imageStream!.addListener(imageListener!);
+
+    updateState();
   }
 
   @override
@@ -103,37 +136,16 @@ class _FaviconState extends State<Favicon> {
   }
 
   void disposables() {
-    // faviconProvider?.evict();
-    faviconProvider = null;
-    if (!(_dioCancelToken != null && _dioCancelToken!.isCancelled)) {
-      _dioCancelToken?.cancel();
-    }
-    disposeClient();
-  }
+    imageStream?.removeListener(imageListener!);
+    imageStream = null;
+    imageListener = null;
 
-  Widget loadingElementBuilder(BuildContext ctx) {
-    // if (loadingProgress == null && !settingsHandler.thumbnailCache) {
-    //   // Resulting image for network loaded thumbnail
-    //   return child;
-    // }
+    mainProvider = null;
 
-    if (isFailed) {
-      return Center(
-        child: InkWell(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(Icons.broken_image, size: iconSize),
-            ],
-          ),
-          onTap: () {
-            restartLoading();
-          },
-        ),
-      );
-    } else {
-      return const Icon(null); // Center(child: CircularProgressIndicator());
+    if (!(cancelToken != null && cancelToken!.isCancelled)) {
+      cancelToken?.cancel();
     }
+    cancelToken = null;
   }
 
   @override
@@ -146,24 +158,46 @@ class _FaviconState extends State<Favicon> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          if (faviconProvider == null) loadingElementBuilder(context),
+          if (mainProvider != null)
+            Image(
+              image: mainProvider!,
+              width: iconSize,
+              height: iconSize,
+              errorBuilder: (_, Object exception, ___) {
+                return FaviconError(
+                  iconSize: iconSize,
+                  color: widget.color ?? Theme.of(context).colorScheme.onBackground,
+                  code: errorCode,
+                  onRestart: () {
+                    manualReloadTapped = true;
+                    restartLoading();
+                  },
+                );
+              },
+            )
+          else ...[
+            if (isFailed)
+              FaviconError(
+                iconSize: iconSize,
+                color: Colors.grey,
+                code: errorCode,
+                onRestart: () {
+                  manualReloadTapped = true;
+                  restartLoading();
+                },
+              )
+            else
+              const SizedBox.shrink(),
+          ],
 
-          AnimatedOpacity(
-            opacity: faviconProvider != null ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: faviconProvider != null
-                ? Image(
-                    image: faviconProvider!,
-                    width: iconSize,
-                    height: iconSize,
-                    errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-                      Logger.Inst().log("Failed to load favicon: ${widget.faviconURL}", "Favicon", "build", LogTypes.imageInfo);
-                      isFailed = true;
-                      return loadingElementBuilder(context);
-                      // return const Icon(Icons.broken_image, size: iconSize);
-                    },
-                  )
-                : null,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: (isLoaded || isFailed)
+                ? const SizedBox.shrink()
+                : ShimmerCard(
+                    isLoading: !isLoaded && !isFailed,
+                    child: !isLoaded && !isFailed ? null : Container(),
+                  ),
           ),
 
           // Image(
@@ -175,6 +209,60 @@ class _FaviconState extends State<Favicon> {
           //   },
           // ),
         ],
+      ),
+    );
+  }
+}
+
+class FaviconError extends StatelessWidget {
+  const FaviconError({
+    this.iconSize = 20,
+    this.color = Colors.grey,
+    this.code,
+    this.onRestart,
+    super.key,
+  });
+
+  final double iconSize;
+  final Color color;
+  final String? code;
+  final VoidCallback? onRestart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: InkWell(
+        onTap: onRestart,
+        child: Stack(
+          children: [
+            Center(
+              child: Icon(
+                Icons.broken_image,
+                size: iconSize,
+                color: color,
+              ),
+            ),
+            if (code != null)
+              Center(
+                child: FittedBox(
+                  child: Container(
+                    padding: const EdgeInsets.all(1),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error,
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                    child: Text(
+                      code!,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Theme.of(context).colorScheme.onError,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

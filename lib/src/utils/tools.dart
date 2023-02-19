@@ -4,8 +4,13 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:dio/dio.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
@@ -29,16 +34,14 @@ class Tools {
   }
 
   static String getFileExt(String fileURL) {
-    int queryLastIndex =
-        fileURL.lastIndexOf("?"); // if has GET query parameters
+    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
     return fileExt;
   }
 
   static String getFileName(String fileURL) {
-    int queryLastIndex =
-        fileURL.lastIndexOf("?"); // if has GET query parameters
+    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
     String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
     return fileExt;
@@ -48,9 +51,7 @@ class Tools {
     RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
     RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
     RegExp reservedRe = RegExp(r'^\.+$');
-    RegExp windowsReservedRe = RegExp(
-        r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$',
-        caseSensitive: false);
+    RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
     RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
 
     // TODO truncate to 255 symbols for windows?
@@ -64,10 +65,27 @@ class Tools {
   }
 
   // unified http headers list generator for dio in thumb/media/video loaders
-  static Map<String, String> getFileCustomHeaders(Booru booru,
-      {bool checkForReferer = false}) {
-    // a few boorus doesn't work without a browser useragent
+  static Future<Map<String, String>> getFileCustomHeaders(
+    Booru booru, {
+    bool checkForReferer = false,
+  }) async {
+    // a few boorus don't work without a browser useragent
     Map<String, String> headers = {"User-Agent": browserUserAgent()};
+    if(booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
+      headers["User-Agent"] = appUserAgent();
+    }
+
+    if (!isTestMode) {
+      try {
+        final cookies = await CookieManager.instance().getCookies(url: Uri(host: Uri.parse(booru.baseURL!).host));
+        if (cookies.isNotEmpty) {
+          headers["Cookie"] = cookies.map((e) => "${e.name}=${e.value}").join("; ");
+        }
+      } catch (e) {
+        print('Error getting cookies: $e');
+      }
+    }
+
     // some boorus require referer header
     if (checkForReferer) {
       switch (booru.type) {
@@ -114,8 +132,29 @@ class Tools {
 
   // TODO move to separate class (something with the name like "Constants")
   static String appUserAgent() => "LoliSnatcher_Droid/${Constants.appVersion}";
-  static String browserUserAgent() =>
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
+  static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
+
+  static Future<void> checkForCaptcha(Response? response, Uri uri) async {
+    if (captchaScreenActive || isTestMode) return;
+
+    final RegExp captchaRegex = RegExp(r'captcha', caseSensitive: false);
+    if ((response?.statusCode == 503 || response?.statusCode == 403) || (response?.data is String && captchaRegex.hasMatch(response?.data as String))) {
+      captchaScreenActive = true;
+      await Navigator.push(
+        NavigationHandler.instance.navigatorKey.currentContext!,
+        MaterialPageRoute(
+          builder: (context) => InAppWebviewView(
+            initialUrl: '${uri.scheme}://${uri.host}',
+            title: 'Captcha check',
+            subtitle: 'Possible captcha detected, please solve it and press back after that. If there is no captcha then it\'s probably some other authentication issue. [Beta]',
+          ),
+        ),
+      );
+      captchaScreenActive = false;
+    }
+  }
 }
+
+bool captchaScreenActive = false;

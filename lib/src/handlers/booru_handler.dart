@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' as Get;
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -42,9 +42,9 @@ abstract class BooruHandler {
     "sort:" : "S",
   };
 
-  RxList<BooruItem> fetched = RxList<BooruItem>([]);
+  Get.RxList<BooruItem> fetched = Get.RxList<BooruItem>([]);
   List<BooruItem> get filteredFetched => fetched.where((el) {
-    SettingsHandler settingsHandler = Get.find<SettingsHandler>();
+    SettingsHandler settingsHandler = SettingsHandler.instance;
 
     if (settingsHandler.filterHated && el.isHated.value) {
       return false;
@@ -107,7 +107,7 @@ abstract class BooruHandler {
     }
     Logger.Inst().log('$url ${uri.toString()}', className, "Search", LogTypes.booruHandlerSearchURL);
 
-    final dynamic response;
+    Response response;
     try {
       response = await fetchSearch(uri);
       if (response.statusCode == 200) {
@@ -123,6 +123,8 @@ abstract class BooruHandler {
           locked = true;
         }
       } else {
+        await Tools.checkForCaptcha(response, uri);
+
         Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("response: ${response.data}", className, "Search", LogTypes.booruHandlerFetchFailed);
@@ -131,6 +133,7 @@ abstract class BooruHandler {
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
       if(e is DioError) {
+        await Tools.checkForCaptcha(e.response, uri);
         errorString = e.message;
       } else {
         errorString = e.toString();
@@ -141,7 +144,7 @@ abstract class BooruHandler {
     return fetched;
   }
 
-  Future fetchSearch(Uri uri) async {
+  Future<Response<dynamic>> fetchSearch(Uri uri) async {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
@@ -203,7 +206,7 @@ abstract class BooruHandler {
   Future<void> afterParseResponse(List<BooruItem> newItems) async {
     final int lengthBefore = fetched.length;
     fetched.addAll(newItems);
-    await setMultipleTrackedValues(lengthBefore, fetched.length);
+    unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
     // TODO
     // notifyAboutFailed();
     failedItems.clear();
@@ -235,7 +238,7 @@ abstract class BooruHandler {
     }
     Logger.Inst().log('$url ${uri.toString()}', className, "tagSearch", LogTypes.booruHandlerSearchURL);
 
-    final dynamic response;
+    Response response;
     const int limit = 10;
     try {
       response = await fetchTagSuggestions(uri, input);
@@ -268,7 +271,7 @@ abstract class BooruHandler {
     return tags;
   }
 
-  Future fetchTagSuggestions(Uri uri, String input) async {
+  Future<Response<dynamic>> fetchTagSuggestions(Uri uri, String input) async {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
@@ -314,7 +317,7 @@ abstract class BooruHandler {
     }
     Logger.Inst().log('$url ${uri.toString()}', className, "getComments", LogTypes.booruHandlerSearchURL);
 
-    final dynamic response;
+    Response response;
     try {
       response = await fetchComments(uri);
       if (response.statusCode == 200) {
@@ -339,7 +342,7 @@ abstract class BooruHandler {
     return comments;
   }
 
-  Future fetchComments(Uri uri) async {
+  Future<Response<dynamic>> fetchComments(Uri uri) async {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
@@ -395,7 +398,7 @@ abstract class BooruHandler {
     }
     Logger.Inst().log('$url ${uri.toString()}', className, "getNotes", LogTypes.booruHandlerSearchURL);
 
-    final dynamic response;
+    Response response;
     try {
       response = await fetchNotes(uri);
       if (response.statusCode == 200) {
@@ -420,7 +423,7 @@ abstract class BooruHandler {
     return notes;
   }
 
-  Future fetchNotes(Uri uri) async {
+  Future<Response<dynamic>> fetchNotes(Uri uri) async {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
@@ -455,7 +458,7 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  RxInt totalCount = 0.obs;
+  Get.RxInt totalCount = 0.obs;
   // TODO for boorus where api doesn't give amount outright and we have to calculate it based on smth (last page*items per page, for example) - show "~" symbol to indicate that
   bool countIsQuestionable = false;
   Future<void> searchCount(String input) async {

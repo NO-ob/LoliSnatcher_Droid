@@ -7,6 +7,7 @@ import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
@@ -17,8 +18,8 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 
 class NotesRenderer extends StatefulWidget {
-  const NotesRenderer(this.controller, {Key? key}) : super(key: key);
-  final PreloadPageController? controller;
+  const NotesRenderer(this.pageController, {Key? key}) : super(key: key);
+  final PreloadPageController? pageController;
 
   @override
   State<NotesRenderer> createState() => _NotesRendererState();
@@ -28,6 +29,7 @@ class _NotesRendererState extends State<NotesRenderer> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
+  final NavigationHandler navigationHandler = NavigationHandler.instance;
 
   late BooruItem item;
   late double screenWidth,
@@ -60,12 +62,10 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     item = searchHandler.viewedItem.value;
     doCalculations(); // trigger calculations on init even if there is no item to init all values
-    loading = true;
     loadNotes();
     itemListener = searchHandler.viewedItem.listen((BooruItem item) {
       // TODO doesn't trigger for the first item after changing tabs on desktop
       this.item = item;
-      loading = true;
       updateState();
       loadNotes();
     });
@@ -75,7 +75,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       triggerCalculations();
     });
 
-    widget.controller?.addListener(() {
+    widget.pageController?.addListener(() {
       triggerCalculations();
     });
   }
@@ -98,13 +98,18 @@ class _NotesRendererState extends State<NotesRenderer> {
     final handler = searchHandler.currentBooruHandler;
     final bool hasSupport = handler.hasNotesSupport;
     final bool hasNotes = item.hasNotes == true;
-    final bool alreadyLoaded = item.notes.isNotEmpty;
+    // final bool alreadyLoaded = item.notes.isNotEmpty;
 
-    if (item.fileURL.isEmpty || !hasSupport || !hasNotes || alreadyLoaded) {
+    if (item.fileURL.isEmpty || !hasSupport || !hasNotes) {
       loading = false;
       updateState();
       return;
     }
+
+    if (loading) {
+      return;
+    }
+    loading = true;
 
     item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
 
@@ -117,13 +122,13 @@ class _NotesRendererState extends State<NotesRenderer> {
   void triggerCalculations() {
     // debounce to prevent unnecessary calculations, especially when resizing
     // lessens the impact on performance, but causes notes to be a bit shake-ey when resizing
-    Debounce.debounce(
+    Debounce.delay(
       tag: 'notes_calculations',
       callback: () {
         doCalculations();
         updateState();
       },
-      duration: const Duration(milliseconds: 2),
+      duration: const Duration(milliseconds: 50),
     );
   }
 
@@ -135,7 +140,7 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     ratioDiff = 1;
     widthLimit = 0;
-    if (settingsHandler.disableImageScaling || item.isNoScale.value) {
+    if (settingsHandler.disableImageScaling || item.isNoScale.value || item.isAnimation) {
       //  do nothing
     } else {
       Size screenSize = WidgetsBinding.instance.window.physicalSize;
@@ -149,10 +154,10 @@ class _NotesRendererState extends State<NotesRenderer> {
       }
     }
 
-    viewScale = viewerHandler.viewState.value.scale ?? 1;
+    viewScale = viewerHandler.viewState.value?.scale ?? 1;
     screenToImageRatio = viewScale == 1 ? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight)) : viewScale;
 
-    pageOffset = (((widget.controller?.page ?? 0) * 10000).toInt() % 10000) / 10000;
+    pageOffset = (((widget.pageController?.page ?? 0) * 10000).toInt() % 10000) / 10000;
     pageOffset = pageOffset > 0.5 ? (1 - pageOffset) : (0 - pageOffset);
     bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
 
@@ -160,32 +165,10 @@ class _NotesRendererState extends State<NotesRenderer> {
     offsetX = isVertical ? offsetX : (offsetX + (pageOffset * screenWidth));
 
     offsetY = (screenHeight / 2) - (imageHeight / 2 * screenToImageRatio);
-    offsetY = isVertical ? (offsetY + (pageOffset * screenHeight )) : offsetY;
+    offsetY = isVertical ? (offsetY + (pageOffset * screenHeight)) : offsetY;
 
-    viewOffsetX = viewerHandler.viewState.value.position.dx;
-    viewOffsetY = viewerHandler.viewState.value.position.dy;
-  }
-
-  Widget buildNote(NoteItem note) {
-    final double scaledX = (note.posX * screenToImageRatio * ratioDiff) + offsetX + viewOffsetX;
-    final double scaledY = (note.posY * screenToImageRatio * ratioDiff) + offsetY + viewOffsetY;
-    final double scaledWidth = note.width * screenToImageRatio * ratioDiff;
-    final double scaledHeight = note.height * screenToImageRatio * ratioDiff;
-
-    // TODO don't render when out of view
-    // ...but is it really needed? that will add extra calculations...
-
-    if(loading) {
-      return const SizedBox();
-    }
-
-    return NoteBuild(
-      text: note.content,
-      left: scaledX,
-      top: scaledY,
-      width: scaledWidth,
-      height: scaledHeight,
-    );
+    viewOffsetX = viewerHandler.viewState.value?.position.dx ?? 0;
+    viewOffsetY = viewerHandler.viewState.value?.position.dy ?? 0;
   }
 
   @override
@@ -225,19 +208,16 @@ class _NotesRendererState extends State<NotesRenderer> {
                       ],
                     ),
                   ),
-                ),
-              ...item.notes.map((note) => buildNote(note)).toList(),
-              // ...List.generate(
-              //   5,
-              //   (int index) => NoteItem(
-              //     postID: 'fakeNote$index',
-              //     content: 'fakeNote$index',
-              //     posX: 100 * index,
-              //     posY: 100 * index,
-              //     width: 100,
-              //     height: 100,
-              //   ),
-              // ).map((note) => buildNote(note)).toList(),
+                )
+              else
+                // TODO change to animated transform?
+                ...item.notes.map((note) => NoteBuild(
+                      text: note.content,
+                      left: (note.posX * screenToImageRatio * ratioDiff) + offsetX + viewOffsetX,
+                      top: (note.posY * screenToImageRatio * ratioDiff) + offsetY + viewOffsetY,
+                      width: note.width * screenToImageRatio * ratioDiff,
+                      height: note.height * screenToImageRatio * ratioDiff,
+                    )),
             ],
           );
         }
@@ -247,12 +227,6 @@ class _NotesRendererState extends State<NotesRenderer> {
 }
 
 class NoteBuild extends StatefulWidget {
-  final String? text;
-  final double left;
-  final double top;
-  final double width;
-  final double height;
-
   const NoteBuild({
     Key? key,
     required this.text,
@@ -261,6 +235,12 @@ class NoteBuild extends StatefulWidget {
     required this.width,
     required this.height,
   }) : super(key: key);
+
+  final String? text;
+  final double left;
+  final double top;
+  final double width;
+  final double height;
 
   @override
   State<NoteBuild> createState() => _NoteBuildState();
@@ -271,6 +251,15 @@ class _NoteBuildState extends State<NoteBuild> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO don't render when box is out of the screen
+    // final screen = MediaQuery.of(context).size;
+    // if (widget.left < (0 - widget.width - 30) ||
+    //     widget.top < (0 - widget.height - 30) ||
+    //     widget.left > (screen.width + 30) ||
+    //     widget.top > (screen.height + 30)) {
+    //   return const SizedBox.shrink();
+    // }
+
     return Positioned(
       left: widget.left,
       top: widget.top,

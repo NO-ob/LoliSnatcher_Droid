@@ -185,7 +185,7 @@ class TabBooruSelectorItem extends StatelessWidget {
     return Row(
       children: <Widget>[
         //Booru Icon
-        if (withFavicon) booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru.faviconURL!),
+        if (withFavicon) booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru),
         //Booru name
         MarqueeText(
           key: ValueKey(name),

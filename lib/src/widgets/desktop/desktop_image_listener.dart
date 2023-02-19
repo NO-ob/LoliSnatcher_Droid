@@ -46,9 +46,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value) {
-    if (value.isImage()) {
-      return ImageViewer(value.key, value, 1);
-    } else if (value.isVideo()) {
+    if (value.isImage) {
+      return ImageViewer(value, 1, key: value.key);
+    } else if (value.isVideo) {
       if (Platform.isAndroid || Platform.isIOS) {
         return VideoViewer(value.key, value, 1, true);
       } else if (Platform.isWindows || Platform.isLinux) {
@@ -141,6 +141,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       [item],
                       searchHandler.currentBooru,
                       0,
+                      false,
                     );
                   },
                   child: const Icon(Icons.save),

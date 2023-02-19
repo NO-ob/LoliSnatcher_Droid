@@ -101,7 +101,7 @@ class _MainAppBarState extends State<MainAppBar> {
     // return Obx(() {
     //   if (LocalAuthHandler.instance.deviceSupportsBiometrics.value == true) {
     //     return IconButton(
-    //       icon: Icon(Icons.lock, color: Theme.of(context).appBarTheme.iconTheme!.color!),
+    //       icon: Icon(Icons.lock, color: Theme.of(context).appBarTheme.iconTheme?.color),
     //       onPressed: () {
     //         LocalAuthHandler.instance.logout();
     //       },
@@ -114,7 +114,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget devButton() {
     return IconButton(
-      icon: Icon(Icons.timelapse, color: Theme.of(context).appBarTheme.iconTheme!.color!),
+      icon: Icon(Icons.timelapse, color: Theme.of(context).appBarTheme.iconTheme?.color),
       onPressed: () {
         sinceLastBackup();
         Tools.forceClearMemoryCache(withLive: true);
@@ -127,7 +127,7 @@ class _MainAppBarState extends State<MainAppBar> {
       if (searchHandler.list.isNotEmpty) {
         return Stack(alignment: Alignment.center, children: [
           IconButton(
-            icon: Icon(Icons.save, color: Theme.of(context).appBarTheme.iconTheme!.color!),
+            icon: Icon(Icons.save, color: Theme.of(context).appBarTheme.iconTheme?.color),
             onPressed: () {
               getPerms();
               // call a function to save the currently viewed image when the save button is pressed
@@ -136,6 +136,7 @@ class _MainAppBarState extends State<MainAppBar> {
                   searchHandler.currentTab.getSelected(),
                   searchHandler.currentBooru,
                   settingsHandler.snatchCooldown,
+                  false,
                 );
                 searchHandler.currentTab.selected.value = [];
               } else {

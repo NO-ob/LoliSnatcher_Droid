@@ -13,17 +13,15 @@ class ThumbnailLoading extends StatefulWidget {
   const ThumbnailLoading({
     Key? key,
     required this.item,
-
     required this.hasProgress,
     required this.isFromCache,
     required this.isDone,
     required this.isFailed,
-
     required this.total,
     required this.received,
     required this.startedAt,
-
     required this.restartAction,
+    this.errorCode,
   }) : super(key: key);
 
   final BooruItem item;
@@ -36,6 +34,8 @@ class ThumbnailLoading extends StatefulWidget {
   final RxInt total;
   final RxInt received;
   final RxInt startedAt;
+
+  final String? errorCode;
 
   final void Function()? restartAction;
 
@@ -80,7 +80,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     _total = total ?? _total;
 
     final bool isDone = _total > 0 && _received >= _total;
-    Debounce.debounce(
+    Debounce.delay(
       tag: 'loading_thumbnail_progress_${widget.item.thumbnailURL}',
       callback: () {
         updateState();
@@ -152,9 +152,9 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.broken_image),
-                BorderedText(
+              children: [
+                const Icon(Icons.broken_image),
+                const BorderedText(
                   strokeWidth: 2,
                   child: Text(
                     'ERROR',
@@ -164,7 +164,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
                     ),
                   ),
                 ),
-                BorderedText(
+                const BorderedText(
                   strokeWidth: 2,
                   child: Text(
                     'Tap to retry!',
@@ -174,6 +174,17 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
                     ),
                   ),
                 ),
+                if (widget.errorCode?.isNotEmpty == true)
+                  BorderedText(
+                    strokeWidth: 2,
+                    child: Text(
+                      widget.errorCode!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -202,39 +213,27 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
           width: 1,
           child: RotatedBox(
             quarterTurns: -1,
-            child: LinearProgressIndicator(
-              value: percentDone == 0 ? null : percentDone,
+            child: Opacity(
+              opacity: 0.66,
+              child: LinearProgressIndicator(
+                value: percentDone == 0 ? null : percentDone,
+              ),
             ),
           ),
         ),
-
+        // 
         SizedBox(
           width: 1,
           child: RotatedBox(
             quarterTurns: percentDone != 0 ? -1 : 1,
-            child: LinearProgressIndicator(
-              value: percentDone == 0 ? null : percentDone,
+            child: Opacity(
+              opacity: 0.66,
+              child: LinearProgressIndicator(
+                value: percentDone == 0 ? null : percentDone,
+              ),
             ),
           ),
         ),
-        // SizedBox(
-        //   height: 100 / widget.columnCount,
-        //   width: 100 / widget.columnCount,
-        //   child: CircularProgressIndicator(
-        //     strokeWidth: 14 / widget.columnCount,
-        //     value: percentDone,
-        //   ),
-        // ),
-        // if(widget.columnCount < 5 && percentDoneText != null) // Text element overflows if too many thumbnails are shown
-        //   ...[
-        //     Padding(padding: EdgeInsets.only(bottom: 10)),
-        //     Text(
-        //       percentDoneText,
-        //       style: TextStyle(
-        //         fontSize: 12,
-        //       ),
-        //     ),
-        //   ],
       ],
     );
   }

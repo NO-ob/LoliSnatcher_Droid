@@ -23,6 +23,10 @@ class BooruItem{
   double? fileWidth, fileHeight, fileAspectRatio, sampleWidth, sampleHeight, sampleAspectRatio, previewWidth, previewHeight, previewAspectRatio;
   int? fileSize;
 
+  bool get isLong {
+    return fileAspectRatio != null && fileAspectRatio! < 0.3;
+  }
+
   BooruItem({
     required this.fileURL,
     required this.sampleURL,
@@ -96,15 +100,15 @@ class BooruItem{
     }
   }
 
-  bool isVideo() {
+  bool get isVideo {
     return mediaType == "video";
   }
 
-  bool isImage() {
+  bool get isImage {
     return mediaType == "image" || mediaType == "animation" || mediaType == "not_supported_animation";
   }
 
-  bool isAnimation() {
+  bool get isAnimation {
     return mediaType == "animation";
   }
 

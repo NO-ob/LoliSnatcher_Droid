@@ -82,7 +82,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             Navigator.of(context).pop(true);
           },
           leading: const Icon(Icons.add_circle_outline),
-          trailing: Favicon(SearchHandler.instance.currentBooruHandler.booru.faviconURL ?? ""),
+          trailing: Favicon(SearchHandler.instance.currentBooruHandler.booru),
           title: const Text('Add a tab'),
         ),
         //

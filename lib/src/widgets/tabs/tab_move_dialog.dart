@@ -205,7 +205,7 @@ class TabMovePreview extends StatelessWidget {
         Container(
           margin: const EdgeInsets.only(left: 10, bottom: 10),
           child: ElevatedButton(
-            style: Theme.of(context).elevatedButtonTheme.style!.copyWith(
+            style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
               backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
               side: MaterialStateProperty.all<BorderSide>(BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2)),
             ),

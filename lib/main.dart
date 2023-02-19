@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'package:app_links/app_links.dart';
 import 'package:dart_vlc/dart_vlc.dart';
+import 'package:dio/dio.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
@@ -37,7 +39,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
-    DartVLC.initialize();
+    await DartVLC.initialize();
 
     // Init db stuff
     sqfliteFfiInit();
@@ -45,12 +47,17 @@ void main() async {
   }
 
   FlutterError.onError = (FlutterErrorDetails details) {
+    if (details.exception is DioError && (details.exception as DioError).type == DioErrorType.cancel) {
+      // ignore exceptions caused by cancelling dio requests (mostly for image loading)
+      return;
+    }
     FlutterError.presentError(details);
 
     Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
   };
 
   // load settings before first render to get theme data early
+  Get.put(NavigationHandler(), permanent: true);
   Get.put(ViewerHandler(), permanent: true);
   final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
   await settingsHandler.initialize();
@@ -106,7 +113,7 @@ class _MainAppState extends State<MainApp> {
     searchHandler = Get.put(SearchHandler(updateState), permanent: true);
     snatchHandler = Get.put(SnatchHandler(), permanent: true);
     tagHandler = Get.put(TagHandler(), permanent: true);
-    navigationHandler = Get.put(NavigationHandler(), permanent: true);
+    navigationHandler = Get.find<NavigationHandler>();
     notifyHandler = Get.put(NotifyHandler(), permanent: true);
     // localAuthHandler = Get.put(LocalAuthHandler(), permanent: true);
     initHandlers();
@@ -192,15 +199,18 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
+      final ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
           ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
           : settingsHandler.theme.value;
-      ThemeMode themeMode = settingsHandler.themeMode.value;
-      bool isAmoled = settingsHandler.isAmoled.value;
+      final ThemeMode themeMode = settingsHandler.themeMode.value;
+      final bool useMaterial3 = settingsHandler.useMaterial3.value;
+      final bool useDynamicColor = settingsHandler.useDynamicColor.value;
+      final bool isAmoled = settingsHandler.isAmoled.value;
 
       ThemeHandler themeHandler = ThemeHandler(
         theme: theme,
         themeMode: themeMode,
+        useMaterial3: useMaterial3,
         isAmoled: isAmoled,
       );
 
@@ -222,7 +232,7 @@ class _MainAppState extends State<MainApp> {
       // debugRepaintRainbowEnabled = settingsHandler.showPerf.value;
 
       return StatsFl(
-        isEnabled: settingsHandler.isDebug.value && settingsHandler.showFPS.value, //Toggle on/off
+        isEnabled: settingsHandler.showFPS.value, //Toggle on/off
         width: 400, //Set size
         height: 50, //
         maxFps: maxFps, // Support custom FPS target (default is 60)
@@ -231,21 +241,28 @@ class _MainAppState extends State<MainApp> {
         totalTime: 10, //Total length of timeline, in seconds.
         align: Alignment.bottomLeft, //Alignment of statsbox
         child: ImageStats(
-          isEnabled: settingsHandler.isDebug.value && settingsHandler.showImageStats.value,
+          isEnabled: settingsHandler.showImageStats.value,
           width: 110,
           height: 80,
           align: Alignment.centerLeft,
-          child: MaterialApp(
-            title: 'LoliSnatcher',
-            debugShowCheckedModeBanner: false, // hide debug banner in the corner
-            showPerformanceOverlay: settingsHandler.isDebug.value && settingsHandler.showPerf.value,
-            scrollBehavior: const CustomScrollBehavior(),
-            theme: themeHandler.lightTheme(),
-            darkTheme: themeHandler.darkTheme(),
-            themeMode: themeMode,
-            navigatorKey: navigationHandler.navigatorKey,
-            home: const Home(),
-          ),
+          child: DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
+            themeHandler.setDynamicColors(
+              useDynamicColor ? lightDynamic : null,
+              useDynamicColor ? darkDynamic : null,
+            );
+
+            return MaterialApp(
+              title: 'LoliSnatcher',
+              debugShowCheckedModeBanner: false, // hide debug banner in the corner
+              showPerformanceOverlay: settingsHandler.showPerf.value,
+              scrollBehavior: const CustomScrollBehavior(),
+              theme: themeHandler.lightTheme(),
+              darkTheme: themeHandler.darkTheme(),
+              themeMode: themeMode,
+              navigatorKey: navigationHandler.navigatorKey,
+              home: const Home(),
+            );
+          }),
         ),
       );
     });
@@ -287,10 +304,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
       // TODO possible performance problem if you have too many tags?
-      if(!tagHandler.tagSaveActive){
+      if (!tagHandler.tagSaveActive) {
         tagHandler.saveTags();
       }
-
     });
 
     imageWriter.clearStaleCache();
@@ -335,7 +351,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
           // Rename config if its already in the list
           booru.name = '${booru.name!} (duplicate)';
         }
-        SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
+        await SettingsPageOpen(context: context, page: () => BooruEdit(booru)).open();
       }
     }
   }

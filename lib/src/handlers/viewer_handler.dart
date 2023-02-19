@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
+import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 // TODO media actions, video pause/mute... global controller
 
@@ -52,7 +54,7 @@ class ViewerHandler extends GetxController {
   RxBool displayAppbar = true.obs; // is gallery toolbar visible
   RxBool isZoomed = false.obs; // is current item zoomed in
   RxBool isLoaded = false.obs; // is current item loaded
-  Rx<PhotoViewControllerValue> viewState = Rx(const PhotoViewControllerValue(position: Offset.zero, scale: null, rotation: 0, rotationFocusPoint: null)); // current view state
+  Rx<PhotoViewControllerValue?> viewState = Rx(null); // current view state
   RxBool isFullscreen = false.obs; // is in fullscreen (on mobile for videos through VideoViewer)
   RxBool isDesktopFullscreen = false.obs; // is in fullscreen mode in DesktopHome
 
@@ -75,31 +77,35 @@ class ViewerHandler extends GetxController {
 
     // addPostFrameCallback waits until widget is built to avoid calling setState in it while other setState is active
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      dynamic state = currentKey.value?.currentState;
-      dynamic widget = state?.widget;
-      dynamic widgetState;
-      switch (widget.runtimeType) {
+      var state = currentKey.value?.currentState;
+      switch (state?.widget.runtimeType) {
         case ImageViewer:
-          widgetState = state as ImageViewerState;
+          var widgetState = state as ImageViewerState;
           isZoomed.value = widgetState.isZoomed;
-          isLoaded.value = widgetState.mainProvider != null;
+          isLoaded.value = widgetState.isLoaded;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
         case VideoViewer:
-          widgetState = state as VideoViewerState;
+          var widgetState = state as VideoViewerState;
           isZoomed.value = widgetState.isZoomed;
-          isLoaded.value = widgetState.isVideoInit();
+          isLoaded.value = widgetState.isVideoInited;
           isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
         case VideoViewerDesktop:
-          widgetState = state as VideoViewerDesktopState;
+          var widgetState = state as VideoViewerDesktopState;
           isZoomed.value = widgetState.isZoomed;
           // TODO find a way to get video loaded state
           isLoaded.value = true;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
+          break;
+        case VideoViewerPlaceholder:
+        case UnknownViewerPlaceholder:
+          isLoaded.value = true;
+          isFullscreen.value = false;
+          viewState.value = null;
           break;
         default: break;
       }

@@ -17,8 +17,8 @@ class CancelButton extends StatelessWidget {
     if (withIcon) {
       return ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          primary: Colors.grey[300],
-          onPrimary: Colors.black,
+          backgroundColor: Colors.grey[300],
+          foregroundColor: Colors.black,
           textStyle: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -37,8 +37,8 @@ class CancelButton extends StatelessWidget {
 
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        primary: Colors.grey[300],
-        onPrimary: Colors.black,
+        backgroundColor: Colors.grey[300],
+        foregroundColor: Colors.black,
         textStyle: const TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,

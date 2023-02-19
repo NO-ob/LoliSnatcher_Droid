@@ -287,6 +287,28 @@ class SearchHandler extends GetxController {
   }
 
 
+  HasTabWithTagResult hasTabWithTag(String tag) {
+    for (SearchTab tab in list) {
+      if(tab.tags.toLowerCase().trim() == tag.toLowerCase().trim()) {
+        return HasTabWithTagResult.onlyTag;
+      } else if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
+        return HasTabWithTagResult.containsTag;
+      }
+    }
+    return HasTabWithTagResult.noTag;
+  }
+
+  List<SearchTab> getTabsWithTag(String tag) {
+    List<SearchTab> tabs = [];
+    for (SearchTab tab in list) {
+      if(tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
+        tabs.add(tab);
+      }
+    }
+    return tabs;
+  }
+
+
   int get currentIndex => index.value;
   int get total => list.length;
   SearchTab get currentTab => list[currentIndex];
@@ -497,7 +519,7 @@ class SearchHandler extends GetxController {
 
     // request total image count if not already loaded
     if(currentBooruHandler.totalCount.value == 0) {
-      currentBooruHandler.searchCount(currentTab.tags);
+      unawaited(currentBooruHandler.searchCount(currentTab.tags));
     }
     
     // delay every new page load
@@ -838,4 +860,15 @@ class SearchTab {
     }
     return selectedItems;
   }
+}
+
+enum HasTabWithTagResult {
+  onlyTag,
+  containsTag,
+  noTag;
+
+  bool get isOnlyTag => this == HasTabWithTagResult.onlyTag;
+  bool get isContainsTag => this == HasTabWithTagResult.containsTag;
+  bool get isNoTag => this == HasTabWithTagResult.noTag;
+  bool get hasTag => this == HasTabWithTagResult.containsTag || this == HasTabWithTagResult.onlyTag;
 }

@@ -29,9 +29,9 @@ class NyanPalsHandler extends BooruHandler {
     BooruItem item = BooruItem(fileURL: fileURL, sampleURL: fileURL, thumbnailURL: "", tagsList: currentTags, postURL: fileURL, md5String: md5);
 
     thumbURL = "${booru.baseURL!}/img/pettankontent/";
-    if (item.mediaType == "video") {
+    if (item.isVideo) {
       thumbURL = "$thumbURL${item.md5String!}.mp4";
-    } else if (item.mediaType == "animation") {
+    } else if (item.isAnimation) {
       thumbURL = "${thumbURL}_${item.md5String!}.gif";
     } else {
       thumbURL = "${thumbURL}_${item.md5String!}.png";

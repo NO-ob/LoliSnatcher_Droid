@@ -34,7 +34,6 @@ class DesktopHome extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
-        backgroundColor: Theme.of(context).colorScheme.background,
         actions: <Widget>[
           // Obx(() {
           //   if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
@@ -67,7 +66,7 @@ class DesktopHome extends StatelessWidget {
             if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
               return SettingsButton(
                 name: 'Snatcher',
-                icon: Icon(Icons.download, color: Theme.of(context).colorScheme.onBackground),
+                icon: const Icon(Icons.download),
                 iconOnly: true,
                 page: () => const SnatcherPage(),
               );
@@ -84,7 +83,7 @@ class DesktopHome extends StatelessWidget {
           }),
           SettingsButton(
             name: 'Settings',
-            icon: Icon(Icons.settings, color: Theme.of(context).colorScheme.onBackground),
+            icon: const Icon(Icons.settings),
             iconOnly: true,
             page: () => const SettingsPage(),
           ),
@@ -95,16 +94,17 @@ class DesktopHome extends StatelessWidget {
                 children: [
                   SettingsButton(
                     name: 'Save',
-                    icon: Icon(Icons.save, color: Theme.of(context).colorScheme.onBackground),
+                    icon: const Icon(Icons.save),
                     iconOnly: true,
-                    action: () {
-                      getPerms();
+                    action: () async {
+                      await getPerms();
                       // call a function to save the currently viewed image when the save button is pressed
                       if (searchHandler.currentTab.selected.isNotEmpty) {
                         snatchHandler.queue(
                           searchHandler.currentTab.getSelected(),
                           searchHandler.currentBooru,
                           settingsHandler.snatchCooldown,
+                          false,
                         );
                         searchHandler.currentTab.selected.value = [];
                       } else {

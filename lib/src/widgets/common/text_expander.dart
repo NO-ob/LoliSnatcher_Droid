@@ -16,39 +16,38 @@ class _TextExpanderState extends State<TextExpander> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          children: [
-            Text(
-              widget.title,
-              textScaleFactor: 1.2,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            IconButton(
-              icon: Icon(
-                showText ? Icons.remove : Icons.add,
-                color: Theme.of(context).colorScheme.secondary,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+          child: Row(
+            children: [
+              Text(
+                widget.title,
+                textScaleFactor: 1.2,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              onPressed: () {
-                setState(() {
-                  showText = !showText;
-                });
-              },
-            ),
-          ],
+              IconButton(
+                icon: Icon(
+                  showText ? Icons.remove : Icons.add,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+                onPressed: () {
+                  setState(() {
+                    showText = !showText;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: showText
-              ? Container(
-                  key: UniqueKey(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: widget.bodyList,
-                  ),
-                )
-              : Center(
-                  key: UniqueKey(),
-                  child: const SizedBox(
+              ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widget.bodyList,
+              )
+              : const Center(
+                  child: SizedBox(
                     width: 0,
                     height: 0,
                   ),
@@ -59,7 +58,7 @@ class _TextExpanderState extends State<TextExpander> {
           thickness: 1,
           indent: 5,
           endIndent: 5,
-          color: Theme.of(context).colorScheme.secondary,
+          color: Theme.of(context).dividerColor,
         ),
       ],
     );

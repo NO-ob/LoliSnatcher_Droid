@@ -61,8 +61,8 @@ class SettingsButton extends StatelessWidget {
   Widget build(BuildContext context) {
     if(iconOnly) {
       return GestureDetector(
-        onLongPress: () => {
-          onLongPress?.call()
+        onLongPress: onLongPress == null ? null : () => {
+          onLongPress!()
         },
         child: IconButton(
           icon: icon ?? const Icon(null),
@@ -83,8 +83,8 @@ class SettingsButton extends StatelessWidget {
       onTap: () {
         onTapAction(context);
       },
-      onLongPress: () {
-        onLongPress?.call();
+      onLongPress: onLongPress == null ? null : () {
+        onLongPress!();
       },
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
@@ -135,7 +135,7 @@ class SettingsPageOpen {
         barrierDismissible: barrierDismissible,
       ) ?? false;
     } else {
-      result = await Navigator.push(context, MaterialPageRoute(fullscreenDialog: true, builder: (BuildContext context) => page())) ?? false;
+      result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => page())) ?? false;
     }
     return result;
   }
@@ -240,6 +240,7 @@ class SettingsDropdown<T> extends StatelessWidget {
             labelText: title,
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
+          dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return items.map<DropdownMenuItem<T>>((T item) {
               return DropdownMenuItem<T>(
@@ -321,7 +322,7 @@ class SettingsBooruDropdown extends StatelessWidget {
             children: <Widget>[
               (booru.type == "Favourites"
                   ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                  : Favicon(booru.faviconURL!)
+                  : Favicon(booru)
               ),
               Text(" ${booru.name!}"),
             ],
@@ -581,7 +582,7 @@ class SettingsDialog extends StatelessWidget {
         )
       ),
       backgroundColor: Theme.of(context).colorScheme.surface,
-      actions: (actionButtons?.length ?? 0) > 0 ? actionButtons : [],
+      actions: actionButtons?.isNotEmpty == true ? actionButtons : null,
 
       titlePadding: titlePadding,
       contentPadding: contentPadding,
@@ -616,12 +617,6 @@ class SettingsPageDialog extends StatelessWidget {
       // extendBody: true,
       // resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        // leading: IconButton(
-        //   icon: const Icon(Icons.arrow_back),
-        //   onPressed: () {
-        //     Navigator.of(context).pop();
-        //   },
-        // ),
         title: title,
         actions: [
           if((actions?.length ?? 0) > 0)

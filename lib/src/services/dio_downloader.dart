@@ -13,21 +13,19 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 
 class DioDownloader {
   DioDownloader(
-    this.url,
-    {
-      this.headers = const <String, dynamic>{},
-      this.cancelToken,
-      this.onProgress,
-      this.onEvent,
-      this.onError,
-      this.onDone,
-      this.onDoneFile,
-      this.cacheEnabled = false,
-      this.cacheFolder = 'other',
-      this.timeoutTime,
-      this.fileNameExtras = '',
-    }
-  );
+    this.url, {
+    this.headers = const <String, dynamic>{},
+    this.cancelToken,
+    this.onProgress,
+    this.onEvent,
+    this.onError,
+    this.onDone,
+    this.onDoneFile,
+    this.cacheEnabled = false,
+    this.cacheFolder = 'other',
+    this.timeoutTime,
+    this.fileNameExtras = '',
+  });
 
   final String url;
   final Map<String, dynamic>? headers;
@@ -36,7 +34,7 @@ class DioDownloader {
   final void Function(String, dynamic)? onEvent;
   final void Function(Exception)? onError;
   final void Function(Uint8List, String)? onDone;
-  final void Function(File, String)? onDoneFile;
+  final void Function(File)? onDoneFile;
   final bool cacheEnabled;
   final String cacheFolder;
   final int? timeoutTime;
@@ -84,11 +82,9 @@ class DioDownloader {
     d.send(receivePort.sendPort);
 
     final IsolateCacheConfig config = IsolateCacheConfig.fromHost(await receivePort.first);
-    File? file = await (ImageWriterIsolate(
-      config.cacheRootPath
-    ).writeCacheFromBytes(
+    File? file = await (ImageWriterIsolate(config.cacheRootPath).writeCacheFromBytes(
       config.fileURL,
-      config.bytes, 
+      config.bytes,
       config.typeFolder,
       clearName: config.typeFolder == 'favicons' ? false : true,
       fileNameExtras: config.fileNameExtras,
@@ -101,9 +97,7 @@ class DioDownloader {
     d.send(receivePort.sendPort);
 
     final IsolateCacheConfig config = IsolateCacheConfig.fromHost(await receivePort.first);
-    File? file = await (ImageWriterIsolate(
-      config.cacheRootPath
-    ).readFileFromCache(
+    File? file = await (ImageWriterIsolate(config.cacheRootPath).readFileFromCache(
       config.fileURL,
       config.typeFolder,
       clearName: config.typeFolder == 'favicons' ? false : true,
@@ -117,9 +111,7 @@ class DioDownloader {
     d.send(receivePort.sendPort);
 
     final IsolateCacheConfig config = IsolateCacheConfig.fromHost(await receivePort.first);
-    Uint8List? file = await (ImageWriterIsolate(
-      config.cacheRootPath
-    ).readBytesFromCache(
+    Uint8List? file = await (ImageWriterIsolate(config.cacheRootPath).readBytesFromCache(
       config.fileURL,
       config.typeFolder,
       clearName: config.typeFolder == 'favicons' ? false : true,
@@ -130,7 +122,8 @@ class DioDownloader {
 
   Future<String> getCookies() async {
     String cookieString = '';
-    if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
+    if (Platform.isAndroid || Platform.isIOS) {
+      // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
         final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
@@ -160,7 +153,8 @@ class DioDownloader {
     try {
       final String resolved = Uri.base.resolve(url).toString();
 
-      final String? filePath = await ImageWriter().getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
+      final String? filePath =
+          await ImageWriter().getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
       if (filePath != null) {
         // read from cache
         final File fileToCache = File(filePath);
@@ -168,17 +162,17 @@ class DioDownloader {
         onEvent?.call('isFromCache', null);
         onProgress?.call(fileSize, fileSize);
 
-        if(onDoneFile != null) {
-          start(null, readFileFromCache, (dynamic file) async {
-            if(file != null) {
+        if (onDoneFile != null) {
+          await start(null, readFileFromCache, (dynamic file) async {
+            if (file != null) {
               onEvent?.call('loaded', null);
-              onDoneFile?.call(file as File, url);
+              onDoneFile?.call(file as File);
             }
             dispose();
           });
         } else if (onDone != null) {
-          start(null, readBytesFromCache, (dynamic bytes) async {
-            if(bytes != null) {
+          await start(null, readBytesFromCache, (dynamic bytes) async {
+            if (bytes != null) {
               onEvent?.call('loaded', null);
               onDone?.call(bytes as Uint8List, url);
             }
@@ -189,7 +183,7 @@ class DioDownloader {
       }
     } catch (e) {
       Logger.Inst().log('Error getting from cache $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
-      if(e is Exception) {
+      if (e is Exception) {
         onError?.call(e);
       } else {
         //
@@ -210,7 +204,7 @@ class DioDownloader {
         onReceiveProgress: onProgress,
       );
 
-      if(response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
+      if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
@@ -223,16 +217,16 @@ class DioDownloader {
       }
 
       if (cacheEnabled) {
-        if(onDoneFile == null && onDone != null) {
+        if (onDoneFile == null && onDone != null) {
           // return bytes if file is not requested
           onEvent?.call('loaded', null);
           onDone?.call(response.data as Uint8List, url);
         }
-        start(response.data as Uint8List?, writeToCache, (dynamic file) {
-          if(file != null) {
+        await start(response.data as Uint8List?, writeToCache, (dynamic file) {
+          if (file != null) {
             // onEvent?.call('isFromCache');
             onEvent?.call('loaded', null);
-            onDoneFile?.call(file as File, url);
+            onDoneFile?.call(file as File);
           }
           dispose();
         });
@@ -244,8 +238,8 @@ class DioDownloader {
       return;
     } catch (e) {
       bool isCancelError = e is DioError && CancelToken.isCancel(e);
-      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
-      if(e is Exception) {
+      if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
+      if (e is Exception) {
         onError?.call(e);
       } else {
         //
@@ -259,7 +253,8 @@ class DioDownloader {
     try {
       final String resolved = Uri.base.resolve(url).toString();
 
-      final String? filePath = await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
+      final String? filePath =
+          await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
       if (filePath != null) {
         // read from cache
         final File file = File(filePath);
@@ -269,10 +264,9 @@ class DioDownloader {
         onEvent?.call('loaded', null);
 
         if (onDoneFile != null) {
-          await file.readAsBytes();
-          onDoneFile?.call(file, url);
+          onDoneFile?.call(file);
           dispose();
-        } else if(onDone != null) {
+        } else if (onDone != null) {
           onDone?.call(await file.readAsBytes(), url);
           dispose();
         }
@@ -280,7 +274,7 @@ class DioDownloader {
       }
     } catch (e) {
       Logger.Inst().log('Error getting from cache $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
-      if(e is Exception) {
+      if (e is Exception) {
         onError?.call(e);
       } else {
         //
@@ -300,7 +294,7 @@ class DioDownloader {
         onReceiveProgress: onProgress,
       );
 
-      if(response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
+      if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
@@ -314,25 +308,26 @@ class DioDownloader {
 
       File? tempFile;
       if (cacheEnabled) {
-        tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
-        if(tempFile != null) {
+        tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder,
+            clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
+        if (tempFile != null) {
           // onEvent?.call('isFromCache');
         }
       }
 
       onEvent?.call('loaded', null);
       if (onDoneFile != null && tempFile != null) {
-        onDoneFile?.call(tempFile, url);
+        onDoneFile?.call(tempFile);
         dispose();
-      } else if(onDone != null) {
+      } else if (onDone != null) {
         onDone?.call(response.data as Uint8List, url);
         dispose();
       }
       return;
     } catch (e) {
       bool isCancelError = e is DioError && CancelToken.isCancel(e);
-      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
-      if(e is Exception) {
+      if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
+      if (e is Exception) {
         onError?.call(e);
       } else {
         //
@@ -341,6 +336,86 @@ class DioDownloader {
     }
   }
 
+  Future<void> runRequestDownload() async {
+    final ImageWriter imageWriter = ImageWriter();
+    try {
+      final String resolved = Uri.base.resolve(url).toString();
+
+      final String? filePath =
+          await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
+      if (filePath != null) {
+        // read from cache
+        final File file = File(filePath);
+        final int fileSize = await file.length();
+        onEvent?.call('isFromCache', null);
+        onProgress?.call(fileSize, fileSize);
+        onEvent?.call('loaded', null);
+
+        if (onDoneFile != null) {
+          onDoneFile?.call(file);
+          dispose();
+        }
+        return;
+      }
+    } catch (e) {
+      Logger.Inst().log('Error getting from cache $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
+      if (e is Exception) {
+        onError?.call(e);
+      } else {
+        //
+      }
+      // dispose();
+    }
+
+    try {
+      final String resolved = Uri.base.resolve(url).toString();
+      // load from network and cache if enabled
+      onEvent?.call('isFromNetwork', null);
+      currentClient = DioNetwork.getClient();
+      final Response response = await currentClient!.download(
+        resolved.toString(),
+        imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
+        options: Options(headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        cancelToken: cancelToken,
+        onReceiveProgress: onProgress,
+        deleteOnError: true,
+      );
+
+      if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
+        throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
+      }
+
+      if (response.statusCode != HttpStatus.ok) {
+        throw DioLoadException(url: resolved, statusCode: response.statusCode);
+      }
+
+      File? tempFile;
+      if (cacheEnabled) {
+        final String? tempFilePath =
+            await imageWriter.getCachePath(resolved, cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
+        if (tempFilePath != null) {
+          tempFile = File(tempFilePath);
+          // onEvent?.call('isFromCache');
+        }
+      }
+
+      onEvent?.call('loaded', null);
+      if (onDoneFile != null && tempFile != null && await tempFile.exists()) {
+        onDoneFile?.call(tempFile);
+        dispose();
+      }
+      return;
+    } catch (e) {
+      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
+      if (e is Exception) {
+        onError?.call(e);
+      } else {
+        //
+      }
+      dispose();
+    }
+  }
 
   // get only the file size
   Future<void> runRequestSize() async {
@@ -356,7 +431,7 @@ class DioDownloader {
 
       // print('response size: ${response.headers['content-length']}');
 
-      if(response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
+      if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
@@ -369,8 +444,8 @@ class DioDownloader {
       return;
     } catch (e) {
       bool isCancelError = e is DioError && CancelToken.isCancel(e);
-      if(!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.imageLoadingError);
-      if(e is Exception) {
+      if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.imageLoadingError);
+      if (e is Exception) {
         onError?.call(e);
       } else {
         //
@@ -393,7 +468,6 @@ class DioLoadException implements Exception {
   String toStringShort() => '${statusCode ?? message ?? 'Error'}';
 }
 
-
 class IsolateCacheConfig {
   final String cacheRootPath;
   final String fileURL;
@@ -404,10 +478,9 @@ class IsolateCacheConfig {
   IsolateCacheConfig({required this.cacheRootPath, required this.fileURL, required this.bytes, required this.typeFolder, required this.fileNameExtras});
 
   IsolateCacheConfig.fromHost(dynamic data)
-    : cacheRootPath = data['cacheRootPath'] as String,
-      fileURL = data['fileURL'] as String,
-      bytes = data['bytes'] as List<int>? ?? [],
-      typeFolder = data['typeFolder'] as String,
-      fileNameExtras = data['fileNameExtras'] as String;
-
+      : cacheRootPath = data['cacheRootPath'] as String,
+        fileURL = data['fileURL'] as String,
+        bytes = data['bytes'] as List<int>? ?? [],
+        typeFolder = data['typeFolder'] as String,
+        fileNameExtras = data['fileNameExtras'] as String;
 }

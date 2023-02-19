@@ -29,13 +29,16 @@ class UnknownViewerPlaceholder extends StatelessWidget {
             LayoutBuilder(
               builder: (BuildContext layoutContext, BoxConstraints constraints) {
                 return Container(
-                  color: Colors.black87,
-                  width: constraints.maxWidth / 2,
-                  height: 200,
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                  ),
+                  width: constraints.maxWidth - 80,
+                  height: constraints.maxHeight / 2,
                   child: Center(
                     child: SizedBox(
                       child: SettingsButton(
-                        name: 'Unknown file format, click here to open in browser',
+                        name: 'Unknown file format, tap here to open in browser',
                         action: () {
                           ServiceHandler.launchURL(item.postURL);
                         },

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -82,7 +81,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     // enable volume buttons if opened page is a video AND appbar is visible
     BooruItem item = searchHandler.currentFetched[widget.index];
-    bool isVideo = item.isVideo();
+    bool isVideo = item.isVideo;
     bool isHated = item.isHated.value;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
@@ -106,7 +105,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     }
 
     // enable volume buttons if current page is a video AND appbar is set to visible
-    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo();
+    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
@@ -120,6 +119,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       key: viewerScaffoldKey,
       extendBodyBehindAppBar: true,
       extendBody: true,
+      resizeToAvoidBottomInset: false,
       appBar: settingsHandler.galleryBarPosition == 'Top' ? HideableAppBar(getTitle(), appBarActions()) : null,
       bottomNavigationBar: settingsHandler.galleryBarPosition == 'Bottom' ? HideableAppBar(getTitle(), appBarActions()) : null,
       backgroundColor: Colors.transparent,
@@ -162,12 +162,13 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     snatchHandler.queue(
                       [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
                       searchHandler.currentBooru,
-                      settingsHandler.snatchCooldown
+                      settingsHandler.snatchCooldown,
+                      false,
                     );
                   } else if (event.physicalKey == PhysicalKeyboardKey.keyF) {
                     // favorite on F
                     if (settingsHandler.dbEnabled) {
-                      searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
+                      await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
                     }
                   } else if (event.physicalKey == PhysicalKeyboardKey.escape) {
                     // exit on escape if in focus
@@ -195,14 +196,14 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     itemBuilder: (context, index) {
                       BooruItem item = searchHandler.currentFetched[index];
                       // String fileURL = item.fileURL;
-                      bool isVideo = item.isVideo();
-                      bool isImage = item.isImage();
+                      bool isVideo = item.isVideo;
+                      bool isImage = item.isImage;
                       // print(fileURL);
                       // print('isVideo: '+isVideo.toString());
 
                       late Widget itemWidget;
                       if(isImage) {
-                        itemWidget = ImageViewer(item.key, item, index);
+                        itemWidget = ImageViewer(item, index, key: item.key);
                       } else if(isVideo) {
                         if(settingsHandler.disableVideo) {
                           itemWidget = const Center(child: Text("Video Disabled", style: TextStyle(fontSize: 20)));
@@ -239,7 +240,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             onLongPress: () {
                               toggleToolbar(true);
                             },
-                            child: RepaintBoundary(child: itemWidget),
+                            child: itemWidget,
                           ),
                         );
                       });
@@ -263,7 +264,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       }
 
                       // enable volume buttons if new page is a video AND appbar is visible
-                      bool isVideo = searchHandler.currentFetched[index].isVideo();
+                      bool isVideo = searchHandler.currentFetched[index].isVideo;
                       bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
                       ServiceHandler.setVolumeButtons(isVolumeAllowed);
                       // print('Page changed ' + index.toString());
@@ -283,7 +284,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
           // copy existing main app theme, but make background semitransparent
-          canvasColor: Theme.of(context).canvasColor.withOpacity(0.66),
+          drawerTheme: Theme.of(context).drawerTheme.copyWith(
+            backgroundColor: Theme.of(context).canvasColor.withOpacity(0.66),
+          ),
         ),
         child: renderDrawer(),
       )
@@ -385,12 +388,13 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
   Widget renderDrawer() {
     final MediaQueryData mQuery = MediaQuery.of(context);
-    final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.75) : (mQuery.size.height * 0.75);
+    final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.8) : (mQuery.size.height * 0.8);
 
     return SizedBox(
       width: maxWidth,
-      child: const Drawer(
-        child: SafeArea(
+      child: Drawer(
+        width: maxWidth,
+        child: const SafeArea(
           child: TagView(),
         ),
       )
@@ -437,7 +441,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     if(path != null) {
       // File is already in cache - share from there
-      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -466,7 +470,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media', fileNameExtras: item.fileNameExtras);
       if(cacheFile != null) {
         path = cacheFile.path;
-        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo() ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
             context: context,
@@ -574,7 +578,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         return false;
       }
 
-      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage();
+      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage;
       bool isScaleButton = btn[0] == 'reloadnoscale';
       bool isScaleAllowed = isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
 
@@ -628,6 +632,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             ),
           ]
         ),
+        color: Theme.of(context).colorScheme.surface,
         itemBuilder: (BuildContext itemBuilder) =>
           overFlowList.map((value) =>
             PopupMenuItem(
@@ -643,11 +648,6 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     Navigator.of(context).pop(); // remove overflow menu
                     buttonClick(value[0]);
                   },
-                  // style: ButtonStyle(
-                  //     foregroundColor: MaterialStateProperty.all<Color>(Colors.white), // color of icons and text
-                  //     alignment: Alignment.centerLeft,
-                  //     padding: MaterialStateProperty.all<EdgeInsets>(EdgeInsets.fromLTRB(20, 10, 20, 10))
-                  // ),
                   leading: buildIconButton(value[0], false),
                   title: Text(buttonText(value))
                 ),
@@ -682,7 +682,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
             IconButton(
               icon: buttonIcon(action),
-              color: Colors.white,
+              color: clickable ? Colors.white : Theme.of(context).colorScheme.onSurface,
               onPressed: () {
                 buttonClick(action);
               },
@@ -745,14 +745,17 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             return Container();
           }
 
-          final bool isSnatched = searchHandler.currentFetched[searchHandler.viewedIndex.value].isSnatched.value == true;
+          final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+          final booru = searchHandler.currentBooru;
+
+          final bool isSnatched = item.isSnatched.value == true;
           if(!isSnatched) {
             return const SizedBox();
           } else {
             return Positioned(
               right: 2,
               bottom: 5,
-              child: Icon(Icons.save_alt, size: Theme.of(context).buttonTheme.height / 2.1),
+              child: SnatchedStatusIcon(item: item, booru: booru),
             );
           }
         });
@@ -804,16 +807,17 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         autoScrollState(!autoScroll);
         break;
       case("snatch"):
-        getPerms();
+        await getPerms();
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
           [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
           searchHandler.currentBooru,
-          settingsHandler.snatchCooldown
+          settingsHandler.snatchCooldown,
+          false,
         );
         break;
       case("favourite"):
-        searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
+        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
 
         // set viewed item again in case favourites filter is enabled
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -830,11 +834,65 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
   }
 
   // long tap action
-  void buttonHold(String action) {
+  void buttonHold(String action) async {
     // TODO long press slideshow button to set the timer
     switch(action) {
       case("share"):
         onShareHold();
+        break;
+      case("snatch"):
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
+            return SettingsDialog(
+              title: const Text('Snatch?'),
+              content: Column(
+                children: [
+                  SelectableText(item.fileURL),
+                  const SizedBox(height: 16),
+
+                  if(item.isSnatched.value == true) ...[
+                    ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                      ),
+                      onTap: () async {
+                        item.isSnatched.value = false;
+                        await settingsHandler.dbHandler.updateBooruItem(item, "local");
+                        Navigator.of(context).pop();
+                      },
+                      leading: const Icon(Icons.file_download_off_outlined),
+                      title: const Text('Drop Snatched status'),
+                    ),
+                    const SizedBox(height: 16),
+                  ],                    
+
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                    ),
+                    onTap: () async {
+                      await getPerms();
+                      snatchHandler.queue(
+                        [item],
+                        searchHandler.currentBooru,
+                        settingsHandler.snatchCooldown,
+                        true,
+                      );
+                      Navigator.of(context).pop();
+                    },
+                    leading: const Icon(Icons.file_download_outlined),
+                    title: Text('Snatch ${item.isSnatched.value == true ? '(forced)' : ''}'.trim()),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
         break;
     }
   }
@@ -879,4 +937,60 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     showShareDialog(showTip: false);
   }
 
+}
+
+
+class SnatchedStatusIcon extends StatefulWidget {
+  const SnatchedStatusIcon({required this.item, required this.booru, super.key});
+
+  final BooruItem item;
+  final Booru booru;
+
+  @override
+  State<SnatchedStatusIcon> createState() => _SnatchedStatusIconState();
+}
+
+class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
+  bool fileExists = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fileExistsCheck();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void fileExistsCheck() async {
+    final String extPath = SettingsHandler.instance.extPathOverride;
+    if(extPath.isNotEmpty) {
+      fileExists = await ServiceHandler.existsFileFromSAFDirectory(extPath, ImageWriter().getFilename(widget.item, widget.booru));
+    } else {
+      fileExists = await File(await ImageWriter().getFilePath(widget.item, widget.booru)).exists();
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant SnatchedStatusIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if(oldWidget.item != widget.item) {
+      fileExists = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {});
+      });
+      fileExistsCheck();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(Icons.save_alt, size: Theme.of(context).buttonTheme.height / 2.1, color: fileExists ? Colors.green : Colors.white,);
+  }
 }

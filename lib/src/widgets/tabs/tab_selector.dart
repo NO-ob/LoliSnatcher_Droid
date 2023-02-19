@@ -38,7 +38,7 @@ class TabSelectorHeader extends StatelessWidget {
     const EdgeInsetsGeometry padding = EdgeInsets.fromLTRB(5, 10, 2, 0);
     const EdgeInsetsGeometry contentPadding = EdgeInsets.symmetric(horizontal: 4, vertical: 8);
     const Color borderColor = Colors.transparent;
-    final Color textColor = Theme.of(context).appBarTheme.titleTextStyle!.color!;
+    final Color? textColor = Theme.of(context).appBarTheme.titleTextStyle?.color;
 
     return TabSelectorRender(
       isDesktop: isDesktop,
@@ -89,8 +89,6 @@ class TabSelectorRender extends StatelessWidget {
           return const SizedBox();
         }
 
-        Color currentBorderColor = borderColor ?? Theme.of(context).colorScheme.secondary;
-
         return GestureDetector(
           onLongPress: () => openTabsDialog(context),
           onSecondaryTap: () => openTabsDialog(context),
@@ -101,22 +99,28 @@ class TabSelectorRender extends StatelessWidget {
             itemHeight: kMinInteractiveDimension,
             decoration: InputDecoration(
               labelText: 'Tab | ${searchHandler.currentIndex + 1}/${searchHandler.total}',
-              labelStyle: Theme.of(context).inputDecorationTheme.labelStyle!.copyWith(
-                    color: textColor ?? Theme.of(context).inputDecorationTheme.labelStyle!.color,
+              labelStyle: Theme.of(context).inputDecorationTheme.labelStyle?.copyWith(
+                    color: textColor ?? Theme.of(context).inputDecorationTheme.labelStyle?.color,
                   ),
               contentPadding: contentPadding,
-              border: OutlineInputBorder(
-                borderSide: BorderSide(color: currentBorderColor, width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: currentBorderColor, width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: currentBorderColor, width: 2),
-                borderRadius: BorderRadius.circular(8),
-              ),
+              border: Theme.of(context).inputDecorationTheme.border?.copyWith(
+                    borderSide: BorderSide(
+                      color: borderColor ?? Theme.of(context).inputDecorationTheme.border?.borderSide.color ?? Colors.transparent,
+                      width: 1,
+                    ),
+                  ),
+              enabledBorder: Theme.of(context).inputDecorationTheme.enabledBorder?.copyWith(
+                    borderSide: BorderSide(
+                      color: borderColor ?? Theme.of(context).inputDecorationTheme.enabledBorder?.borderSide.color ?? Colors.transparent,
+                      width: 1,
+                    ),
+                  ),
+              focusedBorder: Theme.of(context).inputDecorationTheme.focusedBorder?.copyWith(
+                    borderSide: BorderSide(
+                      color: borderColor ?? Theme.of(context).inputDecorationTheme.focusedBorder?.borderSide.color ?? Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
             ),
             onChanged: (SearchTab? newValue) {
               if (newValue != null) {

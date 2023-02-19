@@ -15,20 +15,16 @@ class MediaLoading extends StatefulWidget {
   const MediaLoading({
     Key? key,
     required this.item,
-
     required this.hasProgress,
     required this.isFromCache,
     required this.isDone,
-
     this.isTooBig = false,
     required this.isStopped,
     this.stopReasons = const [],
     required this.isViewed,
-
     required this.total,
     required this.received,
     required this.startedAt,
-
     required this.startAction,
     required this.stopAction,
   }) : super(key: key);
@@ -63,7 +59,7 @@ class _MediaLoadingState extends State<MediaLoading> {
   Timer? _checkInterval;
   StreamSubscription? _totalListener, _receivedListener, _startedAtListener;
 
-  int _prevReceivedAmount = 0, _lastReceivedAmount = 0, _prevReceivedTime = 0, _lastReceivedTime = 0;
+  int _prevAmount = 0, _lastAmount = 0, _prevTime = 0, _lastTime = 0;
 
   @override
   void initState() {
@@ -91,15 +87,15 @@ class _MediaLoadingState extends State<MediaLoading> {
     });
 
     _checkInterval?.cancel();
-    _checkInterval = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+    _checkInterval = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       // force restate every second to refresh all timers/indicators, even when loading has stopped/stalled/etc.
       if (!widget.isDone) {
         updateState();
       }
     });
 
-    _prevReceivedTime = DateTime.now().millisecondsSinceEpoch - 1;
-    _lastReceivedTime = _prevReceivedTime + 1;
+    _prevTime = DateTime.now().millisecondsSinceEpoch - 1;
+    _lastTime = _prevTime + 1;
   }
 
   void _onBytesAdded(int? received, int? total) {
@@ -109,12 +105,16 @@ class _MediaLoadingState extends State<MediaLoading> {
     _total = total ?? _total;
 
     final bool isDone = _total > 0 && _received >= _total;
-    Debounce.debounce(
+    Debounce.delay(
       tag: 'loading_media_progress_${widget.item.fileURL}',
       callback: () {
-        updateState();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          updateState();
+        });
       },
-      duration: Duration(milliseconds: isDone ? 0 : 100),
+      // triiger restate only after a small delay, so we don't spam restate on every single byte
+      // if done - send immediately (but still with a delay to let flutter build the parent)
+      duration: Duration(milliseconds: isDone ? 0 : 200),
     );
   }
 
@@ -129,10 +129,10 @@ class _MediaLoadingState extends State<MediaLoading> {
     _received = 0;
     _startedAt = 0;
 
-    _prevReceivedAmount = 0;
-    _lastReceivedAmount = 0;
-    _prevReceivedTime = 0;
-    _lastReceivedTime = 0;
+    _prevAmount = 0;
+    _lastAmount = 0;
+    _prevTime = 0;
+    _lastTime = 0;
 
     _totalListener?.cancel();
     _receivedListener?.cancel();
@@ -189,28 +189,27 @@ class _MediaLoadingState extends State<MediaLoading> {
     int totalBytes = hasProgressData ? _total : 0;
 
     double speedCheckInterval = 1000 / 4;
-    if (hasProgressData && (nowMils - _lastReceivedTime) > speedCheckInterval) {
-      _prevReceivedAmount = _lastReceivedAmount;
-      _lastReceivedAmount = expectedBytes;
+    if (hasProgressData && (nowMils - _lastTime) > speedCheckInterval) {
+      _prevAmount = _lastAmount;
+      _lastAmount = expectedBytes;
 
-      _prevReceivedTime = _lastReceivedTime;
-      _lastReceivedTime = nowMils;
+      _prevTime = _lastTime;
+      _lastTime = nowMils;
     }
 
     double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
     String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
     String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
-    bool isVideo = widget.item.isVideo();
+    bool isVideo = widget.item.isVideo;
 
     String percentDoneText = '';
     if (hasProgressData) {
       if (isVideo) {
         percentDoneText = (percentDone == 1) ? 'Rendering...' : '${(percentDone * 100).toStringAsFixed(2)}%';
       } else {
-        percentDoneText = (percentDone == 1)
-            ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...'
-            : '${(percentDone * 100).toStringAsFixed(2)}%';
+        percentDoneText =
+            (percentDone == 1) ? '${widget.isFromCache ? 'Loading and rendering from cache' : 'Rendering'}...' : '${(percentDone * 100).toStringAsFixed(2)}%';
       }
     } else {
       if (isVideo) {
@@ -223,9 +222,9 @@ class _MediaLoadingState extends State<MediaLoading> {
     String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
 
     int expectedSpeed = 0;
-    if (hasProgressData && _prevReceivedAmount > 0 && _lastReceivedAmount > 0) {
-      expectedSpeed = ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / (nowMils - _prevReceivedTime))).round();
-      // expectedSpeed = ((_lastReceivedAmount - _prevReceivedAmount) * (1000 / speedCheckInterval)).round();
+    if (hasProgressData && _prevAmount > 0 && _lastAmount > 0) {
+      expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
+      // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
     }
     String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
 
@@ -345,7 +344,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             value: percentDone,
             animationDuration: const Duration(milliseconds: 150),
             indicatorStyle: IndicatorStyle.linear,
-            valueColor: Theme.of(context).progressIndicatorTheme.color!.withOpacity(0.66),
+            valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
             minHeight: 6,
           );
 

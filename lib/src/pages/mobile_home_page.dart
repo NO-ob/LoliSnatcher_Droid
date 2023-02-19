@@ -99,7 +99,7 @@ class _MobileHomeState extends State<MobileHome> {
       onLongPress: _onMenuLongTap,
       onSecondaryTap: _onMenuLongTap,
       child: IconButton(
-        icon: Icon(Icons.menu, color: Theme.of(context).appBarTheme.iconTheme!.color!),
+        icon: Icon(Icons.menu, color: Theme.of(context).appBarTheme.iconTheme?.color),
         onPressed: () {
           _toggleDrawer(direction);
 
@@ -136,7 +136,7 @@ class _MobileHomeState extends State<MobileHome> {
           borderRadius: 10,
           leftAnimationType: InnerDrawerAnimation.quadratic,
           rightAnimationType: InnerDrawerAnimation.quadratic,
-          // backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.background),
+          backgroundDecoration: BoxDecoration(color: Theme.of(context).colorScheme.background),
 
           //when a pointer that is in contact with the screen and moves to the right or left
           onDragUpdate: (double val, InnerDrawerDirection? direction) {
@@ -208,7 +208,8 @@ class MainDrawer extends StatelessWidget {
 
     // print('build drawer');
 
-    return RepaintBoundary(
+    return Container(
+      color: Theme.of(context).colorScheme.background,
       child: SafeArea(
         child: Drawer(
           child: Column(

@@ -38,7 +38,8 @@ linter:
     # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
     file_names: true # .dart files should use 'lowercase_with_underscores' naming scheme
     always_use_package_imports: true
-    use_build_context_synchronously: true
+    unawaited_futures: true
+    use_build_context_synchronously: false
 
 # analyzer:
 #   language:

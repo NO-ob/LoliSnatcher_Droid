@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -258,9 +259,9 @@ class LoliSync{
         Logger.Inst().log("Received ${tags.length} tags", "LoliSync", "storeTags", LogTypes.loliSyncInfo);
         if(tags.isNotEmpty) {
           if(mode == 'Overwrite') {
-            tagHandler.loadFromJSON(content, preferTagTypeIfNone: false);
+            unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: false));
           } else if(mode == 'PreferTypeIfNone') {
-            tagHandler.loadFromJSON(content, preferTagTypeIfNone: true);
+            unawaited(tagHandler.loadFromJSON(content, preferTagTypeIfNone: true));
           }
         }
 

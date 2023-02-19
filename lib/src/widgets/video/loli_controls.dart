@@ -134,7 +134,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   AnimatedOpacity _buildBottomBar(
     BuildContext context,
   ) {
-    final iconColor = Theme.of(context).textTheme.button!.color;
+    final iconColor = Theme.of(context).textTheme.labelLarge?.color;
 
     // Don't draw progress bar if shorter than 2 seconds, moves too fast on short durations
     bool isTooShort = controller.value.duration.inSeconds <= 2;
@@ -269,12 +269,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      right: 8,
-                      left: 8,
-                      bottom: 8,
-                    ),
+                    padding: const EdgeInsets.all(8),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
                     child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
                   )
@@ -288,12 +283,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   borderRadius: BorderRadius.circular(10.0),
                   child: Container(
                     alignment: Alignment.center,
-                    padding: const EdgeInsets.only(
-                      top: 8,
-                      right: 8,
-                      left: 8,
-                      bottom: 8,
-                    ),
+                    padding: const EdgeInsets.all(8),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
                     child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
                   )
@@ -430,7 +420,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         );
 
         if (chosenSpeed != null) {
-          controller.setPlaybackSpeed(chosenSpeed);
+          await controller.setPlaybackSpeed(chosenSpeed);
         }
 
         if (_latestValue.isPlaying) {
@@ -764,16 +754,15 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
           _startHideTimer();
         },
-        barHeight: _hideStuff ? 2 : 5,
-        handleHeight: _hideStuff ? 0 : 6,
+        barHeight: 5,
+        handleHeight: _hideStuff ? 3 : 6,
         drawShadow: true,
-        colors: chewieController.materialProgressColors ??
-            ChewieProgressColors(
-              playedColor: Theme.of(context).colorScheme.secondary,
-              handleColor: Theme.of(context).colorScheme.secondary,
-              bufferedColor: Theme.of(context).backgroundColor,
-              backgroundColor: Theme.of(context).disabledColor,
-            ),
+        colors: chewieController.materialProgressColors ?? ChewieProgressColors(
+          playedColor: Theme.of(context).colorScheme.secondary,
+          handleColor: Theme.of(context).colorScheme.secondary,
+          bufferedColor: Theme.of(context).colorScheme.surface,
+          backgroundColor: Theme.of(context).disabledColor,
+        ),
       )
     );
   }
