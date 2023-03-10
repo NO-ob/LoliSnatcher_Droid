@@ -48,9 +48,9 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
 
   final void Function(Object)? onError;
 
-  final int? sendTimeout;
+  final Duration? sendTimeout;
 
-  final int? receiveTimeout;
+  final Duration? receiveTimeout;
 
   @override
   Future<CustomNetworkImage> obtainKey(ImageConfiguration configuration) {

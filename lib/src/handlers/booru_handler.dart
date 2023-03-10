@@ -134,7 +134,7 @@ abstract class BooruHandler {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
       if(e is DioError) {
         await Tools.checkForCaptcha(e.response, uri);
-        errorString = e.message;
+        errorString = e.message ?? e.toString();
       } else {
         errorString = e.toString();
       }

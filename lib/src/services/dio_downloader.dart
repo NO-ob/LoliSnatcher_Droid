@@ -23,7 +23,7 @@ class DioDownloader {
     this.onDoneFile,
     this.cacheEnabled = false,
     this.cacheFolder = 'other',
-    this.timeoutTime,
+    this.timeoutDuration,
     this.fileNameExtras = '',
   });
 
@@ -37,7 +37,7 @@ class DioDownloader {
   final void Function(File)? onDoneFile;
   final bool cacheEnabled;
   final String cacheFolder;
-  final int? timeoutTime;
+  final Duration? timeoutDuration;
   final String fileNameExtras;
 
   Isolate? isolate;
@@ -199,7 +199,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
@@ -289,7 +289,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
@@ -375,7 +375,7 @@ class DioDownloader {
       final Response response = await currentClient!.download(
         resolved.toString(),
         imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
-        options: Options(headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
         deleteOnError: true,
@@ -425,7 +425,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.head(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
       );
 

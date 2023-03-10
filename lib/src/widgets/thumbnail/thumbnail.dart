@@ -95,8 +95,8 @@ class _ThumbnailState extends State<Thumbnail> {
       withCache: settingsHandler.thumbnailCache,
       cacheFolder: isMain ? thumbFolder : 'thumbnails',
       fileNameExtras: widget.item.fileNameExtras,
-      sendTimeout: widget.isStandalone ? 20000 : null,
-      receiveTimeout: widget.isStandalone ? 20000 : null,
+      sendTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
+      receiveTimeout: widget.isStandalone ? const Duration(seconds: 20) : null,
       onError: isMain ? onError : null,
       onCacheDetected: (bool didDetectCache) {
         if (isMain) {
