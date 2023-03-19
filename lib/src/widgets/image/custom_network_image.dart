@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/image/abstract_custom_network_image.dart' as custom_network_image;
 
 @immutable
@@ -197,7 +198,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
                 cancelToken: cancelToken,
               );
 
-        if (response.statusCode != HttpStatus.ok) {
+        if (Tools.isGoodStatusCode(response.statusCode) == false) {
           throw NetworkImageLoadException(
             statusCode: response.statusCode ?? 0,
             uri: resolved,

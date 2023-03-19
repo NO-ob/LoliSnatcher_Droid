@@ -17,19 +17,48 @@ enum Positions {
 }
 
 class FlashElements {
+  /// Shows a snackbar with a title, content and a leading icon, with a strip on the left side. Optionally can be used as a dialog.
+  /// 
+  /// [context] - current build context, if no given - gets it from navigatorKey
+  /// 
+  /// [title] - title of the tip
+  /// 
+  /// [content] - content of the tip
+  /// 
+  /// [sideColor] - color of the strip on the left side
+  /// 
+  /// [leadingIcon] - icon on the left side
+  /// 
+  /// [leadingIconColor] - leading icon color
+  /// 
+  /// [leadingIconSize] - leading icon size
+  /// 
+  /// [overrideLeadingIconWidget] - custom widget which will replace the leading icon
+  /// 
+  /// [duration] - duration before animation is removed from the screen, set to null to leave until closed by user, 4 seconds by default
+  /// 
+  /// [tapToClose] - should the tip close when tapped
+  /// 
+  /// [shouldLeadingPulse] - should the leading icon pulse
+  /// 
+  /// [allowInViewer] - should the tip open when user is in viewer
+  /// 
+  /// [position] - position of the tip on the screen
+  /// 
+  /// [asDialog] - should the tip be shown as a dialog
   static FutureOr<void> showSnackbar({
-    BuildContext? context, // current build context, if no given - get it from navigatorKey
-    required Widget title, // title widget - required
+    BuildContext? context,
+    required Widget title, 
     Widget content = const SizedBox(height: 20),
-    Color sideColor = Colors.red, // color of the strip on the left side
-    IconData? leadingIcon = Icons.info_outline, // icon on the left side
-    Color? leadingIconColor, // icon color
-    double leadingIconSize = 36, // icon size
-    Widget? overrideLeadingIconWidget, // custom widget which will replace the icon
-    Duration? duration = const Duration(seconds: 4), // set to null to leave until closed by user
-    bool tapToClose = true, // close the tip by tapping anywhere on it
-    bool shouldLeadingPulse = true, // should icon widget play pulse animation
-    bool allowInViewer = true, // should tip open when user is in viewer
+    Color sideColor = Colors.red, 
+    IconData? leadingIcon = Icons.info_outline,
+    Color? leadingIconColor,
+    double leadingIconSize = 36,
+    Widget? overrideLeadingIconWidget,
+    Duration? duration = const Duration(seconds: 4),
+    bool tapToClose = true,
+    bool shouldLeadingPulse = true,
+    bool allowInViewer = true,
     Positions position = Positions.bottom,
     bool asDialog = false,
   }) async {

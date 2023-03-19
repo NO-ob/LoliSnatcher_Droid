@@ -266,6 +266,8 @@ class _BooruEditState extends State<BooruEdit> {
     switch (selectedBooruType) {
       case 'Sankaku':
         return 'Password';
+      case 'R34Hentai':
+        return 'Cookies';
       default:
         return 'API Key';
     }
@@ -274,6 +276,7 @@ class _BooruEditState extends State<BooruEdit> {
   String getUserIDTitle() {
     switch (selectedBooruType) {
       case 'Sankaku':
+      case 'Danbooru':
         return 'Login';
       default:
         return 'User ID';
@@ -558,7 +561,7 @@ class _BooruEditState extends State<BooruEdit> {
   /// This function will use the Base URL the user has entered and call a search up to three times
   /// if the searches return null each time it tries the search it uses a different
   /// type of BooruHandler
-  Future<List<String>> booruTest(Booru booru, String userBooruType) async {
+  Future<List<String>> booruTest(Booru booru, String userBooruType, {bool withCaptchaCheck = true,}) async {
     String booruType = "", errorString = "";
     BooruHandler test;
     List<BooruItem> testFetched = [];
@@ -576,7 +579,11 @@ class _BooruEditState extends State<BooruEdit> {
       List<String> typeList = [...booruTypes]..remove("Hydrus");
       for (int i = 1; i < typeList.length; i++) {
         if (booruType == "") {
-          booruType = (await booruTest(booru, typeList.elementAt(i)))[0];
+          booruType = (await booruTest(
+            booru,
+            typeList.elementAt(i),
+            withCaptchaCheck: false,
+          ))[0];
         }
       }
     } else {
@@ -585,7 +592,11 @@ class _BooruEditState extends State<BooruEdit> {
       test.pageNum = temp[1];
       test.pageNum++;
 
-      testFetched = (await test.search(" ", null)) ?? [];
+      testFetched = (await test.search(
+        " ",
+        null,
+        withCaptchaCheck: withCaptchaCheck,
+      )) ?? [];
 
       if (test.errorString.isNotEmpty) {
         errorString = test.errorString;

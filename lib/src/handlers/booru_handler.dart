@@ -69,7 +69,7 @@ abstract class BooruHandler {
   }
   /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
-  Future search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
     // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
@@ -123,7 +123,9 @@ abstract class BooruHandler {
           locked = true;
         }
       } else {
-        await Tools.checkForCaptcha(response, uri);
+        if (withCaptchaCheck) {
+          await Tools.checkForCaptcha(response, uri);
+        }
 
         Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
@@ -133,7 +135,9 @@ abstract class BooruHandler {
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
       if(e is DioError) {
-        await Tools.checkForCaptcha(e.response, uri);
+        if (withCaptchaCheck) {
+          await Tools.checkForCaptcha(e.response, uri);
+        }
         errorString = e.message ?? e.toString();
       } else {
         errorString = e.toString();

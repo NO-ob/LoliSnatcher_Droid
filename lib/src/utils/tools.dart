@@ -77,7 +77,7 @@ class Tools {
 
     if (!isTestMode) {
       try {
-        final cookies = await CookieManager.instance().getCookies(url: Uri(host: Uri.parse(booru.baseURL!).host));
+        final cookies = await CookieManager.instance().getCookies(url: Uri.parse(booru.baseURL!));
         if (cookies.isNotEmpty) {
           headers["Cookie"] = cookies.map((e) => "${e.name}=${e.value}").join("; ");
         }
@@ -130,9 +130,13 @@ class Tools {
     return count == 1 ? str : '${str}s';
   }
 
+  static bool isGoodStatusCode(int? statusCode) {
+    return statusCode != null && statusCode >= 200 && statusCode < 300;
+  }
+
   // TODO move to separate class (something with the name like "Constants")
   static String appUserAgent() => "LoliSnatcher_Droid/${Constants.appVersion}";
-  static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0";
+  static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0";
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
 

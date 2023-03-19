@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 class DioDownloader {
   DioDownloader(
@@ -208,7 +209,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 
@@ -298,7 +299,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 
@@ -385,7 +386,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 
@@ -435,7 +436,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 

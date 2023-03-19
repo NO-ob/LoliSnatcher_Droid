@@ -86,8 +86,10 @@ class DioNetwork {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
   }) async {
+    final client = getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
-    return getClient().get(
+
+    return client.get(
       urlAndQuery['url'],
       queryParameters: urlAndQuery['query'],
       options: mergeOptions(options, headers),
@@ -98,7 +100,7 @@ class DioNetwork {
 
   static Future<Response> post(
     String url, {
-    Map<String, dynamic> data = const {},
+    Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     Map<String, dynamic>? headers = const {},
@@ -106,8 +108,10 @@ class DioNetwork {
     void Function(int, int)? onReceiveProgress,
     void Function(int, int)? onSendProgress,
   }) async {
+    final client = getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
-    return getClient().post(
+    
+    return client.post(
       urlAndQuery['url'],
       data: data,
       queryParameters: urlAndQuery['query'],
@@ -120,7 +124,7 @@ class DioNetwork {
 
   static Future<Response> head(
     String url, {
-    Map<String, dynamic> data = const {},
+    Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     Map<String, dynamic>? headers = const {},
@@ -128,8 +132,10 @@ class DioNetwork {
     void Function(int, int)? onReceiveProgress,
     void Function(int, int)? onSendProgress,
   }) async {
+    final client = getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
-    return getClient().head(
+
+    return client.head(
       urlAndQuery['url'],
       data: data,
       queryParameters: urlAndQuery['query'],
@@ -141,7 +147,7 @@ class DioNetwork {
   static download(
     String url,
     String savePath, {
-    Map<String, dynamic> data = const {},
+    Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     Map<String, dynamic>? headers = const {},
@@ -149,8 +155,10 @@ class DioNetwork {
     void Function(int, int)? onReceiveProgress,
     bool deleteOnError = true,
   }) async {
+    final client = getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
-    return getClient().download(
+
+    return client.download(
       urlAndQuery['url'],
       savePath,
       data: data,
@@ -168,7 +176,7 @@ class DioNetwork {
     String fileNameWoutExt,
     String fileExt,
     String mediaType, {
-    Map<String, dynamic> data = const {},
+    Object? data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     Map<String, dynamic>? headers = const {},
@@ -177,13 +185,14 @@ class DioNetwork {
     String lengthHeader = Headers.contentLengthHeader,
     bool deleteOnError = true,
   }) async {
+    final client = getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
     options = DioMixin.checkOptions('GET', mergeOptions(options, headers));
     options.responseType = ResponseType.stream;
     Response<ResponseBody> response;
     try {
-      response = await getClient().request<ResponseBody>(
+      response = await client.request<ResponseBody>(
         urlAndQuery['url'],
         data: data,
         options: options,

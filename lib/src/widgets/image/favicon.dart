@@ -72,7 +72,7 @@ class _FaviconState extends State<Favicon> {
         ((mainProvider as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
         disposables();
       }
-      if (error is DioError && error.response != null && error.response!.statusCode != HttpStatus.ok) {
+      if (error is DioError && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
           await Tools.checkForCaptcha(error.response!, error.requestOptions.uri);
           manualReloadTapped = false;
