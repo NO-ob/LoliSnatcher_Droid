@@ -140,11 +140,12 @@ class Tools {
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
 
-  static Future<void> checkForCaptcha(Response? response, Uri uri) async {
-    if (captchaScreenActive || isTestMode) return;
+  static Future<bool> checkForCaptcha(Response? response, Uri uri) async {
+    if (captchaScreenActive || isTestMode) return false;
 
-    final RegExp captchaRegex = RegExp(r'captcha', caseSensitive: false);
-    if ((response?.statusCode == 503 || response?.statusCode == 403) || (response?.data is String && captchaRegex.hasMatch(response?.data as String))) {
+    // final RegExp captchaRegex = RegExp(r'captcha', caseSensitive: false);
+    // || (response?.data is String && captchaRegex.hasMatch(response?.data as String))
+    if (response?.statusCode == 503 || response?.statusCode == 403) {
       captchaScreenActive = true;
       await Navigator.push(
         NavigationHandler.instance.navigatorKey.currentContext!,
@@ -157,7 +158,28 @@ class Tools {
         ),
       );
       captchaScreenActive = false;
+      return true;
     }
+    return false;
+  }
+
+  static Future<String> getCookies(Uri uri) async {
+    String cookieString = '';
+    if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
+      try {
+        final CookieManager cookieManager = CookieManager.instance();
+        final List<Cookie> cookies = await cookieManager.getCookies(url: uri);
+        for (Cookie cookie in cookies) {
+          cookieString += '${cookie.name}=${cookie.value}; ';
+        }
+      } catch (e) {
+        // 
+      }
+    }
+
+    cookieString = cookieString.trim();
+
+    return cookieString;
   }
 }
 

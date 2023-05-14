@@ -37,7 +37,7 @@ class SankakuHandler extends BooruHandler {
   bool hasItemUpdateSupport = true;
 
   @override
-  fetchSearch(Uri uri) async {
+  fetchSearch(Uri uri, {bool withCaptchaCheck = true}) async {
     try {
       if (authToken == "" && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
         authToken = await getAuthToken();
@@ -47,7 +47,11 @@ class SankakuHandler extends BooruHandler {
       Logger.Inst().log("Failed to get authtoken: $e", className, "fetchSearch", LogTypes.booruHandlerInfo);
     }
 
-    return DioNetwork.get(uri.toString(), headers: getHeaders());
+    return DioNetwork.get(
+      uri.toString(),
+      headers: getHeaders(),
+      customInterceptor: withCaptchaCheck ? DioNetwork.captchaInterceptor : null,
+    );
   }
 
   @override

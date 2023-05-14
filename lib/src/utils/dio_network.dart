@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -63,6 +65,68 @@ class DioNetwork {
     };
   }
 
+  static Dio captchaInterceptor(Dio client) {
+    client.interceptors.add(
+      InterceptorsWrapper(
+        onResponse: (Response response, ResponseInterceptorHandler handler) async {
+          final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri);
+          if (!captchaWasDetected) {
+            return handler.next(response);
+          }
+
+          String oldCookie = response.requestOptions.headers['Cookie'] as String? ?? '';
+          String newCookie = await Tools.getCookies(response.requestOptions.uri);
+          var headers = {
+            ...response.requestOptions.headers,
+            'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
+          };
+
+          final opts = Options(
+            method: response.requestOptions.method,
+            headers: headers,
+          );
+
+          final cloneReq = await client.request(
+            response.requestOptions.path,
+            options: opts,
+            data: response.requestOptions.data,
+            queryParameters: response.requestOptions.queryParameters,
+          );
+
+          return handler.resolve(cloneReq);
+        },
+        onError: (DioError error, ErrorInterceptorHandler handler) async {
+          final bool captchaWasDetected = await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
+          if (!captchaWasDetected) {
+            return handler.next(error);
+          }
+
+          String oldCookie = error.requestOptions.headers['Cookie'] as String? ?? '';
+          String newCookie = await Tools.getCookies(error.requestOptions.uri);
+          var headers = {
+            ...error.requestOptions.headers,
+            'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
+          };
+
+          final opts = Options(
+            method: error.requestOptions.method,
+            headers: headers,
+          );
+
+          final cloneReq = await client.request(
+            error.requestOptions.path,
+            options: opts,
+            data: error.requestOptions.data,
+            queryParameters: error.requestOptions.queryParameters,
+          );
+
+          return handler.resolve(cloneReq);
+        },
+      ),
+    );
+    return client;
+  }
+
   static CancelToken get cancelToken {
     return CancelToken();
   }
@@ -85,8 +149,9 @@ class DioNetwork {
     Map<String, dynamic>? headers = const {},
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
+    Dio Function(Dio)? customInterceptor,
   }) async {
-    final client = getClient();
+    final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
     return client.get(
@@ -107,10 +172,11 @@ class DioNetwork {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
     void Function(int, int)? onSendProgress,
+    Dio Function(Dio)? customInterceptor,
   }) async {
-    final client = getClient();
+    final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
-    
+
     return client.post(
       urlAndQuery['url'],
       data: data,
@@ -131,8 +197,9 @@ class DioNetwork {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
     void Function(int, int)? onSendProgress,
+    Dio Function(Dio)? customInterceptor,
   }) async {
-    final client = getClient();
+    final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
     return client.head(
@@ -154,8 +221,9 @@ class DioNetwork {
     CancelToken? cancelToken,
     void Function(int, int)? onReceiveProgress,
     bool deleteOnError = true,
+    Dio Function(Dio)? customInterceptor,
   }) async {
-    final client = getClient();
+    final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
     return client.download(
@@ -184,8 +252,9 @@ class DioNetwork {
     void Function(int, int)? onReceiveProgress,
     String lengthHeader = Headers.contentLengthHeader,
     bool deleteOnError = true,
+    Dio Function(Dio)? customInterceptor,
   }) async {
-    final client = getClient();
+    final client = customInterceptor != null ? customInterceptor(getClient()) : getClient();
     final urlAndQuery = separateUrlAndQueryParams(url, queryParameters);
 
     options = DioMixin.checkOptions('GET', mergeOptions(options, headers));
@@ -248,7 +317,7 @@ class DioNetwork {
 
     if (fileUri == null) {
       completer.completeError(
-        DioMixin.assureDioError(Exception('Error creating saf file'), response.requestOptions, null),
+        DioMixin.assureDioError(Exception('Error creating saf file'), response.requestOptions),
       );
     }
 
@@ -276,7 +345,7 @@ class DioNetwork {
             await subscription.cancel();
           } finally {
             completer.completeError(
-              DioMixin.assureDioError(e, response.requestOptions, s),
+              DioMixin.assureDioError(e, response.requestOptions),
             );
           }
         });
@@ -287,9 +356,9 @@ class DioNetwork {
           closed = true;
           await ServiceHandler.closeStreamToFileFromSAFDirectory(fileUri!);
           completer.complete(response);
-        } catch (e, s) {
+        } catch (e) {
           completer.completeError(
-            DioMixin.assureDioError(e, response.requestOptions, s),
+            DioMixin.assureDioError(e, response.requestOptions),
           );
         }
       },
@@ -298,7 +367,7 @@ class DioNetwork {
           await closeAndDelete();
         } finally {
           completer.completeError(
-            DioMixin.assureDioError(e, response.requestOptions, s),
+            DioMixin.assureDioError(e, response.requestOptions),
           );
         }
       },
@@ -319,7 +388,6 @@ class DioNetwork {
           throw DioError.receiveTimeout(
             timeout: timeout,
             requestOptions: response.requestOptions,
-            stackTrace: s,
           );
         } else {
           throw e;

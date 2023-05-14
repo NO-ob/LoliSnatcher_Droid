@@ -11,46 +11,43 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-enum Positions {
-  bottom,
-  top
-}
+enum Positions { bottom, top }
 
 class FlashElements {
   /// Shows a snackbar with a title, content and a leading icon, with a strip on the left side. Optionally can be used as a dialog.
-  /// 
+  ///
   /// [context] - current build context, if no given - gets it from navigatorKey
-  /// 
+  ///
   /// [title] - title of the tip
-  /// 
+  ///
   /// [content] - content of the tip
-  /// 
+  ///
   /// [sideColor] - color of the strip on the left side
-  /// 
+  ///
   /// [leadingIcon] - icon on the left side
-  /// 
+  ///
   /// [leadingIconColor] - leading icon color
-  /// 
+  ///
   /// [leadingIconSize] - leading icon size
-  /// 
+  ///
   /// [overrideLeadingIconWidget] - custom widget which will replace the leading icon
-  /// 
+  ///
   /// [duration] - duration before animation is removed from the screen, set to null to leave until closed by user, 4 seconds by default
-  /// 
+  ///
   /// [tapToClose] - should the tip close when tapped
-  /// 
+  ///
   /// [shouldLeadingPulse] - should the leading icon pulse
-  /// 
+  ///
   /// [allowInViewer] - should the tip open when user is in viewer
-  /// 
+  ///
   /// [position] - position of the tip on the screen
-  /// 
+  ///
   /// [asDialog] - should the tip be shown as a dialog
   static FutureOr<void> showSnackbar({
     BuildContext? context,
-    required Widget title, 
+    required Widget title,
     Widget content = const SizedBox(height: 20),
-    Color sideColor = Colors.red, 
+    Color sideColor = Colors.red,
     IconData? leadingIcon = Icons.info_outline,
     Color? leadingIconColor,
     double leadingIconSize = 36,
@@ -66,11 +63,11 @@ class FlashElements {
     if (Tools.isTestMode) return;
 
     bool inViewer = ViewerHandler.instance.inViewer.value;
-    if(!allowInViewer && inViewer) {
+    if (!allowInViewer && inViewer) {
       return;
     }
 
-    if(context == null && NavigationHandler.instance.navigatorKey.currentContext == null) {
+    if (context == null && NavigationHandler.instance.navigatorKey.currentContext == null) {
       return;
     }
 
@@ -86,10 +83,10 @@ class FlashElements {
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
 
-    if(asDialog) {
-      return showDialog(
+    if (asDialog) {
+      return showModalFlash(
         context: contextToUse,
-        builder: (context) {
+        builder: (context, controller) {
           return SettingsDialog(
             titlePadding: const EdgeInsets.all(0),
             buttonPadding: const EdgeInsets.all(0),
@@ -101,17 +98,19 @@ class FlashElements {
               child: ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(8)),
                 child: FlashBar(
+                  controller: controller,
                   title: title,
                   content: content,
                   indicatorColor: sideColor,
-                  icon: overrideLeadingIconWidget ?? Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Icon(
-                      leadingIcon,
-                      color: leadingIconColor ?? themeData.colorScheme.onBackground,
-                      size: leadingIconSize,
-                    )
-                  ),
+                  icon: overrideLeadingIconWidget ??
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Icon(
+                          leadingIcon,
+                          color: leadingIconColor ?? themeData.colorScheme.onBackground,
+                          size: leadingIconSize,
+                        ),
+                      ),
                   shouldIconPulse: shouldLeadingPulse,
                 ),
               ),
@@ -129,53 +128,63 @@ class FlashElements {
       builder: (_, controller) {
         return Flash(
           controller: controller,
-          margin: (isDesktop && mediaQueryData.size.width > 500)
-            ? EdgeInsets.symmetric(horizontal: mediaQueryData.size.width / 4, vertical: 0)
-            : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
-          behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
           position: flashPosition,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(8),
-            topRight: const Radius.circular(8),
-            bottomLeft: !isDesktop ? const Radius.circular(8) : Radius.zero,
-            bottomRight: !isDesktop ? const Radius.circular(8) : Radius.zero,
-          ),
-          borderColor: isDark ? Colors.grey[800] : Colors.grey[300],
-          boxShadows: kElevationToShadow[8],
-          backgroundColor: themeData.colorScheme.background,
-          onTap: tapToClose ? () => controller.dismiss() : null,
           forwardAnimationCurve: Curves.linearToEaseOut,
           reverseAnimationCurve: Curves.easeOutCirc,
-          horizontalDismissDirection: HorizontalDismissDirection.horizontal,
+          dismissDirections: const [
+            FlashDismissDirection.startToEnd,
+            FlashDismissDirection.endToStart,
+          ],
           child: DefaultTextStyle(
             style: TextStyle(color: themeData.colorScheme.onBackground),
-            child: FlashBar(
-              title: title,
-              content: content,
-              indicatorColor: sideColor,
-              icon: overrideLeadingIconWidget ?? Padding(
-                padding: const EdgeInsets.all(12),
-                child: Icon(
-                  leadingIcon,
-                  color: leadingIconColor ?? themeData.colorScheme.onBackground,
-                  size: leadingIconSize,
-                )
+            child: GestureDetector(
+              onTap: tapToClose ? () => controller.dismiss() : null,
+              child: FlashBar(
+                title: title,
+                content: content,
+                indicatorColor: sideColor,
+                controller: controller,
+                margin: (isDesktop && mediaQueryData.size.width > 500)
+                    ? EdgeInsets.symmetric(horizontal: mediaQueryData.size.width / 4, vertical: 0)
+                    : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
+                behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
+                shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(8),
+                          topRight: const Radius.circular(8),
+                          bottomLeft: !isDesktop ? const Radius.circular(8) : Radius.zero,
+                          bottomRight: !isDesktop ? const Radius.circular(8) : Radius.zero,
+                      ),
+                      side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                ),
+                shadowColor: Colors.black.withOpacity(0.4),
+                elevation: 8,
+                backgroundColor: themeData.colorScheme.background,
+                icon: overrideLeadingIconWidget ??
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Icon(
+                        leadingIcon,
+                        color: leadingIconColor ?? themeData.colorScheme.onBackground,
+                        size: leadingIconSize,
+                      ),
+                    ),
+                shouldIconPulse: shouldLeadingPulse,
+                primaryAction: IconButton(
+                  onPressed: () => controller.dismiss(),
+                  icon: Icon(Icons.close, color: themeData.colorScheme.onBackground),
+                ),
+                // actions: <Widget>[
+                //   TextButton(
+                //     onPressed: () => controller.dismiss('Yes'),
+                //     child: Text(inViewer.toString(), style: TextStyle(color: theme.colorScheme.onBackground))
+                //   ),
+                //   TextButton(
+                //     onPressed: () => controller.dismiss('No'),
+                //     child: Text('NO', style: TextStyle(color: theme.colorScheme.onBackground))
+                //   ),
+                // ],
               ),
-              shouldIconPulse: shouldLeadingPulse,
-              primaryAction: IconButton(
-                onPressed: () => controller.dismiss(),
-                icon: Icon(Icons.close, color: themeData.colorScheme.onBackground),
-              ),
-              // actions: <Widget>[
-              //   TextButton(
-              //     onPressed: () => controller.dismiss('Yes'),
-              //     child: Text(inViewer.toString(), style: TextStyle(color: theme.colorScheme.onBackground))
-              //   ),
-              //   TextButton(
-              //     onPressed: () => controller.dismiss('No'),
-              //     child: Text('NO', style: TextStyle(color: theme.colorScheme.onBackground))
-              //   ),
-              // ],
             ),
           ),
         );

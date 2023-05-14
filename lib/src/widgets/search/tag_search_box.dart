@@ -21,7 +21,6 @@ import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
 // - debounce searches [In progress: needs rewrite of tagSearch to dio to use requests cancelling]
 // - parse tag type from search if possible
 
-
 class TagSearchBox extends StatefulWidget {
   const TagSearchBox({Key? key}) : super(key: key);
 
@@ -77,7 +76,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       removeOverlay();
       isFocused = false;
     }
-    setState(() { });
+    setState(() {});
   }
 
   void animateTransition() {
@@ -197,9 +196,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           onPressed: () async {
                             ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
                             String copied = cdata?.text ?? '';
-                            if(copied.isNotEmpty) {
+                            if (copied.isNotEmpty) {
                               searchHandler.searchTextController.text += ' $copied ';
-                              searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                              searchHandler.searchTextController.selection =
+                                  TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
                               animateTransition();
                               createOverlay();
                             }
@@ -250,7 +250,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     ),
                   ),
                   const SizedBox(width: 10),
-                ]
+                ],
               ),
             ),
           ),
@@ -266,13 +266,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
     for (var i = 0; i < splitInput.length; i++) {
       String stringContent = splitInput.elementAt(i);
-      if(stringContent.isEmpty) {
+      if (stringContent.isEmpty) {
         // skip creating chip element for empty tags (i.e double spaces...)
         continue;
       }
-      tags.add(TagChip(
-        tagString: stringContent,
-        gestureDetector: GestureDetector(
+      tags.add(
+        TagChip(
+          tagString: stringContent,
+          gestureDetector: GestureDetector(
             onTap: () {
               splitInput.removeAt(i);
               searchHandler.searchTextController.text = splitInput.join(' ');
@@ -280,21 +281,22 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               combinedSearch();
             },
             child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
-                )
-            )
+              cursor: SystemMouseCursors.click,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
+              ),
+            ),
+          ),
         ),
-      ));
+      );
     }
     return tags;
   }
 
   void tagStuff() {
     input = searchHandler.searchTextController.text;
-    if (searchHandler.currentBooru.type == "Hydrus"){
+    if (searchHandler.currentBooru.type == "Hydrus") {
       splitInput = input.trim().split(",");
     } else {
       splitInput = input.trim().split(" ");
@@ -302,12 +304,12 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     startIndex = 0;
     setSelectedTag(input);
     multiIndex = -1;
-    if (lastTag.startsWith(RegExp(r"\d+#"))){
+    if (lastTag.startsWith(RegExp(r"\d+#"))) {
       int tmpIndex = int.parse(lastTag.split("#")[0]) - 1;
       String tag = lastTag.split("#")[1];
-      if (searchHandler.currentBooruHandler is MergebooruHandler){
+      if (searchHandler.currentBooruHandler is MergebooruHandler) {
         MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-        if ((tmpIndex) >= 0 && tmpIndex < handler.booruHandlers.length){
+        if ((tmpIndex) >= 0 && tmpIndex < handler.booruHandlers.length) {
           multiIndex = tmpIndex;
           lastTag = tag;
         }
@@ -317,31 +319,24 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     //remove minus (exclude symbol) or tilde (or symbol)
     lastTag = lastTag.replaceAll(RegExp(r'^-'), '').replaceAll(RegExp(r'^~'), '');
     // print("LASTTAG: $lastTag");
-    setState(() { });
+    setState(() {});
   }
 
-  void setSelectedTag(String input){
+  void setSelectedTag(String input) {
     cursorPos = searchHandler.searchTextController.selection.baseOffset;
     if (cursorPos < 0) cursorPos = 0;
     int tmpStartIndex = cursorPos - 1;
-    while(
-    tmpStartIndex > 0 &&
-        (
-            searchHandler.currentBooru.type == "Hydrus"?
-            input[tmpStartIndex] != ",":
-            input[tmpStartIndex] != " "
-        )
-    ) {
-      tmpStartIndex --;
+    while (tmpStartIndex > 0 && (searchHandler.currentBooru.type == "Hydrus" ? input[tmpStartIndex] != "," : input[tmpStartIndex] != " ")) {
+      tmpStartIndex--;
     }
 
-    if (cursorPos == input.length){
+    if (cursorPos == input.length) {
       lastTag = splitInput.last;
       replaceString = lastTag;
     } else {
       int endIndex = input.indexOf(" ", cursorPos);
-      if (searchHandler.currentBooru.type == "Hydrus"){
-        if(tmpStartIndex == -1){
+      if (searchHandler.currentBooru.type == "Hydrus") {
+        if (tmpStartIndex == -1) {
           endIndex = input.length;
         } else {
           endIndex = input.indexOf(",", tmpStartIndex);
@@ -352,50 +347,63 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       replaceString = input.substring((tmpStartIndex == 0 ? tmpStartIndex : tmpStartIndex + 1), endIndex);
       startIndex = tmpStartIndex;
     }
-
   }
 
   void searchBooru() async {
-    booruResults.value = [[' ', 'loading']];
+    booruResults.value = [
+      [' ', 'loading']
+    ];
     // TODO cancel previous search when new starts
     List<String?> getFromBooru = [];
-    if (multiIndex != -1){
+    if (multiIndex != -1) {
       MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
       getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag);
     } else {
       getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
     }
 
-    booruResults.value = getFromBooru.map((tag){
+    booruResults.value = getFromBooru.map((tag) {
       final String tagTemp = tag ?? '';
       return [tagTemp, 'booru'];
     }).toList();
   }
 
   void searchHistory() async {
-    historyResults.value = [[' ', 'loading']];
+    historyResults.value = [
+      [' ', 'loading']
+    ];
     historyResults.value = lastTag.isNotEmpty
-      ? (await settingsHandler.dbHandler.getSearchHistoryByInput(lastTag, 2)).map((tag){
-        return [tag, 'history'];
-      }).toList()
-      : [];
-    historyResults.value = historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
+        ? (await settingsHandler.dbHandler.getSearchHistoryByInput(lastTag, 2)).map((tag) {
+            return [tag, 'history'];
+          }).toList()
+        : [];
+    historyResults.value =
+        historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
   }
+
   void searchDatabase() async {
-    databaseResults.value = [[' ', 'loading']];
+    databaseResults.value = [
+      [' ', 'loading']
+    ];
     databaseResults.value = lastTag.isNotEmpty
-      ? (await settingsHandler.dbHandler.getTags(lastTag, 2)).map((tag){
-        return [tag, 'database'];
-      }).toList()
-      : [];
-    databaseResults.value = databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList();
+        ? (await settingsHandler.dbHandler.getTags(lastTag, 2)).map((tag) {
+            return [tag, 'database'];
+          }).toList()
+        : [];
+    databaseResults.value = databaseResults
+        .where((tag) =>
+            booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 &&
+            historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1)
+        .toList();
   }
   // TODO add a list of search modifiers (rating:s, sort:score...) to every booru handler
   // void searchModifiers() async { }
 
   void combinedSearch() {
     // drop previous list even if new search didn't start yet
-    booruResults.value = [[' ', 'loading']];
+    booruResults.value = [
+      [' ', 'loading']
+    ];
     Debounce.debounce(
       tag: 'tag_search_box',
       callback: () {
@@ -407,8 +415,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       duration: const Duration(milliseconds: 300),
     );
   }
-
-
 
   OverlayEntry? _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
@@ -427,11 +433,15 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           child: Obx(() {
             List<List<String>> items = [
               ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
-              ...databaseResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 && historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
+              ...databaseResults.where(
+                (tag) =>
+                    booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 &&
+                    historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1,
+              ),
               ...booruResults,
             ];
 
-            if(items.isEmpty) {
+            if (items.isEmpty) {
               return ListTile(
                 horizontalTitleGap: 4,
                 minLeadingWidth: 20,
@@ -504,7 +514,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           isExpanded: false,
                         ),
                         onTap: () {
-                          if(type == 'loading') {
+                          if (type == 'loading') {
                             return;
                           }
 
@@ -523,10 +533,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           }
 
                           String newInput = "";
-                          if (startIndex >= 0 && replaceString.isNotEmpty){
+                          if (startIndex >= 0 && replaceString.isNotEmpty) {
                             //newInput = searchHandler.searchTextController.text.replaceRange(start, end, replacement)
                             newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, cursorPos - replaceString.length);
-                          } else if (startIndex == -1){
+                          } else if (startIndex == -1) {
                             newInput = newTag + (searchHandler.currentBooru.type == "Hydrus" ? "," : " ") + searchHandler.searchTextController.text;
                           } else {
                             newInput = searchHandler.searchTextController.text + newTag;
@@ -541,14 +551,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           combinedSearch();
                           _overlayEntry!.markNeedsBuild();
 
-                          setState(() { });
+                          setState(() {});
                         },
                       );
                     } else {
                       return const SizedBox();
                     }
-                  }
-                )
+                  },
+                ),
               );
             }
           }),
@@ -583,18 +593,20 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               searchHandler.searchBoxFocus.unfocus();
               searchHandler.searchAction(text, null);
             },
-            onEditingComplete: (){
+            onEditingComplete: () {
               searchHandler.searchBoxFocus.unfocus();
             },
             onTap: () {
-              if(!searchHandler.searchBoxFocus.hasFocus) {
+              if (!searchHandler.searchBoxFocus.hasFocus) {
                 // add space to the end
-                if(input.isNotEmpty && input[input.length - 1] != ' ') {
+                if (input.isNotEmpty && input[input.length - 1] != ' ') {
                   searchHandler.searchTextController.text = '$input ';
                   createOverlay();
                 }
                 // set cursor to the end when tapped unfocused
-                searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                searchHandler.searchTextController.selection = TextSelection.fromPosition(
+                  TextPosition(offset: searchHandler.searchTextController.text.length),
+                );
                 animateTransition();
               } else {
                 tagStuff();
@@ -604,61 +616,58 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             decoration: InputDecoration(
               hintText: searchHandler.searchTextController.text.isEmpty ? "Enter Tags" : '',
               prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
-                ? IconButton(
-                    padding: const EdgeInsets.all(5),
-                    onPressed: () {
-                      searchHandler.searchTextController.clear();
-                      tagStuff();
-                      combinedSearch();
-                      _overlayEntry!.markNeedsBuild();
-                      setState(() {});
-                    },
-                    icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onBackground),
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10)
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Listener(
-                        onPointerSignal: (pointerSignal) {
-                          if(pointerSignal is PointerScrollEvent) {
-                            tagsScrollController.jumpTo(
-                              tagsScrollController.offset + pointerSignal.scrollDelta.dy,
-                              // duration: Duration(milliseconds: 20),
-                              // curve: Curves.linear
-                            );
-                          }
-                        },
-                        child: SingleChildScrollView(
-                          controller: tagsScrollController,
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ...getTagsChips(),
-                              if(input.isNotEmpty && splitInput.isNotEmpty) ...[
-                                if(splitInput.length < 3)
-                                  const SizedBox(width: 120)
-                                else
-                                  const SizedBox(width: 60),
-                                const Text(''),
-                              ],
-                            ],
-                          ),
-                        )
-                      ),
+                  ? IconButton(
+                      padding: const EdgeInsets.all(5),
+                      onPressed: () {
+                        searchHandler.searchTextController.clear();
+                        tagStuff();
+                        combinedSearch();
+                        _overlayEntry!.markNeedsBuild();
+                        setState(() {});
+                      },
+                      icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onBackground),
                     )
-                  ),
-              contentPadding: const EdgeInsets.fromLTRB(15, 0, 5, 0), // left,top,right,bottom
+                  : Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Listener(
+                          onPointerSignal: (pointerSignal) {
+                            if (pointerSignal is PointerScrollEvent) {
+                              tagsScrollController.jumpTo(
+                                tagsScrollController.offset + pointerSignal.scrollDelta.dy,
+                                // duration: Duration(milliseconds: 20),
+                                // curve: Curves.linear
+                              );
+                            }
+                          },
+                          child: SingleChildScrollView(
+                            controller: tagsScrollController,
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ...getTagsChips(),
+                                if (input.isNotEmpty && splitInput.isNotEmpty) ...[
+                                  if (splitInput.length < 3) const SizedBox(width: 120) else const SizedBox(width: 60),
+                                  const Text(''),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+              contentPadding: const EdgeInsets.fromLTRB(15, 0, 5, 0),
             ),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }

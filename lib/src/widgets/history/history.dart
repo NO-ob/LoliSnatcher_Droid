@@ -279,7 +279,7 @@ class _HistoryListState extends State<HistoryList> {
       },
       pageFuture: (page) => _loadPage(page, pageSize),
       pageSize: pageSize,
-      thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index) {
+      thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index, bool alwaysVisibleScrollThumb, Animation<double> thumbAnimation) {
         HistoryItem item = filteredHistory[index];
         return CustomScrollBarThumb(
           backgroundColor: backgroundColor,
@@ -358,7 +358,7 @@ class _HistoryListState extends State<HistoryList> {
           fontWeight: FontWeight.bold,
           isExpanded: false,
         ),
-        subtitle: Text(booru?.name ?? 'Unknown'),
+        subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
       ),
     );
   }

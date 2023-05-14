@@ -38,7 +38,7 @@ class UnknownViewerPlaceholder extends StatelessWidget {
                   child: Center(
                     child: SizedBox(
                       child: SettingsButton(
-                        name: 'Unknown file format, tap here to open in browser',
+                        name: 'Unknown file format (.${item.fileExt}), tap here to open in browser',
                         action: () {
                           ServiceHandler.launchURL(item.postURL);
                         },

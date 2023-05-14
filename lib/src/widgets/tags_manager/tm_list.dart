@@ -77,7 +77,7 @@ class TagsManagerList extends StatelessWidget {
                 // },
                 pageFuture: (page) => _loadPage(page, TagsManagerList.PAGE_SIZE),
                 pageSize: TagsManagerList.PAGE_SIZE,
-                thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index) {
+                thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index, bool alwaysVisibleScrollThumb, Animation<double> thumbAnimation) {
                   Tag tag = tags[index];
                   return CustomScrollBarThumb(
                     backgroundColor: backgroundColor,
