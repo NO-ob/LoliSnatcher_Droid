@@ -57,7 +57,7 @@ class ImageWriter {
           '${path!}/',
           fileNameWoutExt,
           item.fileExt!,
-          item.mediaType,
+          item.mediaType.toJson(),
           options: Options(
             responseType: ResponseType.bytes,
             contentType: "*/*",

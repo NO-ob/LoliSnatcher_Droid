@@ -214,10 +214,10 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
     final bool isGifSampleNotAllowed =
-        widget.item.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated.value : true);
+        widget.item.mediaType.value.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated.value : true);
 
     isThumbQuality = settingsHandler.previewMode == "Thumbnail" ||
-        (isGifSampleNotAllowed || widget.item.mediaType == 'video') ||
+        (isGifSampleNotAllowed || widget.item.mediaType.value.isVideo || widget.item.mediaType.value.isNeedsExtraRequest) ||
         (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
     thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
@@ -372,13 +372,15 @@ class _ThumbnailState extends State<Thumbnail> {
     final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
     final bool useExtra = isThumbQuality == false && !widget.item.isHated.value;
 
+    const double fullOpacity = 1;
+
     return Stack(
       alignment: Alignment.center,
       children: [
         if (useExtra) // fetch small low quality thumbnail while loading a sample
           AnimatedOpacity(
             // fade in image
-            opacity: !widget.isStandalone ? 1 : (isLoadedExtra ? 1 : 0),
+            opacity: !widget.isStandalone ? fullOpacity : (isLoadedExtra ? fullOpacity : 0),
             duration: const Duration(milliseconds: 200),
             child: AnimatedSwitcher(
               duration: Duration(milliseconds: widget.isStandalone ? 100 : 0),
@@ -413,7 +415,7 @@ class _ThumbnailState extends State<Thumbnail> {
           ),
         AnimatedOpacity(
           // fade in image
-          opacity: !widget.isStandalone ? 1 : (isLoaded ? 1 : 0),
+          opacity: !widget.isStandalone ? fullOpacity : (isLoaded ? fullOpacity : 0),
           duration: const Duration(milliseconds: 300),
           child: AnimatedSwitcher(
             duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),

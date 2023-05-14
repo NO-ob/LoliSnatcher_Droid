@@ -30,6 +30,7 @@ import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
@@ -81,8 +82,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     // enable volume buttons if opened page is a video AND appbar is visible
     BooruItem item = searchHandler.currentFetched[widget.index];
-    bool isVideo = item.isVideo;
-    bool isHated = item.isHated.value;
+    bool isVideo = item.mediaType.value.isVideo;
+    // bool isHated = item.isHated.value;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     setVolumeListener();
@@ -105,7 +106,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     }
 
     // enable volume buttons if current page is a video AND appbar is set to visible
-    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo;
+    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isVideo;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
@@ -196,8 +197,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     itemBuilder: (context, index) {
                       BooruItem item = searchHandler.currentFetched[index];
                       // String fileURL = item.fileURL;
-                      bool isVideo = item.isVideo;
-                      bool isImage = item.isImage;
+                      bool isVideo = item.mediaType.value.isVideo;
+                      bool isImage = item.mediaType.value.isImageOrAnimation;
+                      bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
                       // print(fileURL);
                       // print('isVideo: '+isVideo.toString());
 
@@ -217,6 +219,16 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             itemWidget = VideoViewerPlaceholder(item: item, index: index);
                           }
                         }
+                      } else if (isNeedsExtraRequest) {
+                        itemWidget = GuessExtensionViewer(
+                          itemKey: item.key,
+                          item: item,
+                          index: index,
+                          onMediaTypeGuessed: (MediaType mediaType) {
+                            item.mediaType.value = mediaType;
+                            setState(() {});
+                          },
+                        );
                       } else {
                         itemWidget = UnknownViewerPlaceholder(item: item, index: index);
                       }
@@ -264,7 +276,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       }
 
                       // enable volume buttons if new page is a video AND appbar is visible
-                      bool isVideo = searchHandler.currentFetched[index].isVideo;
+                      bool isVideo = searchHandler.currentFetched[index].mediaType.value.isVideo;
                       bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
                       ServiceHandler.setVolumeButtons(isVolumeAllowed);
                       // print('Page changed ' + index.toString());
@@ -330,7 +342,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
   void scrollToNextPage() {
     // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
     final int viewedIndex = searchHandler.viewedIndex.value;
-    final bool isImage = searchHandler.currentFetched[viewedIndex].mediaType == "image";
+    final bool isImage = searchHandler.currentFetched[viewedIndex].mediaType.value.isImageOrAnimation;
     // TODO video and gifs support
     // TODO check if item is loaded
     if(viewedIndex < (searchHandler.currentFetched.length - 1)) {
@@ -441,7 +453,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     if(path != null) {
       // File is already in cache - share from there
-      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -470,7 +482,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
       final File? cacheFile = await imageWriter.writeCacheFromBytes(item.fileURL, bytes, 'media', fileNameExtras: item.fileNameExtras);
       if(cacheFile != null) {
         path = cacheFile.path;
-        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
             context: context,
@@ -578,7 +590,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
         return false;
       }
 
-      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage;
+      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isImageOrAnimation;
       bool isScaleButton = btn[0] == 'reloadnoscale';
       bool isScaleAllowed = isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
 

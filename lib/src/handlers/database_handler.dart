@@ -135,7 +135,7 @@ class DBHandler{
     String resultStr = "";
     if (itemID == null || itemID.isEmpty) {
       var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)",
-          [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true)]);
+          [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType.toJson(), Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true)]);
       itemID = result?.toString();
       updateTags(item.tagsList, itemID);
       resultStr = "Inserted";
@@ -162,7 +162,7 @@ class DBHandler{
 
       if (itemID == null || itemID.isEmpty) {
         var result = await db?.rawInsert("INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)",
-            [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType, Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true)]);
+            [item.thumbnailURL, item.sampleURL, item.fileURL, item.postURL, item.mediaType.toJson(), Tools.boolToInt(item.isSnatched.value == true), Tools.boolToInt(item.isFavourite.value == true)]);
         itemID = result?.toString();
         updateTags(item.tagsList, itemID);
         saved++;

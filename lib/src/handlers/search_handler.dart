@@ -332,12 +332,12 @@ class SearchHandler extends GetxController {
 
   RxInt viewedIndex = (-1).obs;
   Rx<BooruItem> viewedItem = BooruItem(
-          fileURL: "",
-          sampleURL: "",
-          thumbnailURL: "",
-          tagsList: [],
-          postURL: "")
-      .obs;
+    fileURL: "",
+    sampleURL: "",
+    thumbnailURL: "",
+    tagsList: [],
+    postURL: "",
+  ).obs;
 
   BooruItem setViewedItem(int i) {
     int newIndex = i;

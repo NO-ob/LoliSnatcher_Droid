@@ -62,7 +62,8 @@ class ThumbnailCardBuild extends StatelessWidget {
               child: InkResponse(
                 enableFeedback: true,
                 highlightShape: BoxShape.rectangle,
-                containedInkWell: false,
+                containedInkWell: true,
+                borderRadius: BorderRadius.circular(10),
                 highlightColor: Theme.of(context).colorScheme.secondary,
                 splashColor: Colors.pink,
                 child: ThumbnailBuild(index: index, item: item),

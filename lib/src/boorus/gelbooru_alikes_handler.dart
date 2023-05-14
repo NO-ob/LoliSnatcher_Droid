@@ -71,7 +71,7 @@ class GelbooruAlikesHandler extends BooruHandler {
         fileURL = "${booru.baseURL}/images/$directory/$hash.$fileExt";
 
         bool isSample = !fileURL.endsWith(".webm") && getAttrOrElem(current, "sample_url")!.toString().contains('/samples/');
-        String sampleExt = Tools.getFileExt(getAttrOrElem(current, "sample_url")!.toString());
+        // String sampleExt = Tools.getFileExt(getAttrOrElem(current, "sample_url")!.toString());
         sampleURL = isSample ? getAttrOrElem(current, "sample_url")!.toString() : fileURL;
         // sampleURL = "${booru.baseURL}/${isSample ? "samples" : "images"}/$directory/${isSample ? "sample_" : ""}$hash.$sampleExt";
 
@@ -82,12 +82,14 @@ class GelbooruAlikesHandler extends BooruHandler {
         if(sampleURL != fileURL && sampleURL.contains('samples')) sampleURL = sampleURL.replaceFirst('.png', '.jpg');
       }
 
+      final List<String> tags = parseFragment(getAttrOrElem(current, "tags")).text?.split(" ") ?? [];
+
 
       BooruItem item = BooruItem(
         fileURL: fileURL,
         sampleURL: sampleURL,
         thumbnailURL: previewURL,
-        tagsList: parseFragment(getAttrOrElem(current, "tags")).text?.split(" ") ?? [],
+        tagsList: tags,
         postURL: makePostURL(getAttrOrElem(current, "id")!.toString()),
         fileWidth: double.tryParse(getAttrOrElem(current, "width")?.toString() ?? ''),
         fileHeight: double.tryParse(getAttrOrElem(current, "height")?.toString() ?? ''),
@@ -106,6 +108,17 @@ class GelbooruAlikesHandler extends BooruHandler {
         postDate: getAttrOrElem(current, "created_at")?.toString(), // Fri Jun 18 02:13:45 -0500 2021
         postDateFormat: "EEE MMM dd HH:mm:ss  yyyy", // when timezone support added: "EEE MMM dd HH:mm:ss Z yyyy",
       );
+
+      if(booru.baseURL!.contains('realbooru.com')) {
+        // the api is even shittier now and they don't even return correct file extensions
+        // now we'll have to either rely on tags and make a bunch of requests for each item to get the real file ext
+        item.possibleExt.value = (tags.contains('gif') || tags.contains('animated_gif'))
+          ? 'animation'
+          : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
+              ? 'video'
+              : null;
+        item.mediaType.value = MediaType.needsExtraRequest;
+      }
 
       return item;
     } else {

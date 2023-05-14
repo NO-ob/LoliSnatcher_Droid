@@ -140,7 +140,7 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     ratioDiff = 1;
     widthLimit = 0;
-    if (settingsHandler.disableImageScaling || item.isNoScale.value || item.isAnimation) {
+    if (settingsHandler.disableImageScaling || item.isNoScale.value || !item.mediaType.value.isImageOrAnimation) {
       //  do nothing
     } else {
       Size screenSize = WidgetsBinding.instance.window.physicalSize;

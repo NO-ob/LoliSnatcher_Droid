@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
@@ -46,9 +47,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value) {
-    if (value.isImage) {
+    if (value.mediaType.value.isImageOrAnimation) {
       return ImageViewer(value, 1, key: value.key);
-    } else if (value.isVideo) {
+    } else if (value.mediaType.value.isVideo) {
       if (Platform.isAndroid || Platform.isIOS) {
         return VideoViewer(value.key, value, 1, true);
       } else if (Platform.isWindows || Platform.isLinux) {
@@ -57,6 +58,16 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       } else {
         return VideoViewerPlaceholder(item: value, index: 1);
       }
+    } else if (value.mediaType.value.isNeedsExtraRequest) {
+      return GuessExtensionViewer(
+        item: value,
+        index: 1,
+        itemKey: value.key,
+        onMediaTypeGuessed: (MediaType mediaType) {
+          value.mediaType.value = mediaType;
+          updateState();
+        },
+      );
     } else {
       return UnknownViewerPlaceholder(item: value, index: 1);
     }
