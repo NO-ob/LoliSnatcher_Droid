@@ -472,9 +472,12 @@ class VideoViewerState extends State<VideoViewer> {
           child: Stack(
             children: [
               controllerProvider,
-              TransparentPointer(
-                child: SafeArea(
-                  child: LoliControls(outsideController: controllerProvider.controller),
+              ChewieControllerProvider(
+                controller: chewieController!,
+                child: const TransparentPointer(
+                  child: SafeArea(
+                    child: LoliControls(),
+                  ),
                 ),
               ),
             ],
@@ -589,10 +592,11 @@ class VideoViewerState extends State<VideoViewer> {
                             scaleStateController: scaleController,
                             child: Chewie(controller: chewieController!),
                           ),
-                          TransparentPointer(
-                            child: SafeArea(
-                              child: LoliControls(
-                                outsideController: chewieController,
+                          ChewieControllerProvider(
+                            controller: chewieController!,
+                            child: const TransparentPointer(
+                              child: SafeArea(
+                                child: LoliControls(),
                               ),
                             ),
                           )
