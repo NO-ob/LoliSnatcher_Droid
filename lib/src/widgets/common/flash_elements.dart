@@ -43,6 +43,8 @@ class FlashElements {
   /// [position] - position of the tip on the screen
   ///
   /// [asDialog] - should the tip be shown as a dialog
+  ///
+  /// [ignoreDesktopCheck] - should we ignore desktop specific style checks
   static FutureOr<void> showSnackbar({
     BuildContext? context,
     required Widget title,
@@ -58,6 +60,7 @@ class FlashElements {
     bool allowInViewer = true,
     Positions position = Positions.bottom,
     bool asDialog = false,
+    bool ignoreDesktopCheck = false,
   }) async {
     // do nothing if in test mode
     if (Tools.isTestMode) return;
@@ -78,7 +81,7 @@ class FlashElements {
     // therefore causing an exception, because this context is not available anymore
     ThemeData themeData = Theme.of(contextToUse);
 
-    bool isDesktop = SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux;
+    bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux);
     bool isDark = themeData.brightness == Brightness.dark;
 
     FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
@@ -93,15 +96,25 @@ class FlashElements {
             contentPadding: const EdgeInsets.all(0),
             insetPadding: const EdgeInsets.all(0),
             borderRadius: const BorderRadius.all(Radius.circular(8)),
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
             content: DefaultTextStyle(
               style: TextStyle(color: themeData.colorScheme.onBackground),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(8)),
+              child: GestureDetector(
+                onTap: tapToClose ? () => controller.dismiss() : null,
                 child: FlashBar(
                   controller: controller,
                   title: title,
                   content: content,
                   indicatorColor: sideColor,
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: const BorderRadius.all(Radius.circular(8)),
+                    side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                  ),
+                  dismissDirections: const [],
+                  shadowColor: Colors.black.withOpacity(0.4),
+                  elevation: 8,
                   icon: overrideLeadingIconWidget ??
                       Padding(
                         padding: const EdgeInsets.all(12),
@@ -135,6 +148,27 @@ class FlashElements {
             FlashDismissDirection.startToEnd,
             FlashDismissDirection.endToStart,
           ],
+          slideAnimationCreator: (
+            BuildContext context,
+            FlashPosition? position,
+            Animation<double> parent,
+            Curve curve,
+            Curve? reverseCurve,
+          ) {
+            Animatable<Offset> animatable;
+            if (position == FlashPosition.top) {
+              animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
+            } else if (position == FlashPosition.bottom) {
+              animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
+            } else {
+              animatable = Tween<Offset>(begin: Offset.zero, end: Offset.zero);
+            }
+            return CurvedAnimation(
+              parent: parent,
+              curve: curve,
+              reverseCurve: reverseCurve,
+            ).drive(animatable);
+          },
           child: DefaultTextStyle(
             style: TextStyle(color: themeData.colorScheme.onBackground),
             child: GestureDetector(
@@ -148,14 +182,15 @@ class FlashElements {
                     ? EdgeInsets.symmetric(horizontal: mediaQueryData.size.width / 4, vertical: 0)
                     : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
                 behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
+                clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(8),
-                          topRight: const Radius.circular(8),
-                          bottomLeft: !isDesktop ? const Radius.circular(8) : Radius.zero,
-                          bottomRight: !isDesktop ? const Radius.circular(8) : Radius.zero,
-                      ),
-                      side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(8),
+                    topRight: const Radius.circular(8),
+                    bottomLeft: !isDesktop ? const Radius.circular(8) : Radius.zero,
+                    bottomRight: !isDesktop ? const Radius.circular(8) : Radius.zero,
+                  ),
+                  side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                 ),
                 shadowColor: Colors.black.withOpacity(0.4),
                 elevation: 8,

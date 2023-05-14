@@ -240,6 +240,7 @@ class SettingsDropdown<T> extends StatelessWidget {
             labelText: title,
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
+          borderRadius: BorderRadius.circular(8),
           dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return items.map<DropdownMenuItem<T>>((T item) {
@@ -550,6 +551,8 @@ class SettingsDialog extends StatelessWidget {
     this.buttonPadding,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
     this.borderRadius,
+    this.backgroundColor,
+    this.surfaceTintColor,
     this.scrollable = true,
   }) : super(key: key);
 
@@ -562,6 +565,8 @@ class SettingsDialog extends StatelessWidget {
   final EdgeInsets? buttonPadding;
   final EdgeInsets insetPadding;
   final BorderRadius? borderRadius;
+  final Color? backgroundColor;
+  final Color? surfaceTintColor;
   final bool scrollable;
 
   @override
@@ -574,7 +579,8 @@ class SettingsDialog extends StatelessWidget {
               children: contentItems ?? [],
             ),
           ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
+      surfaceTintColor: surfaceTintColor ?? Theme.of(context).colorScheme.surfaceTint,
       actions: actionButtons?.isNotEmpty == true ? actionButtons : null,
       titlePadding: titlePadding,
       contentPadding: contentPadding,

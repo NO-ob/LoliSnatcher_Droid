@@ -122,6 +122,7 @@ class TabSelectorRender extends StatelessWidget {
                     ),
                   ),
             ),
+            borderRadius: BorderRadius.circular(8),
             onChanged: (SearchTab? newValue) {
               if (newValue != null) {
                 searchHandler.changeTabIndex(list.indexOf(newValue));
