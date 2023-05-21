@@ -162,6 +162,10 @@ class SearchHandler extends GetxController {
     return list.indexOf(tab);
   }
 
+  int getItemIndex(BooruItem item) {
+    return currentFetched.indexOf(item);
+  }
+
   // grid scroll controller
   AutoScrollController gridScrollController =
       AutoScrollController(); // will be overwritten on the first render because there is hasClients check

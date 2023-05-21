@@ -312,7 +312,7 @@ class CustomPrettyDioLogger extends Interceptor {
         } else {
           _printList(response.data as List);
         }
-        logPrint('║${_indent()}[');
+        logPrint('║${_indent()}]');
       } else {
         _printBlock(response.data.toString());
       }

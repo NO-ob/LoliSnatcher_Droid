@@ -7,10 +7,9 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class UnknownViewerPlaceholder extends StatelessWidget {
-  const UnknownViewerPlaceholder({Key? key, required this.item, required this.index}) : super(key: key);
+  const UnknownViewerPlaceholder({required this.item, super.key,});
 
   final BooruItem item;
-  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +21,6 @@ class UnknownViewerPlaceholder extends StatelessWidget {
           children: [
             Thumbnail(
               item: item,
-              index: index,
               isStandalone: false,
               ignoreColumnsCount: true,
             ),

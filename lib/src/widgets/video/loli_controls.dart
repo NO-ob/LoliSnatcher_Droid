@@ -13,8 +13,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 
 class LoliControls extends StatefulWidget {
-  const LoliControls({Key? key, this.outsideController}) : super(key: key);
-  final ChewieController? outsideController;
+  const LoliControls({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -118,7 +117,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   @override
   void didChangeDependencies() {
     final ChewieController? oldController = _chewieController;
-    _chewieController = widget.outsideController ?? ChewieController.of(context);
+    _chewieController = ChewieController.of(context);
     controller = chewieController.videoPlayerController;
 
     if (oldController != chewieController) {

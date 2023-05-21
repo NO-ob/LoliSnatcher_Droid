@@ -20,9 +20,9 @@ import 'package:lolisnatcher/src/widgets/common/media_loading.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class VideoViewerDesktop extends StatefulWidget {
-  const VideoViewerDesktop(Key? key, this.booruItem, this.index) : super(key: key);
+  const VideoViewerDesktop(this.booruItem, {super.key});
+
   final BooruItem booruItem;
-  final int index;
 
   @override
   State<VideoViewerDesktop> createState() => VideoViewerDesktopState();
@@ -217,11 +217,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == widget.index
+        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == widget.index;
+      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
@@ -394,7 +394,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     }
     isLoaded = true;
 
-    videoController = Player(id: widget.index);
+    videoController = Player(id: searchHandler.getItemIndex(widget.booruItem));
     videoController!.setUserAgent(Tools.browserUserAgent());
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
@@ -475,7 +475,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     // TODO move controls outside, to exclude them from zoom
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
       child: Material(
         child: Listener(
           onPointerSignal: (pointerSignal) {
@@ -496,7 +496,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
               children: [
                 Thumbnail(
                   item: widget.booruItem,
-                  index: widget.index,
                   isStandalone: false,
                   ignoreColumnsCount: true,
                 ),

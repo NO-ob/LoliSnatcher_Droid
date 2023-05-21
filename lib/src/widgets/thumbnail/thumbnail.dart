@@ -22,13 +22,11 @@ class Thumbnail extends StatefulWidget {
   const Thumbnail({
     Key? key,
     required this.item,
-    required this.index,
     required this.isStandalone,
     this.ignoreColumnsCount = false,
   }) : super(key: key);
 
   final BooruItem item;
-  final int index;
 
   /// set to true when used in gallery preview to enable hero animation
   final bool isStandalone;
@@ -174,7 +172,7 @@ class _ThumbnailState extends State<Thumbnail> {
       if (restartedCount < 5) {
         // attempt to reload 5 times with a second delay
         Debounce.debounce(
-          tag: 'thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}',
+          tag: 'thumbnail_reload_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}',
           callback: () {
             restartLoading();
             restartedCount++;
@@ -233,7 +231,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     Debounce.debounce(
-      tag: 'thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}',
+      tag: 'thumbnail_start_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}',
       callback: () {
         startDownloading();
       },
@@ -361,8 +359,8 @@ class _ThumbnailState extends State<Thumbnail> {
       extraProvider = null;
     }
 
-    Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
-    Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id.toString()}#${widget.index.toString()}');
+    Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}');
+    Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}');
   }
 
   Widget renderImages(BuildContext context) {
@@ -497,7 +495,7 @@ class _ThumbnailState extends State<Thumbnail> {
   Widget build(BuildContext context) {
     if (widget.isStandalone) {
       return Hero(
-        tag: 'imageHero${widget.index}#${widget.item.fileURL}',
+        tag: 'imageHero${searchHandler.getItemIndex(widget.item)}#${widget.item.fileURL}',
         placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
           // keep building the image since the images can be visible in the
           // background of the image gallery
@@ -506,7 +504,7 @@ class _ThumbnailState extends State<Thumbnail> {
         child: renderImages(context),
       );
     } else {
-      // print('building thumb ${widget.index}');
+      // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
       return Container(color: Colors.black, child: renderImages(context));
     }
   }

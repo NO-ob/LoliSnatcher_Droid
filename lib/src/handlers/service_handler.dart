@@ -214,6 +214,17 @@ class ServiceHandler{
     return result;
   }
 
+  static Future<bool> copySafFileToDir(String SAFUri, String fileName, String targetPath) async {
+    bool result = false;
+    try {
+      result = await platform.invokeMethod("copySafFileToDir",{"uri":SAFUri,"fileName":fileName,"targetPath":targetPath});
+    } catch (e) {
+      print(e);
+      result = false;
+    }
+    return result;
+  }
+
 
   static Future<String> getConfigDir() async {
     String result = '';

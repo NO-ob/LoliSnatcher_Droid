@@ -48,15 +48,15 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
   //This function decides what media widget to return
   Widget getImageWidget(BooruItem value) {
     if (value.mediaType.value.isImageOrAnimation) {
-      return ImageViewer(value, 1, key: value.key);
+      return ImageViewer(value, key: value.key);
     } else if (value.mediaType.value.isVideo) {
       if (Platform.isAndroid || Platform.isIOS) {
-        return VideoViewer(value.key, value, 1, true);
+        return VideoViewer(value, enableFullscreen: true, key: value.key);
       } else if (Platform.isWindows || Platform.isLinux) {
-        // return VideoViewerPlaceholder(item: value, index: 1);
-        return VideoViewerDesktop(value.key, value, 1);
+        // return VideoViewerPlaceholder(item: value);
+        return VideoViewerDesktop(value, key: value.key);
       } else {
-        return VideoViewerPlaceholder(item: value, index: 1);
+        return VideoViewerPlaceholder(item: value);
       }
     } else if (value.mediaType.value.isNeedsExtraRequest) {
       return GuessExtensionViewer(
@@ -69,7 +69,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         },
       );
     } else {
-      return UnknownViewerPlaceholder(item: value, index: 1);
+      return UnknownViewerPlaceholder(item: value);
     }
   }
 
