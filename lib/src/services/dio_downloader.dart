@@ -375,7 +375,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.download(
         resolved.toString(),
-        imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
+        await imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
         options: Options(headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,

@@ -173,8 +173,8 @@ class _BooruEditState extends State<BooruEdit> {
                     ? [
                         SizedBox(
                           width: double.infinity,
-                          child: TextButton(
-                            style: TextButton.styleFrom(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                                 side: BorderSide(

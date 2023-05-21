@@ -197,7 +197,9 @@ class ImageViewerState extends State<ImageViewer> {
     ImageProvider provider;
     cancelToken = CancelToken();
     provider = CustomNetworkImage(
-      widget.booruItem.fileURL,
+      (settingsHandler.galleryMode == "Sample")
+        ? widget.booruItem.sampleURL
+        : widget.booruItem.fileURL,
       cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(
         searchHandler.currentBooru,
