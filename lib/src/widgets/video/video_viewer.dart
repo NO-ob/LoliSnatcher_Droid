@@ -25,9 +25,9 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 import 'package:lolisnatcher/src/widgets/video/loli_controls.dart';
 
 class VideoViewer extends StatefulWidget {
-  const VideoViewer(Key? key, this.booruItem, this.index, this.enableFullscreen) : super(key: key);
+  const VideoViewer(this.booruItem, {this.enableFullscreen = true, super.key,});
+
   final BooruItem booruItem;
-  final int index;
   final bool enableFullscreen;
 
   @override
@@ -202,11 +202,11 @@ class VideoViewerState extends State<VideoViewer> {
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
 
     isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == widget.index
+        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == widget.index;
+      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
@@ -369,7 +369,7 @@ class VideoViewerState extends State<VideoViewer> {
       viewerHandler.isFullscreen.value = chewieController!.isFullScreen;
     }
 
-    if (searchHandler.viewedIndex.value == widget.index) {
+    if (searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)) {
       if (chewieController!.isFullScreen || !settingsHandler.useVolumeButtonsForScroll) {
         ServiceHandler.setVolumeButtons(true); // in full screen or volumebuttons scroll setting is disabled
       } else {
@@ -525,7 +525,7 @@ class VideoViewerState extends State<VideoViewer> {
     );
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
       child: Material(
         child: Stack(
           alignment: Alignment.center,
@@ -536,7 +536,6 @@ class VideoViewerState extends State<VideoViewer> {
                   ? Container()
                   : Thumbnail(
                       item: widget.booruItem,
-                      index: widget.index,
                       isStandalone: false,
                       ignoreColumnsCount: true,
                     ),

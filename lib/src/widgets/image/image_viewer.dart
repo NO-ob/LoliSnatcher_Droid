@@ -20,13 +20,11 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class ImageViewer extends StatefulWidget {
   const ImageViewer(
-    this.booruItem,
-    this.index, {
+    this.booruItem, {
     super.key,
   });
 
   final BooruItem booruItem;
-  final int index;
 
   @override
   State<ImageViewer> createState() => ImageViewerState();
@@ -112,11 +110,11 @@ class ImageViewerState extends State<ImageViewer> {
     viewerHandler.addViewed(widget.key);
 
     isViewed = settingsHandler.appMode.value.isMobile
-        ? searchHandler.viewedIndex.value == widget.index
+        ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
-      final bool isCurrentIndex = value == widget.index;
+      final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
       final bool isCurrentItem = searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
@@ -197,9 +195,7 @@ class ImageViewerState extends State<ImageViewer> {
     ImageProvider provider;
     cancelToken = CancelToken();
     provider = CustomNetworkImage(
-      (settingsHandler.galleryMode == "Sample")
-        ? widget.booruItem.sampleURL
-        : widget.booruItem.fileURL,
+      (settingsHandler.galleryMode == "Sample") ? widget.booruItem.sampleURL : widget.booruItem.fileURL,
       cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(
         searchHandler.currentBooru,
@@ -333,10 +329,10 @@ class ImageViewerState extends State<ImageViewer> {
 
   @override
   Widget build(BuildContext context) {
-    // print('!!! Build media ${widget.index} $isViewed !!!');
+    // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.index}#${widget.booruItem.fileURL}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
       // without this every text element will have broken styles on first frames
       child: Material(
         color: Colors.black,
@@ -346,7 +342,6 @@ class ImageViewerState extends State<ImageViewer> {
             // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
             Thumbnail(
               item: widget.booruItem,
-              index: widget.index,
               isStandalone: false,
               ignoreColumnsCount: true,
             ),

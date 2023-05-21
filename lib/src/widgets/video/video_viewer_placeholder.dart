@@ -8,10 +8,9 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class VideoViewerPlaceholder extends StatelessWidget {
-  const VideoViewerPlaceholder({Key? key, required this.item, required this.index}) : super(key: key);
+  const VideoViewerPlaceholder({required this.item, super.key,});
 
   final BooruItem item;
-  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,6 @@ class VideoViewerPlaceholder extends StatelessWidget {
         children: [
           Thumbnail(
             item: item,
-            index: index,
             isStandalone: false,
             ignoreColumnsCount: true,
           ),
