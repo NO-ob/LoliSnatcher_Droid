@@ -291,7 +291,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
               maxHeight: 150,
               maxWidth: 100,
             ),
-            child: ThumbnailBuild(index: widget.index, item: widget.item),
+            child: ThumbnailBuild(item: widget.item),
           ),
         ),
       ],

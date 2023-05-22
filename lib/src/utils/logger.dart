@@ -255,7 +255,7 @@ class CustomPrettyDioLogger extends Interceptor {
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {
     if (error) {
-      if (err.type == DioErrorType.response) {
+      if (err.type == DioErrorType.badResponse) {
         final uri = err.response?.requestOptions.uri;
         _printBoxed(
             header:
@@ -312,7 +312,7 @@ class CustomPrettyDioLogger extends Interceptor {
         } else {
           _printList(response.data as List);
         }
-        logPrint('║${_indent()}[');
+        logPrint('║${_indent()}]');
       } else {
         _printBlock(response.data.toString());
       }

@@ -13,8 +13,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 
 class LoliControls extends StatefulWidget {
-  const LoliControls({Key? key, this.outsideController}) : super(key: key);
-  final ChewieController? outsideController;
+  const LoliControls({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -40,8 +39,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   ChewieController? _chewieController;
   // We know that _chewieController is set in didChangeDependencies
   ChewieController get chewieController => _chewieController!;
-  late AnimationController playPauseIconAnimationController =
-  AnimationController(
+  late AnimationController playPauseIconAnimationController = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 400),
     reverseDuration: const Duration(milliseconds: 400),
@@ -54,14 +52,13 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   int _lastDoubleTapSide = 0;
   String _doubleTapExtraMessage = '';
 
-
   @override
   Widget build(BuildContext context) {
     if (_latestValue.hasError) {
       return chewieController.errorBuilder?.call(
-        context,
-        chewieController.videoPlayerController.value.errorDescription!,
-      ) ??
+            context,
+            chewieController.videoPlayerController.value.errorDescription!,
+          ) ??
           const Center(
             child: Icon(
               Icons.error,
@@ -120,7 +117,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   @override
   void didChangeDependencies() {
     final ChewieController? oldController = _chewieController;
-    _chewieController = widget.outsideController ?? ChewieController.of(context);
+    _chewieController = ChewieController.of(context);
     controller = chewieController.videoPlayerController;
 
     if (oldController != chewieController) {
@@ -145,7 +142,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       duration: const Duration(milliseconds: 300),
       child: Column(
         children: <Widget>[
-          if(drawProgressBar)
+          if (drawProgressBar)
             Container(
               height: barHeight / 1.5,
               color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
@@ -157,7 +154,6 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                 ],
               ),
             ),
-
           Container(
             height: barHeight,
             color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
@@ -166,7 +162,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Expanded(
-                  flex : 6,
+                  flex: 6,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: <Widget>[
@@ -174,29 +170,24 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                       Container(
                         width: 130,
                         alignment: Alignment.center,
-                        child: chewieController.isLive
-                          ? const Expanded(child: Text('LIVE', style: TextStyle(color: Colors.white)))
-                          : _buildPosition(iconColor),
+                        child: chewieController.isLive ? const Expanded(child: Text('LIVE', style: TextStyle(color: Colors.white))) : _buildPosition(iconColor),
                       ),
-                    ]
-                  )
+                    ],
+                  ),
                 ),
-                 Expanded(
+                Expanded(
                   flex: 4,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      if (chewieController.allowPlaybackSpeedChanging)
-                        _buildSpeedButton(controller),
-                        // Container(child: _buildSpeedButton(controller), decoration: BoxDecoration(color: Colors.red)),
-                      if (chewieController.allowMuting)
-                        _buildMuteButton(controller),
-                        // Container(child: _buildMuteButton(controller), decoration: BoxDecoration(color: Colors.yellow)),
-                      if (chewieController.allowFullScreen)
-                        _buildExpandButton(),
-                        // Container(child: _buildExpandButton(), decoration: BoxDecoration(color: Colors.green)),
-                    ]
-                  )
+                      if (chewieController.allowPlaybackSpeedChanging) _buildSpeedButton(controller),
+                      // Container(child: _buildSpeedButton(controller), decoration: BoxDecoration(color: Colors.red)),
+                      if (chewieController.allowMuting) _buildMuteButton(controller),
+                      // Container(child: _buildMuteButton(controller), decoration: BoxDecoration(color: Colors.yellow)),
+                      if (chewieController.allowFullScreen) _buildExpandButton(),
+                      // Container(child: _buildExpandButton(), decoration: BoxDecoration(color: Colors.green)),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -219,14 +210,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           height: 5,
           child: Row(
             children: [
-              if (chewieController.isLive)
-                const SizedBox()
-              else
-                _buildProgressBar(),
+              if (chewieController.isLive) const SizedBox() else _buildProgressBar(),
             ],
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 
@@ -234,8 +222,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     String tapSideSymbol = _lastDoubleTapSide > 0 ? '>>' : '<<';
     bool isOneSecond = _lastDoubleTapAmount == 1;
     String msgText = _doubleTapExtraMessage != ''
-      ? (_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : "")
-      : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
+        ? (_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : "")
+        : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
 
     return AnimatedOpacity(
       opacity: _doubleTapped ? 1.0 : 0.0,
@@ -271,12 +259,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(8),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
-                  )
+                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white)),
+                  ),
                 )
               else
                 const SizedBox(),
-
               const Spacer(),
               if (_lastDoubleTapSide > 0)
                 ClipRRect(
@@ -285,8 +272,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(8),
                     color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white))
-                  )
+                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white)),
+                  ),
                 )
               else
                 const SizedBox(),
@@ -300,7 +287,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   GestureDetector _buildExpandButton() {
     return GestureDetector(
       onTap: _onExpandCollapse,
-      child: Container( // extra container with decoration to force more clickable width, otherwise there is ~40px of empty space on the right
+      child: Container(
+        // extra container with decoration to force more clickable width, otherwise there is ~40px of empty space on the right
         decoration: const BoxDecoration(color: Colors.transparent),
         child: AnimatedOpacity(
           opacity: _hideStuff ? 0.0 : 1.0,
@@ -314,14 +302,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ),
             child: Center(
               child: Icon(
-                chewieController.isFullScreen
-                    ? Icons.fullscreen_exit
-                    : Icons.fullscreen,
+                chewieController.isFullScreen ? Icons.fullscreen_exit : Icons.fullscreen,
                 color: Colors.white,
               ),
             ),
           ),
-        )
+        ),
       ),
     );
   }
@@ -379,9 +365,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                                 ),
                           onPressed: () {
                             _playPause();
-                          }
+                          },
                         ),
-                      )
+                      ),
                     ),
                   ),
                 ),
@@ -393,7 +379,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                       strokeWidth: 5,
                     ),
                   ),
-              ]
+              ],
             ),
           ),
         ),
@@ -437,10 +423,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               left: 8.0,
               right: 8.0,
             ),
-            child: Icon(Icons.speed,
-                color: _latestValue.playbackSpeed == 1.0
-                    ? Colors.white
-                    : Theme.of(context).colorScheme.secondary),
+            child: Icon(
+              Icons.speed,
+              color: _latestValue.playbackSpeed == 1.0 ? Colors.white : Theme.of(context).colorScheme.secondary,
+            ),
           ),
         ),
       ),
@@ -465,7 +451,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         viewerHandler.videoAutoMute = !viewerHandler.videoAutoMute;
         if (viewerHandler.videoAutoMute && _latestValue.volume != 0) {
           controller.setVolume(0);
-        } else if (!viewerHandler.videoAutoMute && _latestValue.volume == 0){
+        } else if (!viewerHandler.videoAutoMute && _latestValue.volume == 0) {
           controller.setVolume(1);
         }
       },
@@ -480,11 +466,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               right: 8.0,
             ),
             child: Icon(
-              _latestValue.volume > 0
-                ? Icons.volume_up
-                : (isGlobalMute
-                    ? Icons.volume_off
-                    : Icons.volume_mute),
+              _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
               color: Colors.white,
             ),
           ),
@@ -492,6 +474,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       ),
     );
   }
+
   GestureDetector _buildPlayPause(VideoPlayerController controller) {
     return GestureDetector(
       onTap: _playPause,
@@ -504,9 +487,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           right: 12.0,
         ),
         child: Icon(
-          controller.value.isPlaying
-            ? Icons.pause
-            : Icons.play_arrow,
+          controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
           color: Colors.white,
         ),
       ),
@@ -517,7 +498,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     final position = _latestValue.position;
     final duration = _latestValue.duration;
 
-    return Text('${formatDuration(position)} / ${formatDuration(duration)}',
+    return Text(
+      '${formatDuration(position)} / ${formatDuration(duration)}',
       //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
       style: const TextStyle(
         fontSize: 14.0,
@@ -526,7 +508,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     );
   }
 
-  String formatDurationShorter(Duration position) { //unused
+  String formatDurationShorter(Duration position) {
+    //unused
     final ms = position.inMilliseconds;
 
     int seconds = ms ~/ 1000;
@@ -553,8 +536,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             ? '00'
             : '0$seconds';
 
-    final formattedTime =
-        '${hoursString == '00' ? '' : '$hoursString:'}${minutesString == '00' ? '' : minutesString}:$secondsString';
+    final formattedTime = '${hoursString == '00' ? '' : '$hoursString:'}${minutesString == '00' ? '' : minutesString}:$secondsString';
 
     return formattedTime;
   }
@@ -601,8 +583,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     setState(() {
       _hideStuff = true;
       chewieController.toggleFullScreen();
-      _showAfterExpandCollapseTimer =
-          Timer(const Duration(milliseconds: 300), () {
+      _showAfterExpandCollapseTimer = Timer(const Duration(milliseconds: 300), () {
         setState(() {
           _cancelAndRestartTimer();
         });
@@ -704,8 +685,9 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       int videoDurationMillisecs = controller.value.duration.inMilliseconds;
       // Calculate new time with skip and limit it to range (0 to duration of video) (in milliseconds for accuracy)
       int newTime = min(
-          max(0, videoPositionMillisecs + (skipSeconds * 1000 * tapSide)),
-          videoDurationMillisecs);
+        max(0, videoPositionMillisecs + (skipSeconds * 1000 * tapSide)),
+        videoDurationMillisecs,
+      );
       // print(newTime);
       // Skip set amount of seconds if we tapped on left/right third of the screen or play/pause if in the middle
       controller.seekTo(Duration(milliseconds: newTime));
@@ -724,9 +706,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         }
 
         // Add to last skip amount if it's still visible
-        _lastDoubleTapAmount = (tapSide == _lastDoubleTapSide && !isAtVideoEdge)
-            ? (_lastDoubleTapAmount + skipSeconds)
-            : skipSeconds;
+        _lastDoubleTapAmount = (tapSide == _lastDoubleTapSide && !isAtVideoEdge) ? (_lastDoubleTapAmount + skipSeconds) : skipSeconds;
         _lastDoubleTapSide = tapSide;
       });
       _startDoubleTapTimer();
@@ -757,13 +737,14 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         barHeight: 5,
         handleHeight: _hideStuff ? 3 : 6,
         drawShadow: true,
-        colors: chewieController.materialProgressColors ?? ChewieProgressColors(
-          playedColor: Theme.of(context).colorScheme.secondary,
-          handleColor: Theme.of(context).colorScheme.secondary,
-          bufferedColor: Theme.of(context).colorScheme.surface,
-          backgroundColor: Theme.of(context).disabledColor,
-        ),
-      )
+        colors: chewieController.materialProgressColors ??
+            ChewieProgressColors(
+              playedColor: Theme.of(context).colorScheme.secondary,
+              handleColor: Theme.of(context).colorScheme.secondary,
+              bufferedColor: Theme.of(context).colorScheme.surface,
+              backgroundColor: Theme.of(context).disabledColor,
+            ),
+      ),
     );
   }
 }
@@ -787,14 +768,14 @@ class _PlaybackSpeedDialog extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SizedBox(
+        const SizedBox(
           height: 58,
           child: Row(
-            children: const [
+            children: [
               SizedBox(width: 16.0),
               Text('Select Video Speed:', style: TextStyle(color: Colors.white)),
-            ]
-          )
+            ],
+          ),
         ),
         ListView.builder(
           shrinkWrap: true,
@@ -814,7 +795,10 @@ class _PlaybackSpeedDialog extends StatelessWidget {
                   else
                     Container(width: 20.0),
                   const SizedBox(width: 16.0),
-                  Text(speed.toString(), style: const TextStyle(color: Colors.white)),
+                  Text(
+                    speed.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ],
               ),
               selected: speed == _selected,
@@ -829,4 +813,3 @@ class _PlaybackSpeedDialog extends StatelessWidget {
     );
   }
 }
-

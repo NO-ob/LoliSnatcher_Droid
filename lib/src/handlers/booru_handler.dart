@@ -69,7 +69,7 @@ abstract class BooruHandler {
   }
   /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
-  Future search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
     // set custom page number
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
@@ -109,7 +109,7 @@ abstract class BooruHandler {
 
     Response response;
     try {
-      response = await fetchSearch(uri);
+      response = await fetchSearch(uri, withCaptchaCheck: withCaptchaCheck);
       if (response.statusCode == 200) {
         // parse response data
         List<BooruItem> newItems = await parseResponse(response);
@@ -123,7 +123,6 @@ abstract class BooruHandler {
           locked = true;
         }
       } else {
-        await Tools.checkForCaptcha(response, uri);
 
         Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
@@ -133,8 +132,7 @@ abstract class BooruHandler {
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
       if(e is DioError) {
-        await Tools.checkForCaptcha(e.response, uri);
-        errorString = e.message;
+        errorString = e.message ?? e.toString();
       } else {
         errorString = e.toString();
       }
@@ -144,7 +142,7 @@ abstract class BooruHandler {
     return fetched;
   }
 
-  Future<Response<dynamic>> fetchSearch(Uri uri) async {
+  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true}) async {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
@@ -153,7 +151,11 @@ abstract class BooruHandler {
 
     Logger.Inst().log('fetching: $uri with headers: $headers', className, "Search", LogTypes.booruHandlerSearchURL);
 
-    return DioNetwork.get(uri.toString(), headers: headers);
+    return DioNetwork.get(
+      uri.toString(),
+      headers: headers,
+      customInterceptor: withCaptchaCheck ? DioNetwork.captchaInterceptor : null,
+    );
   }
 
   FutureOr<List<BooruItem>> parseResponse(response) async {
