@@ -102,12 +102,14 @@ class SettingsPageOpen {
     required this.context,
     this.condition = true,
     this.barrierDismissible = true,
+    this.asDialog = false,
   });
 
   final Widget Function() page;
   final BuildContext context;
   final bool condition;
   final bool barrierDismissible;
+  final bool asDialog;
 
   Future<bool> open() async {
     if (!condition) return true;
@@ -123,9 +125,9 @@ class SettingsPageOpen {
       result = await showDialog(
             context: context,
             builder: (BuildContext context) {
-              return Dialog(
-                child: SizedBox(
-                  width: 500,
+              return SizedBox(
+                width: 500,
+                child: Dialog(
                   child: page(),
                 ),
               );
@@ -134,7 +136,24 @@ class SettingsPageOpen {
           ) ??
           false;
     } else {
-      result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => page())) ?? false;
+      if(asDialog) {
+        result = await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return page();
+              },
+              barrierDismissible: barrierDismissible,
+            ) ??
+            false;
+      } else {
+        result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => page(),
+              ),
+            ) ??
+            false;
+      }
     }
     return result;
   }

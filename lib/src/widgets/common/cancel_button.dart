@@ -20,11 +20,8 @@ class CancelButton extends StatelessWidget {
           backgroundColor: Colors.grey[300],
           foregroundColor: Colors.black,
           textStyle: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
           ),
         ),
         onPressed: () {
@@ -40,11 +37,8 @@ class CancelButton extends StatelessWidget {
         backgroundColor: Colors.grey[300],
         foregroundColor: Colors.black,
         textStyle: const TextStyle(
-          fontSize: 18,
+          fontSize: 16,
           fontWeight: FontWeight.w600,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
         ),
       ),
       onPressed: () {

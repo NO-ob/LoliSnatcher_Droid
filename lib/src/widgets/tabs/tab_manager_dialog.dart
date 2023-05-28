@@ -30,22 +30,24 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
   late final AutoScrollController scrollController;
   final TextEditingController filterController = TextEditingController();
   bool? sortTabs;
+  bool firstBuild = true;
 
   bool get isFilterActive => filteredTabs.length != searchHandler.total || sortTabs != null;
 
   @override
   void initState() {
     super.initState();
-    tabs = searchHandler.list;
-    filteredTabs = tabs;
+    getTabs();
 
-    scrollController = AutoScrollController(
-      // pre-scroll on first render to avoid lag
-      initialScrollOffset: searchHandler.currentIndex * (72 + 2), // 72 - tile height, 2 - half of margins between items
-    );
+    scrollController = AutoScrollController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      jumpToCurrent();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await jumpToCurrent();
+      firstBuild = false;
+      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        jumpToCurrent();
+      });
     });
   }
 
@@ -55,7 +57,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
     filterTabs();
   }
 
-  void jumpToCurrent() async {
+  Future<void> jumpToCurrent() async {
     if (scrollController.hasClients) {
       final int filteredIndex = filteredTabs.indexOf(searchHandler.currentTab);
       if (filteredIndex == -1) {
@@ -68,7 +70,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
       );
       await Future.delayed(const Duration(milliseconds: 50));
       // then correct the position (otherwise duration is ignored and it scrolls slower than intended)
-      await scrollController.scrollToIndex(filteredIndex, duration: const Duration(milliseconds: 10), preferPosition: AutoScrollPosition.begin);
+      await scrollController.scrollToIndex(filteredIndex, duration: const Duration(milliseconds: 50), preferPosition: AutoScrollPosition.begin);
     }
   }
 
@@ -246,7 +248,12 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
       key: ValueKey(index),
       controller: scrollController,
       index: index,
-      child: buildEntry(index, true, true),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: firstBuild
+          ? const SizedBox(height: 72, width: double.maxFinite, child: Card())
+          : buildEntry(index, true, true),
+      ),
     );
   }
 
@@ -286,7 +293,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
           : Favicon(tab.selectedBooru.value))
       : const Icon(CupertinoIcons.question, size: 18);
 
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       child: ListTile(
         shape: RoundedRectangleBorder(
@@ -352,8 +359,16 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
       IconButton(
         icon: const Icon(Icons.subdirectory_arrow_left_outlined),
         tooltip: 'Scroll to current tab',
-        onPressed: () {
-          jumpToCurrent();
+        onPressed: () async {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            firstBuild = true;
+            await jumpToCurrent();
+            firstBuild = false;
+            setState(() {});
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              jumpToCurrent();
+            });
+          });
         },
       ),
       Transform(
@@ -384,16 +399,16 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               return SettingsDialog(
                 title: const Text('Tabs Manager'),
                 contentItems: <Widget>[
-                  Row(
-                    children: const [
+                  const Row(
+                    children: [
                       Icon(Icons.subdirectory_arrow_left_outlined),
                       SizedBox(width: 10),
                       Text('Scroll to current tab'),
                     ],
                   ),
                   const Divider(),
-                  Row(
-                    children: const [
+                  const Row(
+                    children: [
                       Icon(Icons.sort_by_alpha),
                       SizedBox(width: 10),
                       Text('Default tabs order'),
@@ -422,8 +437,8 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                     ],
                   ),
                   const Divider(),
-                  Row(
-                    children: const [
+                  const Row(
+                    children: [
                       Icon(Icons.expand),
                       SizedBox(width: 10),
                       Text('Long press on a tab to move it'),
@@ -447,7 +462,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                   const Text('Unloaded tabs have italic text'),
                 ],
               );
-            }
+            },
           );
         },
       ),
@@ -456,7 +471,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
 
   Widget selectedActionsBuild() {
     if(selectedTabs.isEmpty) {
-      if(isFilterActive && filteredTabs.isNotEmpty) {
+      if(filteredTabs.isNotEmpty) {
         return Row(
           children: [
             Expanded(
@@ -479,11 +494,11 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
       }
     }
 
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+    return Container(
+      margin: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Expanded(
             child: ElevatedButton.icon(
               icon: const Icon(Icons.delete_forever),
               label: Text("Delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}"),
@@ -491,22 +506,34 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                 if(selectedTabs.isEmpty) {
                   return;
                 }
-
+    
                 final Widget deleteDialog = SettingsDialog(
-                  title: const Text("Delete Tabs"),
+                  title: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Delete Tabs"),
+                      Text(
+                        'Are you sure you want to delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}?',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
                   scrollable: false,
-                  content: SizedBox(
+                  content: Container(
+                    height: MediaQuery.of(context).size.height * 0.75,
                     width: double.maxFinite,
-                    child: ListView(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: ListView.builder(
+                      clipBehavior: Clip.hardEdge,
                       shrinkWrap: true,
-                      children: [
-                        Text('Are you sure you want to delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}?'),
-                        const SizedBox(height: 10),
-                        ...selectedTabs.map((SearchTab tab) {
-                          final int index = searchHandler.list.indexOf(tab);
-                          return buildEntry(index, false, false);
-                        }).toList(),
-                      ],
+                      itemCount: selectedTabs.length,
+                      itemBuilder: (_, index) {
+                        return buildEntry(index, false, false);
+                      },
                     ),
                   ),
                   actionButtons: [
@@ -526,7 +553,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                     ),
                   ],
                 );
-
+    
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -535,11 +562,10 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               },
             ),
           ),
-        ),
-
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+    
+          const SizedBox(width: 10),
+    
+          Expanded(
             child: ElevatedButton.icon(
               icon: const Icon(Icons.border_clear),
               label: const Text("Clear selection"),
@@ -549,8 +575,8 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               },
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

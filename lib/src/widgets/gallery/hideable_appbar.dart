@@ -154,7 +154,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         return false;
       }
 
-      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage;
+      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isImageOrAnimation;
       bool isScaleButton = btn[0] == 'reloadnoscale';
       bool isScaleAllowed =
           isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
@@ -597,7 +597,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     if (path != null) {
       // File is already in cache - share from there
-      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -648,7 +648,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final File cacheFile = File(await imageWriter.getCachePath(item.fileURL, 'media', fileNameExtras: item.fileNameExtras) ?? '');
       if (await cacheFile.exists()) {
         path = cacheFile.path;
-        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
           context: context,

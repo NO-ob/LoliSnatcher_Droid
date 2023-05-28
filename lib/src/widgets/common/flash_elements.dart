@@ -61,6 +61,8 @@ class FlashElements {
     Positions position = Positions.bottom,
     bool asDialog = false,
     bool ignoreDesktopCheck = false,
+    List<Widget>? Function(FlashController)? actionsBuilder,
+    Widget? Function(FlashController)? primaryActionBuilder,
   }) async {
     // do nothing if in test mode
     if (Tools.isTestMode) return;
@@ -205,20 +207,13 @@ class FlashElements {
                       ),
                     ),
                 shouldIconPulse: shouldLeadingPulse,
-                primaryAction: IconButton(
-                  onPressed: () => controller.dismiss(),
-                  icon: Icon(Icons.close, color: themeData.colorScheme.onBackground),
-                ),
-                // actions: <Widget>[
-                //   TextButton(
-                //     onPressed: () => controller.dismiss('Yes'),
-                //     child: Text(inViewer.toString(), style: TextStyle(color: theme.colorScheme.onBackground))
-                //   ),
-                //   TextButton(
-                //     onPressed: () => controller.dismiss('No'),
-                //     child: Text('NO', style: TextStyle(color: theme.colorScheme.onBackground))
-                //   ),
-                // ],
+                primaryAction: primaryActionBuilder != null
+                    ? primaryActionBuilder(controller)
+                    : IconButton(
+                        onPressed: () => controller.dismiss(),
+                        icon: Icon(Icons.close, color: themeData.colorScheme.onBackground),
+                      ),
+                actions: actionsBuilder != null ? actionsBuilder(controller) : null,
               ),
             ),
           ),

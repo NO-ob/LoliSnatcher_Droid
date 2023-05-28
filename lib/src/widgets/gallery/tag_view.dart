@@ -16,6 +16,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -135,6 +136,7 @@ class _TagViewState extends State<TagView> {
 
   Widget infoBuild() {
     final String fileName = Tools.getFileName(item.fileURL);
+    final String fileUrl = item.fileURL;
     final String fileRes = (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
     final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
     final String hasNotes = item.hasNotes != null ? item.hasNotes.toString() : '';
@@ -169,6 +171,7 @@ class _TagViewState extends State<TagView> {
       delegate: SliverChildListDelegate(
         [
           if(settingsHandler.isDebug.value) infoText('Filename', fileName),
+          infoText('URL', fileUrl),
           infoText('ID', itemId),
           infoText('Rating', rating),
           infoText('Score', score),
@@ -320,14 +323,7 @@ class _TagViewState extends State<TagView> {
                             content: Text(link),
                             actionsOverflowDirection: VerticalDirection.up,
                             actions: [
-                              OutlinedButton.icon(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                label: const Text('Cancel'),
-                                icon: const Icon(Icons.cancel),
-                              ),
-                              OutlinedButton.icon(
+                              ElevatedButton.icon(
                                 onPressed: () async {
                                   await Clipboard.setData(ClipboardData(text: link));
                                   FlashElements.showSnackbar(
@@ -343,7 +339,7 @@ class _TagViewState extends State<TagView> {
                                 label: const Text('Copy'),
                                 icon: const Icon(Icons.copy),
                               ),
-                              OutlinedButton.icon(
+                              ElevatedButton.icon(
                                 onPressed: () {
                                   ServiceHandler.launchURL(link);
                                   Navigator.of(context).pop();
@@ -351,6 +347,7 @@ class _TagViewState extends State<TagView> {
                                 label: const Text('Open'),
                                 icon: const Icon(Icons.open_in_new),
                               ),
+                              const CancelButton(withIcon: true),
                             ],
                           );
                         },
@@ -726,6 +723,29 @@ class _TagViewState extends State<TagView> {
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
+                        primaryActionBuilder: (controller) {
+                          return Row(children: [
+                            IconButton(
+                              onPressed: () {
+                                ServiceHandler.vibrate();
+                                if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
+                                  Navigator.of(context).pop(true); // exit drawer
+                                  Navigator.of(context).pop(true); // exit viewer
+                                }
+                                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                  searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                });
+                                controller.dismiss();
+                              },
+                              icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onBackground),
+                            ),
+                            const SizedBox(width: 4),
+                            IconButton(
+                              onPressed: () => controller.dismiss(),
+                              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onBackground),
+                            ),
+                          ]);
+                        },
                       );
                       sortAndGroupTagsList();
                       setState(() {});

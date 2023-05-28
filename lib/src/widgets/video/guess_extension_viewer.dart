@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class GuessExtensionViewer extends StatefulWidget {
   const GuessExtensionViewer({
@@ -55,6 +56,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
     } else if (widget.item.possibleExt.value == 'video') {
       possibleExtensions = [...videoExtensions, ...imageExtensions, ...gifExtensions];
     } else {
+      // videos are still in front because realbooru can have both image (video thumbnail) and video under same url (minus extension)
       possibleExtensions = [...videoExtensions, ...imageExtensions, ...gifExtensions];
     }
 
@@ -63,12 +65,12 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
         currentExtension = extension;
         setState(() {});
 
+        // TODO run multiple requests at once through Future.wait? (at least from the same category)
+
+        // HEAD request, because we don't need the actual file, just its status code
         final res = await client.head(
           '${widget.item.fileURL.replaceAll(RegExp(r'\.\w+$'), '')}.$extension',
           cancelToken: cancelToken,
-          options: Options(
-            responseType: ResponseType.bytes,
-          ),
         );
 
         if (res.statusCode == 200) {
@@ -78,7 +80,8 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
           return;
         }
 
-        await Future.delayed(const Duration(milliseconds: 100));
+        // 30ms should be okay to not hammer their servers too much?
+        await Future.delayed(const Duration(milliseconds: 30));
       } catch (e) {
         continue;
       }
@@ -88,10 +91,66 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: Center(
-        child: Text(failed ? '[Could not guess the file extension]' : '[Guessing file extension...$currentExtension...?]'),
+    const String failedText = 'Failed to guess the file extension';
+    const String defaultText = 'Guessing file extension...';
+
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Thumbnail(
+            item: widget.item,
+            isStandalone: false,
+            ignoreColumnsCount: true,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  failed ? failedText : defaultText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                const SizedBox(height: 10),
+                if (failed) ...[
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                    ),
+                    onPressed: () {
+                      failed = false;
+                      startGuessing();
+                      setState(() {});
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Retry'),
+                  ),
+                ] else ...[
+                  const Text(
+                    'Currently checking:',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  Text(
+                    currentExtension,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 10),
+                  const CircularProgressIndicator(),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

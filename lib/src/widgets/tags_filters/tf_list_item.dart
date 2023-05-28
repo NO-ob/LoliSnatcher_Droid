@@ -17,7 +17,7 @@ class TagsFiltersListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       child: ListTile(
         shape: RoundedRectangleBorder(

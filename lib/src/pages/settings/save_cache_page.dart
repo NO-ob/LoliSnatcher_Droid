@@ -30,14 +30,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
   late String videoCacheMode, extPathOverride;
   bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true;
   
-  final List<Map<String, String?>> cacheTypes = [
-    {'folder': null, 'label': 'Total'},
+  static const List<_CacheType> cacheTypes = [
+    _CacheType('Total', null),
     // TODO ask before deleting favicons, since they cause unneeded network requests on each render if not cached
-    {'folder': 'favicons', 'label': 'Favicons'},
-    {'folder': 'thumbnails', 'label': 'Thumbnails'},
-    {'folder': 'samples', 'label': 'Samples'},
-    {'folder': 'media', 'label': 'Media'}
-  ]; // [cache folder, displayed name]
+    _CacheType('Favicons', 'favicons'),
+    _CacheType('Thumbnails', 'thumbnails'),
+    _CacheType('Samples', 'samples'),
+    _CacheType('Media', 'media'),
+    _CacheType('WebView', 'WebView'),
+  ]; // {displayed name, cache folder}
   List<Map<String, dynamic>> cacheStats = [];
   Map<String, dynamic>? cacheDurationSelected;
   late Duration cacheDuration;
@@ -59,7 +60,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     cacheSizeController.text = settingsHandler.cacheSize.toString();
     downloadNotifications = settingsHandler.downloadNotifications;
 
-    getCacheStats();
+    getCacheStats(null);
   }
 
   @override
@@ -69,9 +70,17 @@ class _SaveCachePageState extends State<SaveCachePage> {
     super.dispose();
   }
 
-  void getCacheStats() async {
-    cacheStats = [];
-    for(Map<String, String?> type in cacheTypes) {
+  void getCacheStats(String? folder) async {
+    if(folder != null) {
+      // delete selected folder stats + global
+      cacheStats.removeWhere((e) => e['type'] == folder || e['type'] == '' || e['type'] == null);
+    } else {
+      cacheStats = [];
+    }
+
+    var cacheTypesToGet = folder == null ? cacheTypes : cacheTypes.where((e) => e.folder == folder || e.folder == null).toList();
+
+    for(_CacheType type in cacheTypesToGet) {
       final ReceivePort receivePort = ReceivePort();
       isolate = await Isolate.spawn(_isolateEntry, receivePort.sendPort);
 
@@ -80,7 +89,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
           if (data is SendPort) {
             data.send({
               'path': await ServiceHandler.getCacheDir(),
-              'type': type['folder'],
+              'type': type.folder,
             });
           }else {
             cacheStats.add(data);
@@ -122,10 +131,10 @@ class _SaveCachePageState extends State<SaveCachePage> {
     }
   }
 
-  Widget buildCacheButton(Map<String, String?> type) {
-    Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type['folder'], orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
-    String? folder = type['folder'];
-    String label = type['label'] ?? '???';
+  Widget buildCacheButton(_CacheType type) {
+    Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type.folder, orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
+    String? folder = type.folder;
+    String label = type.label;
     String size = Tools.formatBytes(stat['totalSize']!, 2);
     int fileCount = stat['fileNum'] ?? 0;
     bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
@@ -149,11 +158,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
             duration: const Duration(seconds: 2),
             title: const Text(
               'Cache cleared!',
-              style: TextStyle(fontSize: 20)
+              style: TextStyle(fontSize: 20),
             ),
             content: Text(
               'Cleared $label cache!',
-              style: const TextStyle(fontSize: 16)
+              style: const TextStyle(fontSize: 16),
             ),
             leadingIcon: Icons.delete_forever,
             leadingIconColor: Colors.red,
@@ -161,9 +170,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
             sideColor: Colors.yellow,
           );
           await imageWriter.deleteCacheFolder(folder);
-          getCacheStats();
+          getCacheStats(folder);
         }
-      }
+      },
     );
   }
 
@@ -203,7 +212,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   } else {
                     return null;
                   }
-                }
+                },
               ),
               SettingsToggle(
                 value: downloadNotifications,
@@ -262,11 +271,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                       context: context,
                       title: const Text(
                         'Error!',
-                        style: TextStyle(fontSize: 20)
+                        style: TextStyle(fontSize: 20),
                       ),
                       content: const Text(
                         'Currently not available for this platform',
-                        style: TextStyle(fontSize: 16)
+                        style: TextStyle(fontSize: 16),
                       ),
                       leadingIcon: Icons.error_outline,
                       leadingIconColor: Colors.red,
@@ -383,20 +392,20 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     position: Positions.top,
                     title: const Text(
                       'Cache cleared!',
-                      style: TextStyle(fontSize: 20)
+                      style: TextStyle(fontSize: 20),
                     ),
-                    content: Column(
+                    content: const Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Cleared cache completely!',
-                          style: TextStyle(fontSize: 16)
+                          style: TextStyle(fontSize: 16),
                         ),
                         Text(
                           'App Restart may be required!',
-                          style: TextStyle(fontSize: 16)
+                          style: TextStyle(fontSize: 16),
                         ),
-                      ]
+                      ],
                     ),
                     leadingIcon: Icons.delete_forever,
                     leadingIconColor: Colors.red,
@@ -405,9 +414,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   );
                   await imageWriter.deleteCacheFolder('');
                   // await serviceHandler.emptyCache();
-                  getCacheStats();
+                  getCacheStats(null);
                 },
-                drawBottomBorder: false
+                drawBottomBorder: false,
               ),
             ],
           ),
@@ -417,3 +426,13 @@ class _SaveCachePageState extends State<SaveCachePage> {
   }
 }
 
+
+class _CacheType {
+  const _CacheType(
+    this.label,
+    this.folder,
+  );
+
+  final String label;
+  final String? folder;
+}

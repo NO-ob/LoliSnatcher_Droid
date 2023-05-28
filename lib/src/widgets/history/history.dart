@@ -328,7 +328,7 @@ class _HistoryListState extends State<HistoryList> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      height: 66,
+      height: 72,
       child: ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
