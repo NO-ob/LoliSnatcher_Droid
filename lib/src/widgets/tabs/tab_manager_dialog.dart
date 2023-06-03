@@ -506,6 +506,9 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                 if(selectedTabs.isEmpty) {
                   return;
                 }
+
+                // sort selected tabs in order of appearance in the list instead of order of selection
+                selectedTabs.sort((a, b) => searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b)));
     
                 final Widget deleteDialog = SettingsDialog(
                   title: Column(
@@ -532,7 +535,9 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                       shrinkWrap: true,
                       itemCount: selectedTabs.length,
                       itemBuilder: (_, index) {
-                        return buildEntry(index, false, false);
+                        final int itemIndex = searchHandler.list.indexOf(selectedTabs[index]);
+
+                        return buildEntry(itemIndex, false, false);
                       },
                     ),
                   ),

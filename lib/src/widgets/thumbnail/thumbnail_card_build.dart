@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -45,38 +47,38 @@ class ThumbnailCardBuild extends StatelessWidget {
         controller: searchHandler.gridScrollController,
         index: index,
         child: Material(
-          borderOnForeground: true,
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
           child: Ink(
             decoration: (isCurrent || isSelected)
                 ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                    color: isCurrent ? Colors.red : Theme.of(context).colorScheme.secondary,
                     border: Border.all(
                       color: isCurrent ? Colors.red : Theme.of(context).colorScheme.secondary,
-                      width: 2.0,
+                      width: max(2, MediaQuery.of(context).devicePixelRatio),
                     ),
                   )
                 : null,
-            child: GestureDetector(
+            child: InkWell(
+              enableFeedback: true,
+              borderRadius: BorderRadius.circular(4),
+              highlightColor: Theme.of(context).colorScheme.secondary.withOpacity(0.4),
+              splashColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+              onTap: () {
+                onTap?.call(index, item);
+              },
+              onDoubleTap: () {
+                onDoubleTap?.call(index, item);
+              },
+              onLongPress: () {
+                onLongPress?.call(index, item);
+              },
               onSecondaryTap: () {
                 onSecondaryTap?.call(index, item);
               },
-              child: InkResponse(
-                enableFeedback: true,
-                highlightShape: BoxShape.rectangle,
-                containedInkWell: true,
-                borderRadius: BorderRadius.circular(10),
-                highlightColor: Theme.of(context).colorScheme.secondary,
-                splashColor: Colors.pink,
-                child: ThumbnailBuild(item: item),
-                onTap: () {
-                  onTap?.call(index, item);
-                },
-                onDoubleTap: () {
-                  onDoubleTap?.call(index, item);
-                },
-                onLongPress: () {
-                  onLongPress?.call(index, item);
-                },
-              ),
+              // TODO make inkwell ripple work with thumbnail (currently can't just use stack because thumbnail must be clickable too (i.e. checkbox))
+              child: ThumbnailBuild(item: item),
             ),
           ),
         ),

@@ -77,9 +77,9 @@ class Tools {
 
     if (!isTestMode) {
       try {
-        final cookies = await CookieManager.instance().getCookies(url: Uri.parse(booru.baseURL!));
-        if (cookies.isNotEmpty) {
-          headers["Cookie"] = cookies.map((e) => "${e.name}=${e.value}").join("; ");
+        final cookiesStr = await getCookies(Uri.parse(booru.baseURL!));
+        if (cookiesStr.isNotEmpty) {
+          headers["Cookie"] = cookiesStr;
         }
       } catch (e) {
         print('Error getting cookies: $e');

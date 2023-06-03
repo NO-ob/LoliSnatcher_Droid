@@ -196,7 +196,7 @@ class ThemeHandler {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           splashFactory: InkSparkle.splashFactory,
         ),

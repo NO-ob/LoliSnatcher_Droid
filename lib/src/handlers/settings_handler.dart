@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:alice/alice.dart';
+import 'package:alice_lightweight/alice.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -1570,8 +1570,6 @@ class SettingsHandler extends GetxController {
     // print(jsonEncode(toJSON()));
 
     alice = Alice(
-      showNotification: false,
-      showInspectorOnShake: false,
       darkTheme: false, // TODO on true - throws theme exception when opening inspector?
     );
 

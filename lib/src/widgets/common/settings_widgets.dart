@@ -605,7 +605,7 @@ class SettingsDialog extends StatelessWidget {
       contentPadding: contentPadding,
       buttonPadding: buttonPadding,
       insetPadding: insetPadding,
-      shape: RoundedRectangleBorder(borderRadius: borderRadius ?? BorderRadius.circular(4)),
+      shape: RoundedRectangleBorder(borderRadius: borderRadius ?? BorderRadius.circular(10)),
       scrollable: scrollable,
     );
   }

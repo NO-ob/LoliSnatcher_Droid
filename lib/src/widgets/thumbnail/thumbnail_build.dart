@@ -40,7 +40,7 @@ class ThumbnailBuild extends StatelessWidget {
       // print('ThumbnailBuild $index');
 
       return ClipRRect(
-        borderRadius: BorderRadius.circular(3),
+        borderRadius: BorderRadius.circular(4),
         child: Stack(
           alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
           children: [
