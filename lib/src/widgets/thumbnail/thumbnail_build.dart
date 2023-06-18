@@ -10,17 +10,17 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class ThumbnailBuild extends StatelessWidget {
   const ThumbnailBuild({
-    Key? key,
-    required this.index,
     required this.item,
-  }) : super(key: key);
+    super.key,
+  });
 
-  final int index;
   final BooruItem item;
 
   @override
   Widget build(BuildContext context) {
+    final SearchHandler searchHandler = SearchHandler.instance;
     final SettingsHandler settingsHandler = SettingsHandler.instance;
+
     final IconData itemIcon = Tools.getFileIcon(item.mediaType);
 
     final List<List<String>> parsedTags = settingsHandler.parseTagsList(
@@ -45,7 +45,6 @@ class ThumbnailBuild extends StatelessWidget {
         alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
         children: [
           Thumbnail(
-            index: index,
             item: item,
             isStandalone: true,
           ),
@@ -64,16 +63,18 @@ class ThumbnailBuild extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Obx(() {
-                  final selected = SearchHandler.instance.currentTab.selected;
+                  final selected = searchHandler.currentTab.selected;
                   if (selected.isNotEmpty) {
+                    final itemIndex = searchHandler.getItemIndex(item);
+
                     return Checkbox(
-                      value: selected.contains(index),
+                      value: selected.contains(itemIndex),
                       onChanged: (bool? value) {
                         if (value != null) {
                           if (value) {
-                            SearchHandler.instance.currentTab.selected.add(index);
+                            searchHandler.currentTab.selected.add(itemIndex);
                           } else {
-                            SearchHandler.instance.currentTab.selected.remove(index);
+                            searchHandler.currentTab.selected.remove(itemIndex);
                           }
                         }
                       },

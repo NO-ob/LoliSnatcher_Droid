@@ -124,6 +124,7 @@ class TabBooruSelector extends StatelessWidget {
                   ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                   : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
+            borderRadius: BorderRadius.circular(8),
             onChanged: (Booru? newValue) {
               if (searchHandler.currentBooru != newValue) {
                 // if not already selected

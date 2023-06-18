@@ -65,7 +65,7 @@ class ThumbnailCardBuild extends StatelessWidget {
                 containedInkWell: false,
                 highlightColor: Theme.of(context).colorScheme.secondary,
                 splashColor: Colors.pink,
-                child: ThumbnailBuild(index: index, item: item),
+                child: ThumbnailBuild(item: item),
                 onTap: () {
                   onTap?.call(index, item);
                 },

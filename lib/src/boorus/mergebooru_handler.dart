@@ -21,10 +21,10 @@ class MergebooruHandler extends BooruHandler{
   bool hasGelbooruV1 = false;
 
   @override
-  bool hasSizeData = false;
+  bool get hasSizeData => booruHandlers.every((e) => e.hasSizeData);
 
   @override
-  Future search(String tags, int? pageNumCustom) async {
+  Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
     if (pageNumCustom != null) {
       pageNum = pageNumCustom;
     }

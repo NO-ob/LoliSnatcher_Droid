@@ -79,8 +79,24 @@ class ImageWriter {
       }
 
       if (settingsHandler.jsonWrite) {
-        File jsonFile = File("${path!}$fileNameWoutExt.json");
-        await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
+        if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty && await ServiceHandler.getAndroidSDKVersion() >= 31) {
+          final String? safPath = await ServiceHandler.createFileStreamFromSAFDirectory(
+            fileNameWoutExt,
+            'application/json',
+            'json',
+            '${path!}/',
+          );
+          if (safPath != null) {
+            await ServiceHandler.writeStreamToFileFromSAFDirectory(
+              safPath,
+              Uint8List.fromList(jsonEncode(item.toJson()).codeUnits),
+            );
+            await ServiceHandler.closeStreamToFileFromSAFDirectory(safPath);
+          }
+        } else {
+          File jsonFile = File("${path!}$fileNameWoutExt.json");
+          await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
+        }
       }
       print("Image written: ${path!}$fileName");
       item.isSnatched.value = true;

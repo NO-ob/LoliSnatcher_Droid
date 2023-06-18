@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/services/image_writer_isolate.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 class DioDownloader {
   DioDownloader(
@@ -23,7 +24,7 @@ class DioDownloader {
     this.onDoneFile,
     this.cacheEnabled = false,
     this.cacheFolder = 'other',
-    this.timeoutTime,
+    this.timeoutDuration,
     this.fileNameExtras = '',
   });
 
@@ -37,7 +38,7 @@ class DioDownloader {
   final void Function(File)? onDoneFile;
   final bool cacheEnabled;
   final String cacheFolder;
-  final int? timeoutTime;
+  final Duration? timeoutDuration;
   final String fileNameExtras;
 
   Isolate? isolate;
@@ -199,7 +200,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
@@ -208,7 +209,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 
@@ -289,7 +290,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.get(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
@@ -298,7 +299,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 
@@ -374,8 +375,8 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.download(
         resolved.toString(),
-        imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
-        options: Options(headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        await imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
+        options: Options(headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
         deleteOnError: true,
@@ -385,7 +386,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 
@@ -425,7 +426,7 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.head(
         resolved.toString(),
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutTime, receiveTimeout: timeoutTime),
+        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
       );
 
@@ -435,7 +436,7 @@ class DioDownloader {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
       }
 
-      if (response.statusCode != HttpStatus.ok) {
+      if (Tools.isGoodStatusCode(response.statusCode) == false) {
         throw DioLoadException(url: resolved, statusCode: response.statusCode);
       }
 

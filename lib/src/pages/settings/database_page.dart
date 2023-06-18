@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -21,6 +22,7 @@ class DatabasePage extends StatefulWidget {
 
 class _DatabasePageState extends State<DatabasePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final SearchHandler searchHandler = SearchHandler.instance;
 
   bool dbEnabled = true, searchHistoryEnabled = true, isUpdating = false, tagTypeFetchEnabled = true;
   int updatingFailed = 0, updatingDone = 0;
@@ -302,6 +304,14 @@ class _DatabasePageState extends State<DatabasePage> {
                               if (settingsHandler.dbHandler.db != null) {
                                 settingsHandler.dbHandler.clearSnatched();
 
+                                for (final tab in searchHandler.list) {
+                                  for (final item in tab.booruHandler.fetched) {
+                                    if(item.isSnatched.value == true) {
+                                      item.isSnatched.value = false;
+                                    }
+                                  }
+                                }
+
                                 FlashElements.showSnackbar(
                                   context: context,
                                   title: const Text("Snatched Cleared!", style: TextStyle(fontSize: 20)),
@@ -341,6 +351,15 @@ class _DatabasePageState extends State<DatabasePage> {
                             onPressed: () {
                               if (settingsHandler.dbHandler.db != null) {
                                 settingsHandler.dbHandler.clearFavourites();
+
+                                for (final tab in searchHandler.list) {
+                                  for (final item in tab.booruHandler.fetched) {
+                                    if(item.isFavourite.value == true) {
+                                      item.isFavourite.value = false;
+                                    }
+                                  }
+                                }
+
                                 FlashElements.showSnackbar(
                                   context: context,
                                   title: const Text("Favourites Cleared!", style: TextStyle(fontSize: 20)),

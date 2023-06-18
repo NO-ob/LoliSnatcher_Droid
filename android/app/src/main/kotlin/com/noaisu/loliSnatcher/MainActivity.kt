@@ -268,6 +268,18 @@ class MainActivity: FlutterActivity() {
                 } else {
                     result.success(null);
                 }
+            } else if(call.method == "copySafFileToDir"){
+                val uri = call.argument<String>("uri");
+                val fileName = call.argument<String>("fileName");
+                val targetPath = call.argument<String>("targetPath");
+                if (uri != null && fileName != null && targetPath != null){
+                    Executors.newSingleThreadExecutor().execute {
+                        val success = copySafFileToDir(uri,fileName,targetPath)
+                        result.success(success)
+                    }
+                } else {
+                    result.success(false);
+                }
             } else if (call.method == "testSAF"){
                 val uri: String? = call.argument("uri");
                 val permissions =
@@ -540,6 +552,27 @@ class MainActivity: FlutterActivity() {
                 Objects.requireNonNull(activeFiles.get(uri))?.close()
                 activeFiles.remove(uri)
                 return true
+            }
+        }
+        return false
+    }
+
+    @Throws(IOException::class)
+    private fun copySafFileToDir(uriString: String, fileName: String, targetPath: String): Boolean {
+        val uri: Uri = Uri.parse(uriString)
+        if (uri != null && uri != Uri.EMPTY) {
+            val documentTree = DocumentFile.fromTreeUri(context, uri)
+            if (documentTree != null) {
+                val file = documentTree.findFile(fileName)
+                if (file != null) {
+                    val inputStream: InputStream? = contentResolver.openInputStream(file.uri)
+                    val file = File(targetPath, fileName)
+                    val outputStream = FileOutputStream(file)
+                    inputStream?.copyTo(outputStream)
+                    inputStream?.close()
+                    outputStream.close()
+                    return true
+                }
             }
         }
         return false

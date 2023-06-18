@@ -20,12 +20,10 @@ class SettingsButton extends StatelessWidget {
     required this.name,
     this.icon,
     this.subtitle,
-
     this.page, // which page to open after button was pressed (needs to be wrapped in anonymous function, i.e.: () => Page)
     // OR
     this.action, // function to execute on button press
     this.onLongPress,
-
     this.trailingIcon, // icon at the end (i.e. if action is a link which will open a browser)
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
@@ -48,10 +46,10 @@ class SettingsButton extends StatelessWidget {
   final bool dense;
 
   void onTapAction(BuildContext context) {
-    if(action != null) {
+    if (action != null) {
       action?.call();
     } else {
-      if(page != null) {
+      if (page != null) {
         SettingsPageOpen(context: context, page: page!).open();
       }
     }
@@ -59,14 +57,12 @@ class SettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if(iconOnly) {
+    if (iconOnly) {
       return GestureDetector(
-        onLongPress: onLongPress == null ? null : () => {
-          onLongPress!()
-        },
+        onLongPress: onLongPress == null ? null : () => {onLongPress!()},
         child: IconButton(
           icon: icon ?? const Icon(null),
-          onPressed: (){
+          onPressed: () {
             onTapAction(context);
           },
         ),
@@ -83,15 +79,17 @@ class SettingsButton extends StatelessWidget {
       onTap: () {
         onTapAction(context);
       },
-      onLongPress: onLongPress == null ? null : () {
-        onLongPress!();
-      },
+      onLongPress: onLongPress == null
+          ? null
+          : () {
+              onLongPress!();
+            },
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile
         top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
         bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-      )
+      ),
     );
   }
 }
@@ -112,7 +110,7 @@ class SettingsPageOpen {
   final bool barrierDismissible;
 
   Future<bool> open() async {
-    if(!condition) return true;
+    if (!condition) return true;
 
     SettingsHandler settingsHandler = SettingsHandler.instance;
 
@@ -121,26 +119,26 @@ class SettingsPageOpen {
     bool useDesktopMode = !isTooNarrow && isDesktop;
 
     bool result = false;
-    if(useDesktopMode) {
+    if (useDesktopMode) {
       result = await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Dialog(
-            child: SizedBox(
-              width: 500,
-              child: page(),
-            ),
-          );
-        },
-        barrierDismissible: barrierDismissible,
-      ) ?? false;
+            context: context,
+            builder: (BuildContext context) {
+              return Dialog(
+                child: SizedBox(
+                  width: 500,
+                  child: page(),
+                ),
+              );
+            },
+            barrierDismissible: barrierDismissible,
+          ) ??
+          false;
     } else {
       result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => page())) ?? false;
     }
     return result;
   }
 }
-
 
 class SettingsToggle extends StatelessWidget {
   const SettingsToggle({
@@ -166,13 +164,15 @@ class SettingsToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return MergeSemantics(
       child: ListTile(
-        title: Row(children: [
-          MarqueeText(
-            text: title,
-            fontSize: 16,
-          ),
-          trailingIcon ?? const SizedBox(width: 8),
-        ]),
+        title: Row(
+          children: [
+            MarqueeText(
+              text: title,
+              fontSize: 16,
+            ),
+            trailingIcon ?? const SizedBox(width: 8),
+          ],
+        ),
         subtitle: subtitle,
         trailing: Switch(
           value: value,
@@ -186,7 +186,7 @@ class SettingsToggle extends StatelessWidget {
           top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
           // draw bottom border when item is among other listtiles, but not when it's the last one
           bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        )
+        ),
       ),
     );
   }
@@ -240,6 +240,7 @@ class SettingsDropdown<T> extends StatelessWidget {
             labelText: title,
             contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
           ),
+          borderRadius: BorderRadius.circular(8),
           dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return items.map<DropdownMenuItem<T>>((T item) {
@@ -261,15 +262,15 @@ class SettingsDropdown<T> extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: isCurrent
-                  ? BoxDecoration(
-                      border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                      borderRadius: BorderRadius.circular(5),
-                    )
-                  : null,
+                    ? BoxDecoration(
+                        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
+                        borderRadius: BorderRadius.circular(5),
+                      )
+                    : null,
                 child: Row(
                   children: [
                     getItemWidget(item),
-                  ]
+                  ],
                 ),
               ),
             );
@@ -283,7 +284,7 @@ class SettingsDropdown<T> extends StatelessWidget {
         top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
         bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-      )
+      ),
     );
   }
 }
@@ -320,10 +321,7 @@ class SettingsBooruDropdown extends StatelessWidget {
         itemBuilder: (Booru booru) {
           return Row(
             children: <Widget>[
-              (booru.type == "Favourites"
-                  ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                  : Favicon(booru)
-              ),
+              (booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)),
               Text(" ${booru.name!}"),
             ],
           );
@@ -377,7 +375,7 @@ class SettingsTextInput extends StatefulWidget {
   final double numberMin;
   final double numberMax;
   final Widget? trailingIcon;
-  final bool onlyInput; 
+  final bool onlyInput;
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
 }
@@ -394,7 +392,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void focusListener() {
     isFocused = _focusNode.hasFocus;
-    setState(() { });
+    setState(() {});
   }
 
   @override
@@ -405,7 +403,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   }
 
   void onChangedCallback(String value) {
-      widget.onChanged?.call(value);
+    widget.onChanged?.call(value);
   }
 
   void stepNumberDown() {
@@ -418,7 +416,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   }
 
   void stepNumberUp() {
-    if(widget.numberButtons) {
+    if (widget.numberButtons) {
       double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) + widget.numberStep;
       double newValue = valueWithStep <= widget.numberMax ? valueWithStep : widget.numberMax;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
@@ -443,24 +441,21 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     );
   }
 
-
-
   Widget buildSuffixIcons() {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if(widget.numberButtons && isFocused)
+        if (widget.numberButtons && isFocused)
           Container(
             key: const Key('number-button-down'),
             child: buildNumberButton(stepNumberDown, Icons.remove),
           ),
-        if(widget.numberButtons && isFocused)
+        if (widget.numberButtons && isFocused)
           Container(
             key: const Key('number-button-up'),
             child: buildNumberButton(stepNumberUp, Icons.add),
           ),
-
-        if(widget.clearable && isFocused)
+        if (widget.clearable && isFocused)
           IconButton(
             key: const Key('clear-button'),
             icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
@@ -469,8 +464,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               onChangedCallback(widget.controller.text);
             },
           ),
-
-        if(widget.resetText != null)
+        if (widget.resetText != null)
           IconButton(
             key: const Key('reset-button'),
             icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),
@@ -479,23 +473,22 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               onChangedCallback(widget.controller.text);
             },
           ),
-
         isFocused
-          ? IconButton(
-              key: const Key('submit-button'),
-              icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
-              onPressed: () {
-                if(widget.onSubmitted != null) widget.onSubmitted!(widget.controller.text);
-                _focusNode.unfocus();
-              },
-            )
-          : IconButton(
-              key: const Key('edit-button'),
-              icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
-              onPressed: () {
-                _focusNode.requestFocus();
-              },
-            ),
+            ? IconButton(
+                key: const Key('submit-button'),
+                icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
+                onPressed: () {
+                  if (widget.onSubmitted != null) widget.onSubmitted!(widget.controller.text);
+                  _focusNode.unfocus();
+                },
+              )
+            : IconButton(
+                key: const Key('edit-button'),
+                icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
+                onPressed: () {
+                  _focusNode.requestFocus();
+                },
+              ),
       ],
     );
   }
@@ -524,10 +517,10 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             child: buildSuffixIcons(),
           ),
         ),
-      )
+      ),
     );
 
-    if(widget.onlyInput) {
+    if (widget.onlyInput) {
       return field;
     }
 
@@ -541,7 +534,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
         // draw bottom border when item is among other listtiles, but not when it's the last one
         bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-      )
+      ),
     );
   }
 }
@@ -558,6 +551,8 @@ class SettingsDialog extends StatelessWidget {
     this.buttonPadding,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
     this.borderRadius,
+    this.backgroundColor,
+    this.surfaceTintColor,
     this.scrollable = true,
   }) : super(key: key);
 
@@ -570,20 +565,23 @@ class SettingsDialog extends StatelessWidget {
   final EdgeInsets? buttonPadding;
   final EdgeInsets insetPadding;
   final BorderRadius? borderRadius;
+  final Color? backgroundColor;
+  final Color? surfaceTintColor;
   final bool scrollable;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: title,
-      content: content ?? SingleChildScrollView(
-        child: ListBody(
-          children: contentItems ?? [],
-        )
-      ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      content: content ??
+          SingleChildScrollView(
+            child: ListBody(
+              children: contentItems ?? [],
+            ),
+          ),
+      backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.surface,
+      surfaceTintColor: surfaceTintColor ?? Theme.of(context).colorScheme.surfaceTint,
       actions: actionButtons?.isNotEmpty == true ? actionButtons : null,
-
       titlePadding: titlePadding,
       contentPadding: contentPadding,
       buttonPadding: buttonPadding,
@@ -593,8 +591,6 @@ class SettingsDialog extends StatelessWidget {
     );
   }
 }
-
-
 
 class SettingsPageDialog extends StatelessWidget {
   const SettingsPageDialog({
@@ -619,13 +615,19 @@ class SettingsPageDialog extends StatelessWidget {
       appBar: AppBar(
         title: title,
         actions: [
-          if((actions?.length ?? 0) > 0)
+          if ((actions?.length ?? 0) > 0)
             Row(
               // add separators between actions and after the last action
-              children: actions?.map((e) => [
-                e,
-                const SizedBox(width: 8),
-              ]).expand((e) => e).toList() ?? [],
+              children: actions
+                      ?.map(
+                        (e) => [
+                          e,
+                          const SizedBox(width: 8),
+                        ],
+                      )
+                      .expand((e) => e)
+                      .toList() ??
+                  [],
             ),
         ],
       ),
