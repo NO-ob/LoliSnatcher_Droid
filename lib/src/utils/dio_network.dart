@@ -319,7 +319,7 @@ class DioNetwork {
 
     if (fileUri == null) {
       completer.completeError(
-        DioMixin.assureDioError(Exception('Error creating saf file'), response.requestOptions),
+        DioMixin.assureDioException(Exception('Error creating saf file'), response.requestOptions),
       );
     }
 
@@ -347,7 +347,7 @@ class DioNetwork {
             await subscription.cancel();
           } finally {
             completer.completeError(
-              DioMixin.assureDioError(e, response.requestOptions),
+              DioMixin.assureDioException(e, response.requestOptions),
             );
           }
         });
@@ -360,7 +360,7 @@ class DioNetwork {
           completer.complete(response);
         } catch (e) {
           completer.completeError(
-            DioMixin.assureDioError(e, response.requestOptions),
+            DioMixin.assureDioException(e, response.requestOptions),
           );
         }
       },
@@ -369,7 +369,7 @@ class DioNetwork {
           await closeAndDelete();
         } finally {
           completer.completeError(
-            DioMixin.assureDioError(e, response.requestOptions),
+            DioMixin.assureDioException(e, response.requestOptions),
           );
         }
       },
