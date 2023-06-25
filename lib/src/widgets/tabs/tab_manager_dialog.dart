@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -30,6 +31,9 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
   late final AutoScrollController scrollController;
   final TextEditingController filterController = TextEditingController();
   bool? sortTabs;
+  bool? loadedFilter;
+  Booru? booruFilter;
+  bool duplicateFilter = false;
   bool firstBuild = true;
 
   bool get isFilterActive => filteredTabs.length != searchHandler.total || sortTabs != null;
@@ -75,42 +79,37 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
   }
 
   void filterTabs() {
-    if (filterController.text.isNotEmpty) {
-      filteredTabs = [...tabs].where((t) {
-        String filterText = filterController.text.toLowerCase().trim();
+    filteredTabs = [...tabs];
 
-        bool filterLoaded = filterText == 'loaded';
-        bool filterUnloaded = filterText == 'unloaded';
-        if (filterLoaded || filterUnloaded) {
-          bool checkLoaded = filterLoaded ? t.booruHandler.filteredFetched.isNotEmpty : true;
-          bool checkUnloaded = filterUnloaded ? t.booruHandler.filteredFetched.isEmpty : true;
-          return checkLoaded && checkUnloaded;
-        }
+    if (booruFilter != null) {
+      filteredTabs = filteredTabs.where((t) => t.selectedBooru.value == booruFilter).toList();
+    }
 
-        bool doTagsMatch = false;
-        String booruText = t.selectedBooru.value.name?.toLowerCase() ?? "unknown";
-        String booruTypeText = t.selectedBooru.value.type?.toLowerCase() ?? "unknown";
-        bool doBooruMatch = booruText.contains(filterText) || booruTypeText.contains(filterText);
-        if (filterText.startsWith('booru:')) {
-          // if user explicitly searches booru:xxx, reparse the filter and redo the booru and tags check
-          String? filterBooru = filterText.split(' ')[0].replaceAll('booru:', '');
-          doBooruMatch = booruText.contains(filterBooru) || booruTypeText.contains(filterBooru);
-          filterText = filterText.replaceAll(RegExp(r'booru:\w+'), '').trim();
-          doTagsMatch = filterText.isNotEmpty ? t.tags.toLowerCase().contains(filterText) : true;
-          return doBooruMatch && doTagsMatch;
-        } else {
-          doTagsMatch = t.tags.toLowerCase().contains(filterText);
-        }
+    if (loadedFilter != null) {
+      filteredTabs =
+          filteredTabs.where((t) => loadedFilter == true ? t.booruHandler.filteredFetched.isNotEmpty : t.booruHandler.filteredFetched.isEmpty).toList();
+    }
 
-        return doTagsMatch || doBooruMatch;
+    if (duplicateFilter) {
+      // tabs where booru and tags are the same
+      filteredTabs = filteredTabs.where((tab) {
+        final List<SearchTab> sameBooru = filteredTabs.where((t) => t.selectedBooru.value == tab.selectedBooru.value).toList();
+        final List<SearchTab> sameTags = sameBooru.where((t) => t.tags == tab.tags).toList();
+        return sameTags.length > 1;
       }).toList();
-    } else {
-      filteredTabs = [...tabs];
+    }
+
+    if (filterController.text.isNotEmpty) {
+      filteredTabs = filteredTabs.where((t) {
+        String filterText = filterController.text.toLowerCase().trim();
+        return t.tags.toLowerCase().contains(filterText);
+      }).toList();
     }
 
     if (sortTabs != null) {
       filteredTabs.sort(
-          (a, b) => sortTabs == true ? a.tags.toLowerCase().compareTo(b.tags.toLowerCase()) : b.tags.toLowerCase().compareTo(a.tags.toLowerCase()));
+        (a, b) => sortTabs == true ? a.tags.toLowerCase().compareTo(b.tags.toLowerCase()) : b.tags.toLowerCase().compareTo(a.tags.toLowerCase()),
+      );
     }
 
     setState(() {});
@@ -125,7 +124,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
         return SettingsDialog(
           contentItems: <Widget>[
             SizedBox(width: double.maxFinite, child: row),
-            // 
+            //
             const SizedBox(height: 20),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -142,7 +141,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               leading: const Icon(Icons.menu_open),
               title: const Text('Open'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -164,7 +163,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               leading: const Icon(Icons.copy),
               title: const Text('Copy'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -184,7 +183,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               leading: const Icon(Icons.move_down_sharp),
               title: const Text('Move'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -250,9 +249,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
       index: index,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 200),
-        child: firstBuild
-          ? const SizedBox(height: 72, width: double.maxFinite, child: Card())
-          : buildEntry(index, true, true),
+        child: firstBuild ? const SizedBox(height: 72, width: double.maxFinite, child: Card()) : buildEntry(index, true, true),
       ),
     );
   }
@@ -278,20 +275,18 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
     final Widget checkbox = Checkbox(
       value: isSelected,
       onChanged: (bool? newValue) {
-        if(isSelected) {
+        if (isSelected) {
           selectedTabs.removeWhere((item) => item == tab);
         } else {
           selectedTabs.add(tab);
         }
-        setState(() { });
+        setState(() {});
       },
     );
 
     final Widget favicon = isNotEmptyBooru
-      ? (tab.selectedBooru.value.type == "Favourites"
-          ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-          : Favicon(tab.selectedBooru.value))
-      : const Icon(CupertinoIcons.question, size: 18);
+        ? (tab.selectedBooru.value.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(tab.selectedBooru.value))
+        : const Icon(CupertinoIcons.question, size: 18);
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
@@ -309,8 +304,15 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             favicon,
-            Text(tabIndexText, style: const TextStyle(fontSize: 10),),
-            if(givenIndexText != null && givenIndexText != '0') Text(givenIndexText, style: const TextStyle(fontSize: 10),),
+            Text(
+              tabIndexText,
+              style: const TextStyle(fontSize: 10),
+            ),
+            if (givenIndexText != null && givenIndexText != '0')
+              Text(
+                givenIndexText,
+                style: const TextStyle(fontSize: 10),
+              ),
           ],
         ),
         trailing: showCheckbox ? checkbox : null,
@@ -327,7 +329,53 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
     );
   }
 
+  int get filtersCount {
+    int count = 0;
+    if (loadedFilter != null) {
+      count++;
+    }
+    if (booruFilter != null) {
+      count++;
+    }
+    if (duplicateFilter) {
+      count++;
+    }
+    return count;
+  }
+
+  void openFiltersDialog() async {
+    final String? result = await SettingsPageOpen(
+      context: context,
+      asBottomSheet: true,
+      page: () => TabManagerFiltersDialog(
+        loadedFilter: loadedFilter,
+        loadedFilterChanged: (bool? newValue) {
+          loadedFilter = newValue;
+        },
+        booruFilter: booruFilter,
+        booruFilterChanged: (Booru? newValue) {
+          booruFilter = newValue;
+        },
+        duplicateFilter: duplicateFilter,
+        duplicateFilterChanged: (bool newValue) {
+          duplicateFilter = newValue;
+        },
+      ),
+    ).open();
+
+    if (result == 'apply') {
+      filterTabs();
+    } else if (result == 'clear') {
+      loadedFilter = null;
+      booruFilter = null;
+      duplicateFilter = false;
+      filterTabs();
+    }
+  }
+
   Widget filterBuild() {
+    final String filterText = "Filter Tabs (${!isFilterActive ? tabs.length : '${filteredTabs.length}/${tabs.length}'})";
+
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 2, 10, 10),
       width: double.infinity,
@@ -341,13 +389,47 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               onChanged: (String? input) {
                 filterTabs();
               },
-              title: "Filter Tabs (${filterController.text.isEmpty ? tabs.length : '${filteredTabs.length}/${tabs.length}'})",
-              hintText: "Filter Tabs (${filterController.text.isEmpty ? tabs.length : '${filteredTabs.length}/${tabs.length}'})",
+              title: filterText,
+              hintText: 'Input tags to filter tabs',
               inputType: TextInputType.text,
               clearable: true,
               drawBottomBorder: false,
               margin: const EdgeInsets.fromLTRB(2, 8, 2, 5),
             ),
+          ),
+          const SizedBox(width: 10),
+          Stack(
+            children: [
+              IconButton(
+                iconSize: 24,
+                onPressed: openFiltersDialog,
+                icon: const Icon(CupertinoIcons.slider_horizontal_3),
+              ),
+              if (filtersCount > 0)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: GestureDetector(
+                    onTap: openFiltersDialog,
+                    child: Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                      child: Text(
+                        filtersCount.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -409,6 +491,14 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                   const Divider(),
                   const Row(
                     children: [
+                      Icon(CupertinoIcons.slider_horizontal_3),
+                      SizedBox(width: 10),
+                      Text('Filter tabs by booru, loaded state, duplicates, etc.'),
+                    ],
+                  ),
+                  const Divider(),
+                  const Row(
+                    children: [
                       Icon(Icons.sort_by_alpha),
                       SizedBox(width: 10),
                       Text('Default tabs order'),
@@ -445,13 +535,6 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                     ],
                   ),
                   const Divider(),
-                  const Text('Filter by booru:'),
-                  const Text('Just type in the name or type of the booru to filter tabs related to it'),
-                  const SizedBox(height: 5),
-                  const Text('Filter by booru AND tags:'),
-                  const Text('Add "booru:" to the beggining of the filter and then enter booru name/type and tags'),
-                  const Text('Example: "booru:gelbooru high_resolution"'),
-                  const Divider(),
                   const Text('Numbers under the favicon:'),
                   const Text('First number - tab index in default list order'),
                   const Text('Second number - tab index in current list order, appears when filtering/sorting is active'),
@@ -470,8 +553,8 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
   }
 
   Widget selectedActionsBuild() {
-    if(selectedTabs.isEmpty) {
-      if(filteredTabs.isNotEmpty) {
+    if (selectedTabs.isEmpty) {
+      if (filteredTabs.isNotEmpty) {
         return Row(
           children: [
             Expanded(
@@ -482,7 +565,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                   label: const Text("Select all"),
                   onPressed: () {
                     selectedTabs = filteredTabs.where((element) => element != searchHandler.currentTab).toList();
-                    setState(() { });
+                    setState(() {});
                   },
                 ),
               ),
@@ -503,13 +586,13 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               icon: const Icon(Icons.delete_forever),
               label: Text("Delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}"),
               onPressed: () {
-                if(selectedTabs.isEmpty) {
+                if (selectedTabs.isEmpty) {
                   return;
                 }
 
                 // sort selected tabs in order of appearance in the list instead of order of selection
                 selectedTabs.sort((a, b) => searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b)));
-    
+
                 final Widget deleteDialog = SettingsDialog(
                   title: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -547,7 +630,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                       label: const Text("Delete"),
                       icon: const Icon(Icons.delete_forever),
                       onPressed: () {
-                        for(int i = 0; i < selectedTabs.length; i++) {
+                        for (int i = 0; i < selectedTabs.length; i++) {
                           final int index = searchHandler.list.indexOf(selectedTabs[i]);
                           searchHandler.removeTabAt(tabIndex: index);
                         }
@@ -558,7 +641,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                     ),
                   ],
                 );
-    
+
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -567,16 +650,14 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
               },
             ),
           ),
-    
           const SizedBox(width: 10),
-    
           Expanded(
             child: ElevatedButton.icon(
               icon: const Icon(Icons.border_clear),
               label: const Text("Clear selection"),
               onPressed: () {
                 selectedTabs.clear();
-                setState(() { });
+                setState(() {});
               },
             ),
           ),
@@ -597,6 +678,111 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
         ],
       ),
       actions: filterActions(),
+    );
+  }
+}
+
+class TabManagerFiltersDialog extends StatefulWidget {
+  const TabManagerFiltersDialog({
+    required this.loadedFilter,
+    required this.loadedFilterChanged,
+    required this.booruFilter,
+    required this.booruFilterChanged,
+    required this.duplicateFilter,
+    required this.duplicateFilterChanged,
+    super.key,
+  });
+
+  final bool? loadedFilter;
+  final ValueChanged<bool?> loadedFilterChanged;
+  final Booru? booruFilter;
+  final ValueChanged<Booru?> booruFilterChanged;
+  final bool duplicateFilter;
+  final ValueChanged<bool> duplicateFilterChanged;
+
+  @override
+  State<TabManagerFiltersDialog> createState() => _TabManagerFiltersDialogState();
+}
+
+class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
+  bool? loadedFilter;
+  Booru? booruFilter;
+  bool duplicateFilter = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    loadedFilter = widget.loadedFilter;
+    booruFilter = widget.booruFilter;
+    duplicateFilter = widget.duplicateFilter;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsBottomSheet(
+      title: const Text("Tab Filters"),
+      contentItems: [
+        SettingsBooruDropdown(
+          title: "Booru",
+          value: booruFilter,
+          drawBottomBorder: false,
+          onChanged: (Booru? newValue) {
+            booruFilter = newValue;
+            setState(() {});
+          },
+        ),
+        SettingsDropdown<bool?>(
+          title: "Loaded",
+          value: loadedFilter,
+          drawBottomBorder: false,
+          onChanged: (bool? newValue) {
+            loadedFilter = newValue;
+            setState(() {});
+          },
+          items: const [
+            null,
+            true,
+            false,
+          ],
+          itemBuilder: (item) => item == null ? const Text("All") : Text(item ? "Loaded" : "Unloaded"),
+          itemTitleBuilder: (item) => item == null
+              ? "All"
+              : item
+                  ? "Loaded"
+                  : "Unloaded",
+        ),
+        SettingsToggle(
+          title: "Duplicates",
+          value: duplicateFilter,
+          onChanged: (bool newValue) {
+            duplicateFilter = newValue;
+            setState(() {});
+          },
+        ),
+      ],
+      actionButtons: [
+        const CancelButton(withIcon: true),
+        const SizedBox(width: 10),
+        ElevatedButton.icon(
+          label: const Text("Clear"),
+          icon: const Icon(Icons.delete),
+          onPressed: () {
+            Navigator.of(context).pop('clear');
+          },
+        ),
+        const SizedBox(width: 10),
+        ElevatedButton.icon(
+          label: const Text("Apply"),
+          icon: const Icon(Icons.check),
+          onPressed: () {
+            widget.loadedFilterChanged(loadedFilter);
+            widget.booruFilterChanged(booruFilter);
+            widget.duplicateFilterChanged(duplicateFilter);
+            Navigator.of(context).pop('apply');
+          },
+        ),
+      ],
     );
   }
 }

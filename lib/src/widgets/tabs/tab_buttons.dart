@@ -13,7 +13,7 @@ class TabButtons extends StatelessWidget {
   final bool withArrows;
   final WrapAlignment? alignment;
 
-  Future<bool> showHistory(BuildContext context) async {
+  Future<dynamic> showHistory(BuildContext context) async {
     return await SettingsPageOpen(
       context: context,
       page: () => const HistoryList(),

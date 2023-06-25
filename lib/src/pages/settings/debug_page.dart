@@ -46,7 +46,7 @@ class _DebugPageState extends State<DebugPage> {
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
   }
 
-  Future<bool> showTagsManager(BuildContext context) async {
+  Future<dynamic> showTagsManager(BuildContext context) async {
     return await SettingsPageOpen(
       context: context,
       page: () => const TagsManagerDialog(),

@@ -66,7 +66,7 @@ class TabSelectorRender extends StatelessWidget {
   final Color? borderColor;
   final Color? textColor;
 
-  Future<bool> openTabsDialog(context) async {
+  Future<dynamic> openTabsDialog(context) async {
     return await SettingsPageOpen(
       context: context,
       page: () => const TabManagerDialog(),
