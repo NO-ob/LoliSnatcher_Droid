@@ -101,12 +101,11 @@ class TabButtons extends StatelessWidget {
         icon: const Icon(Icons.format_list_numbered),
         color: iconColor,
         onPressed: () {
-          showDialog(
+          SettingsPageOpen(
             context: context,
-            builder: (context) {
-              return const PageNumberDialog();
-            },
-          );
+            asBottomSheet: true,
+            page: () => const PageNumberDialog(),
+          ).open();
         },
       );
 

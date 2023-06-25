@@ -722,6 +722,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
       title: const Text("Tab Filters"),
+      contentPadding: const EdgeInsets.all(16),
       contentItems: [
         SettingsBooruDropdown(
           title: "Booru",
@@ -762,8 +763,6 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
       ],
       actionButtons: [
-        const CancelButton(withIcon: true),
-        const SizedBox(width: 10),
         ElevatedButton.icon(
           label: const Text("Clear"),
           icon: const Icon(Icons.delete),

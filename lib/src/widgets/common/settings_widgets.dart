@@ -125,9 +125,9 @@ class SettingsPageOpen {
       result = await showDialog(
             context: context,
             builder: (BuildContext context) {
-              return SizedBox(
-                width: 500,
-                child: Dialog(
+              return Dialog(
+                child: SizedBox(
+                  width: 500,
                   child: page(),
                 ),
               );
@@ -150,9 +150,7 @@ class SettingsPageOpen {
                 return page();
               },
               isScrollControlled: true,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-              ),
+              backgroundColor: Colors.transparent,
             );
       } else {
         result = await Navigator.push(
@@ -575,7 +573,7 @@ class SettingsDialog extends StatelessWidget {
     this.contentItems,
     this.actionButtons,
     this.titlePadding,
-    this.contentPadding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    this.contentPadding = const EdgeInsets.fromLTRB(16, 20, 16, 16),
     this.buttonPadding,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
     this.borderRadius,
@@ -628,10 +626,11 @@ class SettingsBottomSheet extends StatelessWidget {
     this.contentItems,
     this.actionButtons,
     this.titlePadding,
-    this.contentPadding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    this.contentPadding = const EdgeInsets.fromLTRB(16, 0, 16, 16),
     this.buttonPadding,
     this.borderRadius,
     this.backgroundColor,
+    this.showCloseButton = true,
   }) : super(key: key);
 
   final Widget? title;
@@ -643,49 +642,65 @@ class SettingsBottomSheet extends StatelessWidget {
   final EdgeInsets? buttonPadding;
   final BorderRadius? borderRadius;
   final Color? backgroundColor;
+  final bool showCloseButton;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: SingleChildScrollView(
-        child: Container(
-          decoration: BoxDecoration(
-            color: backgroundColor ?? Theme.of(context).colorScheme.surface,
-            borderRadius: borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Theme.of(context).colorScheme.surface,
+        borderRadius: borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (title != null)
                 Padding(
-                  padding: titlePadding ?? const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  padding: titlePadding ?? const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   child: title,
-                ),
-              if (content != null)
+                )
+              else
+                const SizedBox(height: 12),
+              if (showCloseButton)
                 Padding(
-                  padding: contentPadding,
-                  child: content,
-                ),
-              if (contentItems != null)
-                Padding(
-                  padding: contentPadding,
-                  child: SingleChildScrollView(
-                    child: ListBody(
-                      children: contentItems ?? [],
-                    ),
-                  ),
-                ),
-              if (actionButtons != null)
-                Padding(
-                  padding: buttonPadding ?? const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: actionButtons ?? [],
+                  padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
                   ),
                 ),
             ],
           ),
-        ),
+          if (content != null)
+            Padding(
+              padding: contentPadding,
+              child: content,
+            ),
+          if (contentItems != null)
+            Padding(
+              padding: contentPadding,
+              child: Expanded(
+                child: SingleChildScrollView(
+                  child: ListBody(
+                    children: contentItems ?? [],
+                  ),
+                ),
+              ),
+            ),
+          if (actionButtons != null)
+            Padding(
+              padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: actionButtons ?? [],
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -22,7 +22,8 @@ class PageNumberDialog extends StatelessWidget {
     final int total = searchHandler.currentBooruHandler.totalCount.value;
     final int possibleMaxPageNum = total != 0 ? (total / settingsHandler.limit).round() : 0;
 
-    return SettingsDialog(
+    return SettingsBottomSheet(
+      title: const Text('Page changer'),
       contentItems: <Widget>[
         SettingsTextInput(
           title: "Page #",
@@ -73,6 +74,7 @@ class PageNumberDialog extends StatelessWidget {
             }
           },
         ),
+        const SizedBox(width: 10),
         ElevatedButton(
           child: const Text('Search until page'),
           onPressed: () {
@@ -86,8 +88,6 @@ class PageNumberDialog extends StatelessWidget {
           },
         ),
       ],
-      contentPadding: const EdgeInsets.all(10),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 24.0),
     );
   }
 }
