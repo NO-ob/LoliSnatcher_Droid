@@ -33,15 +33,21 @@ dependencies:
   chewie: ^1.5.0
   crypto: ^3.0.2
   cupertino_icons: ^1.0.5
-  # dart_vlc: ^0.3.0
-  dart_vlc:
-    git:
-      # 0.3.0 - synced with original github repo, they now use higher version of vlclib
-      url: "https://github.com/NANI-SORE/dart_vlc.git"
-      ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
+  #dart_vlc:
+  #  git:
+  #    # 0.3.0 - synced with original github repo, they now use higher version of vlclib
+  #    url: "https://github.com/NANI-SORE/dart_vlc.git"
+  #    ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
   dio: ^5.0.3
   dropdown_search: ^5.0.6
   dynamic_color: ^1.6.3
+  media_kit: ^0.0.11                             # Primary package.
+  media_kit_video: ^0.0.12                       # For video rendering
+  media_kit_native_event_loop: ^1.0.4            # Support for higher number of concurrent instances & better performance.
+  #media_kit_libs_macos_video: ^1.0.5             # macOS package for video native libraries.
+  media_kit_libs_windows_video: ^1.0.2           # Windows package for video native libraries.
+  media_kit_libs_linux: ^1.0.2
+  path: ^1.8.3
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original

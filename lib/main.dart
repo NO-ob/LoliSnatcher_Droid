@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:app_links/app_links.dart';
-import 'package:dart_vlc/dart_vlc.dart';
+
+//import 'package:dart_vlc/dart_vlc.dart';
 import 'package:dio/dio.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:media_kit/media_kit.dart';
+//import 'package:media_kit_video/media_kit_video.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
@@ -39,8 +42,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
-    await DartVLC.initialize();
-
+    //await DartVLC.initialize();
+    MediaKit.ensureInitialized();
     // Init db stuff
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
