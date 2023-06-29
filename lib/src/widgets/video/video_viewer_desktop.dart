@@ -41,17 +41,22 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-    //Player? controller;
-  //final controller = Player();
-  //VideoController vidcontroller;
-   final configuration = ValueNotifier<VideoControllerConfiguration>(
-  const VideoControllerConfiguration(enableHardwareAcceleration: true),
+  
+  //final player = Player();
+  Player? player;
+  VideoController? controller;
+  //  configuration: PlayerConfiguration(
+  //    title: 'Lolisnatcher',
+  //  ),
+  //);
+  final configuration = ValueNotifier<VideoControllerConfiguration>(
+    const VideoControllerConfiguration(enableHardwareAcceleration: true),
   );
-  late final player = Player();
-  late final VideoController controller = VideoController(
-    player,
-    configuration: configuration.value,
-  );
+  //late final VideoController controller = VideoController(
+  //  player!,
+  //  configuration: configuration.value,
+  //);
+
   Media? media;
 
   final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
@@ -320,8 +325,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void disposables() {
     // controller?.setVolume(0);
-    player.pause();
-    player.dispose();
+    player?.pause();
+    player?.dispose();
     //controller = null;
 
     if (!(_cancelToken != null && _cancelToken!.isCancelled)){
@@ -374,32 +379,26 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   Future<void> changeNetworkVideo() async {
     if(_video != null) { 
-      print(_video!.path);  // if (settingsHandler.mediaCache || _video != null) {
+      // if (settingsHandler.mediaCache || _video != null) {
       // Start from cache if was already cached or only caching is allowed
       media = Media(
         _video!.path,
-        //startTime: const Duration(milliseconds: 50),
       );
     } else {
-      //print(widget.booruItem.fileURL);
       // Otherwise load from network
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media(
-        widget.booruItem.fileURL,
-        //extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-        //startTime: const Duration(milliseconds: 50),
+        //widget.booruItem.fileURL,
+        Uri.encodeFull(widget.booruItem.fileURL),
+
       );
     }
     isLoaded = true;
 
-    await player.open(
-      Playlist(
-        [
-        media!//,controller
-      //autoStart: settingsHandler.autoPlayEnabled,
-        ],
-      ),
-    );
+    await player?.open(
+      media!,
+      play: settingsHandler.autoPlayEnabled,
+      );
   }
 
   Future<void> initPlayer() async {
@@ -408,8 +407,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // Start from cache if was already cached or only caching is allowed
       media = Media(
         _video!.path,
-        // move start a bit forward to help avoid playback start issues
-        //startTime: const Duration(milliseconds: 50),
       );
     } else {
       print(widget.booruItem.fileURL);
@@ -417,48 +414,24 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media(
         Uri.encodeFull(widget.booruItem.fileURL),
-        //extras: Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-        //startTime: const Duration(milliseconds: 50),
       );
     }
     isLoaded = true;
 
-    //videoController = Player(id: searchHandler.getItemIndex(widget.booruItem)); //rebase
-    //videoController!.setUserAgent(Tools.browserUserAgent());
-    //videoController!.setVolume(viewerHandler.videoVolume);
-    // videoController!.open(
-    //controller = Player();//(id: widget.index);
-    //controller!.setUserAgent(Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: false).entries.first.value);
-    //controller.volume = viewerHandler.videoVolume;
-    // controller!.open(
-    //   media!,
-    //   autoStart: settingsHandler.autoPlayEnabled,
-    // );
+    //final player = Player(
+    //  configuration: PlayerConfiguration(
+    //    title: 'Lolisnatcher',
+    //   ),
+    //);
+    player = Player();
+    controller = VideoController(
+      player!,
+      configuration: configuration.value,
+    );
+    //await player.setPlaylistMode(PlaylistMode.single); //TODO: this needs to be toggleable
 
-    //controller!.playbackStream.listen((PlaybackState state) {
-      // dart_vlc has loop logic integrated into playlists, but it is not working?
-      // this will force restart videos on completion
-
-      //if(Player.state.isPlaying) {
-      //  if(Player.state.isCompleted) {
-      //    controller!.play();
-      //  }
-      //}
-    //});
-
-    
-    //controller!.generalStream.listen((GeneralState state) {
-    //  viewerHandler.videoVolume = state.volume;
-    //});
-
-    //controller!.errorStream.listen((String error) {
-    //  if(error.isNotEmpty) {
-    //    killLoading(['Error:', error]);
-    //  }
-    //});
-
-    // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
+    
   }
 
   @override
@@ -475,34 +448,38 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       if (isViewed) {
         // Reset video time if came into view
         if(needsRestart) {
-          player.seek(Duration.zero);
+          player?.seek(Duration.zero);
         }
 
         if(!firstViewFix) {
-          player.open(
-            Playlist(
-              [
-              media!//,
-              //autoStart: settingsHandler.autoPlayEnabled,
-              ],
-            ),
-          );
+          player?.open(
+              media!,
+              play: settingsHandler.autoPlayEnabled,
+              );
+          //player.open(
+          //  Playlist(
+          //    [
+          //    media!//,
+          //    //autoStart: settingsHandler.autoPlayEnabled,
+          //    ],
+          //  ),
+          //);
           firstViewFix = true;
         }
 
         // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
         if (settingsHandler.autoPlayEnabled) {
           // autoplay if viewed and setting is enabled
-            player.play();
+            player?.play();
         } else {
-          player.pause();
+          player?.pause();
         }
 
         //if (viewerHandler.videoAutoMute) {
         //  controller!.volume = 0;
         //}
       } else {
-        player.pause();
+        player?.pause();
       }
     }
 
@@ -564,7 +541,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
                 if(isViewed && initialized)
                   Video(
-                    controller: controller,
+                    controller: controller!,
+                    controls: MaterialDesktopVideoControls,
                   ),
               ],
             ),

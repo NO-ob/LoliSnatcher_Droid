@@ -41,12 +41,25 @@ dependencies:
   dio: ^5.0.3
   dropdown_search: ^5.0.6
   dynamic_color: ^1.6.3
-  media_kit: ^0.0.11                             # Primary package.
-  media_kit_video: ^0.0.12                       # For video rendering
-  media_kit_native_event_loop: ^1.0.4            # Support for higher number of concurrent instances & better performance.
-  #media_kit_libs_macos_video: ^1.0.5             # macOS package for video native libraries.
-  media_kit_libs_windows_video: ^1.0.2           # Windows package for video native libraries.
-  media_kit_libs_linux: ^1.0.2
+  #media_kit: ^0.0.11                             # Primary package.
+  #media_kit_video: ^0.0.12                       # For video rendering
+  #media_kit_native_event_loop: ^1.0.5            # Support for higher number of concurrent instances & better performance.
+  ##media_kit_libs_macos_video: ^1.0.5             # macOS package for video native libraries.
+  #media_kit_libs_windows_video: ^1.0.2           # Windows package for video native libraries.
+  #media_kit_libs_linux: ^1.0.2
+  
+  media_kit:
+    path: ../media_kit/media_kit
+  media_kit_video:
+    path: ../media_kit/media_kit_video
+  media_kit_native_event_loop:
+    path: ../media_kit/media_kit_native_event_loop
+  media_kit_libs_windows_video:
+    path: ../media_kit/media_kit_libs_windows_video
+  media_kit_video_controls:
+    path: ../media_kit/media_kit_video_controls
+  media_kit_libs_linux:
+    path: ../media_kit/media_kit_libs_linux
   path: ^1.8.3
   fast_marquee:
     git:
@@ -120,7 +133,11 @@ dependency_overrides:
   ffi: ^2.0.1 # to override dart_vlc to use newer ffi to allow installing alice
   sensors_plus: ^2.0.1 # to override logger_flutter_fork to use newer sensors_plus to allow installing alice
   video_player_android: ^2.4.1 # to override video_player to use newer video_player_android to allow overriding default exoplayer user-agent header
-
+  media_kit:
+    path: ../media_kit/media_kit
+  media_kit_video:
+    path: ../media_kit/media_kit_video
+  
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
