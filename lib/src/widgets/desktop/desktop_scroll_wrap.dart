@@ -24,6 +24,7 @@ class DesktopScrollWrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
     // set physics to:
     // (Platform.isWindows || Platform.isLinux || Platform.isMacOS) ? const NeverScrollableScrollPhysics() : null,
     // on child element wrapped in this
@@ -60,8 +61,10 @@ class DesktopScrollWrap extends StatelessWidget {
             return const Duration(milliseconds: 2000);
           },
         ),
-        customMouseWheelScrollConfig: const CustomMouseWheelScrollConfig(
-          scrollAmountMultiplier: 10.0,
+        customMouseWheelScrollConfig: CustomMouseWheelScrollConfig(
+          scrollAmountMultiplier: SettingsHandler.instance.appMode.value.isDesktop == true 
+          ? (settingsHandler.desktopmodifierScrollSpeed / 5) 
+          : settingsHandler.desktopmodifierScrollSpeed,
         ),
         child: child,
       );

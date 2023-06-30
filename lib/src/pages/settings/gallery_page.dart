@@ -20,6 +20,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
+  TextEditingController desktopSpeedController = TextEditingController();
   TextEditingController galleryAutoScrollController = TextEditingController();
 
   @override
@@ -38,6 +39,7 @@ class _GalleryPageState extends State<GalleryPage> {
     autoPlay = settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
+    desktopSpeedController.text = settingsHandler.desktopmodifierScrollSpeed.toString();
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadController.text = settingsHandler.preloadCount.toString();
     shitDevice = settingsHandler.shitDevice;
@@ -70,6 +72,7 @@ class _GalleryPageState extends State<GalleryPage> {
       galleryAutoScrollController.text = "800";
     }
     settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
+    settingsHandler.desktopmodifierScrollSpeed = double.parse(desktopSpeedController.text);
     settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
     if (int.parse(preloadController.text) < 0){
       preloadController.text = 0.toString();
@@ -448,6 +451,32 @@ class _GalleryPageState extends State<GalleryPage> {
                     return 'Please enter a valid numeric value';
                   } else if(parse < 100) {
                     return 'Please enter a value bigger than 100';
+                  } else {
+                    return null;
+                  }
+                }
+              ),
+              SettingsTextInput(
+                controller: desktopSpeedController,
+                title: 'Desktop Scroll modifer',
+                hintText: "Scroll modifier",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly
+                ],
+                resetText: () => settingsHandler.map['desktopmodifierScrollSpeed']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: 0.5,
+                numberMin: 0.1,
+                numberMax: 20.0,
+                validator: (String? value) {
+                  double? parse = double.tryParse(value ?? '');
+                  if(value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if(parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if(parse > 20.0) {
+                    return 'Please enter a value between 0.1 and 20.0';
                   } else {
                     return null;
                   }
