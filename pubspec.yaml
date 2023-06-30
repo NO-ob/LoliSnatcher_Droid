@@ -106,6 +106,7 @@ dependencies:
   video_player: ^2.6.0
   waterfall_flow: ^3.0.2
   xml: ^6.1.0
+  sqlite3_flutter_libs: ^0.5.15 #Is there a way to do this for only windows?
 
 
 
