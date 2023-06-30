@@ -20,7 +20,7 @@ class _GalleryPageState extends State<GalleryPage> {
 
   TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
-  TextEditingController desktopSpeedController = TextEditingController();
+  TextEditingController mouseSpeedController = TextEditingController();
   TextEditingController galleryAutoScrollController = TextEditingController();
 
   @override
@@ -39,7 +39,7 @@ class _GalleryPageState extends State<GalleryPage> {
     autoPlay = settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
-    desktopSpeedController.text = settingsHandler.desktopmodifierScrollSpeed.toString();
+    mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadController.text = settingsHandler.preloadCount.toString();
     shitDevice = settingsHandler.shitDevice;
@@ -72,7 +72,7 @@ class _GalleryPageState extends State<GalleryPage> {
       galleryAutoScrollController.text = "800";
     }
     settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
-    settingsHandler.desktopmodifierScrollSpeed = double.parse(desktopSpeedController.text);
+    settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
     settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
     if (int.parse(preloadController.text) < 0){
       preloadController.text = 0.toString();
@@ -457,14 +457,14 @@ class _GalleryPageState extends State<GalleryPage> {
                 }
               ),
               SettingsTextInput(
-                controller: desktopSpeedController,
-                title: 'Desktop Scroll modifer',
+                controller: mouseSpeedController,
+                title: 'Mouse Wheel Scroll Modifer',
                 hintText: "Scroll modifier",
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.digitsOnly
                 ],
-                resetText: () => settingsHandler.map['desktopmodifierScrollSpeed']!['default']!.toString(),
+                resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 0.5,
                 numberMin: 0.1,

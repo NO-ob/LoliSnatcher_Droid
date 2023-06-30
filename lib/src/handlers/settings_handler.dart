@@ -92,7 +92,7 @@ class SettingsHandler extends GetxController {
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
 
-  double desktopmodifierScrollSpeed = 10.0;
+  double mousewheelScrollSpeed = 10.0;
 
   int currentColumnCount(BuildContext context) {
     return MediaQuery.of(context).orientation == Orientation.portrait
@@ -166,7 +166,7 @@ class SettingsHandler extends GetxController {
     'thumbnailCache', 'mediaCache',
     'dbEnabled', 'searchHistoryEnabled',
     'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
-    'desktopmodifierScrollSpeed' , 
+    'mousewheelScrollSpeed' , 
     'prefBooru', 'appMode', 'handSide', 'extPathOverride',
     'lastSyncIp', 'lastSyncPort',
     'theme', 'themeMode', 'isAmoled', 'useMaterial3', 'useDynamicColor',
@@ -306,7 +306,7 @@ class SettingsHandler extends GetxController {
       "upperLimit": 1000000,
       "lowerLimit": 0,
     },
-    "desktopmodifierScrollSpeed": {
+    "mousewheelScrollSpeed": {
       "type": "double",
       "default": 10.0,
       "upperLimit": 20.0,
@@ -765,8 +765,8 @@ class SettingsHandler extends GetxController {
         return useVolumeButtonsForScroll;
       case 'volumeButtonsScrollSpeed':
         return volumeButtonsScrollSpeed;
-      case 'desktopModifierScrollSpeed':
-        return desktopmodifierScrollSpeed;
+      case 'mousewheelScrollSpeed':
+        return mousewheelScrollSpeed;
       case 'disableVideo':
         return disableVideo;
       case 'shitDevice':
@@ -923,8 +923,8 @@ class SettingsHandler extends GetxController {
       case 'volumeButtonsScrollSpeed':
         volumeButtonsScrollSpeed = validatedValue;
         break;
-      case 'desktopmodifierScrollSpeed':
-        desktopmodifierScrollSpeed = validatedValue;
+      case 'mousewheelScrollSpeed':
+        mousewheelScrollSpeed = validatedValue;
         break;
       case 'disableVideo':
         disableVideo = validatedValue;
@@ -1054,7 +1054,7 @@ class SettingsHandler extends GetxController {
       "filterFavourites" : validateValue("filterFavourites", null, toJSON: true),
       "useVolumeButtonsForScroll" : validateValue("useVolumeButtonsForScroll", null, toJSON: true),
       "volumeButtonsScrollSpeed" : validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
-      "desktopModifierScrollSpeed" : validateValue("desktopModifierScrollSpeed", null, toJSON: true),
+      "mousewheelScrollSpeed" : validateValue("mousewheelScrollSpeed", null, toJSON: true),
       "disableVideo" : validateValue("disableVideo", null, toJSON: true),
       "shitDevice" : validateValue("shitDevice", null, toJSON: true),
       "galleryAutoScrollTime" : validateValue("galleryAutoScrollTime", null, toJSON: true),
