@@ -140,11 +140,11 @@ class Tools {
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
 
-  static Future<bool> checkForCaptcha(Response? response, Uri uri) async {
-    if (captchaScreenActive || isTestMode) return false;
+  static const String captchaCheckHeader = 'LSCaptchaCheck';
 
-    // final RegExp captchaRegex = RegExp(r'captcha', caseSensitive: false);
-    // || (response?.data is String && captchaRegex.hasMatch(response?.data as String))
+  static Future<bool> checkForCaptcha(Response? response, Uri uri) async {
+    if (captchaScreenActive || isTestMode || response?.requestOptions.headers.containsKey(captchaCheckHeader) == true) return false;
+
     if (response?.statusCode == 503 || response?.statusCode == 403) {
       captchaScreenActive = true;
       await Navigator.push(

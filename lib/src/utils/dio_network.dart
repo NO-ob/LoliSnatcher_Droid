@@ -81,6 +81,7 @@ class DioNetwork {
           var headers = {
             ...response.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
+            Tools.captchaCheckHeader: 'done',
           };
 
           final opts = Options(
@@ -108,6 +109,7 @@ class DioNetwork {
           var headers = {
             ...error.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
+            Tools.captchaCheckHeader: 'done',
           };
 
           final opts = Options(
