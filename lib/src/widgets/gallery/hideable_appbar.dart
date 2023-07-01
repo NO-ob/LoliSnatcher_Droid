@@ -782,34 +782,51 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      // to fix height bug when bar on top
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.linear,
-        color: Colors.transparent,
-        height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
-        child: AppBar(
-          // toolbarHeight: widget.defaultHeight,
-          elevation: 1, // set to zero to disable a shadow behind
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          shadowColor: Colors.black54,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            // to ignore icon change
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
+    return WillPopScope(
+      onWillPop: () async {
+        // clear currently loading item from cache to avoid creating broken files
+        // TODO move sharing download routine to somewhere in global context?
+        shareCancelToken?.cancel();
+        if(sharedItem != null) {
+          unawaited(
+            imageWriter.deleteFileFromCache(
+              sharedItem!.fileURL,
+              'media',
+              fileNameExtras: sharedItem!.fileNameExtras,
+            ),
+          );
+        }
+        return true;
+      },
+      child: SafeArea(
+        // to fix height bug when bar on top
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+          color: Colors.transparent,
+          height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
+          child: AppBar(
+            // toolbarHeight: widget.defaultHeight,
+            elevation: 1, // set to zero to disable a shadow behind
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            shadowColor: Colors.black54,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              // to ignore icon change
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Obx(() {
+                final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
+                final String formattedTotal = searchHandler.currentFetched.length.toString();
+                return Text("$formattedViewedIndex/$formattedTotal", style: const TextStyle(color: Colors.white));
+              }),
+            ),
+            actions: getActions(),
           ),
-          title: FittedBox(
-            fit: BoxFit.fitWidth,
-            child: Obx(() {
-              final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
-              final String formattedTotal = searchHandler.currentFetched.length.toString();
-              return Text("$formattedViewedIndex/$formattedTotal", style: const TextStyle(color: Colors.white));
-            }),
-          ),
-          actions: getActions(),
         ),
       ),
     );
