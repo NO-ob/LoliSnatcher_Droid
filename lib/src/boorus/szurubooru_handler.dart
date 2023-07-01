@@ -25,7 +25,7 @@ class SzurubooruHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(responseItem, int index) {
-    var current = responseItem;
+    final current = responseItem;
 
     List<String> tags = [];
     for (int x = 0; x < current['tags'].length; x++) {
@@ -37,7 +37,6 @@ class SzurubooruHandler extends BooruHandler {
         tags.add(currentTags);
       }
     }
-
     if (current['contentUrl'] != null) {
       BooruItem item = BooruItem(
         fileURL: "${booru.baseURL}/${current['contentUrl']}",
@@ -50,7 +49,7 @@ class SzurubooruHandler extends BooruHandler {
         score: current['score'].toString(),
         postURL: makePostURL(current['id'].toString()),
         rating: current['safety'],
-        postDate: current['creationTime'].substring(0, 22),
+        postDate: (current['creationTime'].replaceAll("Z", "") + ".0000").substring(0, 22),
         postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS",
       );
 
