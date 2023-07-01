@@ -89,14 +89,17 @@ class DioNetwork {
             headers: headers,
           );
 
-          final cloneReq = await client.request(
-            response.requestOptions.path,
-            options: opts,
-            data: response.requestOptions.data,
-            queryParameters: response.requestOptions.queryParameters,
-          );
-
-          return handler.resolve(cloneReq);
+          try {
+            final cloneReq = await client.request(
+              response.requestOptions.path,
+              options: opts,
+              data: response.requestOptions.data,
+              queryParameters: response.requestOptions.queryParameters,
+            );
+            return handler.resolve(cloneReq);
+          } catch (e) {
+            return handler.next(response);
+          }
         },
         onError: (DioException error, ErrorInterceptorHandler handler) async {
           final bool captchaWasDetected = await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
@@ -117,14 +120,17 @@ class DioNetwork {
             headers: headers,
           );
 
-          final cloneReq = await client.request(
-            error.requestOptions.path,
-            options: opts,
-            data: error.requestOptions.data,
-            queryParameters: error.requestOptions.queryParameters,
-          );
-
-          return handler.resolve(cloneReq);
+          try {
+            final cloneReq = await client.request(
+              error.requestOptions.path,
+              options: opts,
+              data: error.requestOptions.data,
+              queryParameters: error.requestOptions.queryParameters,
+            );
+            return handler.resolve(cloneReq);
+          } catch (e) {
+            return handler.next(error);
+          }          
         },
       ),
     );
