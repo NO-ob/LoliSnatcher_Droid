@@ -493,7 +493,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                     children: [
                       Icon(CupertinoIcons.slider_horizontal_3),
                       SizedBox(width: 10),
-                      Text('Filter tabs by booru, loaded state, duplicates, etc.'),
+                      Expanded(child: Text('Filter tabs by booru, loaded state, duplicates, etc.')),
                     ],
                   ),
                   const Divider(),
@@ -542,7 +542,18 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                   const Text('Special filters:'),
                   const Text('"loaded" - show tabs which have loaded items'),
                   const Text('"unloaded" - show tabs which are not loaded and/or have zero items'),
-                  const Text('Unloaded tabs have italic text'),
+                  RichText(
+                    text: const TextSpan(
+                      children: [
+                        TextSpan(text: 'Unloaded tabs have '),
+                        TextSpan(
+                          text: 'italic',
+                          style: TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                        TextSpan(text: ' text'),
+                      ],
+                    ),
+                  ),
                 ],
               );
             },

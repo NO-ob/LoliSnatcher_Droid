@@ -147,9 +147,13 @@ class SettingsPageOpen {
         result = await showModalBottomSheet(
               context: context,
               builder: (BuildContext context) {
-                return page();
+                return Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: page(),
+                );
               },
               isScrollControlled: true,
+              useSafeArea: true,
               backgroundColor: Colors.transparent,
             );
       } else {
@@ -682,9 +686,9 @@ class SettingsBottomSheet extends StatelessWidget {
               child: content,
             ),
           if (contentItems != null)
-            Padding(
-              padding: contentPadding,
-              child: Expanded(
+            Flexible(
+              child: Padding(
+                padding: contentPadding,
                 child: SingleChildScrollView(
                   child: ListBody(
                     children: contentItems ?? [],
