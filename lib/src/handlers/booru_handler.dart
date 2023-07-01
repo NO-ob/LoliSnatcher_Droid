@@ -131,7 +131,7 @@ abstract class BooruHandler {
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
-      if(e is DioError) {
+      if(e is DioException) {
         errorString = e.message ?? e.toString();
       } else {
         errorString = e.toString();

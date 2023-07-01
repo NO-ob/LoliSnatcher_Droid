@@ -181,10 +181,10 @@ class VideoViewerState extends State<VideoViewer> {
 
   void onError(Exception error) {
     //// Error handling
-    if (error is DioError && CancelToken.isCancel(error)) {
+    if (error is DioException && CancelToken.isCancel(error)) {
       // print('Canceled by user: $imageURL | $error');
     } else {
-      if (error is DioError) {
+      if (error is DioException) {
         killLoading(['Loading Error: ${error.message}']);
       } else {
         killLoading(['Loading Error: $error']);

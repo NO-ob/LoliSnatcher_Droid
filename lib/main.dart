@@ -47,7 +47,7 @@ void main() async {
   }
 
   FlutterError.onError = (FlutterErrorDetails details) {
-    if (details.exception is DioError && (details.exception as DioError).type == DioErrorType.cancel) {
+    if (details.exception is DioException && (details.exception as DioException).type == DioExceptionType.cancel) {
       // ignore exceptions caused by cancelling dio requests (mostly for image loading)
       return;
     }

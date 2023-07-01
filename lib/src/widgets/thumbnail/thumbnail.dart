@@ -166,7 +166,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
   void onError(Object error, {bool delayed = false}) {
     /// Error handling
-    if (error is DioError && CancelToken.isCancel(error)) {
+    if (error is DioException && CancelToken.isCancel(error)) {
       // print('Canceled by user: $error');
     } else {
       if (restartedCount < 5) {
@@ -182,7 +182,7 @@ class _ThumbnailState extends State<Thumbnail> {
       } else {
         //show error
         isFailed = true;
-        if (error is DioError) {
+        if (error is DioException) {
           errorCode = error.response?.statusCode?.toString();
         } else {
           errorCode = null;
@@ -257,7 +257,7 @@ class _ThumbnailState extends State<Thumbnail> {
         onBytesAdded(event.cumulativeBytesLoaded, event.expectedTotalBytes);
       },
       onError: (e, stack) {
-        if (e is! DioError) {
+        if (e is! DioException) {
           failedRendering = true;
         }
         Logger.Inst().log('Error loading thumbnail: ${widget.item.sampleURL} ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);
@@ -278,7 +278,7 @@ class _ThumbnailState extends State<Thumbnail> {
           }
         },
         onError: (e, stack) {
-          if (e is! DioError) {
+          if (e is! DioException) {
             failedRendering = true;
           }
           Logger.Inst().log('Error loading extra thumbnail: ${widget.item.thumbnailURL}', 'Thumbnail', 'build', LogTypes.imageLoadingError);

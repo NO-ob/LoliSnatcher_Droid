@@ -93,10 +93,10 @@ class ImageViewerState extends State<ImageViewer> {
 
   void onError(Object error) {
     //// Error handling
-    if (error is DioError && CancelToken.isCancel(error)) {
+    if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
-      if (error is DioError) {
+      if (error is DioException) {
         killLoading(['Loading Error: ${error.message}']);
       } else {
         killLoading(['Loading Error: $error']);

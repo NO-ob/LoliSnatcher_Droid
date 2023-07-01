@@ -238,7 +238,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -326,7 +326,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -407,7 +407,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -444,7 +444,7 @@ class DioDownloader {
       dispose();
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);

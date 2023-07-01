@@ -65,14 +65,14 @@ class _FaviconState extends State<Favicon> {
 
   void onError(Object error) async {
     //// Error handling
-    if (error is DioError && CancelToken.isCancel(error)) {
+    if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
       if (error is Exception && (error as dynamic).message == 'Invalid image data') {
         ((mainProvider as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
         disposables();
       }
-      if (error is DioError && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
+      if (error is DioException && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
           await Tools.checkForCaptcha(error.response!, error.requestOptions.uri);
           manualReloadTapped = false;

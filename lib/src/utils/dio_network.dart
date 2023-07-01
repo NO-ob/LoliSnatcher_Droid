@@ -97,7 +97,7 @@ class DioNetwork {
 
           return handler.resolve(cloneReq);
         },
-        onError: (DioError error, ErrorInterceptorHandler handler) async {
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
           final bool captchaWasDetected = await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
           if (!captchaWasDetected) {
             return handler.next(error);
@@ -270,8 +270,8 @@ class DioNetwork {
         queryParameters: urlAndQuery['query'],
         cancelToken: cancelToken ?? CancelToken(),
       );
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse) {
         e.response!.data = null;
       }
       rethrow;
@@ -387,7 +387,7 @@ class DioNetwork {
         await subscription.cancel();
         await closeAndDelete();
         if (e is TimeoutException) {
-          throw DioError.receiveTimeout(
+          throw DioException.receiveTimeout(
             timeout: timeout,
             requestOptions: response.requestOptions,
           );
