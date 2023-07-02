@@ -75,6 +75,9 @@ class Tools {
     if (booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
       headers["User-Agent"] = appUserAgent;
     }
+    if(booru.baseURL?.contains("sankakucomplex.com") ?? false) {
+      headers["User-Agent"] = Constants.defaultBrowserUserAgent;
+    }
 
     if (!isTestMode) {
       try {
