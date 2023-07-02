@@ -67,11 +67,11 @@ class DioNetwork {
     };
   }
 
-  static Dio captchaInterceptor(Dio client) {
+  static Dio captchaInterceptor(Dio client, {String? customUserAgent}) {
     client.interceptors.add(
       InterceptorsWrapper(
         onResponse: (Response response, ResponseInterceptorHandler handler) async {
-          final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri);
+          final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri, customUserAgent: customUserAgent);
           if (!captchaWasDetected) {
             return handler.next(response);
           }
@@ -81,6 +81,7 @@ class DioNetwork {
           var headers = {
             ...response.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
+            Tools.captchaCheckHeader: 'done',
           };
 
           final opts = Options(
@@ -88,16 +89,19 @@ class DioNetwork {
             headers: headers,
           );
 
-          final cloneReq = await client.request(
-            response.requestOptions.path,
-            options: opts,
-            data: response.requestOptions.data,
-            queryParameters: response.requestOptions.queryParameters,
-          );
-
-          return handler.resolve(cloneReq);
+          try {
+            final cloneReq = await client.request(
+              response.requestOptions.path,
+              options: opts,
+              data: response.requestOptions.data,
+              queryParameters: response.requestOptions.queryParameters,
+            );
+            return handler.resolve(cloneReq);
+          } catch (e) {
+            return handler.next(response);
+          }
         },
-        onError: (DioError error, ErrorInterceptorHandler handler) async {
+        onError: (DioException error, ErrorInterceptorHandler handler) async {
           final bool captchaWasDetected = await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
           if (!captchaWasDetected) {
             return handler.next(error);
@@ -108,6 +112,7 @@ class DioNetwork {
           var headers = {
             ...error.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
+            Tools.captchaCheckHeader: 'done',
           };
 
           final opts = Options(
@@ -115,14 +120,17 @@ class DioNetwork {
             headers: headers,
           );
 
-          final cloneReq = await client.request(
-            error.requestOptions.path,
-            options: opts,
-            data: error.requestOptions.data,
-            queryParameters: error.requestOptions.queryParameters,
-          );
-
-          return handler.resolve(cloneReq);
+          try {
+            final cloneReq = await client.request(
+              error.requestOptions.path,
+              options: opts,
+              data: error.requestOptions.data,
+              queryParameters: error.requestOptions.queryParameters,
+            );
+            return handler.resolve(cloneReq);
+          } catch (e) {
+            return handler.next(error);
+          }          
         },
       ),
     );
@@ -270,8 +278,8 @@ class DioNetwork {
         queryParameters: urlAndQuery['query'],
         cancelToken: cancelToken ?? CancelToken(),
       );
-    } on DioError catch (e) {
-      if (e.type == DioErrorType.badResponse) {
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.badResponse) {
         e.response!.data = null;
       }
       rethrow;
@@ -319,7 +327,7 @@ class DioNetwork {
 
     if (fileUri == null) {
       completer.completeError(
-        DioMixin.assureDioError(Exception('Error creating saf file'), response.requestOptions),
+        DioMixin.assureDioException(Exception('Error creating saf file'), response.requestOptions),
       );
     }
 
@@ -347,7 +355,7 @@ class DioNetwork {
             await subscription.cancel();
           } finally {
             completer.completeError(
-              DioMixin.assureDioError(e, response.requestOptions),
+              DioMixin.assureDioException(e, response.requestOptions),
             );
           }
         });
@@ -360,7 +368,7 @@ class DioNetwork {
           completer.complete(response);
         } catch (e) {
           completer.completeError(
-            DioMixin.assureDioError(e, response.requestOptions),
+            DioMixin.assureDioException(e, response.requestOptions),
           );
         }
       },
@@ -369,7 +377,7 @@ class DioNetwork {
           await closeAndDelete();
         } finally {
           completer.completeError(
-            DioMixin.assureDioError(e, response.requestOptions),
+            DioMixin.assureDioException(e, response.requestOptions),
           );
         }
       },
@@ -387,7 +395,7 @@ class DioNetwork {
         await subscription.cancel();
         await closeAndDelete();
         if (e is TimeoutException) {
-          throw DioError.receiveTimeout(
+          throw DioException.receiveTimeout(
             timeout: timeout,
             requestOptions: response.requestOptions,
           );

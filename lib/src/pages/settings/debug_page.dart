@@ -38,15 +38,16 @@ class _DebugPageState extends State<DebugPage> {
   double vAmplitude = -1;
   bool vFlutterway = false;
 
-  final TextEditingController sessionStrController = TextEditingController();
+  final TextEditingController sessionStrController = TextEditingController(), userAgentController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
+    userAgentController.text = settingsHandler.customUserAgent;
   }
 
-  Future<bool> showTagsManager(BuildContext context) async {
+  Future<dynamic> showTagsManager(BuildContext context) async {
     return await SettingsPageOpen(
       context: context,
       page: () => const TagsManagerDialog(),
@@ -55,6 +56,7 @@ class _DebugPageState extends State<DebugPage> {
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
+    settingsHandler.customUserAgent = userAgentController.text;
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     bool result = await settingsHandler.saveSettings(restate: false);
     if (allowSelfSignedCerts) {
@@ -317,6 +319,31 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Webview',
                 icon: const Icon(Icons.public),
                 page: () => const InAppWebviewView(initialUrl: 'gelbooru.com'),
+              ),
+              SettingsTextInput(
+                controller: userAgentController,
+                title: 'Custom User Agent',
+                clearable: true,
+                resetText: () => '',
+                trailingIcon: IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: const Text('Custom User Agent'),
+                          contentItems: <Widget>[
+                            const Text('Keep empty to use default value'),
+                            Text('Default: ${Tools.browserUserAgent}'),
+                            const Text('Will be used on requests for almost all boorus and on the webview'),
+                            const Text('Value is saved after leaving this page'),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
               SettingsButton(
                 name: 'Delete All Cookies',

@@ -93,10 +93,10 @@ class ImageViewerState extends State<ImageViewer> {
 
   void onError(Object error) {
     //// Error handling
-    if (error is DioError && CancelToken.isCancel(error)) {
+    if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
-      if (error is DioError) {
+      if (error is DioException) {
         killLoading(['Loading Error: ${error.message}']);
       } else {
         killLoading(['Loading Error: $error']);
@@ -214,7 +214,7 @@ class ImageViewerState extends State<ImageViewer> {
     );
 
     // scale image only if it's not an animation, scaling is allowed and item is not marked as noScale
-    if (!widget.booruItem.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value && (widthLimit ?? 0) > 0) {
+    if (!widget.booruItem.mediaType.value.isAnimation && !settingsHandler.disableImageScaling && !widget.booruItem.isNoScale.value && (widthLimit ?? 0) > 0) {
       // resizeimage if resolution is too high (in attempt to fix crashes if multiple very HQ images are loaded), only check by width, otherwise looooooong/thin images could look bad
       provider = ResizeImage(
         provider,
@@ -270,8 +270,8 @@ class ImageViewerState extends State<ImageViewer> {
     }
     cancelToken = null;
 
-    // evict image from memory cache it it's media type or it's an animation and gifsAsThumbnails is disabled
-    if (imageFolder == 'media' || (!widget.booruItem.isAnimation || !settingsHandler.gifsAsThumbnails)) {
+    // evict image from memory cache if it's media type or it's an animation and gifsAsThumbnails is disabled
+    if (imageFolder == 'media' || (!widget.booruItem.mediaType.value.isAnimation || !settingsHandler.gifsAsThumbnails)) {
       mainProvider?.evict();
       // mainProvider?.evict().then((bool success) {
       //   if(success) {

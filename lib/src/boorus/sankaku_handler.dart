@@ -144,7 +144,7 @@ class SankakuHandler extends BooruHandler {
         ? {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": Tools.browserUserAgent(),
+            "User-Agent": Tools.browserUserAgent,
             "Referer": "https://beta.sankakucomplex.com/",
             "Origin": "https://beta.sankakucomplex.com/"
           }
@@ -152,7 +152,7 @@ class SankakuHandler extends BooruHandler {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": authToken,
-            "User-Agent": Tools.browserUserAgent(),
+            "User-Agent": Tools.browserUserAgent,
             "Referer": "https://beta.sankakucomplex.com/",
             "Origin": "https://beta.sankakucomplex.com/"
           };
@@ -179,7 +179,7 @@ class SankakuHandler extends BooruHandler {
       queryParameters: {"lang": "english"},
       headers: {
         "Content-Type": "application/json",
-        "User-Agent": Tools.browserUserAgent(),
+        "User-Agent": Tools.browserUserAgent,
       },
       data: {"login": booru.userID, "password": booru.apiKey},
       // encoding: Encoding.getByName("utf-8"),

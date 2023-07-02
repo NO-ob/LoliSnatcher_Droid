@@ -20,6 +20,7 @@ import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/gallery/tag_view.dart';
 import 'package:lolisnatcher/src/widgets/gallery/viewer_tutorial.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
@@ -57,7 +58,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
     // enable volume buttons if opened page is a video AND appbar is visible
     BooruItem item = searchHandler.currentFetched[widget.initialIndex];
-    bool isVideo = item.isVideo;
+    bool isVideo = item.mediaType.value.isVideo;
     // bool isHated = item.isHated.value;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
@@ -73,7 +74,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     }
 
     // enable volume buttons if current page is a video AND appbar is set to visible
-    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].isVideo;
+    bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isVideo;
     bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
@@ -171,8 +172,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                     itemBuilder: (context, index) {
                       BooruItem item = searchHandler.currentFetched[index];
                       // String fileURL = item.fileURL;
-                      bool isVideo = item.isVideo;
-                      bool isImage = item.isImage;
+                      bool isVideo = item.mediaType.value.isVideo;
+                      bool isImage = item.mediaType.value.isImageOrAnimation;
+                      bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
                       // print(fileURL);
                       // print('isVideo: '+isVideo.toString());
 
@@ -192,6 +194,16 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             itemWidget = VideoViewerPlaceholder(item: item);
                           }
                         }
+                      } else if (isNeedsExtraRequest) {
+                        itemWidget = GuessExtensionViewer(
+                          itemKey: item.key,
+                          item: item,
+                          index: index,
+                          onMediaTypeGuessed: (MediaType mediaType) {
+                            item.mediaType.value = mediaType;
+                            setState(() {});
+                          },
+                        );
                       } else {
                         itemWidget = UnknownViewerPlaceholder(item: item);
                       }
@@ -230,7 +242,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                       viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
 
                       // enable volume buttons if new page is a video AND appbar is visible
-                      bool isVideo = searchHandler.currentFetched[index].isVideo;
+                      bool isVideo = searchHandler.currentFetched[index].mediaType.value.isVideo;
                       bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
                       ServiceHandler.setVolumeButtons(isVolumeAllowed);
                       // print('Page changed ' + index.toString());

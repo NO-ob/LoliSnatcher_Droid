@@ -193,10 +193,11 @@ class ThemeHandler {
           disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
           textStyle: TextStyle(
             color: accentIsDark ? Colors.white : Colors.black,
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           splashFactory: InkSparkle.splashFactory,
         ),
       );
@@ -243,7 +244,7 @@ class ThemeHandler {
   IconThemeData iconTheme(ColorScheme colorScheme) => IconThemeData(
         color: colorScheme.onBackground,
         opacity: 1,
-        size: 24,
+        size: 22,
       );
 
   InputDecorationTheme inputDecorationTheme(ColorScheme colorScheme) => InputDecorationTheme(

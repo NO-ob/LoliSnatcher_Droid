@@ -154,7 +154,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         return false;
       }
 
-      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].isImage;
+      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isImageOrAnimation;
       bool isScaleButton = btn[0] == 'reloadnoscale';
       bool isScaleAllowed =
           isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
@@ -597,7 +597,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
     if (path != null) {
       // File is already in cache - share from there
-      await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+      await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
     } else {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
@@ -648,7 +648,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final File cacheFile = File(await imageWriter.getCachePath(item.fileURL, 'media', fileNameExtras: item.fileNameExtras) ?? '');
       if (await cacheFile.exists()) {
         path = cacheFile.path;
-        await ServiceHandler.loadShareFileIntent(path, '${item.isVideo ? 'video' : 'image'}/${item.fileExt!}');
+        await ServiceHandler.loadShareFileIntent(path, '${item.mediaType.value.isVideo ? 'video' : 'image'}/${item.fileExt!}');
       } else {
         FlashElements.showSnackbar(
           context: context,
@@ -782,34 +782,51 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      // to fix height bug when bar on top
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.linear,
-        color: Colors.transparent,
-        height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
-        child: AppBar(
-          // toolbarHeight: widget.defaultHeight,
-          elevation: 1, // set to zero to disable a shadow behind
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          shadowColor: Colors.black54,
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            // to ignore icon change
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
+    return WillPopScope(
+      onWillPop: () async {
+        // clear currently loading item from cache to avoid creating broken files
+        // TODO move sharing download routine to somewhere in global context?
+        shareCancelToken?.cancel();
+        if(sharedItem != null) {
+          unawaited(
+            imageWriter.deleteFileFromCache(
+              sharedItem!.fileURL,
+              'media',
+              fileNameExtras: sharedItem!.fileNameExtras,
+            ),
+          );
+        }
+        return true;
+      },
+      child: SafeArea(
+        // to fix height bug when bar on top
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.linear,
+          color: Colors.transparent,
+          height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
+          child: AppBar(
+            // toolbarHeight: widget.defaultHeight,
+            elevation: 1, // set to zero to disable a shadow behind
+            backgroundColor: Colors.transparent,
+            foregroundColor: Colors.white,
+            shadowColor: Colors.black54,
+            surfaceTintColor: Colors.transparent,
+            leading: IconButton(
+              // to ignore icon change
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Obx(() {
+                final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
+                final String formattedTotal = searchHandler.currentFetched.length.toString();
+                return Text("$formattedViewedIndex/$formattedTotal", style: const TextStyle(color: Colors.white));
+              }),
+            ),
+            actions: getActions(),
           ),
-          title: FittedBox(
-            fit: BoxFit.fitWidth,
-            child: Obx(() {
-              final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
-              final String formattedTotal = searchHandler.currentFetched.length.toString();
-              return Text("$formattedViewedIndex/$formattedTotal", style: const TextStyle(color: Colors.white));
-            }),
-          ),
-          actions: getActions(),
         ),
       ),
     );

@@ -10,6 +10,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class Tools {
@@ -70,16 +71,16 @@ class Tools {
     bool checkForReferer = false,
   }) async {
     // a few boorus don't work without a browser useragent
-    Map<String, String> headers = {"User-Agent": browserUserAgent()};
-    if(booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
-      headers["User-Agent"] = appUserAgent();
+    Map<String, String> headers = {"User-Agent": browserUserAgent};
+    if (booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
+      headers["User-Agent"] = appUserAgent;
     }
 
     if (!isTestMode) {
       try {
-        final cookies = await CookieManager.instance().getCookies(url: Uri.parse(booru.baseURL!));
-        if (cookies.isNotEmpty) {
-          headers["Cookie"] = cookies.map((e) => "${e.name}=${e.value}").join("; ");
+        final cookiesStr = await getCookies(Uri.parse(booru.baseURL!));
+        if (cookiesStr.isNotEmpty) {
+          headers["Cookie"] = cookiesStr;
         }
       } catch (e) {
         print('Error getting cookies: $e');
@@ -135,16 +136,20 @@ class Tools {
   }
 
   // TODO move to separate class (something with the name like "Constants")
-  static String appUserAgent() => "LoliSnatcher_Droid/${Constants.appVersion}";
-  static String browserUserAgent() => "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0";
+  static const String appUserAgent = "LoliSnatcher_Droid/${Constants.appVersion}";
+  static String get browserUserAgent {
+    const defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0";
+
+    return isTestMode ? defaultUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : defaultUserAgent);
+  }
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
 
-  static Future<bool> checkForCaptcha(Response? response, Uri uri) async {
-    if (captchaScreenActive || isTestMode) return false;
+  static const String captchaCheckHeader = 'LSCaptchaCheck';
 
-    // final RegExp captchaRegex = RegExp(r'captcha', caseSensitive: false);
-    // || (response?.data is String && captchaRegex.hasMatch(response?.data as String))
+  static Future<bool> checkForCaptcha(Response? response, Uri uri, {String? customUserAgent}) async {
+    if (captchaScreenActive || isTestMode || response?.requestOptions.headers.containsKey(captchaCheckHeader) == true) return false;
+
     if (response?.statusCode == 503 || response?.statusCode == 403) {
       captchaScreenActive = true;
       await Navigator.push(
@@ -152,8 +157,10 @@ class Tools {
         MaterialPageRoute(
           builder: (context) => InAppWebviewView(
             initialUrl: '${uri.scheme}://${uri.host}',
+            userAgent: customUserAgent,
             title: 'Captcha check',
-            subtitle: 'Possible captcha detected, please solve it and press back after that. If there is no captcha then it\'s probably some other authentication issue. [Beta]',
+            subtitle:
+                'Possible captcha detected, please solve it and press back after that. If there is no captcha then it\'s probably some other authentication issue. [Beta]',
           ),
         ),
       );
@@ -165,15 +172,16 @@ class Tools {
 
   static Future<String> getCookies(Uri uri) async {
     String cookieString = '';
-    if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
+    if (Platform.isAndroid || Platform.isIOS) {
+      // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: uri);
+        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri.uri(uri));
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
       } catch (e) {
-        // 
+        //
       }
     }
 

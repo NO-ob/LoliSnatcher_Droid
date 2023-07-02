@@ -196,10 +196,10 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void _onError(Exception error) {
     //// Error handling
-    if (error is DioError && CancelToken.isCancel(error)) {
+    if (error is DioException && CancelToken.isCancel(error)) {
       // print('Canceled by user: $imageURL | $error');
     } else {
-      if (error is DioError) {
+      if (error is DioException) {
         killLoading(['Loading Error: ${error.message}']);
       } else {
         killLoading(['Loading Error: $error']);
@@ -395,7 +395,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     isLoaded = true;
 
     videoController = Player(id: searchHandler.getItemIndex(widget.booruItem));
-    videoController!.setUserAgent(Tools.browserUserAgent());
+    videoController!.setUserAgent(Tools.browserUserAgent);
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
     //   media!,

@@ -425,7 +425,7 @@ class ServiceHandler{
     return thumbnail;
   }
 
-  static Future<String?> writeImage(var imageData, fileName, mediaType, fileExt, extPathOverride) async{
+  static Future<String?> writeImage(var imageData, String fileName, String mediaType, String fileExt, String? extPathOverride) async {
     String? result;
     try{
       result = await platform.invokeMethod("writeImage",{"imageData": imageData, "fileName": fileName, "mediaType": mediaType, "fileExt": fileExt, "extPathOverride":extPathOverride,});

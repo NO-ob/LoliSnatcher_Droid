@@ -7,11 +7,12 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
-class BooruItem{
+class BooruItem {
   late Key key;
   String fileURL, sampleURL, thumbnailURL, postURL;
   List<String> tagsList;
-  late String mediaType;
+  late Rx<MediaType> mediaType;
+  RxnString possibleExt = RxnString(null);
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
   RxBool isHated = false.obs, isLoved = false.obs, isNoScale = false.obs;
 
@@ -42,7 +43,6 @@ class BooruItem{
     this.sampleHeight,
     this.previewWidth,
     this.previewHeight,
-
     this.hasNotes,
     this.hasComments,
     this.serverId,
@@ -54,62 +54,26 @@ class BooruItem{
     this.md5String,
     this.postDate,
     this.postDateFormat,
-  }){
+  }) {
     // Create a unique key for every loaded item, to later use them to read the state of their viewer
     key = GlobalKey();
 
-    if (sampleURL.isEmpty || sampleURL == "null"){
+    if (sampleURL.isEmpty || sampleURL == "null") {
       sampleURL = thumbnailURL;
     }
     fileExt = (fileExt ?? Tools.getFileExt(fileURL)).toLowerCase();
 
-    if (fileWidth != null && fileHeight != null){
+    if (fileWidth != null && fileHeight != null) {
       fileAspectRatio = fileWidth! / fileHeight!;
     }
-    if (sampleWidth != null && sampleHeight != null){
+    if (sampleWidth != null && sampleHeight != null) {
       sampleAspectRatio = sampleWidth! / sampleHeight!;
     }
-    if (previewWidth != null && previewHeight != null){
+    if (previewWidth != null && previewHeight != null) {
       previewAspectRatio = previewWidth! / previewHeight!;
     }
 
-    switch (fileExt) {
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'webp':
-        mediaType = 'image';
-        break;
-
-      case 'mp4':
-      case 'webm':
-        mediaType = 'video';
-        break;
-
-      case 'gif':
-        mediaType = 'animation';
-        break;
-
-      case 'apng':
-        mediaType = 'not_supported_animation';
-        break;
-
-      default:
-        mediaType = 'unknown';
-        break;
-    }
-  }
-
-  bool get isVideo {
-    return mediaType == "video";
-  }
-
-  bool get isImage {
-    return mediaType == "image" || mediaType == "animation" || mediaType == "not_supported_animation";
-  }
-
-  bool get isAnimation {
-    return mediaType == "animation";
+    mediaType = Rx<MediaType>(MediaType.fromExtension(fileExt));
   }
 
   Map<String, dynamic> toJson() {
@@ -121,7 +85,7 @@ class BooruItem{
       "tags": tagsList,
       "fileExt": fileExt,
       "isFavourite": isFavourite.value,
-      "isSnatched" : isSnatched.value,
+      "isSnatched": isSnatched.value,
       "serverId": serverId,
       "rating": rating,
       "score": score,
@@ -137,7 +101,7 @@ class BooruItem{
     return jsonEncode(toJson());
   }
 
-  static BooruItem fromJSON(String jsonString){
+  static BooruItem fromJSON(String jsonString) {
     Map<String, dynamic> json = jsonDecode(jsonString);
     return BooruItem.fromMap(json);
   }
@@ -145,7 +109,7 @@ class BooruItem{
   static BooruItem fromMap(Map<String, dynamic> json) {
     List<String> tags = [];
     List tagz = json["tags"];
-    for (int i = 0; i < tagz.length; i++){
+    for (int i = 0; i < tagz.length; i++) {
       tags.add(tagz[i].toString());
     }
     //BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt
@@ -154,11 +118,11 @@ class BooruItem{
       sampleURL: json["sampleURL"].toString(),
       thumbnailURL: json["thumbnailURL"].toString(),
       tagsList: tags,
-      postURL: json["postURL"].toString()
+      postURL: json["postURL"].toString(),
       // TODO stringify other options here
     );
     item.isFavourite.value = json["isFavourite"].toString() == "true" ? true : false;
-    item.isSnatched.value = json["isSnatched"].toString() == "true"? true : false;
+    item.isSnatched.value = json["isSnatched"].toString() == "true" ? true : false;
     return item;
   }
 
@@ -171,11 +135,72 @@ class BooruItem{
       tagsList: tags,
       postURL: row["postURL"].toString(),
     );
-    item.isFavourite.value = Tools.intToBool(row["isFavourite"]) ;
+    item.isFavourite.value = Tools.intToBool(row["isFavourite"]);
     item.isSnatched.value = Tools.intToBool(row["isSnatched"]);
     return item;
   }
 }
 
+enum MediaType {
+  image,
+  video,
+  animation,
+  notSupportedAnimation,
+  unknown,
+  needsExtraRequest;
 
+  bool get isImage {
+    return this == MediaType.image;
+  }
 
+  bool get isImageOrAnimation {
+    return this == MediaType.image || this == MediaType.animation || this == MediaType.notSupportedAnimation;
+  }
+
+  bool get isVideo {
+    return this == MediaType.video;
+  }
+
+  bool get isAnimation {
+    return this == MediaType.animation;
+  }
+
+  bool get isNotSupportedAnimation {
+    return this == MediaType.notSupportedAnimation;
+  }
+
+  bool get isUnknown {
+    return this == MediaType.unknown;
+  }
+
+  bool get isNeedsExtraRequest {
+    return this == MediaType.needsExtraRequest;
+  }
+
+  String toJson() {
+    return name.replaceAll(RegExp(r'(?<=[a-z])(?=[A-Z])'), '_').toLowerCase();
+  }
+
+  static MediaType fromExtension(String? ext) {
+    switch (ext) {
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'webp':
+        return MediaType.image;
+
+      case 'mp4':
+      case 'webm':
+        return MediaType.video;
+
+      case 'gif':
+        return MediaType.animation;
+
+      case 'apng':
+        return MediaType.notSupportedAnimation;
+
+      default:
+        return MediaType.unknown;
+    }
+  }
+}

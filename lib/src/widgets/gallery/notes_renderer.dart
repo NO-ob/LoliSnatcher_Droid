@@ -75,9 +75,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       triggerCalculations();
     });
 
-    widget.pageController?.addListener(() {
-      triggerCalculations();
-    });
+    widget.pageController?.addListener(triggerCalculations);
   }
 
   void updateState() {
@@ -88,6 +86,7 @@ class _NotesRendererState extends State<NotesRenderer> {
 
   @override
   void dispose() {
+    widget.pageController?.removeListener(triggerCalculations);
     itemListener?.cancel();
     viewStateListener?.cancel();
     Debounce.cancel('notes_calculations');
@@ -140,7 +139,7 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     ratioDiff = 1;
     widthLimit = 0;
-    if (settingsHandler.disableImageScaling || item.isNoScale.value || item.isAnimation) {
+    if (settingsHandler.disableImageScaling || item.isNoScale.value || !item.mediaType.value.isImageOrAnimation) {
       //  do nothing
     } else {
       Size screenSize = WidgetsBinding.instance.window.physicalSize;
@@ -157,7 +156,8 @@ class _NotesRendererState extends State<NotesRenderer> {
     viewScale = viewerHandler.viewState.value?.scale ?? 1;
     screenToImageRatio = viewScale == 1 ? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight)) : viewScale;
 
-    pageOffset = (((widget.pageController?.page ?? 0) * 10000).toInt() % 10000) / 10000;
+    final double page = widget.pageController?.hasClients == true ? (widget.pageController!.page ?? 0) : 0;
+    pageOffset = ((page * 10000).toInt() % 10000) / 10000;
     pageOffset = pageOffset > 0.5 ? (1 - pageOffset) : (0 - pageOffset);
     bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
 

@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
@@ -102,15 +100,19 @@ class SettingsPageOpen {
     required this.context,
     this.condition = true,
     this.barrierDismissible = true,
-  });
+    this.asDialog = false,
+    this.asBottomSheet = false,
+  }) : assert(!(asDialog && asBottomSheet), "asDialog and asBottomSheet can't be true at the same time");
 
   final Widget Function() page;
   final BuildContext context;
   final bool condition;
   final bool barrierDismissible;
+  final bool asDialog;
+  final bool asBottomSheet;
 
-  Future<bool> open() async {
-    if (!condition) return true;
+  Future<dynamic> open() async {
+    if (!condition) return null;
 
     SettingsHandler settingsHandler = SettingsHandler.instance;
 
@@ -118,7 +120,7 @@ class SettingsPageOpen {
     bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
     bool useDesktopMode = !isTooNarrow && isDesktop;
 
-    bool result = false;
+    dynamic result;
     if (useDesktopMode) {
       result = await showDialog(
             context: context,
@@ -131,10 +133,37 @@ class SettingsPageOpen {
               );
             },
             barrierDismissible: barrierDismissible,
-          ) ??
-          false;
+          );
     } else {
-      result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => page())) ?? false;
+      if(asDialog) {
+        result = await showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return page();
+              },
+              barrierDismissible: barrierDismissible,
+            );
+      } else if (asBottomSheet) {
+        result = await showModalBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                  child: page(),
+                );
+              },
+              isScrollControlled: true,
+              useSafeArea: true,
+              backgroundColor: Colors.transparent,
+            );
+      } else {
+        result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => page(),
+              ),
+            );
+      }
     }
     return result;
   }
@@ -162,31 +191,29 @@ class SettingsToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MergeSemantics(
-      child: ListTile(
-        title: Row(
-          children: [
-            MarqueeText(
-              text: title,
-              fontSize: 16,
-            ),
-            trailingIcon ?? const SizedBox(width: 8),
-          ],
-        ),
-        subtitle: subtitle,
-        trailing: Switch(
-          value: value,
-          onChanged: onChanged,
-        ),
-        onTap: () {
-          onChanged(!value);
-        },
-        shape: Border(
-          // draw top border when item is in the middle of other items, but they are not listtile
-          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-          // draw bottom border when item is among other listtiles, but not when it's the last one
-          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        ),
+    return ListTile(
+      title: Row(
+        children: [
+          MarqueeText(
+            text: title,
+            fontSize: 16,
+          ),
+          trailingIcon ?? const SizedBox(width: 8),
+        ],
+      ),
+      subtitle: subtitle,
+      trailing: Switch(
+        value: value,
+        onChanged: onChanged,
+      ),
+      onTap: () {
+        onChanged(!value);
+      },
+      shape: Border(
+        // draw top border when item is in the middle of other items, but they are not listtile
+        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        // draw bottom border when item is among other listtiles, but not when it's the last one
+        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
       ),
     );
   }
@@ -199,6 +226,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     required this.title,
+    this.subtitle,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon,
@@ -210,6 +238,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final List<T> items;
   final void Function(T?)? onChanged;
   final String title;
+  final Widget? subtitle;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? trailingIcon;
@@ -277,6 +306,7 @@ class SettingsDropdown<T> extends StatelessWidget {
           }).toList(),
         ),
       ),
+      subtitle: subtitle,
       trailing: trailingIcon,
       dense: false,
       shape: Border(
@@ -300,7 +330,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     this.trailingIcon,
   }) : super(key: key);
 
-  final Booru value;
+  final Booru? value;
   final void Function(Booru?)? onChanged;
   final String title;
   final bool drawTopBorder;
@@ -309,25 +339,25 @@ class SettingsBooruDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      List<Booru> boorus = SettingsHandler.instance.booruList;
-      Booru newValue = boorus.contains(value) ? value : boorus.first;
+    List<Booru> boorus = SettingsHandler.instance.booruList;
 
-      return SettingsDropdown(
-        value: newValue,
-        items: boorus,
-        onChanged: onChanged,
-        title: title,
-        itemBuilder: (Booru booru) {
-          return Row(
-            children: <Widget>[
-              (booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)),
-              Text(" ${booru.name!}"),
-            ],
-          );
-        },
-      );
-    });
+    return SettingsDropdown<Booru?>(
+      value: value,
+      items: boorus,
+      onChanged: onChanged,
+      title: title,
+      drawTopBorder: drawTopBorder,
+      drawBottomBorder: drawBottomBorder,
+      trailingIcon: trailingIcon,
+      itemBuilder: (Booru? booru) {
+        return Row(
+          children: <Widget>[
+            booru == null ? const Icon(null) :(booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)),
+            Text(" ${booru?.name ?? ''}".trim()),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -547,7 +577,7 @@ class SettingsDialog extends StatelessWidget {
     this.contentItems,
     this.actionButtons,
     this.titlePadding,
-    this.contentPadding = const EdgeInsets.fromLTRB(24, 20, 24, 24),
+    this.contentPadding = const EdgeInsets.fromLTRB(16, 20, 16, 16),
     this.buttonPadding,
     this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
     this.borderRadius,
@@ -586,8 +616,96 @@ class SettingsDialog extends StatelessWidget {
       contentPadding: contentPadding,
       buttonPadding: buttonPadding,
       insetPadding: insetPadding,
-      shape: RoundedRectangleBorder(borderRadius: borderRadius ?? BorderRadius.circular(4)),
+      shape: RoundedRectangleBorder(borderRadius: borderRadius ?? BorderRadius.circular(10)),
       scrollable: scrollable,
+    );
+  }
+}
+
+class SettingsBottomSheet extends StatelessWidget {
+  const SettingsBottomSheet({
+    Key? key,
+    this.title,
+    this.content,
+    this.contentItems,
+    this.actionButtons,
+    this.titlePadding,
+    this.contentPadding = const EdgeInsets.fromLTRB(16, 0, 16, 16),
+    this.buttonPadding,
+    this.borderRadius,
+    this.backgroundColor,
+    this.showCloseButton = true,
+  }) : super(key: key);
+
+  final Widget? title;
+  final Widget? content;
+  final List<Widget>? contentItems;
+  final List<Widget>? actionButtons;
+  final EdgeInsets? titlePadding;
+  final EdgeInsets contentPadding;
+  final EdgeInsets? buttonPadding;
+  final BorderRadius? borderRadius;
+  final Color? backgroundColor;
+  final bool showCloseButton;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundColor ?? Theme.of(context).colorScheme.surface,
+        borderRadius: borderRadius ?? const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (title != null)
+                Padding(
+                  padding: titlePadding ?? const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: title,
+                )
+              else
+                const SizedBox(height: 12),
+              if (showCloseButton)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 12, 16, 0),
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+            ],
+          ),
+          if (content != null)
+            Padding(
+              padding: contentPadding,
+              child: content,
+            ),
+          if (contentItems != null)
+            Flexible(
+              child: Padding(
+                padding: contentPadding,
+                child: SingleChildScrollView(
+                  child: ListBody(
+                    children: contentItems ?? [],
+                  ),
+                ),
+              ),
+            ),
+          if (actionButtons != null)
+            Padding(
+              padding: buttonPadding ?? const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: actionButtons ?? [],
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

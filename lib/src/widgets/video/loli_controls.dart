@@ -219,11 +219,39 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   AnimatedOpacity _buildDoubleTapMessage() {
-    String tapSideSymbol = _lastDoubleTapSide > 0 ? '>>' : '<<';
-    bool isOneSecond = _lastDoubleTapAmount == 1;
     String msgText = _doubleTapExtraMessage != ''
-        ? (_doubleTapExtraMessage != '' ? "Reached Video $_doubleTapExtraMessage" : "")
-        : "$tapSideSymbol $_lastDoubleTapAmount second${isOneSecond ? "" : "s"}";
+        ? _doubleTapExtraMessage
+        : "${_lastDoubleTapAmount}s";
+
+    IconData iconData = _lastDoubleTapSide > 0 ? Icons.fast_forward : Icons.fast_rewind;
+    Widget msgIcon = Icon(
+      iconData,
+      color: Colors.white,
+      size: 32.0,
+    );
+
+    Widget msgWidget = ClipRRect(
+      borderRadius: BorderRadius.circular(10.0),
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        color: Colors.black38,
+        child: Row(
+          children: [
+            if(_lastDoubleTapSide < 0) ...[
+              msgIcon,
+              const SizedBox(width: 8),
+            ],
+            Text(msgText, style: const TextStyle(fontSize: 24, color: Colors.white)),
+            if(_lastDoubleTapSide > 0) ...[
+              const SizedBox(width: 8),
+              msgIcon,
+            ],
+          ],
+        ),
+      ),
+    );
+
 
     return AnimatedOpacity(
       opacity: _doubleTapped ? 1.0 : 0.0,
@@ -249,32 +277,19 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             top: chewieController.isFullScreen ? 10 : 60,
             right: 10,
             left: 10,
+            bottom: 10,
           ),
           child: Row(
             children: <Widget>[
               if (_lastDoubleTapSide < 0)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10.0),
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white)),
-                  ),
-                )
+                msgWidget
               else
                 const SizedBox(),
+              //
               const Spacer(),
+              //
               if (_lastDoubleTapSide > 0)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(10.0),
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(8),
-                    color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
-                    child: Text(msgText, style: const TextStyle(fontSize: 20, color: Colors.white)),
-                  ),
-                )
+                msgWidget
               else
                 const SizedBox(),
             ],

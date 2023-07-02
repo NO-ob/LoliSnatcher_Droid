@@ -143,6 +143,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
       return Center(
         child: InkWell(
           onTap: widget.restartAction,
+          borderRadius: BorderRadius.circular(10),
           child: Container(
             height: 90,
             padding: const EdgeInsets.all(4),

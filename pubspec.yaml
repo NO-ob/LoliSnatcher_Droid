@@ -16,18 +16,14 @@ version: 2.3.2+182
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
-  flutter: ^3.10.0
+  flutter: ^3.10.3
 
 dependencies:
   flutter:
     sdk: flutter
 
-  # alice: ^0.3.2
-  alice: # TODO intil they update dependencies
-    git:
-      url: "https://github.com/mark-nicepants/alice.git"
-      ref: 10c58b0cd440168806c701da619bd0a44431c2a7
-  app_links: ^3.4.2
+  alice_lightweight: ^3.4.0
+  app_links: ^3.4.3
   auto_size_text: ^3.0.0
   awesome_notifications: ^0.7.4+1
   chewie: ^1.5.0
@@ -39,38 +35,38 @@ dependencies:
       # 0.3.0 - synced with original github repo, they now use higher version of vlclib
       url: "https://github.com/NANI-SORE/dart_vlc.git"
       ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
-  dio: ^5.0.3
+  dio: ^5.2.1+1
   dropdown_search: ^5.0.6
-  dynamic_color: ^1.6.3
+  dynamic_color: ^1.6.5
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original
       url: "https://github.com/NANI-SORE/fast_marquee.git"
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
-  flash: ^3.0.3+5
+  flash: ^3.0.5+1
   flex_color_picker: ^3.2.2
   flutter_displaymode: ^0.6.0
   flutter_improved_scrolling: ^0.0.3
-  flutter_inappwebview: ^5.7.2+3
+  flutter_inappwebview: ^6.0.0-beta.24+1
   flutter_inner_drawer:
     git:
       url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
       ref: 8e50920055dcb04b6b58560629daced7b86be36e # master
-  flutter_linkify: ^5.0.2
+  flutter_linkify: ^6.0.0
   font_awesome_flutter: ^10.4.0
   get: ^4.6.5
-  google_fonts: ^4.0.3
-  html: ^0.15.2
-  huge_listview: ^2.0.4
+  google_fonts: ^4.0.4
+  html: ^0.15.4
+  huge_listview: ^2.0.10
   image: ^4.0.15
-  intl: ^0.17.0
+  intl: ^0.18.1
   keyboard_actions: ^4.2.0
   logger_fork: ^1.2.0
   logger_flutter_fork: ^1.3.1
   # local_auth: ^2.1.0
   # marquee: ^2.2.2 # replaced with fast_marquee
   path_provider: ^2.0.14
-  permission_handler: ^10.2.0
+  permission_handler: ^10.3.0
   photo_view: # ^0.12.0
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
@@ -79,12 +75,12 @@ dependencies:
   scroll_to_index: ^3.0.1
   scrollable_positioned_list: ^0.3.5
   sqflite_common_ffi: ^2.2.2
-  sqflite: ^2.2.6
+  sqflite: ^2.2.8+4
   statsfl: ^2.3.0
   transparent_image: ^2.0.1
   uuid: ^3.0.7
   vibration: ^1.7.5
-  video_player: ^2.6.0
+  video_player: ^2.6.1
   waterfall_flow: ^3.0.2
   xml: ^6.1.0
 
@@ -106,17 +102,11 @@ dev_dependencies:
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # TODO/reminder don't forget to check if the dependencies are updated when changing versions of other packages
 # Current list of affected packages:
-#   - alice
 #   - dart_vlc
-#   - video_player
-#   - logger_flutter_fork
 dependency_overrides:
   ffi: ^2.0.1 # to override dart_vlc to use newer ffi to allow installing alice
-  sensors_plus: ^2.0.1 # to override logger_flutter_fork to use newer sensors_plus to allow installing alice
-  video_player_android: ^2.4.1 # to override video_player to use newer video_player_android to allow overriding default exoplayer user-agent header
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 
 # For information on the generic Dart part of this file, see the

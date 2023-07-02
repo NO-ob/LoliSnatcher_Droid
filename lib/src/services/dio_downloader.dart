@@ -127,7 +127,7 @@ class DioDownloader {
       // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(url));
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
@@ -238,7 +238,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -326,7 +326,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -407,7 +407,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -444,7 +444,7 @@ class DioDownloader {
       dispose();
       return;
     } catch (e) {
-      bool isCancelError = e is DioError && CancelToken.isCancel(e);
+      bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);

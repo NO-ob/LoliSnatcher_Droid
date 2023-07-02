@@ -34,7 +34,7 @@ class WebviewNavigationControls extends StatelessWidget {
                   builder: (context) => WebviewHistoryDialog(
                     controller: controller,
                     onSelect: (String url) {
-                      controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
+                      controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
                     },
                   ),
                 );

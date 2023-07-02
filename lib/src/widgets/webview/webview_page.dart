@@ -31,33 +31,30 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   final GlobalKey webViewKey = GlobalKey();
 
   Completer<InAppWebViewController> controller = Completer<InAppWebViewController>();
-  late final InAppWebViewGroupOptions options;
+  late final InAppWebViewSettings settings;
 
   late PullToRefreshController pullToRefreshController;
   int loadingPercentage = 0;
+  bool hideSubtitle = false;
 
   @override
   void initState() {
     super.initState();
 
-    options = InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(
-        userAgent: widget.userAgent ?? Tools.browserUserAgent(),
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: false,
-        javaScriptEnabled: true,
-        cacheEnabled: false,
-      ),
-      android: AndroidInAppWebViewOptions(
-        useHybridComposition: true,
-      ),
-      ios: IOSInAppWebViewOptions(
-        allowsInlineMediaPlayback: true,
-      ),
+    settings = InAppWebViewSettings(
+      userAgent: widget.userAgent ?? Tools.browserUserAgent,
+      useShouldOverrideUrlLoading: true,
+      mediaPlaybackRequiresUserGesture: false,
+      javaScriptEnabled: true,
+      cacheEnabled: true,
+      useHybridComposition: true,
+      thirdPartyCookiesEnabled: true,
+      allowsInlineMediaPlayback: true,
+      sharedCookiesEnabled: true,
     );
 
     pullToRefreshController = PullToRefreshController(
-      options: PullToRefreshOptions(
+      settings: PullToRefreshSettings(
         color: Colors.blue,
       ),
       onRefresh: () async {
@@ -92,8 +89,8 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       body: Stack(
         children: [
           InAppWebView(
-            initialUrlRequest: URLRequest(url: Uri.parse(widget.initialUrl)),
-            initialOptions: options,
+            initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
+            initialSettings: settings,
             pullToRefreshController: pullToRefreshController,
             onWebViewCreated: (webViewController) {
               controller.complete(webViewController);
@@ -124,7 +121,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
             LinearProgressIndicator(
               value: loadingPercentage / 100.0,
             ),
-          if (widget.subtitle != null)
+          if (widget.subtitle != null && !hideSubtitle)
             Positioned(
               bottom: MediaQuery.of(context).padding.bottom + 8,
               left: 8,
@@ -155,6 +152,15 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
+                    ),
+                    IconButton(
+                      iconSize: 22,
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        setState(() {
+                          hideSubtitle = true;
+                        });
+                      },
                     ),
                   ],
                 ),

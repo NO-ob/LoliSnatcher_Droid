@@ -128,6 +128,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void openAddDialog(String type) {
     SettingsPageOpen(
       context: context,
+      asDialog: true,
       page: () => TagsFiltersAddDialog(
         tagFilterType: type,
         onAdd: (String newTag) => addTag(newTag, type),
@@ -138,6 +139,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void openEditDialog(String tag, String type) {
     SettingsPageOpen(
       context: context,
+      asDialog: true,
       page: () => TagsFiltersEditDialog(
         tag: tag,
         onEdit: (String newTag) => editTag(tag, newTag, type),
@@ -160,6 +162,10 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
             onTap: (int index) {
               tagSearchController.clear();
             },
+            labelColor: Theme.of(context).colorScheme.secondary,
+            unselectedLabelColor: Theme.of(context).appBarTheme.foregroundColor,
+            labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: const TextStyle(fontSize: 16),
             tabs: [
               const Tab(
                 text: 'Hated',

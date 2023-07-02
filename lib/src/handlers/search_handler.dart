@@ -94,9 +94,9 @@ class SearchHandler extends GetxController {
       // if there is only one tab, reset to default tags
       FlashElements.showSnackbar(
         title: const Text("Removed Last Tab", style: TextStyle(fontSize: 20)),
-        content: Column(
+        content: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text('Resetting search to default tags!'),
           ],
         ),
@@ -106,10 +106,11 @@ class SearchHandler extends GetxController {
       );
 
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      searchTextController.text = settingsHandler.defTags;
+      final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
+      searchTextController.text = defaultText;
 
       SearchTab newTab =
-          SearchTab(currentBooru.obs, null, settingsHandler.defTags);
+          SearchTab(currentBooru.obs, null, defaultText);
       list[0] = newTab;
       changeTabIndex(0);
     }
@@ -336,12 +337,12 @@ class SearchHandler extends GetxController {
 
   RxInt viewedIndex = (-1).obs;
   Rx<BooruItem> viewedItem = BooruItem(
-          fileURL: "",
-          sampleURL: "",
-          thumbnailURL: "",
-          tagsList: [],
-          postURL: "")
-      .obs;
+    fileURL: "",
+    sampleURL: "",
+    thumbnailURL: "",
+    tagsList: [],
+    postURL: "",
+  ).obs;
 
   BooruItem setViewedItem(int i) {
     int newIndex = i;
@@ -700,13 +701,14 @@ class SearchHandler extends GetxController {
       if (settingsHandler.booruList.isNotEmpty) {
         defaultBooru = settingsHandler.booruList[0];
       }
+      final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
       if (defaultBooru.type != null) {
         SearchTab newTab =
-            SearchTab(defaultBooru.obs, null, settingsHandler.defTags);
+            SearchTab(defaultBooru.obs, null, defaultText);
         list.add(newTab);
         changeTabIndex(0);
       }
-      searchTextController.text = settingsHandler.defTags;
+      searchTextController.text = defaultText;
     }
     // rootRestate();
     return;

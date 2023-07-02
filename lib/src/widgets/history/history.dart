@@ -328,7 +328,7 @@ class _HistoryListState extends State<HistoryList> {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      height: 66,
+      height: 72,
       child: ListTile(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
@@ -382,29 +382,26 @@ class _HistoryListState extends State<HistoryList> {
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
           ),
-          Stack(
-            children: <Widget>[
-              Center(
-                child: IconButton(
-                  padding: const EdgeInsets.fromLTRB(0, 5, 0, 15),
-                  icon: const Icon(Icons.favorite, size: 40, color: Colors.red),
-                  onPressed: () {},
-                ),
-              ),
-              Center(
-                child: IconButton(
-                  padding: const EdgeInsets.fromLTRB(0, 11, 0, 15),
-                  icon: Icon(
-                    showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
-                    color: showFavourites ? Colors.white : Colors.white60,
+          Center(
+            child: IconButton(
+              icon: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Icon(Icons.favorite, size: 40, color: Colors.red),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Icon(
+                      showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                      color: showFavourites ? Colors.white : Colors.white60,
+                    ),
                   ),
-                  onPressed: () {
-                    showFavourites = !showFavourites;
-                    filterHistory();
-                  },
-                ),
-              )
-            ],
+                ],
+              ),
+              onPressed: () {
+                showFavourites = !showFavourites;
+                filterHistory();
+              },
+            ),
           ),
         ],
       ),
