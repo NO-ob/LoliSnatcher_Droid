@@ -48,18 +48,11 @@ dependencies:
   #media_kit_libs_windows_video: ^1.0.2           # Windows package for video native libraries.
   #media_kit_libs_linux: ^1.0.2
   
-  media_kit:
-    path: ../media_kit/media_kit
-  media_kit_video:
-    path: ../media_kit/media_kit_video
-  media_kit_native_event_loop:
-    path: ../media_kit/media_kit_native_event_loop
-  media_kit_libs_windows_video:
-    path: ../media_kit/media_kit_libs_windows_video
-  media_kit_video_controls:
-    path: ../media_kit/media_kit_video_controls
-  media_kit_libs_linux:
-    path: ../media_kit/media_kit_libs_linux
+  media_kit: ^1.0.0
+  media_kit_video: ^1.0.0   
+  media_kit_native_event_loop: ^1.0.5 
+  media_kit_libs_windows_video: ^1.0.2 
+  media_kit_libs_linux: ^1.0.2  
   path: ^1.8.3
   fast_marquee:
     git:
