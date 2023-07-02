@@ -20,13 +20,14 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
 
   final TextEditingController columnsLandscapeController = TextEditingController();
   final TextEditingController columnsPortraitController = TextEditingController();
+  final TextEditingController mouseSpeedController = TextEditingController();
 
   late String previewMode, previewDisplay;
   late AppMode appMode;
   late HandSide handSide;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     columnsPortraitController.text = settingsHandler.portraitColumns.toString();
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
@@ -34,6 +35,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     handSide = settingsHandler.handSide.value;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
+    mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
@@ -42,14 +44,15 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.handSide.value = handSide;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
-    if (int.parse(columnsLandscapeController.text) < 1){
+    if (int.parse(columnsLandscapeController.text) < 1) {
       columnsLandscapeController.text = 1.toString();
     }
-    if (int.parse(columnsPortraitController.text) < 1){
+    if (int.parse(columnsPortraitController.text) < 1) {
       columnsPortraitController.text = 1.toString();
     }
     settingsHandler.landscapeColumns = int.parse(columnsLandscapeController.text);
     settingsHandler.portraitColumns = int.parse(columnsPortraitController.text);
+    settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
     bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
@@ -69,8 +72,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsDropdown(
                 value: appMode,
                 items: AppMode.values,
-                onChanged: (AppMode? newValue){
-                  setState((){
+                onChanged: (AppMode? newValue) {
+                  setState(() {
                     appMode = newValue!;
                   });
                 },
@@ -87,10 +90,12 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             Text("- Mobile - Normal Mobile UI"),
                             Text("- Desktop - Ahoviewer Style UI"),
                             SizedBox(height: 10),
-                            Text("[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs."),
+                            Text(
+                              "[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.",
+                            ),
                             Text("If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json"),
                             Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
-                          ]
+                          ],
                         );
                       },
                     );
@@ -100,8 +105,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsDropdown(
                 value: handSide,
                 items: HandSide.values,
-                onChanged: (HandSide? newValue){
-                  setState((){
+                onChanged: (HandSide? newValue) {
+                  setState(() {
                     handSide = newValue!;
                   });
                 },
@@ -118,7 +123,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             Text("Moves some parts of the UI to the selected side of the screen"),
                             Text('Currently only changes the position of the main drawer button'),
                             Text('[This is a WIP feature, will include more changes in the future versions]')
-                          ]
+                          ],
                         );
                       },
                     );
@@ -130,11 +135,9 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 title: 'Preview Columns Portrait',
                 hintText: "Columns in Portrait orientation",
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 onChanged: (String? text) {
-                  setState(() { });
+                  setState(() {});
                 },
                 resetText: () => settingsHandler.map['portraitColumns']!['default']!.toString(),
                 numberButtons: true,
@@ -143,25 +146,23 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Please enter a value';
-                  } else if(parse == null) {
+                  } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if(parse > 3 && (Platform.isAndroid || Platform.isIOS)) {
+                  } else if (parse > 3 && (Platform.isAndroid || Platform.isIOS)) {
                     return 'More than 3 columns could affect performance';
                   } else {
                     return null;
                   }
-                }
+                },
               ),
               SettingsTextInput(
                 controller: columnsLandscapeController,
                 title: 'Preview Columns Landscape',
                 hintText: "Columns in Landscape orientation",
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
@@ -169,20 +170,20 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Please enter a value';
-                  } else if(parse == null) {
+                  } else if (parse == null) {
                     return 'Please enter a valid numeric value';
                   } else {
                     return null;
                   }
-                }
+                },
               ),
               SettingsDropdown(
                 value: previewMode,
                 items: settingsHandler.map['previewMode']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
                   });
                 },
@@ -201,7 +202,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             Text(" - Thumbnail - Low resolution"),
                             Text(" "),
                             Text("[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid")
-                          ]
+                          ],
                         );
                       },
                     );
@@ -211,12 +212,36 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsDropdown(
                 value: previewDisplay,
                 items: settingsHandler.map['previewDisplay']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     previewDisplay = newValue ?? settingsHandler.map['previewDisplay']!['default'];
                   });
                 },
                 title: 'Preview Display',
+              ),
+              SettingsTextInput(
+                controller: mouseSpeedController,
+                title: 'Mouse Wheel Scroll Modifer',
+                hintText: "Scroll modifier",
+                inputType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
+                numberButtons: true,
+                numberStep: 0.5,
+                numberMin: 0.1,
+                numberMax: 20.0,
+                validator: (String? value) {
+                  double? parse = double.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a value';
+                  } else if (parse == null) {
+                    return 'Please enter a valid numeric value';
+                  } else if (parse > 20.0) {
+                    return 'Please enter a value between 0.1 and 20.0';
+                  } else {
+                    return null;
+                  }
+                },
               ),
             ],
           ),

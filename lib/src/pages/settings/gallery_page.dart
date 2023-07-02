@@ -13,18 +13,23 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  bool autoHideImageBar = false, autoPlay = true, loadingGif = false, useVolumeButtonsForScroll = false, shitDevice = false, disableVideo = false, wakeLockEnabled = true;
+  bool autoHideImageBar = false,
+      autoPlay = true,
+      loadingGif = false,
+      useVolumeButtonsForScroll = false,
+      shitDevice = false,
+      disableVideo = false,
+      wakeLockEnabled = true;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
 
   TextEditingController preloadController = TextEditingController();
   TextEditingController scrollSpeedController = TextEditingController();
-  TextEditingController mouseSpeedController = TextEditingController();
   TextEditingController galleryAutoScrollController = TextEditingController();
 
   @override
-  void initState(){
+  void initState() {
     autoHideImageBar = settingsHandler.autoHideImageBar;
     galleryMode = settingsHandler.galleryMode;
     galleryBarPosition = settingsHandler.galleryBarPosition;
@@ -32,14 +37,13 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
 
     shareAction = settingsHandler.shareAction;
-    if(!settingsHandler.hasHydrus && settingsHandler.shareAction == "Hydrus") shareAction = "Ask";
+    if (!settingsHandler.hasHydrus && settingsHandler.shareAction == "Hydrus") shareAction = "Ask";
 
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
     autoPlay = settingsHandler.autoPlayEnabled;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
-    mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadController.text = settingsHandler.preloadCount.toString();
     shitDevice = settingsHandler.shitDevice;
@@ -65,16 +69,15 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.disableVideo = disableVideo;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
-    if (int.parse(scrollSpeedController.text) < 100){
+    if (int.parse(scrollSpeedController.text) < 100) {
       scrollSpeedController.text = "100";
     }
-    if (int.parse(galleryAutoScrollController.text) < 800){
+    if (int.parse(galleryAutoScrollController.text) < 800) {
       galleryAutoScrollController.text = "800";
     }
     settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
-    settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
     settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
-    if (int.parse(preloadController.text) < 0){
+    if (int.parse(preloadController.text) < 0) {
       preloadController.text = 0.toString();
     }
     settingsHandler.preloadCount = int.parse(preloadController.text);
@@ -106,9 +109,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Gallery View Preload',
                 hintText: "Images to preload",
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
@@ -116,22 +117,22 @@ class _GalleryPageState extends State<GalleryPage> {
                 numberMax: 5,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Please enter a value';
-                  } else if(parse == null) {
+                  } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if(parse > 4) {
+                  } else if (parse > 4) {
                     return 'Please enter a value less than 5';
                   } else {
                     return null;
                   }
-                }
+                },
               ),
               SettingsDropdown(
                 value: galleryMode,
                 items: settingsHandler.map['galleryMode']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     galleryMode = newValue ?? settingsHandler.map['galleryMode']!['default'];
                   });
                 },
@@ -151,7 +152,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text(" - Full Res - Full resolution"),
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),
@@ -159,8 +160,8 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsDropdown(
                 value: galleryScrollDirection,
                 items: settingsHandler.map['galleryScrollDirection']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     galleryScrollDirection = newValue ?? settingsHandler.map['galleryScrollDirection']!['default'];
                   });
                 },
@@ -169,8 +170,8 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsDropdown(
                 value: shareAction,
                 items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
                   });
                 },
@@ -188,15 +189,16 @@ class _GalleryPageState extends State<GalleryPage> {
                             const Text("- Post URL"),
                             const Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
                             const Text("- File - shares viewed file itself"),
-                            if(hasHydrus)
-                              const Text("- Hydrus - sends the post url to Hydrus for import"),
+                            if (hasHydrus) const Text("- Hydrus - sends the post url to Hydrus for import"),
                             const Text(''),
-                            const Text("[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time."),
+                            const Text(
+                              "[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time.",
+                            ),
                             const Text(''),
                             const Text("[Tip]: You can open Share Actions Menu by long pressing Share button.")
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),
@@ -204,8 +206,8 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsDropdown(
                 value: galleryBarPosition,
                 items: settingsHandler.map['galleryBarPosition']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     galleryBarPosition = newValue ?? settingsHandler.map['galleryBarPosition']!['default'];
                   });
                 },
@@ -214,8 +216,8 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsDropdown(
                 value: zoomButtonPosition,
                 items: settingsHandler.map['zoomButtonPosition']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     zoomButtonPosition = newValue ?? settingsHandler.map['zoomButtonPosition']!['default'];
                   });
                 },
@@ -224,8 +226,8 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsDropdown(
                 value: changePageButtonsPosition,
                 items: settingsHandler.map['changePageButtonsPosition']!['options'],
-                onChanged: (String? newValue){
-                  setState((){
+                onChanged: (String? newValue) {
+                  setState(() {
                     changePageButtonsPosition = newValue ?? settingsHandler.map['changePageButtonsPosition']!['default'];
                   });
                 },
@@ -241,73 +243,70 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Auto Hide Gallery Bar',
               ),
 
-
-
               Container(
-                  margin: const EdgeInsets.fromLTRB(10,10,10,10),
-                  child: Column(
-                    children: [
-                        SettingsButton(
-                          name: 'Toolbar Buttons Order',
-                          drawBottomBorder: false,
-                          trailingIcon: IconButton(
-                            icon: const Icon(Icons.help_outline),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return const SettingsDialog(
-                                    title: Text('Buttons Order'),
-                                    contentItems: <Widget>[
-                                      Text("Long press to change item order."),
-                                      Text("First 4 buttons from this list will be always visible on Toolbar."),
-                                      Text("Other buttons will be in overflow (three dots) menu."),
-                                    ],
-                                  );
-                                }
+                margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                child: Column(
+                  children: [
+                    SettingsButton(
+                      name: 'Toolbar Buttons Order',
+                      drawBottomBorder: false,
+                      trailingIcon: IconButton(
+                        icon: const Icon(Icons.help_outline),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return const SettingsDialog(
+                                title: Text('Buttons Order'),
+                                contentItems: <Widget>[
+                                  Text("Long press to change item order."),
+                                  Text("First 4 buttons from this list will be always visible on Toolbar."),
+                                  Text("Other buttons will be in overflow (three dots) menu."),
+                                ],
                               );
                             },
-                        )
-                      ),
-                      ReorderableListView(
-                        padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [
-                          for (int index = 0; index < buttonOrder!.length; index++)
-                            ListTile(
-                              onTap: () {
-                                FlashElements.showSnackbar(
-                                  context: context,
-                                  title: const Text(
-                                    "Long Press to move items",
-                                    style: TextStyle(fontSize: 20)
-                                  ),
-                                  leadingIcon: Icons.warning_amber,
-                                  leadingIconColor: Colors.yellow,
-                                  sideColor: Colors.yellow,
-                                );
-                              },
-                              key: Key('$index'),
-                              tileColor: index.isOdd ? oddItemColor : evenItemColor,
-                              title: Text(buttonOrder![index][1]),
-                              trailing: const Icon(Icons.menu),
-                            ),
-                        ],
-                        onReorder: (int oldIndex, int newIndex) {
-                          setState(() {
-                            if (oldIndex < newIndex) {
-                              newIndex -= 1;
-                            }
-                            final List<String> item = buttonOrder!.removeAt(oldIndex);
-                            buttonOrder!.insert(newIndex, item);
-                          });
+                          );
                         },
-                      )
-                    ]
-                  )
+                      ),
+                    ),
+                    ReorderableListView(
+                      padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        for (int index = 0; index < buttonOrder!.length; index++)
+                          ListTile(
+                            onTap: () {
+                              FlashElements.showSnackbar(
+                                context: context,
+                                title: const Text(
+                                  "Long Press to move items",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                                leadingIcon: Icons.warning_amber,
+                                leadingIconColor: Colors.yellow,
+                                sideColor: Colors.yellow,
+                              );
+                            },
+                            key: Key('$index'),
+                            tileColor: index.isOdd ? oddItemColor : evenItemColor,
+                            title: Text(buttonOrder![index][1]),
+                            trailing: const Icon(Icons.menu),
+                          ),
+                      ],
+                      onReorder: (int oldIndex, int newIndex) {
+                        setState(() {
+                          if (oldIndex < newIndex) {
+                            newIndex -= 1;
+                          }
+                          final List<String> item = buttonOrder!.removeAt(oldIndex);
+                          buttonOrder!.insert(newIndex, item);
+                        });
+                      },
+                    )
+                  ],
+                ),
               ),
-
 
               SettingsToggle(
                 value: disableVideo,
@@ -331,7 +330,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text("Replaces video with text that says 'Video disabled'."),
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),
@@ -345,7 +344,6 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Video Auto Play',
               ),
-
 
               // TODO rework into loading element variant (small, verbose, gif...)
               // TODO ...or remove completely, this gif is like 20% of the app's size
@@ -363,7 +361,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 onChanged: (newValue) {
                   setState(() {
                     shitDevice = newValue;
-                    if (shitDevice){
+                    if (shitDevice) {
                       preloadController.text = "0";
                       galleryMode = "Sample";
                       autoPlay = false;
@@ -390,13 +388,12 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text("   - Video Auto Play"),
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),
               ),
               //////////////////////////////////////////
-
 
               SettingsToggle(
                 value: useVolumeButtonsForScroll,
@@ -425,7 +422,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text(" - App Bar hidden - controls scrolling"),
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),
@@ -435,9 +432,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Buttons Scroll Speed',
                 hintText: "Scroll Speed",
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 100,
@@ -445,51 +440,24 @@ class _GalleryPageState extends State<GalleryPage> {
                 numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Please enter a value';
-                  } else if(parse == null) {
+                  } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if(parse < 100) {
+                  } else if (parse < 100) {
                     return 'Please enter a value bigger than 100';
                   } else {
                     return null;
                   }
-                }
+                },
               ),
-              SettingsTextInput(
-                controller: mouseSpeedController,
-                title: 'Mouse Wheel Scroll Modifer',
-                hintText: "Scroll modifier",
-                inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
-                resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
-                numberButtons: true,
-                numberStep: 0.5,
-                numberMin: 0.1,
-                numberMax: 20.0,
-                validator: (String? value) {
-                  double? parse = double.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
-                    return 'Please enter a value';
-                  } else if(parse == null) {
-                    return 'Please enter a valid numeric value';
-                  } else if(parse > 20.0) {
-                    return 'Please enter a value between 0.1 and 20.0';
-                  } else {
-                    return null;
-                  }
-                }
-              ),
+
               SettingsTextInput(
                 controller: galleryAutoScrollController,
                 title: 'AutoScroll Timeout (in ms)',
                 hintText: "AutoScroll Timeout (in ms)",
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 100,
@@ -497,9 +465,9 @@ class _GalleryPageState extends State<GalleryPage> {
                 numberMax: double.infinity,
                 validator: (String? value) {
                   int? parse = int.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'Please enter a value';
-                  } else if(parse == null) {
+                  } else if (parse == null) {
                     return 'Please enter a valid numeric value';
                   } else {
                     return null;
@@ -517,7 +485,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text("[WIP] Videos and gifs must be scrolled manually for now."),
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),

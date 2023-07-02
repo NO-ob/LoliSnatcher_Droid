@@ -19,11 +19,11 @@ import 'package:lolisnatcher/src/boorus/rainbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/boorus/szurubooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/wildcritters_handler.dart';
 import 'package:lolisnatcher/src/boorus/worldxyz_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-
 
 class BooruHandlerFactory {
   BooruHandler? booruHandler;
@@ -36,92 +36,96 @@ class BooruHandlerFactory {
       final Booru booru = boorus.first;
 
       switch (booru.type) {
-        case("Moebooru"):
+        case ("Moebooru"):
           pageNum = 0;
           booruHandler = MoebooruHandler(booru, limit);
           break;
-        case("Gelbooru"):
+        case ("Gelbooru"):
           // current gelbooru is v.0.2.5, while safe and others are 0.2.0, but sice we had them under the same type from the start
           // we should keep them like that, but change sub-handler depending on the link
           // TODO are there only these 4 sites, or possible more?
           const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'realbooru.com', 'furry.booru.org'];
 
-          if(booru.baseURL!.contains("gelbooru.com")) {
+          if (booru.baseURL!.contains("gelbooru.com")) {
             booruHandler = GelbooruHandler(booru, limit);
-          } else if(gelbooruAlikes.any((element) => booru.baseURL!.contains(element))) {
+          } else if (gelbooruAlikes.any((element) => booru.baseURL!.contains(element))) {
             booruHandler = GelbooruAlikesHandler(booru, limit);
           } else {
             // fallback to alikes handler since probably no one else has latest version of gelbooru
             booruHandler = GelbooruAlikesHandler(booru, limit);
           }
           break;
-        case("GelbooruAlike"):
+        case ("GelbooruAlike"):
           // this type is not available in type selector
           booruHandler = GelbooruAlikesHandler(booru, limit);
           break;
-        case("Danbooru"):
+        case ("Danbooru"):
           pageNum = 0;
           booruHandler = DanbooruHandler(booru, limit);
           break;
-        case("e621"):
+        case ("e621"):
           pageNum = 0;
           booruHandler = e621Handler(booru, limit);
           break;
-        case("Shimmie"):
+        case ("Shimmie"):
           pageNum = 0;
           booruHandler = ShimmieHandler(booru, limit);
           break;
-        case("Philomena"):
+        case ("Philomena"):
           pageNum = 0;
           booruHandler = PhilomenaHandler(booru, limit);
           break;
-        case("Szurubooru"):
+        case ("Szurubooru"):
           booruHandler = SzurubooruHandler(booru, limit);
           break;
-        case("Sankaku"):
+        case ("Sankaku"):
           pageNum = 0;
           booruHandler = SankakuHandler(booru, limit);
           break;
-        case("Hydrus"):
+        case ("Hydrus"):
           booruHandler = HydrusHandler(booru, limit);
           break;
-        case("GelbooruV1"):
+        case ("GelbooruV1"):
           booruHandler = GelbooruV1Handler(booru, limit);
           break;
-        case("BooruOnRails"):
+        case ("BooruOnRails"):
           pageNum = 0;
           booruHandler = BooruOnRailsHandler(booru, limit);
           break;
-        case("Favourites"):
+        case ("Favourites"):
           booruHandler = FavouritesHandler(booru, limit);
           break;
-        case("Rainbooru"):
+        case ("Rainbooru"):
           pageNum = 0;
           booruHandler = RainbooruHandler(booru, limit);
           break;
-        case("R34Hentai"):
+        case ("R34Hentai"):
           pageNum = 0;
           booruHandler = R34HentaiHandler(booru, limit);
           break;
-        case("World"):
+        case ("World"):
           booruHandler = WorldXyzHandler(booru, limit);
           break;
-        case("IdolSankaku"):
+        case ("IdolSankaku"):
           pageNum = 0;
           booruHandler = IdolSankakuHandler(booru, limit);
           break;
-        case("InkBunny"):
+        case ("InkBunny"):
           pageNum = 0;
           booruHandler = InkBunnyHandler(booru, limit);
           break;
-        case("AGNPH"):
+        case ("AGNPH"):
           pageNum = 0;
           booruHandler = AGNPHHandler(booru, limit);
           break;
-        case("NyanPals"):
+        case ("NyanPals"):
           // this type is not available in type selector
           pageNum = 0;
           booruHandler = NyanPalsHandler(booru, limit);
+          break;
+        case ("WildCritters"):
+          pageNum = 0;
+          booruHandler = WildCrittersHandler(booru, limit);
           break;
         default:
           booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);
