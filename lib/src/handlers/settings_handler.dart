@@ -79,6 +79,8 @@ class SettingsHandler extends GetxController {
   String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? "Right" : "Disabled";
   String lastSyncIp = '';
   String lastSyncPort = '';
+  // TODO move it to boorus themselves to have different user agents for different boorus?
+  String customUserAgent = '';
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -165,7 +167,7 @@ class SettingsHandler extends GetxController {
     'dbEnabled', 'searchHistoryEnabled',
     'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
     'prefBooru', 'appMode', 'handSide', 'extPathOverride',
-    'lastSyncIp', 'lastSyncPort',
+    'lastSyncIp', 'lastSyncPort', 'customUserAgent',
     'theme', 'themeMode', 'isAmoled', 'useMaterial3', 'useDynamicColor',
     'customPrimaryColor', 'customAccentColor',
     'version', 'disableImageScaling', 'gifsAsThumbnails',
@@ -248,6 +250,10 @@ class SettingsHandler extends GetxController {
       "default": "",
     },
     "lastSyncPort": {
+      "type": "string",
+      "default": "",
+    },
+    "customUserAgent": {
       "type": "string",
       "default": "",
     },
@@ -795,6 +801,8 @@ class SettingsHandler extends GetxController {
         return lastSyncIp;
       case 'lastSyncPort':
         return lastSyncPort;
+      case 'customUserAgent':
+        return customUserAgent;
       case 'wakeLockEnabled':
         return wakeLockEnabled;
       case 'tagTypeFetchEnabled':
@@ -957,6 +965,9 @@ class SettingsHandler extends GetxController {
       case 'lastSyncPort':
         lastSyncPort = validatedValue;
         break;
+      case 'customUserAgent':
+        customUserAgent = validatedValue;
+        break;
       case 'allowSelfSignedCerts':
         allowSelfSignedCerts = validatedValue;
         break;
@@ -1067,6 +1078,7 @@ class SettingsHandler extends GetxController {
       "extPathOverride": validateValue("extPathOverride", null, toJSON: true),
       "lastSyncIp": validateValue("lastSyncIp", null, toJSON: true),
       "lastSyncPort": validateValue("lastSyncPort", null, toJSON: true),
+      "customUserAgent": validateValue("customUserAgent", null, toJSON: true),
 
       "theme": validateValue("theme", null, toJSON: true),
       "themeMode": validateValue("themeMode", null, toJSON: true),

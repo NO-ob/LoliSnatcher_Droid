@@ -67,11 +67,11 @@ class DioNetwork {
     };
   }
 
-  static Dio captchaInterceptor(Dio client) {
+  static Dio captchaInterceptor(Dio client, {String? customUserAgent}) {
     client.interceptors.add(
       InterceptorsWrapper(
         onResponse: (Response response, ResponseInterceptorHandler handler) async {
-          final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri);
+          final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri, customUserAgent: customUserAgent);
           if (!captchaWasDetected) {
             return handler.next(response);
           }

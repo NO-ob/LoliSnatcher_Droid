@@ -4,6 +4,8 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class DanbooruHandler extends BooruHandler {
@@ -39,8 +41,27 @@ class DanbooruHandler extends BooruHandler {
   @override
   Map<String, String> getHeaders() {
     final defaultHeaders = super.getHeaders();
-    defaultHeaders['User-Agent'] = Tools.appUserAgent();
+    defaultHeaders['User-Agent'] = Tools.appUserAgent;
     return defaultHeaders;
+  }
+
+
+  // TODO set booru useragent in the handler itself to avoid overriding fetch func?
+  @override
+  fetchSearch(Uri uri, {bool withCaptchaCheck = true}) async {
+    final String cookies = await getCookies() ?? "";
+    final Map<String, String> headers = {
+      ...getHeaders(),
+      if(cookies.isNotEmpty) 'Cookie': cookies,
+    };
+
+    Logger.Inst().log('fetching: $uri with headers: $headers', className, "Search", LogTypes.booruHandlerSearchURL);
+
+    return DioNetwork.get(
+      uri.toString(),
+      headers: headers,
+      customInterceptor: withCaptchaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Tools.appUserAgent) : null,
+    );
   }
 
   @override

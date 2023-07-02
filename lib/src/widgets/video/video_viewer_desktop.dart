@@ -395,7 +395,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     isLoaded = true;
 
     videoController = Player(id: searchHandler.getItemIndex(widget.booruItem));
-    videoController!.setUserAgent(Tools.browserUserAgent());
+    videoController!.setUserAgent(Tools.browserUserAgent);
     videoController!.setVolume(viewerHandler.videoVolume);
     // videoController!.open(
     //   media!,

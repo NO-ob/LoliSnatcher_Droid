@@ -127,7 +127,7 @@ class DioDownloader {
       // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(url));
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }

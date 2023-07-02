@@ -477,8 +477,8 @@ abstract class BooruHandler {
   Map<String, String> getHeaders() {
     return {
       "Accept": "text/html,application/xml,application/json",
-      // "User-Agent": Tools.appUserAgent(),
-      "User-Agent": Tools.browserUserAgent(),
+      // "User-Agent": Tools.appUserAgent,
+      "User-Agent": Tools.browserUserAgent,
     };
   }
 
@@ -487,7 +487,7 @@ abstract class BooruHandler {
     if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
