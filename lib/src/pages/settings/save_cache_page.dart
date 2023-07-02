@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -453,7 +454,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
               SettingsButton(
                 name: 'Tap to use suggested browser user agent',
                 action: () {
-                  userAgentController.text = Tools.browserUserAgent;
+                  userAgentController.text = Constants.defaultBrowserUserAgent;
                 },
               ),
             ],
