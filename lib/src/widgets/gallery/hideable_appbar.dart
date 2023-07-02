@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
@@ -533,7 +534,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   void shareHydrusAction(BooruItem item) {
     if (settingsHandler.hasHydrus) {
-      Booru hydrus = settingsHandler.booruList.where((element) => element.type == "Hydrus").first;
+      Booru hydrus = settingsHandler.booruList.where((element) => element.type == BooruType.Hydrus).first;
       HydrusHandler hydrusHandler = HydrusHandler(hydrus, 10);
       hydrusHandler.addURL(item);
     }
@@ -787,7 +788,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         // clear currently loading item from cache to avoid creating broken files
         // TODO move sharing download routine to somewhere in global context?
         shareCancelToken?.cancel();
-        if(sharedItem != null) {
+        if (sharedItem != null) {
           unawaited(
             imageWriter.deleteFileFromCache(
               sharedItem!.fileURL,

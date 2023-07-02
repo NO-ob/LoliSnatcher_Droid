@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
@@ -39,7 +40,7 @@ class TabRow extends StatelessWidget {
           children: [
             if (withFavicon)
               isNotEmptyBooru
-                  ? (tab.selectedBooru.value.type == "Favourites"
+                  ? (tab.selectedBooru.value.type == BooruType.Favourites
                       ? const Icon(Icons.favorite, color: Colors.red, size: 18)
                       : Favicon(tab.selectedBooru.value, color: color))
                   : const Icon(CupertinoIcons.question, size: 18),

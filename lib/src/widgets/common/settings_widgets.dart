@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -123,46 +124,46 @@ class SettingsPageOpen {
     dynamic result;
     if (useDesktopMode) {
       result = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return Dialog(
-                child: SizedBox(
-                  width: 500,
-                  child: page(),
-                ),
-              );
-            },
-            barrierDismissible: barrierDismissible,
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: SizedBox(
+              width: 500,
+              child: page(),
+            ),
           );
+        },
+        barrierDismissible: barrierDismissible,
+      );
     } else {
-      if(asDialog) {
+      if (asDialog) {
         result = await showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return page();
-              },
-              barrierDismissible: barrierDismissible,
-            );
+          context: context,
+          builder: (BuildContext context) {
+            return page();
+          },
+          barrierDismissible: barrierDismissible,
+        );
       } else if (asBottomSheet) {
         result = await showModalBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-                  child: page(),
-                );
-              },
-              isScrollControlled: true,
-              useSafeArea: true,
-              backgroundColor: Colors.transparent,
+          context: context,
+          builder: (BuildContext context) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: page(),
             );
+          },
+          isScrollControlled: true,
+          useSafeArea: true,
+          backgroundColor: Colors.transparent,
+        );
       } else {
         result = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => page(),
-              ),
-            );
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => page(),
+          ),
+        );
       }
     }
     return result;
@@ -352,7 +353,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       itemBuilder: (Booru? booru) {
         return Row(
           children: <Widget>[
-            booru == null ? const Icon(null) :(booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)),
+            booru == null ? const Icon(null) : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)),
             Text(" ${booru?.name ?? ''}".trim()),
           ],
         );

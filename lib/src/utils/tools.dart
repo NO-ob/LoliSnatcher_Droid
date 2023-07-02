@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -18,7 +19,7 @@ class Tools {
   static String formatBytes(int bytes, int decimals) {
     if (bytes <= 0) return "0 B";
     const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-    var i = (log(bytes) / log(1024)).floor();
+    final i = (log(bytes) / log(1024)).floor();
     return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
   }
 
@@ -75,7 +76,7 @@ class Tools {
     if (booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
       headers["User-Agent"] = appUserAgent;
     }
-    if(booru.baseURL?.contains("sankakucomplex.com") ?? false) {
+    if (booru.baseURL?.contains("sankakucomplex.com") ?? false) {
       headers["User-Agent"] = Constants.defaultBrowserUserAgent;
     }
 
@@ -93,7 +94,7 @@ class Tools {
     // some boorus require referer header
     if (checkForReferer) {
       switch (booru.type) {
-        case 'World':
+        case BooruType.World:
           if (booru.baseURL!.contains('rule34.xyz')) {
             headers["Referer"] = "https://rule34xyz.b-cdn.net";
           } else if (booru.baseURL!.contains('rule34.world')) {

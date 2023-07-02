@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -77,7 +78,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
       child: Row(
         children: [
           isNotEmptyBooru
-              ? (tab.selectedBooru.value.type == "Favourites"
+              ? (tab.selectedBooru.value.type == BooruType.Favourites
                   ? const Icon(Icons.favorite, color: Colors.red, size: 18)
                   : Favicon(tab.selectedBooru.value))
               : const Icon(CupertinoIcons.question, size: 18),

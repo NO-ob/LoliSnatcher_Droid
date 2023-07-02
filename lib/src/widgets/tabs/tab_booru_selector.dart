@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -186,7 +187,7 @@ class TabBooruSelectorItem extends StatelessWidget {
     return Row(
       children: <Widget>[
         //Booru Icon
-        if (withFavicon) booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru),
+        if (withFavicon) booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru),
         //Booru name
         MarqueeText(
           key: ValueKey(name),

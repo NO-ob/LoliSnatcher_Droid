@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -68,7 +69,7 @@ class ImageWriter {
       } else {
         await DioNetwork.download(
           item.fileURL,
-          path! + '/' + fileName,
+          '${path!}/$fileName',
           options: Options(
             responseType: ResponseType.bytes,
             contentType: "*/*",
@@ -133,9 +134,9 @@ class ImageWriter {
     int queryLastIndex = item.fileURL.lastIndexOf("?");
     int lastIndex = queryLastIndex != -1 ? queryLastIndex : item.fileURL.length;
     String fileName = "";
-    if (booru.type == ("BooruOnRails") || booru.type == "Philomena") {
+    if (booru.type == BooruType.BooruOnRails || booru.type == BooruType.Philomena) {
       fileName = "${item.fileNameExtras}.${item.fileExt!}";
-    } else if (booru.type == "Hydrus") {
+    } else if (booru.type == BooruType.Hydrus) {
       fileName = "${item.fileNameExtras}_${item.md5String}.${item.fileExt}";
     } else if (booru.baseURL!.contains("yande.re")) {
       fileName = "yandere_${item.md5String}.${item.fileExt}";
@@ -167,7 +168,7 @@ class ImageWriter {
     List<BooruItem> failedList = [];
     for (int i = 0; i < snatched.length; i++) {
       await Future.delayed(Duration(milliseconds: cooldown), () async {
-        var snatchResult = await write(
+        final snatchResult = await write(
           snatched.elementAt(i),
           booru,
           onProgress,

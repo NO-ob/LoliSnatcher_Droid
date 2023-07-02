@@ -73,7 +73,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
             SettingsButton(
               name: 'Add New Booru',
               icon: const Icon(Icons.settings),
-              page: () => BooruEdit(Booru("New", "", "", "", "")),
+              page: () => BooruEdit(Booru("New", null, "", "", "")),
             ),
             SettingsButton(
               name: 'Help',

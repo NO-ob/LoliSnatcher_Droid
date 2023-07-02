@@ -30,33 +30,33 @@ abstract class BooruHandler {
   String prevTags = "";
   bool locked = false;
   Booru booru;
-  
+
   String errorString = '';
   List failedItems = [];
 
   Map<String, TagType> tagTypeMap = {};
-  Map<String,String> tagModifierMap = {
-    "rating:" : "R",
-    "artist:" : "A",
-    "order:" : "O",
-    "sort:" : "S",
+  Map<String, String> tagModifierMap = {
+    "rating:": "R",
+    "artist:": "A",
+    "order:": "O",
+    "sort:": "S",
   };
 
   Get.RxList<BooruItem> fetched = Get.RxList<BooruItem>([]);
   List<BooruItem> get filteredFetched => fetched.where((el) {
-    SettingsHandler settingsHandler = SettingsHandler.instance;
+        SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    if (settingsHandler.filterHated && el.isHated.value) {
-      return false;
-    }
+        if (settingsHandler.filterHated && el.isHated.value) {
+          return false;
+        }
 
-    final bool filterFavourites = settingsHandler.filterFavourites && booru.type != 'Favourites';
-    if (filterFavourites && el.isFavourite.value == true) {
-      return false;
-    }
+        final bool filterFavourites = settingsHandler.filterFavourites && booru.type != 'Favourites';
+        if (filterFavourites && el.isFavourite.value == true) {
+          return false;
+        }
 
-    return true;
-  }).toList();
+        return true;
+      }).toList();
 
   String get className => runtimeType.toString();
 
@@ -67,6 +67,7 @@ abstract class BooruHandler {
   Future<bool> searchSetup() async {
     return true;
   }
+
   /// This function will call a http request using the tags and pagenumber parsed to it
   /// it will then create a list of booruItems
   Future search(String tags, int? pageNumCustom, {bool withCaptchaCheck = true}) async {
@@ -75,7 +76,7 @@ abstract class BooruHandler {
       pageNum = pageNumCustom;
     }
     // Any setup that needs to happen before the url is created
-    if(!await searchSetup()){
+    if (!await searchSetup()) {
       Logger.Inst().log('Search setup failed for booru: $booru', className, "Search", LogTypes.booruHandlerFetchFailed);
       locked = true;
       return fetched;
@@ -95,7 +96,7 @@ abstract class BooruHandler {
 
     // create url
     final String url = makeURL(tags);
-    if(url.isEmpty) return fetched;
+    if (url.isEmpty) return fetched;
 
     Uri uri;
     try {
@@ -123,7 +124,6 @@ abstract class BooruHandler {
           locked = true;
         }
       } else {
-
         Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
         Logger.Inst().log("response: ${response.data}", className, "Search", LogTypes.booruHandlerFetchFailed);
@@ -131,7 +131,7 @@ abstract class BooruHandler {
       }
     } catch (e) {
       Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
-      if(e is DioException) {
+      if (e is DioException) {
         errorString = e.message ?? e.toString();
       } else {
         errorString = e.toString();
@@ -146,7 +146,7 @@ abstract class BooruHandler {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
-      if(cookies.isNotEmpty) 'Cookie': cookies,
+      if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
     Logger.Inst().log('fetching: $uri with headers: $headers', className, "Search", LogTypes.booruHandlerSearchURL);
@@ -169,14 +169,14 @@ abstract class BooruHandler {
       errorString = e.toString();
       rethrow;
     }
-    
+
     List<BooruItem> newItems = [];
     if (posts.isNotEmpty) {
       for (int i = 0; i < posts.length; i++) {
-        var post = posts.elementAt(i);
+        final post = posts.elementAt(i);
         try {
           BooruItem? item = await parseItemFromResponse(post, i);
-          if(item != null) {
+          if (item != null) {
             final List<List<String>> hatedAndLovedTags = SettingsHandler.instance.parseTagsList(item.tagsList);
             item.isHated.value = hatedAndLovedTags[0].isNotEmpty;
             item.isLoved.value = hatedAndLovedTags[1].isNotEmpty;
@@ -193,7 +193,7 @@ abstract class BooruHandler {
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  /// 
+  ///
   /// parse raw response into a list of posts,
   /// here you should also parse any other info included with the response (i.e. totalcount)
   FutureOr<List> parseListFromResponse(response) {
@@ -224,13 +224,13 @@ abstract class BooruHandler {
   }
 
   ////////////////////////////////////////////////////////////////////////
-  
+
   // TODO rename to getTagSuggestions
   Future<List<String>> tagSearch(String input) async {
     List<String> tags = [];
 
     String url = makeTagURL(input);
-    if(url.isEmpty) return tags;
+    if (url.isEmpty) return tags;
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -246,11 +246,11 @@ abstract class BooruHandler {
       response = await fetchTagSuggestions(uri, input);
       if (response.statusCode == 200) {
         Logger.Inst().log("fetchTagSuggestions response: ${response.data}", className, "tagSearch", null);
-        var rawTags = await parseTagSuggestionsList(response);
+        final rawTags = await parseTagSuggestionsList(response);
         for (int i = 0; i < rawTags.length; i++) {
           final rawTag = rawTags[i];
           try {
-            if(tags.length < limit) {
+            if (tags.length < limit) {
               String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '').trim();
               if (parsedTag.isNotEmpty) {
                 // TODO add tag to taghandler before adding it to list
@@ -277,7 +277,7 @@ abstract class BooruHandler {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
-      if(cookies.isNotEmpty) 'Cookie': cookies,
+      if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
     return DioNetwork.get(uri.toString(), headers: headers);
@@ -309,7 +309,7 @@ abstract class BooruHandler {
     List<CommentItem> comments = [];
 
     String url = makeCommentsURL(postID, pageNum);
-    if(url.isEmpty) return comments;
+    if (url.isEmpty) return comments;
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -323,7 +323,7 @@ abstract class BooruHandler {
     try {
       response = await fetchComments(uri);
       if (response.statusCode == 200) {
-        var rawComments = await parseCommentsList(response);
+        final rawComments = await parseCommentsList(response);
         for (int i = 0; i < rawComments.length; i++) {
           final rawComment = rawComments[i];
           try {
@@ -348,7 +348,7 @@ abstract class BooruHandler {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
-      if(cookies.isNotEmpty) 'Cookie': cookies,
+      if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
     return DioNetwork.get(uri.toString(), headers: headers);
@@ -369,8 +369,6 @@ abstract class BooruHandler {
     return '';
   }
 
-
-
   ////////////////////////////////////////////////////////////////////////
 
   // TODO
@@ -390,7 +388,7 @@ abstract class BooruHandler {
     List<NoteItem> notes = [];
 
     String url = makeNotesURL(postID);
-    if(url.isEmpty) return notes;
+    if (url.isEmpty) return notes;
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -404,7 +402,7 @@ abstract class BooruHandler {
     try {
       response = await fetchNotes(uri);
       if (response.statusCode == 200) {
-        var rawNotes = await parseNotesList(response);
+        final rawNotes = await parseNotesList(response);
         for (int i = 0; i < rawNotes.length; i++) {
           final rawNote = rawNotes[i];
           try {
@@ -429,7 +427,7 @@ abstract class BooruHandler {
     final String cookies = await getCookies() ?? "";
     final Map<String, String> headers = {
       ...getHeaders(),
-      if(cookies.isNotEmpty) 'Cookie': cookies,
+      if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
     return DioNetwork.get(uri.toString(), headers: headers);
@@ -483,7 +481,8 @@ abstract class BooruHandler {
 
   Future<String?> getCookies() async {
     String cookieString = '';
-    if(Platform.isAndroid || Platform.isIOS) {  // TODO add when there is desktop support?
+    if (Platform.isAndroid || Platform.isIOS) {
+      // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
         final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
@@ -496,7 +495,7 @@ abstract class BooruHandler {
     }
 
     Map<String, String> headers = getHeaders();
-    if(headers['Cookie']?.isNotEmpty ?? false) {
+    if (headers['Cookie']?.isNotEmpty ?? false) {
       cookieString += headers['Cookie']!;
     }
 
@@ -508,19 +507,19 @@ abstract class BooruHandler {
   }
 
   void addTagsWithType(List<String> tags, TagType type) {
-     TagHandler.instance.addTagsWithType(tags, type);
+    TagHandler.instance.addTagsWithType(tags, type);
   }
 
   void populateTagHandler(List<BooruItem> items) async {
     List<String> unTyped = [];
-    for(int x = 0; x < items.length; x++) {
+    for (int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
         final String tag = items[x].tagsList[i];
 
         final bool alreadyStoredAndNotStale = TagHandler.instance.hasTagAndNotStale(tag); //TagHandler.instance.hasTag(tag);
         if (!alreadyStoredAndNotStale) {
           final bool isPresent = unTyped.contains(tag);
-          if(!isPresent) {
+          if (!isPresent) {
             unTyped.add(tag);
           }
         }
@@ -532,12 +531,12 @@ abstract class BooruHandler {
     }
   }
 
-  String getTagDisplayString(String tag){
+  String getTagDisplayString(String tag) {
     // TODO Convert tag from things like artist:artistname to artistname
     return tag;
   }
 
-  Future<List<Tag>> genTagObjects(List<String> tags) async{
+  Future<List<Tag>> genTagObjects(List<String> tags) async {
     return [];
   }
 

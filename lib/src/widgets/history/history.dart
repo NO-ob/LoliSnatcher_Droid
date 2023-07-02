@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:huge_listview/huge_listview.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -19,7 +20,6 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
-
 
 // TODO split in smaller widgets
 
@@ -41,11 +41,8 @@ class _HistoryListState extends State<HistoryList> {
 
   bool get isFilterActive => filteredHistory.length != history.length;
 
-  bool get areThereErrors => isLoading ||
-        (history.isEmpty) ||
-        (filteredHistory.isEmpty) ||
-        (!settingsHandler.searchHistoryEnabled) ||
-        (!settingsHandler.dbEnabled);
+  bool get areThereErrors =>
+      isLoading || (history.isEmpty) || (filteredHistory.isEmpty) || (!settingsHandler.searchHistoryEnabled) || (!settingsHandler.dbEnabled);
 
   @override
   void initState() {
@@ -55,7 +52,7 @@ class _HistoryListState extends State<HistoryList> {
 
   void getHistory() async {
     isLoading = true;
-    setState(() { });
+    setState(() {});
 
     history = ((settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled) ? await settingsHandler.dbHandler.getSearchHistory() : [])
         .map((e) => HistoryItem.fromMap(e))
@@ -89,7 +86,8 @@ class _HistoryListState extends State<HistoryList> {
           final String filter = filterSearchController.text.toLowerCase();
           final bool textFilter = h.searchText.toLowerCase().contains(filter);
           final bool booruFilter = h.booruName.toLowerCase().contains(filter) || h.booruType.toLowerCase().contains(filter);
-          final bool unknownFilter = 'unknown'.contains(filter) && settingsHandler.booruList.firstWhereOrNull((booru) => h.booruName == booru.name && h.booruType == booru.type) == null;
+          final bool unknownFilter = 'unknown'.contains(filter) &&
+              settingsHandler.booruList.firstWhereOrNull((booru) => h.booruName == booru.name && h.booruType == booru.type) == null;
           return textFilter || booruFilter || unknownFilter;
         }
       }).toList();
@@ -141,7 +139,7 @@ class _HistoryListState extends State<HistoryList> {
           contentItems: <Widget>[
             SizedBox(width: double.maxFinite, child: row),
             Text("Last searched on: ${formatDate(entry.timestamp)}", textAlign: TextAlign.center),
-            // 
+            //
             const SizedBox(height: 20),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -170,7 +168,7 @@ class _HistoryListState extends State<HistoryList> {
               leading: const Icon(Icons.open_in_browser),
               title: const Text('Open'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -201,7 +199,7 @@ class _HistoryListState extends State<HistoryList> {
               leading: const Icon(Icons.add_circle_outline),
               title: const Text('Open in new tab'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -224,7 +222,7 @@ class _HistoryListState extends State<HistoryList> {
               leading: Icon(entry.isFavourite ? Icons.favorite_border : Icons.favorite, color: entry.isFavourite ? Colors.grey : Colors.red),
               title: Text(entry.isFavourite ? 'Remove from Favourites' : 'Set as Favourite'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -246,7 +244,7 @@ class _HistoryListState extends State<HistoryList> {
               leading: const Icon(Icons.copy),
               title: const Text('Copy'),
             ),
-            // 
+            //
             const SizedBox(height: 10),
             ListTile(
               shape: RoundedRectangleBorder(
@@ -258,7 +256,7 @@ class _HistoryListState extends State<HistoryList> {
                 await deleteEntry(entry);
                 Navigator.of(context).pop(true);
               },
-              leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
+              leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
               title: const Text('Delete'),
             ),
           ],
@@ -317,12 +315,12 @@ class _HistoryListState extends State<HistoryList> {
     final Widget checkbox = Checkbox(
       value: isSelected,
       onChanged: (bool? newValue) {
-        if(isSelected) {
+        if (isSelected) {
           selectedEntries.removeWhere((item) => item == currentEntry);
         } else {
           selectedEntries.add(currentEntry);
         }
-        setState(() { });
+        setState(() {});
       },
     );
 
@@ -337,18 +335,17 @@ class _HistoryListState extends State<HistoryList> {
         onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
         minLeadingWidth: 20,
         leading: booru != null
-            ? (booru.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru))
+            ? (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru))
             : const Icon(CupertinoIcons.question, size: 18),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if(currentEntry.isFavourite)
+            if (currentEntry.isFavourite)
               const Padding(
                 padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
                 child: Icon(Icons.favorite, color: Colors.red),
               ),
-            if(showCheckbox)
-              checkbox,
+            if (showCheckbox) checkbox,
           ],
         ),
         title: MarqueeText(
@@ -419,27 +416,25 @@ class _HistoryListState extends State<HistoryList> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 60),
-
               if (isLoading)
                 const CircularProgressIndicator()
               else if (history.isEmpty)
                 const Text('Search History is empty')
               else if (filteredHistory.isEmpty)
                 const Text('Nothing found'),
-
               if (!settingsHandler.searchHistoryEnabled) const Text('Search History is disabled.'),
               if (!settingsHandler.dbEnabled) const Text('Search History requires enabling Database in settings.'),
             ],
           )
-        else 
+        else
           const SizedBox(),
       ],
     );
   }
 
   Widget selectedActionsBuild() {
-    if(selectedEntries.isEmpty) {
-      if(isFilterActive) {
+    if (selectedEntries.isEmpty) {
+      if (isFilterActive) {
         return Row(
           children: [
             Expanded(
@@ -451,7 +446,7 @@ class _HistoryListState extends State<HistoryList> {
                   onPressed: () {
                     // create new list through spread to avoid modifying the original list
                     selectedEntries = [...filteredHistory];
-                    setState(() { });
+                    setState(() {});
                   },
                 ),
               ),
@@ -472,7 +467,7 @@ class _HistoryListState extends State<HistoryList> {
               label: Text("Delete ${selectedEntries.length} ${Tools.pluralize('item', selectedEntries.length)}"),
               icon: const Icon(Icons.delete_forever),
               onPressed: () {
-                if(selectedEntries.isEmpty) {
+                if (selectedEntries.isEmpty) {
                   return;
                 }
 
@@ -499,7 +494,7 @@ class _HistoryListState extends State<HistoryList> {
                       label: const Text("Delete"),
                       icon: const Icon(Icons.delete_forever),
                       onPressed: () async {
-                        for(int i = 0; i < selectedEntries.length; i++) {
+                        for (int i = 0; i < selectedEntries.length; i++) {
                           await deleteEntry(selectedEntries[i]);
                         }
                         selectedEntries.clear();
@@ -519,14 +514,13 @@ class _HistoryListState extends State<HistoryList> {
             ),
           ),
         ),
-
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.border_clear),
             label: const Text("Clear selection"),
             onPressed: () {
               selectedEntries.clear();
-              setState(() { });
+              setState(() {});
             },
           ),
         ),

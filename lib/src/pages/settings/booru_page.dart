@@ -92,7 +92,7 @@ class _BooruPageState extends State<BooruPage> {
     return SettingsButton(
       name: 'Add New Booru',
       icon: const Icon(Icons.add),
-      page: () => BooruEdit(Booru("New", "", "", "", "")),
+      page: () => BooruEdit(Booru("New", null, "", "", "")),
     );
   }
 
@@ -145,7 +145,8 @@ class _BooruPageState extends State<BooruPage> {
               title: const Text('Share Booru'),
               contentItems: <Widget>[
                 Text(
-                    "Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}."),
+                  "Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
+                ),
                 const Text(''),
                 const Text("Should login/apikey data be included?"),
               ],
@@ -256,57 +257,61 @@ class _BooruPageState extends State<BooruPage> {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return SettingsDialog(title: const Text('Are you sure?'), contentItems: [
-              Text("Delete Booru: ${selectedBooru?.name}?"),
-            ], actionButtons: [
-              const CancelButton(),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  // save current and select next available booru to avoid exception after deletion
-                  Booru tempSelected = selectedBooru!;
-                  if (settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
-                    selectedBooru = settingsHandler.booruList[1];
-                  } else {
-                    selectedBooru = null;
-                  }
-                  // set new prefbooru if it is a deleted one
-                  if (tempSelected.name == settingsHandler.prefBooru) {
-                    settingsHandler.prefBooru = selectedBooru?.name ?? '';
-                  }
-                  // restate to avoid an exception due to changed booru list
-                  setState(() {});
+            return SettingsDialog(
+              title: const Text('Are you sure?'),
+              contentItems: [
+                Text("Delete Booru: ${selectedBooru?.name}?"),
+              ],
+              actionButtons: [
+                const CancelButton(),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    // save current and select next available booru to avoid exception after deletion
+                    Booru tempSelected = selectedBooru!;
+                    if (settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
+                      selectedBooru = settingsHandler.booruList[1];
+                    } else {
+                      selectedBooru = null;
+                    }
+                    // set new prefbooru if it is a deleted one
+                    if (tempSelected.name == settingsHandler.prefBooru) {
+                      settingsHandler.prefBooru = selectedBooru?.name ?? '';
+                    }
+                    // restate to avoid an exception due to changed booru list
+                    setState(() {});
 
-                  if (await settingsHandler.deleteBooru(tempSelected)) {
-                    FlashElements.showSnackbar(
-                      context: context,
-                      title: const Text("Booru Deleted!", style: TextStyle(fontSize: 20)),
-                      leadingIcon: Icons.delete_forever,
-                      leadingIconColor: Colors.red,
-                      sideColor: Colors.yellow,
-                    );
-                  } else {
-                    // restore selected and prefbooru if something went wrong
-                    selectedBooru = tempSelected;
-                    settingsHandler.prefBooru = tempSelected.name ?? '';
-                    settingsHandler.sortBooruList();
+                    if (await settingsHandler.deleteBooru(tempSelected)) {
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: const Text("Booru Deleted!", style: TextStyle(fontSize: 20)),
+                        leadingIcon: Icons.delete_forever,
+                        leadingIconColor: Colors.red,
+                        sideColor: Colors.yellow,
+                      );
+                    } else {
+                      // restore selected and prefbooru if something went wrong
+                      selectedBooru = tempSelected;
+                      settingsHandler.prefBooru = tempSelected.name ?? '';
+                      settingsHandler.sortBooruList();
 
-                    FlashElements.showSnackbar(
-                      context: context,
-                      title: const Text("Error!", style: TextStyle(fontSize: 20)),
-                      content: const Text("Something went wrong during deletion of a booru config!", style: TextStyle(fontSize: 16)),
-                      leadingIcon: Icons.warning_amber,
-                      leadingIconColor: Colors.red,
-                      sideColor: Colors.red,
-                    );
-                  }
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: const Text("Error!", style: TextStyle(fontSize: 20)),
+                        content: const Text("Something went wrong during deletion of a booru config!", style: TextStyle(fontSize: 16)),
+                        leadingIcon: Icons.warning_amber,
+                        leadingIconColor: Colors.red,
+                        sideColor: Colors.red,
+                      );
+                    }
 
-                  setState(() {});
-                  Navigator.of(context).pop(true);
-                },
-                label: const Text('Delete Booru'),
-                icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
-              ),
-            ]);
+                    setState(() {});
+                    Navigator.of(context).pop(true);
+                  },
+                  label: const Text('Delete Booru'),
+                  icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+            );
           },
         );
       },
@@ -339,9 +344,11 @@ class _BooruPageState extends State<BooruPage> {
                 // Rename config if its already in the list
                 booru.name = '${booru.name!} (duplicate)';
               }
-              await Navigator.of(context).push(MaterialPageRoute(
-                builder: (BuildContext context) => BooruEdit(booru),
-              ));
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) => BooruEdit(booru),
+                ),
+              );
             }
           } else {
             FlashElements.showSnackbar(

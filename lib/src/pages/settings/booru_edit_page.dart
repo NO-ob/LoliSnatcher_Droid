@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -22,7 +23,7 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 class BooruEdit extends StatefulWidget {
   BooruEdit(this.booru, {Key? key}) : super(key: key);
   Booru booru;
-  String booruType = "";
+  BooruType? booruType;
 
   @override
   State<BooruEdit> createState() => _BooruEditState();
@@ -40,27 +41,7 @@ class _BooruEditState extends State<BooruEdit> {
   final booruDefTagsController = TextEditingController();
 
   // TODO (NO_ob): Update to use enum for booru types
-  String selectedBooruType = "AutoDetect";
-  List<String> booruTypes = [
-    "AGNPH",
-    "BooruOnRails",
-    "Danbooru",
-    "e621",
-    "Gelbooru",
-    "GelbooruV1",
-    "Hydrus",
-    "IdolSankaku",
-    "InkBunny",
-    "Moebooru",
-    "Philomena",
-    "Rainbooru",
-    "R34Hentai",
-    "Sankaku",
-    "Shimmie",
-    "Szurubooru",
-    "WildCritters",
-    "World",
-  ];
+  BooruType selectedBooruType = BooruType.AutoDetect;
 
   // TODO make standalone / move to handlers themselves
   String convertSiteUrlToApi() {
@@ -82,9 +63,6 @@ class _BooruEditState extends State<BooruEdit> {
 
   @override
   void initState() {
-    booruTypes.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
-    booruTypes.insert(0, 'AutoDetect');
-
     //Load settings from the Booru instance parsed to the widget and populate the text fields
     if (widget.booru.name != "New") {
       booruNameController.text = widget.booru.name!;
@@ -93,7 +71,7 @@ class _BooruEditState extends State<BooruEdit> {
       booruAPIKeyController.text = widget.booru.apiKey!;
       booruUserIDController.text = widget.booru.userID!;
       booruDefTagsController.text = widget.booru.defTags!;
-      selectedBooruType = booruTypes.contains(widget.booru.type ?? '') ? widget.booru.type! : selectedBooruType;
+      selectedBooruType = BooruType.values.contains(widget.booru.type) ? widget.booru.type! : selectedBooruType;
     }
     super.initState();
   }
@@ -135,13 +113,14 @@ class _BooruEditState extends State<BooruEdit> {
             ),
             SettingsDropdown(
               value: selectedBooruType,
-              items: booruTypes,
-              onChanged: (String? newValue) {
+              items: BooruType.dropDownValues,
+              onChanged: (BooruType? newValue) {
                 setState(() {
-                  selectedBooruType = newValue ?? booruTypes[0];
+                  selectedBooruType = newValue ?? BooruType.values.first;
                 });
               },
               title: 'Booru Type',
+              itemTitleBuilder: (p0) => (p0 as BooruType).name,
             ),
             SettingsTextInput(
               controller: booruFaviconController,
@@ -189,7 +168,7 @@ class _BooruEditState extends State<BooruEdit> {
                               HydrusHandler hydrus = HydrusHandler(
                                 Booru(
                                   "Hydrus",
-                                  "Hydrus",
+                                  BooruType.Hydrus,
                                   "Hydrus",
                                   booruURLController.text,
                                   "",
@@ -281,9 +260,9 @@ class _BooruEditState extends State<BooruEdit> {
 
   String getApiKeyTitle() {
     switch (selectedBooruType) {
-      case 'Sankaku':
+      case BooruType.Sankaku:
         return 'Password';
-      case 'R34Hentai':
+      case BooruType.R34Hentai:
         return 'Cookies';
       default:
         return 'API Key';
@@ -292,8 +271,8 @@ class _BooruEditState extends State<BooruEdit> {
 
   String getUserIDTitle() {
     switch (selectedBooruType) {
-      case 'Sankaku':
-      case 'Danbooru':
+      case BooruType.Sankaku:
+      case BooruType.Danbooru:
         return 'Login';
       default:
         return 'User ID';
@@ -310,7 +289,7 @@ class _BooruEditState extends State<BooruEdit> {
             context,
             MaterialPageRoute(
               builder: (context) => InAppWebviewView(
-                initialUrl: booruURLController.text,
+                initialUrl: selectedBooruType == BooruType.FurAffinity ? "${booruURLController.text}/login" : booruURLController.text,
               ),
             ),
           );
@@ -400,12 +379,12 @@ class _BooruEditState extends State<BooruEdit> {
         }
         isTesting = true;
         setState(() {});
-        List<String> testResults = await booruTest(testBooru, selectedBooruType);
-        String booruType = testResults[0];
+        List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
+        BooruType? booruType = testResults[0];
         String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : "";
 
         // If a booru type is returned set the widget state
-        if (booruType != "") {
+        if (booruType != null) {
           widget.booruType = booruType;
           selectedBooruType = booruType;
           // Alert user about the results of the test
@@ -582,17 +561,18 @@ class _BooruEditState extends State<BooruEdit> {
   /// This function will use the Base URL the user has entered and call a search up to three times
   /// if the searches return null each time it tries the search it uses a different
   /// type of BooruHandler
-  Future<List<String>> booruTest(
+  Future<List<dynamic>> booruTest(
     Booru booru,
-    String userBooruType, {
+    BooruType userBooruType, {
     bool withCaptchaCheck = true,
   }) async {
-    String booruType = "", errorString = "";
+    BooruType? booruType;
+    String? errorString = "";
     BooruHandler test;
     List<BooruItem> testFetched = [];
     booru.type = userBooruType;
 
-    if (userBooruType == "Hydrus") {
+    if (userBooruType == BooruType.Hydrus) {
       HydrusHandler hydrusHandler = HydrusHandler(booru, 20);
       if (await hydrusHandler.verifyApiAccess()) {
         return [userBooruType, ''];
@@ -600,16 +580,14 @@ class _BooruEditState extends State<BooruEdit> {
       return ['', 'Failed to verify api access for Hydrus'];
     }
 
-    if (userBooruType == "AutoDetect") {
-      List<String> typeList = [...booruTypes]..remove("Hydrus");
+    if (userBooruType == BooruType.AutoDetect) {
+      List<BooruType> typeList = BooruType.detectable;
       for (int i = 1; i < typeList.length; i++) {
-        if (booruType == "") {
-          booruType = (await booruTest(
-            booru,
-            typeList.elementAt(i),
-            withCaptchaCheck: false,
-          ))[0];
-        }
+        booruType ??= (await booruTest(
+          booru,
+          typeList.elementAt(i),
+          withCaptchaCheck: false,
+        ))[0];
       }
     } else {
       List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
@@ -630,7 +608,7 @@ class _BooruEditState extends State<BooruEdit> {
       }
     }
 
-    if (booruType == "") {
+    if (booruType == null) {
       if (testFetched.isNotEmpty) {
         booruType = userBooruType;
         print("Found Results as $userBooruType");

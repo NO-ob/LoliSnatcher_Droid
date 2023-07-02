@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -296,7 +297,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   void tagStuff() {
     input = searchHandler.searchTextController.text;
-    if (searchHandler.currentBooru.type == "Hydrus") {
+    if (searchHandler.currentBooru.type == BooruType.Hydrus) {
       splitInput = input.trim().split(",");
     } else {
       splitInput = input.trim().split(" ");
@@ -326,7 +327,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     cursorPos = searchHandler.searchTextController.selection.baseOffset;
     if (cursorPos < 0) cursorPos = 0;
     int tmpStartIndex = cursorPos - 1;
-    while (tmpStartIndex > 0 && (searchHandler.currentBooru.type == "Hydrus" ? input[tmpStartIndex] != "," : input[tmpStartIndex] != " ")) {
+    while (tmpStartIndex > 0 && (searchHandler.currentBooru.type == BooruType.Hydrus ? input[tmpStartIndex] != "," : input[tmpStartIndex] != " ")) {
       tmpStartIndex--;
     }
 
@@ -335,7 +336,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       replaceString = lastTag;
     } else {
       int endIndex = input.indexOf(" ", cursorPos);
-      if (searchHandler.currentBooru.type == "Hydrus") {
+      if (searchHandler.currentBooru.type == BooruType.Hydrus) {
         if (tmpStartIndex == -1) {
           endIndex = input.length;
         } else {
@@ -391,9 +392,11 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           }).toList()
         : [];
     databaseResults.value = databaseResults
-        .where((tag) =>
-            booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 &&
-            historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1)
+        .where(
+          (tag) =>
+              booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1 &&
+              historyResults.indexWhere((htag) => htag[0].toLowerCase() == tag[0].toLowerCase()) == -1,
+        )
         .toList();
   }
   // TODO add a list of search modifiers (rating:s, sort:score...) to every booru handler
@@ -418,8 +421,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   OverlayEntry? _createOverlayEntry() {
     RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    var size = renderBox.size;
-    var offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
 
     return OverlayEntry(
       builder: (context) => Positioned(
@@ -525,7 +528,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                           bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
                           String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag;
-                          if (searchHandler.currentBooru.type == "Hydrus") {
+                          if (searchHandler.currentBooru.type == BooruType.Hydrus) {
                             final String tagWithSpaces = newTag.replaceAll(RegExp(r'_'), ' ');
                             newTag = "$tagWithSpaces,";
                           } else {
@@ -537,7 +540,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                             //newInput = searchHandler.searchTextController.text.replaceRange(start, end, replacement)
                             newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, cursorPos - replaceString.length);
                           } else if (startIndex == -1) {
-                            newInput = newTag + (searchHandler.currentBooru.type == "Hydrus" ? "," : " ") + searchHandler.searchTextController.text;
+                            newInput = newTag + (searchHandler.currentBooru.type == BooruType.Hydrus ? "," : " ") + searchHandler.searchTextController.text;
                           } else {
                             newInput = searchHandler.searchTextController.text + newTag;
                           }

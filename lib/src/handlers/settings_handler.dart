@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -97,9 +98,7 @@ class SettingsHandler extends GetxController {
   double mousewheelScrollSpeed = 10.0;
 
   int currentColumnCount(BuildContext context) {
-    return MediaQuery.of(context).orientation == Orientation.portrait
-        ? portraitColumns
-        : landscapeColumns;
+    return MediaQuery.of(context).orientation == Orientation.portrait ? portraitColumns : landscapeColumns;
   }
 
   Duration cacheDuration = Duration.zero;
@@ -148,10 +147,11 @@ class SettingsHandler extends GetxController {
   Rx<ThemeItem> theme = ThemeItem(
     name: "Pink",
     primary: Colors.pink[200],
-    accent: Colors.pink[600]
-  ).obs..listen((ThemeItem theme) {
-    print('newTheme ${theme.name} ${theme.primary}');
-  });
+    accent: Colors.pink[600],
+  ).obs
+    ..listen((ThemeItem theme) {
+      print('newTheme ${theme.name} ${theme.primary}');
+    });
 
   Rx<Color?> customPrimaryColor = Colors.pink[200].obs;
   Rx<Color?> customAccentColor = Colors.pink[600].obs;
@@ -164,20 +164,42 @@ class SettingsHandler extends GetxController {
 
   // list of setting names which shouldnt be synced with other devices
   List<String> deviceSpecificSettings = [
-    'shitDevice', 'disableVideo',
-    'thumbnailCache', 'mediaCache',
-    'dbEnabled', 'searchHistoryEnabled',
-    'useVolumeButtonsForScroll', 'volumeButtonsScrollSpeed',
-    'mousewheelScrollSpeed' , 
-    'prefBooru', 'appMode', 'handSide', 'extPathOverride',
-    'lastSyncIp', 'lastSyncPort', 'customUserAgent',
-    'theme', 'themeMode', 'isAmoled', 'useMaterial3', 'useDynamicColor',
-    'customPrimaryColor', 'customAccentColor',
-    'version', 'disableImageScaling', 'gifsAsThumbnails',
-    'cacheDuration', 'cacheSize', 'enableDrawerMascot',
-    'drawerMascotPathOverride', 'allowSelfSignedCerts',
-    'showFPS', 'showPerf', 'showImageStats',
-    'isDebug', 'showURLOnThumb',
+    'shitDevice',
+    'disableVideo',
+    'thumbnailCache',
+    'mediaCache',
+    'dbEnabled',
+    'searchHistoryEnabled',
+    'useVolumeButtonsForScroll',
+    'volumeButtonsScrollSpeed',
+    'mousewheelScrollSpeed',
+    'prefBooru',
+    'appMode',
+    'handSide',
+    'extPathOverride',
+    'lastSyncIp',
+    'lastSyncPort',
+    'customUserAgent',
+    'theme',
+    'themeMode',
+    'isAmoled',
+    'useMaterial3',
+    'useDynamicColor',
+    'customPrimaryColor',
+    'customAccentColor',
+    'version',
+    'disableImageScaling',
+    'gifsAsThumbnails',
+    'cacheDuration',
+    'cacheSize',
+    'enableDrawerMascot',
+    'drawerMascotPathOverride',
+    'allowSelfSignedCerts',
+    'showFPS',
+    'showPerf',
+    'showImageStats',
+    'isDebug',
+    'showURLOnThumb',
     'desktopListsDrag'
   ];
   // default values and possible options map for validation
@@ -390,8 +412,8 @@ class SettingsHandler extends GetxController {
       "type": "bool",
       "default": false,
     },
-    "allowSelfSignedCerts":{
-      "type" : "bool",
+    "allowSelfSignedCerts": {
+      "type": "bool",
       "default": false,
     },
     "disableImageScaling": {
@@ -502,12 +524,12 @@ class SettingsHandler extends GetxController {
   dynamic validateValue(String name, dynamic value, {bool toJSON = false}) {
     Map<String, dynamic>? settingParams = map[name];
 
-    if(toJSON) {
+    if (toJSON) {
       value = getByString(name);
     }
 
-    if(settingParams == null) {
-      if(toJSON) {
+    if (settingParams == null) {
+      if (toJSON) {
         return value.toString();
       } else {
         return value;
@@ -518,14 +540,14 @@ class SettingsHandler extends GetxController {
       switch (settingParams["type"]) {
         case 'stringFromList':
           String validValue = List<String>.from(settingParams["options"]!).firstWhere((el) => el == value, orElse: () => '');
-          if(validValue != '') {
+          if (validValue != '') {
             return validValue;
           } else {
             return settingParams["default"];
           }
 
         case 'string':
-          if(value is! String) {
+          if (value is! String) {
             throw 'value "$value" for $name is not a String';
           } else {
             return value;
@@ -533,10 +555,10 @@ class SettingsHandler extends GetxController {
 
         case 'int':
           int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
-          if(parse == null) {
+          if (parse == null) {
             throw 'value "$value" of type ${value.runtimeType} for $name is not an int';
           } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
-            if(toJSON) {
+            if (toJSON) {
               // force default value when not passing validation when saving
               setByString(name, settingParams["default"]);
             }
@@ -546,8 +568,8 @@ class SettingsHandler extends GetxController {
           }
 
         case 'bool':
-          if(value is! bool) {
-            if(value is String && (value == 'true' || value == 'false')) {
+          if (value is! bool) {
+            if (value is String && (value == 'true' || value == 'false')) {
               return value == 'true' ? true : false;
             } else {
               throw 'value "$value" for $name is not a bool';
@@ -562,7 +584,7 @@ class SettingsHandler extends GetxController {
             return (value as RxBool).value;
           } else {
             // bool to rxbool
-            if(value is RxBool) {
+            if (value is RxBool) {
               return value;
             } else if (value is bool) {
               return value.obs;
@@ -572,11 +594,11 @@ class SettingsHandler extends GetxController {
           }
 
         case 'appMode':
-          if(toJSON) {
+          if (toJSON) {
             // rxobject to string
             return (value as Rx<AppMode>).value.toString();
           } else {
-            if(value is String) {
+            if (value is String) {
               // string to rxobject
               return AppMode.fromString(value);
             } else {
@@ -585,24 +607,24 @@ class SettingsHandler extends GetxController {
           }
 
         case 'handSide':
-          if(toJSON) {
+          if (toJSON) {
             // rxobject to string
             return (value as Rx<HandSide>).value.toString();
           } else {
-            if(value is String) {
+            if (value is String) {
               // string to rxobject
               return HandSide.fromString(value);
             } else {
               return settingParams["default"];
             }
           }
-        
+
         case 'logTypesList':
-          if(toJSON) {
+          if (toJSON) {
             // rxobject to list<string>
             return (value as RxList<LogTypes>).map((el) => el.toString()).toList();
           } else {
-            if(value is List) {
+            if (value is List) {
               // list<string> to list<LogTypes>
               return List<String>.from(value).map((el) => LogTypes.fromString(el)).toList();
             } else {
@@ -611,13 +633,14 @@ class SettingsHandler extends GetxController {
           }
 
         case 'theme':
-          if(toJSON) {
+          if (toJSON) {
             // rxobject to string
             return (value as Rx<ThemeItem>).value.name;
           } else {
-            if(value is String) {
+            if (value is String) {
               // string to rxobject
-              final ThemeItem findTheme = List<ThemeItem>.from(settingParams["options"]!).firstWhere((el) => el.name == value, orElse: () => settingParams["default"]);
+              final ThemeItem findTheme =
+                  List<ThemeItem>.from(settingParams["options"]!).firstWhere((el) => el.name == value, orElse: () => settingParams["default"]);
               return findTheme;
             } else {
               return settingParams["default"];
@@ -663,7 +686,7 @@ class SettingsHandler extends GetxController {
           } else {
             if (value is Duration) {
               return value;
-            } else if(value is int) {
+            } else if (value is int) {
               // int to Duration
               return Duration(seconds: value);
             } else {
@@ -675,7 +698,7 @@ class SettingsHandler extends GetxController {
         default:
           return value;
       }
-    } catch(err) {
+    } catch (err) {
       // return default value on exceptions
       Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", null);
       return settingParams["default"];
@@ -686,13 +709,13 @@ class SettingsHandler extends GetxController {
     if (path == "") await setConfigDir();
     if (cachePath == "") cachePath = await ServiceHandler.getCacheDir();
 
-    if(await checkForSettings()) {
+    if (await checkForSettings()) {
       await loadSettingsJson();
     } else {
       await saveSettings(restate: true);
     }
 
-    if(!Tools.isTestMode) {
+    if (!Tools.isTestMode) {
       if (dbEnabled) {
         await dbHandler.dbConnect(path);
       } else {
@@ -706,6 +729,7 @@ class SettingsHandler extends GetxController {
     File settingsFile = File("${path}settings.json");
     return await settingsFile.exists();
   }
+
   Future<void> loadSettingsJson() async {
     File settingsFile = File("${path}settings.json");
     String settings = await settingsFile.readAsString();
@@ -713,7 +737,6 @@ class SettingsHandler extends GetxController {
     await loadFromJSON(settings, true);
     return;
   }
-
 
   dynamic getByString(String varName) {
     switch (varName) {
@@ -1037,7 +1060,6 @@ class SettingsHandler extends GetxController {
     }
   }
 
-
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       "defTags": validateValue("defTags", null, toJSON: true),
@@ -1045,42 +1067,42 @@ class SettingsHandler extends GetxController {
       "videoCacheMode": validateValue("videoCacheMode", null, toJSON: true),
       "previewDisplay": validateValue("previewDisplay", null, toJSON: true),
       "galleryMode": validateValue("galleryMode", null, toJSON: true),
-      "shareAction" : validateValue("shareAction", null, toJSON: true),
-      "limit" : validateValue("limit", null, toJSON: true),
-      "portraitColumns" : validateValue("portraitColumns", null, toJSON: true),
-      "landscapeColumns" : validateValue("landscapeColumns", null, toJSON: true),
-      "preloadCount" : validateValue("preloadCount", null, toJSON: true),
-      "snatchCooldown" : validateValue("snatchCooldown", null, toJSON: true),
-      "galleryBarPosition" : validateValue("galleryBarPosition", null, toJSON: true),
-      "galleryScrollDirection" : validateValue("galleryScrollDirection", null, toJSON: true),
-      "jsonWrite" : validateValue("jsonWrite", null, toJSON: true),
-      "autoPlayEnabled" : validateValue("autoPlayEnabled", null, toJSON: true),
-      "loadingGif" : validateValue("loadingGif", null, toJSON: true),
-      "thumbnailCache" : validateValue("thumbnailCache", null, toJSON: true),
+      "shareAction": validateValue("shareAction", null, toJSON: true),
+      "limit": validateValue("limit", null, toJSON: true),
+      "portraitColumns": validateValue("portraitColumns", null, toJSON: true),
+      "landscapeColumns": validateValue("landscapeColumns", null, toJSON: true),
+      "preloadCount": validateValue("preloadCount", null, toJSON: true),
+      "snatchCooldown": validateValue("snatchCooldown", null, toJSON: true),
+      "galleryBarPosition": validateValue("galleryBarPosition", null, toJSON: true),
+      "galleryScrollDirection": validateValue("galleryScrollDirection", null, toJSON: true),
+      "jsonWrite": validateValue("jsonWrite", null, toJSON: true),
+      "autoPlayEnabled": validateValue("autoPlayEnabled", null, toJSON: true),
+      "loadingGif": validateValue("loadingGif", null, toJSON: true),
+      "thumbnailCache": validateValue("thumbnailCache", null, toJSON: true),
       "mediaCache": validateValue("mediaCache", null, toJSON: true),
-      "autoHideImageBar" : validateValue("autoHideImageBar", null, toJSON: true),
-      "dbEnabled" : validateValue("dbEnabled", null, toJSON: true),
-      "searchHistoryEnabled" : validateValue("searchHistoryEnabled", null, toJSON: true),
-      "filterHated" : validateValue("filterHated", null, toJSON: true),
-      "filterFavourites" : validateValue("filterFavourites", null, toJSON: true),
-      "useVolumeButtonsForScroll" : validateValue("useVolumeButtonsForScroll", null, toJSON: true),
-      "volumeButtonsScrollSpeed" : validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
-      "mousewheelScrollSpeed" : validateValue("mousewheelScrollSpeed", null, toJSON: true),
-      "disableVideo" : validateValue("disableVideo", null, toJSON: true),
-      "shitDevice" : validateValue("shitDevice", null, toJSON: true),
-      "galleryAutoScrollTime" : validateValue("galleryAutoScrollTime", null, toJSON: true),
+      "autoHideImageBar": validateValue("autoHideImageBar", null, toJSON: true),
+      "dbEnabled": validateValue("dbEnabled", null, toJSON: true),
+      "searchHistoryEnabled": validateValue("searchHistoryEnabled", null, toJSON: true),
+      "filterHated": validateValue("filterHated", null, toJSON: true),
+      "filterFavourites": validateValue("filterFavourites", null, toJSON: true),
+      "useVolumeButtonsForScroll": validateValue("useVolumeButtonsForScroll", null, toJSON: true),
+      "volumeButtonsScrollSpeed": validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
+      "mousewheelScrollSpeed": validateValue("mousewheelScrollSpeed", null, toJSON: true),
+      "disableVideo": validateValue("disableVideo", null, toJSON: true),
+      "shitDevice": validateValue("shitDevice", null, toJSON: true),
+      "galleryAutoScrollTime": validateValue("galleryAutoScrollTime", null, toJSON: true),
       "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
       "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
-      "disableImageScaling" : validateValue("disableImageScaling", null, toJSON: true),
-      "gifsAsThumbnails" : validateValue("gifsAsThumbnails", null, toJSON: true),
-      "desktopListsDrag" : validateValue("desktopListsDrag", null, toJSON: true),
-      "cacheDuration" : validateValue("cacheDuration", null, toJSON: true),
-      "cacheSize" : validateValue("cacheSize", null, toJSON: true),
+      "disableImageScaling": validateValue("disableImageScaling", null, toJSON: true),
+      "gifsAsThumbnails": validateValue("gifsAsThumbnails", null, toJSON: true),
+      "desktopListsDrag": validateValue("desktopListsDrag", null, toJSON: true),
+      "cacheDuration": validateValue("cacheDuration", null, toJSON: true),
+      "cacheSize": validateValue("cacheSize", null, toJSON: true),
       "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
       "enabledLogTypes": validateValue("enabledLogTypes", null, toJSON: true),
-      "wakeLockEnabled" : validateValue("wakeLockEnabled", null, toJSON: true),
-      "tagTypeFetchEnabled" : validateValue("tagTypeFetchEnabled", null, toJSON: true),
-      "downloadNotifications" : validateValue("downloadNotifications", null, toJSON: true),
+      "wakeLockEnabled": validateValue("wakeLockEnabled", null, toJSON: true),
+      "tagTypeFetchEnabled": validateValue("tagTypeFetchEnabled", null, toJSON: true),
+      "downloadNotifications": validateValue("downloadNotifications", null, toJSON: true),
 
       //TODO
       "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
@@ -1100,7 +1122,7 @@ class SettingsHandler extends GetxController {
       "useMaterial3": validateValue("useMaterial3", null, toJSON: true),
       "useDynamicColor": validateValue("useDynamicColor", null, toJSON: true),
       "isAmoled": validateValue("isAmoled", null, toJSON: true),
-      "enableDrawerMascot" : validateValue("enableDrawerMascot", null, toJSON: true),
+      "enableDrawerMascot": validateValue("enableDrawerMascot", null, toJSON: true),
       "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
       "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
       "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
@@ -1125,20 +1147,27 @@ class SettingsHandler extends GetxController {
 
     try {
       dynamic tempBtnOrder = json["buttonOrder"];
-      if(tempBtnOrder is List) {
+      if (tempBtnOrder is List) {
         // print('btnorder is a list');
-      } else if(tempBtnOrder is String) {
+      } else if (tempBtnOrder is String) {
         // print('btnorder is a string');
         tempBtnOrder = tempBtnOrder.split(',');
       } else {
         // print('btnorder is a ${tempBtnOrder.runtimeType} type');
         tempBtnOrder = [];
       }
-      List<List<String>> btnOrder = List<String>.from(tempBtnOrder).map((bstr) {
-        List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
-        return button;
-      }).where((el) => el[0] != 'null').toList();
-      btnOrder.addAll(buttonList.where((el) => !btnOrder.contains(el))); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
+      List<List<String>> btnOrder = List<String>.from(tempBtnOrder)
+          .map((bstr) {
+            List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+            return button;
+          })
+          .where((el) => el[0] != 'null')
+          .toList();
+      btnOrder.addAll(
+        buttonList.where(
+          (el) => !btnOrder.contains(el),
+        ),
+      ); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
       buttonOrder = btnOrder;
     } catch (e) {
       Logger.Inst().log('Failed to parse button order $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
@@ -1146,9 +1175,9 @@ class SettingsHandler extends GetxController {
 
     try {
       dynamic tempHatedTags = json["hatedTags"];
-      if(tempHatedTags is List) {
+      if (tempHatedTags is List) {
         // print('hatedTags is a list');
-      } else if(tempHatedTags is String) {
+      } else if (tempHatedTags is String) {
         // print('hatedTags is a string');
         tempHatedTags = tempHatedTags.split(',');
       } else {
@@ -1156,7 +1185,7 @@ class SettingsHandler extends GetxController {
         tempHatedTags = [];
       }
       List<String> hateTags = List<String>.from(tempHatedTags);
-      for (int i = 0; i < hateTags.length; i++){
+      for (int i = 0; i < hateTags.length; i++) {
         if (!hatedTags.contains(hateTags.elementAt(i))) {
           hatedTags.add(hateTags.elementAt(i));
         }
@@ -1167,9 +1196,9 @@ class SettingsHandler extends GetxController {
 
     try {
       dynamic tempLovedTags = json["lovedTags"];
-      if(tempLovedTags is List) {
+      if (tempLovedTags is List) {
         // print('lovedTags is a list');
-      } else if(tempLovedTags is String) {
+      } else if (tempLovedTags is String) {
         // print('lovedTags is a string');
         tempLovedTags = tempLovedTags.split(',');
       } else {
@@ -1177,8 +1206,8 @@ class SettingsHandler extends GetxController {
         tempLovedTags = [];
       }
       List<String> loveTags = List<String>.from(tempLovedTags);
-      for (int i = 0; i < loveTags.length; i++){
-        if (!lovedTags.contains(loveTags.elementAt(i))){
+      for (int i = 0; i < loveTags.length; i++) {
+        if (!lovedTags.contains(loveTags.elementAt(i))) {
           lovedTags.add(loveTags.elementAt(i));
         }
       }
@@ -1187,7 +1216,7 @@ class SettingsHandler extends GetxController {
     }
 
     List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
-    for(String key in leftoverKeys) {
+    for (String key in leftoverKeys) {
       // TODO something causes rare exception which causes settings to reset
       try {
         setByString(key, json[key]);
@@ -1197,7 +1226,7 @@ class SettingsHandler extends GetxController {
       // print('key $key val ${json[key]} type ${json[key].runtimeType}');
     }
 
-    if(setMissingKeys) {
+    if (setMissingKeys) {
       // find all keys that are missing in the file and set them to default values
       map.forEach((key, value) {
         if (!json.keys.contains(key)) {
@@ -1214,13 +1243,13 @@ class SettingsHandler extends GetxController {
   Future<bool> saveSettings({required bool restate}) async {
     await getPerms();
     if (path == "") await setConfigDir();
-    await Directory(path).create(recursive:true);
+    await Directory(path).create(recursive: true);
     File settingsFile = File("${path}settings.json");
-    var writer = settingsFile.openWrite();
+    final writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
     await writer.close();
 
-    if(restate) {
+    if (restate) {
       SearchHandler.instance.rootRestate(); // force global state update to redraw stuff
     }
     return true;
@@ -1233,24 +1262,25 @@ class SettingsHandler extends GetxController {
 
       Directory directory = Directory(boorusPath);
       List<FileSystemEntity> files = [];
-      if(await directory.exists()) {
+      if (await directory.exists()) {
         files = await directory.list().toList();
       }
 
       if (files.isNotEmpty) {
         for (int i = 0; i < files.length; i++) {
-          if (files[i].path.contains(".json")) { // && files[i].path != 'settings.json'
+          if (files[i].path.contains(".json")) {
+            // && files[i].path != 'settings.json'
             // print(files[i].toString());
             File booruFile = files[i] as File;
             Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
             bool isAllowed = booruFromFile.type != 'Favourites';
-            if(isAllowed) {
+            if (isAllowed) {
               tempList.add(booruFromFile);
             } else {
               await booruFile.delete();
             }
 
-            if (booruFromFile.type == "Hydrus") {
+            if (booruFromFile.type == BooruType.Hydrus) {
               hasHydrus = true;
             }
           }
@@ -1258,7 +1288,7 @@ class SettingsHandler extends GetxController {
       }
 
       if (dbEnabled && tempList.isNotEmpty) {
-        tempList.add(Booru("Favourites", "Favourites", "", "", ""));
+        tempList.add(Booru("Favourites", BooruType.Favourites, "", "", ""));
       }
     } catch (e) {
       Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
@@ -1272,8 +1302,6 @@ class SettingsHandler extends GetxController {
     return true;
   }
 
-
-
   void sortBooruList() async {
     List<Booru> sorted = [...booruList]; // spread the array just in case, to guarantee that we don't affect the original value
     sorted.sort((a, b) {
@@ -1282,13 +1310,13 @@ class SettingsHandler extends GetxController {
     });
 
     int prefIndex = 0;
-    for (int i = 0; i < sorted.length; i++){
-      if (sorted[i].name == prefBooru && prefBooru.isNotEmpty){
+    for (int i = 0; i < sorted.length; i++) {
+      if (sorted[i].name == prefBooru && prefBooru.isNotEmpty) {
         prefIndex = i;
         // print("prefIndex is" + prefIndex.toString());
       }
     }
-    if (prefIndex != 0){
+    if (prefIndex != 0) {
       // move default booru to top
       // print("Booru pref found in booruList");
       Booru tmp = sorted.elementAt(prefIndex);
@@ -1299,7 +1327,7 @@ class SettingsHandler extends GetxController {
     }
 
     int favsIndex = sorted.indexWhere((el) => el.type == 'Favourites');
-    if(favsIndex != -1) {
+    if (favsIndex != -1) {
       // move favourites to the end
       Booru tmp = sorted.elementAt(favsIndex);
       sorted.remove(tmp);
@@ -1311,13 +1339,13 @@ class SettingsHandler extends GetxController {
   Future saveBooru(Booru booru, {bool onlySave = false}) async {
     if (path == "") await setConfigDir();
 
-    await Directory(boorusPath).create(recursive:true);
+    await Directory(boorusPath).create(recursive: true);
     File booruFile = File("$boorusPath${booru.name}.json");
-    var writer = booruFile.openWrite();
+    final writer = booruFile.openWrite();
     writer.write(jsonEncode(booru.toJson()));
     await writer.close();
 
-    if(!onlySave) {
+    if (!onlySave) {
       // used only to avoid duplication after migration to json format
       // TODO remove condition when migration logic is removed
       booruList.add(booru);
@@ -1329,7 +1357,7 @@ class SettingsHandler extends GetxController {
   Future<bool> deleteBooru(Booru booru) async {
     File booruFile = File("$boorusPath${booru.name}.json");
     await booruFile.delete();
-    if (prefBooru == booru.name){
+    if (prefBooru == booru.name) {
       prefBooru = "";
       await saveSettings(restate: true);
     }
@@ -1345,11 +1373,11 @@ class SettingsHandler extends GetxController {
     List<String> soundInItem = ['sound', 'sound_edit', 'has_audio', 'voice_acted'].where((tag) => cleanItemTags.contains(tag)).toList();
     // TODO add more sound tags?
 
-    if(isCapped) {
-      if(hatedInItem.length > 5) {
+    if (isCapped) {
+      if (hatedInItem.length > 5) {
         hatedInItem = [...hatedInItem.take(5), '...'];
       }
-      if(lovedInItem.length > 5) {
+      if (lovedInItem.length > 5) {
         lovedInItem = [...lovedInItem.take(5), '...'];
       }
     }
@@ -1369,7 +1397,8 @@ class SettingsHandler extends GetxController {
           lovedTags.add(tag);
         }
         break;
-      default: break;
+      default:
+        break;
     }
     saveSettings(restate: false);
   }
@@ -1386,7 +1415,8 @@ class SettingsHandler extends GetxController {
           lovedTags.remove(tag);
         }
         break;
-      default: break;
+      default:
+        break;
     }
     saveSettings(restate: false);
   }
@@ -1399,7 +1429,7 @@ class SettingsHandler extends GetxController {
   }
 
   void checkUpdate({bool withMessage = false}) async {
-    if(Tools.isTestMode) {
+    if (Tools.isTestMode) {
       return;
     }
 
@@ -1410,7 +1440,8 @@ class SettingsHandler extends GetxController {
       "title": "Title",
       "changelog": changelog,
       "is_in_store": true, // is app still in store
-      "is_update_in_store": true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
+      "is_update_in_store":
+          true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
       "is_important": false, // is update important => force open dialog on start
       "store_package": "com.noaisu.play.loliSnatcher", // custom app package name, to allow to redirect store users to new app if it will be needed
       "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
@@ -1438,38 +1469,43 @@ class SettingsHandler extends GetxController {
       );
 
       String? discordFromGithub = json["discord_url"];
-      if(discordFromGithub != null && discordFromGithub.isNotEmpty) {
+      if (discordFromGithub != null && discordFromGithub.isNotEmpty) {
         // overwrite included discord url if it's not the same as the one in update info
-        if(discordFromGithub != discordURL.value) {
+        if (discordFromGithub != discordURL.value) {
           discordURL.value = discordFromGithub;
         }
       }
 
-      if(Constants.appBuildNumber < (updateInfo.value!.buildNumber)) { // if current build number is less than update build number in json
-        if(EnvironmentConfig.isFromStore) { // installed from store
-          if(updateInfo.value!.isInStore) { // app is still in store
+      if (Constants.appBuildNumber < (updateInfo.value!.buildNumber)) {
+        // if current build number is less than update build number in json
+        if (EnvironmentConfig.isFromStore) {
+          // installed from store
+          if (updateInfo.value!.isInStore) {
+            // app is still in store
             showUpdate(withMessage || updateInfo.value!.isImportant);
-          } else { // app was removed from store
+          } else {
+            // app was removed from store
             // then always notify user so they can move to github version and get news about removal
             showUpdate(true);
           }
-        } else { // installed from github
+        } else {
+          // installed from github
           showUpdate(withMessage || updateInfo.value!.isImportant);
         }
-      } else { // otherwise show latest version message
+      } else {
+        // otherwise show latest version message
         showLastVersionMessage(withMessage);
         updateInfo.value = null;
       }
-
     } catch (e) {
-      if(withMessage) {
+      if (withMessage) {
         FlashElements.showSnackbar(
           title: const Text(
             "Update Check Error!",
-            style: TextStyle(fontSize: 20)
+            style: TextStyle(fontSize: 20),
           ),
           content: Text(
-            e.toString()
+            e.toString(),
           ),
           sideColor: Colors.red,
           leadingIcon: Icons.update,
@@ -1480,11 +1516,11 @@ class SettingsHandler extends GetxController {
   }
 
   void showLastVersionMessage(bool withMessage) {
-    if(withMessage) {
+    if (withMessage) {
       FlashElements.showSnackbar(
         title: const Text(
           "You already have the latest version!",
-          style: TextStyle(fontSize: 20)
+          style: TextStyle(fontSize: 20),
         ),
         sideColor: Colors.green,
         leadingIcon: Icons.update,
@@ -1494,7 +1530,7 @@ class SettingsHandler extends GetxController {
   }
 
   void showUpdate(bool withMessage) {
-    if(withMessage && updateInfo.value != null) {
+    if (withMessage && updateInfo.value != null) {
       // TODO get from some external variable when building
       bool isFromStore = EnvironmentConfig.isFromStore;
 
@@ -1504,7 +1540,7 @@ class SettingsHandler extends GetxController {
           return SettingsDialog(
             title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
             contentItems: [
-              Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+              const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
               const Text(''),
               Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const Text(''),
@@ -1518,9 +1554,9 @@ class SettingsHandler extends GetxController {
                 onPressed: () {
                   Navigator.of(context).pop(true);
                 },
-                child: const Text('Later')
+                child: const Text('Later'),
               ),
-              if(isFromStore && updateInfo.value!.isInStore)
+              if (isFromStore && updateInfo.value!.isInStore)
                 ElevatedButton.icon(
                   onPressed: () async {
                     // try {
@@ -1532,7 +1568,7 @@ class SettingsHandler extends GetxController {
                     Navigator.of(context).pop(true);
                   },
                   icon: const Icon(Icons.play_arrow),
-                  label: const Text('Visit Play Store')
+                  label: const Text('Visit Play Store'),
                 )
               else
                 ElevatedButton.icon(
@@ -1541,7 +1577,7 @@ class SettingsHandler extends GetxController {
                     Navigator.of(context).pop(true);
                   },
                   icon: const Icon(Icons.exit_to_app),
-                  label: const Text('Visit Releases')
+                  label: const Text('Visit Releases'),
                 ),
             ],
           );
@@ -1559,9 +1595,8 @@ class SettingsHandler extends GetxController {
     return;
   }
 
-
   Future<void> initialize() async {
-    if(isInit.value == true) {
+    if (isInit.value == true) {
       return;
     }
 
@@ -1580,10 +1615,10 @@ class SettingsHandler extends GetxController {
       FlashElements.showSnackbar(
         title: const Text(
           "Initialization Error!",
-          style: TextStyle(fontSize: 20)
+          style: TextStyle(fontSize: 20),
         ),
         content: Text(
-          e.toString()
+          e.toString(),
         ),
         sideColor: Colors.red,
         leadingIcon: Icons.error,
@@ -1609,6 +1644,6 @@ class SettingsHandler extends GetxController {
 class EnvironmentConfig {
   static const isFromStore = bool.fromEnvironment(
     'LS_IS_STORE',
-    defaultValue: false
+    defaultValue: false,
   );
 }

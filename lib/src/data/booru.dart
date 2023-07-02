@@ -1,19 +1,23 @@
 import 'dart:convert';
 
+import 'package:get/utils.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+
 class Booru {
-  String? name = "", faviconURL = "", type = "", baseURL = "", apiKey = "", userID = "", defTags = "";
+  String? name = "", faviconURL = "", baseURL = "", apiKey = "", userID = "", defTags = "";
+  BooruType? type;
   Booru(this.name, this.type, this.faviconURL, this.baseURL, this.defTags);
   Booru.withKey(this.name, this.type, this.faviconURL, this.baseURL, this.defTags, this.apiKey, this.userID);
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
       "name": name,
-      "type": type,
+      "type": type?.name,
       "faviconURL": faviconURL,
       "baseURL": baseURL,
       "defTags": defTags,
       "apiKey": apiKey,
-      "userID" : userID
+      "userID": userID,
     };
   }
 
@@ -28,7 +32,7 @@ class Booru {
 
   String toLink(bool withSensitiveData) {
     Map json = toJson();
-    if(withSensitiveData == false) {
+    if (withSensitiveData == false) {
       json.remove("apiKey");
       json.remove("userID");
     }
@@ -43,9 +47,9 @@ class Booru {
     setFromMap(json);
   }
 
-  void setFromMap(Map<String,dynamic> json) {
+  void setFromMap(Map<String, dynamic> json) {
     name = json["name"]?.toString();
-    type = json["type"]?.toString();
+    type = BooruType.values.firstWhereOrNull((e) => e.name.toLowerCase() == json["type"]?.toString().toLowerCase());
     faviconURL = json["faviconURL"]?.toString();
     baseURL = json["baseURL"]?.toString();
     defTags = json["defTags"]?.toString();

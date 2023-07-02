@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -285,7 +286,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
     );
 
     final Widget favicon = isNotEmptyBooru
-        ? (tab.selectedBooru.value.type == "Favourites" ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(tab.selectedBooru.value))
+        ? (tab.selectedBooru.value.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(tab.selectedBooru.value))
         : const Icon(CupertinoIcons.question, size: 18);
 
     return Card(
