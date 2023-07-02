@@ -5,11 +5,8 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-//import 'package:dart_vlc/dart_vlc.dart';
-
 import 'package:media_kit/media_kit.dart'; 
 import 'package:media_kit_video/media_kit_video.dart';
-
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
@@ -42,20 +39,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
   
-  //final player = Player();
   Player? player;
   VideoController? controller;
-  //  configuration: PlayerConfiguration(
-  //    title: 'Lolisnatcher',
-  //  ),
-  //);
   final configuration = ValueNotifier<VideoControllerConfiguration>(
     const VideoControllerConfiguration(enableHardwareAcceleration: true),
   );
-  //late final VideoController controller = VideoController(
-  //  player!,
-  //  configuration: configuration.value,
-  //);
 
   Media? media;
 
@@ -240,9 +228,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     isViewed = settingsHandler.appMode.value.isMobile
         ? searchHandler.viewedIndex.value == searchHandler.getItemIndex(widget.booruItem)
         : searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL;
-      //? searchHandler.viewedIndex.value == widget.index
-      //: searchHandler.viewedItem.value.fileURL == widget.booruItem.fileURL; //rebase
-
     indexListener = searchHandler.viewedIndex.listen((int value) {
       final bool prevViewed = isViewed;
       final bool isCurrentIndex = value == searchHandler.getItemIndex(widget.booruItem);
@@ -269,7 +254,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void updateState() {
     if(mounted) {
-      //final controller = VideoController.create(controller.handle);
+      //final controller = VideoController.create(controller.handle); //TODO: I forget why this is here
       setState(() { });
     }
   }
@@ -324,10 +309,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   void disposables() {
-    // controller?.setVolume(0);
     player?.pause();
     player?.dispose();
-    //controller = null;
 
     if (!(_cancelToken != null && _cancelToken!.isCancelled)){
       _cancelToken?.cancel();
@@ -418,16 +401,12 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     }
     isLoaded = true;
 
-    //final player = Player(
-    //  configuration: PlayerConfiguration(
-    //    title: 'Lolisnatcher',
-    //   ),
-    //);
     player = Player();
     controller = VideoController(
       player!,
       configuration: configuration.value,
     );
+    // controller?.setVolume(0); //TODO: remeber audio volume
     //await player.setPlaylistMode(PlaylistMode.single); //TODO: this needs to be toggleable
 
     updateState();
@@ -435,9 +414,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // print('!!! Build video desktop ${widget.index}!!!');
-    
+  Widget build(BuildContext context) {   
     bool initialized = isLoaded; // controller != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
@@ -456,14 +433,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
               media!,
               play: settingsHandler.autoPlayEnabled,
               );
-          //player.open(
-          //  Playlist(
-          //    [
-          //    media!//,
-          //    //autoStart: settingsHandler.autoPlayEnabled,
-          //    ],
-          //  ),
-          //);
           firstViewFix = true;
         }
 
@@ -474,10 +443,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
         } else {
           player?.pause();
         }
-
-        //if (viewerHandler.videoAutoMute) {
-        //  controller!.volume = 0;
-        //}
       } else {
         player?.pause();
       }
