@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -50,7 +51,7 @@ class SankakuHandler extends BooruHandler {
     return DioNetwork.get(
       uri.toString(),
       headers: getHeaders(),
-      customInterceptor: withCaptchaCheck ? DioNetwork.captchaInterceptor : null,
+      customInterceptor: withCaptchaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
     );
   }
 
@@ -144,7 +145,7 @@ class SankakuHandler extends BooruHandler {
         ? {
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "User-Agent": Tools.browserUserAgent,
+            "User-Agent": Constants.defaultBrowserUserAgent,
             "Referer": "https://beta.sankakucomplex.com/",
             "Origin": "https://beta.sankakucomplex.com/"
           }
@@ -152,7 +153,7 @@ class SankakuHandler extends BooruHandler {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": authToken,
-            "User-Agent": Tools.browserUserAgent,
+            "User-Agent": Constants.defaultBrowserUserAgent,
             "Referer": "https://beta.sankakucomplex.com/",
             "Origin": "https://beta.sankakucomplex.com/"
           };
