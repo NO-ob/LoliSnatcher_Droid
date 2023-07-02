@@ -477,7 +477,6 @@ abstract class BooruHandler {
   Map<String, String> getHeaders() {
     return {
       "Accept": "text/html,application/xml,application/json",
-      // "User-Agent": Tools.appUserAgent,
       "User-Agent": Tools.browserUserAgent,
     };
   }

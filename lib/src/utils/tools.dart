@@ -75,6 +75,9 @@ class Tools {
     if (booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
       headers["User-Agent"] = appUserAgent;
     }
+    if(booru.baseURL?.contains("sankakucomplex.com") ?? false) {
+      headers["User-Agent"] = Constants.defaultBrowserUserAgent;
+    }
 
     if (!isTestMode) {
       try {
@@ -138,9 +141,7 @@ class Tools {
   // TODO move to separate class (something with the name like "Constants")
   static const String appUserAgent = "LoliSnatcher_Droid/${Constants.appVersion}";
   static String get browserUserAgent {
-    const defaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0";
-
-    return isTestMode ? defaultUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : defaultUserAgent);
+    return isTestMode ? appUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : appUserAgent);
   }
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
