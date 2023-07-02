@@ -26,6 +26,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
+  final TextEditingController userAgentController = TextEditingController();
   
   late String videoCacheMode, extPathOverride;
   bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true;
@@ -59,6 +60,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     });
     cacheSizeController.text = settingsHandler.cacheSize.toString();
     downloadNotifications = settingsHandler.downloadNotifications;
+    userAgentController.text = settingsHandler.customUserAgent;
 
     getCacheStats(null);
   }
@@ -120,6 +122,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.cacheSize = int.parse(cacheSizeController.text);
     settingsHandler.extPathOverride = extPathOverride;
     settingsHandler.downloadNotifications = downloadNotifications;
+    settingsHandler.customUserAgent = userAgentController.text;
     bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
@@ -417,6 +420,41 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   getCacheStats(null);
                 },
                 drawBottomBorder: false,
+              ),
+
+              const SettingsButton(name: '', enabled: false),
+
+              SettingsTextInput(
+                controller: userAgentController,
+                title: 'Custom User Agent',
+                clearable: true,
+                resetText: () => '',
+                drawBottomBorder: false,
+                trailingIcon: IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return const SettingsDialog(
+                          title: Text('Custom User Agent'),
+                          contentItems: <Widget>[
+                            Text('Keep empty to use default value'),
+                            Text('Default: ${Tools.appUserAgent}'),
+                            Text('Will be used on requests for almost all boorus and on the webview'),
+                            Text('Value is saved after leaving this page'),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              SettingsButton(
+                name: 'Tap to use suggested browser user agent',
+                action: () {
+                  userAgentController.text = Tools.browserUserAgent;
+                },
               ),
             ],
           ),

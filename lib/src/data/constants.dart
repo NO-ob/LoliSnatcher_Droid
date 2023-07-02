@@ -13,4 +13,6 @@ class Constants {
   static const int tagStaleTime = 3 * 24 * 60 * 60 * 1000; // 3 days
 
   static const String discordURL = 'https://discord.gg/r9E4HDx9dz';
+
+  static const String defaultBrowserUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/111.0";
 }
