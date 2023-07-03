@@ -21,15 +21,6 @@ class R34HentaiHandler extends ShimmieHandler {
   }
 
   @override
-  String validateTags(tags) {
-    if (tags == " " || tags == "") {
-      return "";
-    } else {
-      return tags;
-    }
-  }
-
-  @override
   List parseListFromResponse(response) {
     var document = parse(response.data);
     return document.getElementsByClassName("thumb");

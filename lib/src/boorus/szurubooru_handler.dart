@@ -13,7 +13,7 @@ class SzurubooruHandler extends BooruHandler {
     if (tags == "" || tags == " ") {
       return "*";
     } else {
-      return tags;
+      return super.validateTags(tags);
     }
   }
 

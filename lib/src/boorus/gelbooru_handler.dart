@@ -42,7 +42,7 @@ class GelbooruHandler extends BooruHandler {
     if (tags.toLowerCase().contains('rating:safe')) {
       tags = tags.toLowerCase().replaceAll('rating:safe', 'rating:general');
     }
-    return tags;
+    return super.validateTags(tags);
   }
 
   @override

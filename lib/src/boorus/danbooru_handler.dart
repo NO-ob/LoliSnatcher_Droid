@@ -35,7 +35,7 @@ class DanbooruHandler extends BooruHandler {
         booru.baseURL!.contains('danbooru.donmai.us')) {
       tags = tags.toLowerCase().replaceAll('rating:safe', 'rating:general');
     }
-    return tags;
+    return super.validateTags(tags);
   }
 
   @override

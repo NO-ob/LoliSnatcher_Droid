@@ -17,7 +17,7 @@ class R34USHandler extends BooruHandler {
     if (tags == " " || tags == "") {
       return "all";
     } else {
-      return tags;
+      return super.validateTags(tags);
     }
   }
 
