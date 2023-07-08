@@ -127,7 +127,7 @@ class DioDownloader {
       // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(url));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(url));
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
@@ -143,7 +143,7 @@ class DioDownloader {
 
   Future<Map<String, dynamic>> getHeaders() async {
     Map<String, dynamic> resultHeaders = {...headers ?? {}};
-    String cookieString = await getCookies();
+    final String cookieString = await getCookies();
     if (cookieString.isNotEmpty) {
       resultHeaders['Cookie'] = cookieString;
     }
@@ -238,7 +238,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioException && CancelToken.isCancel(e);
+      final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -309,8 +309,13 @@ class DioDownloader {
 
       File? tempFile;
       if (cacheEnabled) {
-        tempFile = await imageWriter.writeCacheFromBytes(resolved, response.data as Uint8List, cacheFolder,
-            clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras);
+        tempFile = await imageWriter.writeCacheFromBytes(
+          resolved,
+          response.data as Uint8List,
+          cacheFolder,
+          clearName: cacheFolder == 'favicons' ? false : true,
+          fileNameExtras: fileNameExtras,
+        );
         if (tempFile != null) {
           // onEvent?.call('isFromCache');
         }
@@ -326,7 +331,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioException && CancelToken.isCancel(e);
+      final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -375,7 +380,8 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.download(
         resolved.toString(),
-        await imageWriter.getCachePathString(resolved.toString(), cacheFolder, clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
+        await imageWriter.getCachePathString(resolved.toString(), cacheFolder,
+            clearName: cacheFolder == 'favicons' ? false : true, fileNameExtras: fileNameExtras),
         options: Options(headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
@@ -407,7 +413,7 @@ class DioDownloader {
       }
       return;
     } catch (e) {
-      bool isCancelError = e is DioException && CancelToken.isCancel(e);
+      final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);
@@ -444,7 +450,7 @@ class DioDownloader {
       dispose();
       return;
     } catch (e) {
-      bool isCancelError = e is DioException && CancelToken.isCancel(e);
+      final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) Logger.Inst().log('Error downloading $url :: $e', runtimeType.toString(), 'runRequestSize', LogTypes.imageLoadingError);
       if (e is Exception) {
         onError?.call(e);

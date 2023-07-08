@@ -16,8 +16,8 @@ class WebviewNavigationControls extends StatelessWidget {
       builder: (context, snapshot) {
         final InAppWebViewController? controller = snapshot.data;
         if (snapshot.connectionState != ConnectionState.done || controller == null) {
-          return Row(
-            children: const <Widget>[
+          return const Row(
+            children: <Widget>[
               Icon(Icons.arrow_back_ios),
               Icon(Icons.arrow_forward_ios),
               Icon(Icons.replay),
@@ -34,7 +34,7 @@ class WebviewNavigationControls extends StatelessWidget {
                   builder: (context) => WebviewHistoryDialog(
                     controller: controller,
                     onSelect: (String url) {
-                      controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+                      controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
                     },
                   ),
                 );

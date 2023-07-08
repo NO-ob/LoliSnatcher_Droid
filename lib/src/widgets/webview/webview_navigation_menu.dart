@@ -33,7 +33,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
   final TextEditingController _urlController = TextEditingController();
 
   Future<void> _onGoToInitial(InAppWebViewController controller) async {
-    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(widget.initialUrl)));
+    await controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(widget.initialUrl)));
   }
 
   Future<void> _onEnterCustomUrl(InAppWebViewController controller) async {
@@ -76,43 +76,46 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
       if (!url.startsWith('https')) {
         url = 'https://$url';
       }
-      await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
+      await controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
     }
   }
 
   Future<void> _onListCookies(InAppWebViewController controller) async {
-    final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? WebUri('https://flutter.dev'));
+    final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? Uri.parse('https://flutter.dev'));
     if (!mounted) return;
 
-    await showDialog(context: context, builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Cookies'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: cookies.map((Cookie cookie) {
-              return Text(
-                '${cookie.name} = ${cookie.value}',
-                style: const TextStyle(fontSize: 16),
-              );
-            }).toList(),
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Cookies'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: cookies.map((Cookie cookie) {
+                return Text(
+                  '${cookie.name} = ${cookie.value}',
+                  style: const TextStyle(fontSize: 16),
+                );
+              }).toList(),
+            ),
           ),
-        ),
-        actions: const [
-          CloseButton(),
-        ],
-      );
-    });
+          actions: const [
+            CloseButton(),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _onClearCookies(InAppWebViewController controller) async {
     // TODO doesn't work? maybe something related to android 12?
-    Uri url = await controller.getUrl() ?? WebUri('https://flutter.dev');
+    final Uri url = await controller.getUrl() ?? Uri.parse('https://flutter.dev');
     print('Clearing cookies for $url');
-    await cookieManager.deleteCookies(url: WebUri.uri(url));
-    String message = 'There were cookies. Now, they are gone!';
+    await cookieManager.deleteCookies(url: url);
+    const String message = 'There were cookies. Now, they are gone!';
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text(message),
       ),
     );
@@ -133,32 +136,35 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
 
     final Uri? uri = await controller.getUrl();
 
-    await showDialog(context: context, builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('Favicon'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: [
-              SelectableText(
-                favicon ?? 'No favicon found',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const Text('Host:'),
-              SelectableText(
-                '${uri?.scheme}://${uri?.host}',
-              ),
-              const Text('(text above is selectable)'),
-              const Text(''),
-              const Text('Field to merge texts:'),
-              const TextField(),
-            ],
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Favicon'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: [
+                SelectableText(
+                  favicon ?? 'No favicon found',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const Text('Host:'),
+                SelectableText(
+                  '${uri?.scheme}://${uri?.host}',
+                ),
+                const Text('(text above is selectable)'),
+                const Text(''),
+                const Text('Field to merge texts:'),
+                const TextField(),
+              ],
+            ),
           ),
-        ),
-        actions: const [
-          CloseButton(),
-        ],
-      );
-    });
+          actions: const [
+            CloseButton(),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> _onCopyUrl(InAppWebViewController controller) async {

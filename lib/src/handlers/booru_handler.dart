@@ -486,7 +486,7 @@ abstract class BooruHandler {
       // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
