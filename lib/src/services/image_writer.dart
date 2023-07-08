@@ -5,8 +5,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -41,7 +41,13 @@ class ImageWriter {
     // print(path! + fileName);
     bool fileExists = await image.exists();
     // if (fileExists) return null;
-    if (!ignoreExists && (fileExists || item.isSnatched.value == true)) return null;
+    if (!ignoreExists && (fileExists || item.isSnatched.value == true)) {
+      item.isSnatched.value = true;
+      if (settingsHandler.dbEnabled) {
+        await settingsHandler.dbHandler.updateBooruItem(item, "local");
+      }
+      return null;
+    }
     try {
       final fileNameSplit = fileName.split(".");
       final fileNameWoutExt = fileNameSplit.sublist(0, fileNameSplit.length - 1).join(".");
