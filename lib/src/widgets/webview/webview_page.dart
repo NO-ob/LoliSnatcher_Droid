@@ -35,6 +35,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
 
   late PullToRefreshController pullToRefreshController;
   int loadingPercentage = 0;
+  bool hideSubtitle = false;
 
   @override
   void initState() {
@@ -124,7 +125,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
             LinearProgressIndicator(
               value: loadingPercentage / 100.0,
             ),
-          if (widget.subtitle != null)
+          if (widget.subtitle != null && !hideSubtitle)
             Positioned(
               bottom: MediaQuery.of(context).padding.bottom + 8,
               left: 8,
@@ -155,6 +156,15 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
+                    ),
+                    IconButton(
+                      iconSize: 22,
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        setState(() {
+                          hideSubtitle = true;
+                        });
+                      },
                     ),
                   ],
                 ),
