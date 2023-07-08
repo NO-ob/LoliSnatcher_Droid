@@ -3,7 +3,7 @@ enum BooruType {
   BooruOnRails,
   Danbooru,
   e621,
-  FurAffinity,
+  //FurAffinity,
   Gelbooru,
   GelbooruV1,
   Hydrus,

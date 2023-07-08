@@ -5,7 +5,6 @@ import 'package:lolisnatcher/src/boorus/danbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/e621_handler.dart';
 import 'package:lolisnatcher/src/boorus/empty_handler.dart';
 import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
-import 'package:lolisnatcher/src/boorus/furaffinity_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_alikes_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooru_handler.dart';
 import 'package:lolisnatcher/src/boorus/gelbooruv1_handler.dart';
@@ -128,10 +127,10 @@ class BooruHandlerFactory {
           pageNum = 0;
           booruHandler = WildCrittersHandler(booru, limit);
           break;
-        case (BooruType.FurAffinity):
+        /*   case (BooruType.FurAffinity):
           pageNum = 0;
           booruHandler = FurAffinityHandler(booru, limit);
-          break;
+          break;*/
         default:
           booruHandler = EmptyHandler(Booru(null, null, null, null, null), limit);
           break;

@@ -539,7 +539,7 @@ class SettingsHandler extends GetxController {
     try {
       switch (settingParams["type"]) {
         case 'stringFromList':
-          String validValue = List<String>.from(settingParams["options"]!).firstWhere((el) => el == value, orElse: () => '');
+          final String validValue = List<String>.from(settingParams["options"]!).firstWhere((el) => el == value, orElse: () => '');
           if (validValue != '') {
             return validValue;
           } else {
@@ -726,13 +726,13 @@ class SettingsHandler extends GetxController {
   }
 
   Future<bool> checkForSettings() async {
-    File settingsFile = File("${path}settings.json");
+    final File settingsFile = File("${path}settings.json");
     return await settingsFile.exists();
   }
 
   Future<void> loadSettingsJson() async {
-    File settingsFile = File("${path}settings.json");
-    String settings = await settingsFile.readAsString();
+    final File settingsFile = File("${path}settings.json");
+    final String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
     await loadFromJSON(settings, true);
     return;
@@ -868,7 +868,7 @@ class SettingsHandler extends GetxController {
   }
 
   dynamic setByString(String varName, dynamic value) {
-    dynamic validatedValue = validateValue(varName, value);
+    final dynamic validatedValue = validateValue(varName, value);
     //Could this just be replaced with getByString(varName) = validatedValue?
     switch (varName) {
       case 'defTags':
@@ -1244,7 +1244,7 @@ class SettingsHandler extends GetxController {
     await getPerms();
     if (path == "") await setConfigDir();
     await Directory(path).create(recursive: true);
-    File settingsFile = File("${path}settings.json");
+    final File settingsFile = File("${path}settings.json");
     final writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
     await writer.close();
@@ -1260,7 +1260,7 @@ class SettingsHandler extends GetxController {
     try {
       if (path == "") await setConfigDir();
 
-      Directory directory = Directory(boorusPath);
+      final Directory directory = Directory(boorusPath);
       List<FileSystemEntity> files = [];
       if (await directory.exists()) {
         files = await directory.list().toList();
@@ -1271,9 +1271,9 @@ class SettingsHandler extends GetxController {
           if (files[i].path.contains(".json")) {
             // && files[i].path != 'settings.json'
             // print(files[i].toString());
-            File booruFile = files[i] as File;
-            Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            bool isAllowed = booruFromFile.type != 'Favourites';
+            final File booruFile = files[i] as File;
+            final Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
+            final bool isAllowed = booruFromFile.type != BooruType.Favourites;
             if (isAllowed) {
               tempList.add(booruFromFile);
             } else {
@@ -1319,17 +1319,17 @@ class SettingsHandler extends GetxController {
     if (prefIndex != 0) {
       // move default booru to top
       // print("Booru pref found in booruList");
-      Booru tmp = sorted.elementAt(prefIndex);
+      final Booru tmp = sorted.elementAt(prefIndex);
       sorted.remove(tmp);
       sorted.insert(0, tmp);
       // print("booruList is");
       // print(sorted);
     }
 
-    int favsIndex = sorted.indexWhere((el) => el.type == 'Favourites');
+    final int favsIndex = sorted.indexWhere((el) => el.type == BooruType.Favourites);
     if (favsIndex != -1) {
       // move favourites to the end
-      Booru tmp = sorted.elementAt(favsIndex);
+      final Booru tmp = sorted.elementAt(favsIndex);
       sorted.remove(tmp);
       sorted.add(tmp);
     }
@@ -1340,7 +1340,7 @@ class SettingsHandler extends GetxController {
     if (path == "") await setConfigDir();
 
     await Directory(boorusPath).create(recursive: true);
-    File booruFile = File("$boorusPath${booru.name}.json");
+    final File booruFile = File("$boorusPath${booru.name}.json");
     final writer = booruFile.openWrite();
     writer.write(jsonEncode(booru.toJson()));
     await writer.close();
@@ -1355,7 +1355,7 @@ class SettingsHandler extends GetxController {
   }
 
   Future<bool> deleteBooru(Booru booru) async {
-    File booruFile = File("$boorusPath${booru.name}.json");
+    final File booruFile = File("$boorusPath${booru.name}.json");
     await booruFile.delete();
     if (prefBooru == booru.name) {
       prefBooru = "";
@@ -1532,7 +1532,7 @@ class SettingsHandler extends GetxController {
   void showUpdate(bool withMessage) {
     if (withMessage && updateInfo.value != null) {
       // TODO get from some external variable when building
-      bool isFromStore = EnvironmentConfig.isFromStore;
+      const bool isFromStore = EnvironmentConfig.isFromStore;
 
       showDialog(
         context: NavigationHandler.instance.navigatorKey.currentContext!,

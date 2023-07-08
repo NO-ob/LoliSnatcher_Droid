@@ -31,40 +31,43 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   final GlobalKey webViewKey = GlobalKey();
 
   Completer<InAppWebViewController> controller = Completer<InAppWebViewController>();
-  late final InAppWebViewSettings settings;
+  late final InAppWebViewGroupOptions options;
 
   late PullToRefreshController pullToRefreshController;
   int loadingPercentage = 0;
-  bool hideSubtitle = false;
 
   @override
   void initState() {
     super.initState();
 
-    settings = InAppWebViewSettings(
-      userAgent: widget.userAgent ?? Tools.browserUserAgent,
-      useShouldOverrideUrlLoading: true,
-      mediaPlaybackRequiresUserGesture: false,
-      javaScriptEnabled: true,
-      cacheEnabled: true,
-      useHybridComposition: true,
-      thirdPartyCookiesEnabled: true,
-      allowsInlineMediaPlayback: true,
-      sharedCookiesEnabled: true,
+    options = InAppWebViewGroupOptions(
+      crossPlatform: InAppWebViewOptions(
+        userAgent: widget.userAgent ?? Tools.browserUserAgent,
+        useShouldOverrideUrlLoading: true,
+        mediaPlaybackRequiresUserGesture: false,
+        javaScriptEnabled: true,
+        cacheEnabled: false,
+      ),
+      android: AndroidInAppWebViewOptions(
+        useHybridComposition: true,
+      ),
+      ios: IOSInAppWebViewOptions(
+        allowsInlineMediaPlayback: true,
+      ),
     );
 
     pullToRefreshController = PullToRefreshController(
-      settings: PullToRefreshSettings(
+      options: PullToRefreshOptions(
         color: Colors.blue,
       ),
       onRefresh: () async {
         if (Platform.isAndroid) {
-          controller.future.then((controller) {
+          await controller.future.then((controller) {
             controller.reload();
           });
         } else if (Platform.isIOS) {
-          controller.future.then((controller) async {
-            controller.loadUrl(urlRequest: URLRequest(url: await controller.getUrl()));
+          await controller.future.then((controller) async {
+            await controller.loadUrl(urlRequest: URLRequest(url: await controller.getUrl()));
           });
         }
       },
@@ -89,8 +92,8 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       body: Stack(
         children: [
           InAppWebView(
-            initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
-            initialSettings: settings,
+            initialUrlRequest: URLRequest(url: Uri.parse(widget.initialUrl)),
+            initialOptions: options,
             pullToRefreshController: pullToRefreshController,
             onWebViewCreated: (webViewController) {
               controller.complete(webViewController);
@@ -121,7 +124,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
             LinearProgressIndicator(
               value: loadingPercentage / 100.0,
             ),
-          if (widget.subtitle != null && !hideSubtitle)
+          if (widget.subtitle != null)
             Positioned(
               bottom: MediaQuery.of(context).padding.bottom + 8,
               left: 8,
@@ -152,15 +155,6 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                    ),
-                    IconButton(
-                      iconSize: 22,
-                      icon: const Icon(Icons.close),
-                      onPressed: () {
-                        setState(() {
-                          hideSubtitle = true;
-                        });
-                      },
                     ),
                   ],
                 ),

@@ -36,25 +36,25 @@ class Tools {
   }
 
   static String getFileExt(String fileURL) {
-    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
-    int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
-    String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
+    final int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+    final int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
+    final String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
     return fileExt;
   }
 
   static String getFileName(String fileURL) {
-    int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
-    int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
-    String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
+    final int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+    final int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
+    final String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
     return fileExt;
   }
 
   static String sanitize(String str, {String replacement = ''}) {
-    RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
-    RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
-    RegExp reservedRe = RegExp(r'^\.+$');
-    RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
-    RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
+    final RegExp illegalRe = RegExp(r'[\/\?<>\\:\*\|"]');
+    final RegExp controlRe = RegExp(r'[\x00-\x1f\x80-\x9f]');
+    final RegExp reservedRe = RegExp(r'^\.+$');
+    final RegExp windowsReservedRe = RegExp(r'^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$', caseSensitive: false);
+    final RegExp windowsTrailingRe = RegExp(r'[\. ]+$');
 
     // TODO truncate to 255 symbols for windows?
     return str
@@ -178,7 +178,7 @@ class Tools {
       // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri.uri(uri));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: uri);
         for (Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }

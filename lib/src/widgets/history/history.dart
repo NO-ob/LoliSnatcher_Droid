@@ -85,7 +85,7 @@ class _HistoryListState extends State<HistoryList> {
           // TODO copy filtering logic from tabboxdialog
           final String filter = filterSearchController.text.toLowerCase();
           final bool textFilter = h.searchText.toLowerCase().contains(filter);
-          final bool booruFilter = h.booruName.toLowerCase().contains(filter) || h.booruType.toLowerCase().contains(filter);
+          final bool booruFilter = h.booruName.toLowerCase().contains(filter) || (h.booruType != null && h.booruType!.name.toLowerCase().contains(filter));
           final bool unknownFilter = 'unknown'.contains(filter) &&
               settingsHandler.booruList.firstWhereOrNull((booru) => h.booruName == booru.name && h.booruType == booru.type) == null;
           return textFilter || booruFilter || unknownFilter;
@@ -207,8 +207,8 @@ class _HistoryListState extends State<HistoryList> {
                 side: BorderSide(color: Theme.of(context).colorScheme.secondary),
               ),
               onTap: () {
-                int indexWhere = history.indexWhere((el) => el.id == entry.id);
-                bool newFavourite = !entry.isFavourite;
+                final int indexWhere = history.indexWhere((el) => el.id == entry.id);
+                final bool newFavourite = !entry.isFavourite;
                 entry.isFavourite = newFavourite;
 
                 history[indexWhere] = entry;
@@ -278,7 +278,7 @@ class _HistoryListState extends State<HistoryList> {
       pageFuture: (page) => _loadPage(page, pageSize),
       pageSize: pageSize,
       thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index, bool alwaysVisibleScrollThumb, Animation<double> thumbAnimation) {
-        HistoryItem item = filteredHistory[index];
+        final HistoryItem item = filteredHistory[index];
         return CustomScrollBarThumb(
           backgroundColor: backgroundColor,
           drawColor: drawColor,
@@ -303,7 +303,7 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   Widget buildEntry(int index, bool isActive, bool fromFiltered) {
-    HistoryItem currentEntry = fromFiltered ? filteredHistory[index] : history[index];
+    final HistoryItem currentEntry = fromFiltered ? filteredHistory[index] : history[index];
     Booru? booru;
     if (settingsHandler.booruList.isNotEmpty) {
       booru = settingsHandler.booruList.firstWhereOrNull((b) => b.type == currentEntry.booruType && b.name == currentEntry.booruName);

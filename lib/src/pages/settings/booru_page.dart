@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 
@@ -52,7 +53,7 @@ class _BooruPageState extends State<BooruPage> {
 
   void copyBooruLink(bool withSensitiveData) {
     Navigator.of(context).pop(true); // remove dialog
-    String link = selectedBooru?.toLink(withSensitiveData) ?? '';
+    final String link = selectedBooru?.toLink(withSensitiveData) ?? '';
     if (Platform.isWindows || Platform.isLinux) {
       Clipboard.setData(ClipboardData(text: link));
       FlashElements.showSnackbar(
@@ -83,7 +84,7 @@ class _BooruPageState extends State<BooruPage> {
       settingsHandler.prefBooru = selectedBooru?.name ?? '';
     }
     settingsHandler.limit = int.parse(limitController.text);
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     settingsHandler.sortBooruList();
     return result;
   }
@@ -134,7 +135,7 @@ class _BooruPageState extends State<BooruPage> {
       name: 'Share Selected Booru',
       icon: const Icon(Icons.share),
       action: () {
-        if (selectedBooru?.type == 'Favourites') {
+        if (selectedBooru?.type == BooruType.Favourites) {
           return;
         }
 
@@ -209,7 +210,7 @@ class _BooruPageState extends State<BooruPage> {
       // do nothing if no selected or selected "Favourites"
       // TODO update all tabs with old booru with a new one
       // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
-      page: (selectedBooru != null && selectedBooru?.type != 'Favourites') ? () => BooruEdit(selectedBooru!) : null,
+      page: (selectedBooru != null && selectedBooru?.type != BooruType.Favourites) ? () => BooruEdit(selectedBooru!) : null,
     );
   }
 
@@ -229,7 +230,7 @@ class _BooruPageState extends State<BooruPage> {
           );
           return;
         }
-        if (selectedBooru?.type == 'Favourites') {
+        if (selectedBooru?.type == BooruType.Favourites) {
           FlashElements.showSnackbar(
             context: context,
             title: const Text("Can't delete this Booru!", style: TextStyle(fontSize: 20)),
@@ -267,7 +268,7 @@ class _BooruPageState extends State<BooruPage> {
                 ElevatedButton.icon(
                   onPressed: () async {
                     // save current and select next available booru to avoid exception after deletion
-                    Booru tempSelected = selectedBooru!;
+                    final Booru tempSelected = selectedBooru!;
                     if (settingsHandler.booruList.isNotEmpty && settingsHandler.booruList.length > 1) {
                       selectedBooru = settingsHandler.booruList[1];
                     } else {
@@ -334,11 +335,11 @@ class _BooruPageState extends State<BooruPage> {
       action: () async {
         // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
         ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
-        String url = cdata?.text ?? '';
+        final String url = cdata?.text ?? '';
         Logger.Inst().log(url, "BooruPage", "getBooruFromClipboard", LogTypes.settingsLoad);
         if (url.isNotEmpty) {
           if (url.contains('loli.snatcher')) {
-            Booru booru = Booru.fromLink(url);
+            final Booru booru = Booru.fromLink(url);
             if (booru.name != null && booru.name!.isNotEmpty) {
               if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
                 // Rename config if its already in the list

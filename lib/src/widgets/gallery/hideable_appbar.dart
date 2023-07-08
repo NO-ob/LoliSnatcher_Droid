@@ -90,7 +90,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void autoScrollState(bool newState) {
-    bool isNotLastPage = (searchHandler.viewedIndex.value + 1) < searchHandler.currentFetched.length;
+    final bool isNotLastPage = (searchHandler.viewedIndex.value + 1) < searchHandler.currentFetched.length;
     if (autoScroll != newState) {
       if (isNotLastPage) {
         setState(() {
@@ -130,7 +130,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   void scrollToNextPage() {
     // Not sure if video and gifs should be autoscrolled, could maybe add a listener for video playtime so it changes at the end
     final int viewedIndex = searchHandler.viewedIndex.value;
-    final bool isImage = searchHandler.currentFetched[viewedIndex].mediaType == "image";
+    final bool isImage = searchHandler.currentFetched[viewedIndex].mediaType.value == MediaType.image;
     // TODO video and gifs support
     // TODO check if item is loaded
     if (viewedIndex < (searchHandler.currentFetched.length - 1)) {
@@ -155,13 +155,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
         return false;
       }
 
-      bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isImageOrAnimation;
-      bool isScaleButton = btn[0] == 'reloadnoscale';
-      bool isScaleAllowed =
+      final bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isImageOrAnimation;
+      final bool isScaleButton = btn[0] == 'reloadnoscale';
+      final bool isScaleAllowed =
           isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
 
-      bool isFavButton = btn[0] == 'favourite';
-      bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
+      final bool isFavButton = btn[0] == 'favourite';
+      final bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
 
       return isScaleAllowed && isFavAllowed;
     }).toList();
@@ -170,7 +170,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     List<List<String>> overFlowList = [];
     List<List<String>> buttonList = [];
     // first 4 buttons will show on toolbar
-    int listSplit = (MediaQuery.of(context).size.width / 100).floor();
+    final int listSplit = (MediaQuery.of(context).size.width / 100).floor();
     // print(MediaQuery.of(context).size.width);
     if (listSplit < filteredButtonOrder.length) {
       overFlowList = (filteredButtonOrder.sublist(listSplit));
@@ -179,7 +179,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       buttonList = filteredButtonOrder;
     }
     for (var value in buttonList) {
-      String name = value[0];
+      final String name = value[0];
 
       actions.add(
         ToolbarAction(
@@ -228,7 +228,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           color: Theme.of(context).colorScheme.surface,
           itemBuilder: (BuildContext itemBuilder) => overFlowList.map(
             (value) {
-              String name = value[0];
+              final String name = value[0];
 
               return PopupMenuItem(
                 padding: const EdgeInsets.all(0),
@@ -485,7 +485,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   void onShareClick() {
-    String shareSetting = settingsHandler.shareAction;
+    final String shareSetting = settingsHandler.shareAction;
     switch (shareSetting) {
       case 'Post URL':
         if (searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL != '') {
@@ -534,14 +534,14 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   void shareHydrusAction(BooruItem item) {
     if (settingsHandler.hasHydrus) {
-      Booru hydrus = settingsHandler.booruList.where((element) => element.type == BooruType.Hydrus).first;
-      HydrusHandler hydrusHandler = HydrusHandler(hydrus, 10);
+      final Booru hydrus = settingsHandler.booruList.where((element) => element.type == BooruType.Hydrus).first;
+      final HydrusHandler hydrusHandler = HydrusHandler(hydrus, 10);
       hydrusHandler.addURL(item);
     }
   }
 
   void shareFileAction() async {
-    BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+    final BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
 
     if (sharedItem != null) {
       final dialogRes = await showDialog(
@@ -722,7 +722,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   title: const Text('File'),
                 ),
                 const SizedBox(height: 15),
-                settingsHandler.hasHydrus && searchHandler.currentBooru.type != "Hydrus"
+                settingsHandler.hasHydrus && searchHandler.currentBooru.type != BooruType.Hydrus
                     ? ListTile(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
