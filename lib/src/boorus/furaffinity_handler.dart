@@ -54,8 +54,8 @@ class FurAffinityHandler extends BooruHandler {
     final imgItem = responseItem.querySelector("img");
 
     if (imgItem.attributes["src"] != null) {
-      String id = responseItem.attributes["href"]!.replaceAll("/", "").replaceAll("view", "");
-      String thumbURL = "https:${imgItem.attributes["src"]!}";
+      final String id = responseItem.attributes["href"]!.replaceAll("/", "").replaceAll("view", "");
+      final String thumbURL = "https:${imgItem.attributes["src"]!}";
       Document? postPage = await getPostPage(id);
 
       if (postPage == null) {
@@ -64,16 +64,16 @@ class FurAffinityHandler extends BooruHandler {
 
       final image = postPage.getElementById("submissionImg");
 
-      String fileURL = "https:${image?.attributes["data-fullview-src"]}";
-      String sampleURL = "https:${image?.attributes["data-preview-src"]}" ?? "";
+      final String fileURL = "https:${image?.attributes["data-fullview-src"]}";
+      final String sampleURL = "https:${image?.attributes["data-preview-src"]}";
       if (fileURL == "https:") {
         return null;
       }
 
-      List<String> tags = postPage.querySelectorAll("span.tags > a").map((e) => e.innerHtml).toList();
-      BooruItem item = BooruItem(
+      final List<String> tags = postPage.querySelectorAll("span.tags > a").map((e) => e.innerHtml).toList();
+      final BooruItem item = BooruItem(
         fileURL: fileURL,
-        sampleURL: sampleURL == "https:" ? fileURL : fileURL,
+        sampleURL: sampleURL == "https:" ? fileURL : sampleURL,
         thumbnailURL: thumbURL,
         tagsList: tags,
         postURL: makePostURL(id),
@@ -88,7 +88,7 @@ class FurAffinityHandler extends BooruHandler {
   }
 
   Future<Document?> getPostPage(String id) async {
-    String url = makePostURL(id);
+    final String url = makePostURL(id);
     final response = await DioNetwork.get(url, headers: getHeaders());
     if (response.statusCode == 200) {
       return parse(response.data);
