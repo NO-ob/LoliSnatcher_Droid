@@ -40,12 +40,11 @@ class _BooruEditState extends State<BooruEdit> {
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
 
-  // TODO (NO_ob): Update to use enum for booru types
   BooruType selectedBooruType = BooruType.AutoDetect;
 
   // TODO make standalone / move to handlers themselves
   String convertSiteUrlToApi() {
-    String url = booruURLController.text;
+    final String url = booruURLController.text;
 
     if (url.contains("chan.sankakucomplex.com")) {
       // Sankaku api override
@@ -78,7 +77,7 @@ class _BooruEditState extends State<BooruEdit> {
 
   @override
   Widget build(BuildContext context) {
-    String? description = selectedBooruType != "AutoDetect"
+    String? description = selectedBooruType != BooruType.AutoDetect
         ? BooruHandlerFactory().getBooruHandler(
             [Booru('', selectedBooruType, '', '', '')],
             1,
@@ -150,7 +149,7 @@ class _BooruEditState extends State<BooruEdit> {
                 child: SelectableText(description),
               ),
             Column(
-              children: selectedBooruType == 'Hydrus'
+              children: selectedBooruType == BooruType.Hydrus
                   ? [
                       SizedBox(
                         width: double.infinity,
@@ -164,8 +163,8 @@ class _BooruEditState extends State<BooruEdit> {
                             ),
                           ),
                           onPressed: () async {
-                            if (selectedBooruType == "Hydrus") {
-                              HydrusHandler hydrus = HydrusHandler(
+                            if (selectedBooruType == BooruType.Hydrus) {
+                              final HydrusHandler hydrus = HydrusHandler(
                                 Booru(
                                   "Hydrus",
                                   BooruType.Hydrus,
@@ -175,7 +174,7 @@ class _BooruEditState extends State<BooruEdit> {
                                 ),
                                 5,
                               );
-                              String accessKey = await hydrus.getAccessKey();
+                              final String accessKey = await hydrus.getAccessKey();
                               if (accessKey != "") {
                                 FlashElements.showSnackbar(
                                   context: context,
@@ -289,7 +288,7 @@ class _BooruEditState extends State<BooruEdit> {
             context,
             MaterialPageRoute(
               builder: (context) => InAppWebviewView(
-                initialUrl: selectedBooruType == BooruType.FurAffinity ? "${booruURLController.text}/login" : booruURLController.text,
+                initialUrl: booruURLController.text,
               ),
             ),
           );
@@ -381,7 +380,7 @@ class _BooruEditState extends State<BooruEdit> {
         setState(() {});
         List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
         BooruType? booruType = testResults[0];
-        String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : "";
+        final String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : "";
 
         // If a booru type is returned set the widget state
         if (booruType != null) {
@@ -425,15 +424,15 @@ class _BooruEditState extends State<BooruEdit> {
   /// allowing the user to save the booru config otherwise an empty container is returned
   Widget saveButton() {
     return SettingsButton(
-      name: "Save Booru${widget.booruType == '' ? ' (Run Test First)' : ''}",
+      name: "Save Booru${widget.booruType == null ? ' (Run Test First)' : ''}",
       icon: Icon(
         Icons.save,
-        color: widget.booruType == '' ? Colors.red : Colors.green,
+        color: widget.booruType == null ? Colors.red : Colors.green,
       ),
       action: () async {
         sanitizeBooruName();
 
-        if (widget.booruType == "") {
+        if (widget.booruType == null) {
           FlashElements.showSnackbar(
             context: context,
             title: const Text('Run Test First!', style: TextStyle(fontSize: 20)),
@@ -445,7 +444,7 @@ class _BooruEditState extends State<BooruEdit> {
         }
 
         await getPerms();
-        Booru newBooru = (booruAPIKeyController.text == "" && booruUserIDController.text == "")
+        final Booru newBooru = (booruAPIKeyController.text == "" && booruUserIDController.text == "")
             ? Booru(
                 booruNameController.text,
                 widget.booruType,
@@ -573,7 +572,7 @@ class _BooruEditState extends State<BooruEdit> {
     booru.type = userBooruType;
 
     if (userBooruType == BooruType.Hydrus) {
-      HydrusHandler hydrusHandler = HydrusHandler(booru, 20);
+      final HydrusHandler hydrusHandler = HydrusHandler(booru, 20);
       if (await hydrusHandler.verifyApiAccess()) {
         return [userBooruType, ''];
       }
@@ -590,7 +589,7 @@ class _BooruEditState extends State<BooruEdit> {
         ))[0];
       }
     } else {
-      List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
+      final List temp = BooruHandlerFactory().getBooruHandler([booru], 5);
       test = temp[0];
       test.pageNum = temp[1];
       test.pageNum++;

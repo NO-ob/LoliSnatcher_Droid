@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart' as Get;
 import 'package:html/parser.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -44,13 +45,13 @@ abstract class BooruHandler {
 
   Get.RxList<BooruItem> fetched = Get.RxList<BooruItem>([]);
   List<BooruItem> get filteredFetched => fetched.where((el) {
-        SettingsHandler settingsHandler = SettingsHandler.instance;
+        final SettingsHandler settingsHandler = SettingsHandler.instance;
 
         if (settingsHandler.filterHated && el.isHated.value) {
           return false;
         }
 
-        final bool filterFavourites = settingsHandler.filterFavourites && booru.type != 'Favourites';
+        final bool filterFavourites = settingsHandler.filterFavourites && booru.type != BooruType.Favourites;
         if (filterFavourites && el.isFavourite.value == true) {
           return false;
         }
@@ -92,7 +93,7 @@ abstract class BooruHandler {
     }
 
     // get amount of items before fetching
-    int length = fetched.length;
+    final int length = fetched.length;
 
     // create url
     final String url = makeURL(tags);
@@ -229,7 +230,7 @@ abstract class BooruHandler {
   Future<List<String>> tagSearch(String input) async {
     List<String> tags = [];
 
-    String url = makeTagURL(input);
+    final String url = makeTagURL(input);
     if (url.isEmpty) return tags;
     Uri uri;
     try {
@@ -251,7 +252,7 @@ abstract class BooruHandler {
           final rawTag = rawTags[i];
           try {
             if (tags.length < limit) {
-              String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '').trim();
+              final String parsedTag = Uri.decodeComponent(parseFragment(await parseTagSuggestion(rawTag, i) ?? '').text ?? '').trim();
               if (parsedTag.isNotEmpty) {
                 // TODO add tag to taghandler before adding it to list
                 // addTagsWithType(parsedTag, tagType);
@@ -308,7 +309,7 @@ abstract class BooruHandler {
   Future<List<CommentItem>> getComments(String postID, int pageNum) async {
     List<CommentItem> comments = [];
 
-    String url = makeCommentsURL(postID, pageNum);
+    final String url = makeCommentsURL(postID, pageNum);
     if (url.isEmpty) return comments;
     Uri uri;
     try {
@@ -387,7 +388,7 @@ abstract class BooruHandler {
   Future<List<NoteItem>> getNotes(String postID) async {
     List<NoteItem> notes = [];
 
-    String url = makeNotesURL(postID);
+    final String url = makeNotesURL(postID);
     if (url.isEmpty) return notes;
     Uri uri;
     try {

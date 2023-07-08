@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
@@ -44,7 +45,7 @@ class SearchHandler extends GetxController {
     Rx<Booru> booru = (customBooru ?? currentBooru).obs;
 
     // Add new tab to the end
-    SearchTab newTab = SearchTab(booru, null, searchText);
+    final SearchTab newTab = SearchTab(booru, null, searchText);
     list.add(newTab);
 
     // record search query to db
@@ -109,7 +110,7 @@ class SearchHandler extends GetxController {
       final String defaultText = currentBooru.defTags?.isNotEmpty == true ? currentBooru.defTags! : settingsHandler.defTags;
       searchTextController.text = defaultText;
 
-      SearchTab newTab = SearchTab(currentBooru.obs, null, defaultText);
+      final SearchTab newTab = SearchTab(currentBooru.obs, null, defaultText);
       list[0] = newTab;
       changeTabIndex(0);
     }
@@ -176,7 +177,7 @@ class SearchHandler extends GetxController {
   final TextEditingController searchTextController = TextEditingController();
   void addTagToSearch(String tag) {
     if (tag.isNotEmpty) {
-      if (currentBooru.type == 'Hydrus') {
+      if (currentBooru.type == BooruType.Hydrus) {
         searchTextController.text += ', $tag';
       } else {
         searchTextController.text += ' $tag';
@@ -249,7 +250,7 @@ class SearchHandler extends GetxController {
     isLoading.value = false;
 
     // trigger first search OR just get old filteredFetched list
-    bool isNewSearch = currentFetched.isEmpty;
+    final bool isNewSearch = currentFetched.isEmpty;
     // print('isNEW: $isNewSearch ${currentIndex}');
     // trigger search if there are items inside booruHandler
     if (isNewSearch) {
@@ -264,7 +265,7 @@ class SearchHandler extends GetxController {
 
   // recreate current tab with custom starting page number
   void changeCurrentTabPageNumber(int newPageNum) {
-    SearchTab newTab = SearchTab(
+    final SearchTab newTab = SearchTab(
       currentBooru.obs,
       currentTab.secondaryBoorus,
       currentTab.tags,
@@ -337,9 +338,9 @@ class SearchHandler extends GetxController {
   ).obs;
 
   BooruItem setViewedItem(int i) {
-    int newIndex = i;
-    int oldIndex = viewedIndex.value;
-    BooruItem newItem = newIndex != -1
+    final int newIndex = i;
+    final int oldIndex = viewedIndex.value;
+    final BooruItem newItem = newIndex != -1
         ? currentFetched[newIndex]
         : BooruItem(
             fileURL: "",
@@ -383,7 +384,7 @@ class SearchHandler extends GetxController {
     // set new tab data
     if (list.isEmpty) {
       if (settingsHandler.booruList.isNotEmpty) {
-        SearchTab newTab = SearchTab(
+        final SearchTab newTab = SearchTab(
           settingsHandler.booruList[0].obs,
           currentTab.secondaryBoorus,
           text,
@@ -391,7 +392,7 @@ class SearchHandler extends GetxController {
         list.add(newTab);
       }
     } else {
-      SearchTab newTab = SearchTab(
+      final SearchTab newTab = SearchTab(
         (newBooru ?? currentBooru).obs,
         currentTab.secondaryBoorus,
         text,
@@ -426,8 +427,8 @@ class SearchHandler extends GetxController {
 
     // Notify about ratings change on gelbooru and danbooru
     if (text.contains('rating:safe')) {
-      bool isOnBooruWhereRatingsChanged =
-          (booru.type == 'Gelbooru' && booru.baseURL!.contains('gelbooru.com')) || (booru.type == 'Danbooru' && booru.baseURL!.contains('danbooru.donmai.us'));
+      final bool isOnBooruWhereRatingsChanged = (booru.type == BooruType.Gelbooru && booru.baseURL!.contains('gelbooru.com')) ||
+          (booru.type == BooruType.Danbooru && booru.baseURL!.contains('danbooru.donmai.us'));
       if (isOnBooruWhereRatingsChanged) {
         FlashElements.showSnackbar(
           duration: null,
@@ -477,10 +478,10 @@ class SearchHandler extends GetxController {
   void mergeAction(List<Booru>? secondaryBoorus) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    bool canAddSecondary = secondaryBoorus != null && settingsHandler.booruList.length > 1;
+    final bool canAddSecondary = secondaryBoorus != null && settingsHandler.booruList.length > 1;
     RxList<Booru>? secondary = canAddSecondary ? secondaryBoorus.obs : null;
 
-    SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
+    final SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
     list[currentIndex] = newTab;
 
     // run search
@@ -628,20 +629,20 @@ class SearchHandler extends GetxController {
       // print('restoreTabs: ${splitInput}');
       for (List<String> booruAndTags in splitInput) {
         // check for parsing errors
-        bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
+        final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
         if (isEntryValid) {
           // find booru by name and create searchtab with given tags
-          Booru findBooru = settingsHandler.booruList.firstWhere(
+          final Booru findBooru = settingsHandler.booruList.firstWhere(
             (booru) => booru.name == booruAndTags[0],
             orElse: () => Booru(null, null, null, null, null),
           );
           if (findBooru.name != null) {
-            SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
+            final SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
             restoredGlobals.add(newTab);
           } else {
             foundBrokenItem = true;
             brokenItems.add('${booruAndTags[0]}: ${booruAndTags[1]}');
-            SearchTab newTab = SearchTab(
+            final SearchTab newTab = SearchTab(
               settingsHandler.booruList[0].obs,
               null,
               booruAndTags[1],
@@ -652,7 +653,7 @@ class SearchHandler extends GetxController {
           // check if tab was marked as selected and set current selected index accordingly
           if (booruAndTags.length > 2 && booruAndTags[2] == 'selected') {
             // if split has third item (selected) - set as current tab
-            int index = splitInput.indexWhere((si) => si == booruAndTags);
+            final int index = splitInput.indexWhere((si) => si == booruAndTags);
             newIndex = index;
           }
         } else {
@@ -703,7 +704,7 @@ class SearchHandler extends GetxController {
       }
       final String defaultText = defaultBooru.defTags?.isNotEmpty == true ? defaultBooru.defTags! : settingsHandler.defTags;
       if (defaultBooru.type != null) {
-        SearchTab newTab = SearchTab(defaultBooru.obs, null, defaultText);
+        final SearchTab newTab = SearchTab(defaultBooru.obs, null, defaultText);
         list.add(newTab);
         changeTabIndex(0);
       }
@@ -719,15 +720,15 @@ class SearchHandler extends GetxController {
     List<SearchTab> restoredGlobals = [];
     for (List<String> booruAndTags in splitInput) {
       // check for parsing errors
-      bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
+      final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
         // find booru by name and create searchtab with given tags
-        Booru findBooru = settingsHandler.booruList.firstWhere(
+        final Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
           orElse: () => Booru(null, null, null, null, null),
         );
         if (findBooru.name != null) {
-          SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
+          final SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
           // add only if there are not already the same tab in the list and booru is available on this device
           if (list.indexWhere(
                 (tab) => tab.selectedBooru.value.name == newTab.selectedBooru.value.name && tab.tags == newTab.tags,
@@ -762,19 +763,19 @@ class SearchHandler extends GetxController {
 
     for (List<String> booruAndTags in splitInput) {
       // check for parsing errors
-      bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
+      final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
         // find booru by name and create searchtab with given tags
-        Booru findBooru = settingsHandler.booruList.firstWhere(
+        final Booru findBooru = settingsHandler.booruList.firstWhere(
           (booru) => booru.name == booruAndTags[0],
           orElse: () => Booru(null, null, null, null, null),
         );
         if (findBooru.name != null) {
-          SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
+          final SearchTab newTab = SearchTab(findBooru.obs, null, booruAndTags[1]);
           restoredGlobals.add(newTab);
 
           if (booruAndTags[2] == 'selected') {
-            int index = splitInput.indexWhere((si) => si == booruAndTags);
+            final int index = splitInput.indexWhere((si) => si == booruAndTags);
             newIndex = index;
           }
         }
@@ -801,13 +802,14 @@ class SearchHandler extends GetxController {
     // if there are only one tab - check that its not with default booru and tags
     // if there are more than 1 tab or check return false - start backup
     List<SearchTab> tabList = list;
-    int tabIndex = currentIndex;
-    bool onlyDefaultTab = tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
+    final int tabIndex = currentIndex;
+    final bool onlyDefaultTab =
+        tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
     if (!onlyDefaultTab && settingsHandler.booruList.isNotEmpty) {
       final List<String> dump = tabList.map((tab) {
-        String booruName = tab.selectedBooru.value.name ?? 'unknown';
-        String tabTags = tab.tags;
-        String selected = tab == tabList[tabIndex]
+        final String booruName = tab.selectedBooru.value.name ?? 'unknown';
+        final String tabTags = tab.tags;
+        final String selected = tab == tabList[tabIndex]
             ? 'selected'
             : 'tab'; // 'tab' to always have controlled end of the string, to avoid broken strings (see kaguya anime full name as example)
         return '$booruName$tabDivider$tabTags$tabDivider$selected'; // booruName|searchTags|selected (last only if its the current tab)
