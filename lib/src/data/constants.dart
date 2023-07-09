@@ -4,8 +4,8 @@ class Constants {
   static const String appName = "LoliSnatcher";
   // TODO don't forget to update on every new release
   // TODO take these from smth like .env?
-  static const String appVersion = "2.3.2";
-  static const int appBuildNumber = 182;
+  static const String appVersion = "2.3.3";
+  static const int appBuildNumber = 183;
   //
 
   static const int defaultItemLimit = 20;
