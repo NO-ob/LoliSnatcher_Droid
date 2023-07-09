@@ -9,11 +9,6 @@ class WildCrittersHandler extends BooruHandler {
   WildCrittersHandler(Booru booru, int limit) : super(booru, limit);
 
   @override
-  String validateTags(tags) {
-    return tags;
-  }
-
-  @override
   List parseListFromResponse(response) {
     final document = parse(response.data);
     final spans = document.getElementsByClassName("thumb");

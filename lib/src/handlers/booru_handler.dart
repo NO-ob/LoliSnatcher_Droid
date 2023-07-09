@@ -84,7 +84,7 @@ abstract class BooruHandler {
     }
 
     // validate tags (usually just convert empty string to current booru "search all" query)
-    tags = validateTags(tags);
+    tags = validateTags(tags.trim());
 
     // if tags are different than previous tags, reset fetched
     if (prevTags != tags) {
@@ -216,7 +216,8 @@ abstract class BooruHandler {
   }
 
   String validateTags(String tags) {
-    return tags;
+    // remember to return super.validateTags(tags) if you override this function
+    return Uri.encodeComponent(tags);
   }
 
   /// [SHOULD BE OVERRIDDEN]

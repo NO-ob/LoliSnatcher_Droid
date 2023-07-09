@@ -18,7 +18,7 @@ class ShimmieHandler extends BooruHandler {
     if (tags == " " || tags == "") {
       return "*";
     } else {
-      return tags;
+      return super.validateTags(tags);
     }
   }
 

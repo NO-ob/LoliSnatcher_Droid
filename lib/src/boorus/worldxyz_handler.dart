@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -9,15 +7,6 @@ import 'package:lolisnatcher/src/utils/dio_network.dart';
 
 class WorldXyzHandler extends BooruHandler {
   WorldXyzHandler(Booru booru, int limit) : super(booru, limit);
-
-  @override
-  String validateTags(tags) {
-    if (tags == " " || tags == "") {
-      return "";
-    } else {
-      return tags;
-    }
-  }
 
   @override
   List parseListFromResponse(response) {

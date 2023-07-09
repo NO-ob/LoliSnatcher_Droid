@@ -12,7 +12,7 @@ class GelbooruV1Handler extends BooruHandler {
     if (tags == " " || tags == "") {
       return "all";
     } else {
-      return tags;
+      return super.validateTags(tags);
     }
   }
 

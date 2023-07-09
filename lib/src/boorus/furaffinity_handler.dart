@@ -15,11 +15,6 @@ class FurAffinityHandler extends BooruHandler {
   FurAffinityHandler(Booru booru, int limit) : super(booru, limit);
 
   @override
-  String validateTags(tags) {
-    return tags;
-  }
-
-  @override
   List parseListFromResponse(response) {
     final document = parse(response.data);
     final gallery = document.getElementById("gallery-browse") ?? document.getElementById("gallery-search-results");
