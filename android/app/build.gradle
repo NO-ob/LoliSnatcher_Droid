@@ -40,7 +40,7 @@ if (project.hasProperty('dart-defines')) {
         }
 }
 println("LS_IS_STORE=${dartEnvironmentVariables.LS_IS_STORE}")
-def packageName = dartEnvironmentVariables.LS_IS_STORE ? "com.noaisu.play.loliSnatcher" : "com.noaisu.loliSnatcher"
+def packageName = dartEnvironmentVariables.LS_IS_STORE == "true" ? "com.noaisu.play.loliSnatcher" : "com.noaisu.loliSnatcher"
 println("packageName=${packageName}")
 // Build example
 // flutter build apk --split-per-abi --dart-define=LS_IS_STORE=true
