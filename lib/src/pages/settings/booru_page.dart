@@ -99,7 +99,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget booruSelector() {
     return SettingsBooruDropdown(
-      value: selectedBooru ?? settingsHandler.booruList[0],
+      value: settingsHandler.booruList.contains(selectedBooru) ? selectedBooru : settingsHandler.booruList[0],
       onChanged: (Booru? newValue) {
         final bool isNewValuePresent = settingsHandler.booruList.contains(newValue);
         setState(() {
