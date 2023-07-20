@@ -16,7 +16,7 @@ version: 2.3.3+183
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
-  flutter: ^3.10.3
+  flutter: ^3.10.6
 
 dependencies:
   flutter:
@@ -35,16 +35,16 @@ dependencies:
       # 0.3.0 - synced with original github repo, they now use higher version of vlclib
       url: "https://github.com/NANI-SORE/dart_vlc.git"
       ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
-  dio: ^5.2.1+1
+  dio: ^5.3.0
   dropdown_search: ^5.0.6
-  dynamic_color: ^1.6.5
+  dynamic_color: ^1.6.6
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original
       url: "https://github.com/NANI-SORE/fast_marquee.git"
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
   flash: ^3.0.5+1
-  flex_color_picker: ^3.2.2
+  flex_color_picker: ^3.3.0
   flutter_displaymode: ^0.6.0
   flutter_improved_scrolling: ^0.0.3
   flutter_inappwebview: ^5.7.2+3
@@ -53,7 +53,7 @@ dependencies:
       url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
       ref: 8e50920055dcb04b6b58560629daced7b86be36e # master
   flutter_linkify: ^6.0.0
-  font_awesome_flutter: ^10.4.0
+  font_awesome_flutter: ^10.5.0
   get: ^4.6.5
   google_fonts: ^4.0.4
   html: ^0.15.4
@@ -66,7 +66,7 @@ dependencies:
   # local_auth: ^2.1.0
   # marquee: ^2.2.2 # replaced with fast_marquee
   path_provider: ^2.0.14
-  permission_handler: ^10.3.0
+  permission_handler: ^10.4.3
   photo_view: # ^0.12.0
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
@@ -95,9 +95,9 @@ flutter_icons:
 
 
 dev_dependencies:
+  flutter_lints: ^2.0.2
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # TODO/reminder don't forget to check if the dependencies are updated when changing versions of other packages
