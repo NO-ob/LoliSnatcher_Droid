@@ -22,7 +22,7 @@ class DBHandler{
   DBHandler();
 
   /// Connects to the database file and create the database if the tables dont exist
-  Future<bool> dbConnect(String path) async {
+  Future<bool> dbConnect(String path, bool indexesEnabled) async {
     // await Sqflite.devSetDebugModeOn(true);
     if(Platform.isAndroid || Platform.isIOS){
       db = await openDatabase("${path}store.db", version: 1, singleInstance: false);
@@ -30,7 +30,11 @@ class DBHandler{
       db = await databaseFactory.openDatabase("${path}store.db");
     }
     await updateTable();
-    await createIndexes();
+    if(indexesEnabled) {
+      await createIndexes();
+    } else {
+      await dropIndexes();
+    }
     await deleteUntracked();
     return true;
   }
@@ -102,16 +106,8 @@ class DBHandler{
   }
 
   Future<bool> createIndexes() async {
-    // TODO Indexes dont seem to help that much? + they double the size of the db
-    // await db?.execute("CREATE INDEX IF NOT EXISTS ImageTag_tagID_index ON ImageTag (tagID);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS ImageTag_booruItemID_index ON ImageTag (booruItemID);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_isSnatched_index ON BooruItem (isSnatched);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_isFavourite_index ON BooruItem (isFavourite);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_fileURL_index ON BooruItem (fileURL);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_id_index ON BooruItem (id);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS BooruItem_fileURL_isFavourite_isSnatched_index ON BooruItem (fileURL, isFavourite, isSnatched);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS Tag_name_index ON Tag (name);");
-    // await db?.execute("CREATE INDEX IF NOT EXISTS Tag_id_index ON Tag (id);");
+    await db?.execute("CREATE INDEX IF NOT EXISTS ImageTag_tagID_index ON ImageTag (tagID);");
+    await db?.execute("CREATE INDEX IF NOT EXISTS ImageTag_booruItemID_index ON ImageTag (booruItemID);");
     return true;
   }
 
@@ -247,37 +243,70 @@ class DBHandler{
     if (siteSearch.isNotEmpty) {
       searchTags.remove(siteSearch);
       siteSearch = siteSearch.replaceAll("site:", "");
-      siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
+      siteQuery = "bi.postURL LIKE '%$siteSearch%' ";
     }
 
     if(searchTags.where((element) => element.startsWith("-")).isNotEmpty){
-      excludeTags = searchTags.where((element) => element.startsWith("-")).toList();
-      excludeTags = excludeTags.map((tag) => tag.replaceAll("-", "")).toList();
+      excludeTags = searchTags.where((element) => element.startsWith("-")).map((tag) => tag.replaceAll("-", "")).toList();
       searchTags = searchTags.where((element) => !element.startsWith("-")).toList();
     } else {
       excludeTags = [];
     }
 
     // benchmark reqest time
-    // DateTime start = DateTime.now();
+    // final DateTime start = DateTime.now();
 
-    if (searchTags.isNotEmpty) {
+    if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
+      final String searchPart = searchTags.isNotEmpty
+        ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+        : "";
+
+      final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? "AND" : "";
+      final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? "AND" : "";
+
+      final String excludePart = excludeTags.isNotEmpty
+        ? "LEFT JOIN ("
+          "  SELECT bi.id "
+          "  FROM BooruItem AS bi "
+          "  JOIN ImageTag AS it ON bi.id = it.booruItemID "
+          "  JOIN Tag AS t ON it.tagID = t.id "
+          "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
+          ") AS ei ON bi.id = ei.id "
+          "WHERE ei.id IS NULL AND bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart "
+        : "WHERE                   bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart ";
+
+      final String havingPart = searchTags.isNotEmpty ? "HAVING COUNT(DISTINCT t.id) = ${searchTags.length} " : "";
+
       result = await db?.rawQuery(
-        "SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite FROM BooruItem bi "
-        "JOIN (SELECT it.booruItemID FROM ImageTag it JOIN Tag t ON t.id = it.tagID "
-              "WHERE t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
-              "GROUP BY it.booruItemID HAVING COUNT(DISTINCT t.name) = ${searchTags.length}) tags ON tags.booruItemID = dbid "
-
-        "WHERE $siteQuery bi.isFavourite = 1 GROUP BY dbid ORDER BY dbid $order LIMIT $limit OFFSET $offset", searchTags);
+        "SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite "
+        "FROM BooruItem AS bi "
+        "JOIN ImageTag AS it ON bi.id = it.booruItemID "
+        "JOIN Tag AS t ON it.tagID = t.id "
+        "$excludePart"
+        "GROUP BY bi.id "
+        "$havingPart"
+        "ORDER BY bi.id $order "
+        "LIMIT $limit "
+        "OFFSET $offset;",
+        [...excludeTags, ...searchTags],
+      );
     } else {
+      final andStr1 = siteQuery.isNotEmpty ? "AND" : "";
+
       result = await db?.rawQuery(
-          "SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite FROM BooruItem bi "
-            "WHERE $siteQuery bi.isFavourite = 1 GROUP BY dbid ORDER BY dbid $order LIMIT $limit OFFSET $offset");
+        "SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite "
+        "FROM BooruItem AS bi "
+        "WHERE $siteQuery $andStr1 bi.isFavourite = 1 "
+        "GROUP BY bi.id "
+        "ORDER BY bi.id $order "
+        "LIMIT $limit "
+        "OFFSET $offset;",
+      );
     }
 
     // benchmark reqest time
-    // DateTime end = DateTime.now();
-    // Duration diff = end.difference(start);
+    // final DateTime end = DateTime.now();
+    // final Duration diff = end.difference(start);
     // print('Searching DB took: ${diff.inMilliseconds} ms');
 
     Logger.Inst().log("got results from db", "DBHandler", "searchDB", LogTypes.booruHandlerInfo);
@@ -296,12 +325,6 @@ class DBHandler{
           item.isSnatched.value = false;
         }
         return item;
-      }).where((item) {
-        if (excludeTags.isNotEmpty) {
-          return !excludeTags.any((tag) => item.tagsList.contains(tag));
-        } else {
-          return true;
-        }
       }).toList();
 
       // end = DateTime.now();
@@ -354,32 +377,56 @@ class DBHandler{
     if (siteSearch.isNotEmpty) {
       searchTags.remove(siteSearch);
       siteSearch = siteSearch.replaceAll("site:", "");
-      siteQuery = "BooruItem.postURL LIKE '%$siteSearch%' AND ";
+      siteQuery = "bi.postURL LIKE '%$siteSearch%' ";
     }
 
     if(searchTags.where((element) => element.startsWith("-")).isNotEmpty){
-      excludeTags = searchTags.where((element) => element.startsWith("-")).toList();
-      excludeTags = excludeTags.map((tag) => tag.replaceAll("-", "")).toList();
+      excludeTags = searchTags.where((element) => element.startsWith("-")).map((tag) => tag.replaceAll("-", "")).toList();
       searchTags = searchTags.where((element) => !element.startsWith("-")).toList();
     } else {
       excludeTags = [];
     }
 
-    // TODO temprorary disable count when search has exluded tags until a better query is done
-    if(excludeTags.isNotEmpty) {
-      return 0;
-    }
+    if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
+      final String searchPart = searchTags.isNotEmpty
+        ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
+        : "";
 
-    if (searchTags.isNotEmpty){
+      final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? "AND" : "";
+      final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? "AND" : "";
+
+      final String excludePart = excludeTags.isNotEmpty
+        ? "LEFT JOIN ("
+          "  SELECT bi.id "
+          "  FROM BooruItem AS bi "
+          "  JOIN ImageTag AS it ON bi.id = it.booruItemID "
+          "  JOIN Tag AS t ON it.tagID = t.id "
+          "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
+          ") AS ei ON bi.id = ei.id "
+          "WHERE ei.id IS NULL AND bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart "
+        : "WHERE                   bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart ";
+
+      final String havingPart = searchTags.isNotEmpty ? "HAVING COUNT(DISTINCT t.id) = ${searchTags.length} " : "";
+
       result = await db?.rawQuery(
-          "SELECT COUNT(*) as count FROM BooruItem "
-              "LEFT JOIN ImageTag on BooruItem.id = ImageTag.booruItemID "
-              "LEFT JOIN Tag on ImageTag.tagID = Tag.id "
-              "WHERE $siteQuery Tag.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) "
-              "AND isFavourite = 1 GROUP BY BooruItem.id "
-              "HAVING COUNT(DISTINCT Tag.name) = ${searchTags.length}", searchTags);
+        "SELECT COUNT(*) as count "
+        "FROM BooruItem AS bi "
+        "JOIN ImageTag AS it ON bi.id = it.booruItemID "
+        "JOIN Tag AS t ON it.tagID = t.id "
+        "$excludePart"
+        "GROUP BY bi.id "
+        "$havingPart;",
+        [...excludeTags, ...searchTags],
+      );
     } else {
-      result = await db?.rawQuery("SELECT COUNT(*) as count FROM BooruItem WHERE $siteQuery isFavourite = 1");
+      final andStr1 = siteQuery.isNotEmpty ? "AND" : "";
+
+      result = await db?.rawQuery(
+        "SELECT COUNT(*) as count "
+        "FROM BooruItem AS bi "
+        "WHERE $siteQuery $andStr1 bi.isFavourite = 1 "
+        "GROUP BY bi.id;"
+      );
     }
 
     Logger.Inst().log("got results from db", "DBHandler", "searchDBCount", LogTypes.booruHandlerInfo);

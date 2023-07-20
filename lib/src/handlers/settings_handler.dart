@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
@@ -129,6 +129,7 @@ class SettingsHandler extends GetxController {
   bool mediaCache = false;
   bool autoHideImageBar = false;
   bool dbEnabled = true;
+  bool indexesEnabled = false;
   bool searchHistoryEnabled = true;
   bool filterHated = false;
   bool filterFavourites = false;
@@ -169,6 +170,7 @@ class SettingsHandler extends GetxController {
     'thumbnailCache',
     'mediaCache',
     'dbEnabled',
+    'indexesEnabled',
     'searchHistoryEnabled',
     'useVolumeButtonsForScroll',
     'volumeButtonsScrollSpeed',
@@ -383,6 +385,10 @@ class SettingsHandler extends GetxController {
     "dbEnabled": {
       "type": "bool",
       "default": true,
+    },
+    "indexesEnabled": {
+      "type": "bool",
+      "default": false,
     },
     "searchHistoryEnabled": {
       "type": "bool",
@@ -717,7 +723,7 @@ class SettingsHandler extends GetxController {
 
     if (!Tools.isTestMode) {
       if (dbEnabled) {
-        await dbHandler.dbConnect(path);
+        await dbHandler.dbConnect(path, indexesEnabled);
       } else {
         dbHandler = DBHandler();
       }
@@ -784,6 +790,8 @@ class SettingsHandler extends GetxController {
         return autoHideImageBar;
       case 'dbEnabled':
         return dbEnabled;
+      case 'indexesEnabled':
+        return indexesEnabled;
       case 'searchHistoryEnabled':
         return searchHistoryEnabled;
       case 'filterHated':
@@ -939,6 +947,9 @@ class SettingsHandler extends GetxController {
       case 'dbEnabled':
         dbEnabled = validatedValue;
         break;
+      case 'indexesEnabled':
+        indexesEnabled = validatedValue;
+        break;
       case 'searchHistoryEnabled':
         searchHistoryEnabled = validatedValue;
         break;
@@ -1082,6 +1093,7 @@ class SettingsHandler extends GetxController {
       "mediaCache": validateValue("mediaCache", null, toJSON: true),
       "autoHideImageBar": validateValue("autoHideImageBar", null, toJSON: true),
       "dbEnabled": validateValue("dbEnabled", null, toJSON: true),
+      "indexesEnabled": validateValue("indexesEnabled", null, toJSON: true),
       "searchHistoryEnabled": validateValue("searchHistoryEnabled", null, toJSON: true),
       "filterHated": validateValue("filterHated", null, toJSON: true),
       "filterFavourites": validateValue("filterFavourites", null, toJSON: true),

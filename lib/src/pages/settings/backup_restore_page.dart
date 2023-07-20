@@ -4,8 +4,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -249,7 +249,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 }
 
                                 settingsHandler.dbHandler = DBHandler();
-                                await settingsHandler.dbHandler.dbConnect(newFile.path);
+                                await settingsHandler.dbHandler.dbConnect(newFile.path, settingsHandler.indexesEnabled);
                                 //
                                 showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
                                 await Future.delayed(const Duration(seconds: 3));
