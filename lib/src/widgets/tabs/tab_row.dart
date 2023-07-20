@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
@@ -25,7 +25,7 @@ class TabRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // print(value.tags);
+      // print(tab.tags);
       final int totalCount = tab.booruHandler.totalCount.value;
       final String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
       final String multiText = (tab.secondaryBoorus?.isNotEmpty ?? false) ? " [M]" : "";

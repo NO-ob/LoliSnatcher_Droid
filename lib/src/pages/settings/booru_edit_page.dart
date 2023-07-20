@@ -119,7 +119,7 @@ class _BooruEditState extends State<BooruEdit> {
                 });
               },
               title: 'Booru Type',
-              itemTitleBuilder: (p0) => (p0 as BooruType).name,
+              itemTitleBuilder: (p0) => (p0 as BooruType).alias,
             ),
             SettingsTextInput(
               controller: booruFaviconController,
@@ -378,8 +378,8 @@ class _BooruEditState extends State<BooruEdit> {
         }
         isTesting = true;
         setState(() {});
-        List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
-        BooruType? booruType = testResults[0];
+        final List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
+        final BooruType? booruType = testResults[0];
         final String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : "";
 
         // If a booru type is returned set the widget state
@@ -390,7 +390,7 @@ class _BooruEditState extends State<BooruEdit> {
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              'Booru Type is $booruType',
+              'Booru Type is ${booruType.alias}',
               style: const TextStyle(fontSize: 20),
             ),
             content: const Text(
