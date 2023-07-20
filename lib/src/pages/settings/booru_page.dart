@@ -2,11 +2,16 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:get/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/sign_in.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -15,6 +20,7 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 // TODO move all buttons to separate widgets/unified functions to be used in other places?
@@ -32,7 +38,7 @@ class _BooruPageState extends State<BooruPage> {
 
   final defaultTagsController = TextEditingController();
   final limitController = TextEditingController();
-  Booru? selectedBooru;
+  Booru? selectedBooru, initPrefBooru;
 
   @override
   void initState() {
@@ -41,14 +47,14 @@ class _BooruPageState extends State<BooruPage> {
     limitController.text = settingsHandler.limit.toString();
 
     if (settingsHandler.prefBooru.isNotEmpty) {
-      selectedBooru = settingsHandler.booruList.firstWhere(
+      selectedBooru = settingsHandler.booruList.firstWhereOrNull(
         (booru) => booru.name == settingsHandler.prefBooru,
-        orElse: () => Booru(null, null, null, null, null),
       );
-      if (selectedBooru?.name == null) selectedBooru = null;
     } else if (settingsHandler.booruList.isNotEmpty) {
       selectedBooru = settingsHandler.booruList[0];
     }
+
+    initPrefBooru = selectedBooru;
   }
 
   void copyBooruLink(bool withSensitiveData) {
@@ -81,7 +87,14 @@ class _BooruPageState extends State<BooruPage> {
       selectedBooru = settingsHandler.booruList[0];
     }
     if (selectedBooru != null) {
-      settingsHandler.prefBooru = selectedBooru?.name ?? '';
+      final res = await askToChangePrefBooru(initPrefBooru, selectedBooru!);
+      if (res == true) {
+        settingsHandler.prefBooru = selectedBooru?.name ?? '';
+      } else if (res == false && initPrefBooru != null) {
+        settingsHandler.prefBooru = initPrefBooru?.name ?? '';
+      } else if (res == null) {
+        return false;
+      }
     }
     settingsHandler.limit = int.parse(limitController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
@@ -242,7 +255,7 @@ class _BooruPageState extends State<BooruPage> {
         }
 
         // TODO reset all tabs to next available booru?
-        List<SearchTab> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
+        final List<SearchTab> tabsWithBooru = searchHandler.list.where((tab) => tab.selectedBooru.value.name == selectedBooru?.name).toList();
         if (tabsWithBooru.isNotEmpty) {
           FlashElements.showSnackbar(
             context: context,
@@ -328,13 +341,65 @@ class _BooruPageState extends State<BooruPage> {
     );
   }
 
+  Widget loginButton() {
+    if (selectedBooru == null) {
+      return const SizedBox.shrink();
+    }
+
+    final List handlers = BooruHandlerFactory().getBooruHandler([selectedBooru!], 5);
+    final BooruHandler handler = handlers[0] as BooruHandler;
+
+    if (handler.hasSignInSupport == false) {
+      return const SizedBox.shrink();
+    }
+
+    return SettingsButton(
+      name: 'Login',
+      icon: const Icon(Icons.login),
+      action: () async {
+        if (selectedBooru?.userID?.isEmpty == true || selectedBooru?.apiKey?.isEmpty == true) {
+          FlashElements.showSnackbar(
+            context: context,
+            title: const Text(
+              "Need Login and Password",
+              style: TextStyle(fontSize: 20),
+            ),
+            content: const Text(
+              "Please change this booru config to have both login AND password fields!",
+              style: TextStyle(fontSize: 16),
+            ),
+            leadingIcon: Icons.warning_amber,
+            leadingIconColor: Colors.red,
+            sideColor: Colors.red,
+          );
+          return;
+        }
+
+        await handler.signIn(
+          SignInData(
+            login: selectedBooru!.userID!,
+            password: selectedBooru!.apiKey!,
+          ),
+        );
+
+        FlashElements.showSnackbar(
+          context: context,
+          title: const Text("Relogin complete!", style: TextStyle(fontSize: 20)),
+          leadingIcon: Icons.login,
+          leadingIconColor: Colors.yellow,
+          sideColor: Colors.yellow,
+        );
+      },
+    );
+  }
+
   Widget addFromClipboardButton() {
     return SettingsButton(
       name: 'Add Booru from URL in Clipboard',
       icon: const Icon(Icons.paste),
       action: () async {
         // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
-        ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
+        final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
         final String url = cdata?.text ?? '';
         Logger.Inst().log(url, "BooruPage", "getBooruFromClipboard", LogTypes.settingsLoad);
         if (url.isNotEmpty) {
@@ -430,6 +495,7 @@ class _BooruPageState extends State<BooruPage> {
                   shareButton(),
                   editButton(),
                   webviewButton(),
+                  loginButton(),
                   deleteButton(),
                 ],
               ],
@@ -438,5 +504,65 @@ class _BooruPageState extends State<BooruPage> {
         ),
       ),
     );
+  }
+}
+
+Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async {
+  if (initBooru != null && initBooru.name != selectedBooru.name) {
+    return await showDialog<bool>(
+      context: NavigationHandler.instance.navigatorKey.currentContext!,
+      builder: (BuildContext context) {
+        return SettingsDialog(
+          title: const Text('Change default booru?'),
+          contentItems: [
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(text: 'Change to: '),
+                  TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  WidgetSpan(child: Favicon(selectedBooru)),
+                  const TextSpan(text: '?'),
+                ],
+              ),
+            ),
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(text: 'Tap [No] to keep current: '),
+                  TextSpan(text: initBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  WidgetSpan(child: Favicon(initBooru)),
+                ],
+              ),
+            ),
+            RichText(
+              text: TextSpan(
+                children: [
+                  const TextSpan(text: 'Tap [Yes] to change to: '),
+                  TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  WidgetSpan(child: Favicon(selectedBooru)),
+                ],
+              ),
+            ),
+          ],
+          actionButtons: [
+            const CancelButton(returnData: null),
+            ElevatedButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  } else {
+    return true;
   }
 }

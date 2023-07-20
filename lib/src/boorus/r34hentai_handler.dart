@@ -1,8 +1,15 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:html/parser.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/sign_in.dart';
+import 'package:lolisnatcher/src/data/sign_out.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 class R34HentaiHandler extends ShimmieHandler {
   R34HentaiHandler(Booru booru, int limit) : super(booru, limit);
@@ -11,10 +18,16 @@ class R34HentaiHandler extends ShimmieHandler {
   bool hasSizeData = true;
 
   @override
+  String validateTags(String tags) {
+    return tags;
+  }
+
+  @override
   Map<String, String> getHeaders() {
-    Map<String, String> headers = {
+    final Map<String, String> headers = {
       ...super.getHeaders(),
-      if(booru.apiKey?.isNotEmpty == true) 'Cookie': "${booru.apiKey};",
+      if (booru.apiKey?.isNotEmpty == true && (booru.apiKey?.contains('shm_user') == true || booru.apiKey?.contains('shm_sesion') == true))
+        'Cookie': "${booru.apiKey};",
     };
 
     return headers;
@@ -22,29 +35,26 @@ class R34HentaiHandler extends ShimmieHandler {
 
   @override
   List parseListFromResponse(response) {
-    var document = parse(response.data);
+    final document = parse(response.data);
     return document.getElementsByClassName("thumb");
   }
 
   @override
   BooruItem? parseItemFromResponse(responseItem, int index) {
-    var current = responseItem;
+    final current = responseItem;
 
-    String id = current.attributes["data-post-id"]!;
-    String fileExt = current.attributes["data-mime"]?.split('/')[1] ?? "png";
-    String thumbURL = current.firstChild!.attributes["src"]!;
-    double? thumbWidth = double.tryParse(current.firstChild!.attributes["width"] ?? '');
-    double? thumbHeight = double.tryParse(current.firstChild!.attributes["height"] ?? '');
-    double? fileWidth = double.tryParse(current.attributes["data-width"] ?? '');
-    double? fileHeight = double.tryParse(current.attributes["data-height"] ?? '');
-    String fileURL = thumbURL
-        .replaceFirst("_thumbs", "_images")
-        .replaceFirst("thumbnails", "images")
-        .replaceFirst("thumbnail_", "")
-        .replaceFirst('.jpg', '.$fileExt');
-    List<String> tags = current.attributes["data-tags"]?.split(" ") ?? [];
+    final String id = current.attributes["data-post-id"]!;
+    final String fileExt = current.attributes["data-mime"]?.split('/')[1] ?? "png";
+    final String thumbURL = current.firstChild!.attributes["src"]!;
+    final double? thumbWidth = double.tryParse(current.firstChild!.attributes["width"] ?? '');
+    final double? thumbHeight = double.tryParse(current.firstChild!.attributes["height"] ?? '');
+    final double? fileWidth = double.tryParse(current.attributes["data-width"] ?? '');
+    final double? fileHeight = double.tryParse(current.attributes["data-height"] ?? '');
+    final String fileURL =
+        thumbURL.replaceFirst("_thumbs", "_images").replaceFirst("thumbnails", "images").replaceFirst("thumbnail_", "").replaceFirst('.jpg', '.$fileExt');
+    final List<String> tags = current.attributes["data-tags"]?.split(" ") ?? [];
 
-    BooruItem item = BooruItem(
+    final BooruItem item = BooruItem(
       thumbnailURL: booru.baseURL! + thumbURL,
       sampleURL: booru.baseURL! + fileURL,
       fileURL: booru.baseURL! + fileURL,
@@ -62,7 +72,7 @@ class R34HentaiHandler extends ShimmieHandler {
   }
 
   String getHashFromURL(String url) {
-    String hash = url.substring(url.lastIndexOf("_") + 1, url.lastIndexOf("."));
+    final String hash = url.substring(url.lastIndexOf("_") + 1, url.lastIndexOf("."));
     return hash;
   }
 
@@ -74,8 +84,104 @@ class R34HentaiHandler extends ShimmieHandler {
   }
 
   @override
-  String getDescription() {
-    return '---------------------\n\nTo view restricted content you need a session token:\n-Paste this into your browser\'s address bar when on the desired site and logged in:\n\njavascript:let cs=document.cookie.split(\'; \');let user=cs.find(c=>c.startsWith(\'shm_user\'));let token=cs.find(c=>c.startsWith(\'shm_session\'));prompt(\'\', user + \'; \' + token);\n\n-Copy the prompt contents into apiKey field\n(example: shm_user=xxx; shm_session=xxx;)\n\n[Note]: The "javascript:" part of the script is often truncated by the browser when pasting. Use the script as bookmarklet to bypass this behavior.\n\n---------------------';
+  bool get hasSignInSupport => true;
+
+  @override
+  Future<bool> signIn(SignInData data) async {
+    final CookieManager cookieManager = CookieManager.instance();
+    List<String>? setCookies;
+    try {
+      final res = await DioNetwork.post(
+        '${booru.baseURL}/user_admin/login',
+        data: {
+          'user': data.login,
+          'pass': data.password,
+          'gobu': 'Log+In',
+        },
+        options: Options(
+          contentType: "application/x-www-form-urlencoded",
+        ),
+        headers: await Tools.getFileCustomHeaders(
+          Booru(
+            'R34Hentai',
+            BooruType.R34Hentai,
+            '${booru.baseURL}/favicon.ico',
+            booru.baseURL,
+            '',
+          ),
+        ),
+      );
+      setCookies = res.headers['set-cookie'];
+    } catch (e) {
+      if (e is DioException) {
+        setCookies = e.response?.headers['set-cookie'];
+      }
+    }
+    if (setCookies != null) {
+      for (final cookie in setCookies) {
+        final name = cookie.split(';')[0].split('=')[0];
+        final value = cookie.split(';')[0].split('=')[1];
+
+        await cookieManager.setCookie(
+          url: Uri.parse(Uri.parse(booru.baseURL!).host),
+          name: name,
+          value: value,
+        );
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> isSignedIn() async {
+    final CookieManager cookieManager = CookieManager.instance();
+    final cookies = await cookieManager.getCookies(url: Uri.parse(Uri.parse(booru.baseURL!).host));
+    final bool hasCookies = cookies.any((e) => e.name == 'shm_user') && cookies.any((e) => e.name == 'shm_session');
+
+    if (!hasCookies) {
+      return false;
+    } else {
+      // TODO here could be a check if the cookies are still valid/not expired, but webview lib doesn't support expire dates for cookies?
+      // or maybe do a network request to check if the cookies are still valid?
+      return true;
+    }
+  }
+
+  @override
+  Future<bool?> signOut(SignOutData? data) async {
+    if (!await isSignedIn()) {
+      return null;
+    }
+
+    bool success = false;
+    try {
+      await DioNetwork.get(
+        '${booru.baseURL}/user_admin/logout',
+        headers: await Tools.getFileCustomHeaders(
+          Booru(
+            'R34Hentai',
+            BooruType.R34Hentai,
+            '${booru.baseURL}/favicon.ico',
+            booru.baseURL,
+            '',
+          ),
+        ),
+      );
+      success = true;
+    } catch (e) {
+      if (e is DioException) {
+        success = e.response?.statusCode == 200;
+      }
+    }
+
+    final CookieManager cookieManager = CookieManager.instance();
+    await cookieManager.deleteCookies(
+      url: Uri.parse(Uri.parse(booru.baseURL!).host),
+    );
+
+    return success;
   }
 }
 
@@ -86,18 +192,18 @@ class R34HentaiHandlerOld extends R34HentaiHandler {
 
   @override
   List parseListFromResponse(response) {
-    List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse; // Limit doesn't work with this api
   }
 
   @override
   BooruItem? parseItemFromResponse(responseItem, int index) {
-    var current = responseItem;
-    String imageUrl = current['file_url'];
-    String sampleUrl = current['sample_url'];
-    String thumbnailUrl = current['preview_url'];
+    final current = responseItem;
+    final String imageUrl = current['file_url'];
+    final String sampleUrl = current['sample_url'];
+    final String thumbnailUrl = current['preview_url'];
 
-    BooruItem item = BooruItem(
+    final BooruItem item = BooruItem(
       fileURL: imageUrl,
       sampleURL: sampleUrl,
       thumbnailURL: thumbnailUrl,

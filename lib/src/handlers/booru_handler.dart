@@ -6,12 +6,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart' as Get;
 import 'package:html/parser.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/sign_in.dart';
+import 'package:lolisnatcher/src/data/sign_out.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -542,8 +544,19 @@ abstract class BooruHandler {
     return [];
   }
 
-  String getDescription() {
-    return '';
+  // TODO check which boorus could benefit from in-app sign in/sign out aside from rule34hentai
+  bool get hasSignInSupport => false;
+
+  Future<dynamic> signIn(SignInData data) async {
+    return;
+  }
+
+  Future<bool> isSignedIn() async {
+    return false;
+  }
+
+  Future<dynamic> signOut(SignOutData? data) async {
+    return;
   }
 
   List<String> searchModifiers() {
