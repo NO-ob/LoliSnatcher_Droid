@@ -25,12 +25,13 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 // TODO better naming for some functions (i.e. Search => getSearch or smth like that)
 
 abstract class BooruHandler {
+  BooruHandler(this.booru, this.limit);
   // pagenum = -1 as "didn't load anything yet" state
   // gets set to higher number for special cases in handler factory
   // TODO get rid of that logic and add pageOffset variable for special cases
   int pageNum = -1;
   int limit = 20;
-  String prevTags = "";
+  String prevTags = '';
   bool locked = false;
   Booru booru;
 
@@ -39,10 +40,10 @@ abstract class BooruHandler {
 
   Map<String, TagType> tagTypeMap = {};
   Map<String, String> tagModifierMap = {
-    "rating:": "R",
-    "artist:": "A",
-    "order:": "O",
-    "sort:": "S",
+    'rating:': 'R',
+    'artist:': 'A',
+    'order:': 'O',
+    'sort:': 'S',
   };
 
   Get.RxList<BooruItem> fetched = Get.RxList<BooruItem>([]);
@@ -65,8 +66,6 @@ abstract class BooruHandler {
 
   bool hasSizeData = false;
 
-  BooruHandler(this.booru, this.limit);
-
   Future<bool> searchSetup() async {
     return true;
   }
@@ -80,7 +79,7 @@ abstract class BooruHandler {
     }
     // Any setup that needs to happen before the url is created
     if (!await searchSetup()) {
-      Logger.Inst().log('Search setup failed for booru: $booru', className, "Search", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log('Search setup failed for booru: $booru', className, 'Search', LogTypes.booruHandlerFetchFailed);
       locked = true;
       return fetched;
     }
@@ -105,11 +104,11 @@ abstract class BooruHandler {
     try {
       uri = Uri.parse(url);
     } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, "Search", LogTypes.booruHandlerFetchFailed);
-      errorString = "Invalid URL ($url)";
+      Logger.Inst().log('invalid url: $url', className, 'Search', LogTypes.booruHandlerFetchFailed);
+      errorString = 'Invalid URL ($url)';
       return fetched;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, "Search", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url ${uri.toString()}', className, 'Search', LogTypes.booruHandlerSearchURL);
 
     Response response;
     try {
@@ -127,13 +126,13 @@ abstract class BooruHandler {
           locked = true;
         }
       } else {
-        Logger.Inst().log("error fetching url: $url", className, "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("status: ${response.statusCode}", className, "Search", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.data}", className, "Search", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('error fetching url: $url', className, 'Search', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('status: ${response.statusCode}', className, 'Search', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('response: ${response.data}', className, 'Search', LogTypes.booruHandlerFetchFailed);
         errorString = response.statusCode.toString();
       }
     } catch (e) {
-      Logger.Inst().log(e.toString(), className, "Search", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log(e.toString(), className, 'Search', LogTypes.booruHandlerFetchFailed);
       if (e is DioException) {
         errorString = e.message ?? e.toString();
       } else {
@@ -145,18 +144,19 @@ abstract class BooruHandler {
     return fetched;
   }
 
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true}) async {
-    final String cookies = await getCookies() ?? "";
+  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
+    final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    Logger.Inst().log('fetching: $uri with headers: $headers', className, "Search", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('fetching: $uri with headers: $headers', className, 'Search', LogTypes.booruHandlerSearchURL);
 
     return DioNetwork.get(
       uri.toString(),
       headers: headers,
+      queryParameters: queryParams,
       customInterceptor: withCaptchaCheck ? DioNetwork.captchaInterceptor : null,
     );
   }
@@ -166,9 +166,9 @@ abstract class BooruHandler {
     try {
       posts = await parseListFromResponse(response);
     } catch (e) {
-      Logger.Inst().log(e.toString(), className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
-      Logger.Inst().log(response.data, className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
-      Logger.Inst().log(response.data.runtimeType, className, "parseListFromResponse", LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(e.toString(), className, 'parseListFromResponse', LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(response.data, className, 'parseListFromResponse', LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log(response.data.runtimeType, className, 'parseListFromResponse', LogTypes.booruHandlerRawFetched);
       errorString = e.toString();
       rethrow;
     }
@@ -186,7 +186,7 @@ abstract class BooruHandler {
             newItems.add(item);
           }
         } catch (e) {
-          Logger.Inst().log('$e $post', className, "parseItemFromResponse", LogTypes.booruHandlerRawFetched);
+          Logger.Inst().log('$e $post', className, 'parseItemFromResponse', LogTypes.booruHandlerRawFetched);
           failedItems.add([post, e]);
         }
       }
@@ -239,17 +239,17 @@ abstract class BooruHandler {
     try {
       uri = Uri.parse(url);
     } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log('invalid url: $url', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
       return tags;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, "tagSearch", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url ${uri.toString()}', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
 
     Response response;
     const int limit = 10;
     try {
       response = await fetchTagSuggestions(uri, input);
       if (response.statusCode == 200) {
-        Logger.Inst().log("fetchTagSuggestions response: ${response.data}", className, "tagSearch", null);
+        Logger.Inst().log('fetchTagSuggestions response: ${response.data}', className, 'tagSearch', null);
         final rawTags = await parseTagSuggestionsList(response);
         for (int i = 0; i < rawTags.length; i++) {
           final rawTag = rawTags[i];
@@ -263,22 +263,22 @@ abstract class BooruHandler {
               }
             }
           } catch (e) {
-            Logger.Inst().log('${e.toString()} $rawTag', className, "parseTagSuggestion", LogTypes.booruHandlerRawFetched);
+            Logger.Inst().log('${e.toString()} $rawTag', className, 'parseTagSuggestion', LogTypes.booruHandlerRawFetched);
           }
         }
       } else {
-        Logger.Inst().log("error fetching url: $url", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("status: ${response.statusCode}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.data}", className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('error fetching url: $url', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('status: ${response.statusCode}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('response: ${response.data}', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
       }
     } catch (e) {
-      Logger.Inst().log(e.toString(), className, "tagSearch", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
     }
     return tags;
   }
 
   Future<Response<dynamic>> fetchTagSuggestions(Uri uri, String input) async {
-    final String cookies = await getCookies() ?? "";
+    final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
@@ -318,10 +318,10 @@ abstract class BooruHandler {
     try {
       uri = Uri.parse(url);
     } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, "getComments", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log('invalid url: $url', className, 'getComments', LogTypes.booruHandlerFetchFailed);
       return comments;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, "getComments", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url ${uri.toString()}', className, 'getComments', LogTypes.booruHandlerSearchURL);
 
     Response response;
     try {
@@ -334,22 +334,22 @@ abstract class BooruHandler {
             CommentItem? parsedComment = await parseComment(rawComment, i);
             if (parsedComment != null) comments.add(parsedComment);
           } catch (e) {
-            Logger.Inst().log('${e.toString()} $rawComment', className, "parseCommentsList", LogTypes.booruHandlerRawFetched);
+            Logger.Inst().log('${e.toString()} $rawComment', className, 'parseCommentsList', LogTypes.booruHandlerRawFetched);
           }
         }
       } else {
-        Logger.Inst().log("error fetching url: $url", className, "getComments", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("status: ${response.statusCode}", className, "getComments", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.data}", className, "getComments", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('error fetching url: $url', className, 'getComments', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('status: ${response.statusCode}', className, 'getComments', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('response: ${response.data}', className, 'getComments', LogTypes.booruHandlerFetchFailed);
       }
     } catch (e) {
-      Logger.Inst().log(e.toString(), className, "getComments", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log(e.toString(), className, 'getComments', LogTypes.booruHandlerFetchFailed);
     }
     return comments;
   }
 
   Future<Response<dynamic>> fetchComments(Uri uri) async {
-    final String cookies = await getCookies() ?? "";
+    final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
@@ -397,10 +397,10 @@ abstract class BooruHandler {
     try {
       uri = Uri.parse(url);
     } catch (e) {
-      Logger.Inst().log('invalid url: $url', className, "getNotes", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log('invalid url: $url', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
       return notes;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, "getNotes", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url ${uri.toString()}', className, 'getNotes', LogTypes.booruHandlerSearchURL);
 
     Response response;
     try {
@@ -413,22 +413,22 @@ abstract class BooruHandler {
             NoteItem? parsedNote = await parseNote(rawNote, i);
             if (parsedNote != null) notes.add(parsedNote);
           } catch (e) {
-            Logger.Inst().log('${e.toString()} $rawNote', className, "parseNotesList", LogTypes.booruHandlerRawFetched);
+            Logger.Inst().log('${e.toString()} $rawNote', className, 'parseNotesList', LogTypes.booruHandlerRawFetched);
           }
         }
       } else {
-        Logger.Inst().log("error fetching url: $url", className, "getNotes", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("status: ${response.statusCode}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
-        Logger.Inst().log("response: ${response.data}", className, "getNotes", LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('error fetching url: $url', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('status: ${response.statusCode}', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
+        Logger.Inst().log('response: ${response.data}', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
       }
     } catch (e) {
-      Logger.Inst().log(e.toString(), className, "getNotes", LogTypes.booruHandlerFetchFailed);
+      Logger.Inst().log(e.toString(), className, 'getNotes', LogTypes.booruHandlerFetchFailed);
     }
     return notes;
   }
 
   Future<Response<dynamic>> fetchNotes(Uri uri) async {
-    final String cookies = await getCookies() ?? "";
+    final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
@@ -478,8 +478,8 @@ abstract class BooruHandler {
 
   Map<String, String> getHeaders() {
     return {
-      "Accept": "text/html,application/xml,application/json",
-      "User-Agent": Tools.browserUserAgent,
+      'Accept': 'text/html,application/xml,application/json',
+      'User-Agent': Tools.browserUserAgent,
     };
   }
 
@@ -490,11 +490,11 @@ abstract class BooruHandler {
       try {
         final CookieManager cookieManager = CookieManager.instance();
         final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
-        for (Cookie cookie in cookies) {
+        for (final Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
       } catch (e) {
-        Logger.Inst().log(e.toString(), className, "getCookies", LogTypes.exception);
+        Logger.Inst().log(e.toString(), className, 'getCookies', LogTypes.exception);
       }
     }
 
@@ -503,7 +503,7 @@ abstract class BooruHandler {
       cookieString += headers['Cookie']!;
     }
 
-    Logger.Inst().log('${booru.baseURL}: $cookieString', className, "getCookies", LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('${booru.baseURL}: $cookieString', className, 'getCookies', LogTypes.booruHandlerSearchURL);
 
     cookieString = cookieString.trim();
 
@@ -514,7 +514,7 @@ abstract class BooruHandler {
     TagHandler.instance.addTagsWithType(tags, type);
   }
 
-  void populateTagHandler(List<BooruItem> items) async {
+  Future<void> populateTagHandler(List<BooruItem> items) async {
     List<String> unTyped = [];
     for (int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
