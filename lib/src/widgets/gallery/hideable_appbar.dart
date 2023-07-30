@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
@@ -102,7 +103,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           FlashElements.showSnackbar(
             context: context,
             title: const Text("Can't start Slideshow", style: TextStyle(fontSize: 20)),
-            content: const Text("Reached the Last loaded Item", style: TextStyle(fontSize: 16)),
+            content: const Text('Reached the Last loaded Item', style: TextStyle(fontSize: 16)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -118,7 +119,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   void pageListener() {
     if (autoScroll) {
-      if ((autoScrollTimer?.isActive == true)) {
+      if (autoScrollTimer?.isActive == true) {
         // reset slideshow timer if user scrolled earlier
         // TODO bug: progress animation lags for a few frames when scroll is automatic
         unsetScrollTimer();
@@ -173,12 +174,12 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final int listSplit = (MediaQuery.of(context).size.width / 100).floor();
     // print(MediaQuery.of(context).size.width);
     if (listSplit < filteredButtonOrder.length) {
-      overFlowList = (filteredButtonOrder.sublist(listSplit));
+      overFlowList = filteredButtonOrder.sublist(listSplit);
       buttonList = filteredButtonOrder.sublist(0, listSplit);
     } else {
       buttonList = filteredButtonOrder;
     }
-    for (var value in buttonList) {
+    for (final value in buttonList) {
       final String name = value[0];
 
       actions.add(
@@ -265,19 +266,19 @@ class _HideableAppBarState extends State<HideableAppBar> {
   Widget buttonIcon(String action) {
     late IconData icon;
     switch (action) {
-      case ("info"):
+      case 'info':
         icon = Icons.info;
         break;
-      case ("open"):
+      case 'open':
         icon = Icons.public;
         break;
-      case ("autoscroll"):
+      case 'autoscroll':
         icon = autoScroll ? Icons.pause : Icons.play_arrow;
         break;
-      case ("snatch"):
+      case 'snatch':
         icon = Icons.save;
         break;
-      case ("favourite"):
+      case 'favourite':
         // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
@@ -293,10 +294,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
             secondChild: Icon(isFav == true ? Icons.favorite : (isFav == false ? Icons.favorite_border : CupertinoIcons.heart_slash)),
           );
         });
-      case ("share"):
+      case 'share':
         icon = Icons.share;
         break;
-      case ("reloadnoscale"):
+      case 'reloadnoscale':
         icon = Icons.refresh;
         break;
     }
@@ -364,13 +365,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
     }
 
     switch (action) {
-      case ("autoscroll"):
+      case 'autoscroll':
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
         break;
-      case ("favourite"):
+      case 'favourite':
         label = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value == true ? 'Unfavourite' : defaultLabel;
         break;
-      case ("reloadnoscale"):
+      case 'reloadnoscale':
         label = searchHandler.currentFetched[searchHandler.viewedIndex.value].isNoScale.value ? 'Reload with scaling' : defaultLabel;
         break;
       default:
@@ -383,18 +384,18 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   Future<void> buttonClick(String action) async {
     switch (action) {
-      case ("info"):
+      case 'info':
         widget.onOpenDrawer();
         break;
-      case ("open"):
+      case 'open':
         // url to html encoded
         final String url = Uri.encodeFull(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
         ServiceHandler.launchURL(url);
         break;
-      case ("autoscroll"):
+      case 'autoscroll':
         autoScrollState(!autoScroll);
         break;
-      case ("snatch"):
+      case 'snatch':
         await getPerms();
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
@@ -404,7 +405,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
           false,
         );
         break;
-      case ("favourite"):
+      case 'favourite':
         await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
 
         // set viewed item again in case favourites filter is enabled
@@ -412,10 +413,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           searchHandler.setViewedItem(searchHandler.viewedIndex.value);
         });
         break;
-      case ("share"):
+      case 'share':
         onShareClick();
         break;
-      case ("reloadnoscale"):
+      case 'reloadnoscale':
         searchHandler.currentFetched[searchHandler.viewedIndex.value].isNoScale.toggle();
         break;
     }
@@ -424,12 +425,12 @@ class _HideableAppBarState extends State<HideableAppBar> {
   Future<void> buttonHold(String action) async {
     // TODO long press slideshow button to set the timer
     switch (action) {
-      case ("share"):
+      case 'share':
         ServiceHandler.vibrate();
         // Ignore share setting on long press
         showShareDialog(showTip: false);
         break;
-      case ("snatch"):
+      case 'snatch':
         await showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -449,7 +450,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       ),
                       onTap: () async {
                         item.isSnatched.value = false;
-                        await settingsHandler.dbHandler.updateBooruItem(item, "local");
+                        await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
                         Navigator.of(context).pop();
                       },
                       leading: const Icon(Icons.file_download_off_outlined),
@@ -493,7 +494,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         } else {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text("No Post URL!", style: TextStyle(fontSize: 20)),
+            title: const Text('No Post URL!', style: TextStyle(fontSize: 20)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -522,7 +523,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       FlashElements.showSnackbar(
         context: context,
         duration: const Duration(seconds: 2),
-        title: const Text("Copied to clipboard!", style: TextStyle(fontSize: 20)),
+        title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
         content: Text(Uri.encodeFull(text), style: const TextStyle(fontSize: 16)),
         leadingIcon: Icons.copy,
         sideColor: Colors.green,
@@ -540,7 +541,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     }
   }
 
-  void shareFileAction() async {
+  Future<void> shareFileAction() async {
     final BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
 
     if (sharedItem != null) {
@@ -548,11 +549,11 @@ class _HideableAppBarState extends State<HideableAppBar> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Share File"),
+            title: const Text('Share File'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("Already downloading file for sharing, do you want to abort and share a new file?"),
+                const Text('Already downloading file for sharing, do you want to abort and share a new file?'),
                 const SizedBox(height: 10),
                 SizedBox(
                   width: 100,
@@ -566,13 +567,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 onPressed: () {
                   Navigator.of(context).pop('new');
                 },
-                child: const Text("Share new"),
+                child: const Text('Share new'),
               ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop('abort');
                 },
-                child: const Text("Abort"),
+                child: const Text('Abort'),
               ),
             ],
           );
@@ -603,8 +604,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
       // File not in cache - load from network, share, delete from cache afterwards
       FlashElements.showSnackbar(
         context: context,
-        title: const Text("Loading File...", style: TextStyle(fontSize: 20)),
-        content: const Text("This can take some time, please wait...", style: TextStyle(fontSize: 16)),
+        title: const Text('Loading File...', style: TextStyle(fontSize: 20)),
+        content: const Text('This can take some time, please wait...', style: TextStyle(fontSize: 16)),
         overrideLeadingIconWidget: const SizedBox(
           width: 50,
           height: 50,
@@ -653,8 +654,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
       } else {
         FlashElements.showSnackbar(
           context: context,
-          title: const Text("Error!", style: TextStyle(fontSize: 20)),
-          content: const Text("Something went wrong when saving the File before Sharing", style: TextStyle(fontSize: 16)),
+          title: const Text('Error!', style: TextStyle(fontSize: 20)),
+          content: const Text('Something went wrong when saving the File before Sharing', style: TextStyle(fontSize: 16)),
           leadingIcon: Icons.warning_amber,
           leadingIconColor: Colors.red,
           sideColor: Colors.red,
@@ -722,20 +723,21 @@ class _HideableAppBarState extends State<HideableAppBar> {
                   title: const Text('File'),
                 ),
                 const SizedBox(height: 15),
-                settingsHandler.hasHydrus && searchHandler.currentBooru.type != BooruType.Hydrus
-                    ? ListTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
-                        },
-                        leading: const Icon(Icons.file_present),
-                        title: const Text('Hydrus'),
-                      )
-                    : Container()
+                if (settingsHandler.hasHydrus && searchHandler.currentBooru.type != BooruType.Hydrus)
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
+                    },
+                    leading: const Icon(Icons.file_present),
+                    title: const Text('Hydrus'),
+                  )
+                else
+                  Container()
               ],
             ),
             const SizedBox(height: 15),
@@ -823,7 +825,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
               child: Obx(() {
                 final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
                 final String formattedTotal = searchHandler.currentFetched.length.toString();
-                return Text("$formattedViewedIndex/$formattedTotal", style: const TextStyle(color: Colors.white));
+                return Text('$formattedViewedIndex/$formattedTotal', style: const TextStyle(color: Colors.white));
               }),
             ),
             actions: getActions(),

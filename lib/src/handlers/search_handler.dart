@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
@@ -19,11 +20,12 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
-var uuid = const Uuid();
+Uuid uuid = const Uuid();
 
-var volumeKeyChannel = Platform.isAndroid ? const EventChannel('com.noaisu.loliSnatcher/volume') : null;
+EventChannel? volumeKeyChannel = Platform.isAndroid ? const EventChannel('com.noaisu.loliSnatcher/volume') : null;
 
 class SearchHandler extends GetxController {
+  SearchHandler(this.rootRestate);
   // alternative way to get instance of the controller
   // i.e. "SearchHandler.to.list" instead of "Get.find<SearchHandler>().list"
   static SearchHandler get instance => Get.find<SearchHandler>();
@@ -50,7 +52,7 @@ class SearchHandler extends GetxController {
 
     // record search query to db
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    if (searchText != "" && settingsHandler.searchHistoryEnabled) {
+    if (searchText != '' && settingsHandler.searchHistoryEnabled) {
       settingsHandler.dbHandler.updateSearchHistory(searchText, booru.value.type?.name, booru.value.name);
     }
 
@@ -94,7 +96,7 @@ class SearchHandler extends GetxController {
     } else {
       // if there is only one tab, reset to default tags
       FlashElements.showSnackbar(
-        title: const Text("Removed Last Tab", style: TextStyle(fontSize: 20)),
+        title: const Text('Removed Last Tab', style: TextStyle(fontSize: 20)),
         content: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -166,7 +168,7 @@ class SearchHandler extends GetxController {
 
   // grid scroll controller
   AutoScrollController gridScrollController = AutoScrollController(); // will be overwritten on the first render because there is hasClients check
-  RxDouble scrollOffset = (0.0).obs;
+  RxDouble scrollOffset = 0.0.obs;
 
   void updateScrollPosition() {
     scrollOffset.value = gridScrollController.offset;
@@ -196,7 +198,7 @@ class SearchHandler extends GetxController {
 
   late GlobalKey<InnerDrawerState> mainDrawerKey;
 
-  void openAndFocusSearch() async {
+  Future<void> openAndFocusSearch() async {
     mainDrawerKey.currentState?.open();
     await Future.delayed(const Duration(milliseconds: 300));
     searchBoxFocus.requestFocus();
@@ -278,7 +280,7 @@ class SearchHandler extends GetxController {
   }
 
   // search on the current tab until we reach given page number or there is an error
-  void searchCurrentTabUntilPageNumber(
+  Future<void> searchCurrentTabUntilPageNumber(
     int newPageNum, {
     int? customDelay,
   }) async {
@@ -301,7 +303,7 @@ class SearchHandler extends GetxController {
   }
 
   HasTabWithTagResult hasTabWithTag(String tag) {
-    for (SearchTab tab in list) {
+    for (final SearchTab tab in list) {
       if (tab.tags.toLowerCase().trim() == tag.toLowerCase().trim()) {
         return HasTabWithTagResult.onlyTag;
       } else if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
@@ -313,7 +315,7 @@ class SearchHandler extends GetxController {
 
   List<SearchTab> getTabsWithTag(String tag) {
     List<SearchTab> tabs = [];
-    for (SearchTab tab in list) {
+    for (final SearchTab tab in list) {
       if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
         tabs.add(tab);
       }
@@ -330,11 +332,11 @@ class SearchHandler extends GetxController {
 
   RxInt viewedIndex = (-1).obs;
   Rx<BooruItem> viewedItem = BooruItem(
-    fileURL: "",
-    sampleURL: "",
-    thumbnailURL: "",
+    fileURL: '',
+    sampleURL: '',
+    thumbnailURL: '',
     tagsList: [],
-    postURL: "",
+    postURL: '',
   ).obs;
 
   BooruItem setViewedItem(int i) {
@@ -343,11 +345,11 @@ class SearchHandler extends GetxController {
     final BooruItem newItem = newIndex != -1
         ? currentFetched[newIndex]
         : BooruItem(
-            fileURL: "",
-            sampleURL: "",
-            thumbnailURL: "",
+            fileURL: '',
+            sampleURL: '',
+            thumbnailURL: '',
             tagsList: [],
-            postURL: "",
+            postURL: '',
           );
     viewedItem.value = newItem;
     currentTab.viewedItem.value = newItem;
@@ -366,7 +368,7 @@ class SearchHandler extends GetxController {
       ServiceHandler.vibrate();
 
       item.isFavourite.value = item.isFavourite.value == true ? false : true;
-      await SettingsHandler.instance.dbHandler.updateBooruItem(item, "local");
+      await SettingsHandler.instance.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
     }
     return item.isFavourite.value;
   }
@@ -408,17 +410,17 @@ class SearchHandler extends GetxController {
     changeTabIndex(currentIndex, ignoreSameIndexCheck: true);
 
     // write to history
-    if (text != "" && settingsHandler.searchHistoryEnabled) {
+    if (text != '' && settingsHandler.searchHistoryEnabled) {
       settingsHandler.dbHandler.updateSearchHistory(text, currentBooru.type?.name, currentBooru.name!);
     }
   }
 
   void searchReactions(String text, Booru booru) {
     // UOOOOOHHHHH
-    if (text.toLowerCase().contains("loli")) {
+    if (text.toLowerCase().contains('loli')) {
       FlashElements.showSnackbar(
         duration: const Duration(seconds: 2),
-        title: const Text("UOOOOOOOHHH", style: TextStyle(fontSize: 20)),
+        title: const Text('UOOOOOOOHHH', style: TextStyle(fontSize: 20)),
         // TODO replace with image asset to avoid system-to-system font differences
         overrideLeadingIconWidget: const Text(' 😭 ', style: TextStyle(fontSize: 40)),
         sideColor: Colors.pink,
@@ -432,7 +434,7 @@ class SearchHandler extends GetxController {
       if (isOnBooruWhereRatingsChanged) {
         FlashElements.showSnackbar(
           duration: null,
-          title: const Text("Ratings changed", style: TextStyle(fontSize: 20)),
+          title: const Text('Ratings changed', style: TextStyle(fontSize: 20)),
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -461,7 +463,7 @@ class SearchHandler extends GetxController {
               ),
               const Text(''),
               const Text(
-                "App fixed the rating automatically, but consider changing to correct rating in your future queries",
+                'App fixed the rating automatically, but consider changing to correct rating in your future queries',
                 style: TextStyle(fontSize: 18),
               ),
             ],
@@ -495,7 +497,7 @@ class SearchHandler extends GetxController {
   // did search detect last page (usually when response is an empty array)
   RxBool isLastPage = false.obs;
   // did search encounter an error
-  RxString errorString = "".obs;
+  RxString errorString = ''.obs;
 
   // run search on current tab
   Future<void> runSearch() async {
@@ -585,8 +587,6 @@ class SearchHandler extends GetxController {
     super.onClose();
   }
 
-  SearchHandler(this.rootRestate);
-
   // Backup/restore tabs stuff
 
   // special strings used to separate parts of tab backup string
@@ -608,7 +608,7 @@ class SearchHandler extends GetxController {
   List<List<String>> decodeBackupString(String input) {
     List<List<String>> result = [];
     List<String> splitInput = input.split(listDivider);
-    for (String str in splitInput) {
+    for (final String str in splitInput) {
       List<String> booruAndTags = str.split(tabDivider);
       result.add(booruAndTags);
     }
@@ -627,7 +627,7 @@ class SearchHandler extends GetxController {
       // split list into tabs
       List<List<String>> splitInput = decodeBackupString(result[1]);
       // print('restoreTabs: ${splitInput}');
-      for (List<String> booruAndTags in splitInput) {
+      for (final List<String> booruAndTags in splitInput) {
         // check for parsing errors
         final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
         if (isEntryValid) {
@@ -670,7 +670,7 @@ class SearchHandler extends GetxController {
     // set parsed tabs OR set first default tab if nothing to restore
     if (restoredGlobals.isNotEmpty) {
       FlashElements.showSnackbar(
-        title: const Text("Tabs restored", style: TextStyle(fontSize: 20)),
+        title: const Text('Tabs restored', style: TextStyle(fontSize: 20)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -718,7 +718,7 @@ class SearchHandler extends GetxController {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     List<List<String>> splitInput = decodeBackupString(tabStr);
     List<SearchTab> restoredGlobals = [];
-    for (List<String> booruAndTags in splitInput) {
+    for (final List<String> booruAndTags in splitInput) {
       // check for parsing errors
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
@@ -761,7 +761,7 @@ class SearchHandler extends GetxController {
     // reset current tab index to avoid exceptions when tab list length is different
     changeTabIndex(0, switchOnly: true);
 
-    for (List<String> booruAndTags in splitInput) {
+    for (final List<String> booruAndTags in splitInput) {
       // check for parsing errors
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
       if (isEntryValid) {
@@ -841,25 +841,6 @@ class SearchHandler extends GetxController {
 }
 
 class SearchTab {
-  // unique id to use for booru controller
-  String id = uuid.v4();
-  String tags = "";
-
-  Rx<Booru> selectedBooru;
-  RxList<Booru>? secondaryBoorus;
-  late BooruHandler booruHandler;
-
-  double scrollPosition = 0.0;
-  RxInt viewedIndex = (-1).obs;
-  Rx<BooruItem> viewedItem = BooruItem(
-    fileURL: "",
-    sampleURL: "",
-    thumbnailURL: "",
-    tagsList: [],
-    postURL: "",
-  ).obs;
-  RxList<int> selected = RxList<int>.from([]);
-
   SearchTab(this.selectedBooru, this.secondaryBoorus, this.tags) {
     List<Booru> tempBooruList = [];
     tempBooruList.add(selectedBooru.value);
@@ -873,10 +854,28 @@ class SearchTab {
     booruHandler = handlerTemp;
     booruHandler.pageNum = pageNumTemp;
   }
+  // unique id to use for booru controller
+  String id = uuid.v4();
+  String tags = '';
+
+  Rx<Booru> selectedBooru;
+  RxList<Booru>? secondaryBoorus;
+  late BooruHandler booruHandler;
+
+  double scrollPosition = 0;
+  RxInt viewedIndex = (-1).obs;
+  Rx<BooruItem> viewedItem = BooruItem(
+    fileURL: '',
+    sampleURL: '',
+    thumbnailURL: '',
+    tagsList: [],
+    postURL: '',
+  ).obs;
+  RxList<int> selected = RxList<int>.from([]);
 
   @override
   String toString() {
-    return ("tags: $tags selectedBooru: ${selectedBooru.toString()} booruHandler: $booruHandler");
+    return 'tags: $tags selectedBooru: ${selectedBooru.toString()} booruHandler: $booruHandler';
   }
 
   List<BooruItem> getSelected() {

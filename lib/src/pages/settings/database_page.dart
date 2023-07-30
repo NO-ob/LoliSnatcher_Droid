@@ -2,13 +2,17 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
+import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -43,7 +47,7 @@ class _DatabasePageState extends State<DatabasePage> {
     if (changingIndexes) {
       FlashElements.showSnackbar(
         title: const Text('Please wait!', style: TextStyle(fontSize: 20)),
-        content: const Text("Indexes are being changed", style: TextStyle(fontSize: 16)),
+        content: const Text('Indexes are being changed', style: TextStyle(fontSize: 16)),
         leadingIcon: Icons.info_outline,
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
@@ -60,13 +64,16 @@ class _DatabasePageState extends State<DatabasePage> {
     return result;
   }
 
-  Booru? getSankakuBooru() {
+  List<Booru> getSankakuBoorus() {
+    final List<Booru> sankakuBoorus = [];
+
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].baseURL == "https://capi-v2.sankakucomplex.com") {
-        return settingsHandler.booruList[i];
+      if (settingsHandler.booruList[i].baseURL == 'https://capi-v2.sankakucomplex.com' ||
+          settingsHandler.booruList[i].baseURL == 'https://iapi.sankakucomplex.com') {
+        sankakuBoorus.add(settingsHandler.booruList[i]);
       }
     }
-    return null;
+    return sankakuBoorus;
   }
 
   Future<bool> updateSankakuItems() async {
@@ -75,7 +82,7 @@ class _DatabasePageState extends State<DatabasePage> {
       title: const Text('Sankaku Favourites Update Started!', style: TextStyle(fontSize: 20)),
       content: const Column(
         children: [
-          Text("New image urls will be fetched for Sankaku items in your favourites", style: TextStyle(fontSize: 16)),
+          Text('New image urls will be fetched for Sankaku items in your favourites', style: TextStyle(fontSize: 16)),
           Text("Don't leave this page until the process is complete or stopped", style: TextStyle(fontSize: 14)),
         ],
       ),
@@ -92,9 +99,8 @@ class _DatabasePageState extends State<DatabasePage> {
       isUpdating = true;
     });
 
-    updatingItems = await settingsHandler.dbHandler.getSankakuItems();
-    final Booru? sankakuBooru = getSankakuBooru();
-    if (sankakuBooru == null) {
+    final List<Booru> sankakuBoorus = getSankakuBoorus();
+    if (sankakuBoorus.isEmpty) {
       FlashElements.showSnackbar(
         title: const Text('No Sankaku config found!', style: TextStyle(fontSize: 20)),
         leadingIcon: Icons.warning_amber,
@@ -110,23 +116,28 @@ class _DatabasePageState extends State<DatabasePage> {
       return true;
     }
 
-    final SankakuHandler sankakuHandler = SankakuHandler(sankakuBooru, 10);
-    for (BooruItem item in updatingItems) {
-      if (isUpdating) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        final List result = await sankakuHandler.loadItem(item);
-        if (result[1] == false) {
-          setState(() {
-            updatingFailed += 1;
-            failedURLs.add(item.postURL);
-          });
-          print("something went wrong updating favourites: ${result[2]}");
-        } else {
-          item = result[0];
-          unawaited(settingsHandler.dbHandler.updateBooruItem(item, "urlUpdate"));
-          setState(() {
-            updatingDone += 1;
-          });
+    for (final Booru sankakuBooru in sankakuBoorus) {
+      final SankakuHandler sankakuHandler =
+          sankakuBooru.type == BooruType.IdolSankaku ? IdolSankakuHandler(sankakuBooru, 10) : SankakuHandler(sankakuBooru, 10);
+      updatingItems = await settingsHandler.dbHandler.getSankakuItems(idol: sankakuBooru.type == BooruType.IdolSankaku);
+
+      for (BooruItem item in updatingItems) {
+        if (isUpdating) {
+          await Future.delayed(const Duration(milliseconds: 100));
+          final List result = await sankakuHandler.loadItem(item);
+          if (result[1] == false) {
+            setState(() {
+              updatingFailed += 1;
+              failedURLs.add(item.postURL);
+            });
+            Logger.Inst().log('something went wrong updating favourites: ${result[2]}', 'DataBasePage', 'updateSankakuItems', LogTypes.exception);
+          } else {
+            item = result[0];
+            unawaited(settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.urlUpdate));
+            setState(() {
+              updatingDone += 1;
+            });
+          }
         }
       }
     }
@@ -154,7 +165,7 @@ class _DatabasePageState extends State<DatabasePage> {
       title: const Text('Failed Item Purge Started!', style: TextStyle(fontSize: 20)),
       content: const Column(
         children: [
-          Text("Items that failed to update will be removed from the database", style: TextStyle(fontSize: 16)),
+          Text('Items that failed to update will be removed from the database', style: TextStyle(fontSize: 16)),
         ],
       ),
       leadingIcon: Icons.info_outline,
@@ -163,7 +174,7 @@ class _DatabasePageState extends State<DatabasePage> {
     );
 
     final List<String> failedIDs = await settingsHandler.dbHandler.getItemIDs(failedURLs);
-    settingsHandler.dbHandler.deleteItem(failedIDs);
+    await settingsHandler.dbHandler.deleteItem(failedIDs);
     setState(() {
       failedURLs = [];
     });
@@ -193,7 +204,7 @@ class _DatabasePageState extends State<DatabasePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Database"),
+          title: const Text('Database'),
         ),
         body: Center(
           child: ListView(
@@ -215,8 +226,8 @@ class _DatabasePageState extends State<DatabasePage> {
                         return const SettingsDialog(
                           title: Text('Database'),
                           contentItems: [
-                            Text("The database will store favourites and also track if an item is snatched"),
-                            Text("If an item is snatched it wont be snatched again"),
+                            Text('The database will store favourites and also track if an item is snatched'),
+                            Text('If an item is snatched it wont be snatched again'),
                           ],
                         );
                       },
@@ -244,8 +255,8 @@ class _DatabasePageState extends State<DatabasePage> {
                                 return const SettingsDialog(
                                   title: Text('Indexes'),
                                   contentItems: [
-                                    Text("Indexes help make searching database faster,"),
-                                    Text("but they take up more space on disk (possibly doubling the size of the database)"),
+                                    Text('Indexes help make searching database faster,'),
+                                    Text('but they take up more space on disk (possibly doubling the size of the database)'),
                                     Text("Don't leave the page while indexes are being changed to avoid database corruption"),
                                   ],
                                 );
@@ -291,10 +302,10 @@ class _DatabasePageState extends State<DatabasePage> {
                           return const SettingsDialog(
                             title: Text('Search History'),
                             contentItems: [
-                              Text("Requires enabled Database."),
-                              Text("Long press any history entry for additional actions (Delete, Set as Favourite...)"),
-                              Text("Favourited entries are pinned to the top of the list and will not be counted towards item limit."),
-                              Text("Records last 5000 search queries."),
+                              Text('Requires enabled Database.'),
+                              Text('Long press any history entry for additional actions (Delete, Set as Favourite...)'),
+                              Text('Favourited entries are pinned to the top of the list and will not be counted towards item limit.'),
+                              Text('Records last 5000 search queries.'),
                             ],
                           );
                         },
@@ -319,8 +330,8 @@ class _DatabasePageState extends State<DatabasePage> {
                           return const SettingsDialog(
                             title: Text('Tag Type Fetching'),
                             contentItems: [
-                              Text("Will search for tag types on supported boorus"),
-                              Text("This could lead to rate limiting"),
+                              Text('Will search for tag types on supported boorus'),
+                              Text('This could lead to rate limiting'),
                             ],
                           );
                         },
@@ -339,7 +350,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         return SettingsDialog(
                           title: const Text('Are you sure?'),
                           contentItems: const [
-                            Text("Delete Database?"),
+                            Text('Delete Database?'),
                           ],
                           actionButtons: [
                             const CancelButton(),
@@ -349,8 +360,8 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                 FlashElements.showSnackbar(
                                   context: context,
-                                  title: const Text("Database Deleted!", style: TextStyle(fontSize: 20)),
-                                  content: const Text("An app restart is required!", style: TextStyle(fontSize: 16)),
+                                  title: const Text('Database Deleted!', style: TextStyle(fontSize: 20)),
+                                  content: const Text('An app restart is required!', style: TextStyle(fontSize: 16)),
                                   leadingIcon: Icons.delete_forever,
                                   leadingIconColor: Colors.red,
                                   sideColor: Colors.yellow,
@@ -377,7 +388,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         return SettingsDialog(
                           title: const Text('Are you sure?'),
                           contentItems: const [
-                            Text("Clear all Snatched items?"),
+                            Text('Clear all Snatched items?'),
                           ],
                           actionButtons: [
                             const CancelButton(),
@@ -396,8 +407,8 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: const Text("Snatched Cleared!", style: TextStyle(fontSize: 20)),
-                                    content: const Text("An app restart may be required!", style: TextStyle(fontSize: 16)),
+                                    title: const Text('Snatched Cleared!', style: TextStyle(fontSize: 20)),
+                                    content: const Text('An app restart may be required!', style: TextStyle(fontSize: 16)),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
                                     sideColor: Colors.yellow,
@@ -425,7 +436,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         return SettingsDialog(
                           title: const Text('Are you sure?'),
                           contentItems: const [
-                            Text("Clear all Favourited items?"),
+                            Text('Clear all Favourited items?'),
                           ],
                           actionButtons: [
                             const CancelButton(),
@@ -444,8 +455,8 @@ class _DatabasePageState extends State<DatabasePage> {
 
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: const Text("Favourites Cleared!", style: TextStyle(fontSize: 20)),
-                                    content: const Text("An app restart may be required!", style: TextStyle(fontSize: 16)),
+                                    title: const Text('Favourites Cleared!', style: TextStyle(fontSize: 20)),
+                                    content: const Text('An app restart may be required!', style: TextStyle(fontSize: 16)),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
                                     sideColor: Colors.yellow,
@@ -473,7 +484,7 @@ class _DatabasePageState extends State<DatabasePage> {
                         return SettingsDialog(
                           title: const Text('Are you sure?'),
                           contentItems: const [
-                            Text("Clear Search History?"),
+                            Text('Clear Search History?'),
                           ],
                           actionButtons: [
                             const CancelButton(),
@@ -483,8 +494,8 @@ class _DatabasePageState extends State<DatabasePage> {
                                   settingsHandler.dbHandler.deleteFromSearchHistory(null);
                                   FlashElements.showSnackbar(
                                     context: context,
-                                    title: const Text("Search History Cleared!", style: TextStyle(fontSize: 20)),
-                                    content: const Text("An app restart may be required!", style: TextStyle(fontSize: 16)),
+                                    title: const Text('Search History Cleared!', style: TextStyle(fontSize: 20)),
+                                    content: const Text('An app restart may be required!', style: TextStyle(fontSize: 16)),
                                     leadingIcon: Icons.delete_forever,
                                     leadingIconColor: Colors.red,
                                     sideColor: Colors.yellow,
