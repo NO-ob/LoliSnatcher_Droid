@@ -2,9 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+
+import 'package:dio/dio.dart';
+
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
-
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -27,23 +29,43 @@ class DatabasePage extends StatefulWidget {
 class _DatabasePageState extends State<DatabasePage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final SearchHandler searchHandler = SearchHandler.instance;
+  final ScrollController scrollController = ScrollController();
 
   bool dbEnabled = true, indexesEnabled = true, changingIndexes = false, searchHistoryEnabled = true, isUpdating = false, tagTypeFetchEnabled = true;
   int updatingFailed = 0, updatingDone = 0;
-  List<BooruItem> updatingItems = [];
-  List<String> failedURLs = [];
+  BooruType? sankakuType;
+  CancelToken? cancelToken;
+  final TextEditingController sankakuSearchController = TextEditingController();
+  List<BooruItem> updatingItems = [], failedItems = [];
 
   @override
   void initState() {
+    super.initState();
+
     dbEnabled = settingsHandler.dbEnabled;
     indexesEnabled = settingsHandler.indexesEnabled;
     searchHistoryEnabled = settingsHandler.searchHistoryEnabled;
     tagTypeFetchEnabled = settingsHandler.tagTypeFetchEnabled;
-    super.initState();
+
+    final List<Booru> sankakuBoorus = getSankakuBoorus();
+    if (sankakuBoorus.isNotEmpty) {
+      sankakuType = sankakuBoorus.first.type;
+    }
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
+    if (isUpdating) {
+      FlashElements.showSnackbar(
+        title: const Text("Can't leave the page right now!", style: TextStyle(fontSize: 20)),
+        content: const Text('Sankaku data is being updated, wait until it ends or cancel manually at the bottom of the page', style: TextStyle(fontSize: 16)),
+        leadingIcon: Icons.warning_amber,
+        leadingIconColor: Colors.yellow,
+        sideColor: Colors.yellow,
+      );
+      return false;
+    }
+
     if (changingIndexes) {
       FlashElements.showSnackbar(
         title: const Text('Please wait!', style: TextStyle(fontSize: 20)),
@@ -76,7 +98,11 @@ class _DatabasePageState extends State<DatabasePage> {
     return sankakuBoorus;
   }
 
-  Future<bool> updateSankakuItems() async {
+  Future<bool> updateSankakuItems({List<BooruItem>? customItems}) async {
+    if (isUpdating) {
+      return false;
+    }
+
     FlashElements.showSnackbar(
       duration: const Duration(seconds: 6),
       title: const Text('Sankaku Favourites Update Started!', style: TextStyle(fontSize: 20)),
@@ -93,13 +119,22 @@ class _DatabasePageState extends State<DatabasePage> {
 
     setState(() {
       updatingItems = [];
-      failedURLs = [];
+      failedItems = [];
       updatingFailed = 0;
       updatingDone = 0;
       isUpdating = true;
+      cancelToken?.cancel();
     });
 
-    final List<Booru> sankakuBoorus = getSankakuBoorus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+
+    final List<Booru> sankakuBoorus = getSankakuBoorus().where((e) => e.type == sankakuType).toList();
     if (sankakuBoorus.isEmpty) {
       FlashElements.showSnackbar(
         title: const Text('No Sankaku config found!', style: TextStyle(fontSize: 20)),
@@ -119,23 +154,33 @@ class _DatabasePageState extends State<DatabasePage> {
     for (final Booru sankakuBooru in sankakuBoorus) {
       final SankakuHandler sankakuHandler =
           sankakuBooru.type == BooruType.IdolSankaku ? IdolSankakuHandler(sankakuBooru, 10) : SankakuHandler(sankakuBooru, 10);
-      updatingItems = await settingsHandler.dbHandler.getSankakuItems(idol: sankakuBooru.type == BooruType.IdolSankaku);
+      updatingItems = customItems?.isNotEmpty == true
+          ? customItems!
+          : await settingsHandler.dbHandler.getSankakuItems(search: sankakuSearchController.text, idol: sankakuBooru.type == BooruType.IdolSankaku);
+
+      safeSetState(() {});
 
       for (BooruItem item in updatingItems) {
         if (isUpdating) {
           await Future.delayed(const Duration(milliseconds: 100));
-          final List result = await sankakuHandler.loadItem(item);
+          cancelToken = CancelToken();
+          final List result = await sankakuHandler.loadItem(item: item, cancelToken: cancelToken);
           if (result[1] == false) {
-            setState(() {
+            safeSetState(() {
               updatingFailed += 1;
-              failedURLs.add(item.postURL);
+              failedItems.add(item);
             });
             Logger.Inst().log('something went wrong updating favourites: ${result[2]}', 'DataBasePage', 'updateSankakuItems', LogTypes.exception);
-          } else {
+          } else if (result[1] == true) {
             item = result[0];
             unawaited(settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.urlUpdate));
-            setState(() {
+            safeSetState(() {
               updatingDone += 1;
+            });
+          } else {
+            safeSetState(() {
+              updatingFailed += 1;
+              failedItems.add(item);
             });
           }
         }
@@ -150,13 +195,21 @@ class _DatabasePageState extends State<DatabasePage> {
         sideColor: Colors.green,
       );
     }
-    setState(() {
+
+    safeSetState(() {
       updatingFailed = 0;
       updatingDone = 0;
       isUpdating = false;
     });
 
     return true;
+  }
+
+  void safeSetState(VoidCallback fn) {
+    fn();
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<bool> purgeFailedSankakuItems() async {
@@ -173,10 +226,10 @@ class _DatabasePageState extends State<DatabasePage> {
       sideColor: Colors.green,
     );
 
-    final List<String> failedIDs = await settingsHandler.dbHandler.getItemIDs(failedURLs);
+    final List<String> failedIDs = await settingsHandler.dbHandler.getItemIDs(failedItems.map((e) => e.postURL).toList());
     await settingsHandler.dbHandler.deleteItem(failedIDs);
     setState(() {
-      failedURLs = [];
+      failedItems = [];
     });
     return true;
   }
@@ -208,6 +261,7 @@ class _DatabasePageState extends State<DatabasePage> {
         ),
         body: Center(
           child: ListView(
+            controller: scrollController,
             children: [
               SettingsToggle(
                 value: dbEnabled,
@@ -512,54 +566,124 @@ class _DatabasePageState extends State<DatabasePage> {
                     );
                   },
                 ),
-                const SettingsButton(name: '', enabled: false),
-                SettingsButton(
-                  name: 'Update Sankaku URLs',
-                  trailingIcon: const Icon(Icons.image),
-                  action: () {
-                    if (!isUpdating) {
-                      updateSankakuItems();
-                    }
-                  },
-                ),
-                if (isUpdating)
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Updating ${updatingItems.isEmpty ? '...' : updatingItems.length} items:'),
-                        Text('Left: ${max(updatingItems.length - updatingDone - updatingFailed, 0)}'),
-                        Text('Done: $updatingDone'),
-                        Text('Failed: $updatingFailed'),
-                        const Text(''),
-                        const Text(
-                          "Stop and try again later if you start seeing 'Failed' number constantly growing, you could have reached rate limit and/or Sankaku blocks requests from your IP.",
+                if (sankakuType != null) ...[
+                  const SettingsButton(name: '', enabled: false),
+                  const SettingsButton(
+                    name: 'Sankaku Favourites Update',
+                    // drawBottomBorder: false,
+                  ),
+                  Stack(
+                    children: [
+                      IgnorePointer(
+                        ignoring: isUpdating,
+                        child: Column(
+                          children: [
+                            SettingsDropdown<BooruType?>(
+                              value: sankakuType,
+                              items: getSankakuBoorus().map((e) => e.type).toList(),
+                              itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
+                              onChanged: (BooruType? newValue) {
+                                setState(() {
+                                  sankakuType = newValue;
+                                });
+                              },
+                              title: 'Sankaku type to update',
+                            ),
+                            SettingsTextInput(
+                              controller: sankakuSearchController,
+                              clearable: true,
+                              title: 'Search query',
+                              hintText: '(optional, may make the process slower)',
+                            ),
+                            SettingsButton(
+                              name: 'Update Sankaku URLs',
+                              trailingIcon: const Icon(Icons.image),
+                              action: () {
+                                updateSankakuItems();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isUpdating) ...[
+                        Positioned.fill(
+                          child: ColoredBox(
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                        ),
+                        const Positioned.fill(
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
                         ),
                       ],
+                    ],
+                  ),
+                  if (isUpdating) ...[
+                    Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Updating ${updatingItems.isEmpty ? '...' : updatingItems.length} items:'),
+                          Text('Left: ${max(updatingItems.length - updatingDone - updatingFailed, 0)}'),
+                          Text('Done: $updatingDone'),
+                          Text('Failed/Skipped: $updatingFailed'),
+                          const Text(''),
+                          const Text(
+                            "Stop and try again later if you start seeing 'Failed' number constantly growing, you could have reached rate limit and/or Sankaku blocks requests from your IP.",
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                if (isUpdating)
-                  SettingsButton(
-                    name: 'Press here to stop',
-                    drawTopBorder: true,
-                    action: () {
-                      setState(() {
-                        isUpdating = false;
-                      });
-                    },
-                  ),
-                if (!isUpdating && failedURLs.isNotEmpty)
-                  SettingsButton(
-                    name: 'Purge Items That Failed to Update',
-                    trailingIcon: const Icon(Icons.delete_forever),
-                    drawTopBorder: true,
-                    action: () {
-                      setState(() {
-                        purgeFailedSankakuItems();
-                      });
-                    },
-                  ),
+                    SettingsButton(
+                      name: 'Press here to skip current item',
+                      subtitle: const Text('Use if item appears to be stuck'),
+                      trailingIcon: const Icon(Icons.skip_next),
+                      drawTopBorder: true,
+                      action: () {
+                        cancelToken?.cancel();
+                      },
+                    ),
+                    SettingsButton(
+                      name: 'Press here to stop',
+                      trailingIcon: const Icon(Icons.cancel),
+                      drawTopBorder: true,
+                      action: () {
+                        setState(() {
+                          isUpdating = false;
+                          cancelToken?.cancel();
+                        });
+                      },
+                    ),
+                  ],
+                  if (!isUpdating && failedItems.isNotEmpty) ...[
+                    SettingsButton(
+                      name: 'Purge Failed Items (${failedItems.length})',
+                      trailingIcon: const Icon(Icons.delete_forever),
+                      drawTopBorder: true,
+                      action: () {
+                        setState(() {
+                          purgeFailedSankakuItems();
+                        });
+                      },
+                    ),
+                    SettingsButton(
+                      name: 'Retry Failed Items (${failedItems.length})',
+                      trailingIcon: const Icon(Icons.refresh),
+                      drawTopBorder: true,
+                      action: () {
+                        updateSankakuItems(customItems: [...failedItems]);
+                      },
+                    ),
+                  ],
+                  const SettingsButton(name: '', enabled: false),
+                ],
               ],
             ],
           ),

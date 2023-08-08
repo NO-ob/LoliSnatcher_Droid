@@ -218,24 +218,33 @@ class DBHandler {
     return ids;
   }
 
-  Future<List<BooruItem>> getSankakuItems({bool idol = false}) async {
+  Future<List<BooruItem>> getSankakuItems({
+    String search = '',
+    bool idol = false,
+  }) async {
+    if (search.isNotEmpty) {
+      return searchDB(
+        search,
+        '0',
+        '1000000',
+        'DESC',
+        'loliSyncFav',
+        customConditions: ["bi.postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%'"],
+      );
+    }
+
     final List? result = await db?.rawQuery(
-      "SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite FROM BooruItem WHERE postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%'",
+      'SELECT BooruItem.id as ItemID, thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite '
+      'FROM BooruItem '
+      "WHERE postURL like '%${idol ? "idol" : "chan"}.sankakucomplex%' "
+      'ORDER BY BooruItem.id DESC;',
     );
     final List<BooruItem> items = [];
     if (result != null && result.isNotEmpty) {
       for (int i = 0; i < result.length; i++) {
         final currentItem = result[i];
         if (currentItem != null && currentItem.isNotEmpty) {
-          final BooruItem bItem = BooruItem(
-            fileURL: currentItem['fileURL'].toString(),
-            sampleURL: currentItem['sampleURL'].toString(),
-            thumbnailURL: currentItem['thumbnailURL'].toString(),
-            tagsList: [],
-            postURL: currentItem['postURL'].toString(),
-          );
-          bItem.isSnatched.value = Tools.intToBool(currentItem['isSnatched']);
-          bItem.isFavourite.value = Tools.intToBool(currentItem['isFavourite']);
+          final BooruItem bItem = BooruItem.fromDBRow(currentItem, []);
           items.add(bItem);
         }
       }
@@ -244,15 +253,21 @@ class DBHandler {
   }
 
   /// Gets a list of BooruItem from the database
-  Future<List<BooruItem>> searchDB(String searchTagsString, String offset, String limit, String order, String mode) async {
+  Future<List<BooruItem>> searchDB(
+    String searchTagsString,
+    String offset,
+    String limit,
+    String order,
+    String mode, {
+    List<String> customConditions = const [],
+  }) async {
     // TODO multiple tags in search can lead to wrong results
     List<String> searchTags = [], excludeTags = [];
     List? result;
 
     Logger.Inst().log('Searching DB for tags $searchTagsString', 'DBHandler', 'searchDB', LogTypes.booruHandlerInfo);
 
-    searchTagsString = searchTagsString.trim();
-    searchTags = searchTagsString.split(' ').where((tag) => tag.isNotEmpty).toList();
+    searchTags = searchTagsString.trim().split(' ').where((tag) => tag.isNotEmpty).toList();
 
     // this adds support of filtering by posturls which have site:*some text* as their substring
     String siteSearch = searchTags.firstWhere((tag) => tag.startsWith('site:'), orElse: () => '');
@@ -279,6 +294,8 @@ class DBHandler {
       final andStr1 = siteQuery.isNotEmpty || searchPart.isNotEmpty ? 'AND' : '';
       final andStr2 = siteQuery.isNotEmpty && searchPart.isNotEmpty ? 'AND' : '';
 
+      final customConditionsStr = customConditions.isNotEmpty ? 'AND ${customConditions.join(' AND ')}' : '';
+
       final String excludePart = excludeTags.isNotEmpty
           ? 'LEFT JOIN ('
               '  SELECT bi.id '
@@ -287,8 +304,8 @@ class DBHandler {
               '  JOIN Tag AS t ON it.tagID = t.id '
               "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
               ') AS ei ON bi.id = ei.id '
-              'WHERE ei.id IS NULL AND bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart '
-          : 'WHERE                   bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart ';
+              'WHERE ei.id IS NULL AND bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr '
+          : 'WHERE                   bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr ';
 
       final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
 

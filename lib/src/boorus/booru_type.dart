@@ -11,7 +11,6 @@ enum BooruType {
   Gelbooru,
   GelbooruV1,
   Hydrus,
-  IdolSankaku,
   InkBunny,
   Moebooru,
   NyanPals,
@@ -19,12 +18,13 @@ enum BooruType {
   Rainbooru,
   R34Hentai,
   Sankaku,
+  IdolSankaku,
   Shimmie,
   Szurubooru,
   WildCritters,
   World,
 
-  // Special
+  // [Special types]
   GelbooruAlike,
   Merge,
   Favourites;
@@ -48,6 +48,8 @@ enum BooruType {
     switch (this) {
       case World:
         return 'World/XYZ';
+      case IdolSankaku:
+        return 'Sankaku Idol';
       default:
         return name;
     }
