@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
@@ -35,7 +36,6 @@ class SankakuHandler extends BooruHandler {
   @override
   bool hasNotesSupport = true;
 
-  @override
   bool hasItemUpdateSupport = true;
 
   @override
@@ -59,7 +59,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseListFromResponse(response) {
-    List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -67,8 +67,8 @@ class SankakuHandler extends BooruHandler {
   BooruItem? parseItemFromResponse(responseItem, int index) {
     final dynamic current = responseItem;
 
-    List<String> tags = [];
-    Map<TagType, List<String>> tagMap = {};
+    final List<String> tags = [];
+    final Map<TagType, List<String>> tagMap = {};
 
     for (int x = 0; x < current['tags'].length; x++) {
       tags.add(current['tags'][x]['name'].toString());
@@ -117,16 +117,20 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  Future<List> loadItem(BooruItem item) async {
+  Future<List> loadItem({required BooruItem item, CancelToken? cancelToken}) async {
     try {
       if (authToken == '' && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
         authToken = await getAuthToken();
       }
-      final response = await DioNetwork.get(makeApiPostURL(item.postURL.split('/').last), headers: getHeaders());
+      final response = await DioNetwork.get(
+        makeApiPostURL(item.postURL.split('/').last),
+        headers: getHeaders(),
+        cancelToken: cancelToken,
+      );
       if (response.statusCode != 200) {
         return [item, false, 'Invalid status code ${response.statusCode}'];
       } else {
-        Map<String, dynamic> current = response.data;
+        final Map<String, dynamic> current = response.data;
         Logger.Inst().log(current.toString(), className, 'updateFavourite', LogTypes.booruHandlerRawFetched);
         if (current['file_url'] != null) {
           item.fileURL = current['file_url'];
@@ -135,6 +139,10 @@ class SankakuHandler extends BooruHandler {
         }
       }
     } catch (e) {
+      if(e is DioException && e.type == DioExceptionType.cancel) {
+        return [item, null, 'Cancelled'];
+      }
+
       return [item, false, e.toString()];
     }
     return [item, true, null];
@@ -142,22 +150,14 @@ class SankakuHandler extends BooruHandler {
 
   @override
   Map<String, String> getHeaders() {
-    return authToken.isEmpty
-        ? {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'User-Agent': Constants.defaultBrowserUserAgent,
-            'Referer': 'https://beta.sankakucomplex.com/',
-            'Origin': 'https://beta.sankakucomplex.com/'
-          }
-        : {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Authorization': authToken,
-            'User-Agent': Constants.defaultBrowserUserAgent,
-            'Referer': 'https://beta.sankakucomplex.com/',
-            'Origin': 'https://beta.sankakucomplex.com/'
-          };
+    return {
+      'Accept': 'application/vnd.sankaku.api+json;v=2',
+      if(authToken.isNotEmpty) 'Authorization': authToken,
+      // 'User-Agent': 'SCChannelApp/4.0',
+      'User-Agent': Constants.defaultBrowserUserAgent,
+      'Referer': 'https://sankaku.app/',
+      'Origin': 'https://sankaku.app'
+    };
   }
 
   @override
@@ -188,7 +188,7 @@ class SankakuHandler extends BooruHandler {
     );
 
     if (response.statusCode == 200) {
-      Map<String, dynamic> parsedResponse = response.data;
+      final Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse['success']) {
         Logger.Inst().log('Sankaku auth token loaded', className, 'getAuthToken', LogTypes.booruHandlerInfo);
         token = "${parsedResponse["token_type"]} ${parsedResponse["access_token"]}";
@@ -208,7 +208,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseTagSuggestionsList(response) {
-    List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -236,7 +236,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseCommentsList(response) {
-    List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
@@ -264,7 +264,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   List parseNotesList(response) {
-    List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
