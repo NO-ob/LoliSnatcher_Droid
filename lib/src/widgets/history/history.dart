@@ -37,6 +37,7 @@ class _HistoryListState extends State<HistoryList> {
 
   List<HistoryItem> history = [], filteredHistory = [], selectedEntries = [];
   final ItemScrollController itemScrollController = ItemScrollController();
+  final HugeListViewController hugeListViewController = HugeListViewController(totalItemCount: 0);
   final TextEditingController filterSearchController = TextEditingController();
   bool isLoading = true, showFavourites = true;
 
@@ -95,6 +96,10 @@ class _HistoryListState extends State<HistoryList> {
     } else {
       filteredHistory = history;
     }
+
+    hugeListViewController.totalItemCount = filteredHistory.length;
+    hugeListViewController.invalidateList(true);
+
     setState(() {});
   }
 
@@ -270,8 +275,8 @@ class _HistoryListState extends State<HistoryList> {
     final pageSize = MediaQuery.of(context).size.height ~/ 70;
 
     return HugeListView(
-      controller: itemScrollController,
-      totalCount: filteredHistory.length,
+      scrollController: itemScrollController,
+      listViewController: hugeListViewController,
       itemBuilder: (context, index, _) => listEntryBuild(context, index),
       placeholderBuilder: (BuildContext context, int index) {
         return const LinearProgressIndicator();

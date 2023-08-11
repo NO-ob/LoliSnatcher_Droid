@@ -397,8 +397,8 @@ class VideoViewerState extends State<VideoViewer> {
       );
     } else {
       // Otherwise load from network
-      videoController = VideoPlayerController.network(
-        widget.booruItem.fileURL,
+      videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.booruItem.fileURL),
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
         httpHeaders: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       );

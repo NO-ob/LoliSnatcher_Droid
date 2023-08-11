@@ -38,6 +38,8 @@ class TagsManagerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ItemScrollController itemScrollController = ItemScrollController();
+    final HugeListViewController hugeListViewController = HugeListViewController(totalItemCount: tags.length);
+
     return Expanded(
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
@@ -51,8 +53,8 @@ class TagsManagerList extends StatelessWidget {
               color: Theme.of(context).colorScheme.secondary,
               onRefresh: onRefresh,
               child: HugeListView(
-                controller: itemScrollController,
-                totalCount: tags.length,
+                scrollController: itemScrollController,
+                listViewController: hugeListViewController,
                 itemBuilder: (BuildContext context, int index, Tag tag) {
                   // final Tag tag = tags[index];
                   return TagsManagerListItem(
