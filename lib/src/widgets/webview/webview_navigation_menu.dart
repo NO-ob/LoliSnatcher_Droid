@@ -49,10 +49,11 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
               labelText: 'Enter a URL',
               border: const OutlineInputBorder(),
               suffixIcon: GestureDetector(
-                onTap: () {
-                  _urlController.clear();
-                },
-                child: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface),
+                onTap: _urlController.clear,
+                child: Icon(
+                  Icons.clear,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
             keyboardType: TextInputType.url,
@@ -127,7 +128,10 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
 
     String? favicon;
     if (html != null) {
-      final RegExp faviconRegex = RegExp(r'<link rel="(?:shortcut icon|icon|)" href="([^"]+)"', caseSensitive: false);
+      final RegExp faviconRegex = RegExp(
+        '<link rel="(?:shortcut icon|icon|)" href="([^"]+)"',
+        caseSensitive: false,
+      );
       final RegExpMatch? match = faviconRegex.firstMatch(html);
       if (match != null) {
         favicon = match.group(1);

@@ -7,13 +7,13 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 
 class ImageStats extends StatefulWidget {
   const ImageStats({
-      Key? key,
-      required this.child,
-      this.width = 120,
-      this.height = 40,
-      this.isEnabled = true,
-      this.align
-  }) : super(key: key);
+    required this.child,
+    this.width = 120,
+    this.height = 40,
+    this.isEnabled = true,
+    this.align,
+    super.key,
+  });
 
   /// Toggle the stats on/off, there should be no performance cost when the widget is off.
   final bool isEnabled;
@@ -37,13 +37,13 @@ class ImageStats extends StatefulWidget {
 class _ImageStatsState extends State<ImageStats> {
   int _lastCalcTime = 0;
   late Ticker _ticker;
-  double _ticks = 0;
+  // double _ticks = 0;
   final RxInt _totalLive = 0.obs;
   final RxInt _totalPending = 0.obs;
   final RxInt _totalAll = 0.obs;
   final RxInt _cacheSize = 0.obs;
   final RxInt _cacheMax = 0.obs;
-  final bool _shouldRepaint = false;
+  // final bool _shouldRepaint = false;
   int sampleTimeMs = 500;
 
   int get nowMs => DateTime.now().millisecondsSinceEpoch;
@@ -78,7 +78,7 @@ class _ImageStatsState extends State<ImageStats> {
     _totalLive.value = PaintingBinding.instance.imageCache.liveImageCount;
     _totalPending.value = PaintingBinding.instance.imageCache.pendingImageCount;
     _totalAll.value = PaintingBinding.instance.imageCache.currentSize;
-    _cacheSize.value = PaintingBinding.instance.imageCache.currentSizeBytes ;
+    _cacheSize.value = PaintingBinding.instance.imageCache.currentSizeBytes;
     _cacheMax.value = PaintingBinding.instance.imageCache.maximumSizeBytes;
   }
 
@@ -88,12 +88,12 @@ class _ImageStatsState extends State<ImageStats> {
       return;
     }
     // Tick
-    _ticks++;
+    // _ticks++;
     // Calculate
     if (nowMs - _lastCalcTime > sampleTimeMs) {
-      int remainder = (nowMs - _lastCalcTime - sampleTimeMs).round();
+      final int remainder = nowMs - _lastCalcTime - sampleTimeMs;
       _lastCalcTime = nowMs - remainder;
-      _ticks = 0;
+      // _ticks = 0;
       updateValues();
     }
   }
@@ -115,15 +115,17 @@ class _ImageStatsState extends State<ImageStats> {
                     height: widget.height,
                     color: Colors.white.withOpacity(0.8),
                     child: RepaintBoundary(
-                      child: Obx(() => Column(
-                        children: [
-                          Text('Live: ${_totalLive.value}'),
-                          Text('Pending: ${_totalPending.value}'),
-                          Text('Total: ${_totalAll.value}'),
-                          Text('Size: ${Tools.formatBytes(_cacheSize.value, 0)}'),
-                          Text('Max: ${Tools.formatBytes(_cacheMax.value, 0)}'),
-                        ]
-                      )),
+                      child: Obx(
+                        () => Column(
+                          children: [
+                            Text('Live: ${_totalLive.value}'),
+                            Text('Pending: ${_totalPending.value}'),
+                            Text('Total: ${_totalAll.value}'),
+                            Text('Size: ${Tools.formatBytes(_cacheSize.value, 0)}'),
+                            Text('Max: ${Tools.formatBytes(_cacheMax.value, 0)}'),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),

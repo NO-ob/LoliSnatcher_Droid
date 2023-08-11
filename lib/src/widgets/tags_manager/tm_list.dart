@@ -7,18 +7,17 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
-import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 
 class TagsManagerList extends StatelessWidget {
   const TagsManagerList({
-    Key? key,
     required this.tags,
     required this.selected,
     required this.onRefresh,
     required this.onTap,
     required this.onSelect,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<Tag> tags;
   final List<Tag> selected;
@@ -26,7 +25,7 @@ class TagsManagerList extends StatelessWidget {
   final void Function(Tag) onTap;
   final void Function(bool?, Tag) onSelect;
 
-  static const int PAGE_SIZE = 12;
+  static const int defaultPageSize = 12;
 
   Future<List<Tag>> _loadPage(int page, int pageSize) async {
     final int start = page * pageSize;
@@ -75,68 +74,21 @@ class TagsManagerList extends StatelessWidget {
                 //     child: Text('Error loading tags'),
                 //   );
                 // },
-                pageFuture: (page) => _loadPage(page, TagsManagerList.PAGE_SIZE),
-                pageSize: TagsManagerList.PAGE_SIZE,
-                thumbBuilder: (Color backgroundColor, Color drawColor, double height, int index, bool alwaysVisibleScrollThumb, Animation<double> thumbAnimation) {
-                  Tag tag = tags[index];
+                pageFuture: (page) => _loadPage(page, TagsManagerList.defaultPageSize),
+                pageSize: TagsManagerList.defaultPageSize,
+                thumbBuilder:
+                    (Color backgroundColor, Color drawColor, double height, int index, bool alwaysVisibleScrollThumb, Animation<double> thumbAnimation) {
+                  final Tag tag = tags[index];
                   return CustomScrollBarThumb(
                     backgroundColor: backgroundColor,
                     drawColor: drawColor,
                     height: height * 1.2, // 48
-                    title: '${tag.tagType.toString()} [${tag.fullString[0]}]',
+                    title: '${tag.tagType} [${tag.fullString[0]}]',
                   );
                 },
                 thumbBackgroundColor: Theme.of(context).colorScheme.surface,
                 thumbDrawColor: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
                 startIndex: 0,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-
-    final ScrollController scrollController = ScrollController();
-    return Expanded(
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
-        child: Material(
-          child: SizedBox(
-            width: double.maxFinite,
-            child: Scrollbar(
-              controller: scrollController,
-              child: RefreshIndicator(
-                triggerMode: RefreshIndicatorTriggerMode.anywhere,
-                displacement: 80,
-                strokeWidth: 4,
-                color: Theme.of(context).colorScheme.secondary,
-                onRefresh: onRefresh,
-                child: DesktopScrollWrap(
-                  controller: scrollController,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                    controller: scrollController,
-                    physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                    shrinkWrap: false,
-                    itemCount: tags.length,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (BuildContext context, int index) => Row(
-                      key: Key(index.toString()),
-                      children: <Widget>[
-                        Expanded(
-                          child: TagsManagerListItem(
-                            tag: tags[index],
-                            isSelected: selected.contains(tags[index]),
-                            onSelect: (bool? value) => onSelect(value, tags[index]),
-                            onTap: () {
-                              onTap(tags[index]);
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ),
             ),
           ),

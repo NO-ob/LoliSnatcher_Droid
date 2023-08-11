@@ -6,16 +6,15 @@ import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 
-
 class TagsManagerListBottom extends StatelessWidget {
   const TagsManagerListBottom({
-    Key? key,
     required this.selected,
     required this.isFilterActive,
     required this.onSelectAll,
     required this.onDeselectAll,
     required this.onDelete,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<Tag> selected;
   final bool isFilterActive;
@@ -34,7 +33,7 @@ class TagsManagerListBottom extends StatelessWidget {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: const Text("Select all"),
+                  label: const Text('Select all'),
                   onPressed: onSelectAll,
                 ),
               ),
@@ -60,7 +59,7 @@ class TagsManagerListBottom extends StatelessWidget {
                 }
 
                 final Widget deleteDialog = SettingsDialog(
-                  title: const Text("Delete Tags"),
+                  title: const Text('Delete Tags'),
                   scrollable: false,
                   content: SizedBox(
                     width: double.maxFinite,
@@ -71,14 +70,14 @@ class TagsManagerListBottom extends StatelessWidget {
                         const SizedBox(height: 10),
                         ...selected.map((Tag entry) {
                           return TagsManagerListItem(tag: entry);
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),
                   actionButtons: [
                     const CancelButton(),
                     ElevatedButton.icon(
-                      label: const Text("Delete"),
+                      label: const Text('Delete'),
                       icon: const Icon(Icons.delete_forever),
                       onPressed: onDelete,
                     ),
@@ -97,7 +96,7 @@ class TagsManagerListBottom extends StatelessWidget {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.border_clear),
-            label: const Text("Clear selection"),
+            label: const Text('Clear selection'),
             onPressed: onDeselectAll,
           ),
         ),

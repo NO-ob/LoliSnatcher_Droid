@@ -9,28 +9,29 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class DirPicker extends StatefulWidget {
-  const DirPicker(this.path, {Key? key}) : super(key: key);
+  const DirPicker(this.path, {super.key});
   final String path;
 
   @override
   State<DirPicker> createState() => _DirPickerState();
 }
+
 // Need to make this return the seslected directory to previous page. Might use getx variable not sure yet
 // Might also use a grid and add folder icons isntead of listing text
 // Need to make a dialog to create a new folder
 class _DirPickerState extends State<DirPicker> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final newDirNameController = TextEditingController();
-  String path = "";
+  String path = '';
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     path = widget.path;
   }
 
   Future<bool> _onWillPop() async {
-    if (path == "/storage"){
+    if (path == '/storage') {
       final shouldPop = await showDialog(
         context: context,
         builder: (context) {
@@ -58,9 +59,9 @@ class _DirPickerState extends State<DirPicker> {
       );
       return shouldPop;
     } else {
-      if(path.lastIndexOf("/") > -1) {
+      if (path.lastIndexOf('/') > -1) {
         setState(() {
-          path = path.substring(0,path.lastIndexOf("/"));
+          path = path.substring(0, path.lastIndexOf('/'));
           print(path);
         });
       }
@@ -68,38 +69,38 @@ class _DirPickerState extends State<DirPicker> {
     }
   }
 
-  void mkdir(){
-    var dir = Directory("$path/${newDirNameController.text}");
-    if (!dir.existsSync()){
+  void mkdir() {
+    final dir = Directory('$path/${newDirNameController.text}');
+    if (!dir.existsSync()) {
       dir.createSync(recursive: true);
     }
-    if (dir.existsSync()){
+    if (dir.existsSync()) {
       setState(() {
-        path += "/${newDirNameController.text}";
-        newDirNameController.text = "";
+        path += '/${newDirNameController.text}';
+        newDirNameController.text = '';
       });
     } else {
-      newDirNameController.text = "";
+      newDirNameController.text = '';
 
       FlashElements.showSnackbar(
         context: context,
         title: const Text(
-          "Error!",
-          style: TextStyle(fontSize: 20)
+          'Error!',
+          style: TextStyle(fontSize: 20),
         ),
         content: const Text(
-          "Failed to create directory!",
-          style: TextStyle(fontSize: 16)
+          'Failed to create directory!',
+          style: TextStyle(fontSize: 16),
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
       );
     }
-
   }
-  bool isWritable(){
-    File file = File("$path/test.txt");
+
+  bool isWritable() {
+    final File file = File('$path/test.txt');
     try {
       file.createSync();
       file.writeAsStringSync('', mode: FileMode.write, flush: true);
@@ -109,12 +110,12 @@ class _DirPickerState extends State<DirPicker> {
       FlashElements.showSnackbar(
         context: context,
         title: const Text(
-          "Error!",
-          style: TextStyle(fontSize: 20)
+          'Error!',
+          style: TextStyle(fontSize: 20),
         ),
         content: const Text(
-          "Directory is not writable!",
-          style: TextStyle(fontSize: 16)
+          'Directory is not writable!',
+          style: TextStyle(fontSize: 16),
         ),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
@@ -123,21 +124,23 @@ class _DirPickerState extends State<DirPicker> {
       return false;
     }
   }
-  Future<List<String>> getDirs() async{
-    List<String> dirs = [];
-    var dir = Directory(path);
+
+  Future<List<String>> getDirs() async {
+    final List<String> dirs = [];
+    final dir = Directory(path);
     await dir.list(recursive: false).forEach((file) {
-      if (file is Directory){
-        dirs.add(file.path.replaceAll(path,""));
+      if (file is Directory) {
+        dirs.add(file.path.replaceAll(path, ''));
       }
     });
     return dirs;
   }
+
   @override
   Widget build(BuildContext context) {
-    String title = "Select a Directory";
-    if (path != widget.path){
-      title = path.substring(path.lastIndexOf("/")+1);
+    String title = 'Select a Directory';
+    if (path != widget.path) {
+      title = path.substring(path.lastIndexOf('/') + 1);
     }
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -148,77 +151,82 @@ class _DirPickerState extends State<DirPicker> {
         ),
         body: Center(
           child: FutureBuilder(
-              future: getDirs(),
-              builder: (BuildContext context, AsyncSnapshot snapshot){
-                if (snapshot.connectionState == ConnectionState.done){
-                  if (snapshot.data.length > 0){
-                    return ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: snapshot.data.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return GestureDetector(
-                            onTap: (){
-                              setState(() {
-                                if (!path.endsWith(snapshot.data[index])){
-                                  path += snapshot.data[index];
-                                  print(path);
-                                }
-                                settingsHandler.extPathOverride = "$path/";
-                              });
-                            },
-                            child: SizedBox(
-                              height: 50,
-                              child: Center(child: Text(snapshot.data[index])),
-                            ),
-                          );
-                        }
-                    );
-                  } else if (title == "emulated"){
-                    return ListView(children: [
-                        GestureDetector(
-                        onTap: (){
+            future: getDirs(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.data.length > 0) {
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () {
                           setState(() {
-                            if (!path.endsWith("0")){
-                              path += "/0";
+                            if (!path.endsWith(snapshot.data[index])) {
+                              path += snapshot.data[index];
                               print(path);
                             }
-                            settingsHandler.extPathOverride = "$path/";
+                            settingsHandler.extPathOverride = '$path/';
+                          });
+                        },
+                        child: SizedBox(
+                          height: 50,
+                          child: Center(child: Text(snapshot.data[index])),
+                        ),
+                      );
+                    },
+                  );
+                } else if (title == 'emulated') {
+                  return ListView(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (!path.endsWith('0')) {
+                              path += '/0';
+                              print(path);
+                            }
+                            settingsHandler.extPathOverride = '$path/';
                           });
                         },
                         child: const SizedBox(
-                        height: 50,
-                        child: Center(child: Text("/0")),
-                          ),
+                          height: 50,
+                          child: Center(child: Text('/0')),
                         ),
-                      ],);
-                  } else {
-                    return Container();
-                  }
-                } else {
-                  return const Center(
-                    child: CircularProgressIndicator()
+                      ),
+                    ],
                   );
+                } else {
+                  return Container();
                 }
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
+            },
           ),
         ),
         floatingActionButton: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            path == widget.path
-              ? Container()
-              : FloatingActionButton(
+            if (path == widget.path)
+              Container()
+            else
+              FloatingActionButton(
                 heroTag: null,
                 onPressed: () {
-                  if (isWritable()){
+                  if (isWritable()) {
                     Navigator.of(context).pop('$path/');
                   }
                 },
                 backgroundColor: Theme.of(context).colorScheme.secondary,
                 child: const Icon(Icons.check),
               ),
-            Container(width: 5,),
+            Container(
+              width: 5,
+            ),
             FloatingActionButton(
               heroTag: null,
               onPressed: () {
@@ -232,9 +240,7 @@ class _DirPickerState extends State<DirPicker> {
                         title: 'Directory Name',
                         hintText: 'Directory Name',
                         onlyInput: true,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))
-                        ],
+                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))],
                       ),
                       actionButtons: <Widget>[
                         const CancelButton(),
@@ -254,7 +260,7 @@ class _DirPickerState extends State<DirPicker> {
               child: const Icon(Icons.add),
             ),
           ],
-        )
+        ),
       ),
     );
   }

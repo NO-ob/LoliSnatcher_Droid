@@ -3,9 +3,9 @@ import 'dart:async';
 //  based on https://github.com/magnuswikhog/easy_debounce
 
 class Debounce {
+  const Debounce();
   // ignore: prefer_final_fields
   static Map<String, DebounceOperation> _debounceMap = {};
-  Debounce();
 
   /// Debounce a [callback] function by [duration]
   static void debounce({
@@ -83,7 +83,7 @@ class Debounce {
   static void cancelAllStartingWith(String substring) {
     // cancel all debounce operations that have tag, starting with the given substring
     // i.e. loading_element_progress_[fileUrl] where [fileUrl] is not included in the substring
-    _debounceMap.keys.where((key) => key.startsWith(substring)).forEach((key) => cancel(key));
+    _debounceMap.keys.where((key) => key.startsWith(substring)).forEach(cancel);
   }
 
   static void cancelAll() {
@@ -95,9 +95,13 @@ class Debounce {
 }
 
 class DebounceOperation {
+  DebounceOperation({
+    required this.callback,
+    required this.timer,
+    this.startedAt,
+  });
+
   final void Function() callback;
   final Timer timer;
   final int? startedAt;
-
-  DebounceOperation({required this.callback, required this.timer, this.startedAt});
 }

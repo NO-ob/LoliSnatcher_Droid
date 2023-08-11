@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -6,9 +7,9 @@ import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:huge_listview/huge_listview.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/history_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -24,7 +25,7 @@ import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 // TODO split in smaller widgets
 
 class HistoryList extends StatefulWidget {
-  const HistoryList({Key? key}) : super(key: key);
+  const HistoryList({super.key});
 
   @override
   State<HistoryList> createState() => _HistoryListState();
@@ -50,13 +51,13 @@ class _HistoryListState extends State<HistoryList> {
     getHistory();
   }
 
-  void getHistory() async {
+  Future<void> getHistory() async {
     isLoading = true;
     setState(() {});
 
-    history = ((settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled) ? await settingsHandler.dbHandler.getSearchHistory() : [])
-        .map((e) => HistoryItem.fromMap(e))
-        .toList();
+    final List<Map<String, dynamic>> rawHistory =
+        (settingsHandler.dbEnabled && settingsHandler.searchHistoryEnabled) ? await settingsHandler.dbHandler.getSearchHistory() : [];
+    history = List.from(rawHistory.map(HistoryItem.fromMap));
 
     history.sort(compareFavourites);
     filteredHistory = history;
@@ -127,7 +128,7 @@ class _HistoryListState extends State<HistoryList> {
     final String hourStr = searchDate.hour.toString().padLeft(2, '0');
     final String minuteStr = searchDate.minute.toString().padLeft(2, '0');
     final String secondStr = searchDate.second.toString().padLeft(2, '0');
-    final String searchDateStr = withTime ? "$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr" : "$dayStr.$monthStr.$yearStr";
+    final String searchDateStr = withTime ? '$dayStr.$monthStr.$yearStr $hourStr:$minuteStr:$secondStr' : '$dayStr.$monthStr.$yearStr';
     return searchDateStr;
   }
 
@@ -138,7 +139,7 @@ class _HistoryListState extends State<HistoryList> {
         return SettingsDialog(
           contentItems: <Widget>[
             SizedBox(width: double.maxFinite, child: row),
-            Text("Last searched on: ${formatDate(entry.timestamp)}", textAlign: TextAlign.center),
+            Text('Last searched on: ${formatDate(entry.timestamp)}', textAlign: TextAlign.center),
             //
             const SizedBox(height: 20),
             ListTile(
@@ -155,7 +156,7 @@ class _HistoryListState extends State<HistoryList> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text("Unknown Booru type!", style: TextStyle(fontSize: 20)),
+                    title: const Text('Unknown Booru type!', style: TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -187,7 +188,7 @@ class _HistoryListState extends State<HistoryList> {
                 } else {
                   FlashElements.showSnackbar(
                     context: context,
-                    title: const Text("Unknown Booru type!", style: TextStyle(fontSize: 20)),
+                    title: const Text('Unknown Booru type!', style: TextStyle(fontSize: 20)),
                     leadingIcon: Icons.warning_amber,
                     leadingIconColor: Colors.red,
                     sideColor: Colors.red,
@@ -234,7 +235,7 @@ class _HistoryListState extends State<HistoryList> {
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: const Text("Copied to clipboard!", style: TextStyle(fontSize: 20)),
+                  title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
                   content: Text(entry.searchText, style: const TextStyle(fontSize: 16)),
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
@@ -442,7 +443,7 @@ class _HistoryListState extends State<HistoryList> {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: const Text("Select all"),
+                  label: const Text('Select all'),
                   onPressed: () {
                     // create new list through spread to avoid modifying the original list
                     selectedEntries = [...filteredHistory];
@@ -472,7 +473,7 @@ class _HistoryListState extends State<HistoryList> {
                 }
 
                 final Widget deleteDialog = SettingsDialog(
-                  title: const Text("Delete History Entries"),
+                  title: const Text('Delete History Entries'),
                   scrollable: false,
                   content: SizedBox(
                     width: double.maxFinite,
@@ -484,21 +485,21 @@ class _HistoryListState extends State<HistoryList> {
                         ...selectedEntries.map((HistoryItem entry) {
                           final int index = history.indexOf(entry);
                           return buildEntry(index, false, false);
-                        }).toList(),
+                        }),
                       ],
                     ),
                   ),
                   actionButtons: [
                     const CancelButton(),
                     ElevatedButton.icon(
-                      label: const Text("Delete"),
+                      label: const Text('Delete'),
                       icon: const Icon(Icons.delete_forever),
                       onPressed: () async {
                         for (int i = 0; i < selectedEntries.length; i++) {
                           await deleteEntry(selectedEntries[i]);
                         }
                         selectedEntries.clear();
-                        getHistory();
+                        unawaited(getHistory());
                         Navigator.of(context).pop();
                       },
                     ),
@@ -517,7 +518,7 @@ class _HistoryListState extends State<HistoryList> {
         Expanded(
           child: ElevatedButton.icon(
             icon: const Icon(Icons.border_clear),
-            label: const Text("Clear selection"),
+            label: const Text('Clear selection'),
             onPressed: () {
               selectedEntries.clear();
               setState(() {});

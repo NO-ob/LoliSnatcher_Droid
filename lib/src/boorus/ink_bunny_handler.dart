@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -10,19 +9,19 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 // We then need to get the is and do a search to get full info for all results from the search
 
 class InkBunnyHandler extends BooruHandler {
-  InkBunnyHandler(Booru booru, int limit) : super(booru, limit);
+  InkBunnyHandler(super.booru, super.limit);
 
   String sessionToken = '';
   bool _gettingToken = false;
   @override
-  bool hasSizeData = true;
+  bool get hasSizeData => true;
 
   Future<bool> setSessionToken() async {
     //https://inkbunny.net/api_login.php?output_mode=xml&username=guest
     //https://inkbunny.net/api_login.php?output_mode=xml&username=myusername&password=mypassword
     _gettingToken = true;
     final String url = '${booru.baseURL}/api_login.php?output_mode=json';
-    Map<String, String> queryParams = {};
+    final Map<String, String> queryParams = {};
     if ((booru.apiKey?.isEmpty ?? true) && (booru.userID?.isEmpty ?? true)) {
       queryParams['username'] = 'guest';
     } else {
@@ -31,7 +30,7 @@ class InkBunnyHandler extends BooruHandler {
     }
     try {
       final response = await fetchSearch(Uri.parse(url), queryParams: queryParams);
-      Map<String, dynamic> parsedResponse = response.data;
+      final Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse['sid'] != null) {
         sessionToken = parsedResponse['sid'].toString();
         Logger.Inst().log('Inkbunny session token found: $sessionToken', 'InkBunnyHandler', 'getSessionToken', LogTypes.booruHandlerInfo);
@@ -43,7 +42,7 @@ class InkBunnyHandler extends BooruHandler {
       Logger.Inst().log('Exception getting session token: $url $e', 'InkBunnyHandler', 'getSessionToken', LogTypes.booruHandlerInfo);
     }
     _gettingToken = false;
-    return sessionToken.isEmpty ? false : true;
+    return sessionToken.isNotEmpty;
   }
 
   // This sets ratings for the session so that all images are returned from the api
@@ -51,7 +50,7 @@ class InkBunnyHandler extends BooruHandler {
     final String url = '${booru.baseURL}/api_userrating.php?output_mode=json&sid=$sessionToken&tag[2]=yes&tag[3]=yes&tag[4]=yes&tag[5]=yes';
     try {
       final response = await fetchSearch(Uri.parse(url));
-      Map<String, dynamic> parsedResponse = response.data;
+      final Map<String, dynamic> parsedResponse = response.data;
       if (parsedResponse['sid'] != null) {
         if (sessionToken == parsedResponse['sid']) {
           Logger.Inst().log('Inkbunny set ratings', className, 'setRatingOptions', LogTypes.booruHandlerInfo);
@@ -66,9 +65,9 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   // The api doesn't give much information about the posts so we need to get their ids and then do another query to get all the data
-  Future getSubmissionResponse(parsedResponse) async {
+  Future getSubmissionResponse(dynamic parsedResponse) async {
     totalCount.value = int.parse(parsedResponse['results_count_all']);
-    List<String> ids = [];
+    final List<String> ids = [];
     for (int i = 0; i < parsedResponse['submissions'].length; i++) {
       final current = parsedResponse['submissions'][i];
       ids.add(current['submission_id'].toString());
@@ -77,7 +76,7 @@ class InkBunnyHandler extends BooruHandler {
     try {
       final Uri uri = Uri.parse("${booru.baseURL}/api_submissions.php?output_mode=json&sid=$sessionToken&submission_ids=${ids.join(",")}");
       final response = await fetchSearch(uri);
-      Logger.Inst().log('Getting submission data: ${uri.toString()}', className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
+      Logger.Inst().log('Getting submission data: $uri', className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
       if (response.statusCode == 200) {
         Logger.Inst().log(response.data, className, 'getSubmissionResponse', LogTypes.booruHandlerRawFetched);
         return response.data;
@@ -92,7 +91,7 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   @override
-  Future<List> parseListFromResponse(response) async {
+  Future<List> parseListFromResponse(dynamic response) async {
     // The api will keep loading pages with the same results as the last page if pagenum is bigger than the max
     final parsedResponse = response.data;
     final int maxPageCount = parsedResponse['pages_count'];
@@ -115,14 +114,14 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   // Inkbunny can have multiple images per posts so the response cannot be parsed like the other boorus
-  List<BooruItem> parseItemsFromResponse(parsedResponse) {
+  List<BooruItem> parseItemsFromResponse(dynamic parsedResponse) {
     // Api orders the results the wrong way
     final List rawItems = (parsedResponse['submissions'] ?? []).reversed.toList();
-    List<BooruItem> items = [];
+    final List<BooruItem> items = [];
     for (int i = 0; i < rawItems.length; i++) {
       final current = rawItems[i];
       Logger.Inst().log(current.toString(), className, 'parseItemsFromResponse', LogTypes.booruHandlerRawFetched);
-      List<String> currentTags = [];
+      final List<String> currentTags = [];
       currentTags.add("artist:${current["username"]}");
       final tags = current['keywords'] ?? [];
 
@@ -171,7 +170,7 @@ class InkBunnyHandler extends BooruHandler {
   }
 
   @override
-  FutureOr<BooruItem?> parseItemFromResponse(responseItem, int index) {
+  FutureOr<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) {
     return responseItem;
   }
 
@@ -186,7 +185,7 @@ class InkBunnyHandler extends BooruHandler {
     String order = '';
     String artist = '';
     bool random = false;
-    List<String> tagList = tags.split(' ');
+    final List<String> tagList = tags.split(' ');
     String tagStr = '';
     for (int i = 0; i < tagList.length; i++) {
       if (tagList[i].contains('artist:')) {
@@ -221,7 +220,7 @@ class InkBunnyHandler extends BooruHandler {
 
   @override
   Future<List<String>> tagSearch(String input) async {
-    List<String> searchTags = [];
+    final List<String> searchTags = [];
     final String url = makeTagURL(input);
     try {
       final Uri uri = Uri.parse(url);

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,6 +14,7 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -44,7 +44,7 @@ class SearchHandler extends GetxController {
     // Add after the current tab
     // list.insert(currentIndex + 1, SearchTab(currentBooru.obs, null, searchText));
 
-    Rx<Booru> booru = (customBooru ?? currentBooru).obs;
+    final Rx<Booru> booru = (customBooru ?? currentBooru).obs;
 
     // Add new tab to the end
     final SearchTab newTab = SearchTab(booru, null, searchText);
@@ -214,7 +214,7 @@ class SearchHandler extends GetxController {
     bool ignoreSameIndexCheck = false,
   }) {
     // change only if new index != current index
-    final int oldIndex = currentIndex;
+    // final int oldIndex = currentIndex;
     int newIndex = i;
 
     // protection from early execution on start
@@ -314,7 +314,7 @@ class SearchHandler extends GetxController {
   }
 
   List<SearchTab> getTabsWithTag(String tag) {
-    List<SearchTab> tabs = [];
+    final List<SearchTab> tabs = [];
     for (final SearchTab tab in list) {
       if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
         tabs.add(tab);
@@ -341,7 +341,7 @@ class SearchHandler extends GetxController {
 
   BooruItem setViewedItem(int i) {
     final int newIndex = i;
-    final int oldIndex = viewedIndex.value;
+    // final int oldIndex = viewedIndex.value;
     final BooruItem newItem = newIndex != -1
         ? currentFetched[newIndex]
         : BooruItem(
@@ -411,7 +411,7 @@ class SearchHandler extends GetxController {
 
     // write to history
     if (text != '' && settingsHandler.searchHistoryEnabled) {
-      settingsHandler.dbHandler.updateSearchHistory(text, currentBooru.type?.name, currentBooru.name!);
+      settingsHandler.dbHandler.updateSearchHistory(text, currentBooru.type?.name, currentBooru.name);
     }
   }
 
@@ -481,7 +481,7 @@ class SearchHandler extends GetxController {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     final bool canAddSecondary = secondaryBoorus != null && settingsHandler.booruList.length > 1;
-    RxList<Booru>? secondary = canAddSecondary ? secondaryBoorus.obs : null;
+    final RxList<Booru>? secondary = canAddSecondary ? secondaryBoorus.obs : null;
 
     final SearchTab newTab = SearchTab(currentBooru.obs, secondary, currentTab.tags);
     list[currentIndex] = newTab;
@@ -502,8 +502,9 @@ class SearchHandler extends GetxController {
   // run search on current tab
   Future<void> runSearch() async {
     // do nothing if reached the end or detected an error
-    if (isLastPage.value) return;
-    if (errorString.isNotEmpty) return;
+    if (isLastPage.value || errorString.isNotEmpty) {
+      return;
+    }
 
     // if not last page - set loading state and increment page
     if (!currentBooruHandler.locked) {
@@ -606,10 +607,10 @@ class SearchHandler extends GetxController {
 
   // Restores tabs from a string saved in DB
   List<List<String>> decodeBackupString(String input) {
-    List<List<String>> result = [];
-    List<String> splitInput = input.split(listDivider);
+    final List<List<String>> result = [];
+    final List<String> splitInput = input.split(listDivider);
     for (final String str in splitInput) {
-      List<String> booruAndTags = str.split(tabDivider);
+      final List<String> booruAndTags = str.split(tabDivider);
       result.add(booruAndTags);
     }
     return result;
@@ -617,15 +618,15 @@ class SearchHandler extends GetxController {
 
   Future<void> restoreTabs() async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    List<String> result = await settingsHandler.dbHandler.getTabRestore();
-    List<SearchTab> restoredGlobals = [];
+    final List<String> result = await settingsHandler.dbHandler.getTabRestore();
+    final List<SearchTab> restoredGlobals = [];
 
     bool foundBrokenItem = false;
-    List<String> brokenItems = [];
+    final List<String> brokenItems = [];
     int newIndex = 0;
     if (result.length == 2) {
       // split list into tabs
-      List<List<String>> splitInput = decodeBackupString(result[1]);
+      final List<List<String>> splitInput = decodeBackupString(result[1]);
       // print('restoreTabs: ${splitInput}');
       for (final List<String> booruAndTags in splitInput) {
         // check for parsing errors
@@ -716,8 +717,8 @@ class SearchHandler extends GetxController {
 
   void mergeTabs(String tabStr) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    List<List<String>> splitInput = decodeBackupString(tabStr);
-    List<SearchTab> restoredGlobals = [];
+    final List<List<String>> splitInput = decodeBackupString(tabStr);
+    final List<SearchTab> restoredGlobals = [];
     for (final List<String> booruAndTags in splitInput) {
       // check for parsing errors
       final bool isEntryValid = booruAndTags.length > 1 && booruAndTags[0].isNotEmpty;
@@ -754,8 +755,8 @@ class SearchHandler extends GetxController {
 
   void replaceTabs(String tabStr) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    List<List<String>> splitInput = decodeBackupString(tabStr);
-    List<SearchTab> restoredGlobals = [];
+    final List<List<String>> splitInput = decodeBackupString(tabStr);
+    final List<SearchTab> restoredGlobals = [];
     int newIndex = 0;
 
     // reset current tab index to avoid exceptions when tab list length is different
@@ -801,7 +802,7 @@ class SearchHandler extends GetxController {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     // if there are only one tab - check that its not with default booru and tags
     // if there are more than 1 tab or check return false - start backup
-    List<SearchTab> tabList = list;
+    final List<SearchTab> tabList = list;
     final int tabIndex = currentIndex;
     final bool onlyDefaultTab =
         tabList.length == 1 && tabList[0].booruHandler.booru.name == settingsHandler.prefBooru && tabList[0].tags == settingsHandler.defTags;
@@ -827,7 +828,7 @@ class SearchHandler extends GetxController {
       return;
     }
 
-    String? backupString = getBackupString();
+    final String? backupString = getBackupString();
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     // print('backupString: $backupString');
     if (backupString != null) {
@@ -842,7 +843,7 @@ class SearchHandler extends GetxController {
 
 class SearchTab {
   SearchTab(this.selectedBooru, this.secondaryBoorus, this.tags) {
-    List<Booru> tempBooruList = [];
+    final List<Booru> tempBooruList = [];
     tempBooruList.add(selectedBooru.value);
     if (secondaryBoorus != null) {
       tempBooruList.addAll(secondaryBoorus!);
@@ -875,11 +876,11 @@ class SearchTab {
 
   @override
   String toString() {
-    return 'tags: $tags selectedBooru: ${selectedBooru.toString()} booruHandler: $booruHandler';
+    return 'tags: $tags selectedBooru: $selectedBooru booruHandler: $booruHandler';
   }
 
   List<BooruItem> getSelected() {
-    List<BooruItem>? selectedItems = [];
+    final List<BooruItem> selectedItems = [];
     for (int i = 0; i < selected.length; i++) {
       selectedItems.add(booruHandler.filteredFetched.elementAt(selected[i]));
     }

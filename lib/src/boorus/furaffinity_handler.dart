@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -10,11 +9,12 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 
 /// Need to workout how login stuff works it will only display sfw atm, tried copying cookies from browser and that didn't seem to work
 class FurAffinityHandler extends BooruHandler {
-  FurAffinityHandler(Booru booru, int limit) : super(booru, limit);
+  FurAffinityHandler(super.booru, super.limit);
+
   Map<String, String>? body;
 
   @override
-  List parseListFromResponse(response) {
+  List parseListFromResponse(dynamic response) {
     final document = parse(response.data);
     final gallery = document.getElementById('gallery-browse') ?? document.getElementById('gallery-search-results');
     final links = gallery?.querySelectorAll('figure > b > u > a') ?? [];
@@ -45,13 +45,13 @@ class FurAffinityHandler extends BooruHandler {
   }
 
   @override
-  Future<BooruItem?> parseItemFromResponse(responseItem, int index) async {
+  Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
     final imgItem = responseItem.querySelector('img');
 
     if (imgItem.attributes['src'] != null) {
       final String id = responseItem.attributes['href']!.replaceAll('/', '').replaceAll('view', '');
       final String thumbURL = "https:${imgItem.attributes["src"]!}";
-      Document? postPage = await getPostPage(id);
+      final Document? postPage = await getPostPage(id);
 
       if (postPage == null) {
         return null;

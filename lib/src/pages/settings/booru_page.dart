@@ -26,7 +26,7 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 // TODO move all buttons to separate widgets/unified functions to be used in other places?
 
 class BooruPage extends StatefulWidget {
-  const BooruPage({Key? key}) : super(key: key);
+  const BooruPage({super.key});
 
   @override
   State<BooruPage> createState() => _BooruPageState();
@@ -78,9 +78,9 @@ class _BooruPageState extends State<BooruPage> {
   Future<bool> _onWillPop() async {
     settingsHandler.defTags = defaultTagsController.text;
     if (int.parse(limitController.text) > 100) {
-      limitController.text = "100";
+      limitController.text = '100';
     } else if (int.parse(limitController.text) < 10) {
-      limitController.text = "10";
+      limitController.text = '10';
     }
 
     if (selectedBooru == null && settingsHandler.booruList.isNotEmpty) {
@@ -98,7 +98,7 @@ class _BooruPageState extends State<BooruPage> {
     }
     settingsHandler.limit = int.parse(limitController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
-    settingsHandler.sortBooruList();
+    await settingsHandler.sortBooruList();
     return result;
   }
 
@@ -106,7 +106,7 @@ class _BooruPageState extends State<BooruPage> {
     return SettingsButton(
       name: 'Add New Booru',
       icon: const Icon(Icons.add),
-      page: () => BooruEdit(Booru("New", null, "", "", "")),
+      page: () => BooruEdit(Booru('New', null, '', '', '')),
     );
   }
 
@@ -131,9 +131,9 @@ class _BooruPageState extends State<BooruPage> {
               return const SettingsDialog(
                 title: Text('Booru'),
                 contentItems: <Widget>[
-                  Text("The Booru selected here will be set as default after saving."),
+                  Text('The Booru selected here will be set as default after saving.'),
                   Text(''),
-                  Text("The default Booru will be first to appear in the dropdown boxes."),
+                  Text('The default Booru will be first to appear in the dropdown boxes.'),
                 ],
               );
             },
@@ -162,7 +162,7 @@ class _BooruPageState extends State<BooruPage> {
                   "Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
                 ),
                 const Text(''),
-                const Text("Should login/apikey data be included?"),
+                const Text('Should login/apikey data be included?'),
               ],
               actionButtons: [
                 const CancelButton(),
@@ -195,16 +195,14 @@ class _BooruPageState extends State<BooruPage> {
                   // TODO more explanations about booru sharing
                   const Text(''),
                   if (Platform.isAndroid) ...[
-                    const Text("How to automatically open booru config links in the app on Android 12 and higher:"),
+                    const Text('How to automatically open booru config links in the app on Android 12 and higher:'),
                     const Text('1) Tap button below to open system app settings'),
                     const Text('2) Go to "Open by default"'),
                     const Text('3) Tap on "Add link"/Plus icon and select all available options'),
                     const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        openAppSettings();
-                      },
-                      child: const Text('Go to settings'),
+                    const ElevatedButton(
+                      onPressed: openAppSettings,
+                      child: Text('Go to settings'),
                     ),
                   ],
                 ],
@@ -260,7 +258,7 @@ class _BooruPageState extends State<BooruPage> {
           FlashElements.showSnackbar(
             context: context,
             title: const Text("Can't delete this Booru!", style: TextStyle(fontSize: 20)),
-            content: const Text("Remove all tabs which use it first!", style: TextStyle(fontSize: 16)),
+            content: const Text('Remove all tabs which use it first!', style: TextStyle(fontSize: 16)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -274,7 +272,7 @@ class _BooruPageState extends State<BooruPage> {
             return SettingsDialog(
               title: const Text('Are you sure?'),
               contentItems: [
-                Text("Delete Booru: ${selectedBooru?.name}?"),
+                Text('Delete Booru: ${selectedBooru?.name}?'),
               ],
               actionButtons: [
                 const CancelButton(),
@@ -297,7 +295,7 @@ class _BooruPageState extends State<BooruPage> {
                     if (await settingsHandler.deleteBooru(tempSelected)) {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: const Text("Booru Deleted!", style: TextStyle(fontSize: 20)),
+                        title: const Text('Booru Deleted!', style: TextStyle(fontSize: 20)),
                         leadingIcon: Icons.delete_forever,
                         leadingIconColor: Colors.red,
                         sideColor: Colors.yellow,
@@ -306,12 +304,12 @@ class _BooruPageState extends State<BooruPage> {
                       // restore selected and prefbooru if something went wrong
                       selectedBooru = tempSelected;
                       settingsHandler.prefBooru = tempSelected.name ?? '';
-                      settingsHandler.sortBooruList();
+                      await settingsHandler.sortBooruList();
 
                       FlashElements.showSnackbar(
                         context: context,
-                        title: const Text("Error!", style: TextStyle(fontSize: 20)),
-                        content: const Text("Something went wrong during deletion of a booru config!", style: TextStyle(fontSize: 16)),
+                        title: const Text('Error!', style: TextStyle(fontSize: 20)),
+                        content: const Text('Something went wrong during deletion of a booru config!', style: TextStyle(fontSize: 16)),
                         leadingIcon: Icons.warning_amber,
                         leadingIconColor: Colors.red,
                         sideColor: Colors.red,
@@ -361,11 +359,11 @@ class _BooruPageState extends State<BooruPage> {
           FlashElements.showSnackbar(
             context: context,
             title: const Text(
-              "Need Login and Password",
+              'Need Login and Password',
               style: TextStyle(fontSize: 20),
             ),
             content: const Text(
-              "Please change this booru config to have both login AND password fields!",
+              'Please change this booru config to have both login AND password fields!',
               style: TextStyle(fontSize: 16),
             ),
             leadingIcon: Icons.warning_amber,
@@ -384,7 +382,7 @@ class _BooruPageState extends State<BooruPage> {
 
         FlashElements.showSnackbar(
           context: context,
-          title: const Text("Relogin complete!", style: TextStyle(fontSize: 20)),
+          title: const Text('Relogin complete!', style: TextStyle(fontSize: 20)),
           leadingIcon: Icons.login,
           leadingIconColor: Colors.yellow,
           sideColor: Colors.yellow,
@@ -401,7 +399,7 @@ class _BooruPageState extends State<BooruPage> {
         // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
         final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
         final String url = cdata?.text ?? '';
-        Logger.Inst().log(url, "BooruPage", "getBooruFromClipboard", LogTypes.settingsLoad);
+        Logger.Inst().log(url, 'BooruPage', 'getBooruFromClipboard', LogTypes.settingsLoad);
         if (url.isNotEmpty) {
           if (url.contains('loli.snatcher')) {
             final Booru booru = Booru.fromLink(url);
@@ -419,7 +417,7 @@ class _BooruPageState extends State<BooruPage> {
           } else {
             FlashElements.showSnackbar(
               context: context,
-              title: const Text("Invalid URL!", style: TextStyle(fontSize: 20)),
+              title: const Text('Invalid URL!', style: TextStyle(fontSize: 20)),
               leadingIcon: Icons.warning_amber,
               leadingIconColor: Colors.red,
               sideColor: Colors.red,
@@ -445,7 +443,7 @@ class _BooruPageState extends State<BooruPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Boorus & Search"),
+          title: const Text('Boorus & Search'),
         ),
         body: Center(
           child: ListView(
@@ -453,7 +451,7 @@ class _BooruPageState extends State<BooruPage> {
               SettingsTextInput(
                 controller: defaultTagsController,
                 title: 'Default Tags',
-                hintText: "Tags searched when app opens",
+                hintText: 'Tags searched when app opens',
                 inputType: TextInputType.text,
                 clearable: true,
                 resetText: () => 'rating:safe',
@@ -461,7 +459,7 @@ class _BooruPageState extends State<BooruPage> {
               SettingsTextInput(
                 controller: limitController,
                 title: 'Items per Page',
-                hintText: "Items to fetch per page 10-100",
+                hintText: 'Items to fetch per page 10-100',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['limit']!['default']!.toString(),
@@ -470,7 +468,7 @@ class _BooruPageState extends State<BooruPage> {
                 numberMin: 10,
                 numberMax: 100,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
+                  final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {
@@ -509,7 +507,7 @@ class _BooruPageState extends State<BooruPage> {
 
 Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async {
   if (initBooru != null && initBooru.name != selectedBooru.name) {
-    return await showDialog<bool>(
+    return showDialog<bool>(
       context: NavigationHandler.instance.navigatorKey.currentContext!,
       builder: (BuildContext context) {
         return SettingsDialog(

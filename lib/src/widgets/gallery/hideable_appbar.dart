@@ -7,13 +7,13 @@ import 'package:flutter/services.dart';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
-import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -44,7 +44,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final PreloadPageController pageController;
   final VoidCallback onOpenDrawer;
 
-  final double defaultHeight = kToolbarHeight; //56.0
+  double get defaultHeight => kToolbarHeight; //56.0
 
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
@@ -151,7 +151,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   ////////// Toolbar Stuff ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   List<Widget> getActions() {
-    List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
+    final List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
       if (searchHandler.viewedIndex.value == -1) {
         return false;
       }
@@ -167,7 +167,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       return isScaleAllowed && isFavAllowed;
     }).toList();
 
-    List<Widget> actions = [];
+    final List<Widget> actions = [];
     List<List<String>> overFlowList = [];
     List<List<String>> buttonList = [];
     // first 4 buttons will show on toolbar
@@ -232,7 +232,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
               final String name = value[0];
 
               return PopupMenuItem(
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 value: name,
                 child: SizedBox(
                   width: double.infinity, // force button to take full width
@@ -357,7 +357,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   String buttonText(List<String> actionAndLabel) {
-    String action = actionAndLabel[0], defaultLabel = actionAndLabel[1];
+    final String action = actionAndLabel[0], defaultLabel = actionAndLabel[1];
     late String label;
 
     if (searchHandler.viewedIndex.value == -1) {

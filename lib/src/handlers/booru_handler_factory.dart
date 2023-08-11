@@ -27,7 +27,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class BooruHandlerFactory {
-  BooruHandler? booruHandler;
+  late BooruHandler booruHandler;
   int pageNum = -1;
 
   List getBooruHandler(List<Booru> boorus, int? customLimit) {
@@ -37,17 +37,17 @@ class BooruHandlerFactory {
       final Booru booru = boorus.first;
 
       switch (booru.type) {
-        case (BooruType.Moebooru):
+        case BooruType.Moebooru:
           pageNum = 0;
           booruHandler = MoebooruHandler(booru, limit);
           break;
-        case (BooruType.Gelbooru):
+        case BooruType.Gelbooru:
           // current gelbooru is v.0.2.5, while safe and others are 0.2.0, but sice we had them under the same type from the start
           // we should keep them like that, but change sub-handler depending on the link
           // TODO are there only these 4 sites, or possible more?
           const List<String> gelbooruAlikes = ['rule34.xxx', 'safebooru.org', 'realbooru.com', 'furry.booru.org'];
 
-          if (booru.baseURL!.contains("gelbooru.com")) {
+          if (booru.baseURL!.contains('gelbooru.com')) {
             booruHandler = GelbooruHandler(booru, limit);
           } else if (gelbooruAlikes.any((element) => booru.baseURL!.contains(element))) {
             booruHandler = GelbooruAlikesHandler(booru, limit);
@@ -56,74 +56,74 @@ class BooruHandlerFactory {
             booruHandler = GelbooruAlikesHandler(booru, limit);
           }
           break;
-        case (BooruType.GelbooruAlike):
+        case BooruType.GelbooruAlike:
           // this type is not available in type selector
           booruHandler = GelbooruAlikesHandler(booru, limit);
           break;
-        case (BooruType.Danbooru):
+        case BooruType.Danbooru:
           pageNum = 0;
           booruHandler = DanbooruHandler(booru, limit);
           break;
-        case (BooruType.e621):
+        case BooruType.e621:
           pageNum = 0;
           booruHandler = e621Handler(booru, limit);
           break;
-        case (BooruType.Shimmie):
+        case BooruType.Shimmie:
           pageNum = 0;
           booruHandler = ShimmieHandler(booru, limit);
           break;
-        case (BooruType.Philomena):
+        case BooruType.Philomena:
           pageNum = 0;
           booruHandler = PhilomenaHandler(booru, limit);
           break;
-        case (BooruType.Szurubooru):
+        case BooruType.Szurubooru:
           booruHandler = SzurubooruHandler(booru, limit);
           break;
-        case (BooruType.Sankaku):
+        case BooruType.Sankaku:
           pageNum = 0;
           booruHandler = SankakuHandler(booru, limit);
           break;
-        case (BooruType.Hydrus):
+        case BooruType.Hydrus:
           booruHandler = HydrusHandler(booru, limit);
           break;
-        case (BooruType.GelbooruV1):
+        case BooruType.GelbooruV1:
           booruHandler = GelbooruV1Handler(booru, limit);
           break;
-        case (BooruType.BooruOnRails):
+        case BooruType.BooruOnRails:
           pageNum = 0;
           booruHandler = BooruOnRailsHandler(booru, limit);
           break;
-        case (BooruType.Favourites):
+        case BooruType.Favourites:
           booruHandler = FavouritesHandler(booru, limit);
           break;
-        case (BooruType.Rainbooru):
+        case BooruType.Rainbooru:
           pageNum = 0;
           booruHandler = RainbooruHandler(booru, limit);
           break;
-        case (BooruType.R34Hentai):
+        case BooruType.R34Hentai:
           pageNum = 0;
           booruHandler = R34HentaiHandler(booru, limit);
           break;
-        case (BooruType.World):
+        case BooruType.World:
           booruHandler = WorldXyzHandler(booru, limit);
           break;
-        case (BooruType.IdolSankaku):
+        case BooruType.IdolSankaku:
           pageNum = 0;
           booruHandler = IdolSankakuHandler(booru, limit);
           break;
-        case (BooruType.InkBunny):
+        case BooruType.InkBunny:
           pageNum = 0;
           booruHandler = InkBunnyHandler(booru, limit);
           break;
-        case (BooruType.AGNPH):
+        case BooruType.AGNPH:
           pageNum = 0;
           booruHandler = AGNPHHandler(booru, limit);
           break;
-        case (BooruType.NyanPals):
+        case BooruType.NyanPals:
           pageNum = 0;
           booruHandler = NyanPalsHandler(booru, limit);
           break;
-        case (BooruType.WildCritters):
+        case BooruType.WildCritters:
           pageNum = 0;
           booruHandler = WildCrittersHandler(booru, limit);
           break;
@@ -136,7 +136,7 @@ class BooruHandlerFactory {
           break;
       }
     } else {
-      booruHandler = MergebooruHandler(Booru("Merge", BooruType.Merge, "", "", ""), limit);
+      booruHandler = MergebooruHandler(Booru('Merge', BooruType.Merge, '', '', ''), limit);
       (booruHandler as MergebooruHandler).setupMerge(boorus);
     }
     return [booruHandler, pageNum];

@@ -10,7 +10,7 @@ import 'package:lolisnatcher/src/widgets/gallery/change_page_buttons.dart';
 import 'package:lolisnatcher/src/widgets/gallery/zoom_button.dart';
 
 class GalleryButtons extends StatefulWidget {
-  const GalleryButtons({Key? key, this.pageController}) : super(key: key);
+  const GalleryButtons({super.key, this.pageController});
   final PreloadPageController? pageController;
 
   @override
@@ -62,6 +62,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
   @override
   void dispose() {
     appbarListener?.cancel();
+    loadedListener?.cancel();
     super.dispose();
   }
 
@@ -121,7 +122,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                     left: distanceFromSide,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Container(
+                      child: ColoredBox(
                         color: Theme.of(context).colorScheme.background.withOpacity(0.33),
                         child: isVerticalDirection
                             ? Column(
@@ -140,7 +141,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                     right: distanceFromSide,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Container(
+                      child: ColoredBox(
                         color: Theme.of(context).colorScheme.background.withOpacity(0.33),
                         child: isVerticalDirection
                             ? Column(

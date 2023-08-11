@@ -19,10 +19,10 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class CommentsDialog extends StatefulWidget {
   const CommentsDialog({
-    Key? key,
     required this.index,
     required this.item,
-  }) : super(key: key);
+    super.key,
+  });
 
   final int index;
   final BooruItem item;
@@ -52,7 +52,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
         // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
         // remove timezones from strings until they fix it
         DateTime parsedDate;
-        if (format == "unix") {
+        if (format == 'unix') {
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(date) * 1000);
         } else {
           date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
@@ -67,7 +67,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   String parseContent(String? content) {
-    if (content == null) return '';
+    if (content == null) {
+      return '';
+    }
 
     // TODO more rules
     // TODO maybe there is a better/more optimized way to do this?
@@ -82,7 +84,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
         // move three dots away from everything
         .replaceAll('...', ' ... ')
         // multiple spaces to one
-        .replaceAll(RegExp(r' +'), ' ')
+        .replaceAll(RegExp(' +'), ' ')
         // multiple new lines to one
         .replaceAll(RegExp(r'\n+'), '\n');
   }
@@ -108,11 +110,11 @@ class _CommentsDialogState extends State<CommentsDialog> {
     }
   }
 
-  void getComments() async {
+  Future<void> getComments() async {
     isLoading = true;
     if (widget.item.serverId != null) {
       setState(() {}); // set state to update the loading indicator
-      List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
+      final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
       comments = fetched;
     } else {
       notSupported = true;
@@ -136,7 +138,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Widget mainBuild() {
-    bool areThereErrors = isLoading || notSupported || comments.isEmpty;
+    final bool areThereErrors = isLoading || notSupported || comments.isEmpty;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
@@ -151,7 +153,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
               strokeWidth: 4,
               color: Theme.of(context).colorScheme.secondary,
               onRefresh: () async {
-                getComments();
+                await getComments();
               },
               child: DesktopScrollWrap(
                 controller: scrollController,
@@ -172,21 +174,21 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Widget listEntryBuild(BuildContext context, int index) {
-    if(index == 0) {
+    if (index == 0) {
       return listHeader();
     }
 
     index = index - 1;
 
-    CommentItem currentEntry = comments[index];
+    final CommentItem currentEntry = comments[index];
 
-    Widget entryRow = Container(
+    final Widget entryRow = Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       child: Ink(
         child: InkWell(
           onTap: () {},
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -215,26 +217,28 @@ class _CommentsDialogState extends State<CommentsDialog> {
                       children: [
                         if (currentEntry.authorName?.isNotEmpty == true)
                           Padding(
-                            padding: const EdgeInsets.all(4.0),
+                            padding: const EdgeInsets.all(4),
                             child: SelectableText(currentEntry.authorName!, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Row(children: [
-                            if (currentEntry.title?.isNotEmpty == true)
-                              SelectableText(currentEntry.title!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 5),
-                            if (currentEntry.createDate?.isNotEmpty == true)
-                              Text(
-                                formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          padding: const EdgeInsets.all(4),
+                          child: Row(
+                            children: [
+                              if (currentEntry.title?.isNotEmpty == true)
+                                SelectableText(currentEntry.title!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 5),
+                              if (currentEntry.createDate?.isNotEmpty == true)
+                                Text(
+                                  formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                                  ),
                                 ),
-                              ),
-                            const SizedBox(width: 15),
-                            scoreText(currentEntry.score),
-                          ]),
+                              const SizedBox(width: 15),
+                              scoreText(currentEntry.score),
+                            ],
+                          ),
                         ),
                       ],
                     )
@@ -242,7 +246,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(12),
                   width: double.maxFinite,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
@@ -273,19 +277,23 @@ class _CommentsDialogState extends State<CommentsDialog> {
       ),
     );
 
-    return Column(children: <Widget>[
-      Row(children: [
-        Expanded(child: entryRow),
-      ]),
-      Divider(height: 1, thickness: 1, color: Colors.grey[800]),
-    ]);
+    return Column(
+      children: <Widget>[
+        Row(
+          children: [
+            Expanded(child: entryRow),
+          ],
+        ),
+        Divider(height: 1, thickness: 1, color: Colors.grey[800]),
+      ],
+    );
   }
 
   Widget listHeader() {
     return Row(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Container(
             constraints: const BoxConstraints(
               maxHeight: 150,
@@ -299,7 +307,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
   }
 
   Widget errorEntryBuild(BuildContext context, int index) {
-    if(index == 0) {
+    if (index == 0) {
       return listHeader();
     }
 
@@ -308,21 +316,21 @@ class _CommentsDialogState extends State<CommentsDialog> {
         if (isLoading)
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(18.0),
+              padding: EdgeInsets.all(18),
               child: CircularProgressIndicator(),
             ),
           )
         else if (notSupported)
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text('This Booru doesn\'t have comments or there is no API for them.'),
+              padding: EdgeInsets.all(8),
+              child: Text("This Booru doesn't have comments or there is no API for them."),
             ),
           )
         else if (comments.isEmpty)
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8),
               child: Text('No comments.'),
             ),
           ),
@@ -337,9 +345,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
       content: mainBuild(),
       actions: [
         IconButton(
-          onPressed: () {
-            getComments();
-          },
+          onPressed: getComments,
           icon: const Icon(Icons.refresh),
         ),
         if (widget.item.postURL.isNotEmpty)

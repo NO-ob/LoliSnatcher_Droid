@@ -12,15 +12,14 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class ThumbnailCardBuild extends StatelessWidget {
   const ThumbnailCardBuild({
-    Key? key,
     required this.index,
     required this.item,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
     this.onSecondaryTap,
-    
-  }) : super(key: key);
+    super.key,
+  });
 
   final int index;
   final BooruItem item;
@@ -36,8 +35,8 @@ class ThumbnailCardBuild extends StatelessWidget {
 
     // print('ThumbnailCardBuild: $index');
     return Obx(() {
-      bool isSelected = searchHandler.currentTab.selected.contains(index);
-      bool isCurrent = settingsHandler.appMode.value.isDesktop && (searchHandler.viewedIndex.value == index);
+      final bool isSelected = searchHandler.currentTab.selected.contains(index);
+      final bool isCurrent = settingsHandler.appMode.value.isDesktop && (searchHandler.viewedIndex.value == index);
 
       // print('ThumbnailCardBuild obx: $index');
 

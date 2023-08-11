@@ -5,7 +5,12 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TabMoveDialog extends StatefulWidget {
-  const TabMoveDialog({Key? key, required this.row, required this.index}) : super(key: key);
+  const TabMoveDialog({
+    required this.row,
+    required this.index,
+    super.key,
+  });
+
   final Widget row;
   final int index;
 
@@ -30,7 +35,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
     return SettingsDialog(
       contentItems: <Widget>[
         SizedBox(width: double.maxFinite, child: widget.row),
-        // 
+        //
         const SizedBox(height: 10),
         ListTile(
           shape: RoundedRectangleBorder(
@@ -45,7 +50,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
           leading: const Icon(Icons.vertical_align_top),
           title: const Text('To Top'),
         ),
-        // 
+        //
         const SizedBox(height: 10),
         ListTile(
           shape: RoundedRectangleBorder(
@@ -60,21 +65,21 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
           leading: const Icon(Icons.vertical_align_bottom),
           title: const Text('To Bottom'),
         ),
-        // 
+        //
         const SizedBox(height: 30),
         SettingsTextInput(
-          title: "Tab Number",
-          hintText: "Tab Number",
+          title: 'Tab Number',
+          hintText: 'Tab Number',
           onlyInput: true,
           controller: indexController,
-          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+          inputType: TextInputType.number,
           numberButtons: true,
           resetText: () => (widget.index + 1).toString(),
           numberStep: 1,
           numberMin: 1,
           numberMax: searchHandler.total.toDouble(),
           onChanged: (String value) {
-            setState(() { });
+            setState(() {});
           },
         ),
         ListTile(
@@ -84,28 +89,28 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
           ),
           onTap: () async {
             final int? enteredIndex = int.tryParse(indexController.text);
-            if(enteredIndex == null) {
+            if (enteredIndex == null) {
               return await FlashElements.showSnackbar(
-                title: const Text("Invalid Tab Number"),
-                content: Column(
+                title: const Text('Invalid Tab Number'),
+                content: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const <Widget>[
-                    Text("Invalid Input"),
+                  children: <Widget>[
+                    Text('Invalid Input'),
                     SizedBox(height: 10),
-                    Text("Please enter a valid tab number"),
+                    Text('Please enter a valid tab number'),
                   ],
                 ),
               );
             } else {
-              if(enteredIndex < 0 || enteredIndex > searchHandler.total) {
+              if (enteredIndex < 0 || enteredIndex > searchHandler.total) {
                 return await FlashElements.showSnackbar(
-                  title: const Text("Invalid Tab Number"),
-                  content: Column(
+                  title: const Text('Invalid Tab Number'),
+                  content: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const <Widget>[
-                      Text("Out of range"),
+                    children: <Widget>[
+                      Text('Out of range'),
                       SizedBox(height: 10),
-                      Text("Please enter a valid tab number"),
+                      Text('Please enter a valid tab number'),
                     ],
                   ),
                 );
@@ -122,7 +127,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
           leading: const Icon(Icons.vertical_align_center),
           title: const Text('To Set Number'),
         ),
-        // 
+        //
         const SizedBox(height: 10),
         const Text('Preview:'),
         const SizedBox(height: 10),
@@ -137,10 +142,10 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
 
 class TabMovePreview extends StatelessWidget {
   const TabMovePreview({
-    Key? key,
     required this.index,
     required this.indexController,
-  }) : super(key: key);
+    super.key,
+  });
 
   final int index;
   final TextEditingController indexController;
@@ -151,9 +156,9 @@ class TabMovePreview extends StatelessWidget {
 
     int enteredIndex = int.tryParse(indexController.text) ?? index;
 
-    if(enteredIndex < 1) {
+    if (enteredIndex < 1) {
       enteredIndex = index;
-    } else if(enteredIndex > searchHandler.total) {
+    } else if (enteredIndex > searchHandler.total) {
       enteredIndex = index;
     }
 
@@ -168,30 +173,35 @@ class TabMovePreview extends StatelessWidget {
     final SearchTab lastTab = searchHandler.getTabByIndex(searchHandler.total - 1)!;
 
     final bool showFirst = enteredIndex > 2;
-    final bool showFirstDots = showFirst && (enteredIndex > 1) && (enteredIndex - 1 > 2); // is first tab shown and entered number is bigger than 2 and possible prev tab number is bigger than 2
+    final bool showFirstDots = showFirst &&
+        (enteredIndex > 1) &&
+        (enteredIndex - 1 > 2); // is first tab shown and entered number is bigger than 2 and possible prev tab number is bigger than 2
     final bool showLast = enteredIndex < searchHandler.total - 1;
-    final bool showLastDots = showLast && (enteredIndex < searchHandler.total) && (enteredIndex + 1 < searchHandler.total - 1); // is last tab shown and entered number is smaller than total and possible next tab number is smaller than total - 1
+    final bool showLastDots = showLast &&
+        (enteredIndex < searchHandler.total) &&
+        (enteredIndex + 1 <
+            searchHandler.total - 1); // is last tab shown and entered number is smaller than total and possible next tab number is smaller than total - 1
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if(showFirst)
+        if (showFirst)
           Container(
             margin: const EdgeInsets.only(left: 10, bottom: 10),
             child: ElevatedButton(
               child: Text('#1 - ${firstTab.tags}'),
               onPressed: () {
-                indexController.text = "1";
+                indexController.text = '1';
               },
             ),
           ),
-        if(showFirstDots)
+        if (showFirstDots)
           Container(
             margin: const EdgeInsets.only(left: 10, bottom: 5),
-            child: const Text("..."),
+            child: const Text('...'),
           ),
-        // 
-        if(prevTab != null)
+        //
+        if (prevTab != null)
           Container(
             margin: const EdgeInsets.only(left: 10, bottom: 10),
             child: ElevatedButton(
@@ -201,14 +211,14 @@ class TabMovePreview extends StatelessWidget {
               },
             ),
           ),
-        // 
+        //
         Container(
           margin: const EdgeInsets.only(left: 10, bottom: 10),
           child: ElevatedButton(
             style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-              backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-              side: MaterialStateProperty.all<BorderSide>(BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2)),
-            ),
+                  backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
+                  side: MaterialStateProperty.all<BorderSide>(BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2)),
+                ),
             child: Text(
               '#$enteredIndex - ${currentTab.tags}',
             ),
@@ -217,8 +227,8 @@ class TabMovePreview extends StatelessWidget {
             },
           ),
         ),
-        // 
-        if(nextTab != null)
+        //
+        if (nextTab != null)
           Container(
             margin: const EdgeInsets.only(left: 10, bottom: 10),
             child: ElevatedButton(
@@ -228,13 +238,13 @@ class TabMovePreview extends StatelessWidget {
               },
             ),
           ),
-        // 
-        if(showLastDots)
+        //
+        if (showLastDots)
           Container(
             margin: const EdgeInsets.only(left: 10, bottom: 5),
-            child: const Text("..."),
+            child: const Text('...'),
           ),
-        if(showLast)
+        if (showLast)
           Container(
             margin: const EdgeInsets.only(left: 10),
             child: ElevatedButton(
@@ -244,7 +254,6 @@ class TabMovePreview extends StatelessWidget {
               },
             ),
           ),
-        
       ],
     );
   }

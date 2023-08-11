@@ -9,7 +9,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class UserInterfacePage extends StatefulWidget {
-  const UserInterfacePage({Key? key}) : super(key: key);
+  const UserInterfacePage({super.key});
 
   @override
   State<UserInterfacePage> createState() => _UserInterfacePageState();
@@ -53,7 +53,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.landscapeColumns = int.parse(columnsLandscapeController.text);
     settingsHandler.portraitColumns = int.parse(columnsPortraitController.text);
     settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -64,7 +64,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Interface"),
+          title: const Text('Interface'),
         ),
         body: Center(
           child: ListView(
@@ -87,14 +87,14 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         return const SettingsDialog(
                           title: Text('App UI Mode'),
                           contentItems: [
-                            Text("- Mobile - Normal Mobile UI"),
-                            Text("- Desktop - Ahoviewer Style UI"),
+                            Text('- Mobile - Normal Mobile UI'),
+                            Text('- Desktop - Ahoviewer Style UI'),
                             SizedBox(height: 10),
                             Text(
-                              "[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.",
+                              '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
                             ),
-                            Text("If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json"),
-                            Text("If you are on android 11 or higher you will have to wipe app data via system settings"),
+                            Text('If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
+                            Text('If you are on android 11 or higher you will have to wipe app data via system settings'),
                           ],
                         );
                       },
@@ -120,7 +120,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         return const SettingsDialog(
                           title: Text('Hand Side'),
                           contentItems: [
-                            Text("Moves some parts of the UI to the selected side of the screen"),
+                            Text('Moves some parts of the UI to the selected side of the screen'),
                             Text('Currently only changes the position of the main drawer button'),
                             Text('[This is a WIP feature, will include more changes in the future versions]')
                           ],
@@ -133,7 +133,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsTextInput(
                 controller: columnsPortraitController,
                 title: 'Preview Columns Portrait',
-                hintText: "Columns in Portrait orientation",
+                hintText: 'Columns in Portrait orientation',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 onChanged: (String? text) {
@@ -145,7 +145,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 numberMin: 1,
                 numberMax: double.infinity,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
+                  final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {
@@ -160,7 +160,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsTextInput(
                 controller: columnsLandscapeController,
                 title: 'Preview Columns Landscape',
-                hintText: "Columns in Landscape orientation",
+                hintText: 'Columns in Landscape orientation',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
@@ -169,7 +169,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 numberMin: 1,
                 numberMax: double.infinity,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
+                  final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {
@@ -197,11 +197,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         return const SettingsDialog(
                           title: Text('Preview Quality'),
                           contentItems: [
-                            Text("This setting changes the resolution of images in the preview grid"),
-                            Text(" - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads"),
-                            Text(" - Thumbnail - Low resolution"),
-                            Text(" "),
-                            Text("[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid")
+                            Text('This setting changes the resolution of images in the preview grid'),
+                            Text(' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads'),
+                            Text(' - Thumbnail - Low resolution'),
+                            Text(' '),
+                            Text('[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid')
                           ],
                         );
                       },
@@ -222,16 +222,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsTextInput(
                 controller: mouseSpeedController,
                 title: 'Mouse Wheel Scroll Modifer',
-                hintText: "Scroll modifier",
+                hintText: 'Scroll modifier',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 0.5,
                 numberMin: 0.1,
-                numberMax: 20.0,
+                numberMax: 20,
                 validator: (String? value) {
-                  double? parse = double.tryParse(value ?? '');
+                  final double? parse = double.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {

@@ -42,7 +42,7 @@ class ThumbnailBuild extends StatelessWidget {
       return ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: Stack(
-          alignment: settingsHandler.previewDisplay == "Square" ? Alignment.center : Alignment.bottomCenter,
+          alignment: settingsHandler.previewDisplay == 'Square' ? Alignment.center : Alignment.bottomCenter,
           children: [
             Thumbnail(
               item: item,

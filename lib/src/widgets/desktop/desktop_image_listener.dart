@@ -25,7 +25,7 @@ import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 /// If the file url isn't empty it will return a current media widget for the fileURL
 ///
 class DesktopImageListener extends StatefulWidget {
-  const DesktopImageListener(this.searchTab, {Key? key}) : super(key: key);
+  const DesktopImageListener(this.searchTab, {super.key});
   final SearchTab searchTab;
 
   @override
@@ -183,7 +183,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   onPressed: () async {
                     viewerHandler.isDesktopFullscreen.value = true;
                     updateState();
-                    delayedZoomReset();
+                    unawaited(delayedZoomReset());
 
                     await showDialog(
                       context: context,
@@ -215,7 +215,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
                     viewerHandler.isDesktopFullscreen.value = false;
                     updateState();
-                    delayedZoomReset();
+                    unawaited(delayedZoomReset());
                   },
                   child: const Icon(Icons.fullscreen),
                 ),

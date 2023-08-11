@@ -1,13 +1,4 @@
 class UpdateInfo {
-  String versionName;
-  int buildNumber;
-  String title;
-  String changelog;
-  bool isInStore;
-  bool isImportant;
-  String storePackage;
-  String githubURL;
-
   UpdateInfo({
     required this.versionName,
     required this.buildNumber,
@@ -18,4 +9,13 @@ class UpdateInfo {
     required this.storePackage,
     required this.githubURL,
   });
+
+  String versionName;
+  int buildNumber;
+  String title;
+  String changelog;
+  bool isInStore;
+  bool isImportant;
+  String storePackage;
+  String githubURL;
 }

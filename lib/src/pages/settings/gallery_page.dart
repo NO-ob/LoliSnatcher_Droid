@@ -6,7 +6,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class GalleryPage extends StatefulWidget {
-  const GalleryPage({Key? key}) : super(key: key);
+  const GalleryPage({super.key});
   @override
   State<GalleryPage> createState() => _GalleryPageState();
 }
@@ -37,7 +37,9 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryScrollDirection = settingsHandler.galleryScrollDirection;
 
     shareAction = settingsHandler.shareAction;
-    if (!settingsHandler.hasHydrus && settingsHandler.shareAction == "Hydrus") shareAction = "Ask";
+    if (!settingsHandler.hasHydrus && settingsHandler.shareAction == 'Hydrus') {
+      shareAction = 'Ask';
+    }
 
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
@@ -70,10 +72,10 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     if (int.parse(scrollSpeedController.text) < 100) {
-      scrollSpeedController.text = "100";
+      scrollSpeedController.text = '100';
     }
     if (int.parse(galleryAutoScrollController.text) < 800) {
-      galleryAutoScrollController.text = "800";
+      galleryAutoScrollController.text = '800';
     }
     settingsHandler.volumeButtonsScrollSpeed = int.parse(scrollSpeedController.text);
     settingsHandler.galleryAutoScrollTime = int.parse(galleryAutoScrollController.text);
@@ -82,7 +84,7 @@ class _GalleryPageState extends State<GalleryPage> {
     }
     settingsHandler.preloadCount = int.parse(preloadController.text);
     // Set settingshandler values here
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -99,7 +101,7 @@ class _GalleryPageState extends State<GalleryPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Gallery"),
+          title: const Text('Gallery'),
         ),
         body: Center(
           child: ListView(
@@ -107,7 +109,7 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsTextInput(
                 controller: preloadController,
                 title: 'Gallery View Preload',
-                hintText: "Images to preload",
+                hintText: 'Images to preload',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['preloadCount']!['default']!.toString(),
@@ -116,7 +118,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 numberMin: 0,
                 numberMax: 5,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
+                  final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {
@@ -146,10 +148,10 @@ class _GalleryPageState extends State<GalleryPage> {
                         return const SettingsDialog(
                           title: Text('Gallery Quality'),
                           contentItems: <Widget>[
-                            Text("The gallery quality changes the resolution of images in the gallery viewer."),
+                            Text('The gallery quality changes the resolution of images in the gallery viewer.'),
                             Text(''),
-                            Text(" - Sample - Medium resolution"),
-                            Text(" - Full Res - Full resolution"),
+                            Text(' - Sample - Medium resolution'),
+                            Text(' - Full Res - Full resolution'),
                           ],
                         );
                       },
@@ -185,17 +187,17 @@ class _GalleryPageState extends State<GalleryPage> {
                         return SettingsDialog(
                           title: const Text('Share Actions'),
                           contentItems: <Widget>[
-                            const Text("- Ask - always ask what to share"),
-                            const Text("- Post URL"),
-                            const Text("- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)"),
-                            const Text("- File - shares viewed file itself"),
-                            if (hasHydrus) const Text("- Hydrus - sends the post url to Hydrus for import"),
+                            const Text('- Ask - always ask what to share'),
+                            const Text('- Post URL'),
+                            const Text('- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)'),
+                            const Text('- File - shares viewed file itself'),
+                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
                             const Text(''),
                             const Text(
-                              "[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time.",
+                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time.',
                             ),
                             const Text(''),
-                            const Text("[Tip]: You can open Share Actions Menu by long pressing Share button.")
+                            const Text('[Tip]: You can open Share Actions Menu by long pressing Share button.')
                           ],
                         );
                       },
@@ -259,9 +261,9 @@ class _GalleryPageState extends State<GalleryPage> {
                               return const SettingsDialog(
                                 title: Text('Buttons Order'),
                                 contentItems: <Widget>[
-                                  Text("Long press to change item order."),
-                                  Text("First 4 buttons from this list will be always visible on Toolbar."),
-                                  Text("Other buttons will be in overflow (three dots) menu."),
+                                  Text('Long press to change item order.'),
+                                  Text('First 4 buttons from this list will be always visible on Toolbar.'),
+                                  Text('Other buttons will be in overflow (three dots) menu.'),
                                 ],
                               );
                             },
@@ -280,7 +282,7 @@ class _GalleryPageState extends State<GalleryPage> {
                               FlashElements.showSnackbar(
                                 context: context,
                                 title: const Text(
-                                  "Long Press to move items",
+                                  'Long Press to move items',
                                   style: TextStyle(fontSize: 20),
                                 ),
                                 leadingIcon: Icons.warning_amber,
@@ -326,7 +328,7 @@ class _GalleryPageState extends State<GalleryPage> {
                         return const SettingsDialog(
                           title: Text('Disable Video'),
                           contentItems: <Widget>[
-                            Text("Useful on low end devices that crash when trying to load videos."),
+                            Text('Useful on low end devices that crash when trying to load videos.'),
                             Text("Replaces video with text that says 'Video disabled'."),
                           ],
                         );
@@ -362,8 +364,8 @@ class _GalleryPageState extends State<GalleryPage> {
                   setState(() {
                     shitDevice = newValue;
                     if (shitDevice) {
-                      preloadController.text = "0";
-                      galleryMode = "Sample";
+                      preloadController.text = '0';
+                      galleryMode = 'Sample';
                       autoPlay = false;
                       // TODO set thumbnails quality to low?
                     }
@@ -379,13 +381,13 @@ class _GalleryPageState extends State<GalleryPage> {
                         return const SettingsDialog(
                           title: Text('Low Performance Mode'),
                           contentItems: <Widget>[
-                            Text("Recommended for old devices and devices with RAM < 2GB."),
+                            Text('Recommended for old devices and devices with RAM < 2GB.'),
                             Text(''),
-                            Text("- Disables loading progress information"),
-                            Text("- Sets optimal settings for:"),
-                            Text("   - Gallery Quality"),
-                            Text("   - Gallery Preload"),
-                            Text("   - Video Auto Play"),
+                            Text('- Disables loading progress information'),
+                            Text('- Sets optimal settings for:'),
+                            Text('   - Gallery Quality'),
+                            Text('   - Gallery Preload'),
+                            Text('   - Video Auto Play'),
                           ],
                         );
                       },
@@ -412,14 +414,14 @@ class _GalleryPageState extends State<GalleryPage> {
                         return const SettingsDialog(
                           title: Text('Volume Buttons Scrolling'),
                           contentItems: <Widget>[
-                            Text("Allows to scroll through previews grid and gallery items using volume buttons"),
+                            Text('Allows to scroll through previews grid and gallery items using volume buttons'),
                             Text(''),
-                            Text(" - Volume Down - next item"),
-                            Text(" - Volume Up - previous item"),
+                            Text(' - Volume Down - next item'),
+                            Text(' - Volume Up - previous item'),
                             Text(''),
-                            Text("On videos:"),
-                            Text(" - App Bar visible - controls volume"),
-                            Text(" - App Bar hidden - controls scrolling"),
+                            Text('On videos:'),
+                            Text(' - App Bar visible - controls volume'),
+                            Text(' - App Bar hidden - controls scrolling'),
                           ],
                         );
                       },
@@ -430,7 +432,7 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsTextInput(
                 controller: scrollSpeedController,
                 title: 'Buttons Scroll Speed',
-                hintText: "Scroll Speed",
+                hintText: 'Scroll Speed',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
@@ -439,7 +441,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 numberMin: 100,
                 numberMax: double.infinity,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
+                  final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {
@@ -455,7 +457,7 @@ class _GalleryPageState extends State<GalleryPage> {
               SettingsTextInput(
                 controller: galleryAutoScrollController,
                 title: 'AutoScroll Timeout (in ms)',
-                hintText: "AutoScroll Timeout (in ms)",
+                hintText: 'AutoScroll Timeout (in ms)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
@@ -464,7 +466,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 numberMin: 100,
                 numberMax: double.infinity,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
+                  final int? parse = int.tryParse(value ?? '');
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   } else if (parse == null) {
@@ -482,7 +484,7 @@ class _GalleryPageState extends State<GalleryPage> {
                         return const SettingsDialog(
                           title: Text('AutoScroll / Slideshow'),
                           contentItems: <Widget>[
-                            Text("[WIP] Videos and gifs must be scrolled manually for now."),
+                            Text('[WIP] Videos and gifs must be scrolled manually for now.'),
                           ],
                         );
                       },

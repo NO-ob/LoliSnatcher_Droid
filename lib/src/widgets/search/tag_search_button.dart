@@ -4,7 +4,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 
 class TagSearchButton extends StatelessWidget {
-  const TagSearchButton({Key? key}) : super(key: key);
+  const TagSearchButton({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,44 +1,44 @@
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
+// ignore: camel_case_types
 class e621Handler extends BooruHandler {
-  e621Handler(Booru booru, int limit) : super(booru, limit);
+  e621Handler(super.booru, super.limit);
 
   @override
-  bool hasSizeData = true;
+  bool get hasSizeData => true;
 
   @override
-  Map<String, TagType> tagTypeMap = {
-    "7": TagType.meta,
-    "3": TagType.copyright,
-    "4": TagType.character,
-    "1": TagType.artist,
-    "5": TagType.species,
-    "0": TagType.none,
-  };
+  Map<String, TagType> get tagTypeMap => {
+        '7': TagType.meta,
+        '3': TagType.copyright,
+        '4': TagType.character,
+        '1': TagType.artist,
+        '5': TagType.species,
+        '0': TagType.none,
+      };
 
   @override
-  List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = response.data;
+  List parseListFromResponse(dynamic response) {
+    final Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['posts'] ?? []) as List;
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final dynamic current = responseItem;
 
     if (current['file']['md5'] != null) {
-      String fileURL = "";
-      String sampleURL = "";
-      String thumbURL = "";
+      String fileURL = '';
+      String sampleURL = '';
+      String thumbURL = '';
       if (current['file']['url'] == null) {
-        String md5FirstSplit = current['file']['md5'].toString().substring(0, 2);
-        String md5SecondSplit = current['file']['md5'].toString().substring(2, 4);
+        final String md5FirstSplit = current['file']['md5'].toString().substring(0, 2);
+        final String md5SecondSplit = current['file']['md5'].toString().substring(2, 4);
         fileURL = "https://static1.e621.net/data/$md5FirstSplit/$md5SecondSplit/${current['file']['md5']}.${current['file']['ext']}";
-        sampleURL = fileURL.replaceFirst("data", "data/sample").replaceFirst(current['file']['ext'], "jpg");
-        thumbURL = sampleURL.replaceFirst("data/sample", "data/preview");
+        sampleURL = fileURL.replaceFirst('data', 'data/sample').replaceFirst(current['file']['ext'], 'jpg');
+        thumbURL = sampleURL.replaceFirst('data/sample', 'data/preview');
         if (current['file']['size'] <= 2694254) {
           sampleURL = fileURL;
         }
@@ -55,9 +55,9 @@ class e621Handler extends BooruHandler {
       addTagsWithType([...current['tags']['general']], TagType.none);
       addTagsWithType([...current['tags']['species']], TagType.species);
 
-      String? dateStr = current['created_at']?.toString().substring(0, current['created_at']!.toString().length - 6);
+      final String? dateStr = current['created_at']?.toString().substring(0, current['created_at']!.toString().length - 6);
 
-      BooruItem item = BooruItem(
+      final BooruItem item = BooruItem(
         fileURL: fileURL,
         sampleURL: sampleURL,
         thumbnailURL: thumbURL,
@@ -96,38 +96,40 @@ class e621Handler extends BooruHandler {
 
   @override
   String makePostURL(String id) {
-    return "${booru.baseURL}/posts/$id?";
+    return '${booru.baseURL}/posts/$id?';
   }
 
   @override
   String makeURL(String tags) {
-    final String loginStr = booru.userID?.isNotEmpty == true ? "&login=${booru.userID}" : "";
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? "&api_key=${booru.apiKey}" : '';
+    final String loginStr = booru.userID?.isNotEmpty == true ? '&login=${booru.userID}' : '';
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
 
-    return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$loginStr$apiKeyStr";
+    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum$loginStr$apiKeyStr';
   }
 
   @override
   String makeTagURL(String input) {
-    return "${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10&search[order]=count";
+    return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10&search[order]=count';
   }
 
   @override
-  List parseTagSuggestionsList(response) {
-    List parsedResponse = response.data;
+  List parseTagSuggestionsList(dynamic response) {
+    final List parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  String? parseTagSuggestion(responseItem, int index) {
-    final String tagStr = responseItem["name"] ?? "";
-    if (tagStr.isEmpty) return null;
+  String? parseTagSuggestion(dynamic responseItem, int index) {
+    final String tagStr = responseItem['name'] ?? '';
+    if (tagStr.isEmpty) {
+      return null;
+    }
 
     // record tag data for future use
-    final String rawTagType = responseItem["category"]?.toString() ?? "";
+    final String rawTagType = responseItem['category']?.toString() ?? '';
     TagType tagType = TagType.none;
     if (rawTagType.isNotEmpty && tagTypeMap.containsKey(rawTagType)) {
-      tagType = (tagTypeMap[rawTagType] ?? TagType.none);
+      tagType = tagTypeMap[rawTagType] ?? TagType.none;
     }
     addTagsWithType([tagStr], tagType);
     return tagStr;

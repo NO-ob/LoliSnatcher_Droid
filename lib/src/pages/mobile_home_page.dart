@@ -22,7 +22,7 @@ import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class MobileHome extends StatefulWidget {
-  const MobileHome({Key? key}) : super(key: key);
+  const MobileHome({super.key});
 
   @override
   State<MobileHome> createState() => _MobileHomeState();
@@ -126,7 +126,7 @@ class _MobileHomeState extends State<MobileHome> {
 
           //When setting the vertical offset, be sure to use only top or bottom
           offset: IDOffset.only(
-            bottom: 0.0,
+            bottom: 0,
             right: orientation == Orientation.landscape ? 0 : 0.5,
             left: orientation == Orientation.landscape ? 0 : 0.5,
           ),
@@ -177,10 +177,12 @@ class _MobileHomeState extends State<MobileHome> {
                   alignment: Alignment.topCenter,
                   children: [
                     const MediaPreviews(),
-                    Obx(() => MainAppBar(
-                          leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : null,
-                          trailing: settingsHandler.handSide.value.isRight ? menuButton(InnerDrawerDirection.end) : null,
-                        )),
+                    Obx(
+                      () => MainAppBar(
+                        leading: settingsHandler.handSide.value.isLeft ? menuButton(InnerDrawerDirection.start) : null,
+                        trailing: settingsHandler.handSide.value.isRight ? menuButton(InnerDrawerDirection.end) : null,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -199,7 +201,7 @@ class _MobileHomeState extends State<MobileHome> {
 }
 
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({Key? key}) : super(key: key);
+  const MainDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +210,7 @@ class MainDrawer extends StatelessWidget {
 
     // print('build drawer');
 
-    return Container(
+    return ColoredBox(
       color: Theme.of(context).colorScheme.background,
       child: SafeArea(
         child: Drawer(
@@ -219,9 +221,9 @@ class MainDrawer extends StatelessWidget {
                   return Container(
                     margin: const EdgeInsets.fromLTRB(2, 15, 2, 15),
                     width: double.infinity,
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.max,
-                      children: const <Widget>[
+                      children: <Widget>[
                         //Tags/Search field
                         TagSearchBox(),
                         TagSearchButton(),
@@ -248,7 +250,7 @@ class MainDrawer extends StatelessWidget {
                       const TabBooruSelector(true),
                       const MergeBooruToggle(),
                       Obx(() {
-                        bool hasTabsAndTabHasSecondaryBoorus =
+                        final bool hasTabsAndTabHasSecondaryBoorus =
                             searchHandler.list.isNotEmpty && (searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false);
                         if (settingsHandler.booruList.length > 1 && hasTabsAndTabHasSecondaryBoorus) {
                           return const TabBooruSelector(false);
@@ -260,7 +262,7 @@ class MainDrawer extends StatelessWidget {
                       Obx(() {
                         if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                           return SettingsButton(
-                            name: "Snatcher",
+                            name: 'Snatcher',
                             icon: const Icon(Icons.download_sharp),
                             page: () => const SnatcherPage(),
                             drawTopBorder: true,
@@ -269,11 +271,11 @@ class MainDrawer extends StatelessWidget {
                           return const SizedBox.shrink();
                         }
                       }),
-                      // 
+                      //
                       Obx(() {
                         if (settingsHandler.isDebug.value) {
                           return SettingsButton(
-                            name: "Open Alice",
+                            name: 'Open Alice',
                             icon: const Icon(Icons.developer_board),
                             action: () {
                               settingsHandler.alice.showInspector();
@@ -286,9 +288,9 @@ class MainDrawer extends StatelessWidget {
                       }),
                       //
                       Obx(() {
-                        if(settingsHandler.isDebug.value && settingsHandler.enabledLogTypes.isNotEmpty) {
+                        if (settingsHandler.isDebug.value && settingsHandler.enabledLogTypes.isNotEmpty) {
                           return SettingsButton(
-                            name: "Open Logger",
+                            name: 'Open Logger',
                             icon: const Icon(Icons.print),
                             action: () {
                               LogConsole.open(
@@ -308,7 +310,7 @@ class MainDrawer extends StatelessWidget {
                         }
                       }),
                       SettingsButton(
-                        name: "Settings",
+                        name: 'Settings',
                         icon: const Icon(Icons.settings),
                         page: () => const SettingsPage(),
                       ),
@@ -360,7 +362,7 @@ class MainDrawer extends StatelessWidget {
 }
 
 class MergeBooruToggle extends StatelessWidget {
-  const MergeBooruToggle({Key? key}) : super(key: key);
+  const MergeBooruToggle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -380,12 +382,12 @@ class MergeBooruToggle extends StatelessWidget {
             FlashElements.showSnackbar(
               context: context,
               title: const Text(
-                "Error!",
+                'Error!',
                 style: TextStyle(fontSize: 20),
               ),
-              content: Column(
+              content: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text('You need at least 2 booru configs to use this feature!'),
                 ],
               ),
@@ -393,7 +395,7 @@ class MergeBooruToggle extends StatelessWidget {
               leadingIconColor: Colors.red,
             );
           } else {
-            var firstAvailableBooru = settingsHandler.booruList.firstWhereOrNull((booru) => booru != searchHandler.currentBooru);
+            final firstAvailableBooru = settingsHandler.booruList.firstWhereOrNull((booru) => booru != searchHandler.currentBooru);
             if (firstAvailableBooru != null) {
               searchHandler.mergeAction(newValue ? [firstAvailableBooru] : null);
             }

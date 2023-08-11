@@ -7,11 +7,10 @@ enum IndicatorStyle {
   linear;
 }
 
-const double _kMinCircularProgressIndicatorSize = 36.0;
+const double _kMinCircularProgressIndicatorSize = 36;
 
 class AnimatedProgressIndicator extends StatefulWidget {
   const AnimatedProgressIndicator({
-    Key? key,
     required this.value,
     this.animationDuration,
     this.backgroundColor,
@@ -19,7 +18,8 @@ class AnimatedProgressIndicator extends StatefulWidget {
     this.minHeight,
     this.strokeWidth = 4,
     this.indicatorStyle = IndicatorStyle.circular,
-  }) : super(key: key);
+    super.key,
+  });
 
   final double value;
   final Duration? animationDuration;
@@ -74,7 +74,7 @@ class AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator> wi
     if (widget.value != oldWidget.value) {
       // Try to start with the previous tween's end value. This ensures that we
       // have a smooth transition from where the previous animation reached.
-      double beginValue = valueTween.evaluate(curve);
+      final double beginValue = valueTween.evaluate(curve);
 
       valueTween = Tween<double>(
         begin: beginValue,
@@ -122,8 +122,7 @@ class AnimatedProgressIndicatorState extends State<AnimatedProgressIndicator> wi
             widget.backgroundColor ??
             (widget.indicatorStyle == IndicatorStyle.circular ? indicatorTheme.circularTrackColor : indicatorTheme.linearTrackColor) ??
             Theme.of(context).colorScheme.background;
-        final Color valueColor =
-            valueColorTween?.evaluate(curve) ?? widget.valueColor ?? indicatorTheme.color ?? Theme.of(context).colorScheme.background;
+        final Color valueColor = valueColorTween?.evaluate(curve) ?? widget.valueColor ?? indicatorTheme.color ?? Theme.of(context).colorScheme.background;
         final double minHeight = widget.minHeight ?? indicatorTheme.linearMinHeight ?? 4.0;
 
         if (widget.indicatorStyle == IndicatorStyle.circular) {
@@ -182,7 +181,7 @@ class CircularProgressIndicatorPainter extends CustomPainter {
     final Offset center = size.center(Offset.zero);
     final double shortestSide = min(size.width - strokeWidth, size.height - strokeWidth);
 
-    final double radius = (shortestSide / 2);
+    final double radius = shortestSide / 2;
 
     const double startAngle = -(2 * pi * 0.25);
     final double sweepAngle = 2 * pi * value;
@@ -209,7 +208,7 @@ class CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    final oldPainter = (oldDelegate as CircularProgressIndicatorPainter);
+    final oldPainter = oldDelegate as CircularProgressIndicatorPainter;
     return oldPainter.value != value ||
         oldPainter.backgroundColor != backgroundColor ||
         oldPainter.valueColor != valueColor ||
@@ -250,7 +249,7 @@ class LinearProgressIndicatorPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
-    final oldPainter = (oldDelegate as LinearProgressIndicatorPainter);
+    final oldPainter = oldDelegate as LinearProgressIndicatorPainter;
     return oldPainter.value != value ||
         oldPainter.backgroundColor != backgroundColor ||
         oldPainter.valueColor != valueColor ||

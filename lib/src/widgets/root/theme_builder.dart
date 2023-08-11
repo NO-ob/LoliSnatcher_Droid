@@ -7,7 +7,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 
 class ThemeBuilder extends StatelessWidget {
-  const ThemeBuilder({Key? key, required this.child}) : super(key: key);
+  const ThemeBuilder({required this.child, super.key});
 
   final Widget child;
 
@@ -16,7 +16,7 @@ class ThemeBuilder extends StatelessWidget {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     return Obx(() {
-      ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
+      final ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
           ? ThemeItem(
               name: 'Custom',
               primary: settingsHandler.customPrimaryColor.value,

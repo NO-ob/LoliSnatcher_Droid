@@ -1,9 +1,6 @@
 import 'dart:convert';
 
 class CommentItem {
-  String? id, title, content, authorID, authorName, avatarUrl, postID, createDate, createDateFormat;
-  int? score;
-
   CommentItem({
     this.id,
     this.title,
@@ -16,6 +13,9 @@ class CommentItem {
     this.createDate,
     this.createDateFormat,
   });
+
+  String? id, title, content, authorID, authorName, avatarUrl, postID, createDate, createDateFormat;
+  int? score;
 
   Map<String, dynamic> toJson() {
     return {
@@ -33,7 +33,7 @@ class CommentItem {
   }
 
   static CommentItem fromJSON(String jsonString) {
-    Map<String, dynamic> json = jsonDecode(jsonString);
+    final Map<String, dynamic> json = jsonDecode(jsonString);
     return CommentItem.fromMap(json);
   }
 

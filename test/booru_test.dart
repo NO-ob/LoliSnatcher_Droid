@@ -43,67 +43,67 @@ Future<void> main() async {
   // prepare/init handlers and stuff
   final SettingsHandler settingsHandler = Get.put(SettingsHandler());
   await settingsHandler.initialize();
-  TagHandler tagHandler = Get.put(TagHandler());
+  final TagHandler tagHandler = Get.put(TagHandler());
   await tagHandler.initialize();
   SettingsHandler.instance.tagTypeFetchEnabled = false;
   SettingsHandler.instance.limit = itemLimit;
 
-  group("booru tests", () {
+  group('booru tests', () {
     test('BooruOnRailsHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("twibooru", BooruType.BooruOnRails, "", "https://twibooru.org", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('twibooru', BooruType.BooruOnRails, '', 'https://twibooru.org', ''));
       expect(booruHandler, isA<BooruOnRailsHandler>());
     });
     test('DanbooruHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("danbooru", BooruType.Danbooru, "", "https://danbooru.donmai.us/", ""), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(Booru('danbooru', BooruType.Danbooru, '', 'https://danbooru.donmai.us/', ''), hardFetchedLength: false);
       expect(booruHandler, isA<DanbooruHandler>());
     });
     test('e621Handler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("e621", BooruType.e621, "", "https://e621.net/", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('e621', BooruType.e621, '', 'https://e621.net/', ''));
       expect(booruHandler, isA<e621Handler>());
     });
 
     group('GelbooruAlikesHandler(s)', () {
       test('Rule34xxx', () async {
-        BooruHandler booruHandler = await testBooru(Booru("rule34", BooruType.Gelbooru, "", "https://rule34.xxx", ""), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(Booru('rule34', BooruType.Gelbooru, '', 'https://rule34.xxx', ''), hardFetchedLength: false);
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
       test('Safebooru', () async {
-        BooruHandler booruHandler = await testBooru(Booru("safebooru", BooruType.Gelbooru, "", "https://safebooru.org", ""));
+        final BooruHandler booruHandler = await testBooru(Booru('safebooru', BooruType.Gelbooru, '', 'https://safebooru.org', ''));
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
       test('Realbooru', () async {
         // TODO first page doesn't give correct amount of items? api side problem?
-        BooruHandler booruHandler = await testBooru(Booru("realbooru", BooruType.Gelbooru, "", "https://realbooru.com", ""), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(Booru('realbooru', BooruType.Gelbooru, '', 'https://realbooru.com', ''), hardFetchedLength: false);
         expect(booruHandler, isA<GelbooruAlikesHandler>());
       });
     });
     test('GelbooruHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("gelbooru", BooruType.Gelbooru, "", "https://gelbooru.com", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('gelbooru', BooruType.Gelbooru, '', 'https://gelbooru.com', ''));
       expect(booruHandler, isA<GelbooruHandler>());
     });
     test('GelbooruV1Handler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("os tan", BooruType.GelbooruV1, "", "https://os-tan.booru.org", ""), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(Booru('os tan', BooruType.GelbooruV1, '', 'https://os-tan.booru.org', ''), hardFetchedLength: false);
       expect(booruHandler, isA<GelbooruV1Handler>());
     });
     test('InkBunnyHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("inkbunny", BooruType.InkBunny, "", "https://inkbunny.net", ""), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(Booru('inkbunny', BooruType.InkBunny, '', 'https://inkbunny.net', ''), hardFetchedLength: false);
       expect(booruHandler, isA<InkBunnyHandler>());
     });
     test('MoebooruHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("lolibooru", BooruType.Moebooru, "", "https://lolibooru.moe", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('lolibooru', BooruType.Moebooru, '', 'https://lolibooru.moe', ''));
       expect(booruHandler, isA<MoebooruHandler>());
     });
     test('NyanPalsHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("nyanpals", BooruType.NyanPals, "", "https://nyanpals.com", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('nyanpals', BooruType.NyanPals, '', 'https://nyanpals.com', ''));
       expect(booruHandler, isA<NyanPalsHandler>());
     });
     test('PhilomenaHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("derpibooru", BooruType.Philomena, "", "https://derpibooru.org", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('derpibooru', BooruType.Philomena, '', 'https://derpibooru.org', ''));
       expect(booruHandler, isA<PhilomenaHandler>());
     });
     test('R34HentaiHandler', () async {
       // requires USA proxy
-      BooruHandler booruHandler = await testBooru(Booru("r34hentai", BooruType.R34Hentai, "", "https://r34hentai.com", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('r34hentai', BooruType.R34Hentai, '', 'https://r34hentai.com', ''));
       expect(booruHandler, isA<PhilomenaHandler>());
     });
     //Not in the factory?
@@ -113,46 +113,46 @@ Future<void> main() async {
     });*/
     test('SankakuHandler', () async {
       // TODO doesn't parse all items correctly?
-      BooruHandler booruHandler = await testBooru(Booru("sankaku", BooruType.Sankaku, "", "https://capi-v2.sankakucomplex.com", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('sankaku', BooruType.Sankaku, '', 'https://capi-v2.sankakucomplex.com', ''));
       expect(booruHandler, isA<SankakuHandler>());
     });
     test('IdolSankakuHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("idolsankaku", BooruType.IdolSankaku, "", "https://iapi.sankakucomplex.com", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('idolsankaku', BooruType.IdolSankaku, '', 'https://iapi.sankakucomplex.com', ''));
       expect(booruHandler, isA<IdolSankakuHandler>());
     });
     test('ShimmieHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("r34 paheal", BooruType.Shimmie, "", "https://rule34.paheal.net", ""));
+      final BooruHandler booruHandler = await testBooru(Booru('r34 paheal', BooruType.Shimmie, '', 'https://rule34.paheal.net', ''));
       expect(booruHandler, isA<ShimmieHandler>());
     });
     test('SzurubooruHandler', () async {
-      BooruHandler booruHandler =
-          await testBooru(Booru("xivbooru", BooruType.Szurubooru, "", "http://xivbooru.com", ""), customSuggestionsInput: 'tat'); // tat[too]
+      final BooruHandler booruHandler =
+          await testBooru(Booru('xivbooru', BooruType.Szurubooru, '', 'http://xivbooru.com', ''), customSuggestionsInput: 'tat'); // tat[too]
       expect(booruHandler, isA<SzurubooruHandler>());
     });
     group('WorldXyzHandler', () {
       test('World', () async {
-        BooruHandler booruHandler = await testBooru(Booru("r34world", BooruType.World, "", "https://rule34.world", ""), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(Booru('r34world', BooruType.World, '', 'https://rule34.world', ''), hardFetchedLength: false);
         expect(booruHandler, isA<WorldXyzHandler>());
       });
       test('Xyz', () async {
-        BooruHandler booruHandler = await testBooru(Booru("r34xyz", BooruType.World, "", "https://rule34.xyz", ""), hardFetchedLength: false);
+        final BooruHandler booruHandler = await testBooru(Booru('r34xyz', BooruType.World, '', 'https://rule34.xyz', ''), hardFetchedLength: false);
         expect(booruHandler, isA<WorldXyzHandler>());
       });
     });
   });
   // Sometimes this fails maybe its giving the thumb urls but they aren't generated yet
 
-  group("slow booru tests", () {
+  group('slow booru tests', () {
     test('AGNPHHandler', () async {
-      BooruHandler booruHandler = await testBooru(
-        Booru("agn.ph", BooruType.AGNPH, "", "https://agn.ph", ""),
+      final BooruHandler booruHandler = await testBooru(
+        Booru('agn.ph', BooruType.AGNPH, '', 'https://agn.ph', ''),
         hardFetchedLength: false,
         timeoutBeforeTagCheck: true,
       );
       expect(booruHandler, isA<AGNPHHandler>());
     });
     test('RainbooruHandler', () async {
-      BooruHandler booruHandler = await testBooru(Booru("rainbooru", BooruType.Rainbooru, "", "https://www.rainbooru.org", ""), hardFetchedLength: false);
+      final BooruHandler booruHandler = await testBooru(Booru('rainbooru', BooruType.Rainbooru, '', 'https://www.rainbooru.org', ''), hardFetchedLength: false);
       expect(booruHandler, isA<RainbooruHandler>());
     });
   });
@@ -170,9 +170,9 @@ Future<BooruHandler> testBooru(
   // +1 because starting page number is out of range
   booruHandler.pageNum = (temp[1] as int) + 1;
 
-  List<BooruItem> fetched = await booruHandler.search(defaultInput, booruHandler.pageNum);
+  final List<BooruItem> fetched = await booruHandler.search(defaultInput, booruHandler.pageNum);
   if (booruHandler.errorString.isNotEmpty) {
-    print("Error: ${booruHandler.errorString}");
+    print('Error: ${booruHandler.errorString}');
   }
   print('fetched length: ${fetched.length}');
   if (hardFetchedLength) {
@@ -188,7 +188,7 @@ Future<BooruHandler> testBooru(
     //
     const int imageTestLimit = imageLimit; // hardFetchedLength ? itemLimit : fetched.length
     for (int i = 0; i < imageTestLimit; i++) {
-      BooruItem item = fetched[i];
+      final BooruItem item = fetched[i];
       print('Fetching images for ${item.postURL}');
       print('${item.fileURL} ${item.sampleURL} ${item.thumbnailURL}');
       // file
@@ -216,9 +216,9 @@ Future<BooruHandler> testBooru(
 }
 
 Future<void> testSuggestions(BooruHandler booruHandler, {String? customSuggestionsInput}) async {
-  print("Testing suggestions for ${booruHandler.booru.name}");
-  String input = customSuggestionsInput ?? "ani"; // ani[mated]
-  List<String> suggestions = await booruHandler.tagSearch(input);
+  print('Testing suggestions for ${booruHandler.booru.name}');
+  final String input = customSuggestionsInput ?? 'ani'; // ani[mated]
+  final List<String> suggestions = await booruHandler.tagSearch(input);
   expect(suggestions.isNotEmpty, equals(true));
   expect(suggestions.length, equals(10));
 }

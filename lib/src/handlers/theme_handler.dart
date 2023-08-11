@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart';
 
 import 'package:google_fonts/google_fonts.dart';
@@ -15,11 +14,14 @@ class ThemeHandler {
     required this.useMaterial3,
     required this.isAmoled,
   }) {
-    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && SchedulerBinding.instance.window.platformBrightness == Brightness.dark);
+    final platformBrigtness = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher.platformBrightness;
+    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness == Brightness.dark);
 
-    Brightness primaryBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
+    final Brightness primaryBrightness =
+        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
     primaryIsDark = primaryBrightness == Brightness.dark;
-    Brightness accentBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
+    final Brightness accentBrightness =
+        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
     accentIsDark = accentBrightness == Brightness.dark;
   }
 
@@ -38,11 +40,14 @@ class ThemeHandler {
     lightDynamic = light;
     darkDynamic = dark;
 
-    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && SchedulerBinding.instance.window.platformBrightness == Brightness.dark);
+    final platformBrigtness = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher.platformBrightness;
+    isDark = themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && platformBrigtness == Brightness.dark);
 
-    Brightness primaryBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
+    final Brightness primaryBrightness =
+        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().primary : theme.primary!);
     primaryIsDark = primaryBrightness == Brightness.dark;
-    Brightness accentBrightness = ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
+    final Brightness accentBrightness =
+        ThemeData.estimateBrightnessForColor((isDark ? darkDynamic : lightDynamic) != null ? colorScheme().secondary : theme.accent!);
     accentIsDark = accentBrightness == Brightness.dark;
   }
 
@@ -155,8 +160,8 @@ class ThemeHandler {
     if (useMaterial3) {
       return ColorScheme.fromSeed(
         seedColor: theme.accent!,
-        primary: theme.primary!,
-        secondary: theme.accent!,
+        primary: theme.primary,
+        secondary: theme.accent,
         brightness: isDark ? Brightness.dark : Brightness.light,
         error: Colors.redAccent,
       );
@@ -322,8 +327,8 @@ class ThemeHandler {
           if (Platform.isAndroid || Platform.isIOS) {
             return 8;
           } else {
-            List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
-            for (MaterialState state in states) {
+            final List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+            for (final MaterialState state in states) {
               if (goodStates.contains(state)) {
                 return 8;
               }
@@ -336,8 +341,8 @@ class ThemeHandler {
           if (Platform.isAndroid || Platform.isIOS) {
             return true;
           } else {
-            List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
-            for (MaterialState state in states) {
+            final List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+            for (final MaterialState state in states) {
               if (goodStates.contains(state)) {
                 return true;
               }
@@ -346,10 +351,10 @@ class ThemeHandler {
           }
         }),
         thumbColor: MaterialStateProperty.resolveWith((states) {
-          List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
+          final List<MaterialState> goodStates = [MaterialState.hovered, MaterialState.focused, MaterialState.pressed];
           Color color = isDark ? Colors.grey[300]! : Colors.grey[900]!;
           color = colorScheme.secondary;
-          for (MaterialState state in states) {
+          for (final MaterialState state in states) {
             if (goodStates.contains(state)) {
               return color.withOpacity(0.75);
             }
@@ -368,11 +373,10 @@ class ThemeHandler {
 
   CheckboxThemeData checkboxTheme(ColorScheme colorScheme) => CheckboxThemeData(
         fillColor: MaterialStateProperty.resolveWith((states) {
-          bool isHovered = states.contains(MaterialState.hovered);
+          final bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {
-            Color color = colorScheme.secondary;
-            color = isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
-            return color;
+            final Color color = colorScheme.secondary;
+            return isHovered ? Color.lerp(color, Colors.black, 0.15)! : color;
           } else {
             return isHovered ? Colors.grey[600] : Colors.grey;
           }
@@ -383,21 +387,19 @@ class ThemeHandler {
 
   SwitchThemeData switchTheme(ColorScheme colorScheme) => SwitchThemeData(
         thumbColor: MaterialStateProperty.resolveWith((states) {
-          bool isHovered = states.contains(MaterialState.hovered);
+          final bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {
-            Color color = colorScheme.secondary;
-            color = isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
-            return color;
+            final Color color = colorScheme.secondary;
+            return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
           } else {
             return isHovered ? Colors.grey[600] : Colors.grey[500];
           }
         }),
         trackColor: MaterialStateProperty.resolveWith((states) {
-          bool isHovered = states.contains(MaterialState.hovered);
+          final bool isHovered = states.contains(MaterialState.hovered);
           if (states.contains(MaterialState.selected)) {
-            Color color = Color.lerp(colorScheme.secondary, Colors.white, 0.3)!;
-            color = isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
-            return color;
+            final Color color = Color.lerp(colorScheme.secondary, Colors.white, 0.3)!;
+            return isHovered ? Color.lerp(color, Colors.black, 0.2)! : color;
           } else {
             return isHovered ? Colors.grey[400] : Colors.grey[300];
           }

@@ -5,7 +5,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class PageNumberDialog extends StatelessWidget {
-  const PageNumberDialog({Key? key}) : super(key: key);
+  const PageNumberDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,24 +26,24 @@ class PageNumberDialog extends StatelessWidget {
       title: const Text('Page changer'),
       contentItems: <Widget>[
         SettingsTextInput(
-          title: "Page #",
-          hintText: "Page #",
+          title: 'Page #',
+          hintText: 'Page #',
           onlyInput: true,
           controller: pageNumberController,
           autofocus: true,
-          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+          inputType: TextInputType.number,
           numberButtons: true,
           numberStep: 1,
           numberMin: -1,
           numberMax: double.infinity,
         ),
         SettingsTextInput(
-          title: "Delay between loadings",
-          hintText: "Delay in ms",
+          title: 'Delay between loadings',
+          hintText: 'Delay in ms',
           onlyInput: true,
           controller: delayController,
           autofocus: false,
-          inputType: const TextInputType.numberWithOptions(signed: false, decimal: false),
+          inputType: TextInputType.number,
           numberButtons: true,
           numberStep: 100,
           numberMin: 0,
@@ -81,7 +81,7 @@ class PageNumberDialog extends StatelessWidget {
             if (pageNumberController.text.isNotEmpty) {
               searchHandler.searchCurrentTabUntilPageNumber(
                 (int.tryParse(pageNumberController.text) ?? 0) - 1,
-                customDelay: (int.tryParse(delayController.text) ?? 200),
+                customDelay: int.tryParse(delayController.text) ?? 200,
               );
               Navigator.of(context).pop();
             }

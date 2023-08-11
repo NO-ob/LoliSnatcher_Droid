@@ -9,12 +9,12 @@ import 'package:lolisnatcher/src/widgets/dialogs/page_number_dialog.dart';
 import 'package:lolisnatcher/src/widgets/history/history.dart';
 
 class TabButtons extends StatelessWidget {
-  const TabButtons(this.withArrows, this.alignment, {Key? key}) : super(key: key);
+  const TabButtons(this.withArrows, this.alignment, {super.key});
   final bool withArrows;
   final WrapAlignment? alignment;
 
-  Future<dynamic> showHistory(BuildContext context) async {
-    return await SettingsPageOpen(
+  Future<dynamic> showHistory(BuildContext context) {
+    return SettingsPageOpen(
       context: context,
       page: () => const HistoryList(),
     ).open();
@@ -64,10 +64,8 @@ class TabButtons extends StatelessWidget {
       final Widget removeButton = IconButton(
         icon: const Icon(Icons.remove_circle_outline),
         color: iconColor,
-        onPressed: () {
-          // Remove selected searchtab from list and apply nearest to search bar
-          searchHandler.removeTabAt();
-        },
+        // Remove selected searchtab from list and apply nearest to search bar
+        onPressed: searchHandler.removeTabAt,
       );
 
       // Add new tab
@@ -75,9 +73,7 @@ class TabButtons extends StatelessWidget {
         icon: const Icon(Icons.add_circle_outline),
         color: iconColor,
         onPressed: () {
-          final String defaultText = searchHandler.currentBooru.defTags?.isNotEmpty == true
-            ? searchHandler.currentBooru.defTags!
-            : settingsHandler.defTags;
+          final String defaultText = searchHandler.currentBooru.defTags?.isNotEmpty == true ? searchHandler.currentBooru.defTags! : settingsHandler.defTags;
           // add new tab and switch to it
           searchHandler.searchTextController.text = defaultText;
           searchHandler.addTabByString(defaultText, switchToNew: true);

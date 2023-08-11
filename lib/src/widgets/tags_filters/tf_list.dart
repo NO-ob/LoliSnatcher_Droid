@@ -6,7 +6,6 @@ import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersList extends StatelessWidget {
   const TagsFiltersList({
-    Key? key,
     required this.tagsList,
     required this.filterTagsType,
     required this.onTagSelected,
@@ -14,7 +13,8 @@ class TagsFiltersList extends StatelessWidget {
     required this.tagSearchController,
     required this.onSearchTextChanged,
     required this.openAddDialog,
-  }) : super(key: key);
+    super.key,
+  });
 
   final List<String> tagsList;
   final String filterTagsType;
@@ -29,7 +29,7 @@ class TagsFiltersList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final int originalCount = tagsList.length;
-    List<String> filteredTagsList = tagsList.where((String tag) {
+    final List<String> filteredTagsList = tagsList.where((String tag) {
       if (!isSearchActive) {
         return true;
       }
@@ -68,11 +68,11 @@ class TagsFiltersList extends StatelessWidget {
                 scrollDirection: Axis.vertical,
                 physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 itemBuilder: (BuildContext context, int index) {
-                  String currentEntry = filteredTagsList[index];
+                  final String currentEntry = filteredTagsList[index];
 
                   return TagsFiltersListItem(
                     tag: currentEntry,
-                    onTap: (String tag) => onTagSelected(tag),
+                    onTap: onTagSelected,
                   );
                 },
               ),

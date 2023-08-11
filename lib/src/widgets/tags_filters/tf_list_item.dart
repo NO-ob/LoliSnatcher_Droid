@@ -5,11 +5,11 @@ import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 
 class TagsFiltersListItem extends StatelessWidget {
   const TagsFiltersListItem({
-    Key? key,
     required this.tag,
     this.onTap,
     this.overrideIcon,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String tag;
   final Function(String)? onTap;

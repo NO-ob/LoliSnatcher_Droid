@@ -34,11 +34,11 @@ class MarqueeText extends StatelessWidget {
     this.pauseAfterRound = const Duration(milliseconds: 1500),
     this.isExpanded = true,
     super.key,
-  }) : text = null,
-  fontSize = 0,
-  fontWeight = FontWeight.normal,
-  fontStyle = FontStyle.normal,
-  color = null;
+  })  : text = null,
+        fontSize = 0,
+        fontWeight = FontWeight.normal,
+        fontStyle = FontStyle.normal,
+        color = null;
 
   final String? text;
   final TextSpan? textSpan;
@@ -57,20 +57,18 @@ class MarqueeText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isExpanded
-      ? Expanded(child: innerBox(context))
-      : innerBox(context);
+    return isExpanded ? Expanded(child: innerBox(context)) : innerBox(context);
   }
 
   Widget marquee(BuildContext context) {
     // This one can detect when text overflows by itself, but I'll leave AutoSize to resize text a bit when nearing overflow
     return Marquee(
-      text: text!,
+      text: text,
       blankSpace: blankSpace,
       curve: curve,
       velocity: velocity,
       startPadding: startPadding,
-      fadingEdgeStartFraction: 0.0,
+      fadingEdgeStartFraction: 0,
       fadingEdgeEndFraction: 0.15,
       showFadingOnlyWhenScrolling: false,
       startAfter: startAfter,
@@ -86,12 +84,12 @@ class MarqueeText extends StatelessWidget {
 
   Widget marqueeRich(BuildContext context) {
     return Marquee.rich(
-      textSpan: textSpan!,
+      textSpan: textSpan,
       blankSpace: blankSpace,
       curve: curve,
       velocity: velocity,
       startPadding: startPadding,
-      fadingEdgeStartFraction: 0.0,
+      fadingEdgeStartFraction: 0,
       fadingEdgeEndFraction: 0.15,
       showFadingOnlyWhenScrolling: false,
       startAfter: startAfter,
@@ -100,7 +98,7 @@ class MarqueeText extends StatelessWidget {
   }
 
   Widget innerBox(BuildContext context) {
-    if(textSpan != null) {
+    if (textSpan != null) {
       return Container(
         alignment: Alignment.centerLeft,
         child: marqueeRich(context),
@@ -112,7 +110,8 @@ class MarqueeText extends StatelessWidget {
       height: (fontSize + addedHeight) * MediaQuery.of(context).textScaleFactor, // +X to not trigger overflow on short strings
       child: AutoSizeText(
         text!,
-        minFontSize: (fontSize * 0.8).ceilToDouble(), // allow text to shrink a bit, so that strings can exceed a few symbols in length before starting to scroll
+        minFontSize:
+            (fontSize * 0.8).ceilToDouble(), // allow text to shrink a bit, so that strings can exceed a few symbols in length before starting to scroll
         maxFontSize: fontSize,
         maxLines: 2,
         style: TextStyle(

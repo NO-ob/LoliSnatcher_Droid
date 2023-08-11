@@ -6,19 +6,22 @@ import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
   static String formatBytes(int bytes, int decimals) {
-    if (bytes <= 0) return "0 B";
-    const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    if (bytes <= 0) {
+      return '0 B';
+    }
+    const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     final i = (log(bytes) / log(1024)).floor();
     return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
   }
@@ -28,24 +31,24 @@ class Tools {
   }
 
   static bool intToBool(int boolean) {
-    return boolean != 0 ? true : false;
+    return boolean != 0;
   }
 
   static bool stringToBool(String boolean) {
-    return boolean == "true" ? true : false;
+    return boolean == 'true';
   }
 
   static String getFileExt(String fileURL) {
-    final int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+    final int queryLastIndex = fileURL.lastIndexOf('?'); // if has GET query parameters
     final int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
-    final String fileExt = fileURL.substring(fileURL.lastIndexOf(".") + 1, lastIndex);
+    final String fileExt = fileURL.substring(fileURL.lastIndexOf('.') + 1, lastIndex);
     return fileExt;
   }
 
   static String getFileName(String fileURL) {
-    final int queryLastIndex = fileURL.lastIndexOf("?"); // if has GET query parameters
+    final int queryLastIndex = fileURL.lastIndexOf('?'); // if has GET query parameters
     final int lastIndex = queryLastIndex != -1 ? queryLastIndex : fileURL.length;
-    final String fileExt = fileURL.substring(fileURL.lastIndexOf("/") + 1, lastIndex);
+    final String fileExt = fileURL.substring(fileURL.lastIndexOf('/') + 1, lastIndex);
     return fileExt;
   }
 
@@ -63,7 +66,7 @@ class Tools {
         .replaceAll(reservedRe, replacement)
         .replaceAll(windowsReservedRe, replacement)
         .replaceAll(windowsTrailingRe, replacement)
-        .replaceAll("%20", "_");
+        .replaceAll('%20', '_');
   }
 
   // unified http headers list generator for dio in thumb/media/video loaders
@@ -72,19 +75,19 @@ class Tools {
     bool checkForReferer = false,
   }) async {
     // a few boorus don't work without a browser useragent
-    Map<String, String> headers = {"User-Agent": browserUserAgent};
-    if (booru.baseURL?.contains("danbooru.donmai.us") ?? false) {
-      headers["User-Agent"] = appUserAgent;
+    final Map<String, String> headers = {'User-Agent': browserUserAgent};
+    if (booru.baseURL?.contains('danbooru.donmai.us') ?? false) {
+      headers['User-Agent'] = appUserAgent;
     }
-    if (booru.baseURL?.contains("sankakucomplex.com") ?? false) {
-      headers["User-Agent"] = Constants.defaultBrowserUserAgent;
+    if (booru.baseURL?.contains('sankakucomplex.com') ?? false) {
+      headers['User-Agent'] = Constants.defaultBrowserUserAgent;
     }
 
     if (!isTestMode) {
       try {
         final cookiesStr = await getCookies(Uri.parse(booru.baseURL!));
         if (cookiesStr.isNotEmpty) {
-          headers["Cookie"] = cookiesStr;
+          headers['Cookie'] = cookiesStr;
         }
       } catch (e) {
         print('Error getting cookies: $e');
@@ -96,9 +99,9 @@ class Tools {
       switch (booru.type) {
         case BooruType.World:
           if (booru.baseURL!.contains('rule34.xyz')) {
-            headers["Referer"] = "https://rule34xyz.b-cdn.net";
+            headers['Referer'] = 'https://rule34xyz.b-cdn.net';
           } else if (booru.baseURL!.contains('rule34.world')) {
-            headers["Referer"] = "https://rule34storage.b-cdn.net";
+            headers['Referer'] = 'https://rule34storage.b-cdn.net';
           }
           break;
 
@@ -128,7 +131,9 @@ class Tools {
   static void forceClearMemoryCache({bool withLive = false}) {
     // clears memory image cache on timer or when changing tabs
     PaintingBinding.instance.imageCache.clear();
-    if (withLive) PaintingBinding.instance.imageCache.clearLiveImages();
+    if (withLive) {
+      PaintingBinding.instance.imageCache.clearLiveImages();
+    }
   }
 
   static String pluralize(String str, int count) {
@@ -140,7 +145,7 @@ class Tools {
   }
 
   // TODO move to separate class (something with the name like "Constants")
-  static const String appUserAgent = "LoliSnatcher_Droid/${Constants.appVersion}";
+  static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
   static String get browserUserAgent {
     return isTestMode ? appUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : appUserAgent);
   }
@@ -150,7 +155,9 @@ class Tools {
   static const String captchaCheckHeader = 'LSCaptchaCheck';
 
   static Future<bool> checkForCaptcha(Response? response, Uri uri, {String? customUserAgent}) async {
-    if (captchaScreenActive || isTestMode || response?.requestOptions.headers.containsKey(captchaCheckHeader) == true) return false;
+    if (captchaScreenActive || isTestMode || response?.requestOptions.headers.containsKey(captchaCheckHeader) == true) {
+      return false;
+    }
 
     if (response?.statusCode == 503 || response?.statusCode == 403) {
       captchaScreenActive = true;
@@ -162,7 +169,7 @@ class Tools {
             userAgent: customUserAgent,
             title: 'Captcha check',
             subtitle:
-                'Possible captcha detected, please solve it and press back after that. If there is no captcha then it\'s probably some other authentication issue. [Beta]',
+                "Possible captcha detected, please solve it and press back after that. If there is no captcha then it's probably some other authentication issue. [Beta]",
           ),
         ),
       );
@@ -179,17 +186,15 @@ class Tools {
       try {
         final CookieManager cookieManager = CookieManager.instance();
         final List<Cookie> cookies = await cookieManager.getCookies(url: uri);
-        for (Cookie cookie in cookies) {
+        for (final Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
       } catch (e) {
-        //
+        Logger.Inst().log(e.toString(), 'Tools', 'getCookies', LogTypes.exception);
       }
     }
 
-    cookieString = cookieString.trim();
-
-    return cookieString;
+    return cookieString.trim();
   }
 }
 

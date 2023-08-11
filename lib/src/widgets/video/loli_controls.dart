@@ -1,9 +1,11 @@
+// ignore_for_file: implementation_imports
+
 import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:chewie/src/chewie_player.dart';
+import 'package:chewie/src/chewie_player.dart' show ChewieController;
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:chewie/src/progress_bar.dart';
@@ -134,8 +136,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     final iconColor = Theme.of(context).textTheme.labelLarge?.color;
 
     // Don't draw progress bar if shorter than 2 seconds, moves too fast on short durations
-    bool isTooShort = controller.value.duration.inSeconds <= 2;
-    bool drawProgressBar = !(chewieController.isLive || isTooShort);
+    final bool isTooShort = controller.value.duration.inSeconds <= 2;
+    final bool drawProgressBar = !(chewieController.isLive || isTooShort);
 
     return AnimatedOpacity(
       opacity: _hideStuff ? 0.0 : 1.0,
@@ -199,7 +201,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
   AnimatedOpacity _buildBottomProgress() {
     // Don't draw if shorter than 2 seconds, moves too fast on short durations
-    bool isTooShort = controller.value.duration.inSeconds <= 2;
+    final bool isTooShort = controller.value.duration.inSeconds <= 2;
 
     return AnimatedOpacity(
       opacity: (_hideStuff && !isTooShort) ? 1.0 : 0.0,
@@ -219,31 +221,29 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   AnimatedOpacity _buildDoubleTapMessage() {
-    String msgText = _doubleTapExtraMessage != ''
-        ? _doubleTapExtraMessage
-        : "${_lastDoubleTapAmount}s";
+    final String msgText = _doubleTapExtraMessage != '' ? _doubleTapExtraMessage : '${_lastDoubleTapAmount}s';
 
-    IconData iconData = _lastDoubleTapSide > 0 ? Icons.fast_forward : Icons.fast_rewind;
-    Widget msgIcon = Icon(
+    final IconData iconData = _lastDoubleTapSide > 0 ? Icons.fast_forward : Icons.fast_rewind;
+    final Widget msgIcon = Icon(
       iconData,
       color: Colors.white,
-      size: 32.0,
+      size: 32,
     );
 
-    Widget msgWidget = ClipRRect(
-      borderRadius: BorderRadius.circular(10.0),
+    final Widget msgWidget = ClipRRect(
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         color: Colors.black38,
         child: Row(
           children: [
-            if(_lastDoubleTapSide < 0) ...[
+            if (_lastDoubleTapSide < 0) ...[
               msgIcon,
               const SizedBox(width: 8),
             ],
             Text(msgText, style: const TextStyle(fontSize: 24, color: Colors.white)),
-            if(_lastDoubleTapSide > 0) ...[
+            if (_lastDoubleTapSide > 0) ...[
               const SizedBox(width: 8),
               msgIcon,
             ],
@@ -252,7 +252,6 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       ),
     );
 
-
     return AnimatedOpacity(
       opacity: _doubleTapped ? 1.0 : 0.0,
       onEnd: () {
@@ -260,7 +259,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           setState(() {
             _lastDoubleTapAmount = 0;
             _lastDoubleTapSide = 0;
-            _doubleTapExtraMessage = "";
+            _doubleTapExtraMessage = '';
           });
         }
       },
@@ -281,17 +280,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           ),
           child: Row(
             children: <Widget>[
-              if (_lastDoubleTapSide < 0)
-                msgWidget
-              else
-                const SizedBox(),
+              if (_lastDoubleTapSide < 0) msgWidget else const SizedBox(),
               //
               const Spacer(),
               //
-              if (_lastDoubleTapSide > 0)
-                msgWidget
-              else
-                const SizedBox(),
+              if (_lastDoubleTapSide > 0) msgWidget else const SizedBox(),
             ],
           ),
         ),
@@ -310,10 +303,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           duration: const Duration(milliseconds: 300),
           child: Container(
             height: barHeight,
-            margin: const EdgeInsets.only(right: 12.0),
+            margin: const EdgeInsets.only(right: 12),
             padding: const EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
+              left: 8,
+              right: 8,
             ),
             child: Center(
               child: Icon(
@@ -351,7 +344,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
           toggleToolbar();
         },
-        child: Container(
+        child: ColoredBox(
           // color: Colors.yellow.withOpacity(0.66),
           color: Colors.transparent,
           child: Center(
@@ -365,22 +358,24 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.black87, //Theme.of(context).dialogBackgroundColor.withOpacity(0.75),
-                        borderRadius: BorderRadius.circular(48.0),
+                        borderRadius: BorderRadius.circular(48),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
+                        padding: const EdgeInsets.all(12),
                         child: IconButton(
                           icon: isFinished
-                              ? const Icon(Icons.replay, size: 32.0, color: Colors.white)
+                              ? const Icon(
+                                  Icons.replay,
+                                  size: 32,
+                                  color: Colors.white,
+                                )
                               : AnimatedIcon(
                                   icon: AnimatedIcons.play_pause,
                                   progress: playPauseIconAnimationController,
                                   color: Colors.white,
-                                  size: 32.0,
+                                  size: 32,
                                 ),
-                          onPressed: () {
-                            _playPause();
-                          },
+                          onPressed: _playPause,
                         ),
                       ),
                     ),
@@ -435,8 +430,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           child: Container(
             height: barHeight,
             padding: const EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
+              left: 8,
+              right: 8,
             ),
             child: Icon(
               Icons.speed,
@@ -449,7 +444,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
   }
 
   GestureDetector _buildMuteButton(VideoPlayerController controller) {
-    bool isGlobalMute = viewerHandler.videoAutoMute;
+    final bool isGlobalMute = viewerHandler.videoAutoMute;
 
     return GestureDetector(
       onTap: () {
@@ -477,8 +472,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           child: Container(
             height: barHeight,
             padding: const EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
+              left: 8,
+              right: 8,
             ),
             child: Icon(
               _latestValue.volume > 0 ? Icons.volume_up : (isGlobalMute ? Icons.volume_off : Icons.volume_mute),
@@ -496,10 +491,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       child: Container(
         height: barHeight,
         color: Colors.transparent,
-        margin: const EdgeInsets.only(left: 8.0, right: 4.0),
+        margin: const EdgeInsets.only(left: 8, right: 4),
         padding: const EdgeInsets.only(
-          left: 12.0,
-          right: 12.0,
+          left: 12,
+          right: 12,
         ),
         child: Icon(
           controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
@@ -517,7 +512,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       '${formatDuration(position)} / ${formatDuration(duration)}',
       //Text('${formatDurationShorter(position)} / ${formatDurationShorter(duration)}',
       style: const TextStyle(
-        fontSize: 14.0,
+        fontSize: 14,
         color: Colors.white,
       ),
     );
@@ -599,9 +594,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       _hideStuff = true;
       chewieController.toggleFullScreen();
       _showAfterExpandCollapseTimer = Timer(const Duration(milliseconds: 300), () {
-        setState(() {
-          _cancelAndRestartTimer();
-        });
+        setState(_cancelAndRestartTimer);
       });
     });
   }
@@ -666,10 +659,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     if (_doubleTapInfo == null || !controller.value.isInitialized) return;
 
     // Detect on which side we tapped
-    double screenWidth = MediaQuery.of(context).size.width;
-    double screenMiddle = screenWidth / 2;
-    double sidesLimit = screenWidth / 6;
-    double tapPositionWidth = _doubleTapInfo!.localPosition.dx;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenMiddle = screenWidth / 2;
+    final double sidesLimit = screenWidth / 6;
+    final double tapPositionWidth = _doubleTapInfo!.localPosition.dx;
     int tapSide;
     bool isAtVideoEdge = false;
     if (tapPositionWidth > (screenMiddle + sidesLimit)) {
@@ -681,7 +674,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     }
 
     // Decide how much we will skip depending on video length
-    int videoDuration = controller.value.duration.inSeconds;
+    final int videoDuration = controller.value.duration.inSeconds;
     int skipSeconds;
     if (videoDuration <= 5) {
       skipSeconds = 0;
@@ -696,10 +689,10 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     }
 
     if (tapSide != 0 && skipSeconds != 0) {
-      int videoPositionMillisecs = controller.value.position.inMilliseconds;
-      int videoDurationMillisecs = controller.value.duration.inMilliseconds;
+      final int videoPositionMillisecs = controller.value.position.inMilliseconds;
+      final int videoDurationMillisecs = controller.value.duration.inMilliseconds;
       // Calculate new time with skip and limit it to range (0 to duration of video) (in milliseconds for accuracy)
-      int newTime = min(
+      final int newTime = min(
         max(0, videoPositionMillisecs + (skipSeconds * 1000 * tapSide)),
         videoDurationMillisecs,
       );
@@ -717,7 +710,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           isAtVideoEdge = true;
           _doubleTapExtraMessage = 'Start';
         } else {
-          _doubleTapExtraMessage = "";
+          _doubleTapExtraMessage = '';
         }
 
         // Add to last skip amount if it's still visible
@@ -787,7 +780,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
           height: 58,
           child: Row(
             children: [
-              SizedBox(width: 16.0),
+              SizedBox(width: 16),
               Text('Select Video Speed:', style: TextStyle(color: Colors.white)),
             ],
           ),
@@ -804,12 +797,12 @@ class _PlaybackSpeedDialog extends StatelessWidget {
                   if (speed == _selected)
                     Icon(
                       Icons.check,
-                      size: 20.0,
+                      size: 20,
                       color: selectedColor,
                     )
                   else
-                    Container(width: 20.0),
-                  const SizedBox(width: 16.0),
+                    Container(width: 20),
+                  const SizedBox(width: 16),
                   Text(
                     speed.toString(),
                     style: const TextStyle(color: Colors.white),

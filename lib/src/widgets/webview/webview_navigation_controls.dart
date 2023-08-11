@@ -68,9 +68,7 @@ class WebviewNavigationControls extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.replay),
-              onPressed: () {
-                controller.reload();
-              },
+              onPressed: controller.reload,
             ),
           ],
         );
@@ -80,7 +78,11 @@ class WebviewNavigationControls extends StatelessWidget {
 }
 
 class WebviewHistoryDialog extends StatefulWidget {
-  const WebviewHistoryDialog({required this.controller, required this.onSelect, super.key});
+  const WebviewHistoryDialog({
+    required this.controller,
+    required this.onSelect,
+    super.key,
+  });
 
   final InAppWebViewController controller;
   final Function(String) onSelect;
@@ -91,8 +93,8 @@ class WebviewHistoryDialog extends StatefulWidget {
 
 class _WebviewHistoryDialogState extends State<WebviewHistoryDialog> {
   WebHistory? _history;
-  int? _currentIndex;
-  WebHistoryItem? _currentItem;
+  // int? _currentIndex;
+  // WebHistoryItem? _currentItem;
   List<WebHistoryItem> _historyItems = [];
 
   @override
@@ -103,8 +105,8 @@ class _WebviewHistoryDialogState extends State<WebviewHistoryDialog> {
       setState(() {
         _history = history;
         _historyItems = _history?.list ?? [];
-        _currentIndex = _history?.currentIndex;
-        _currentItem = _history?.list?[_currentIndex ?? 0];
+        // _currentIndex = _history?.currentIndex;
+        // _currentItem = _history?.list?[_currentIndex ?? 0];
       });
     });
   }
