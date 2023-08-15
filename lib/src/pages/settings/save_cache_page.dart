@@ -15,7 +15,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class SaveCachePage extends StatefulWidget {
-  const SaveCachePage({Key? key}) : super(key: key);
+  const SaveCachePage({super.key});
 
   @override
   State<SaveCachePage> createState() => _SaveCachePageState();
@@ -28,10 +28,10 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
   final TextEditingController userAgentController = TextEditingController();
-  
+
   late String videoCacheMode, extPathOverride;
   bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true;
-  
+
   static const List<_CacheType> cacheTypes = [
     _CacheType('Total', null),
     // TODO ask before deleting favicons, since they cause unneeded network requests on each render if not cached
@@ -57,7 +57,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     jsonWrite = settingsHandler.jsonWrite;
     cacheDuration = settingsHandler.cacheDuration;
     cacheDurationSelected = settingsHandler.map['cacheDuration']!['options']!.firstWhere((dur) {
-      return dur["value"].inSeconds == cacheDuration.inSeconds;
+      return dur['value'].inSeconds == cacheDuration.inSeconds;
     });
     cacheSizeController.text = settingsHandler.cacheSize.toString();
     downloadNotifications = settingsHandler.downloadNotifications;
@@ -73,17 +73,17 @@ class _SaveCachePageState extends State<SaveCachePage> {
     super.dispose();
   }
 
-  void getCacheStats(String? folder) async {
-    if(folder != null) {
+  Future<void> getCacheStats(String? folder) async {
+    if (folder != null) {
       // delete selected folder stats + global
       cacheStats.removeWhere((e) => e['type'] == folder || e['type'] == '' || e['type'] == null);
     } else {
       cacheStats = [];
     }
 
-    var cacheTypesToGet = folder == null ? cacheTypes : cacheTypes.where((e) => e.folder == folder || e.folder == null).toList();
+    final cacheTypesToGet = folder == null ? cacheTypes : cacheTypes.where((e) => e.folder == folder || e.folder == null).toList();
 
-    for(_CacheType type in cacheTypesToGet) {
+    for (final _CacheType type in cacheTypesToGet) {
       final ReceivePort receivePort = ReceivePort();
       isolate = await Isolate.spawn(_isolateEntry, receivePort.sendPort);
 
@@ -94,9 +94,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
               'path': await ServiceHandler.getCacheDir(),
               'type': type.folder,
             });
-          }else {
+          } else {
             cacheStats.add(data);
-            setState(() { });
+            setState(() {});
           }
         }
       });
@@ -104,7 +104,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     return;
   }
 
-  static _isolateEntry(dynamic d) async {
+  static Future<void> _isolateEntry(dynamic d) async {
     final ReceivePort receivePort = ReceivePort();
     d.send(receivePort.sendPort);
 
@@ -124,36 +124,38 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.extPathOverride = extPathOverride;
     settingsHandler.downloadNotifications = downloadNotifications;
     settingsHandler.customUserAgent = userAgentController.text;
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
   void setPath(String path) {
-    print("path is $path");
     if (path.isNotEmpty) {
       settingsHandler.extPathOverride = path;
     }
   }
 
   Widget buildCacheButton(_CacheType type) {
-    Map<String, dynamic> stat = cacheStats.firstWhere((stat) => stat['type'] == type.folder, orElse: () => ({'type': 'loading', 'totalSize': -1, 'fileNum': -1}));
-    String? folder = type.folder;
-    String label = type.label;
-    String size = Tools.formatBytes(stat['totalSize']!, 2);
-    int fileCount = stat['fileNum'] ?? 0;
-    bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
-    bool isLoading = stat['type'] == 'loading';
-    String text = isLoading
-      ? 'Loading...'
-      : (isEmpty ? 'Empty' : '$size in ${fileCount.toString()} ${Tools.pluralize('file', fileCount)}');
+    final Map<String, dynamic> stat = cacheStats.firstWhere(
+      (stat) => stat['type'] == type.folder,
+      orElse: () => {
+        'type': 'loading',
+        'totalSize': -1,
+        'fileNum': -1,
+      },
+    );
+    final String? folder = type.folder;
+    final String label = type.label;
+    final String size = Tools.formatBytes(stat['totalSize']!, 2);
+    final int fileCount = stat['fileNum'] ?? 0;
+    final bool isEmpty = stat['fileNum'] == 0 || stat['totalSize'] == 0;
+    final bool isLoading = stat['type'] == 'loading';
+    final String text = isLoading ? 'Loading...' : (isEmpty ? 'Empty' : '$size in $fileCount ${Tools.pluralize('file', fileCount)}');
 
-    bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
+    final bool allowedToClear = folder != null && folder != 'favicons' && !isEmpty;
 
     return SettingsButton(
       name: '$label: $text',
-      icon: isLoading
-        ? const CircularProgressIndicator()
-        : Icon(allowedToClear ? Icons.delete_forever : null),
+      icon: isLoading ? const CircularProgressIndicator() : Icon(allowedToClear ? Icons.delete_forever : null),
       action: () async {
         if (allowedToClear) {
           FlashElements.showSnackbar(
@@ -174,7 +176,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
             sideColor: Colors.yellow,
           );
           await imageWriter.deleteCacheFolder(folder);
-          getCacheStats(folder);
+          await getCacheStats(folder);
         }
       },
     );
@@ -184,10 +186,10 @@ class _SaveCachePageState extends State<SaveCachePage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child:Scaffold(
+      child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Snatching & Caching"),
+          title: const Text('Snatching & Caching'),
         ),
         body: Center(
           child: ListView(
@@ -195,23 +197,21 @@ class _SaveCachePageState extends State<SaveCachePage> {
               SettingsTextInput(
                 controller: snatchCooldownController,
                 title: 'Snatch Cooldown (ms)',
-                hintText: "Timeout between snatching images in ms",
+                hintText: 'Timeout between snatching images in ms',
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['snatchCooldown']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 50,
                 numberMin: 0,
                 numberMax: double.infinity,
                 validator: (String? value) {
-                  int? parse = int.tryParse(value ?? '');
-                  if(value == null || value.isEmpty) {
+                  final int? parse = int.tryParse(value ?? '');
+                  if (value == null || value.isEmpty) {
                     return 'Please enter a value';
-                  } else if(parse == null) {
+                  } else if (parse == null) {
                     return 'Please enter a valid timeout value';
-                  } else if(parse < 10) {
+                  } else if (parse < 10) {
                     return 'Please enter a value bigger than 10ms';
                   } else {
                     return null;
@@ -236,7 +236,6 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 title: 'Write Image Data to JSON on save',
               ),
-
               SettingsButton(
                 name: 'Set Storage Directory',
                 subtitle: Text(extPathOverride.isEmpty ? '...' : 'Current: $extPathOverride'),
@@ -247,7 +246,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   if (Platform.isAndroid) {
                     final String newPath = await ServiceHandler.setExtDir();
                     extPathOverride = newPath;
-                    setState(() { });
+                    setState(() {});
                     // TODO Store uri in settings and make another button so can set seetings dir and pictures dir
                   } else {
                     // TODO need to update dir picker to work on desktop
@@ -270,7 +269,6 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     // }
                     // setPath(value ?? "");
 
-
                     FlashElements.showSnackbar(
                       context: context,
                       title: const Text(
@@ -288,7 +286,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   }
                 },
               ),
-              if(extPathOverride.isNotEmpty)
+              if (extPathOverride.isNotEmpty)
                 SettingsButton(
                   name: 'Reset Storage Directory',
                   icon: const Icon(Icons.refresh),
@@ -299,7 +297,6 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   },
                 ),
               const SettingsButton(name: '', enabled: false),
-
               SettingsToggle(
                 value: thumbnailCache,
                 onChanged: (newValue) {
@@ -337,56 +334,51 @@ class _SaveCachePageState extends State<SaveCachePage> {
                           title: Text('Video Cache Modes'),
                           contentItems: <Widget>[
                             Text("- Stream - Don't cache, start playing as soon as possible"),
-                            Text("- Cache - Saves the file to device storage, plays only when download is complete"),
-                            Text("- Stream+Cache - Mix of both, but currently leads to double download"),
+                            Text('- Cache - Saves the file to device storage, plays only when download is complete'),
+                            Text('- Stream+Cache - Mix of both, but currently leads to double download'),
                             Text(''),
                             Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
                             Text(''),
-                            Text("[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.")
+                            Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.')
                           ],
                         );
-                      }
+                      },
                     );
                   },
                 ),
               ),
-
               SettingsDropdown(
-                value: (cacheDurationSelected?["label"] ?? '') as String,
-                items: List<String>.from(settingsHandler.map['cacheDuration']!['options'].map((dur) {
-                  return dur["label"];
-                })),
+                value: (cacheDurationSelected?['label'] ?? '') as String,
+                items: List<String>.from(
+                  settingsHandler.map['cacheDuration']!['options'].map((dur) {
+                    return dur['label'];
+                  }),
+                ),
                 onChanged: (String? newValue) {
                   setState(() {
                     cacheDurationSelected = settingsHandler.map['cacheDuration']!['options'].firstWhere((dur) {
-                      return dur["label"] == newValue;
+                      return dur['label'] == newValue;
                     });
-                    cacheDuration = cacheDurationSelected!["value"];
+                    cacheDuration = cacheDurationSelected!['value'];
                   });
                 },
                 title: 'Delete Cache after:',
               ),
-
               SettingsTextInput(
                 controller: cacheSizeController,
                 title: 'Cache Size Limit (in GB)',
-                hintText: "Maximum Total Cache Size",
+                hintText: 'Maximum Total Cache Size',
                 inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly
-                ],
+                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['cacheSize']!['default']!.toString(),
                 numberButtons: true,
                 numberStep: 1,
                 numberMin: 0,
                 numberMax: double.infinity,
               ),
-
               const SettingsButton(name: '', enabled: false),
-
               const SettingsButton(name: 'Cache Stats:'),
               ...cacheTypes.map(buildCacheButton),
-
               SettingsButton(
                 name: 'Clear cache completely',
                 icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
@@ -418,13 +410,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   );
                   await imageWriter.deleteCacheFolder('');
                   // await serviceHandler.emptyCache();
-                  getCacheStats(null);
+                  await getCacheStats(null);
                 },
                 drawBottomBorder: false,
               ),
-
               const SettingsButton(name: '', enabled: false),
-
               SettingsTextInput(
                 controller: userAgentController,
                 title: 'Custom User Agent',
@@ -464,7 +454,6 @@ class _SaveCachePageState extends State<SaveCachePage> {
     );
   }
 }
-
 
 class _CacheType {
   const _CacheType(

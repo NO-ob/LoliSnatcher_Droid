@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
 
-import 'package:lolisnatcher/src/utils/html_color.dart' as htmlColor;
+import 'package:lolisnatcher/src/utils/html_color.dart' as html_color;
 
 // Original code: https://gist.github.com/seven332/9dc76255d959c8c5194cbd92068b0f60
 
@@ -31,7 +31,7 @@ InlineSpan _parseRecursive(dynamic node, TextStyle style, bool styleChanged, boo
 String _fixWhitespaceInText(String text) {
   final sb = StringBuffer();
   int pre = ' '.codeUnitAt(0);
-  for (int c in text.codeUnits) {
+  for (final int c in text.codeUnits) {
     if (c == ' '.codeUnitAt(0) || c == '\n'.codeUnitAt(0)) {
       if (pre != ' '.codeUnitAt(0) && pre != '\n'.codeUnitAt(0)) {
         sb.writeCharCode(' '.codeUnitAt(0));
@@ -46,8 +46,10 @@ String _fixWhitespaceInText(String text) {
 }
 
 InlineSpan _parseText(dom.Text text, TextStyle style, bool styleChanged, bool isBordered) {
-  var t = text.data;
-  if (t.isEmpty) return const TextSpan(text: '');
+  final t = text.data;
+  if (t.isEmpty) {
+    return const TextSpan(text: '');
+  }
   // t = _fixWhitespaceInText(t);
   return TextSpan(text: t, style: styleChanged ? style : null);
 }
@@ -66,70 +68,70 @@ InlineSpan _parseElement(dom.Element element, TextStyle style, bool styleChanged
   GestureRecognizer? recognizer;
 
   switch (tag) {
-    case "body":
-    case "span": //?
-    case "div": //?
+    case 'body':
+    case 'span': //?
+    case 'div': //?
       // Ignore
       break;
-    case "br":
-      return TextSpan(text: "\n", style: styleChanged ? style : null);
-    case "strong":
-    case "b":
+    case 'br':
+      return TextSpan(text: '\n', style: styleChanged ? style : null);
+    case 'strong':
+    case 'b':
       style = style.copyWith(fontWeight: FontWeight.bold);
       styleChanged = true;
       break;
-    case "em":
-    case "cite":
-    case "dfn":
-    case "i":
+    case 'em':
+    case 'cite':
+    case 'dfn':
+    case 'i':
       style = style.copyWith(fontStyle: FontStyle.italic);
       styleChanged = true;
       break;
-    case "u":
-    case "ins":
+    case 'u':
+    case 'ins':
       style = style.copyWith(decoration: _combine(style.decoration, TextDecoration.underline));
       styleChanged = true;
       break;
-    case "del":
-    case "s":
-    case "strike":
+    case 'del':
+    case 's':
+    case 'strike':
       style = style.copyWith(decoration: _combine(style.decoration, TextDecoration.lineThrough));
       styleChanged = true;
       break;
-    case "small":
+    case 'small':
       style = style.copyWith(fontSize: (style.fontSize ?? 14) - 2);
       styleChanged = true;
       break;
-    case "big":
+    case 'big':
       style = style.copyWith(fontSize: (style.fontSize ?? 14) + 2);
       styleChanged = true;
       break;
-    case "tn":
+    case 'tn':
       element.text = 'Translator note: ${element.text}';
       style = style.copyWith(fontSize: (style.fontSize ?? 14) - 2);
       styleChanged = true;
       break;
-    case "font":
-      Color? color = htmlColor.tryParse(element.attributes['color'] ?? '');
+    case 'font':
+      final Color? color = html_color.tryParse(element.attributes['color'] ?? '');
       if (color != null) {
         style = style.copyWith(color: color);
         styleChanged = true;
       }
       break;
     default:
-      print("Unhandled tag: $tag");
+      print('Unhandled tag: $tag');
       break;
   }
 
-  if(isBordered) {
-    Paint paint = Paint()
+  if (isBordered) {
+    final Paint paint = Paint()
       ..color = Colors.black.withOpacity(0.75)
       ..style = PaintingStyle.fill
       ..strokeCap = StrokeCap.round
       ..strokeWidth = 2.0;
 
     style = style.copyWith(
-      background: paint
+      background: paint,
     );
     styleChanged = true;
   }
@@ -149,29 +151,30 @@ InlineSpan _parseParent(
   bool isBordered,
 ) {
   final List<InlineSpan> children = [];
-  for (var item in node.nodes) {
+  for (final item in node.nodes) {
     // The change of style is applied below
-    var span = _parseRecursive(item, style, false, isBordered);
+    final span = _parseRecursive(item, style, false, isBordered);
     children.add(span);
   }
 
   // Avoid TextSpan with no child
-  if (children.isEmpty) return const TextSpan(text: '');
+  if (children.isEmpty) {
+    return const TextSpan(text: '');
+  }
 
   // Avoid TextSpan with only one child
   if (children.length == 1) {
     final span = children.single;
     if (span is TextSpan) {
       // Keep origin style/recognizer, or use parent style/recognizer
-      if ((span.style != null || !styleChanged) &&
-        (span.recognizer != null || recognizer == null)) {
+      if ((span.style != null || !styleChanged) && (span.recognizer != null || recognizer == null)) {
         return span;
       } else {
         return TextSpan(
-        text: span.text,
-        style: span.style ?? style,
-        recognizer: span.recognizer ?? recognizer,
-      );
+          text: span.text,
+          style: span.style ?? style,
+          recognizer: span.recognizer ?? recognizer,
+        );
       }
     }
     // TODO what if it's not TextSpan

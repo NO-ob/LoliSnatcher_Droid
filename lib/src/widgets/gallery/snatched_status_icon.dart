@@ -32,9 +32,9 @@ class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
     super.dispose();
   }
 
-  void fileExistsCheck() async {
+  Future<void> fileExistsCheck() async {
     final String extPath = SettingsHandler.instance.extPathOverride;
-    if(extPath.isNotEmpty) {
+    if (extPath.isNotEmpty) {
       fileExists = await ServiceHandler.existsFileFromSAFDirectory(extPath, ImageWriter().getFilename(widget.item, widget.booru));
     } else {
       fileExists = await File(await ImageWriter().getFilePath(widget.item, widget.booru)).exists();
@@ -48,7 +48,7 @@ class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
   void didUpdateWidget(covariant SnatchedStatusIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if(oldWidget.item != widget.item) {
+    if (oldWidget.item != widget.item) {
       fileExists = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {});
@@ -59,6 +59,10 @@ class _SnatchedStatusIconState extends State<SnatchedStatusIcon> {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(Icons.save_alt, size: Theme.of(context).buttonTheme.height / 2.1, color: fileExists ? Colors.green : Colors.white,);
+    return Icon(
+      Icons.save_alt,
+      size: Theme.of(context).buttonTheme.height / 2.1,
+      color: fileExists ? Colors.green : Colors.white,
+    );
   }
 }

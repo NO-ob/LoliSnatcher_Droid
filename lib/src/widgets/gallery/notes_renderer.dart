@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -18,7 +17,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 
 class NotesRenderer extends StatefulWidget {
-  const NotesRenderer(this.pageController, {Key? key}) : super(key: key);
+  const NotesRenderer(this.pageController, {super.key});
   final PreloadPageController? pageController;
 
   @override
@@ -56,8 +55,8 @@ class _NotesRendererState extends State<NotesRenderer> {
   void initState() {
     super.initState();
 
-    screenWidth = WidgetsBinding.instance.window.physicalSize.width;
-    screenHeight = WidgetsBinding.instance.window.physicalSize.height;
+    screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width;
+    screenHeight = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height;
     screenRatio = screenWidth / screenHeight;
 
     item = searchHandler.viewedItem.value;
@@ -93,7 +92,7 @@ class _NotesRendererState extends State<NotesRenderer> {
     super.dispose();
   }
 
-  void loadNotes() async {
+  Future<void> loadNotes() async {
     final handler = searchHandler.currentBooruHandler;
     final bool hasSupport = handler.hasNotesSupport;
     final bool hasNotes = item.hasNotes == true;
@@ -142,8 +141,8 @@ class _NotesRendererState extends State<NotesRenderer> {
     if (settingsHandler.disableImageScaling || item.isNoScale.value || !item.mediaType.value.isImageOrAnimation) {
       //  do nothing
     } else {
-      Size screenSize = WidgetsBinding.instance.window.physicalSize;
-      double pixelRatio = WidgetsBinding.instance.window.devicePixelRatio;
+      final Size screenSize = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+      final double pixelRatio = WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
       // image size can change if scaling is allowed and it's size is too big
       widthLimit = screenSize.width * pixelRatio * 2;
       if (imageWidth > widthLimit) {
@@ -159,7 +158,7 @@ class _NotesRendererState extends State<NotesRenderer> {
     final double page = widget.pageController?.hasClients == true ? (widget.pageController!.page ?? 0) : 0;
     pageOffset = ((page * 10000).toInt() % 10000) / 10000;
     pageOffset = pageOffset > 0.5 ? (1 - pageOffset) : (0 - pageOffset);
-    bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
+    final bool isVertical = settingsHandler.galleryScrollDirection == 'Vertical';
 
     offsetX = (screenWidth / 2) - (imageWidth / 2 * screenToImageRatio);
     offsetX = isVertical ? offsetX : (offsetX + (pageOffset * screenWidth));
@@ -173,68 +172,72 @@ class _NotesRendererState extends State<NotesRenderer> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      if (screenWidth != constraints.maxWidth || screenHeight != constraints.maxHeight) {
-        screenWidth = constraints.maxWidth;
-        screenHeight = constraints.maxHeight;
-        screenRatio = screenWidth / screenHeight;
-        triggerCalculations();
-      }
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        if (screenWidth != constraints.maxWidth || screenHeight != constraints.maxHeight) {
+          screenWidth = constraints.maxWidth;
+          screenHeight = constraints.maxHeight;
+          screenRatio = screenWidth / screenHeight;
+          triggerCalculations();
+        }
 
-      return Obx(() {
-        if (!viewerHandler.isLoaded.value || !viewerHandler.showNotes.value || item.fileURL.isEmpty) {
-          return const SizedBox();
-        } else {
-          return Stack(
-            children: [
-              if (loading)
-                Positioned(
-                  left: 60,
-                  top: kToolbarHeight * 1.5,
-                  child: SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        const CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
-                        Icon(
-                          Icons.note_add,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
-                      ],
+        return Obx(() {
+          if (!viewerHandler.isLoaded.value || !viewerHandler.showNotes.value || item.fileURL.isEmpty) {
+            return const SizedBox();
+          } else {
+            return Stack(
+              children: [
+                if (loading)
+                  Positioned(
+                    left: 60,
+                    top: kToolbarHeight * 1.5,
+                    child: SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                          Icon(
+                            Icons.note_add,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                )
-              else
-                // TODO change to animated transform?
-                ...item.notes.map((note) => NoteBuild(
+                  )
+                else
+                  // TODO change to animated transform?
+                  ...item.notes.map(
+                    (note) => NoteBuild(
                       text: note.content,
                       left: (note.posX * screenToImageRatio * ratioDiff) + offsetX + viewOffsetX,
                       top: (note.posY * screenToImageRatio * ratioDiff) + offsetY + viewOffsetY,
                       width: note.width * screenToImageRatio * ratioDiff,
                       height: note.height * screenToImageRatio * ratioDiff,
-                    )),
-            ],
-          );
-        }
-      });
-    });
+                    ),
+                  ),
+              ],
+            );
+          }
+        });
+      },
+    );
   }
 }
 
 class NoteBuild extends StatefulWidget {
   const NoteBuild({
-    Key? key,
     required this.text,
     required this.left,
     required this.top,
     required this.width,
     required this.height,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String? text;
   final double left;
@@ -335,8 +338,8 @@ class _NoteBuildState extends State<NoteBuild> {
 }
 
 class NotesDialog extends StatelessWidget {
+  const NotesDialog(this.item, {super.key});
   final BooruItem item;
-  const NotesDialog(this.item, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

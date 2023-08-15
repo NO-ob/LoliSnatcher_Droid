@@ -5,13 +5,13 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TagsFiltersSettingsList extends StatelessWidget {
   const TagsFiltersSettingsList({
-    Key? key,
     required this.scrollController,
     required this.filterHated,
     required this.onFilterHatedChanged,
     required this.filterFavourites,
     required this.onFilterFavouritesChanged,
-  }) : super(key: key);
+    super.key,
+  });
 
   final ScrollController scrollController;
   final bool filterHated;
@@ -27,13 +27,13 @@ class TagsFiltersSettingsList extends StatelessWidget {
         const SettingsButton(name: '', enabled: false),
         //
         SettingsToggle(
-          title: "Remove Items with Hated Tags",
+          title: 'Remove Items with Hated Tags',
           value: filterHated,
           onChanged: onFilterHatedChanged,
           trailingIcon: const Icon(CupertinoIcons.eye_slash),
         ),
         SettingsToggle(
-          title: "Remove Favourited Items",
+          title: 'Remove Favourited Items',
           value: filterFavourites,
           onChanged: onFilterFavouritesChanged,
           trailingIcon: const Icon(Icons.favorite, color: Colors.red),

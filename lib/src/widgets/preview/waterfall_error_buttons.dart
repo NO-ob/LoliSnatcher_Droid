@@ -10,7 +10,7 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class WaterfallErrorButtons extends StatefulWidget {
-  const WaterfallErrorButtons({Key? key}) : super(key: key);
+  const WaterfallErrorButtons({super.key});
 
   @override
   State<WaterfallErrorButtons> createState() => _WaterfallErrorButtonsState();
@@ -78,50 +78,52 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
   @override
   Widget build(BuildContext context) {
     final String clickName = (Platform.isWindows || Platform.isLinux) ? 'Click' : 'Tap';
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
-    String sinceStartText = sinceStart > 0 ? 'Started ${sinceStart.toString()} ${Tools.pluralize('second', sinceStart)} ago' : '';
+    final int nowMils = DateTime.now().millisecondsSinceEpoch;
+    final int sinceStart = _startedAt == 0 ? 0 : Duration(milliseconds: nowMils - _startedAt).inSeconds;
+    final String sinceStartText = sinceStart > 0 ? 'Started $sinceStart ${Tools.pluralize('second', sinceStart)} ago' : '';
 
     return Obx(() {
       if (searchHandler.isLastPage.value) {
         // if last page...
         if (searchHandler.currentFetched.isEmpty) {
           // ... and no items loaded
-          return wrapButton(SettingsButton(
-            name: 'No Data Loaded',
-            subtitle: Text('$clickName Here to Reload'),
-            icon: const Icon(Icons.refresh),
-            dense: true,
-            action: () {
-              searchHandler.retrySearch();
-            },
-            drawBottomBorder: false,
-          ));
+          return wrapButton(
+            SettingsButton(
+              name: 'No Data Loaded',
+              subtitle: Text('$clickName Here to Reload'),
+              icon: const Icon(Icons.refresh),
+              dense: true,
+              action: searchHandler.retrySearch,
+              drawBottomBorder: false,
+            ),
+          );
         } else {
           // .. has items loaded
           if (isVisible) {
             final int pageNum = searchHandler.pageNum.value;
-            return wrapButton(SettingsButton(
-              name: 'You Reached the End ($pageNum ${Tools.pluralize('page', pageNum)})',
-              subtitle: Text('$clickName Here to Reload Last Page'),
-              icon: const Icon(Icons.refresh),
-              dense: true,
-              action: () {
-                searchHandler.retrySearch();
-                if (!isVisible) {
-                  isVisible = !isVisible;
-                  updateState();
-                }
-              },
-              trailingIcon: IconButton(
-                onPressed: () {
-                  isVisible = !isVisible;
-                  updateState();
+            return wrapButton(
+              SettingsButton(
+                name: 'You Reached the End ($pageNum ${Tools.pluralize('page', pageNum)})',
+                subtitle: Text('$clickName Here to Reload Last Page'),
+                icon: const Icon(Icons.refresh),
+                dense: true,
+                action: () {
+                  searchHandler.retrySearch();
+                  if (!isVisible) {
+                    isVisible = !isVisible;
+                    updateState();
+                  }
                 },
-                icon: const Icon(Icons.arrow_drop_down),
+                trailingIcon: IconButton(
+                  onPressed: () {
+                    isVisible = !isVisible;
+                    updateState();
+                  },
+                  icon: const Icon(Icons.arrow_drop_down),
+                ),
+                drawBottomBorder: false,
               ),
-              drawBottomBorder: false,
-            ));
+            );
           } else {
             return Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -167,53 +169,53 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
         // if not last page...
         if (searchHandler.isLoading.value) {
           // ... and is currently loading
-          return wrapButton(SettingsButton(
-            name: 'Loading Page #${searchHandler.pageNum}',
-            subtitle: AnimatedOpacity(
-              opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 200),
-              child: Text(sinceStartText),
+          return wrapButton(
+            SettingsButton(
+              name: 'Loading Page #${searchHandler.pageNum}',
+              subtitle: AnimatedOpacity(
+                opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 200),
+                child: Text(sinceStartText),
+              ),
+              icon: const SizedBox(
+                width: 30,
+                height: 30,
+                child: CircularProgressIndicator(),
+              ),
+              dense: true,
+              action: searchHandler.retrySearch,
+              drawBottomBorder: false,
             ),
-            icon: const SizedBox(
-              width: 30,
-              height: 30,
-              child: CircularProgressIndicator(),
-            ),
-            dense: true,
-            action: () {
-              searchHandler.retrySearch();
-            },
-            drawBottomBorder: false,
-          ));
+          );
         } else {
           if (searchHandler.errorString.isNotEmpty) {
             final String errorFormatted = searchHandler.errorString.isNotEmpty ? '\n${searchHandler.errorString}' : '';
             // ... if error happened
-            return wrapButton(SettingsButton(
-              name: 'Error happened when Loading Page #${searchHandler.pageNum}: $errorFormatted',
-              subtitle: Text('$clickName Here to Retry'),
-              icon: const Icon(Icons.refresh),
-              dense: true,
-              action: () {
-                searchHandler.retrySearch();
-              },
-              drawBottomBorder: false,
-            ));
+            return wrapButton(
+              SettingsButton(
+                name: 'Error happened when Loading Page #${searchHandler.pageNum}: $errorFormatted',
+                subtitle: Text('$clickName Here to Retry'),
+                icon: const Icon(Icons.refresh),
+                dense: true,
+                action: searchHandler.retrySearch,
+                drawBottomBorder: false,
+              ),
+            );
           } else if (searchHandler.currentFetched.isEmpty) {
             // ... no items loaded
-            return wrapButton(SettingsButton(
-              name: 'Error, no data loaded:',
-              subtitle: Text('$clickName Here to Retry'),
-              icon: const Icon(Icons.refresh),
-              dense: true,
-              action: () {
-                searchHandler.retrySearch();
-              },
-              drawBottomBorder: false,
-            ));
+            return wrapButton(
+              SettingsButton(
+                name: 'Error, no data loaded:',
+                subtitle: Text('$clickName Here to Retry'),
+                icon: const Icon(Icons.refresh),
+                dense: true,
+                action: searchHandler.retrySearch,
+                drawBottomBorder: false,
+              ),
+            );
           } else {
             // return const SizedBox.shrink();
-    
+
             // add a small container to avoid scrolling when swiping from the bottom of the screen (navigation gestures)
             return Container(height: 10, color: Colors.transparent);
           }

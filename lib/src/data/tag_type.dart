@@ -45,15 +45,15 @@ enum TagType {
 
   Color getColour() {
     switch (this) {
-      case (artist):
+      case artist:
         return Colors.red;
-      case (copyright):
+      case copyright:
         return Colors.purple;
-      case (character):
+      case character:
         return Colors.green;
-      case (species):
+      case species:
         return Colors.brown;
-      case (meta):
+      case meta:
         return Colors.orange;
       default:
         return Colors.transparent;

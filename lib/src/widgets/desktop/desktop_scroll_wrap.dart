@@ -9,7 +9,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 ScrollPhysics? getListPhysics() {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-  bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+  final bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
   if (settingsHandler.desktopListsDrag == false && isDesktopPlatform) {
     return const NeverScrollableScrollPhysics();
   } else {
@@ -18,9 +18,14 @@ ScrollPhysics? getListPhysics() {
 }
 
 class DesktopScrollWrap extends StatelessWidget {
-  final Widget child;
+  const DesktopScrollWrap({
+    required this.controller,
+    required this.child,
+    super.key,
+  });
+
   final ScrollController controller;
-  const DesktopScrollWrap({Key? key, required this.child, required this.controller}) : super(key: key);
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +35,7 @@ class DesktopScrollWrap extends StatelessWidget {
     // on child element wrapped in this
     // otherwise, it will not affect how scroll works
 
-    bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    final bool isDesktopPlatform = Platform.isWindows || Platform.isLinux || Platform.isMacOS;
 
     if (isDesktopPlatform) {
       return ImprovedScrolling(
@@ -53,7 +58,7 @@ class DesktopScrollWrap extends StatelessWidget {
           // customScrollCursor: useSystemCursor ? null : const DefaultCustomScrollCursor(),
         ),
         keyboardScrollConfig: KeyboardScrollConfig(
-          arrowsScrollAmount: 250.0,
+          arrowsScrollAmount: 250,
           homeScrollDurationBuilder: (currentScrollOffset, minScrollOffset) {
             return const Duration(milliseconds: 100);
           },
@@ -62,9 +67,8 @@ class DesktopScrollWrap extends StatelessWidget {
           },
         ),
         customMouseWheelScrollConfig: CustomMouseWheelScrollConfig(
-          scrollAmountMultiplier: SettingsHandler.instance.appMode.value.isDesktop == true 
-          ? (settingsHandler.mousewheelScrollSpeed / 3) 
-          : settingsHandler.mousewheelScrollSpeed,
+          scrollAmountMultiplier:
+              SettingsHandler.instance.appMode.value.isDesktop == true ? (settingsHandler.mousewheelScrollSpeed / 3) : settingsHandler.mousewheelScrollSpeed,
         ),
         child: child,
       );

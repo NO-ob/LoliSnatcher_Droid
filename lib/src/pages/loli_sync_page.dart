@@ -23,7 +23,7 @@ enum SyncSide {
 }
 
 class LoliSyncPage extends StatefulWidget {
-  const LoliSyncPage({Key? key}) : super(key: key);
+  const LoliSyncPage({super.key});
 
   @override
   State<LoliSyncPage> createState() => _LoliSyncPageState();
@@ -41,9 +41,11 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   final LoliSync testSync = LoliSync();
 
+  StreamSubscription<String>? sub;
+
   SyncSide syncSide = SyncSide.none;
 
-  bool favourites = false, favouritesv2 = false, settings = false, booru = false, tabs = false, tags=false;
+  bool favourites = false, favouritesv2 = false, settings = false, booru = false, tabs = false, tags = false;
   int favToggleCount = 0;
   String tabsMode = 'Merge';
   String tagsMode = 'PreferTypeIfNone';
@@ -62,7 +64,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
     settingsHandler.lastSyncIp = ipController.text;
     settingsHandler.lastSyncPort = portController.text;
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
@@ -82,27 +84,34 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     setState(() {});
   }
 
-  void getFavCount() async {
+  @override
+  void dispose() {
+    testSync.killSync();
+    sub?.cancel();
+    super.dispose();
+  }
+
+  Future<void> getFavCount() async {
     favCount = await settingsHandler.dbHandler.getFavouritesCount();
     updateState();
   }
 
-  void getIPList() async {
-    List<NetworkInterface> temp = await ServiceHandler.getIPList();
+  Future<void> getIPList() async {
+    final List<NetworkInterface> temp = await ServiceHandler.getIPList();
     ipList.addAll(temp);
     ipListNames.addAll(temp.map((e) => e.name).toList());
     updateState();
   }
 
-  void sendTestRequest() async {
+  Future<void> sendTestRequest() async {
     if (ipController.text.isEmpty || portController.text.isEmpty) {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text("Error!", style: TextStyle(fontSize: 20)),
-        content: Column(
+        title: const Text('Error!', style: TextStyle(fontSize: 20)),
+        content: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text("Please enter IP address and port."),
+          children: [
+            Text('Please enter IP address and port.'),
           ],
         ),
         sideColor: Colors.red,
@@ -113,15 +122,19 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
     }
 
     testSync.killSync();
-    Stream<String> stream = testSync.startSync(ipController.text, portController.text, ["Test"], 0, 'Merge', 'PreferTypeIfNone');
-    StreamSubscription<String> sub = stream.listen(
+    final Stream<String> stream = testSync.startSync(
+      ipController.text,
+      portController.text,
+      ['Test'],
+      0,
+      'Merge',
+      'PreferTypeIfNone',
+    );
+    sub = stream.listen(
       (data) {
         // print(data);
       },
-      onDone: () {
-        // print('Done');
-        testSync.killSync();
-      },
+      onDone: testSync.killSync,
       onError: (e) {
         // print('Error $e');
         testSync.killSync();
@@ -169,12 +182,13 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: const Text(
-              "Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other"),
+            'Start the server on another device it will show an ip and port, fill those in and then hit start sync to send data from this device to the other',
+          ),
         ),
         SettingsTextInput(
           controller: ipController,
           title: 'IP Address',
-          hintText: "Host IP Address (i.e. 192.168.1.1)",
+          hintText: 'Host IP Address (i.e. 192.168.1.1)',
           inputType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
           clearable: true,
@@ -182,7 +196,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         SettingsTextInput(
           controller: portController,
           title: 'Port',
-          hintText: "Host Port (i.e. 7777)",
+          hintText: 'Host Port (i.e. 7777)',
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
@@ -190,7 +204,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         SettingsToggle(
           value: favouritesv2,
           onChanged: (newValue) {
-            if (newValue) favToggleCount++;
+            if (newValue) {
+              favToggleCount++;
+            }
 
             setState(() {
               favouritesv2 = newValue;
@@ -198,7 +214,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           },
           title: 'Send Favourites',
           subtitle: Text('Favorites: ${favCount ?? '...'}'),
-          drawBottomBorder: favouritesv2 == true ? false : true,
+          drawBottomBorder: !favouritesv2,
         ),
         if (favToggleCount > 2)
           SettingsToggle(
@@ -210,7 +226,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
             },
             title: 'Send Favourites (Legacy)',
             subtitle: Text('Favorites: ${favCount ?? '...'}'),
-            drawBottomBorder: favourites == true ? false : true,
+            drawBottomBorder: !favourites,
           ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -218,7 +234,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               ? SettingsTextInput(
                   controller: favouritesSkipController,
                   title: 'Start Favs Sync from #...',
-                  hintText: "Start Favs Sync from #...",
+                  hintText: 'Start Favs Sync from #...',
                   inputType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                   clearable: true,
@@ -277,7 +293,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           },
           title: 'Send Tabs',
           subtitle: Text('Tabs: ${searchHandler.total}'),
-          drawBottomBorder: tabs == true ? false : true,
+          drawBottomBorder: !tabs,
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -301,7 +317,8 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                             title: Text('Tabs Sync Mode'),
                             contentItems: <Widget>[
                               Text(
-                                  'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored'),
+                                'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored',
+                              ),
                               Text(''),
                               Text('Replace: Completely replace the tabs on the other device with the tabs from this device'),
                             ],
@@ -322,49 +339,48 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           },
           title: 'Send Tags',
           subtitle: Text('Tags: ${tagHandler.tagMap.entries.length}'),
-          drawBottomBorder: tags == true ? false : true,
+          drawBottomBorder: !tags,
         ),
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: tags
               ? SettingsDropdown(
-            value: tagsMode,
-            items: tagsModesList,
-            onChanged: (String? newValue) {
-              setState(() {
-                tagsMode = newValue!;
-              });
-            },
-            title: 'Tags Sync Mode',
-            trailingIcon: IconButton(
-              icon: const Icon(Icons.help_outline),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return const SettingsDialog(
-                      title: Text('Tabs Sync Mode'),
-                      contentItems: <Widget>[
-                        Text("PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped"),
-                        Text(''),
-                        Text(
-                            'Overwrite: Tags will be added, if a tag and tag type exists on the other device it will be overwritten'),
-                      ],
-                    );
+                  value: tagsMode,
+                  items: tagsModesList,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      tagsMode = newValue!;
+                    });
                   },
-                );
-              },
-            ),
-          )
+                  title: 'Tags Sync Mode',
+                  trailingIcon: IconButton(
+                    icon: const Icon(Icons.help_outline),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const SettingsDialog(
+                            title: Text('Tabs Sync Mode'),
+                            contentItems: <Widget>[
+                              Text("PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped"),
+                              Text(''),
+                              Text(
+                                'Overwrite: Tags will be added, if a tag and tag type exists on the other device it will be overwritten',
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                )
               : Container(),
         ),
         const SettingsButton(name: '', enabled: false),
         SettingsButton(
           name: 'Test Connection',
           icon: const Icon(Icons.wifi_tethering),
-          action: () {
-            sendTestRequest();
-          },
+          action: sendTestRequest,
           trailingIcon: IconButton(
             icon: const Icon(Icons.help_outline),
             onPressed: () {
@@ -387,9 +403,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           name: 'Start Sync',
           icon: const Icon(Icons.send_to_mobile),
           action: () async {
-            bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
-            bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs || tags;
-            bool syncAllowed = isAddressEntered && isAnySyncSelected;
+            final bool isAddressEntered = ipController.text.isNotEmpty && portController.text.isNotEmpty;
+            final bool isAnySyncSelected = favouritesv2 || favourites || settings || booru || tabs || tags;
+            final bool syncAllowed = isAddressEntered && isAnySyncSelected;
 
             if (syncAllowed) {
               await SettingsPageOpen(
@@ -419,7 +435,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
               }
               FlashElements.showSnackbar(
                 context: context,
-                title: const Text("Error!", style: TextStyle(fontSize: 20)),
+                title: const Text('Error!', style: TextStyle(fontSize: 20)),
                 content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -445,23 +461,23 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text("Stats of this device:"),
+              const Text('Stats of this device:'),
               Text("Favourites: ${favCount ?? '...'}"),
-              Text("Boorus: ${settingsHandler.booruList.length}"),
-              Text("Tabs: ${searchHandler.total}"),
+              Text('Boorus: ${settingsHandler.booruList.length}'),
+              Text('Tabs: ${searchHandler.total}'),
             ],
           ),
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          child: const Text("Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed"),
+          child: const Text('Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed'),
         ),
         SettingsDropdown(
           value: selectedInterface,
           items: ipListNames,
           onChanged: (String? newValue) {
             selectedInterface = newValue!;
-            NetworkInterface? findInterface = ipList.firstWhereOrNull((el) => el.name == newValue);
+            final NetworkInterface? findInterface = ipList.firstWhereOrNull((el) => el.name == newValue);
 
             if (newValue == 'Localhost') {
               selectedAddress = '127.0.0.1';
@@ -523,7 +539,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("LoliSync"),
+          title: const Text('LoliSync'),
         ),
         body: Center(child: conditionalBuild()),
       ),

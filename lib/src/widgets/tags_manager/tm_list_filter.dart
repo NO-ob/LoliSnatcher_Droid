@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-
 class TagsManagerListFilter extends StatelessWidget {
   const TagsManagerListFilter({
-    Key? key,
     required this.title,
     required this.controller,
     required this.onChanged,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String title;
   final TextEditingController controller;

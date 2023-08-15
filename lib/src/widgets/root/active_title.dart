@@ -7,7 +7,7 @@ import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class ActiveTitle extends StatelessWidget {
-  const ActiveTitle({Key? key}) : super(key: key);
+  const ActiveTitle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class ActiveTitle extends StatelessWidget {
 
         return FittedBox(
           fit: BoxFit.fitWidth,
-          child: Text("Snatching: ${snatchHandler.status} $progressText".trim()),
+          child: Text('Snatching: ${snatchHandler.status} $progressText'.trim()),
         );
       } else {
         if (searchHandler.list.isEmpty) {

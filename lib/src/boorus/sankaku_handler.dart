@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -14,29 +13,30 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class SankakuHandler extends BooruHandler {
-  SankakuHandler(Booru booru, int limit) : super(booru, limit);
+  SankakuHandler(super.booru, super.limit);
 
   String authToken = '';
 
   @override
-  Map<String, TagType> tagTypeMap = {
-    '8': TagType.meta,
-    '3': TagType.copyright,
-    '4': TagType.character,
-    '1': TagType.artist,
-    '0': TagType.none,
-  };
+  Map<String, TagType> get tagTypeMap => {
+        '8': TagType.meta,
+        '3': TagType.copyright,
+        '4': TagType.character,
+        '1': TagType.artist,
+        '0': TagType.none,
+      };
 
   @override
-  bool hasSizeData = true;
+  bool get hasSizeData => true;
 
   @override
-  bool hasCommentsSupport = true;
+  bool get hasCommentsSupport => true;
 
   @override
-  bool hasNotesSupport = true;
+  bool get hasNotesSupport => true;
 
-  bool hasItemUpdateSupport = true;
+  @override
+  bool get hasLoadItemSupport => true;
 
   @override
   Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
@@ -58,13 +58,13 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  List parseListFromResponse(response) {
+  List parseListFromResponse(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final dynamic current = responseItem;
 
     final List<String> tags = [];
@@ -139,7 +139,7 @@ class SankakuHandler extends BooruHandler {
         }
       }
     } catch (e) {
-      if(e is DioException && e.type == DioExceptionType.cancel) {
+      if (e is DioException && e.type == DioExceptionType.cancel) {
         return [item, null, 'Cancelled'];
       }
 
@@ -152,7 +152,7 @@ class SankakuHandler extends BooruHandler {
   Map<String, String> getHeaders() {
     return {
       'Accept': 'application/vnd.sankaku.api+json;v=2',
-      if(authToken.isNotEmpty) 'Authorization': authToken,
+      if (authToken.isNotEmpty) 'Authorization': authToken,
       // 'User-Agent': 'SCChannelApp/4.0',
       'User-Agent': Constants.defaultBrowserUserAgent,
       'Referer': 'https://sankaku.app/',
@@ -167,7 +167,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    return '${booru.baseURL}/posts?tags=${tags.trim()}&limit=${limit.toString()}&page=${pageNum.toString()}';
+    return '${booru.baseURL}/posts?tags=${tags.trim()}&limit=$limit&page=$pageNum';
   }
 
   String makeApiPostURL(String id) {
@@ -195,7 +195,7 @@ class SankakuHandler extends BooruHandler {
       }
     }
     if (token == '') {
-      Logger.Inst().log('Sankaku auth error ${response.statusCode.toString()}', className, 'getAuthToken', LogTypes.booruHandlerInfo);
+      Logger.Inst().log('Sankaku auth error ${response.statusCode}', className, 'getAuthToken', LogTypes.booruHandlerInfo);
     }
 
     return token;
@@ -207,15 +207,17 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  List parseTagSuggestionsList(response) {
+  List parseTagSuggestionsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  String? parseTagSuggestion(responseItem, int index) {
+  String? parseTagSuggestion(dynamic responseItem, int index) {
     final String tagStr = responseItem['name'] ?? '';
-    if (tagStr.isEmpty) return null;
+    if (tagStr.isEmpty) {
+      return null;
+    }
 
     // record tag data for future use
     final String rawTagType = responseItem['type']?.toString() ?? '';
@@ -235,13 +237,13 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  List parseCommentsList(response) {
+  List parseCommentsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  CommentItem? parseComment(responseItem, int index) {
+  CommentItem? parseComment(dynamic responseItem, int index) {
     final current = responseItem;
     return CommentItem(
       id: current['id'].toString(),
@@ -263,13 +265,13 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  List parseNotesList(response) {
+  List parseNotesList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  NoteItem? parseNote(responseItem, int index) {
+  NoteItem? parseNote(dynamic responseItem, int index) {
     final current = responseItem;
     return NoteItem(
       id: current['id'].toString(),

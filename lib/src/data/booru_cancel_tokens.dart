@@ -1,3 +1,5 @@
+// ignore_for_file: join_return_with_assignment
+
 import 'package:dio/dio.dart';
 
 class BooruCancelTokens {
@@ -8,10 +10,11 @@ class BooruCancelTokens {
   CancelToken notes = CancelToken();
 
   void cancelSearch() {
-    if(!search.isCancelled) {
+    if (!search.isCancelled) {
       search.cancel();
     }
   }
+
   CancelToken recreateSearch() {
     cancelSearch();
     search = CancelToken();
@@ -19,10 +22,11 @@ class BooruCancelTokens {
   }
 
   void cancelCount() {
-    if(!count.isCancelled) {
+    if (!count.isCancelled) {
       count.cancel();
     }
   }
+
   CancelToken recreateCount() {
     cancelCount();
     count = CancelToken();
@@ -30,10 +34,11 @@ class BooruCancelTokens {
   }
 
   void cancelSuggestions() {
-    if(!suggestions.isCancelled) {
+    if (!suggestions.isCancelled) {
       suggestions.cancel();
     }
   }
+
   CancelToken recreateSuggestions() {
     cancelSuggestions();
     suggestions = CancelToken();
@@ -41,10 +46,11 @@ class BooruCancelTokens {
   }
 
   void cancelComments() {
-    if(!comments.isCancelled) {
+    if (!comments.isCancelled) {
       comments.cancel();
     }
   }
+
   CancelToken recreateComments() {
     cancelComments();
     comments = CancelToken();
@@ -52,10 +58,11 @@ class BooruCancelTokens {
   }
 
   void cancelNotes() {
-    if(!notes.isCancelled) {
+    if (!notes.isCancelled) {
       notes.cancel();
     }
   }
+
   CancelToken recreateNotes() {
     cancelNotes();
     notes = CancelToken();

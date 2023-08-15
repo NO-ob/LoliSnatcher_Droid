@@ -25,7 +25,11 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 import 'package:lolisnatcher/src/widgets/video/loli_controls.dart';
 
 class VideoViewer extends StatefulWidget {
-  const VideoViewer(this.booruItem, {this.enableFullscreen = true, super.key,});
+  const VideoViewer(
+    this.booruItem, {
+    this.enableFullscreen = true,
+    super.key,
+  });
 
   final BooruItem booruItem;
   final bool enableFullscreen;
@@ -127,11 +131,13 @@ class VideoViewerState extends State<VideoViewer> {
 
   Future<void> getSize() async {
     sizeCancelToken = CancelToken();
-    sizeClient = DioDownloader(widget.booruItem.fileURL,
-        headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
-        cancelToken: sizeCancelToken,
-        onEvent: onEvent,
-        fileNameExtras: widget.booruItem.fileNameExtras);
+    sizeClient = DioDownloader(
+      widget.booruItem.fileURL,
+      headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
+      cancelToken: sizeCancelToken,
+      onEvent: onEvent,
+      fileNameExtras: widget.booruItem.fileNameExtras,
+    );
     unawaited(sizeClient!.runRequestSize());
     return;
   }
@@ -236,7 +242,7 @@ class VideoViewerState extends State<VideoViewer> {
 
   void initVideo(bool ignoreTagsCheck) {
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
-      List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+      final List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
     } else {
       downloadVideo();
@@ -391,8 +397,8 @@ class VideoViewerState extends State<VideoViewer> {
       );
     } else {
       // Otherwise load from network
-      videoController = VideoPlayerController.network(
-        widget.booruItem.fileURL,
+      videoController = VideoPlayerController.networkUrl(
+        Uri.parse(widget.booruItem.fileURL),
         videoPlayerOptions: Platform.isAndroid ? VideoPlayerOptions(mixWithOthers: true) : null,
         httpHeaders: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       );
@@ -401,8 +407,8 @@ class VideoViewerState extends State<VideoViewer> {
     await Future.wait([videoController!.initialize()]);
     videoController!.addListener(updateVideoState);
 
-    Color accentColor = Theme.of(context).colorScheme.secondary;
-    Color darkenedAceentColor = Color.lerp(accentColor, Colors.black, 0.5)!;
+    final Color accentColor = Theme.of(context).colorScheme.secondary;
+    final Color darkenedAceentColor = Color.lerp(accentColor, Colors.black, 0.5)!;
 
     // Player wrapper to allow controls, looping...
     chewieController = ChewieController(
@@ -492,8 +498,8 @@ class VideoViewerState extends State<VideoViewer> {
     // print('!!! Build video mobile ${widget.index}!!!');
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
-    int viewedIndex = searchHandler.viewedIndex.value;
-    bool needsRestart = lastViewedIndex != viewedIndex;
+    final int viewedIndex = searchHandler.viewedIndex.value;
+    final bool needsRestart = lastViewedIndex != viewedIndex;
 
     if (isVideoInited) {
       if (isViewed) {
@@ -517,9 +523,9 @@ class VideoViewerState extends State<VideoViewer> {
       lastViewedIndex = viewedIndex;
     }
 
-    double aspectRatio = videoController?.value.aspectRatio ?? 16 / 9;
-    double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
-    Size childSize = Size(
+    final double aspectRatio = videoController?.value.aspectRatio ?? 16 / 9;
+    final double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
+    final Size childSize = Size(
       aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
       aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
     );

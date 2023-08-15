@@ -8,26 +8,6 @@ import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class BooruItem {
-  late Key key;
-  String fileURL, sampleURL, thumbnailURL, postURL;
-  List<String> tagsList;
-  late Rx<MediaType> mediaType;
-  RxnString possibleExt = RxnString(null);
-  RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
-  RxBool isHated = false.obs, isLoved = false.obs, isNoScale = false.obs;
-
-  String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
-  String fileNameExtras;
-  List<String>? sources;
-  RxList<NoteItem> notes = RxList([]);
-  bool? hasNotes, hasComments;
-  double? fileWidth, fileHeight, fileAspectRatio, sampleWidth, sampleHeight, sampleAspectRatio, previewWidth, previewHeight, previewAspectRatio;
-  int? fileSize;
-
-  bool get isLong {
-    return fileAspectRatio != null && fileAspectRatio! < 0.3;
-  }
-
   BooruItem({
     required this.fileURL,
     required this.sampleURL,
@@ -58,7 +38,7 @@ class BooruItem {
     // Create a unique key for every loaded item, to later use them to read the state of their viewer
     key = GlobalKey();
 
-    if (sampleURL.isEmpty || sampleURL == "null") {
+    if (sampleURL.isEmpty || sampleURL == 'null') {
       sampleURL = thumbnailURL;
     }
     fileExt = (fileExt ?? Tools.getFileExt(fileURL)).toLowerCase();
@@ -76,23 +56,43 @@ class BooruItem {
     mediaType = Rx<MediaType>(MediaType.fromExtension(fileExt));
   }
 
+  late Key key;
+  String fileURL, sampleURL, thumbnailURL, postURL;
+  List<String> tagsList;
+  late Rx<MediaType> mediaType;
+  RxnString possibleExt = RxnString(null);
+  RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
+  RxBool isHated = false.obs, isLoved = false.obs, isNoScale = false.obs;
+
+  String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
+  String fileNameExtras;
+  List<String>? sources;
+  RxList<NoteItem> notes = RxList([]);
+  bool? hasNotes, hasComments;
+  double? fileWidth, fileHeight, fileAspectRatio, sampleWidth, sampleHeight, sampleAspectRatio, previewWidth, previewHeight, previewAspectRatio;
+  int? fileSize;
+
+  bool get isLong {
+    return fileAspectRatio != null && fileAspectRatio! < 0.3;
+  }
+
   Map<String, dynamic> toJson() {
     return {
-      "postURL": postURL,
-      "fileURL": fileURL,
-      "sampleURL": sampleURL,
-      "thumbnailURL": thumbnailURL,
-      "tags": tagsList,
-      "fileExt": fileExt,
-      "isFavourite": isFavourite.value,
-      "isSnatched": isSnatched.value,
-      "serverId": serverId,
-      "rating": rating,
-      "score": score,
-      "sources": sources,
-      "md5String": md5String,
-      "postDate": postDate,
-      "postDateFormat": postDateFormat,
+      'postURL': postURL,
+      'fileURL': fileURL,
+      'sampleURL': sampleURL,
+      'thumbnailURL': thumbnailURL,
+      'tags': tagsList,
+      'fileExt': fileExt,
+      'isFavourite': isFavourite.value,
+      'isSnatched': isSnatched.value,
+      'serverId': serverId,
+      'rating': rating,
+      'score': score,
+      'sources': sources,
+      'md5String': md5String,
+      'postDate': postDate,
+      'postDateFormat': postDateFormat,
     };
   }
 
@@ -102,41 +102,41 @@ class BooruItem {
   }
 
   static BooruItem fromJSON(String jsonString) {
-    Map<String, dynamic> json = jsonDecode(jsonString);
+    final Map<String, dynamic> json = jsonDecode(jsonString);
     return BooruItem.fromMap(json);
   }
 
   static BooruItem fromMap(Map<String, dynamic> json) {
-    List<String> tags = [];
-    List tagz = json["tags"];
+    final List<String> tags = [];
+    final List tagz = json['tags'];
     for (int i = 0; i < tagz.length; i++) {
       tags.add(tagz[i].toString());
     }
     //BooruItem(this.fileURL,this.sampleURL,this.thumbnailURL,this.tagsList,this.postURL,this.fileExt
-    BooruItem item = BooruItem(
-      fileURL: json["fileURL"].toString(),
-      sampleURL: json["sampleURL"].toString(),
-      thumbnailURL: json["thumbnailURL"].toString(),
+    final BooruItem item = BooruItem(
+      fileURL: json['fileURL'].toString(),
+      sampleURL: json['sampleURL'].toString(),
+      thumbnailURL: json['thumbnailURL'].toString(),
       tagsList: tags,
-      postURL: json["postURL"].toString(),
+      postURL: json['postURL'].toString(),
       // TODO stringify other options here
     );
-    item.isFavourite.value = json["isFavourite"].toString() == "true" ? true : false;
-    item.isSnatched.value = json["isSnatched"].toString() == "true" ? true : false;
+    item.isFavourite.value = json['isFavourite'].toString() == 'true';
+    item.isSnatched.value = json['isSnatched'].toString() == 'true';
     return item;
   }
 
   static BooruItem fromDBRow(dynamic row, List<String> tags) {
-    BooruItem item = BooruItem(
-      fileURL: row["fileURL"].toString(),
-      sampleURL: row["sampleURL"].toString(),
-      thumbnailURL: row["thumbnailURL"].toString(),
+    final BooruItem item = BooruItem(
+      fileURL: row['fileURL'].toString(),
+      sampleURL: row['sampleURL'].toString(),
+      thumbnailURL: row['thumbnailURL'].toString(),
       // use custom separator to avoid conflicts with tags containing commas
       tagsList: tags,
-      postURL: row["postURL"].toString(),
+      postURL: row['postURL'].toString(),
     );
-    item.isFavourite.value = Tools.intToBool(row["isFavourite"]);
-    item.isSnatched.value = Tools.intToBool(row["isSnatched"]);
+    item.isFavourite.value = Tools.intToBool(row['isFavourite']);
+    item.isSnatched.value = Tools.intToBool(row['isSnatched']);
     return item;
   }
 }
@@ -178,7 +178,7 @@ enum MediaType {
   }
 
   String toJson() {
-    return name.replaceAll(RegExp(r'(?<=[a-z])(?=[A-Z])'), '_').toLowerCase();
+    return name.replaceAll(RegExp('(?<=[a-z])(?=[A-Z])'), '_').toLowerCase();
   }
 
   static MediaType fromExtension(String? ext) {

@@ -4,7 +4,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:get/get.dart' as Get;
+import 'package:get/get.dart' as getx;
 import 'package:html/parser.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
@@ -38,15 +38,15 @@ abstract class BooruHandler {
   String errorString = '';
   List failedItems = [];
 
-  Map<String, TagType> tagTypeMap = {};
-  Map<String, String> tagModifierMap = {
-    'rating:': 'R',
-    'artist:': 'A',
-    'order:': 'O',
-    'sort:': 'S',
-  };
+  Map<String, TagType> get tagTypeMap => {};
+  Map<String, String> get tagModifierMap => {
+        'rating:': 'R',
+        'artist:': 'A',
+        'order:': 'O',
+        'sort:': 'S',
+      };
 
-  Get.RxList<BooruItem> fetched = Get.RxList<BooruItem>([]);
+  getx.RxList<BooruItem> fetched = getx.RxList<BooruItem>([]);
   List<BooruItem> get filteredFetched => fetched.where((el) {
         final SettingsHandler settingsHandler = SettingsHandler.instance;
 
@@ -64,7 +64,7 @@ abstract class BooruHandler {
 
   String get className => runtimeType.toString();
 
-  bool hasSizeData = false;
+  bool get hasSizeData => false;
 
   Future<bool> searchSetup() async {
     return true;
@@ -98,7 +98,9 @@ abstract class BooruHandler {
 
     // create url
     final String url = makeURL(tags);
-    if (url.isEmpty) return fetched;
+    if (url.isEmpty) {
+      return fetched;
+    }
 
     Uri uri;
     try {
@@ -108,14 +110,14 @@ abstract class BooruHandler {
       errorString = 'Invalid URL ($url)';
       return fetched;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, 'Search', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url $uri', className, 'Search', LogTypes.booruHandlerSearchURL);
 
     Response response;
     try {
       response = await fetchSearch(uri, withCaptchaCheck: withCaptchaCheck);
       if (response.statusCode == 200) {
         // parse response data
-        List<BooruItem> newItems = await parseResponse(response);
+        final List<BooruItem> newItems = await parseResponse(response);
         await afterParseResponse(newItems);
 
         // save tags for check on next search
@@ -161,7 +163,7 @@ abstract class BooruHandler {
     );
   }
 
-  FutureOr<List<BooruItem>> parseResponse(response) async {
+  FutureOr<List<BooruItem>> parseResponse(dynamic response) async {
     List posts = [];
     try {
       posts = await parseListFromResponse(response);
@@ -173,12 +175,12 @@ abstract class BooruHandler {
       rethrow;
     }
 
-    List<BooruItem> newItems = [];
+    final List<BooruItem> newItems = [];
     if (posts.isNotEmpty) {
       for (int i = 0; i < posts.length; i++) {
         final post = posts.elementAt(i);
         try {
-          BooruItem? item = await parseItemFromResponse(post, i);
+          final BooruItem? item = await parseItemFromResponse(post, i);
           if (item != null) {
             final List<List<String>> hatedAndLovedTags = SettingsHandler.instance.parseTagsList(item.tagsList);
             item.isHated.value = hatedAndLovedTags[0].isNotEmpty;
@@ -199,12 +201,12 @@ abstract class BooruHandler {
   ///
   /// parse raw response into a list of posts,
   /// here you should also parse any other info included with the response (i.e. totalcount)
-  FutureOr<List> parseListFromResponse(response) {
+  FutureOr<List> parseListFromResponse(dynamic response) {
     return [];
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<BooruItem?> parseItemFromResponse(responseItem, int index) {
+  FutureOr<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) {
     return BooruItem(fileURL: '', sampleURL: '', thumbnailURL: '', tagsList: [], postURL: '');
   }
 
@@ -231,10 +233,12 @@ abstract class BooruHandler {
 
   // TODO rename to getTagSuggestions
   Future<List<String>> tagSearch(String input) async {
-    List<String> tags = [];
+    final List<String> tags = [];
 
     final String url = makeTagURL(input);
-    if (url.isEmpty) return tags;
+    if (url.isEmpty) {
+      return tags;
+    }
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -242,7 +246,7 @@ abstract class BooruHandler {
       Logger.Inst().log('invalid url: $url', className, 'tagSearch', LogTypes.booruHandlerFetchFailed);
       return tags;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url $uri', className, 'tagSearch', LogTypes.booruHandlerSearchURL);
 
     Response response;
     const int limit = 10;
@@ -263,7 +267,7 @@ abstract class BooruHandler {
               }
             }
           } catch (e) {
-            Logger.Inst().log('${e.toString()} $rawTag', className, 'parseTagSuggestion', LogTypes.booruHandlerRawFetched);
+            Logger.Inst().log('$e $rawTag', className, 'parseTagSuggestion', LogTypes.booruHandlerRawFetched);
           }
         }
       } else {
@@ -288,12 +292,12 @@ abstract class BooruHandler {
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<List> parseTagSuggestionsList(response) {
+  FutureOr<List> parseTagSuggestionsList(dynamic response) {
     return [];
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<String?> parseTagSuggestion(responseItem, int index) {
+  FutureOr<String?> parseTagSuggestion(dynamic responseItem, int index) {
     return '';
   }
 
@@ -308,12 +312,14 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  bool hasCommentsSupport = false;
+  bool get hasCommentsSupport => false;
   Future<List<CommentItem>> getComments(String postID, int pageNum) async {
-    List<CommentItem> comments = [];
+    final List<CommentItem> comments = [];
 
     final String url = makeCommentsURL(postID, pageNum);
-    if (url.isEmpty) return comments;
+    if (url.isEmpty) {
+      return comments;
+    }
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -321,7 +327,7 @@ abstract class BooruHandler {
       Logger.Inst().log('invalid url: $url', className, 'getComments', LogTypes.booruHandlerFetchFailed);
       return comments;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, 'getComments', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url $uri', className, 'getComments', LogTypes.booruHandlerSearchURL);
 
     Response response;
     try {
@@ -331,10 +337,12 @@ abstract class BooruHandler {
         for (int i = 0; i < rawComments.length; i++) {
           final rawComment = rawComments[i];
           try {
-            CommentItem? parsedComment = await parseComment(rawComment, i);
-            if (parsedComment != null) comments.add(parsedComment);
+            final CommentItem? parsedComment = await parseComment(rawComment, i);
+            if (parsedComment != null) {
+              comments.add(parsedComment);
+            }
           } catch (e) {
-            Logger.Inst().log('${e.toString()} $rawComment', className, 'parseCommentsList', LogTypes.booruHandlerRawFetched);
+            Logger.Inst().log('$e $rawComment', className, 'parseCommentsList', LogTypes.booruHandlerRawFetched);
           }
         }
       } else {
@@ -359,12 +367,12 @@ abstract class BooruHandler {
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<List> parseCommentsList(response) {
+  FutureOr<List> parseCommentsList(dynamic response) {
     return [];
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<CommentItem?> parseComment(responseItem, int index) {
+  FutureOr<CommentItem?> parseComment(dynamic responseItem, int index) {
     return CommentItem();
   }
 
@@ -376,10 +384,10 @@ abstract class BooruHandler {
   ////////////////////////////////////////////////////////////////////////
 
   // TODO
-  bool hasLoadItemSupport = false;
+  bool get hasLoadItemSupport => false;
 
   // TODO fetch and overwrite current item data when entering tag view with a newer / more complete data
-  bool shouldUpdateIteminTagView = false;
+  bool get shouldUpdateIteminTagView => false;
 
   Future loadItem({required BooruItem item, CancelToken? cancelToken}) async {
     return null;
@@ -387,12 +395,14 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  bool hasNotesSupport = false;
+  bool get hasNotesSupport => false;
   Future<List<NoteItem>> getNotes(String postID) async {
-    List<NoteItem> notes = [];
+    final List<NoteItem> notes = [];
 
     final String url = makeNotesURL(postID);
-    if (url.isEmpty) return notes;
+    if (url.isEmpty) {
+      return notes;
+    }
     Uri uri;
     try {
       uri = Uri.parse(url);
@@ -400,7 +410,7 @@ abstract class BooruHandler {
       Logger.Inst().log('invalid url: $url', className, 'getNotes', LogTypes.booruHandlerFetchFailed);
       return notes;
     }
-    Logger.Inst().log('$url ${uri.toString()}', className, 'getNotes', LogTypes.booruHandlerSearchURL);
+    Logger.Inst().log('$url $uri', className, 'getNotes', LogTypes.booruHandlerSearchURL);
 
     Response response;
     try {
@@ -410,10 +420,12 @@ abstract class BooruHandler {
         for (int i = 0; i < rawNotes.length; i++) {
           final rawNote = rawNotes[i];
           try {
-            NoteItem? parsedNote = await parseNote(rawNote, i);
-            if (parsedNote != null) notes.add(parsedNote);
+            final NoteItem? parsedNote = await parseNote(rawNote, i);
+            if (parsedNote != null) {
+              notes.add(parsedNote);
+            }
           } catch (e) {
-            Logger.Inst().log('${e.toString()} $rawNote', className, 'parseNotesList', LogTypes.booruHandlerRawFetched);
+            Logger.Inst().log('$e $rawNote', className, 'parseNotesList', LogTypes.booruHandlerRawFetched);
           }
         }
       } else {
@@ -438,12 +450,12 @@ abstract class BooruHandler {
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<List> parseNotesList(response) {
+  FutureOr<List> parseNotesList(dynamic response) {
     return [];
   }
 
   /// [SHOULD BE OVERRIDDEN]
-  FutureOr<NoteItem?> parseNote(responseItem, int index) {
+  FutureOr<NoteItem?> parseNote(dynamic responseItem, int index) {
     return NoteItem(
       id: '',
       postID: '',
@@ -462,9 +474,9 @@ abstract class BooruHandler {
 
   ////////////////////////////////////////////////////////////////////////
 
-  Get.RxInt totalCount = 0.obs;
+  getx.RxInt totalCount = 0.obs;
   // TODO for boorus where api doesn't give amount outright and we have to calculate it based on smth (last page*items per page, for example) - show "~" symbol to indicate that
-  bool countIsQuestionable = false;
+  bool get countIsQuestionable => false;
   Future<void> searchCount(String input) async {
     totalCount.value = 0;
     return;
@@ -498,16 +510,14 @@ abstract class BooruHandler {
       }
     }
 
-    Map<String, String> headers = getHeaders();
+    final Map<String, String> headers = getHeaders();
     if (headers['Cookie']?.isNotEmpty ?? false) {
       cookieString += headers['Cookie']!;
     }
 
     Logger.Inst().log('${booru.baseURL}: $cookieString', className, 'getCookies', LogTypes.booruHandlerSearchURL);
 
-    cookieString = cookieString.trim();
-
-    return cookieString;
+    return cookieString.trim();
   }
 
   void addTagsWithType(List<String> tags, TagType type) {
@@ -515,7 +525,7 @@ abstract class BooruHandler {
   }
 
   Future<void> populateTagHandler(List<BooruItem> items) async {
-    List<String> unTyped = [];
+    final List<String> unTyped = [];
     for (int x = 0; x < items.length; x++) {
       for (int i = 0; i < items[x].tagsList.length; i++) {
         final String tag = items[x].tagsList[i];
@@ -569,7 +579,7 @@ abstract class BooruHandler {
 
     if (settingsHandler.dbHandler.db != null) {
       // TODO make this work in batches, not calling it on every single item ???
-      List<bool> values = await settingsHandler.dbHandler.getTrackedValues(fetched[fetchedIndex]);
+      final List<bool> values = await settingsHandler.dbHandler.getTrackedValues(fetched[fetchedIndex]);
       fetched[fetchedIndex].isSnatched.value = values[0];
       fetched[fetchedIndex].isFavourite.value = values[1];
     }
@@ -598,7 +608,7 @@ abstract class BooruHandler {
 
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     if (settingsHandler.dbHandler.db != null && diff > 0) {
-      List<List<bool>> valuesList = await settingsHandler.dbHandler
+      final List<List<bool>> valuesList = await settingsHandler.dbHandler
           .getMultipleTrackedValues(fetched.sublist(fetchedIndexes.first, fetchedIndexes.last)); //.map((e) => e.fileURL).toList()
 
       valuesList.asMap().forEach((index, values) {

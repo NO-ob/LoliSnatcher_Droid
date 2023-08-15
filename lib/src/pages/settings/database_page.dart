@@ -20,7 +20,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class DatabasePage extends StatefulWidget {
-  const DatabasePage({Key? key}) : super(key: key);
+  const DatabasePage({super.key});
 
   @override
   State<DatabasePage> createState() => _DatabasePageState();
@@ -296,9 +296,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       ignoring: changingIndexes,
                       child: SettingsToggle(
                         value: indexesEnabled,
-                        onChanged: (newValue) {
-                          changeIndexes(newValue);
-                        },
+                        onChanged: changeIndexes,
                         title: 'Enable Indexes',
                         trailingIcon: IconButton(
                           icon: const Icon(Icons.help_outline),
@@ -598,9 +596,7 @@ class _DatabasePageState extends State<DatabasePage> {
                             SettingsButton(
                               name: 'Update Sankaku URLs',
                               trailingIcon: const Icon(Icons.image),
-                              action: () {
-                                updateSankakuItems();
-                              },
+                              action: updateSankakuItems,
                             ),
                           ],
                         ),
@@ -668,9 +664,7 @@ class _DatabasePageState extends State<DatabasePage> {
                       trailingIcon: const Icon(Icons.delete_forever),
                       drawTopBorder: true,
                       action: () {
-                        setState(() {
-                          purgeFailedSankakuItems();
-                        });
+                        setState(purgeFailedSankakuItems);
                       },
                     ),
                     SettingsButton(

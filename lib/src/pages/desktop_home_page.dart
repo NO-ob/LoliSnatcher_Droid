@@ -21,8 +21,7 @@ import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class DesktopHome extends StatelessWidget {
-  const DesktopHome({Key? key}) : super(key: key);
-
+  const DesktopHome({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +44,10 @@ class DesktopHome extends StatelessWidget {
           Obx(() {
             if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
               // return const SizedBox(width: 5);
-              return Expanded(
+              return const Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
-                  children: const <Widget>[
+                  children: <Widget>[
                     SizedBox(width: 15),
                     TagSearchBox(),
                     TagSearchButton(),
@@ -110,8 +109,8 @@ class DesktopHome extends StatelessWidget {
                       } else {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: const Text("No items selected", style: TextStyle(fontSize: 20)),
-                          overrideLeadingIconWidget: const Text(" (」°ロ°)」 ", style: TextStyle(fontSize: 18)),
+                          title: const Text('No items selected', style: TextStyle(fontSize: 20)),
+                          overrideLeadingIconWidget: const Text(' (」°ロ°)」 ', style: TextStyle(fontSize: 18)),
                         );
                       }
                     },
@@ -170,7 +169,7 @@ class DesktopHome extends StatelessWidget {
 }
 
 class DesktopTagListener extends StatelessWidget {
-  const DesktopTagListener({Key? key}) : super(key: key);
+  const DesktopTagListener({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -6,32 +6,38 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 
 class LongPressRepeater extends StatefulWidget {
   /// This widget detects long press on [child] and repeats given action every [tick] milliseconds.
-  /// 
+  ///
   /// After [fasterAfter] amount of ticks, uses faster [tick] interval - [fastTick].
   const LongPressRepeater({
-    Key? key,
     required this.onStart,
+    required this.child,
     this.onStop,
     this.onTap,
     this.tick = 200,
     this.fastTick = 100,
     this.fasterAfter = -1,
     this.behavior,
-    required this.child,
-  }) : super(key: key);
+    super.key,
+  });
 
   /// called on every tick of long press
   final VoidCallback onStart;
+
   /// called afrter user stops long press
   final VoidCallback? onStop;
+
   /// called when user just taps on widget
   final VoidCallback? onTap;
+
   /// delay in ms between each callback during long press
   final int tick;
+
   /// delay in ms between each callback after [fasterAfter] amount of ticks
   final int fastTick;
+
   /// after how many ticks action gets called faster
   final int fasterAfter;
+
   /// see [GestureDetector.behavior]
   final HitTestBehavior? behavior;
   final Widget child;
@@ -55,7 +61,9 @@ class _LongPressRepeaterState extends State<LongPressRepeater> {
     return GestureDetector(
       onLongPressStart: (details) {
         // repeat every 100ms if the user holds down the button
-        if (longPressTimer != null) return;
+        if (longPressTimer != null) {
+          return;
+        }
         longPressTimer = Timer.periodic(Duration(milliseconds: widget.tick), (timer) {
           widget.onStart();
           if (repeatCount > 0) {

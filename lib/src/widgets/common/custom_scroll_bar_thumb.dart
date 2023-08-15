@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class CustomScrollBarThumb extends StatelessWidget {
   const CustomScrollBarThumb({
-    Key? key,
+    super.key,
     this.backgroundColor = Colors.black,
     this.drawColor = Colors.black,
     this.height = 50,
     this.title = '',
-  }) : super(key: key);
+  });
 
   final Color backgroundColor;
   final Color drawColor;
@@ -44,14 +44,14 @@ class CustomScrollBarThumb extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              borderRadius: const BorderRadius.all(Radius.circular(12)),
             ),
             child: Container(
-              width: 24.0,
+              width: 24,
               height: height,
               decoration: BoxDecoration(
                 color: drawColor,
-                borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
               ),
             ),
           ),
@@ -75,10 +75,10 @@ class CustomScrollBarThumb extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _ArrowCustomPainter extends CustomPainter {
-  final Color drawColor;
-
   _ArrowCustomPainter(this.drawColor);
+  final Color drawColor;
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
@@ -110,16 +110,16 @@ class _ArrowCustomPainter extends CustomPainter {
 class _ArrowClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    double arrowWidth = 8.0;
-    double startPointX = (size.width - arrowWidth) / 2;
-    double startPointY1 = size.height / 2 - arrowWidth / 2;
-    double startPointY2 = size.height / 2 + arrowWidth / 2;
+    const double arrowWidth = 8;
+    final double startPointX = (size.width - arrowWidth) / 2;
+    final double startPointY1 = size.height / 2 - arrowWidth / 2;
+    final double startPointY2 = size.height / 2 + arrowWidth / 2;
 
     return Path()
-      ..lineTo(0.0, size.height)
+      ..lineTo(0, size.height)
       ..lineTo(size.width, size.height)
-      ..lineTo(size.width, 0.0)
-      ..lineTo(0.0, 0.0)
+      ..lineTo(size.width, 0)
+      ..lineTo(0, 0)
       ..close()
       ..moveTo(startPointX, startPointY1)
       ..lineTo(startPointX + arrowWidth / 2, startPointY1 - arrowWidth / 2)

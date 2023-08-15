@@ -5,12 +5,12 @@ import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 
 class TagsManagerListItem extends StatelessWidget {
   const TagsManagerListItem({
-    Key? key,
     required this.tag,
     this.isSelected = false,
     this.onSelect,
     this.onTap,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Tag tag;
   final bool isSelected;
@@ -19,8 +19,8 @@ class TagsManagerListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isStale = tag.updatedAt < DateTime.now().subtract(const Duration(days: 3)).millisecondsSinceEpoch;
-    String staleText = isStale ? " (stale)" : "";
+    final bool isStale = tag.updatedAt < DateTime.now().subtract(const Duration(days: 3)).millisecondsSinceEpoch;
+    final String staleText = isStale ? ' (stale)' : '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
@@ -56,7 +56,7 @@ class TagsManagerListItem extends StatelessWidget {
           fontWeight: FontWeight.bold,
           isExpanded: false,
         ),
-        subtitle: Text('${tag.tagType.toString()} $staleText'.trim()),
+        subtitle: Text('${tag.tagType} $staleText'.trim()),
       ),
     );
   }

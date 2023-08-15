@@ -60,7 +60,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
       possibleExtensions = [...videoExtensions, ...imageExtensions, ...gifExtensions];
     }
 
-    for (String extension in possibleExtensions) {
+    for (final String extension in possibleExtensions) {
       try {
         currentExtension = extension;
         setState(() {});

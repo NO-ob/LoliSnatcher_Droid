@@ -1,20 +1,19 @@
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 
 class IdolSankakuHandler extends SankakuHandler {
-  IdolSankakuHandler(Booru booru, int limit) : super(booru, limit);
+  IdolSankakuHandler(super.booru, super.limit);
 
   @override
-  List parseListFromResponse(response) {
+  List parseListFromResponse(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final current = responseItem;
     final List<String> tags = [];
     final Map<TagType, List<String>> tagMap = {};
@@ -70,7 +69,7 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   String makeURL(String tags) {
-    return '${booru.baseURL}/post/index.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}';
+    return '${booru.baseURL}/post/index.json?tags=$tags&limit=$limit&page=$pageNum';
   }
 
   @override
@@ -85,13 +84,13 @@ class IdolSankakuHandler extends SankakuHandler {
   }
 
   @override
-  List parseCommentsList(response) {
+  List parseCommentsList(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  CommentItem? parseComment(responseItem, int index) {
+  CommentItem? parseComment(dynamic responseItem, int index) {
     final current = responseItem;
     return CommentItem(
       id: current['id'].toString(),

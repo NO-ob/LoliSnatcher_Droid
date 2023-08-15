@@ -1,18 +1,18 @@
 import 'dart:convert';
 
 class NoteItem {
-  String? id, postID, content;
-  int posX, posY, width, height;
-
   NoteItem({
-    this.id,
     required this.postID,
     required this.content,
     required this.posX,
     required this.posY,
     required this.width,
     required this.height,
+    this.id,
   });
+
+  String? id, postID, content;
+  int posX, posY, width, height;
 
   Map<String, dynamic> toJson() {
     return {
@@ -27,7 +27,7 @@ class NoteItem {
   }
 
   static NoteItem fromJSON(String jsonString) {
-    Map<String, dynamic> json = jsonDecode(jsonString);
+    final Map<String, dynamic> json = jsonDecode(jsonString);
     return NoteItem.fromMap(json);
   }
 

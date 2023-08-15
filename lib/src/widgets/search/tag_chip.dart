@@ -4,7 +4,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 
 class TagChip extends StatelessWidget {
-  TagChip({Key? key, this.tagString = "", required this.gestureDetector}) : super(key: key);
+  TagChip({required this.gestureDetector, super.key, this.tagString = ''});
 
   final String tagString;
   final GestureDetector gestureDetector;
@@ -15,7 +15,7 @@ class TagChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String stringContent = tagString;
-    List<Widget> tagPins = [];
+    final List<Widget> tagPins = [];
 
     // exclude (-), or(~)
     final bool isExclude = stringContent.startsWith('-');
@@ -26,17 +26,17 @@ class TagChip extends StatelessWidget {
     }
 
     // numbered tags for multibooru
-    if (stringContent.startsWith(RegExp(r"\d+#"))) {
-      String multiIndex = stringContent.split("#")[0];
-      stringContent = stringContent.split("#")[1];
+    if (stringContent.startsWith(RegExp(r'\d+#'))) {
+      final String multiIndex = stringContent.split('#')[0];
+      stringContent = stringContent.split('#')[1];
       tagPins.add(TagPin(content: multiIndex, color: Colors.purple));
     }
 
     // shorten stuff like order, sort, rating, ...
-    Map<String, String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
+    final Map<String, String> modifierMap = searchHandler.currentBooruHandler.tagModifierMap;
     modifierMap.forEach((modifier, displayValue) {
       if (stringContent.toLowerCase().startsWith(modifier)) {
-        stringContent = stringContent.toLowerCase().replaceFirst(modifier, "");
+        stringContent = stringContent.toLowerCase().replaceFirst(modifier, '');
         tagPins.add(TagPin(content: displayValue, color: Colors.purple));
       }
     });
@@ -47,7 +47,7 @@ class TagChip extends StatelessWidget {
     chipColour = chipColour == Colors.transparent ? Colors.blue : chipColour;
 
     // replace all _ with spaces and trim
-    stringContent = stringContent.replaceAll(RegExp(r"_"), " ").trim();
+    stringContent = stringContent.replaceAll(RegExp('_'), ' ').trim();
 
     return Container(
       decoration: BoxDecoration(
@@ -82,10 +82,10 @@ class TagChip extends StatelessWidget {
 
 class TagPin extends StatelessWidget {
   const TagPin({
-    Key? key,
     required this.content,
     required this.color,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String content;
   final Color color;

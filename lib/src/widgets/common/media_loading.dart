@@ -13,21 +13,21 @@ import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
 
 class MediaLoading extends StatefulWidget {
   const MediaLoading({
-    Key? key,
     required this.item,
     required this.hasProgress,
     required this.isFromCache,
     required this.isDone,
-    this.isTooBig = false,
     required this.isStopped,
-    this.stopReasons = const [],
     required this.isViewed,
     required this.total,
     required this.received,
     required this.startedAt,
     required this.startAction,
     required this.stopAction,
-  }) : super(key: key);
+    this.isTooBig = false,
+    this.stopReasons = const [],
+    super.key,
+  });
 
   final BooruItem item;
 
@@ -149,9 +149,9 @@ class _MediaLoadingState extends State<MediaLoading> {
 
   @override
   Widget build(BuildContext context) {
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
-    bool showLoading = !widget.isDone && (widget.isStopped || (widget.isViewed && sinceStart > 999));
+    final int nowMils = DateTime.now().millisecondsSinceEpoch;
+    final int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
+    final bool showLoading = !widget.isDone && (widget.isStopped || (widget.isViewed && sinceStart > 999));
     // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
     // return buildElement(context);
@@ -184,11 +184,11 @@ class _MediaLoadingState extends State<MediaLoading> {
       }
     }
 
-    bool hasProgressData = widget.hasProgress && (_total > 0);
-    int expectedBytes = hasProgressData ? _received : 0;
-    int totalBytes = hasProgressData ? _total : 0;
+    final bool hasProgressData = widget.hasProgress && (_total > 0);
+    final int expectedBytes = hasProgressData ? _received : 0;
+    final int totalBytes = hasProgressData ? _total : 0;
 
-    double speedCheckInterval = 1000 / 4;
+    const double speedCheckInterval = 1000 / 4;
     if (hasProgressData && (nowMils - _lastTime) > speedCheckInterval) {
       _prevAmount = _lastAmount;
       _lastAmount = expectedBytes;
@@ -197,11 +197,11 @@ class _MediaLoadingState extends State<MediaLoading> {
       _lastTime = nowMils;
     }
 
-    double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
-    String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
-    String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
+    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
+    final String loadedSize = hasProgressData ? Tools.formatBytes(expectedBytes, 1) : '';
+    final String expectedSize = hasProgressData ? Tools.formatBytes(totalBytes, 1) : '';
 
-    bool isVideo = widget.item.mediaType.value.isVideo;
+    final bool isVideo = widget.item.mediaType.value.isVideo;
 
     String percentDoneText = '';
     if (hasProgressData) {
@@ -219,22 +219,22 @@ class _MediaLoadingState extends State<MediaLoading> {
       }
     }
 
-    String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
+    final String filesizeText = (hasProgressData && percentDone < 1) ? ('$loadedSize / $expectedSize') : '';
 
     int expectedSpeed = 0;
     if (hasProgressData && _prevAmount > 0 && _lastAmount > 0) {
       expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / (nowMils - _prevTime))).round();
       // expectedSpeed = ((_lastAmount - _prevAmount) * (1000 / speedCheckInterval)).round();
     }
-    String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
+    final String expectedSpeedText = (hasProgressData && percentDone < 1) ? ('${Tools.formatBytes(expectedSpeed, 1)}/s') : '';
 
-    double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
-    String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ("~${expectedTime.toStringAsFixed(1)} s") : '';
+    final double expectedTime = hasProgressData ? (expectedSpeed == 0 ? double.infinity : ((totalBytes - expectedBytes) / expectedSpeed)) : 0;
+    final String expectedTimeText = (hasProgressData && expectedTime > 0 && percentDone < 1) ? ('~${expectedTime.toStringAsFixed(1)} s') : '';
 
-    int sinceStartSeconds = (sinceStart / 1000).floor();
-    String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds.toString()}s ago' : '';
+    final int sinceStartSeconds = (sinceStart / 1000).floor();
+    final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';
 
-    bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated.value;
+    final bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated.value;
 
     // print('$percentDone | $percentDoneText');
 
@@ -376,11 +376,11 @@ class _MediaLoadingState extends State<MediaLoading> {
 
 class LoadingText extends StatelessWidget {
   const LoadingText({
-    Key? key,
     required this.text,
     required this.fontSize,
     this.color = Colors.white,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String text;
   final double fontSize;
@@ -405,19 +405,19 @@ class LoadingText extends StatelessWidget {
     );
 
     // TODO animate text value changes?
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 50),
-      child: BorderedText(
-        key: ValueKey<String>(text),
-        strokeWidth: 3,
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: fontSize,
-            color: color,
-          ),
-        ),
-      ),
-    );
+    // return AnimatedSwitcher(
+    //   duration: const Duration(milliseconds: 50),
+    //   child: BorderedText(
+    //     key: ValueKey<String>(text),
+    //     strokeWidth: 3,
+    //     child: Text(
+    //       text,
+    //       style: TextStyle(
+    //         fontSize: fontSize,
+    //         color: color,
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }

@@ -11,7 +11,6 @@ import 'package:lolisnatcher/src/widgets/common/bordered_text.dart';
 
 class ThumbnailLoading extends StatefulWidget {
   const ThumbnailLoading({
-    Key? key,
     required this.item,
     required this.hasProgress,
     required this.isFromCache,
@@ -22,7 +21,8 @@ class ThumbnailLoading extends StatefulWidget {
     required this.startedAt,
     required this.restartAction,
     this.errorCode,
-  }) : super(key: key);
+    super.key,
+  });
 
   final BooruItem item;
 
@@ -82,9 +82,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     final bool isDone = _total > 0 && _received >= _total;
     Debounce.delay(
       tag: 'loading_thumbnail_progress_${widget.item.thumbnailURL}',
-      callback: () {
-        updateState();
-      },
+      callback: updateState,
       duration: Duration(milliseconds: isDone ? 0 : 250),
     );
   }
@@ -114,9 +112,9 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
 
   @override
   Widget build(BuildContext context) {
-    int nowMils = DateTime.now().millisecondsSinceEpoch;
-    int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
-    bool showLoading = !widget.isDone && (widget.isFailed || (sinceStart > 499));
+    final int nowMils = DateTime.now().millisecondsSinceEpoch;
+    final int sinceStart = _startedAt == 0 ? 0 : nowMils - _startedAt;
+    final bool showLoading = !widget.isDone && (widget.isFailed || (sinceStart > 499));
     // bool showLoading = !widget.isDone || widget.isFailed;
     // delay showing loading info a bit, so we don't clutter interface for fast loading files
 
@@ -193,11 +191,11 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
       );
     }
 
-    bool hasProgressData = widget.hasProgress && (_total > 0);
-    int expectedBytes = hasProgressData ? _received : 0;
-    int totalBytes = hasProgressData ? _total : 0;
+    final bool hasProgressData = widget.hasProgress && (_total > 0);
+    final int expectedBytes = hasProgressData ? _received : 0;
+    final int totalBytes = hasProgressData ? _total : 0;
 
-    double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
+    final double percentDone = hasProgressData ? (expectedBytes / totalBytes) : 0;
     // String? percentDoneText = hasProgressData
     //     ? ((percentDone ?? 0) == 1 ? null : '${(percentDone! * 100).toStringAsFixed(2)}%')
     //     : (isFromCache == true ? '...' : null);
@@ -222,7 +220,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
             ),
           ),
         ),
-        // 
+        //
         SizedBox(
           width: 1,
           child: RotatedBox(

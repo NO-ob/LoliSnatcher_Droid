@@ -1,50 +1,49 @@
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class PhilomenaHandler extends BooruHandler {
-  PhilomenaHandler(Booru booru, int limit) : super(booru, limit);
+  PhilomenaHandler(super.booru, super.limit);
 
   @override
-  String validateTags(tags) {
-    if (tags == "" || tags == " ") {
-      return "*";
+  String validateTags(String tags) {
+    if (tags == '' || tags == ' ') {
+      return '*';
     } else {
       return super.validateTags(tags);
     }
   }
 
   @override
-  List parseListFromResponse(response) {
-    Map<String, dynamic> parsedResponse = response.data;
+  List parseListFromResponse(dynamic response) {
+    final Map<String, dynamic> parsedResponse = response.data;
     return (parsedResponse['images'] ?? []) as List;
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
-    var current = responseItem;
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
+    final current = responseItem;
     if (current['representations']['full'] != null) {
       String sampleURL = current['representations']['medium'], thumbURL = current['representations']['thumb_small'];
-      if (current["mime_type"].toString().contains("video")) {
-        String tmpURL = "${sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1)}thumb.gif";
+      if (current['mime_type'].toString().contains('video')) {
+        final String tmpURL = "${sampleURL.substring(0, sampleURL.lastIndexOf("/") + 1)}thumb.gif";
         sampleURL = tmpURL;
         thumbURL = tmpURL;
       }
 
       String fileURL = current['representations']['full'];
-      if (!fileURL.contains("http")) {
+      if (!fileURL.contains('http')) {
         sampleURL = booru.baseURL! + sampleURL;
         thumbURL = booru.baseURL! + thumbURL;
         fileURL = booru.baseURL! + fileURL;
       }
 
-      List<String> currentTags = current['tags'].toString().substring(1, current['tags'].toString().length - 1).split(", ");
+      final List<String> currentTags = current['tags'].toString().substring(1, current['tags'].toString().length - 1).split(', ');
       for (int x = 0; x < currentTags.length; x++) {
-        if (currentTags[x].contains(" ")) {
-          currentTags[x] = currentTags[x].replaceAll(" ", "+");
+        if (currentTags[x].contains(' ')) {
+          currentTags[x] = currentTags[x].replaceAll(' ', '+');
         }
       }
-      BooruItem item = BooruItem(
+      final BooruItem item = BooruItem(
         fileURL: fileURL,
         fileWidth: current['width']?.toDouble(),
         fileHeight: current['height']?.toDouble(),
@@ -58,7 +57,7 @@ class PhilomenaHandler extends BooruHandler {
         sources: [current['source_url'].toString()],
         postDate: current['created_at'],
         postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
-        fileNameExtras: "${booru.name}_${current['id']}_"
+        fileNameExtras: "${booru.name}_${current['id']}_",
       );
 
       return item;
@@ -69,20 +68,20 @@ class PhilomenaHandler extends BooruHandler {
 
   @override
   String makePostURL(String id) {
-    return "${booru.baseURL}/images/$id";
+    return '${booru.baseURL}/images/$id';
   }
 
   @override
   String makeURL(String tags) {
     // EXAMPLE: https://derpibooru.org/api/v1/json/search/images?q=solo&per_page=20&page=1
-    String filter = "2";
-    if (booru.baseURL!.contains("derpibooru")) {
-      filter = "56027";
+    String filter = '2';
+    if (booru.baseURL!.contains('derpibooru')) {
+      filter = '56027';
     }
     if (booru.apiKey?.isEmpty ?? true) {
-      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=${tags.replaceAll(" ", ",")}&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?filter_id=$filter&q=${tags.replaceAll(" ", ",")}&per_page=$limit&page=$pageNum";
     } else {
-      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q=${tags.replaceAll(" ", ",")}&per_page=${limit.toString()}&page=${pageNum.toString()}";
+      return "${booru.baseURL}/api/v1/json/search/images?key=${booru.apiKey}&q=${tags.replaceAll(" ", ",")}&per_page=$limit&page=$pageNum";
     }
   }
 
@@ -91,24 +90,24 @@ class PhilomenaHandler extends BooruHandler {
     if (input.isEmpty) {
       input = '*';
     }
-    return "${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10";
+    return '${booru.baseURL}/api/v1/json/search/tags?q=$input*&per_page=10';
   }
 
   @override
-  List parseTagSuggestionsList(response) {
-    Map<String, dynamic> parsedResponse = response.data;
+  List parseTagSuggestionsList(dynamic response) {
+    final Map<String, dynamic> parsedResponse = response.data;
     return parsedResponse['tags'];
   }
 
   @override
-  String? parseTagSuggestion(responseItem, int index) {
-    List tagStringReplacements = [
-      ["-colon-", ":"],
-      ["-dash-", "-"],
-      ["-fwslash-", "/"],
-      ["-bwslash-", "\\"],
-      ["-dot-", "."],
-      ["-plus-", "+"]
+  String? parseTagSuggestion(dynamic responseItem, int index) {
+    final List tagStringReplacements = [
+      ['-colon-', ':'],
+      ['-dash-', '-'],
+      ['-fwslash-', '/'],
+      ['-bwslash-', r'\'],
+      ['-dot-', '.'],
+      ['-plus-', '+']
     ];
 
     String tag = responseItem['slug'].toString();

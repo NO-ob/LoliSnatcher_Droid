@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/widgets/common/transparent_pointer.dart';
 
 class ViewerTutorial extends StatefulWidget {
-  const ViewerTutorial({Key? key}) : super(key: key);
+  const ViewerTutorial({super.key});
 
   @override
   State<ViewerTutorial> createState() => _ViewerTutorialState();
@@ -43,53 +43,55 @@ class _ViewerTutorialState extends State<ViewerTutorial> {
 
   @override
   Widget build(BuildContext context) {
-    if(!_isVisible) {
+    if (!_isVisible) {
       return const SizedBox();
     }
 
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-      return TransparentPointer(
-        child: Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          color: Colors.black.withOpacity(0.66),
-          child: getTutorialPage(constraints),
-        ),
-      );
-    });
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return TransparentPointer(
+          child: Container(
+            width: constraints.maxWidth,
+            height: constraints.maxHeight,
+            color: Colors.black.withOpacity(0.66),
+            child: getTutorialPage(constraints),
+          ),
+        );
+      },
+    );
   }
 }
 
 class ImageTutorial extends StatelessWidget {
+  const ImageTutorial(this.constraints, this.onNext, {super.key});
   final BoxConstraints constraints;
   final VoidCallback onNext;
-  const ImageTutorial(this.constraints, this.onNext, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Icon(Icons.image_outlined, size: 28),
                 SizedBox(width: 8),
                 Text('Images', style: TextStyle(color: Colors.white, fontSize: 28)),
               ],
             ),
           ),
-          const SizedBox(height: 15),
-          const Text(
+          SizedBox(height: 15),
+          Text(
             'Tap/Long tap: toggle immersive mode',
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
-          const SizedBox(height: 10),
-          const Text(
+          SizedBox(height: 10),
+          Text(
             'Double tap: fit to screen / original size / reset zoom',
             style: TextStyle(color: Colors.white, fontSize: 20),
           ),
@@ -100,9 +102,9 @@ class ImageTutorial extends StatelessWidget {
 }
 
 class VideoTutorial extends StatelessWidget {
+  const VideoTutorial(this.constraints, this.onNext, {super.key});
   final BoxConstraints constraints;
   final VoidCallback onNext;
-  const VideoTutorial(this.constraints, this.onNext, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -20,11 +20,11 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 
 class Thumbnail extends StatefulWidget {
   const Thumbnail({
-    Key? key,
     required this.item,
     required this.isStandalone,
     this.ignoreColumnsCount = false,
-  }) : super(key: key);
+    super.key,
+  });
 
   final BooruItem item;
 
@@ -86,7 +86,7 @@ class _ThumbnailState extends State<Thumbnail> {
     // }
 
     cancelToken ??= CancelToken();
-    ImageProvider provider = CustomNetworkImage(
+    final ImageProvider provider = CustomNetworkImage(
       isMain ? thumbURL : widget.item.thumbnailURL,
       cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
@@ -111,7 +111,7 @@ class _ThumbnailState extends State<Thumbnail> {
       final MediaQueryData mQuery = NavigationHandler.instance.navigatorKey.currentContext!.mediaQuery;
       final double widthLimit = (mQuery.size.width / columnsCount()) * mQuery.devicePixelRatio * 1;
       double thumbRatio = 1;
-      bool hasSizeData = widget.item.fileHeight != null && widget.item.fileWidth != null;
+      final bool hasSizeData = widget.item.fileHeight != null && widget.item.fileWidth != null;
 
       if (widget.isStandalone) {
         thumbWidth = widthLimit;
@@ -172,7 +172,7 @@ class _ThumbnailState extends State<Thumbnail> {
       if (restartedCount < 5) {
         // attempt to reload 5 times with a second delay
         Debounce.debounce(
-          tag: 'thumbnail_reload_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}',
+          tag: 'thumbnail_reload_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}',
           callback: () {
             restartLoading();
             restartedCount++;
@@ -211,10 +211,10 @@ class _ThumbnailState extends State<Thumbnail> {
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
     // if scaling is disabled - allow gifs as thumbnails, but only if they are not hated (resize image doesnt work with gifs)
-    final bool isGifSampleNotAllowed =
-        widget.item.mediaType.value.isAnimation && ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated.value : true);
+    final bool isGifSampleNotAllowed = widget.item.mediaType.value.isAnimation &&
+        ((settingsHandler.disableImageScaling && settingsHandler.gifsAsThumbnails) ? widget.item.isHated.value : true);
 
-    isThumbQuality = settingsHandler.previewMode == "Thumbnail" ||
+    isThumbQuality = settingsHandler.previewMode == 'Thumbnail' ||
         (isGifSampleNotAllowed || widget.item.mediaType.value.isVideo || widget.item.mediaType.value.isNeedsExtraRequest) ||
         (!widget.isStandalone && widget.item.fileURL == widget.item.sampleURL);
     thumbURL = isThumbQuality == true ? widget.item.thumbnailURL : widget.item.sampleURL;
@@ -231,21 +231,19 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     Debounce.debounce(
-      tag: 'thumbnail_start_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}',
-      callback: () {
-        startDownloading();
-      },
+      tag: 'thumbnail_start_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}',
+      callback: startDownloading,
       duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
     );
     return;
   }
 
-  void startDownloading() async {
+  Future<void> startDownloading() async {
     final bool useExtra = isThumbQuality == false && !widget.item.isHated.value;
 
     mainProvider = await getImageProvider(true);
     mainImageStream?.removeListener(mainImageListener!);
-    mainImageStream = mainProvider!.resolve(const ImageConfiguration());
+    mainImageStream = mainProvider!.resolve(ImageConfiguration.empty);
     mainImageListener = ImageStreamListener(
       (imageInfo, syncCall) {
         isLoaded = true;
@@ -269,7 +267,7 @@ class _ThumbnailState extends State<Thumbnail> {
     if (useExtra) {
       extraProvider = await getImageProvider(false);
       extraImageStream?.removeListener(extraImageListener!);
-      extraImageStream = extraProvider!.resolve(const ImageConfiguration());
+      extraImageStream = extraProvider!.resolve(ImageConfiguration.empty);
       extraImageListener = ImageStreamListener(
         (imageInfo, syncCall) {
           isLoadedExtra = true;
@@ -315,15 +313,15 @@ class _ThumbnailState extends State<Thumbnail> {
     selectThumbProvider();
   }
 
-  void cleanProviderCache() async {
+  Future<void> cleanProviderCache() async {
     if (mainProvider != null) {
       final CustomNetworkImage usedMainProvider =
-          (mainProvider is ResizeImage ? (mainProvider as ResizeImage).imageProvider : mainProvider) as CustomNetworkImage;
+          (mainProvider is ResizeImage ? (mainProvider! as ResizeImage).imageProvider : mainProvider!) as CustomNetworkImage;
       await usedMainProvider.deleteCacheFile();
     }
     if (extraProvider != null) {
       final CustomNetworkImage usedExtraProvider =
-          (extraProvider is ResizeImage ? (extraProvider as ResizeImage).imageProvider : extraProvider) as CustomNetworkImage;
+          (extraProvider is ResizeImage ? (extraProvider! as ResizeImage).imageProvider : extraProvider!) as CustomNetworkImage;
       await usedExtraProvider.deleteCacheFile();
     }
   }
@@ -359,8 +357,8 @@ class _ThumbnailState extends State<Thumbnail> {
       extraProvider = null;
     }
 
-    Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}');
-    Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id.toString()}#${searchHandler.getItemIndex(widget.item)}');
+    Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}');
+    Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}');
   }
 
   Widget renderImages(BuildContext context) {
@@ -405,10 +403,7 @@ class _ThumbnailState extends State<Thumbnail> {
                         },
                       ),
                     )
-                  : const SizedBox(
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
+                  : const SizedBox.expand(),
             ),
           ),
         AnimatedOpacity(
@@ -441,10 +436,7 @@ class _ThumbnailState extends State<Thumbnail> {
                       },
                     ),
                   )
-                : const SizedBox(
-                    width: double.infinity,
-                    height: double.infinity,
-                  ),
+                : const SizedBox.expand(),
           ),
         ),
         AnimatedSwitcher(
@@ -474,16 +466,17 @@ class _ThumbnailState extends State<Thumbnail> {
           ),
         if (widget.item.isHated.value)
           Container(
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(iconSize * 0.1),
-              ),
-              width: iconSize,
-              height: iconSize,
-              child: const Icon(CupertinoIcons.eye_slash, color: Colors.white)),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(iconSize * 0.1),
+            ),
+            width: iconSize,
+            height: iconSize,
+            child: const Icon(CupertinoIcons.eye_slash, color: Colors.white),
+          ),
         if (settingsHandler.showURLOnThumb)
-          Container(
+          ColoredBox(
             color: Colors.black,
             child: Text(thumbURL),
           ),
@@ -505,7 +498,7 @@ class _ThumbnailState extends State<Thumbnail> {
       );
     } else {
       // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
-      return Container(color: Colors.black, child: renderImages(context));
+      return ColoredBox(color: Colors.black, child: renderImages(context));
     }
   }
 }

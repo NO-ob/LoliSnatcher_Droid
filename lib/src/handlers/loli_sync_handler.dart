@@ -4,8 +4,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
@@ -36,8 +36,8 @@ class LoliSync {
 
     yield 'Server active at $ip:$port';
     await for (final req in server!) {
-      Logger.Inst().log(req.uri.path.toString(), 'LoliSync', 'startServer', LogTypes.loliSyncInfo);
-      switch (req.uri.path.toString()) {
+      Logger.Inst().log(req.uri.path, 'LoliSync', 'startServer', LogTypes.loliSyncInfo);
+      switch (req.uri.path) {
         case '/lolisync/boorubatch':
           yield 'Received booru items batch';
           yield await storeBooruBatch(req, settingsHandler);
@@ -68,7 +68,7 @@ class LoliSync {
     }
   }
 
-  Future<String> storeSettings(var req, SettingsHandler settingsHandler) async {
+  Future<String> storeSettings(dynamic req, SettingsHandler settingsHandler) async {
     if (req.method == 'POST') {
       try {
         Logger.Inst().log('request to update settings recieved', 'LoliSync', 'storeSettings', LogTypes.loliSyncInfo);
@@ -81,7 +81,7 @@ class LoliSync {
         Logger.Inst().log(e.toString(), 'LoliSync', 'storeSettings', LogTypes.exception);
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
-        return 'Something went wrong ${e.toString()}';
+        return 'Something went wrong $e';
       }
     } else {
       req.response.statusCode = 404;
@@ -90,7 +90,7 @@ class LoliSync {
     }
   }
 
-  Future<String> storeBooruBatch(var req, SettingsHandler settingsHandler) async {
+  Future<String> storeBooruBatch(dynamic req, SettingsHandler settingsHandler) async {
     if (req.method == 'POST') {
       try {
         final int amount = int.parse(req.uri.queryParameters['amount']!);
@@ -126,7 +126,7 @@ class LoliSync {
         Logger.Inst().log(e.toString(), 'LoliSync', 'storeBooruItem', LogTypes.exception);
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
-        return 'Something went wrong ${e.toString()}';
+        return 'Something went wrong $e';
       }
     } else {
       req.response.statusCode = 404;
@@ -135,7 +135,7 @@ class LoliSync {
     }
   }
 
-  Future<String> storeBooruItem(var req, SettingsHandler settingsHandler) async {
+  Future<String> storeBooruItem(dynamic req, SettingsHandler settingsHandler) async {
     if (req.method == 'POST') {
       try {
         final int amount = int.parse(req.uri.queryParameters['amount']!);
@@ -161,7 +161,7 @@ class LoliSync {
         Logger.Inst().log(e.toString(), 'LoliSync', 'storeBooruItem', LogTypes.exception);
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
-        return 'Something went wrong ${e.toString()}';
+        return 'Something went wrong $e';
       }
     } else {
       req.response.statusCode = 404;
@@ -170,7 +170,7 @@ class LoliSync {
     }
   }
 
-  Future<String> storeBooru(var req, SettingsHandler settingsHandler) async {
+  Future<String> storeBooru(dynamic req, SettingsHandler settingsHandler) async {
     if (req.method == 'POST') {
       try {
         Logger.Inst().log('request to add item recieved', 'LoliSync', 'storeBooru', LogTypes.loliSyncInfo);
@@ -190,7 +190,9 @@ class LoliSync {
           //   }
           // }
           final bool alreadyExists = settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
-          if (!alreadyExists) await settingsHandler.saveBooru(booru);
+          if (!alreadyExists) {
+            await settingsHandler.saveBooru(booru);
+          }
         }
         req.response.statusCode = 200;
         req.response.write('Success');
@@ -203,7 +205,7 @@ class LoliSync {
         Logger.Inst().log(e.toString(), 'LoliSync', 'storeBooru', LogTypes.exception);
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
-        return 'Something went wrong ${e.toString()}';
+        return 'Something went wrong $e';
       }
     } else {
       req.response.statusCode = 404;
@@ -212,7 +214,7 @@ class LoliSync {
     }
   }
 
-  Future<String> storeTabs(var req, SettingsHandler settingsHandler) async {
+  Future<String> storeTabs(dynamic req, SettingsHandler settingsHandler) async {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     if (req.method == 'POST') {
@@ -238,7 +240,7 @@ class LoliSync {
         Logger.Inst().log(e.toString(), 'LoliSync', 'storeTabs', LogTypes.exception);
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
-        return 'Something went wrong ${e.toString()}';
+        return 'Something went wrong $e';
       }
     } else {
       req.response.statusCode = 404;
@@ -247,7 +249,7 @@ class LoliSync {
     }
   }
 
-  Future<String> storeTags(var req, SettingsHandler settingsHandler) async {
+  Future<String> storeTags(dynamic req, SettingsHandler settingsHandler) async {
     final TagHandler tagHandler = TagHandler.instance;
 
     if (req.method == 'POST') {
@@ -272,7 +274,7 @@ class LoliSync {
         Logger.Inst().log(e.toString(), 'LoliSync', 'storeTags', LogTypes.exception);
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
-        return 'Something went wrong ${e.toString()}';
+        return 'Something went wrong $e';
       }
     } else {
       req.response.statusCode = 404;
@@ -402,7 +404,7 @@ class LoliSync {
       Logger.Inst().log(e.toString(), 'LoliSync', 'sendTest', LogTypes.exception);
       FlashElements.showSnackbar(
         title: Text(
-          'Test error: ${e.toString()}',
+          'Test error: $e',
           style: const TextStyle(fontSize: 20),
         ),
         leadingIcon: Icons.warning_amber,
@@ -421,7 +423,7 @@ class LoliSync {
       return response.statusCode.toString();
     } catch (e) {
       Logger.Inst().log(e.toString(), 'LoliSync', 'sendSyncComplete', LogTypes.exception);
-      return 'Sync Complete error ${e.toString()}';
+      return 'Sync Complete error $e';
     }
   }
 
@@ -556,6 +558,6 @@ class LoliSync {
     }
 
     yield 'Sync Complete';
-    final String resp = await sendSyncComplete();
+    await sendSyncComplete();
   }
 }

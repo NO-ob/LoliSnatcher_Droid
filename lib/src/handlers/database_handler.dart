@@ -41,49 +41,46 @@ class DBHandler {
   }
 
   Future<bool> updateTable() async {
-    await db?.execute('CREATE TABLE IF NOT EXISTS BooruItem'
-        '(id INTEGER PRIMARY KEY,'
-        'thumbnailURL TEXT,'
-        'sampleURL TEXT,'
-        'fileURL TEXT,'
-        'postURL TEXT,'
-        'mediaType TEXT,'
-        'isSnatched INTEGER,'
-        'isFavourite INTEGER'
+    await db?.execute('CREATE TABLE IF NOT EXISTS BooruItem '
+        '(id INTEGER PRIMARY KEY, '
+        'thumbnailURL TEXT, '
+        'sampleURL TEXT, '
+        'fileURL TEXT, '
+        'postURL TEXT, '
+        'mediaType TEXT, '
+        'isSnatched INTEGER, '
+        'isFavourite INTEGER '
         ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS Tag ('
-        'id INTEGER PRIMARY KEY,'
-        'name TEXT'
-        'tagType TEXT'
-        'updatedAt INTEGER'
+    await db?.execute('CREATE TABLE IF NOT EXISTS Tag ( '
+        'id INTEGER PRIMARY KEY, '
+        'name TEXT '
+        'tagType TEXT '
+        'updatedAt INTEGER '
         ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS ImageTag ('
-        'tagID INTEGER,'
-        'booruItemID INTEGER'
+    await db?.execute('CREATE TABLE IF NOT EXISTS ImageTag ( '
+        'tagID INTEGER, '
+        'booruItemID INTEGER '
         ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS SearchHistory ('
-        'id INTEGER PRIMARY KEY,'
-        'booruType TEXT,'
-        'booruName TEXT,'
-        'searchText TEXT,'
-        'isFavourite INTEGER,'
-        'timestamp TEXT DEFAULT CURRENT_TIMESTAMP'
+    await db?.execute('CREATE TABLE IF NOT EXISTS SearchHistory ( '
+        'id INTEGER PRIMARY KEY, '
+        'booruType TEXT, '
+        'booruName TEXT, '
+        'searchText TEXT, '
+        'isFavourite INTEGER, '
+        'timestamp TEXT DEFAULT CURRENT_TIMESTAMP '
         ')');
-    await db?.execute('CREATE TABLE IF NOT EXISTS TabRestore ('
-        'id INTEGER PRIMARY KEY,'
-        'restore TEXT'
+    await db?.execute('CREATE TABLE IF NOT EXISTS TabRestore ( '
+        'id INTEGER PRIMARY KEY, '
+        'restore TEXT '
         ')');
     try {
       if (!await columnExists('SearchHistory', 'isFavourite')) {
-        print('creating isFavourite');
         await db?.execute('ALTER TABLE SearchHistory ADD COLUMN isFavourite INTEGER;');
       }
       if (!await columnExists('Tag', 'tagType')) {
-        print('creating tagType');
         await db?.execute('ALTER TABLE Tag ADD COLUMN tagType TEXT;');
       }
       if (!await columnExists('Tag', 'updatedAt')) {
-        print('creating updatedAt');
         await db?.execute('ALTER TABLE Tag ADD COLUMN updatedAt INTEGER;');
       }
     } catch (e) {
@@ -498,7 +495,9 @@ class DBHandler {
 
   /// Adds tags for a BooruItem to the database
   Future<void> updateTags(List tags, String? itemID) async {
-    if (itemID == null) return;
+    if (itemID == null) {
+      return;
+    }
     String? id = '';
     for (final tag in tags) {
       id = await getTagID(tag);

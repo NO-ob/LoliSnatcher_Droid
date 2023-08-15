@@ -9,7 +9,7 @@ import 'package:lolisnatcher/src/widgets/tabs/tab_manager_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
 
 class TabSelector extends StatelessWidget {
-  const TabSelector({Key? key}) : super(key: key);
+  const TabSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class TabSelector extends StatelessWidget {
 }
 
 class TabSelectorHeader extends StatelessWidget {
-  const TabSelectorHeader({Key? key}) : super(key: key);
+  const TabSelectorHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +52,13 @@ class TabSelectorHeader extends StatelessWidget {
 
 class TabSelectorRender extends StatelessWidget {
   const TabSelectorRender({
-    Key? key,
     required this.isDesktop,
     required this.padding,
     required this.contentPadding,
     this.borderColor,
     this.textColor,
-  }) : super(key: key);
+    super.key,
+  });
 
   final bool isDesktop;
   final EdgeInsetsGeometry padding;
@@ -66,8 +66,8 @@ class TabSelectorRender extends StatelessWidget {
   final Color? borderColor;
   final Color? textColor;
 
-  Future<dynamic> openTabsDialog(context) async {
-    return await SettingsPageOpen(
+  Future<dynamic> openTabsDialog(BuildContext context) {
+    return SettingsPageOpen(
       context: context,
       page: () => const TabManagerDialog(),
     ).open();
@@ -82,8 +82,8 @@ class TabSelectorRender extends StatelessWidget {
     return Container(
       padding: padding,
       child: Obx(() {
-        List<SearchTab> list = searchHandler.list;
-        int index = searchHandler.currentIndex;
+        final List<SearchTab> list = searchHandler.list;
+        final int index = searchHandler.currentIndex;
 
         if (list.isEmpty) {
           return const SizedBox();
@@ -130,7 +130,7 @@ class TabSelectorRender extends StatelessWidget {
             },
             selectedItemBuilder: (BuildContext context) {
               return list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
-                bool isCurrent = list.indexOf(value) == index;
+                final bool isCurrent = list.indexOf(value) == index;
 
                 return DropdownMenuItem<SearchTab>(
                   value: value,
@@ -139,7 +139,7 @@ class TabSelectorRender extends StatelessWidget {
               }).toList();
             },
             items: list.map<DropdownMenuItem<SearchTab>>((SearchTab value) {
-              bool isCurrent = list.indexOf(value) == index;
+              final bool isCurrent = list.indexOf(value) == index;
 
               return DropdownMenuItem<SearchTab>(
                 value: value,

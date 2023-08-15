@@ -12,10 +12,10 @@ import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class R34HentaiHandler extends ShimmieHandler {
-  R34HentaiHandler(Booru booru, int limit) : super(booru, limit);
+  R34HentaiHandler(super.booru, super.limit);
 
   @override
-  bool hasSizeData = true;
+  bool get hasSizeData => true;
 
   @override
   String validateTags(String tags) {
@@ -27,32 +27,32 @@ class R34HentaiHandler extends ShimmieHandler {
     final Map<String, String> headers = {
       ...super.getHeaders(),
       if (booru.apiKey?.isNotEmpty == true && (booru.apiKey?.contains('shm_user') == true || booru.apiKey?.contains('shm_sesion') == true))
-        'Cookie': "${booru.apiKey};",
+        'Cookie': '${booru.apiKey};',
     };
 
     return headers;
   }
 
   @override
-  List parseListFromResponse(response) {
+  List parseListFromResponse(dynamic response) {
     final document = parse(response.data);
-    return document.getElementsByClassName("thumb");
+    return document.getElementsByClassName('thumb');
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final current = responseItem;
 
-    final String id = current.attributes["data-post-id"]!;
-    final String fileExt = current.attributes["data-mime"]?.split('/')[1] ?? "png";
-    final String thumbURL = current.firstChild!.attributes["src"]!;
-    final double? thumbWidth = double.tryParse(current.firstChild!.attributes["width"] ?? '');
-    final double? thumbHeight = double.tryParse(current.firstChild!.attributes["height"] ?? '');
-    final double? fileWidth = double.tryParse(current.attributes["data-width"] ?? '');
-    final double? fileHeight = double.tryParse(current.attributes["data-height"] ?? '');
+    final String id = current.attributes['data-post-id']!;
+    final String fileExt = current.attributes['data-mime']?.split('/')[1] ?? 'png';
+    final String thumbURL = current.firstChild!.attributes['src']!;
+    final double? thumbWidth = double.tryParse(current.firstChild!.attributes['width'] ?? '');
+    final double? thumbHeight = double.tryParse(current.firstChild!.attributes['height'] ?? '');
+    final double? fileWidth = double.tryParse(current.attributes['data-width'] ?? '');
+    final double? fileHeight = double.tryParse(current.attributes['data-height'] ?? '');
     final String fileURL =
-        thumbURL.replaceFirst("_thumbs", "_images").replaceFirst("thumbnails", "images").replaceFirst("thumbnail_", "").replaceFirst('.jpg', '.$fileExt');
-    final List<String> tags = current.attributes["data-tags"]?.split(" ") ?? [];
+        thumbURL.replaceFirst('_thumbs', '_images').replaceFirst('thumbnails', 'images').replaceFirst('thumbnail_', '').replaceFirst('.jpg', '.$fileExt');
+    final List<String> tags = current.attributes['data-tags']?.split(' ') ?? [];
 
     final BooruItem item = BooruItem(
       thumbnailURL: booru.baseURL! + thumbURL,
@@ -72,7 +72,7 @@ class R34HentaiHandler extends ShimmieHandler {
   }
 
   String getHashFromURL(String url) {
-    final String hash = url.substring(url.lastIndexOf("_") + 1, url.lastIndexOf("."));
+    final String hash = url.substring(url.lastIndexOf('_') + 1, url.lastIndexOf('.'));
     return hash;
   }
 
@@ -80,7 +80,7 @@ class R34HentaiHandler extends ShimmieHandler {
   String makeURL(String tags) {
     String tagsText = tags.replaceAll(' ', '+');
     tagsText = tagsText.isEmpty ? '' : '$tagsText/';
-    return "${booru.baseURL}/post/list/$tagsText$pageNum";
+    return '${booru.baseURL}/post/list/$tagsText$pageNum';
   }
 
   @override
@@ -99,7 +99,7 @@ class R34HentaiHandler extends ShimmieHandler {
           'gobu': 'Log+In',
         },
         options: Options(
-          contentType: "application/x-www-form-urlencoded",
+          contentType: 'application/x-www-form-urlencoded',
         ),
         headers: await Tools.getFileCustomHeaders(
           Booru(
@@ -188,16 +188,16 @@ class R34HentaiHandler extends ShimmieHandler {
 /// Booru Handler for the r34hentai engine
 // TODO they removed their api, both shimmie and custom one, but maybe it is still hidden somewhere?
 class R34HentaiHandlerOld extends R34HentaiHandler {
-  R34HentaiHandlerOld(Booru booru, int limit) : super(booru, limit);
+  R34HentaiHandlerOld(super.booru, super.limit);
 
   @override
-  List parseListFromResponse(response) {
+  List parseListFromResponse(dynamic response) {
     final List<dynamic> parsedResponse = response.data;
     return parsedResponse; // Limit doesn't work with this api
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final current = responseItem;
     final String imageUrl = current['file_url'];
     final String sampleUrl = current['sample_url'];
@@ -216,6 +216,6 @@ class R34HentaiHandlerOld extends R34HentaiHandler {
 
   @override
   String makeURL(String tags) {
-    return "${booru.baseURL}/post/index.json?limit=$limit&page=$pageNum&tags=$tags";
+    return '${booru.baseURL}/post/index.json?limit=$limit&page=$pageNum&tags=$tags';
   }
 }

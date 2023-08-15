@@ -6,7 +6,7 @@ import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TagsManagerAddDialog extends StatefulWidget {
-  const TagsManagerAddDialog({Key? key}) : super(key: key);
+  const TagsManagerAddDialog({super.key});
 
   @override
   State<TagsManagerAddDialog> createState() => _TagsManagerAddDialogState();
@@ -19,11 +19,11 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsDialog(
-      title: const Text("Add Tag"),
+      title: const Text('Add Tag'),
       contentItems: <Widget>[
         SettingsTextInput(
           controller: _controller,
-          title: "Name",
+          title: 'Name',
           drawBottomBorder: false,
         ),
         SettingsDropdown(
@@ -41,15 +41,17 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
       actionButtons: [
         const CancelButton(returnData: null),
         ElevatedButton.icon(
-          label: const Text("Add"),
+          label: const Text('Add'),
           icon: const Icon(Icons.add),
           onPressed: () {
             final String tagName = _controller.text.trim();
             if (tagName.isNotEmpty) {
-              Navigator.of(context).pop(Tag(
-                tagName,
-                tagType: _type,
-              ));
+              Navigator.of(context).pop(
+                Tag(
+                  tagName,
+                  tagType: _type,
+                ),
+              );
             } else {
               Navigator.of(context).pop(null);
             }

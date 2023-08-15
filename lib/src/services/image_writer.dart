@@ -101,11 +101,11 @@ class ImageWriter {
             await ServiceHandler.closeStreamToFileFromSAFDirectory(safPath);
           }
         } else {
-          final File jsonFile = File("${path!}$fileNameWoutExt.json");
+          final File jsonFile = File('${path!}$fileNameWoutExt.json');
           await jsonFile.writeAsString(jsonEncode(item.toJson()), flush: true);
         }
       }
-      print("Image written: ${path!}$fileName");
+      print('Image written: ${path!}$fileName');
       item.isSnatched.value = true;
       if (settingsHandler.dbEnabled) {
         await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
@@ -119,7 +119,7 @@ class ImageWriter {
               throw Exception('SAF file not found');
             }
           } else {
-            ServiceHandler.callMediaScanner(image.path);
+            await ServiceHandler.callMediaScanner(image.path);
           }
         }
       } catch (e, s) {
@@ -170,8 +170,7 @@ class ImageWriter {
     bool ignoreExists,
   ) async* {
     int snatchedCounter = 1;
-    List<BooruItem> existsList = [];
-    List<BooruItem> failedList = [];
+    final List<BooruItem> existsList = [], failedList = [];
     for (int i = 0; i < snatched.length; i++) {
       await Future.delayed(Duration(milliseconds: cooldown), () async {
         final snatchResult = await write(
@@ -199,11 +198,17 @@ class ImageWriter {
     };
   }
 
-  Future<File?> writeCacheFromBytes(String fileURL, List<int> bytes, String typeFolder, {required String fileNameExtras, bool clearName = true}) async {
+  Future<File?> writeCacheFromBytes(
+    String fileURL,
+    List<int> bytes,
+    String typeFolder, {
+    required String fileNameExtras,
+    bool clearName = true,
+  }) async {
     File? image;
     try {
       await setPaths();
-      final String cachePath = "${cacheRootPath!}$typeFolder/";
+      final String cachePath = '${cacheRootPath!}$typeFolder/';
       // print("write cahce from bytes:: cache path is $cachePath");
       await Directory(cachePath).create(recursive: true);
 
@@ -219,10 +224,14 @@ class ImageWriter {
 
   // Deletes file from given cache folder
   // returns true if successful, false if there was an exception and null if file didn't exist
-  Future deleteFileFromCache(String fileURL, String typeFolder, {required String fileNameExtras}) async {
+  Future deleteFileFromCache(
+    String fileURL,
+    String typeFolder, {
+    required String fileNameExtras,
+  }) async {
     try {
       await setPaths();
-      final String cachePath = "${cacheRootPath!}$typeFolder/";
+      final String cachePath = '${cacheRootPath!}$typeFolder/';
       final String fileName = sanitizeName(parseThumbUrlToName(fileURL), fileNameExtras: fileNameExtras);
       final File file = File(cachePath + fileName);
       if (await file.exists()) {
@@ -240,7 +249,7 @@ class ImageWriter {
   Future deleteCacheFolder(String typeFolder) async {
     try {
       await setPaths();
-      final String cachePath = "${cacheRootPath!}$typeFolder/";
+      final String cachePath = '${cacheRootPath!}$typeFolder/';
       final Directory folder = Directory(cachePath);
       if (await folder.exists()) {
         await folder.delete(recursive: true);
@@ -258,7 +267,7 @@ class ImageWriter {
     String cachePath;
     try {
       await setPaths();
-      cachePath = "${cacheRootPath!}$typeFolder/";
+      cachePath = '${cacheRootPath!}$typeFolder/';
 
       final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
       final File cacheFile = File(cachePath + fileName);
@@ -279,10 +288,15 @@ class ImageWriter {
     }
   }
 
-  Future<String> getCachePathString(String fileURL, String typeFolder, {required String fileNameExtras, bool clearName = true}) async {
+  Future<String> getCachePathString(
+    String fileURL,
+    String typeFolder, {
+    required String fileNameExtras,
+    bool clearName = true,
+  }) async {
     await setPaths();
     String cachePath;
-    cachePath = "${cacheRootPath!}$typeFolder/";
+    cachePath = '${cacheRootPath!}$typeFolder/';
 
     final String fileName = sanitizeName(clearName ? parseThumbUrlToName(fileURL) : fileURL, fileNameExtras: fileNameExtras);
     return cachePath + fileName;
@@ -299,7 +313,7 @@ class ImageWriter {
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
-        List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
+        final List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
         for (final FileSystemEntity file in files) {
           if (file is File) {
             fileNum++;
@@ -331,7 +345,7 @@ class ImageWriter {
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
-        List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
+        final List<FileSystemEntity> files = await cacheDir.list(recursive: true, followLinks: false).toList();
         for (final FileSystemEntity file in files) {
           if (file is File) {
             final bool isNotExcludedExt = Tools.getFileExt(file.path) != 'ico';
@@ -367,7 +381,7 @@ class ImageWriter {
     }
 
     String cacheDirPath;
-    List<FileSystemEntity> toDelete = [];
+    final List<FileSystemEntity> toDelete = [];
     int toDeleteSize = 0;
     int currentCacheSize = 0;
     try {
@@ -376,7 +390,7 @@ class ImageWriter {
 
       final Directory cacheDir = Directory(cacheDirPath);
       if (await cacheDir.exists()) {
-        List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList()).whereType<File>().toList();
+        final List<File> files = (await cacheDir.list(recursive: true, followLinks: false).toList()).whereType<File>().toList();
         for (final File file in files) {
           currentCacheSize += await file.length();
         }
@@ -432,13 +446,13 @@ class ImageWriter {
   }
 
   String sanitizeName(String fileName, {required String fileNameExtras}) {
-    return "${Tools.sanitize(fileNameExtras)}${Tools.sanitize(fileName)}";
+    return '${Tools.sanitize(fileNameExtras)}${Tools.sanitize(fileName)}';
   }
 
   Future<String> writeMascotImage(String contentUri) async {
     await setPaths();
     if (contentUri.isNotEmpty) {
-      Uint8List? fileBytes = await ServiceHandler.getSAFFile(contentUri);
+      final Uint8List? fileBytes = await ServiceHandler.getSAFFile(contentUri);
       final String fileExt = await ServiceHandler.getSAFFileExtension(contentUri);
       if (fileBytes != null && fileExt.isNotEmpty) {
         final String path = await ServiceHandler.getConfigDir();

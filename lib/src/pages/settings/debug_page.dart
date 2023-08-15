@@ -24,7 +24,7 @@ import 'package:lolisnatcher/src/widgets/tags_manager/tm_dialog.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class DebugPage extends StatefulWidget {
-  const DebugPage({Key? key}) : super(key: key);
+  const DebugPage({super.key});
 
   @override
   State<DebugPage> createState() => _DebugPageState();
@@ -47,7 +47,7 @@ class _DebugPageState extends State<DebugPage> {
   }
 
   Future<dynamic> showTagsManager(BuildContext context) async {
-    return await SettingsPageOpen(
+    return SettingsPageOpen(
       context: context,
       page: () => const TagsManagerDialog(),
     ).open();
@@ -56,7 +56,7 @@ class _DebugPageState extends State<DebugPage> {
   //called when page is closed, sets settingshandler variables and then writes settings to disk
   Future<bool> _onWillPop() async {
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     if (allowSelfSignedCerts) {
       HttpOverrides.global = MyHttpOverrides();
     } else {
@@ -72,7 +72,7 @@ class _DebugPageState extends State<DebugPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Debug"),
+          title: const Text('Debug'),
         ),
         body: Center(
           child: ListView(
@@ -120,7 +120,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.gifsAsThumbnails = newValue;
                   });
                 },
-                title: "GIF thumbnails",
+                title: 'GIF thumbnails',
                 subtitle: const Text('Requires "Don\'t scale images"'),
               ),
               SettingsToggle(
@@ -148,7 +148,7 @@ class _DebugPageState extends State<DebugPage> {
                     settingsHandler.desktopListsDrag = newValue;
                   });
                 },
-                title: "Enable drag scroll on lists [Desktop only]",
+                title: 'Enable drag scroll on lists [Desktop only]',
               ),
 
               SettingsButton(
@@ -156,7 +156,7 @@ class _DebugPageState extends State<DebugPage> {
                 icon: const Icon(Icons.timelapse),
                 action: () {
                   const List<double> speeds = [0.25, 0.5, 0.75, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20];
-                  int currentIndex = speeds.indexOf(timeDilation);
+                  final int currentIndex = speeds.indexOf(timeDilation);
                   int newIndex = 0;
                   if ((currentIndex + 1) <= (speeds.length - 1)) {
                     newIndex = currentIndex + 1;
@@ -226,7 +226,7 @@ class _DebugPageState extends State<DebugPage> {
                             },
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
+                            padding: const EdgeInsets.only(left: 8),
                             child: Text('$vDuration'),
                           ),
                         ],
@@ -275,7 +275,7 @@ class _DebugPageState extends State<DebugPage> {
                             },
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
+                            padding: const EdgeInsets.only(left: 8),
                             child: Text('$vAmplitude'),
                           ),
                         ],
@@ -337,7 +337,7 @@ class _DebugPageState extends State<DebugPage> {
                   FlashElements.showSnackbar(
                     context: context,
                     duration: const Duration(seconds: 2),
-                    title: const Text("Copied to clipboard!", style: TextStyle(fontSize: 20)),
+                    title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
                     content: Text(
                       str,
                       style: const TextStyle(fontSize: 16),
@@ -374,7 +374,7 @@ class _DebugPageState extends State<DebugPage> {
                                 FlashElements.showSnackbar(
                                   context: context,
                                   duration: const Duration(seconds: 2),
-                                  title: const Text("Restored session from string!", style: TextStyle(fontSize: 20)),
+                                  title: const Text('Restored session from string!', style: TextStyle(fontSize: 20)),
                                   content: Text(
                                     sessionStrController.text,
                                     style: const TextStyle(fontSize: 16),

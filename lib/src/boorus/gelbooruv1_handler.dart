@@ -1,39 +1,38 @@
 import 'package:html/parser.dart';
 
-import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 
 class GelbooruV1Handler extends BooruHandler {
-  GelbooruV1Handler(Booru booru, int limit) : super(booru, limit);
+  GelbooruV1Handler(super.booru, super.limit);
 
   @override
-  String validateTags(tags) {
-    if (tags == " " || tags == "") {
-      return "all";
+  String validateTags(String tags) {
+    if (tags == ' ' || tags == '') {
+      return 'all';
     } else {
       return super.validateTags(tags);
     }
   }
 
   @override
-  List parseListFromResponse(response) {
-    var document = parse(response.data);
-    var spans = document.getElementsByClassName("thumb");
+  List parseListFromResponse(dynamic response) {
+    final document = parse(response.data);
+    final spans = document.getElementsByClassName('thumb');
     return spans;
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
-    var linkItem = responseItem.firstChild!;
-    var imgItem = linkItem.firstChild!;
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
+    final linkItem = responseItem.firstChild;
+    final imgItem = linkItem.firstChild;
 
-    if (imgItem.attributes["src"] != null) {
-      String id = linkItem.attributes["id"]!.substring(1);
-      String thumbURL = imgItem.attributes["src"]!;
-      String fileURL = thumbURL.replaceFirst("thumbs", "img").replaceFirst("thumbnails", "images").replaceFirst("thumbnail_", "");
-      List<String> tags = imgItem.attributes["title"]!.split(" ");
-      BooruItem item = BooruItem(
+    if (imgItem?.attributes['src'] != null && linkItem?.attributes['id'] != null) {
+      final String id = linkItem.attributes['id'].substring(1);
+      final String thumbURL = imgItem.attributes['src'];
+      final String fileURL = thumbURL.replaceFirst('thumbs', 'img').replaceFirst('thumbnails', 'images').replaceFirst('thumbnail_', '');
+      final List<String> tags = imgItem.attributes['title']!.split(' ');
+      final BooruItem item = BooruItem(
         fileURL: fileURL,
         sampleURL: fileURL,
         thumbnailURL: thumbURL,
@@ -49,17 +48,17 @@ class GelbooruV1Handler extends BooruHandler {
   }
 
   String getHashFromURL(String url) {
-    String hash = url.substring(url.lastIndexOf("_") + 1, url.lastIndexOf("."));
+    final String hash = url.substring(url.lastIndexOf('_') + 1, url.lastIndexOf('.'));
     return hash;
   }
 
   @override
   String makePostURL(String id) {
-    return "${booru.baseURL}/index.php?page=post&s=view&id=$id";
+    return '${booru.baseURL}/index.php?page=post&s=view&id=$id';
   }
 
   @override
   String makeURL(String tags) {
-    return "${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${(pageNum * 20).toString()}";
+    return '${booru.baseURL}/index.php?page=post&s=list&tags=${tags.replaceAll(" ", "+")}&pid=${pageNum * 20}';
   }
 }

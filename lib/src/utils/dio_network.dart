@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
-import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class DioNetwork {
@@ -42,7 +41,7 @@ class DioNetwork {
     final usedOptions = options ?? defaultOptions;
     return usedOptions.copyWith(
       headers: {
-        ...(headers ?? usedOptions.headers ?? defaultOptions.headers!),
+        ...headers ?? usedOptions.headers ?? defaultOptions.headers!,
       },
     );
   }
@@ -57,13 +56,13 @@ class DioNetwork {
     final String cleanUrl = temp.replace(queryParameters: {}).toString();
     final Map<String, dynamic> queryParams = {
       ...temp.queryParameters,
-      ...(givenQueryParams ?? {}),
+      ...givenQueryParams ?? {},
     };
 
     // TODO create a separate class for this?
     return {
-      "url": Uri.encodeFull(cleanUrl),
-      "query": queryParams.isEmpty ? null : queryParams,
+      'url': Uri.encodeFull(cleanUrl),
+      'query': queryParams.isEmpty ? null : queryParams,
     };
   }
 
@@ -76,9 +75,9 @@ class DioNetwork {
             return handler.next(response);
           }
 
-          String oldCookie = response.requestOptions.headers['Cookie'] as String? ?? '';
-          String newCookie = await Tools.getCookies(response.requestOptions.uri);
-          var headers = {
+          final String oldCookie = response.requestOptions.headers['Cookie'] as String? ?? '';
+          final String newCookie = await Tools.getCookies(response.requestOptions.uri);
+          final headers = {
             ...response.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
             Tools.captchaCheckHeader: 'done',
@@ -107,9 +106,9 @@ class DioNetwork {
             return handler.next(error);
           }
 
-          String oldCookie = error.requestOptions.headers['Cookie'] as String? ?? '';
-          String newCookie = await Tools.getCookies(error.requestOptions.uri);
-          var headers = {
+          final String oldCookie = error.requestOptions.headers['Cookie'] as String? ?? '';
+          final String newCookie = await Tools.getCookies(error.requestOptions.uri);
+          final headers = {
             ...error.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
             Tools.captchaCheckHeader: 'done',
@@ -130,7 +129,7 @@ class DioNetwork {
             return handler.resolve(cloneReq);
           } catch (e) {
             return handler.next(error);
-          }          
+          }
         },
       ),
     );
@@ -221,7 +220,7 @@ class DioNetwork {
     );
   }
 
-  static download(
+  static Future<Response> download(
     String url,
     String savePath, {
     Object? data,
@@ -306,7 +305,7 @@ class DioNetwork {
       total = int.parse(response.headers.value(lengthHeader) ?? '-1');
     }
 
-    String? fileUri = await ServiceHandler.createFileStreamFromSAFDirectory(
+    final String? fileUri = await ServiceHandler.createFileStreamFromSAFDirectory(
       fileNameWoutExt,
       mediaType,
       fileExt,
@@ -383,11 +382,12 @@ class DioNetwork {
       },
       cancelOnError: true,
     );
-    // ignore: unawaited_futures
-    cancelToken?.whenCancel.then((_) async {
-      await subscription.cancel();
-      await closeAndDelete();
-    });
+    unawaited(
+      cancelToken?.whenCancel.then((_) async {
+        await subscription.cancel();
+        await closeAndDelete();
+      }),
+    );
 
     final timeout = response.requestOptions.receiveTimeout;
     if (timeout != null) {

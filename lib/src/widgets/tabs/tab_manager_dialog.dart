@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -19,7 +19,7 @@ import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_move_dialog.dart';
 
 class TabManagerDialog extends StatefulWidget {
-  const TabManagerDialog({Key? key}) : super(key: key);
+  const TabManagerDialog({super.key});
 
   @override
   State<TabManagerDialog> createState() => _TabManagerDialogState();
@@ -102,7 +102,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
 
     if (filterController.text.isNotEmpty) {
       filteredTabs = filteredTabs.where((t) {
-        String filterText = filterController.text.toLowerCase().trim();
+        final String filterText = filterController.text.toLowerCase().trim();
         return t.tags.toLowerCase().contains(filterText);
       }).toList();
     }
@@ -154,7 +154,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
-                  title: const Text("Copied to clipboard!", style: TextStyle(fontSize: 20)),
+                  title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
                   content: Text(data.tags, style: const TextStyle(fontSize: 16)),
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
@@ -265,13 +265,13 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
 
     // print(value.tags);
     final int totalCount = tab.booruHandler.totalCount.value;
-    final String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
+    final String totalCountText = (totalCount > 0) ? ' ($totalCount)' : '';
     final String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
 
     final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
 
-    final String? givenIndexText = isFilterActive ? "${index + 1}" : null;
-    final String tabIndexText = "${searchHandler.list.indexOf(tab) + 1}";
+    final String? givenIndexText = isFilterActive ? '${index + 1}' : null;
+    final String tabIndexText = '${searchHandler.list.indexOf(tab) + 1}';
 
     final Widget checkbox = Checkbox(
       value: isSelected,
@@ -322,10 +322,10 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
           text: tagText,
           fontSize: 16,
           fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
-          color: tab.tags == "" ? Colors.grey : null,
+          color: tab.tags == '' ? Colors.grey : null,
           isExpanded: false,
         ),
-        subtitle: Text(isNotEmptyBooru ? tab.selectedBooru.value.name! : ""),
+        subtitle: Text(isNotEmptyBooru ? tab.selectedBooru.value.name! : ''),
       ),
     );
   }
@@ -344,7 +344,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
     return count;
   }
 
-  void openFiltersDialog() async {
+  Future<void> openFiltersDialog() async {
     final String? result = await SettingsPageOpen(
       context: context,
       asBottomSheet: true,
@@ -574,7 +574,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                 margin: const EdgeInsets.all(10),
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.select_all),
-                  label: const Text("Select all"),
+                  label: const Text('Select all'),
                   onPressed: () {
                     selectedTabs = filteredTabs.where((element) => element != searchHandler.currentTab).toList();
                     setState(() {});
@@ -610,7 +610,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Delete Tabs"),
+                      const Text('Delete Tabs'),
                       Text(
                         'Are you sure you want to delete ${selectedTabs.length} ${Tools.pluralize('tab', selectedTabs.length)}?',
                         style: const TextStyle(fontSize: 16),
@@ -639,7 +639,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
                   actionButtons: [
                     const CancelButton(),
                     ElevatedButton.icon(
-                      label: const Text("Delete"),
+                      label: const Text('Delete'),
                       icon: const Icon(Icons.delete_forever),
                       onPressed: () {
                         for (int i = 0; i < selectedTabs.length; i++) {
@@ -666,7 +666,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
           Expanded(
             child: ElevatedButton.icon(
               icon: const Icon(Icons.border_clear),
-              label: const Text("Clear selection"),
+              label: const Text('Clear selection'),
               onPressed: () {
                 selectedTabs.clear();
                 setState(() {});
@@ -681,7 +681,7 @@ class _TabManagerDialogState extends State<TabManagerDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsPageDialog(
-      title: const Text("Tabs"),
+      title: const Text('Tabs'),
       content: Column(
         children: [
           filterBuild(),
@@ -733,11 +733,11 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
-      title: const Text("Tab Filters"),
+      title: const Text('Tab Filters'),
       contentPadding: const EdgeInsets.all(16),
       contentItems: [
         SettingsBooruDropdown(
-          title: "Booru",
+          title: 'Booru',
           value: booruFilter,
           drawBottomBorder: false,
           onChanged: (Booru? newValue) {
@@ -746,7 +746,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
           },
         ),
         SettingsDropdown<bool?>(
-          title: "Loaded",
+          title: 'Loaded',
           value: loadedFilter,
           drawBottomBorder: false,
           onChanged: (bool? newValue) {
@@ -758,15 +758,15 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             true,
             false,
           ],
-          itemBuilder: (item) => item == null ? const Text("All") : Text(item ? "Loaded" : "Unloaded"),
+          itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Loaded' : 'Unloaded'),
           itemTitleBuilder: (item) => item == null
-              ? "All"
+              ? 'All'
               : item
-                  ? "Loaded"
-                  : "Unloaded",
+                  ? 'Loaded'
+                  : 'Unloaded',
         ),
         SettingsToggle(
-          title: "Duplicates",
+          title: 'Duplicates',
           value: duplicateFilter,
           onChanged: (bool newValue) {
             duplicateFilter = newValue;
@@ -776,7 +776,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
       ],
       actionButtons: [
         ElevatedButton.icon(
-          label: const Text("Clear"),
+          label: const Text('Clear'),
           icon: const Icon(Icons.delete),
           onPressed: () {
             Navigator.of(context).pop('clear');
@@ -784,7 +784,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
         const SizedBox(width: 10),
         ElevatedButton.icon(
-          label: const Text("Apply"),
+          label: const Text('Apply'),
           icon: const Icon(Icons.check),
           onPressed: () {
             widget.loadedFilterChanged(loadedFilter);

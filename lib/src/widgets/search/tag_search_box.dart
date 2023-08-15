@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -23,7 +23,7 @@ import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
 // - parse tag type from search if possible
 
 class TagSearchBox extends StatefulWidget {
-  const TagSearchBox({Key? key}) : super(key: key);
+  const TagSearchBox({super.key});
 
   @override
   State<TagSearchBox> createState() => _TagSearchBoxState();
@@ -41,9 +41,9 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   OverlayEntry? _overlayEntry;
   bool isFocused = false;
 
-  String input = "";
-  String lastTag = "";
-  String replaceString = "";
+  String input = '';
+  String lastTag = '';
+  String replaceString = '';
   int startIndex = 0;
   int multiIndex = -1;
   int cursorPos = 0;
@@ -195,8 +195,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         color: Theme.of(context).colorScheme.secondary,
                         child: TextButton(
                           onPressed: () async {
-                            ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
-                            String copied = cdata?.text ?? '';
+                            final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
+                            final String copied = cdata?.text ?? '';
                             if (copied.isNotEmpty) {
                               searchHandler.searchTextController.text += ' $copied ';
                               searchHandler.searchTextController.selection =
@@ -263,10 +263,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   List<Widget> getTagsChips() {
     // TODO on desktop - set cursor to where user clicked?
     // based on https://github.com/eyoeldefare/textfield_tags
-    List<Widget> tags = [];
+    final List<Widget> tags = [];
 
     for (var i = 0; i < splitInput.length; i++) {
-      String stringContent = splitInput.elementAt(i);
+      final String stringContent = splitInput.elementAt(i);
       if (stringContent.isEmpty) {
         // skip creating chip element for empty tags (i.e double spaces...)
         continue;
@@ -298,19 +298,19 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void tagStuff() {
     input = searchHandler.searchTextController.text;
     if (searchHandler.currentBooru.type == BooruType.Hydrus) {
-      splitInput = input.trim().split(",");
+      splitInput = input.trim().split(',');
     } else {
-      splitInput = input.trim().split(" ");
+      splitInput = input.trim().split(' ');
     }
     startIndex = 0;
     setSelectedTag(input);
     multiIndex = -1;
-    if (lastTag.startsWith(RegExp(r"\d+#"))) {
-      int tmpIndex = int.parse(lastTag.split("#")[0]) - 1;
-      String tag = lastTag.split("#")[1];
+    if (lastTag.startsWith(RegExp(r'\d+#'))) {
+      final int tmpIndex = int.parse(lastTag.split('#')[0]) - 1;
+      final String tag = lastTag.split('#')[1];
       if (searchHandler.currentBooruHandler is MergebooruHandler) {
-        MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-        if ((tmpIndex) >= 0 && tmpIndex < handler.booruHandlers.length) {
+        final MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
+        if (tmpIndex >= 0 && tmpIndex < handler.booruHandlers.length) {
           multiIndex = tmpIndex;
           lastTag = tag;
         }
@@ -318,7 +318,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     }
 
     //remove minus (exclude symbol) or tilde (or symbol)
-    lastTag = lastTag.replaceAll(RegExp(r'^-'), '').replaceAll(RegExp(r'^~'), '');
+    lastTag = lastTag.replaceAll(RegExp('^-'), '').replaceAll(RegExp('^~'), '');
     // print("LASTTAG: $lastTag");
     setState(() {});
   }
@@ -327,7 +327,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     cursorPos = searchHandler.searchTextController.selection.baseOffset;
     if (cursorPos < 0) cursorPos = 0;
     int tmpStartIndex = cursorPos - 1;
-    while (tmpStartIndex > 0 && (searchHandler.currentBooru.type == BooruType.Hydrus ? input[tmpStartIndex] != "," : input[tmpStartIndex] != " ")) {
+    while (tmpStartIndex > 0 && (searchHandler.currentBooru.type == BooruType.Hydrus ? input[tmpStartIndex] != ',' : input[tmpStartIndex] != ' ')) {
       tmpStartIndex--;
     }
 
@@ -335,12 +335,12 @@ class _TagSearchBoxState extends State<TagSearchBox> {
       lastTag = splitInput.last;
       replaceString = lastTag;
     } else {
-      int endIndex = input.indexOf(" ", cursorPos);
+      int endIndex = input.indexOf(' ', cursorPos);
       if (searchHandler.currentBooru.type == BooruType.Hydrus) {
         if (tmpStartIndex == -1) {
           endIndex = input.length;
         } else {
-          endIndex = input.indexOf(",", tmpStartIndex);
+          endIndex = input.indexOf(',', tmpStartIndex);
         }
       }
       if (endIndex == -1) endIndex = cursorPos;
@@ -350,14 +350,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     }
   }
 
-  void searchBooru() async {
+  Future<void> searchBooru() async {
     booruResults.value = [
       [' ', 'loading']
     ];
     // TODO cancel previous search when new starts
     List<String?> getFromBooru = [];
     if (multiIndex != -1) {
-      MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
+      final MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
       getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag);
     } else {
       getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
@@ -369,7 +369,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     }).toList();
   }
 
-  void searchHistory() async {
+  Future<void> searchHistory() async {
     historyResults.value = [
       [' ', 'loading']
     ];
@@ -382,7 +382,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1).toList(); // filter out duplicates
   }
 
-  void searchDatabase() async {
+  Future<void> searchDatabase() async {
     databaseResults.value = [
       [' ', 'loading']
     ];
@@ -420,7 +420,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   OverlayEntry? _createOverlayEntry() {
-    RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
     final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
 
@@ -431,10 +431,10 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         width: size.width * 1.2,
         height: 300,
         child: Material(
-          elevation: 4.0,
+          elevation: 4,
           color: Theme.of(context).colorScheme.surface,
           child: Obx(() {
-            List<List<String>> items = [
+            final List<List<String>> items = [
               ...historyResults.where((tag) => booruResults.indexWhere((btag) => btag[0].toLowerCase() == tag[0].toLowerCase()) == -1),
               ...databaseResults.where(
                 (tag) =>
@@ -474,7 +474,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     final String tag = item[0];
                     final String type = item[1];
 
-                    Color tagColor = tagHandler.getTag(tag).getColour();
+                    final Color tagColor = tagHandler.getTag(tag).getColour();
 
                     if (tag.isNotEmpty) {
                       Widget itemIcon = const SizedBox();
@@ -523,24 +523,24 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
                           // widget.searchBoxFocus.unfocus();
 
-                          String multiIndex = replaceString.startsWith(RegExp(r"\d+#")) ? "${replaceString.split("#")[0]}#" : "";
+                          final String multiIndex = replaceString.startsWith(RegExp(r'\d+#')) ? "${replaceString.split("#")[0]}#" : '';
                           // Keep minus if its in the beggining of current (last) tag
-                          bool isExclude = RegExp(r'^-').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
-                          bool isOr = RegExp(r'^~').hasMatch(replaceString.replaceAll(RegExp(r"\d+#"), ""));
+                          final bool isExclude = RegExp('^-').hasMatch(replaceString.replaceAll(RegExp(r'\d+#'), ''));
+                          final bool isOr = RegExp('^~').hasMatch(replaceString.replaceAll(RegExp(r'\d+#'), ''));
                           String newTag = multiIndex + (isExclude ? '-' : '') + (isOr ? '~' : '') + tag;
                           if (searchHandler.currentBooru.type == BooruType.Hydrus) {
-                            final String tagWithSpaces = newTag.replaceAll(RegExp(r'_'), ' ');
-                            newTag = "$tagWithSpaces,";
+                            final String tagWithSpaces = newTag.replaceAll(RegExp('_'), ' ');
+                            newTag = '$tagWithSpaces,';
                           } else {
-                            newTag = "$newTag ";
+                            newTag = '$newTag ';
                           }
 
-                          String newInput = "";
+                          String newInput = '';
                           if (startIndex >= 0 && replaceString.isNotEmpty) {
                             //newInput = searchHandler.searchTextController.text.replaceRange(start, end, replacement)
                             newInput = searchHandler.searchTextController.text.replaceFirst(replaceString, newTag, cursorPos - replaceString.length);
                           } else if (startIndex == -1) {
-                            newInput = newTag + (searchHandler.currentBooru.type == BooruType.Hydrus ? "," : " ") + searchHandler.searchTextController.text;
+                            newInput = newTag + (searchHandler.currentBooru.type == BooruType.Hydrus ? ',' : ' ') + searchHandler.searchTextController.text;
                           } else {
                             newInput = searchHandler.searchTextController.text + newTag;
                           }
@@ -617,7 +617,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
               }
             },
             decoration: InputDecoration(
-              hintText: searchHandler.searchTextController.text.isEmpty ? "Enter Tags" : '',
+              hintText: searchHandler.searchTextController.text.isEmpty ? 'Enter Tags' : '',
               prefixIcon: isFocused //searchHandler.searchTextController.text.length > 0
                   ? IconButton(
                       padding: const EdgeInsets.all(5),

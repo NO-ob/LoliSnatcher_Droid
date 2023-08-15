@@ -14,7 +14,6 @@ import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 class ViewerHandler extends GetxController {
   static ViewerHandler get instance => Get.find<ViewerHandler>();
 
-
   // Keys to get states of all currently built viewers
   RxList<GlobalKey?> activeKeys = RxList([]);
   // Key of the currently viewed media widget
@@ -22,26 +21,38 @@ class ViewerHandler extends GetxController {
 
   // Add media widget key
   void addViewed(Key? key) {
-    if(key == null) return;
-    if(activeKeys.contains(key)) return;
+    if (key == null || activeKeys.contains(key)) {
+      return;
+    }
 
-    if(key is GlobalKey) activeKeys.add(key);
+    if (key is GlobalKey) {
+      activeKeys.add(key);
+    }
   }
+
   // Remove media widget key
   void removeViewed(Key? key) {
-    if(key == null) return;
-    if(!activeKeys.contains(key)) return;
+    if (key == null || !activeKeys.contains(key)) {
+      return;
+    }
 
-    if(key is GlobalKey) activeKeys.remove(key);
+    if (key is GlobalKey) {
+      activeKeys.remove(key);
+    }
   }
+
   // Set the key of current viewed widget
   void setCurrent(Key? key) {
-    if(key == null) return;
-    if(currentKey.value == key) return;
+    if (key == null || currentKey.value == key) {
+      return;
+    }
 
-    if(key is GlobalKey) currentKey.value = key;
+    if (key is GlobalKey) {
+      currentKey.value = key;
+    }
     setNewState(key);
   }
+
   // Drop the key of viewed widget and reset the handler state
   // (used when user exits the viewerpage)
   void dropCurrent() {
@@ -72,29 +83,30 @@ class ViewerHandler extends GetxController {
 
   // Get zoom state of new current item
   void setNewState(Key? key) {
-    if(key == null) return;
-    if(currentKey.value != key) return;
+    if (key == null || currentKey.value != key) {
+      return;
+    }
 
     // addPostFrameCallback waits until widget is built to avoid calling setState in it while other setState is active
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      var state = currentKey.value?.currentState;
+      final state = currentKey.value?.currentState;
       switch (state?.widget.runtimeType) {
         case ImageViewer:
-          var widgetState = state as ImageViewerState;
+          final widgetState = state! as ImageViewerState;
           isZoomed.value = widgetState.isZoomed;
           isLoaded.value = widgetState.isLoaded;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
         case VideoViewer:
-          var widgetState = state as VideoViewerState;
+          final widgetState = state! as VideoViewerState;
           isZoomed.value = widgetState.isZoomed;
           isLoaded.value = widgetState.isVideoInited;
           isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
         case VideoViewerDesktop:
-          var widgetState = state as VideoViewerDesktopState;
+          final widgetState = state! as VideoViewerDesktopState;
           isZoomed.value = widgetState.isZoomed;
           // TODO find a way to get video loaded state
           isLoaded.value = true;
@@ -107,52 +119,56 @@ class ViewerHandler extends GetxController {
           isFullscreen.value = false;
           viewState.value = null;
           break;
-        default: break;
+        default:
+          break;
       }
     });
   }
+
   // Set zoom state, called by the current item itself
   void setZoomed(Key? key, bool isZoom) {
-    if(key == null) return;
-    if(currentKey.value != key) return;
+    if (key == null || currentKey.value != key) {
+      return;
+    }
 
     isZoomed.value = isZoom;
   }
+
   // toggle item's zoom state
   void toggleZoom() {
     isZoomed.value ? resetZoom() : doubleTapZoom();
   }
+
   void resetZoom() {
-    dynamic state = currentKey.value?.currentState;
+    final dynamic state = currentKey.value?.currentState;
     state?.resetZoom?.call();
   }
+
   void doubleTapZoom() {
-    dynamic state = currentKey.value?.currentState;
+    final dynamic state = currentKey.value?.currentState;
     state?.doubleTapZoom?.call();
   }
 
   void setViewState(Key? key, PhotoViewControllerValue value) {
-    if(key == null) return;
-    if(currentKey.value != key) return;
+    if (key == null || currentKey.value != key) {
+      return;
+    }
 
     viewState.value = value;
   }
 
   void setLoaded(Key? key, bool value) {
-    if(key == null) return;
-    if(currentKey.value != key) return;
+    if (key == null || currentKey.value != key) {
+      return;
+    }
 
     isLoaded.value = value;
   }
 
-
-
   // Related to videos
   // TODO check if mute is forced when there are two videos in a row and you mute on the first video and then go to the second video
   bool videoAutoMute = false; // hold volume button in VideoViewer to mute videos globally
-  double videoVolume = 1; 
-
-
+  double videoVolume = 1;
 
   // ViewerHandler() {
   //   // debug: print keys list changes
@@ -227,5 +243,3 @@ class ViewerHandler extends GetxController {
 //     );
 //   });
 // }
-
-

@@ -25,7 +25,7 @@ import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 
 class TagView extends StatefulWidget {
-  const TagView({Key? key}) : super(key: key);
+  const TagView({super.key});
 
   @override
   State<TagView> createState() => _TagViewState();
@@ -75,8 +75,10 @@ class _TagViewState extends State<TagView> {
   }
 
   List<String> filterTags(List<String> tagsToFilter) {
-    List<String> filteredTags = [];
-    if (searchController.text.isEmpty) return tagsToFilter;
+    final List<String> filteredTags = [];
+    if (searchController.text.isEmpty) {
+      return tagsToFilter;
+    }
 
     for (int i = 0; i < tagsToFilter.length; i++) {
       if (tagsToFilter[i].toLowerCase().contains(searchController.text.toLowerCase())) {
@@ -99,8 +101,8 @@ class _TagViewState extends State<TagView> {
   }
 
   void groupTagsList() {
-    Map<TagType, List<String>> tagMap = {};
-    List<String> groupedTags = [];
+    final Map<TagType, List<String>> tagMap = {};
+    final List<String> groupedTags = [];
     for (int i = 0; i < TagType.values.length; i++) {
       tagMap[TagType.values[i]] = [];
     }
@@ -115,7 +117,7 @@ class _TagViewState extends State<TagView> {
     // tagMap.forEach((key, value) => {
     //   print("Type: $key Tags: $value")
     // });
-    for (var value in tagMap.values) {
+    for (final value in tagMap.values) {
       groupedTags.addAll(value);
     }
     tags = groupedTags;
@@ -154,7 +156,7 @@ class _TagViewState extends State<TagView> {
         // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
         // remove timezones from strings until they fix it
         DateTime parsedDate;
-        if (postDateFormat == "unix") {
+        if (postDateFormat == 'unix') {
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
         } else {
           postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
@@ -170,7 +172,7 @@ class _TagViewState extends State<TagView> {
     return SliverList(
       delegate: SliverChildListDelegate(
         [
-          if(settingsHandler.isDebug.value) infoText('Filename', fileName),
+          if (settingsHandler.isDebug.value) infoText('Filename', fileName),
           infoText('URL', fileUrl),
           infoText('ID', itemId),
           infoText('Rating', rating),
@@ -214,26 +216,29 @@ class _TagViewState extends State<TagView> {
       name: 'Tags',
       subtitle: Text(searchController.text.isEmpty ? '${tags.length}' : '${filteredTags.length} / ${tags.length}'),
       trailingIcon: Container(
-              margin: const EdgeInsets.only(left: 10),
-              child: Transform(
-                alignment: Alignment.center,
-                transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-                child: IconButton(
-                  icon: Icon((sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha, color: Theme.of(context).iconTheme.color,),
-                  onPressed: () {
-                    if (sortTags == true) {
-                      sortTags = false;
-                    } else if (sortTags == false) {
-                      sortTags = null;
-                    } else {
-                      sortTags = true;
-                    }
-                    sortAndGroupTagsList();
-                    setState(() {});
-                  },
-                ),
-              ),
+        margin: const EdgeInsets.only(left: 10),
+        child: Transform(
+          alignment: Alignment.center,
+          transform: sortTags == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+          child: IconButton(
+            icon: Icon(
+              (sortTags == true || sortTags == false) ? Icons.sort : Icons.sort_by_alpha,
+              color: Theme.of(context).iconTheme.color,
             ),
+            onPressed: () {
+              if (sortTags == true) {
+                sortTags = false;
+              } else if (sortTags == false) {
+                sortTags = null;
+              } else {
+                sortTags = true;
+              }
+              sortAndGroupTagsList();
+              setState(() {});
+            },
+          ),
+        ),
+      ),
       drawBottomBorder: false,
     );
   }
@@ -249,7 +254,10 @@ class _TagViewState extends State<TagView> {
 
     return SettingsButton(
       name: 'Comments',
-      icon: Icon(icon, color: Theme.of(context).iconTheme.color,),
+      icon: Icon(
+        icon,
+        color: Theme.of(context).iconTheme.color,
+      ),
       action: () {
         SettingsPageOpen(
           context: context,
@@ -275,7 +283,10 @@ class _TagViewState extends State<TagView> {
       if (item.notes.isNotEmpty) {
         return SettingsButton(
           name: '${viewerHandler.showNotes.value ? 'Hide' : 'Show'} Notes (${item.notes.length})',
-          icon: Icon(Icons.note_add, color: Theme.of(context).iconTheme.color,),
+          icon: Icon(
+            Icons.note_add,
+            color: Theme.of(context).iconTheme.color,
+          ),
           action: () {
             viewerHandler.showNotes.toggle();
           },
@@ -292,7 +303,10 @@ class _TagViewState extends State<TagView> {
       } else {
         return SettingsButton(
           name: 'Load notes',
-          icon: Icon(Icons.note_add, color: Theme.of(context).iconTheme.color,),
+          icon: Icon(
+            Icons.note_add,
+            color: Theme.of(context).iconTheme.color,
+          ),
           action: () async {
             item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
           },
@@ -329,7 +343,7 @@ class _TagViewState extends State<TagView> {
                                   FlashElements.showSnackbar(
                                     context: context,
                                     duration: const Duration(seconds: 2),
-                                    title: const Text("Copied source to clipboard!", style: TextStyle(fontSize: 20)),
+                                    title: const Text('Copied source to clipboard!', style: TextStyle(fontSize: 20)),
                                     content: Text(link, style: const TextStyle(fontSize: 16)),
                                     leadingIcon: Icons.copy,
                                     sideColor: Colors.green,
@@ -381,7 +395,7 @@ class _TagViewState extends State<TagView> {
               context: context,
               duration: const Duration(seconds: 2),
               title: Text(
-                "Copied $title to clipboard!",
+                'Copied $title to clipboard!',
                 style: const TextStyle(fontSize: 20),
               ),
               content: Text(
@@ -446,15 +460,18 @@ class _TagViewState extends State<TagView> {
             ),
             const SizedBox(height: 10),
             ListTile(
-              leading: Icon(Icons.copy, color: Theme.of(context).iconTheme.color,),
-              title: const Text("Copy"),
+              leading: Icon(
+                Icons.copy,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              title: const Text('Copy'),
               onTap: () {
                 Clipboard.setData(ClipboardData(text: tag));
                 FlashElements.showSnackbar(
                   context: context,
                   duration: const Duration(seconds: 2),
                   title: const Text(
-                    "Copied to clipboard!",
+                    'Copied to clipboard!',
                     style: TextStyle(fontSize: 20),
                   ),
                   content: Text(
@@ -469,8 +486,11 @@ class _TagViewState extends State<TagView> {
             ),
             if (isInSearch)
               ListTile(
-                leading: Icon(Icons.remove, color: Theme.of(context).iconTheme.color,),
-                title: const Text("Remove from Search"),
+                leading: Icon(
+                  Icons.remove,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                title: const Text('Remove from Search'),
                 onTap: () {
                   searchHandler.removeTagFromSearch(tag);
                   Navigator.of(context).pop(true);
@@ -479,7 +499,7 @@ class _TagViewState extends State<TagView> {
             if (!isInSearch)
               ListTile(
                 leading: const Icon(Icons.add, color: Colors.green),
-                title: const Text("Add to Search"),
+                title: const Text('Add to Search'),
                 onTap: () {
                   searchHandler.addTagToSearch(tag);
 
@@ -487,7 +507,7 @@ class _TagViewState extends State<TagView> {
                     context: context,
                     duration: const Duration(seconds: 2),
                     title: const Text(
-                      "Added to search bar:",
+                      'Added to search bar:',
                       style: TextStyle(fontSize: 20),
                     ),
                     content: Text(
@@ -504,7 +524,7 @@ class _TagViewState extends State<TagView> {
             if (!isInSearch)
               ListTile(
                 leading: const Icon(Icons.add, color: Colors.red),
-                title: const Text("Add to Search (Exclude)"),
+                title: const Text('Add to Search (Exclude)'),
                 onTap: () {
                   searchHandler.addTagToSearch('-$tag');
 
@@ -512,7 +532,7 @@ class _TagViewState extends State<TagView> {
                     context: context,
                     duration: const Duration(seconds: 2),
                     title: const Text(
-                      "Added to search bar (Exclude):",
+                      'Added to search bar (Exclude):',
                       style: TextStyle(fontSize: 20),
                     ),
                     content: Text(
@@ -529,7 +549,7 @@ class _TagViewState extends State<TagView> {
             if (!isHated && !isLoved)
               ListTile(
                 leading: const Icon(Icons.star, color: Colors.yellow),
-                title: const Text("Add to Loved"),
+                title: const Text('Add to Loved'),
                 onTap: () {
                   settingsHandler.addTagToList('loved', tag);
                   parseSortGroupTags();
@@ -539,7 +559,7 @@ class _TagViewState extends State<TagView> {
             if (!isHated && !isLoved)
               ListTile(
                 leading: const Icon(CupertinoIcons.eye_slash, color: Colors.red),
-                title: const Text("Add to Hated"),
+                title: const Text('Add to Hated'),
                 onTap: () {
                   settingsHandler.addTagToList('hated', tag);
                   parseSortGroupTags();
@@ -548,8 +568,11 @@ class _TagViewState extends State<TagView> {
               ),
             if (isLoved)
               ListTile(
-                leading: Icon(Icons.star_border, color: Theme.of(context).iconTheme.color,),
-                title: const Text("Remove from Loved"),
+                leading: Icon(
+                  Icons.star_border,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                title: const Text('Remove from Loved'),
                 onTap: () {
                   settingsHandler.removeTagFromList('loved', tag);
                   parseSortGroupTags();
@@ -558,8 +581,11 @@ class _TagViewState extends State<TagView> {
               ),
             if (isHated)
               ListTile(
-                leading: Icon(CupertinoIcons.eye_slash, color: Theme.of(context).iconTheme.color,),
-                title: const Text("Remove from Hated"),
+                leading: Icon(
+                  CupertinoIcons.eye_slash,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                title: const Text('Remove from Hated'),
                 onTap: () {
                   settingsHandler.removeTagFromList('hated', tag);
                   parseSortGroupTags();
@@ -601,17 +627,20 @@ class _TagViewState extends State<TagView> {
     final HasTabWithTagResult hasTabWithTag = searchHandler.hasTabWithTag(currentTag);
 
     final List<TagInfoIcon> tagIconAndColor = [];
-    if (isSound) tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
-    if (isHated) tagIconAndColor.add(TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
-    if (isLoved) tagIconAndColor.add(TagInfoIcon(Icons.star, Colors.yellow));
+    if (isSound) {
+      tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
+    }
+    if (isHated) {
+      tagIconAndColor.add(TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
+    }
+    if (isLoved) {
+      tagIconAndColor.add(TagInfoIcon(Icons.star, Colors.yellow));
+    }
 
     if (currentTag != '') {
-      return Column(children: <Widget>[
-        Container(
-          // decoration: BoxDecoration(
-          //   border: Border(left: BorderSide(width: 10.0, color: tagHandler.getTag(currentTag).getColour())),
-          // ),
-          child: InkWell(
+      return Column(
+        children: <Widget>[
+          InkWell(
             onTap: () {
               tagDialog(
                 tag: currentTag,
@@ -638,11 +667,13 @@ class _TagViewState extends State<TagView> {
                   isExpanded: true,
                 ),
                 if (tagIconAndColor.isNotEmpty) ...[
-                  ...tagIconAndColor.map((t) => Icon(
-                        t.icon,
-                        color: t.color,
-                        size: 20,
-                      )),
+                  ...tagIconAndColor.map(
+                    (t) => Icon(
+                      t.icon,
+                      color: t.color,
+                      size: 20,
+                    ),
+                  ),
                   const SizedBox(width: 5),
                 ],
                 IconButton(
@@ -662,11 +693,11 @@ class _TagViewState extends State<TagView> {
                     ],
                   ),
                   onPressed: () {
-                    if(isInSearch) {
+                    if (isInSearch) {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text("This tag is already in the current search query:", style: TextStyle(fontSize: 18)),
+                        title: const Text('This tag is already in the current search query:', style: TextStyle(fontSize: 18)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.warning_amber,
                         leadingIconColor: Colors.yellow,
@@ -679,7 +710,7 @@ class _TagViewState extends State<TagView> {
                     FlashElements.showSnackbar(
                       context: context,
                       duration: const Duration(seconds: 2),
-                      title: const Text("Added to current search query:", style: TextStyle(fontSize: 20)),
+                      title: const Text('Added to current search query:', style: TextStyle(fontSize: 20)),
                       content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                       leadingIcon: Icons.add,
                       sideColor: Colors.green,
@@ -719,32 +750,34 @@ class _TagViewState extends State<TagView> {
                       FlashElements.showSnackbar(
                         context: context,
                         duration: const Duration(seconds: 2),
-                        title: const Text("Added new tab:", style: TextStyle(fontSize: 20)),
+                        title: const Text('Added new tab:', style: TextStyle(fontSize: 20)),
                         content: Text(currentTag, style: const TextStyle(fontSize: 16)),
                         leadingIcon: Icons.fiber_new,
                         sideColor: Colors.green,
                         primaryActionBuilder: (controller) {
-                          return Row(children: [
-                            IconButton(
-                              onPressed: () {
-                                ServiceHandler.vibrate();
-                                if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
-                                  Navigator.of(context).pop(true); // exit drawer
-                                  Navigator.of(context).pop(true); // exit viewer
-                                }
-                                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                                  searchHandler.changeTabIndex(searchHandler.list.length - 1);
-                                });
-                                controller.dismiss();
-                              },
-                              icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onBackground),
-                            ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              onPressed: () => controller.dismiss(),
-                              icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onBackground),
-                            ),
-                          ]);
+                          return Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  ServiceHandler.vibrate();
+                                  if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
+                                    Navigator.of(context).pop(true); // exit drawer
+                                    Navigator.of(context).pop(true); // exit viewer
+                                  }
+                                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                                    searchHandler.changeTabIndex(searchHandler.list.length - 1);
+                                  });
+                                  controller.dismiss();
+                                },
+                                icon: Icon(Icons.arrow_forward_rounded, color: Theme.of(context).colorScheme.onBackground),
+                              ),
+                              const SizedBox(width: 4),
+                              IconButton(
+                                onPressed: () => controller.dismiss(),
+                                icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onBackground),
+                              ),
+                            ],
+                          );
                         },
                       );
                       sortAndGroupTagsList();
@@ -756,13 +789,13 @@ class _TagViewState extends State<TagView> {
               ],
             ),
           ),
-        ),
-        Divider(
-          color: Colors.grey[800],
-          height: 1,
-          thickness: 1,
-        ),
-      ]);
+          Divider(
+            color: Colors.grey[800],
+            height: 1,
+            thickness: 1,
+          ),
+        ],
+      );
     } else {
       // Render nothing if currentTag is an empty string
       return const SizedBox();
@@ -794,8 +827,8 @@ class _TagViewState extends State<TagView> {
 
 // TODO move to own/model file
 class TagInfoIcon {
+  TagInfoIcon(this.icon, this.color);
+
   final IconData icon;
   final Color color;
-
-  TagInfoIcon(this.icon, this.color);
 }

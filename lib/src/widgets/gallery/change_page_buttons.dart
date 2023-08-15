@@ -6,7 +6,12 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 
 class ChangePageButtons extends StatelessWidget {
-  const ChangePageButtons({Key? key, required this.controller, required this.isPrev}) : super(key: key);
+  const ChangePageButtons({
+    required this.controller,
+    required this.isPrev,
+    super.key,
+  });
+
   final PreloadPageController? controller;
   final bool isPrev;
 

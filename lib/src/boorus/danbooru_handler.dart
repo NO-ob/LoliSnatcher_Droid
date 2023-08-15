@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:lolisnatcher/src/data/booru.dart';
+
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
@@ -10,25 +10,25 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class DanbooruHandler extends BooruHandler {
-  DanbooruHandler(Booru booru, int limit) : super(booru, limit);
+  DanbooruHandler(super.booru, super.limit);
 
   @override
-  Map<String, TagType> tagTypeMap = {
-    '5': TagType.meta,
-    '3': TagType.copyright,
-    '4': TagType.character,
-    '1': TagType.artist,
-    '0': TagType.none,
-  };
+  Map<String, TagType> get tagTypeMap => {
+        '5': TagType.meta,
+        '3': TagType.copyright,
+        '4': TagType.character,
+        '1': TagType.artist,
+        '0': TagType.none,
+      };
 
   @override
-  bool hasSizeData = true;
+  bool get hasSizeData => true;
 
   @override
-  bool hasCommentsSupport = true;
+  bool get hasCommentsSupport => true;
 
   @override
-  bool hasNotesSupport = true;
+  bool get hasNotesSupport => true;
 
   @override
   String validateTags(String tags) {
@@ -65,13 +65,13 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
-  List parseListFromResponse(response) {
+  List parseListFromResponse(dynamic response) {
     final List parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  BooruItem? parseItemFromResponse(responseItem, int index) {
+  BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
     final current = responseItem;
     /**
      * This check is needed as danbooru will return items which have been banned or deleted and will not have any image urls
@@ -140,7 +140,7 @@ class DanbooruHandler extends BooruHandler {
     // EXAMPLE: https://danbooru.donmai.us/posts.json?tags=rating:safe%20order:rank&limit=20&page=1
     final String loginStr = booru.userID?.isNotEmpty == true ? '&login=${booru.userID}' : '';
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    return "${booru.baseURL}/posts.json?tags=$tags&limit=${limit.toString()}&page=${pageNum.toString()}$loginStr$apiKeyStr";
+    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum$loginStr$apiKeyStr';
   }
 
   @override
@@ -159,15 +159,17 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
-  List parseTagSuggestionsList(response) {
-    List<dynamic> parsedResponse = response.data;
+  List parseTagSuggestionsList(dynamic response) {
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  String? parseTagSuggestion(responseItem, int index) {
+  String? parseTagSuggestion(dynamic responseItem, int index) {
     final String tagStr = (responseItem['antecedent'] ?? responseItem['value'])?.toString() ?? '';
-    if (tagStr.isEmpty) return null;
+    if (tagStr.isEmpty) {
+      return null;
+    }
 
     final String rawTagType = responseItem['category']?.toString() ?? '';
     TagType tagType = TagType.none;
@@ -179,13 +181,13 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
-  List parseCommentsList(response) {
-    List<dynamic> parsedResponse = response.data;
+  List parseCommentsList(dynamic response) {
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  CommentItem? parseComment(responseItem, int index) {
+  CommentItem? parseComment(dynamic responseItem, int index) {
     final String? dateStr = responseItem['created_at']?.toString().substring(0, responseItem['created_at']!.toString().length - 6);
     return CommentItem(
       id: responseItem['id'].toString(),
@@ -208,13 +210,13 @@ class DanbooruHandler extends BooruHandler {
   }
 
   @override
-  List parseNotesList(response) {
-    List<dynamic> parsedResponse = response.data;
+  List parseNotesList(dynamic response) {
+    final List<dynamic> parsedResponse = response.data;
     return parsedResponse;
   }
 
   @override
-  NoteItem? parseNote(responseItem, int index) {
+  NoteItem? parseNote(dynamic responseItem, int index) {
     final current = responseItem;
     return NoteItem(
       id: current['id'].toString(),

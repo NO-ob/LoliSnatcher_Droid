@@ -24,7 +24,11 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 /// This is the booru editor page.
 class BooruEdit extends StatefulWidget {
-  BooruEdit(this.booru, {Key? key}) : super(key: key);
+  BooruEdit(
+    this.booru, {
+    super.key,
+  });
+
   Booru booru;
   BooruType? booruType;
 
@@ -49,12 +53,12 @@ class _BooruEditState extends State<BooruEdit> {
   String convertSiteUrlToApi() {
     final String url = booruURLController.text;
 
-    if (url.contains("chan.sankakucomplex.com")) {
+    if (url.contains('chan.sankakucomplex.com')) {
       // Sankaku api override
-      return "https://capi-v2.sankakucomplex.com";
+      return 'https://capi-v2.sankakucomplex.com';
       // booruFaviconController.text = "https://chan.sankakucomplex.com/favicon.ico";
-    } else if (url.contains("idol.sankakucomplex.com")) {
-      return "https://iapi.sankakucomplex.com";
+    } else if (url.contains('idol.sankakucomplex.com')) {
+      return 'https://iapi.sankakucomplex.com';
       // booruFaviconController.text = "https://idol.sankakucomplex.com/favicon.ico";
     }
 
@@ -66,7 +70,7 @@ class _BooruEditState extends State<BooruEdit> {
   @override
   void initState() {
     //Load settings from the Booru instance parsed to the widget and populate the text fields
-    if (widget.booru.name != "New") {
+    if (widget.booru.name != 'New') {
       booruNameController.text = widget.booru.name!;
       booruURLController.text = widget.booru.baseURL!;
       booruFaviconController.text = widget.booru.faviconURL!;
@@ -83,7 +87,7 @@ class _BooruEditState extends State<BooruEdit> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text("Booru Editor"),
+        title: const Text('Booru Editor'),
         actions: const [],
       ),
       body: Center(
@@ -96,14 +100,13 @@ class _BooruEditState extends State<BooruEdit> {
             SettingsTextInput(
               controller: booruNameController,
               title: 'Name',
-              hintText: "Enter Booru Name",
-              inputType: TextInputType.text,
+              hintText: 'Enter Booru Name',
               clearable: true,
             ),
             SettingsTextInput(
               controller: booruURLController,
               title: 'URL',
-              hintText: "Enter Booru URL",
+              hintText: 'Enter Booru URL',
               inputType: TextInputType.url,
               clearable: true,
             ),
@@ -116,20 +119,19 @@ class _BooruEditState extends State<BooruEdit> {
                 });
               },
               title: 'Booru Type',
-              itemTitleBuilder: (p0) => (p0 as BooruType).alias,
+              itemTitleBuilder: (BooruType p0) => p0.alias,
             ),
             SettingsTextInput(
               controller: booruFaviconController,
               title: 'Favicon',
-              hintText: "(Autofills if blank)",
+              hintText: '(Autofills if blank)',
               inputType: TextInputType.url,
               clearable: true,
             ),
             SettingsTextInput(
               controller: booruDefTagsController,
               title: 'Default Tags',
-              hintText: "Default search for booru",
-              inputType: TextInputType.text,
+              hintText: 'Default search for booru',
               clearable: true,
             ),
             Container(
@@ -156,16 +158,14 @@ class _BooruEditState extends State<BooruEdit> {
             SettingsTextInput(
               controller: booruUserIDController,
               title: getUserIDTitle(),
-              hintText: "(Can be blank)",
-              inputType: TextInputType.text,
+              hintText: '(Can be blank)',
               clearable: true,
               drawTopBorder: true,
             ),
             SettingsTextInput(
               controller: booruAPIKeyController,
               title: getApiKeyTitle(),
-              hintText: "(Can be blank)",
-              inputType: TextInputType.text,
+              hintText: '(Can be blank)',
               clearable: true,
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
@@ -230,7 +230,7 @@ class _BooruEditState extends State<BooruEdit> {
         sanitizeBooruName();
 
         // name and url are required
-        if (booruNameController.text == "") {
+        if (booruNameController.text == '') {
           FlashElements.showSnackbar(
             context: context,
             title: const Text(
@@ -244,7 +244,7 @@ class _BooruEditState extends State<BooruEdit> {
           return;
         }
 
-        if (booruURLController.text == "") {
+        if (booruURLController.text == '') {
           FlashElements.showSnackbar(
             context: context,
             title: const Text(
@@ -259,16 +259,16 @@ class _BooruEditState extends State<BooruEdit> {
         }
 
         // add https if not specified
-        if (!booruURLController.text.contains("http://") && !booruURLController.text.contains("https://")) {
-          booruURLController.text = "https://${booruURLController.text}";
+        if (!booruURLController.text.contains('http://') && !booruURLController.text.contains('https://')) {
+          booruURLController.text = 'https://${booruURLController.text}';
         }
         // autofill favicon if not specified
-        if (booruFaviconController.text == "") {
-          booruFaviconController.text = "${booruURLController.text}/favicon.ico";
+        if (booruFaviconController.text == '') {
+          booruFaviconController.text = '${booruURLController.text}/favicon.ico';
         }
         // TODO make a list of default favicons for boorus where ^default^ one won't work
-        if (booruURLController.text.contains("agn.ph")) {
-          booruFaviconController.text = "https://agn.ph/skin/Retro/favicon.ico";
+        if (booruURLController.text.contains('agn.ph')) {
+          booruFaviconController.text = 'https://agn.ph/skin/Retro/favicon.ico';
         }
 
         // some boorus have their api url different from main host
@@ -276,7 +276,7 @@ class _BooruEditState extends State<BooruEdit> {
 
         //Call the booru test
         Booru testBooru;
-        if (booruAPIKeyController.text == "") {
+        if (booruAPIKeyController.text == '') {
           testBooru = Booru(
             booruNameController.text,
             widget.booruType,
@@ -299,7 +299,7 @@ class _BooruEditState extends State<BooruEdit> {
         setState(() {});
         final List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
         final BooruType? booruType = testResults[0];
-        final String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : "";
+        final String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : '';
 
         // If a booru type is returned set the widget state
         if (booruType != null) {
@@ -363,7 +363,7 @@ class _BooruEditState extends State<BooruEdit> {
         }
 
         await getPerms();
-        final Booru newBooru = (booruAPIKeyController.text == "" && booruUserIDController.text == "")
+        final Booru newBooru = (booruAPIKeyController.text == '' && booruUserIDController.text == '')
             ? Booru(
                 booruNameController.text,
                 widget.booruType,
@@ -390,7 +390,7 @@ class _BooruEditState extends State<BooruEdit> {
             final bool sameNameExists = settingsHandler.booruList.any((element) => element.name == newBooru.name);
             final bool sameURLExists = settingsHandler.booruList.any((element) => element.baseURL == newBooru.baseURL);
 
-            if (widget.booru.name == "New") {
+            if (widget.booru.name == 'New') {
               if (alreadyExists || sameNameExists || sameURLExists) {
                 booruExists = true;
               }
@@ -409,7 +409,7 @@ class _BooruEditState extends State<BooruEdit> {
               }
 
               final bool oldEditBooruExists =
-                  (settingsHandler.booruList[i].baseURL == widget.booru.baseURL && settingsHandler.booruList[i].name == widget.booru.name);
+                  settingsHandler.booruList[i].baseURL == widget.booru.baseURL && settingsHandler.booruList[i].name == widget.booru.name;
               if (!booruExists && oldEditBooruExists) {
                 // remove the old config (same url and name as the start booru)
                 settingsHandler.booruList.removeAt(i);
@@ -460,7 +460,7 @@ class _BooruEditState extends State<BooruEdit> {
               null) {
             // if the booru is already selected in any tab, update the booru to a new one
             // (only if their type and baseurl are the same, otherwise main booru selector will set the value to null and user has to reselect the booru)
-            for (var tab in searchHandler.list) {
+            for (final tab in searchHandler.list) {
               if (tab.selectedBooru.value.type == newBooru.type && tab.selectedBooru.value.baseURL == newBooru.baseURL) {
                 tab.selectedBooru.value = newBooru;
               }
@@ -485,7 +485,7 @@ class _BooruEditState extends State<BooruEdit> {
     bool withCaptchaCheck = true,
   }) async {
     BooruType? booruType;
-    String? errorString = "";
+    String? errorString = '';
     BooruHandler test;
     List<BooruItem> testFetched = [];
     booru.type = userBooruType;
@@ -499,7 +499,7 @@ class _BooruEditState extends State<BooruEdit> {
     }
 
     if (userBooruType == BooruType.AutoDetect) {
-      List<BooruType> typeList = BooruType.detectable;
+      final List<BooruType> typeList = BooruType.detectable;
       for (int i = 1; i < typeList.length; i++) {
         booruType ??= (await booruTest(
           booru,
@@ -514,7 +514,7 @@ class _BooruEditState extends State<BooruEdit> {
       test.pageNum++;
 
       testFetched = (await test.search(
-            " ",
+            ' ',
             null,
             withCaptchaCheck: withCaptchaCheck,
           )) ??
@@ -529,7 +529,7 @@ class _BooruEditState extends State<BooruEdit> {
     if (booruType == null) {
       if (testFetched.isNotEmpty) {
         booruType = userBooruType;
-        print("Found Results as $userBooruType");
+        print('Found Results as $userBooruType');
         return [booruType, ''];
       }
     }
@@ -542,7 +542,6 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
   const _HydrusAccessKeyWidget({
     required this.urlController,
     required this.apiKeyController,
-    super.key,
   });
 
   final TextEditingController urlController;
@@ -559,16 +558,16 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
             onPressed: () async {
               final HydrusHandler hydrus = HydrusHandler(
                 Booru(
-                  "Hydrus",
+                  'Hydrus',
                   BooruType.Hydrus,
-                  "Hydrus",
+                  'Hydrus',
                   urlController.text,
-                  "",
+                  '',
                 ),
                 5,
               );
               final String accessKey = await hydrus.getAccessKey();
-              if (accessKey != "") {
+              if (accessKey != '') {
                 FlashElements.showSnackbar(
                   context: context,
                   title: const Text(
@@ -601,14 +600,14 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
                 );
               }
             },
-            child: const Text("Get Hydrus Api Key"),
+            child: const Text('Get Hydrus Api Key'),
           ),
         ),
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           width: double.infinity,
           child: const Text(
-            "To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request",
+            'To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request',
           ),
         ),
       ],
@@ -621,7 +620,6 @@ class _R34HSignInWidget extends StatelessWidget {
     required this.urlController,
     required this.loginController,
     required this.passwordController,
-    super.key,
   });
 
   final TextEditingController urlController;
@@ -645,8 +643,8 @@ class _R34HSignInWidget extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () async {
               // add https if not specified
-              if (!urlController.text.contains("http://") && !urlController.text.contains("https://")) {
-                urlController.text = "https://${urlController.text}";
+              if (!urlController.text.contains('http://') && !urlController.text.contains('https://')) {
+                urlController.text = 'https://${urlController.text}';
               }
 
               if (urlController.text.isEmpty || loginController.text.isEmpty || passwordController.text.isEmpty) {
@@ -665,11 +663,11 @@ class _R34HSignInWidget extends StatelessWidget {
 
               final R34HentaiHandler r34h = R34HentaiHandler(
                 Booru(
-                  "R34Hentai",
+                  'R34Hentai',
                   BooruType.R34Hentai,
-                  "R34Hentai",
+                  'R34Hentai',
                   urlController.text,
-                  "",
+                  '',
                 ),
                 5,
               );
@@ -707,12 +705,11 @@ class _R34HSignInWidget extends StatelessWidget {
                   ),
                   leadingIcon: Icons.warning_amber,
                   leadingIconColor: Colors.red,
-                  sideColor: Colors.red,
                 );
               }
             },
             icon: const Icon(Icons.login),
-            label: const Text("Sign in"),
+            label: const Text('Sign in'),
           ),
         ),
         // button that shows simple cookie viewer dialog
@@ -723,8 +720,8 @@ class _R34HSignInWidget extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: () async {
                 // add https if not specified
-                if (!urlController.text.contains("http://") && !urlController.text.contains("https://")) {
-                  urlController.text = "https://${urlController.text}";
+                if (!urlController.text.contains('http://') && !urlController.text.contains('https://')) {
+                  urlController.text = 'https://${urlController.text}';
                 }
 
                 if (urlController.text.isEmpty) {
@@ -749,7 +746,7 @@ class _R34HSignInWidget extends StatelessWidget {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Cookies"),
+                        title: const Text('Cookies'),
                         content: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.8,
                           child: ListView.builder(
@@ -768,7 +765,7 @@ class _R34HSignInWidget extends StatelessWidget {
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: const Text("Close"),
+                            child: const Text('Close'),
                           ),
                         ],
                       );
@@ -788,7 +785,7 @@ class _R34HSignInWidget extends StatelessWidget {
                 }
               },
               icon: const Icon(Icons.cookie),
-              label: const Text("View cookies"),
+              label: const Text('View cookies'),
             ),
           ),
         Container(
@@ -797,8 +794,8 @@ class _R34HSignInWidget extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: () async {
               // add https if not specified
-              if (!urlController.text.contains("http://") && !urlController.text.contains("https://")) {
-                urlController.text = "https://${urlController.text}";
+              if (!urlController.text.contains('http://') && !urlController.text.contains('https://')) {
+                urlController.text = 'https://${urlController.text}';
               }
 
               if (urlController.text.isEmpty) {
@@ -817,11 +814,11 @@ class _R34HSignInWidget extends StatelessWidget {
 
               final R34HentaiHandler r34h = R34HentaiHandler(
                 Booru(
-                  "R34Hentai",
+                  'R34Hentai',
                   BooruType.R34Hentai,
-                  "R34Hentai",
+                  'R34Hentai',
                   urlController.text,
-                  "",
+                  '',
                 ),
                 5,
               );
@@ -867,7 +864,7 @@ class _R34HSignInWidget extends StatelessWidget {
               }
             },
             icon: const Icon(Icons.logout),
-            label: const Text("Sign out and clear cookies"),
+            label: const Text('Sign out and clear cookies'),
           ),
         ),
       ],

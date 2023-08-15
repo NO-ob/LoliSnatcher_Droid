@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class ShimmerWrap extends StatelessWidget {
-  const ShimmerWrap({Key? key, required this.child}) : super(key: key);
+  const ShimmerWrap({required this.child, super.key});
   final Widget child;
 
   @override
@@ -26,7 +26,7 @@ class ShimmerList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShimmerWrap(
       child: LayoutBuilder(
-        builder: ((BuildContext layoutContext, BoxConstraints constraints) {
+        builder: (BuildContext layoutContext, BoxConstraints constraints) {
           final SettingsHandler settingsHandler = SettingsHandler.instance;
           final String displayType = settingsHandler.previewDisplay;
           final bool isDesktop = settingsHandler.appMode.value.isDesktop;
@@ -41,8 +41,7 @@ class ShimmerList extends StatelessWidget {
             cacheExtent: 200,
             shrinkWrap: false,
             padding: EdgeInsets.fromLTRB(2, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 2, 80),
-            gridDelegate:
-                SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columnCount, childAspectRatio: displayType == 'Square' ? 1 : 9 / 16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columnCount, childAspectRatio: displayType == 'Square' ? 1 : 9 / 16),
             children: List.generate(
               previewCount,
               (int index) {
@@ -58,7 +57,7 @@ class ShimmerList extends StatelessWidget {
               },
             ),
           );
-        }),
+        },
       ),
     );
   }
@@ -66,10 +65,11 @@ class ShimmerList extends StatelessWidget {
 
 class ShimmerCard extends StatelessWidget {
   const ShimmerCard({
-    Key? key,
     this.isLoading = true,
     this.child,
-  }) : super(key: key);
+    super.key,
+  });
+
   final bool isLoading;
   final Widget? child;
 
@@ -94,23 +94,23 @@ LinearGradient _shimmerGradient(Color c1, Color c2, Color c3) => LinearGradient(
         0.3,
         0.4,
       ],
-      begin: const Alignment(-1.0, -0.3),
-      end: const Alignment(1.0, 0.3),
+      begin: const Alignment(-1, -0.3),
+      end: const Alignment(1, 0.3),
       tileMode: TileMode.clamp,
     );
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 class Shimmer extends StatefulWidget {
+  const Shimmer({
+    required this.linearGradient,
+    this.child,
+    super.key,
+  });
+
   static ShimmerState? of(BuildContext context) {
     return context.findAncestorStateOfType<ShimmerState>();
   }
-
-  const Shimmer({
-    super.key,
-    required this.linearGradient,
-    this.child,
-  });
 
   final LinearGradient linearGradient;
   final Widget? child;
@@ -144,22 +144,22 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
       );
 
   bool get isSized {
-    RenderObject? renderObj = context.findRenderObject();
-    RenderBox? box = renderObj != null ? renderObj as RenderBox : null;
+    final RenderObject? renderObj = context.findRenderObject();
+    final RenderBox? box = renderObj != null ? renderObj as RenderBox : null;
     return box?.hasSize ?? false;
   }
 
   Size get size {
-    RenderObject? renderObj = context.findRenderObject();
-    RenderBox? box = renderObj != null ? renderObj as RenderBox : null;
-    return box?.size ?? const Size(0, 0);
+    final RenderObject? renderObj = context.findRenderObject();
+    final RenderBox? box = renderObj != null ? renderObj as RenderBox : null;
+    return box?.size ?? Size.zero;
   }
 
   Offset getDescendantOffset({
     required RenderBox descendant,
     Offset offset = Offset.zero,
   }) {
-    final shimmerBox = context.findRenderObject() as RenderBox;
+    final shimmerBox = context.findRenderObject() as RenderBox?;
     return descendant.localToGlobal(offset, ancestor: shimmerBox);
   }
 
@@ -180,7 +180,7 @@ class _SlidingGradientTransform extends GradientTransform {
 
   @override
   Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
-    return Matrix4.translationValues(bounds.width * slidePercent, 0.0, 0.0);
+    return Matrix4.translationValues(bounds.width * slidePercent, 0, 0);
   }
 }
 
@@ -188,9 +188,9 @@ class _SlidingGradientTransform extends GradientTransform {
 
 class ShimmerLoading extends StatefulWidget {
   const ShimmerLoading({
-    super.key,
     required this.isLoading,
     required this.child,
+    super.key,
   });
 
   final bool isLoading;

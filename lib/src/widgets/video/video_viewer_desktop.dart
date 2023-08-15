@@ -249,7 +249,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void initVideo(bool ignoreTagsCheck) {
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
-      List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+      final List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
     } else {
       _downloadVideo();
@@ -431,11 +431,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   Widget build(BuildContext context) {
     // print('!!! Build video desktop ${widget.index}!!!');
 
-    bool initialized = isLoaded; // videoController != null;
+    final bool initialized = isLoaded; // videoController != null;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
-    int viewedIndex = searchHandler.viewedIndex.value;
-    bool needsRestart = _lastViewedIndex != viewedIndex;
+    final int viewedIndex = searchHandler.viewedIndex.value;
+    final bool needsRestart = _lastViewedIndex != viewedIndex;
 
     if (initialized) {
       if (isViewed) {
@@ -525,7 +525,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                 if (isViewed && initialized)
                   Video(
                     player: videoController,
-                    scale: 1.0,
+                    scale: 1,
                     progressBarInactiveColor: Colors.grey,
                     progressBarActiveColor: accentColor,
                     progressBarThumbColor: accentColor,

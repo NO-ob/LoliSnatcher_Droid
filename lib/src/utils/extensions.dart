@@ -17,7 +17,7 @@ extension UIExtras on Widget {
 
   Widget withOpacity(double opacity) => Opacity(opacity: opacity, child: this);
 
-  Widget withColor(Color color) => Container(color: color, child: this);
+  Widget withColor(Color color) => ColoredBox(color: color, child: this);
 }
 
 extension StringExtras on String {
@@ -25,7 +25,7 @@ extension StringExtras on String {
     return count == 1 ? this : '${this}s';
   }
 
-  String capitalize() => "${this[0].toUpperCase()}${substring(1)}";
+  String capitalize() => '${this[0].toUpperCase()}${substring(1)}';
 
   String toTitleCase() => split(' ').map((s) => s.capitalize()).join(' ');
 
@@ -41,9 +41,9 @@ extension StringExtras on String {
 }
 
 extension IntExtras on int {
-  bool isEven() => this % 2 == 0;
+  bool isEven() => this.isEven;
 
-  bool isOdd() => this % 2 == 1;
+  bool isOdd() => this.isOdd;
 
   int clamp(int min, int max) => (min > this ? min : (max < this ? max : this));
 

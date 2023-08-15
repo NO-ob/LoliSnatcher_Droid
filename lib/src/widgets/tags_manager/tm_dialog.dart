@@ -12,7 +12,7 @@ import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item_dialog.dart';
 
 class TagsManagerDialog extends StatefulWidget {
-  const TagsManagerDialog({Key? key}) : super(key: key);
+  const TagsManagerDialog({super.key});
 
   @override
   State<TagsManagerDialog> createState() => _TagsManagerDialogState();
@@ -115,7 +115,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     );
   }
 
-  void showAddDialog() async {
+  Future<void> showAddDialog() async {
     final Tag? tag = await showDialog(
       context: context,
       builder: (context) {
@@ -135,7 +135,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     return SettingsPageDialog(
       title: const Text('Tags'),
       fab: Padding(
-        padding: const EdgeInsets.only(bottom: 40.0),
+        padding: const EdgeInsets.only(bottom: 40),
         child: FloatingActionButton(
           onPressed: showAddDialog,
           child: const Icon(Icons.add),
