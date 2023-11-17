@@ -51,10 +51,10 @@ class TransparentPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible for its parent to hit testing, but still
   /// allows its subtree to receive pointer events.
   const TransparentPointer({
-    Key? key,
+    required super.child,
     this.transparent = true,
-    required Widget child,
-  })  : super(key: key, child: child);
+    super.key,
+  });
 
   /// Whether this widget is invisible to its parent during hit testing.
   final bool transparent;
@@ -89,7 +89,9 @@ class RenderTransparentPointer extends RenderProxyBox {
   bool _transparent;
 
   set transparent(bool value) {
-    if (value == _transparent) return;
+    if (value == _transparent) {
+      return;
+    }
     _transparent = value;
   }
 

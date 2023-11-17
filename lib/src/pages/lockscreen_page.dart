@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 // import 'package:lolisnatcher/src/handlers/local_auth_handler.dart';
 
 class LockScreen extends StatelessWidget {
-  const LockScreen({Key? key}) : super(key: key);
+  const LockScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,7 @@ class LockScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("LoliSnatcher"),
+        title: const Text('LoliSnatcher'),
       ),
       body: Center(
         child: InkWell(

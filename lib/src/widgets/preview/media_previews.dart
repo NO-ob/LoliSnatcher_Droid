@@ -13,7 +13,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/preview/waterfall_view.dart';
 
 class MediaPreviews extends StatefulWidget {
-  const MediaPreviews({Key? key}) : super(key: key);
+  const MediaPreviews({super.key});
 
   @override
   State<MediaPreviews> createState() => _MediaPreviewsState();
@@ -73,13 +73,13 @@ class _MediaPreviewsState extends State<MediaPreviews> {
             SettingsButton(
               name: 'Add New Booru',
               icon: const Icon(Icons.settings),
-              page: () => BooruEdit(Booru("New", null, "", "", "")),
+              page: () => BooruEdit(Booru('New', null, '', '', '')),
             ),
             SettingsButton(
               name: 'Help',
               icon: const Icon(Icons.help_center_outlined),
               action: () {
-                ServiceHandler.launchURL("https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
+                ServiceHandler.launchURL('https://github.com/NO-ob/LoliSnatcher_Droid/wiki');
               },
               trailingIcon: const Icon(Icons.exit_to_app),
             ),

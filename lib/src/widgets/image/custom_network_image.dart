@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -26,7 +28,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     this.onError,
     this.sendTimeout,
     this.receiveTimeout,
-  }) : assert(withCache ? cacheFolder != null : true);
+  }) : assert(!withCache || cacheFolder != null, 'cacheFolder must be set when withCache is true');
 
   @override
   final String url;
@@ -85,13 +87,13 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     final String cacheFilePath = await ImageWriter().getCachePathString(
       resolved.toString(),
       cacheFolder ?? 'media',
-      clearName: cacheFolder == 'favicons' ? false : true,
+      clearName: cacheFolder != 'favicons',
       fileNameExtras: fileNameExtras,
     );
     final File cacheFile = File(cacheFilePath);
 
     try {
-      assert(key == this);
+      assert(key == this, 'The $runtimeType cannot be reused after disposing.');
 
       if (await cacheFile.exists()) {
         await cacheFile.delete();
@@ -113,12 +115,12 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
     final String cacheFilePath = await ImageWriter().getCachePathString(
       resolved.toString(),
       cacheFolder ?? 'media',
-      clearName: cacheFolder == 'favicons' ? false : true,
+      clearName: cacheFolder != 'favicons',
       fileNameExtras: fileNameExtras,
     );
     File? cacheFile;
     try {
-      assert(key == this);
+      assert(key == this, 'The $runtimeType cannot be reused after disposing.');
 
       // file already cached
       if (withCache) {
@@ -144,7 +146,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
       }
 
       if (onCacheDetected != null) {
-        onCacheDetected!(cacheFile != null);
+        onCacheDetected?.call(cacheFile != null);
       }
 
       Response? response;
@@ -221,7 +223,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
       return decode(buffer);
     } catch (e) {
       if (onError != null) {
-        onError!(e);
+        onError?.call(e);
       }
 
       scheduleMicrotask(() {

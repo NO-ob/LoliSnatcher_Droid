@@ -15,7 +15,7 @@ import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class ThemePage extends StatefulWidget {
-  const ThemePage({Key? key}) : super(key: key);
+  const ThemePage({super.key});
 
   @override
   State<ThemePage> createState() => _ThemePageState();
@@ -53,7 +53,7 @@ class _ThemePageState extends State<ThemePage> {
     checkSdk();
   }
 
-  void checkSdk() async {
+  Future<void> checkSdk() async {
     if (Platform.isAndroid) {
       currentSdk = await ServiceHandler.getAndroidSDKVersion();
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -92,11 +92,11 @@ class _ThemePageState extends State<ThemePage> {
     } else {
       settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
-    bool result = await settingsHandler.saveSettings(restate: withRestate);
+    final bool result = await settingsHandler.saveSettings(restate: withRestate);
     return result;
   }
 
-  void updateTheme({bool withRestate = false}) async {
+  Future<void> updateTheme({bool withRestate = false}) async {
     // instantly do local restate
     setState(() {});
 
@@ -179,7 +179,7 @@ class _ThemePageState extends State<ThemePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Themes"),
+          title: const Text('Themes'),
         ),
         body: Center(
           child: ListView(
@@ -197,36 +197,42 @@ class _ThemePageState extends State<ThemePage> {
                   const double size = 40;
 
                   switch (prettyValue) {
-                    case ("Dark"):
-                      return Row(children: [
-                        const SizedBox(width: size, child: Icon(Icons.dark_mode)),
-                        Text(prettyValue),
-                      ]);
-                    case ("Light"):
-                      return Row(children: [
-                        const SizedBox(width: size, child: Icon(Icons.light_mode)),
-                        Text(prettyValue),
-                      ]);
-                    case ("System"):
-                      return Row(children: [
-                        SizedBox(
-                          width: size,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              ClipPath(
-                                clipper: SunClipper(),
-                                child: const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.light_mode)),
-                              ),
-                              ClipPath(
-                                clipper: MoonClipper(),
-                                child: const Padding(padding: EdgeInsets.only(left: 5), child: Icon(Icons.dark_mode)),
-                              ),
-                            ],
+                    case 'Dark':
+                      return Row(
+                        children: [
+                          const SizedBox(width: size, child: Icon(Icons.dark_mode)),
+                          Text(prettyValue),
+                        ],
+                      );
+                    case 'Light':
+                      return Row(
+                        children: [
+                          const SizedBox(width: size, child: Icon(Icons.light_mode)),
+                          Text(prettyValue),
+                        ],
+                      );
+                    case 'System':
+                      return Row(
+                        children: [
+                          SizedBox(
+                            width: size,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                ClipPath(
+                                  clipper: SunClipper(),
+                                  child: const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.light_mode)),
+                                ),
+                                ClipPath(
+                                  clipper: MoonClipper(),
+                                  child: const Padding(padding: EdgeInsets.only(left: 5), child: Icon(Icons.dark_mode)),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(prettyValue),
-                      ]);
+                          Text(prettyValue),
+                        ],
+                      );
                     default:
                       return Text(prettyValue);
                   }
@@ -273,42 +279,44 @@ class _ThemePageState extends State<ThemePage> {
                   },
                   title: 'Theme',
                   itemBuilder: (String value) {
-                    ThemeItem theme = settingsHandler.map['theme']!['options'].firstWhere((e) => e.name == value);
-                    Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
-                    Color? accent = theme.name == 'Custom' ? accentPickerColor : theme.accent;
+                    final ThemeItem theme = settingsHandler.map['theme']!['options'].firstWhere((e) => e.name == value);
+                    final Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
+                    final Color? accent = theme.name == 'Custom' ? accentPickerColor : theme.accent;
 
-                    return Row(children: [
-                      Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade500, width: 1.5),
-                            shape: BoxShape.rectangle,
-                            color: primary,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  color: primary,
-                                  height: 10,
-                                  width: 60,
-                                ),
-                                Container(
-                                  color: accent,
-                                  height: 10,
-                                  width: 60,
-                                ),
-                              ],
+                    return Row(
+                      children: [
+                        Center(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade500, width: 1.5),
+                              shape: BoxShape.rectangle,
+                              color: primary,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    color: primary,
+                                    height: 10,
+                                    width: 60,
+                                  ),
+                                  Container(
+                                    color: accent,
+                                    height: 10,
+                                    width: 60,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(value),
-                    ]);
+                        const SizedBox(width: 10),
+                        Text(value),
+                      ],
+                    );
                   },
                 ),
               if (theme.name == 'Custom' && !useDynamicColor)
@@ -332,7 +340,7 @@ class _ThemePageState extends State<ThemePage> {
                       },
                     )) {
                       primaryPickerColor = colorBeforeDialog;
-                      updateTheme();
+                      await updateTheme();
                     }
                   },
                   trailingIcon: ColorIndicator(
@@ -365,7 +373,7 @@ class _ThemePageState extends State<ThemePage> {
                       },
                     )) {
                       accentPickerColor = colorBeforeDialog;
-                      updateTheme();
+                      await updateTheme();
                     }
                   },
                   trailingIcon: ColorIndicator(
@@ -383,7 +391,7 @@ class _ThemePageState extends State<ThemePage> {
                   icon: const Icon(Icons.refresh),
                   drawTopBorder: true,
                   action: () {
-                    ThemeItem theme = settingsHandler.map['theme']!['default'];
+                    final ThemeItem theme = settingsHandler.map['theme']!['default'];
                     primaryPickerColor = theme.primary;
                     accentPickerColor = theme.accent;
                     updateTheme();
@@ -415,11 +423,11 @@ class _ThemePageState extends State<ThemePage> {
                   icon: const Icon(Icons.delete_forever),
                   drawTopBorder: true,
                   action: () async {
-                    File file = File(mascotPathOverride);
+                    final File file = File(mascotPathOverride);
                     if (await file.exists()) {
                       await file.delete();
                     }
-                    mascotPathOverride = "";
+                    mascotPathOverride = '';
                     setState(() {});
                   },
                 ),
@@ -434,7 +442,7 @@ class _ThemePageState extends State<ThemePage> {
 class SunClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    var path = Path();
+    final path = Path();
     path.lineTo(0, size.height);
     path.lineTo(size.width * 0.37, size.height);
     path.lineTo(size.width * 0.37, 0);
@@ -450,7 +458,7 @@ class SunClipper extends CustomClipper<Path> {
 class MoonClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    var path = Path();
+    final path = Path();
     path.lineTo(size.width, 0);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width * 0.45, size.height);

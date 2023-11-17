@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
@@ -24,7 +25,7 @@ import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 /// If the file url isn't empty it will return a current media widget for the fileURL
 ///
 class DesktopImageListener extends StatefulWidget {
-  const DesktopImageListener(this.searchTab, {Key? key}) : super(key: key);
+  const DesktopImageListener(this.searchTab, {super.key});
   final SearchTab searchTab;
 
   @override
@@ -116,7 +117,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     super.dispose();
   }
 
-  void delayedZoomReset() async {
+  Future<void> delayedZoomReset() async {
     await Future.delayed(const Duration(milliseconds: 200));
     viewerHandler.resetZoom();
   }
@@ -127,17 +128,16 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
       return const SizedBox();
     }
 
-    if (item.fileURL == "") {
+    if (item.fileURL == '') {
       return const SizedBox();
     }
 
-    Widget itemWidget = isDelayed ? const SizedBox() : getImageWidget(item);
+    final Widget itemWidget = isDelayed ? const SizedBox() : getImageWidget(item);
 
     return Stack(
       children: [
         if (!viewerHandler.isDesktopFullscreen.value) itemWidget,
         if (!viewerHandler.isDesktopFullscreen.value) const NotesRenderer(null),
-
         Container(
           alignment: Alignment.topRight,
           child: Column(
@@ -166,12 +166,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   onPressed: () {
                     if (item.isFavourite.value != null) {
                       item.isFavourite.toggle();
-                      settingsHandler.dbHandler.updateBooruItem(item, "local");
+                      settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
                     }
                   },
-                  child: Obx(() => Icon(item.isFavourite.value == true
-                      ? Icons.favorite
-                      : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash))),
+                  child: Obx(
+                    () => Icon(
+                      item.isFavourite.value == true ? Icons.favorite : (item.isFavourite.value == false ? Icons.favorite_border : CupertinoIcons.heart_slash),
+                    ),
+                  ),
                 ),
               ),
               SizedBox(
@@ -181,7 +183,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                   onPressed: () async {
                     viewerHandler.isDesktopFullscreen.value = true;
                     updateState();
-                    delayedZoomReset();
+                    unawaited(delayedZoomReset());
 
                     await showDialog(
                       context: context,
@@ -213,7 +215,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
                     viewerHandler.isDesktopFullscreen.value = false;
                     updateState();
-                    delayedZoomReset();
+                    unawaited(delayedZoomReset());
                   },
                   child: const Icon(Icons.fullscreen),
                 ),

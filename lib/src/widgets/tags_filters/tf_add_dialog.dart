@@ -7,10 +7,10 @@ import 'package:lolisnatcher/src/widgets/tags_filters/tf_list_item.dart';
 
 class TagsFiltersAddDialog extends StatefulWidget {
   const TagsFiltersAddDialog({
-    Key? key,
     required this.onAdd,
     required this.tagFilterType,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Function(String) onAdd;
   final String tagFilterType;
@@ -29,7 +29,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
     } else {
       FlashElements.showSnackbar(
         context: context,
-        title: const Text("Empty input!", style: TextStyle(fontSize: 20)),
+        title: const Text('Empty input!', style: TextStyle(fontSize: 20)),
         leadingIcon: Icons.warning_amber,
         leadingIconColor: Colors.red,
         sideColor: Colors.red,
@@ -55,8 +55,8 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
           child: SettingsTextInput(
-            title: "New ${widget.tagFilterType} Tag Filter",
-            hintText: "New Filter",
+            title: 'New ${widget.tagFilterType} Tag Filter',
+            hintText: 'New Filter',
             onlyInput: true,
             controller: _controller,
             autofocus: true,

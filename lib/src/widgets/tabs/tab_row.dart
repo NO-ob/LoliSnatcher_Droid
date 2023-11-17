@@ -2,20 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 
 class TabRow extends StatelessWidget {
   const TabRow({
-    Key? key,
     required this.tab,
     this.color,
     this.fontWeight,
     this.withFavicon = true,
-  }) : super(key: key);
+    super.key,
+  });
 
   final SearchTab tab;
   final Color? color;
@@ -25,10 +25,10 @@ class TabRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // print(value.tags);
+      // print(tab.tags);
       final int totalCount = tab.booruHandler.totalCount.value;
-      final String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
-      final String multiText = (tab.secondaryBoorus?.isNotEmpty ?? false) ? " [M]" : "";
+      final String totalCountText = (totalCount > 0) ? ' ($totalCount)' : '';
+      final String multiText = (tab.secondaryBoorus?.isNotEmpty ?? false) ? ' [M]' : '';
       final String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText$multiText".trim();
 
       final bool hasItems = tab.booruHandler.filteredFetched.isNotEmpty;
@@ -51,7 +51,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == "" ? Colors.grey : null),
+              color: color ?? (tab.tags == '' ? Colors.grey : null),
             ),
           ],
         ),

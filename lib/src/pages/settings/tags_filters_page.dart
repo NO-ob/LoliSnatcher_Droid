@@ -10,7 +10,7 @@ import 'package:lolisnatcher/src/widgets/tags_filters/tf_list.dart';
 import 'package:lolisnatcher/src/widgets/tags_filters/tf_settings_list.dart';
 
 class TagsFiltersPage extends StatefulWidget {
-  const TagsFiltersPage({Key? key}) : super(key: key);
+  const TagsFiltersPage({super.key});
 
   @override
   State<TagsFiltersPage> createState() => _TagsFiltersPageState();
@@ -58,11 +58,11 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
     settingsHandler.filterFavourites = filterFavourites;
-    bool result = await settingsHandler.saveSettings(restate: false);
+    final bool result = await settingsHandler.saveSettings(restate: false);
     return result;
   }
 
-  List<String> getTagsList(type) {
+  List<String> getTagsList(String type) {
     List<String> tagsList = [];
     if (type == 'Hated') {
       tagsList = hatedList;
@@ -77,11 +77,11 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   }
 
   void addTag(String newTag, String type) {
-    if(newTag.isEmpty) {
+    if (newTag.isEmpty) {
       return;
     }
 
-    List<String> changedList = getTagsList(type);
+    final List<String> changedList = getTagsList(type);
     if (changedList.contains(newTag)) {
       duplicateMessage(newTag, type);
     } else {
@@ -92,15 +92,15 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   }
 
   void editTag(String oldTag, String newTag, String type) {
-    if(newTag.isEmpty) {
+    if (newTag.isEmpty) {
       return;
     }
 
-    List<String> changedList = getTagsList(type);
+    final List<String> changedList = getTagsList(type);
     if (changedList.contains(newTag)) {
       duplicateMessage(newTag, type);
     } else {
-      int index = changedList.indexOf(oldTag);
+      final int index = changedList.indexOf(oldTag);
       changedList[index] = newTag;
       changedList.sort(sortTags);
       updateState();
@@ -108,7 +108,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   }
 
   void deleteTag(String tag, String type) {
-    List<String> changedList = getTagsList(type);
+    final List<String> changedList = getTagsList(type);
     changedList.remove(tag);
     changedList.sort(sortTags);
     updateState();
@@ -117,7 +117,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
   void duplicateMessage(String tag, String type) {
     FlashElements.showSnackbar(
       context: context,
-      title: const Text("Duplicate tag!", style: TextStyle(fontSize: 20)),
+      title: const Text('Duplicate tag!', style: TextStyle(fontSize: 20)),
       content: Text("'$tag' is already in $type list", style: const TextStyle(fontSize: 16)),
       leadingIcon: Icons.warning_amber,
       leadingIconColor: Colors.yellow,
@@ -155,7 +155,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
-          title: const Text("Filters Editor"),
+          title: const Text('Filters Editor'),
           bottom: TabBar(
             controller: tabController,
             indicatorColor: Theme.of(context).colorScheme.secondary,

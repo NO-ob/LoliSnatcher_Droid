@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
@@ -37,9 +37,9 @@ class SettingsHandler extends GetxController {
 
   // service vars
   RxBool isInit = false.obs;
-  String cachePath = "";
-  String path = "";
-  String boorusPath = "";
+  String cachePath = '';
+  String path = '';
+  String boorusPath = '';
 
   Rx<UpdateInfo?> updateInfo = Rxn(null);
 
@@ -63,21 +63,21 @@ class SettingsHandler extends GetxController {
   ////////////////////////////////////////////////////
 
   // saveable settings vars
-  String defTags = "rating:safe";
-  String previewMode = "Sample";
-  String videoCacheMode = "Stream";
-  String prefBooru = "";
-  String previewDisplay = "Square";
-  String galleryMode = "Full Res";
-  String shareAction = "Ask";
+  String defTags = 'rating:safe';
+  String previewMode = 'Sample';
+  String videoCacheMode = 'Stream';
+  String prefBooru = '';
+  String previewDisplay = 'Square';
+  String galleryMode = 'Full Res';
+  String shareAction = 'Ask';
   Rx<AppMode> appMode = AppMode.defaultValue.obs;
   Rx<HandSide> handSide = HandSide.defaultValue.obs;
   String galleryBarPosition = 'Top';
   String galleryScrollDirection = 'Horizontal';
-  String extPathOverride = "";
-  String drawerMascotPathOverride = "";
-  String zoomButtonPosition = "Right";
-  String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? "Right" : "Disabled";
+  String extPathOverride = '';
+  String drawerMascotPathOverride = '';
+  String zoomButtonPosition = 'Right';
+  String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled';
   String lastSyncIp = '';
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
@@ -95,7 +95,7 @@ class SettingsHandler extends GetxController {
   int galleryAutoScrollTime = 4000;
   int cacheSize = 3;
 
-  double mousewheelScrollSpeed = 10.0;
+  double mousewheelScrollSpeed = 10;
 
   int currentColumnCount(BuildContext context) {
     return MediaQuery.of(context).orientation == Orientation.portrait ? portraitColumns : landscapeColumns;
@@ -104,22 +104,22 @@ class SettingsHandler extends GetxController {
   Duration cacheDuration = Duration.zero;
 
   List<List<String>> buttonList = [
-    ["autoscroll", "AutoScroll"],
-    ["snatch", "Save"],
-    ["favourite", "Favourite"],
-    ["info", "Display Info"],
-    ["share", "Share"],
-    ["open", "Open in Browser"],
-    ["reloadnoscale", "Reload w/out scaling"]
+    ['autoscroll', 'AutoScroll'],
+    ['snatch', 'Save'],
+    ['favourite', 'Favourite'],
+    ['info', 'Display Info'],
+    ['share', 'Share'],
+    ['open', 'Open in Browser'],
+    ['reloadnoscale', 'Reload w/out scaling']
   ];
   List<List<String>> buttonOrder = [
-    ["autoscroll", "AutoScroll"],
-    ["snatch", "Save"],
-    ["favourite", "Favourite"],
-    ["info", "Display Info"],
-    ["share", "Share"],
-    ["open", "Open in Browser"],
-    ["reloadnoscale", "Reload w/out scaling"]
+    ['autoscroll', 'AutoScroll'],
+    ['snatch', 'Save'],
+    ['favourite', 'Favourite'],
+    ['info', 'Display Info'],
+    ['share', 'Share'],
+    ['open', 'Open in Browser'],
+    ['reloadnoscale', 'Reload w/out scaling']
   ];
 
   bool jsonWrite = false;
@@ -129,6 +129,7 @@ class SettingsHandler extends GetxController {
   bool mediaCache = false;
   bool autoHideImageBar = false;
   bool dbEnabled = true;
+  bool indexesEnabled = false;
   bool searchHistoryEnabled = true;
   bool filterHated = false;
   bool filterFavourites = false;
@@ -145,12 +146,12 @@ class SettingsHandler extends GetxController {
 
   // themes wip
   Rx<ThemeItem> theme = ThemeItem(
-    name: "Pink",
+    name: 'Pink',
     primary: Colors.pink[200],
     accent: Colors.pink[600],
   ).obs
     ..listen((ThemeItem theme) {
-      print('newTheme ${theme.name} ${theme.primary}');
+      // print('newTheme ${theme.name} ${theme.primary}');
     });
 
   Rx<Color?> customPrimaryColor = Colors.pink[200].obs;
@@ -169,6 +170,7 @@ class SettingsHandler extends GetxController {
     'thumbnailCache',
     'mediaCache',
     'dbEnabled',
+    'indexesEnabled',
     'searchHistoryEnabled',
     'useVolumeButtonsForScroll',
     'volumeButtonsScrollSpeed',
@@ -207,257 +209,261 @@ class SettingsHandler extends GetxController {
   // TODO move it in another file?
   Map<String, Map<String, dynamic>> map = {
     // stringFromList
-    "previewMode": {
-      "type": "stringFromList",
-      "default": "Sample",
-      "options": <String>["Sample", "Thumbnail"],
+    'previewMode': {
+      'type': 'stringFromList',
+      'default': 'Sample',
+      'options': <String>['Sample', 'Thumbnail'],
     },
-    "previewDisplay": {
-      "type": "stringFromList",
-      "default": "Square",
-      "options": <String>["Square", "Rectangle", "Staggered"],
+    'previewDisplay': {
+      'type': 'stringFromList',
+      'default': 'Square',
+      'options': <String>['Square', 'Rectangle', 'Staggered'],
     },
-    "shareAction": {
-      "type": "stringFromList",
-      "default": "Ask",
-      "options": <String>["Ask", "Post URL", "File URL", "File", "Hydrus"],
+    'shareAction': {
+      'type': 'stringFromList',
+      'default': 'Ask',
+      'options': <String>['Ask', 'Post URL', 'File URL', 'File', 'Hydrus'],
     },
-    "videoCacheMode": {
-      "type": "stringFromList",
-      "default": "Stream",
-      "options": <String>["Stream", "Cache", "Stream+Cache"],
+    'videoCacheMode': {
+      'type': 'stringFromList',
+      'default': 'Stream',
+      'options': <String>['Stream', 'Cache', 'Stream+Cache'],
     },
-    "galleryMode": {
-      "type": "stringFromList",
-      "default": "Full Res",
-      "options": <String>["Sample", "Full Res"],
+    'galleryMode': {
+      'type': 'stringFromList',
+      'default': 'Full Res',
+      'options': <String>['Sample', 'Full Res'],
     },
-    "galleryScrollDirection": {
-      "type": "stringFromList",
-      "default": "Horizontal",
-      "options": <String>["Horizontal", "Vertical"],
+    'galleryScrollDirection': {
+      'type': 'stringFromList',
+      'default': 'Horizontal',
+      'options': <String>['Horizontal', 'Vertical'],
     },
-    "galleryBarPosition": {
-      "type": "stringFromList",
-      "default": "Top",
-      "options": <String>["Top", "Bottom"],
+    'galleryBarPosition': {
+      'type': 'stringFromList',
+      'default': 'Top',
+      'options': <String>['Top', 'Bottom'],
     },
-    "zoomButtonPosition": {
-      "type": "stringFromList",
-      "default": "Right",
-      "options": <String>["Disabled", "Left", "Right"],
+    'zoomButtonPosition': {
+      'type': 'stringFromList',
+      'default': 'Right',
+      'options': <String>['Disabled', 'Left', 'Right'],
     },
-    "changePageButtonsPosition": {
-      "type": "stringFromList",
-      "default": (Platform.isWindows || Platform.isLinux) ? "Right" : "Disabled",
-      "options": <String>["Disabled", "Left", "Right"],
+    'changePageButtonsPosition': {
+      'type': 'stringFromList',
+      'default': (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled',
+      'options': <String>['Disabled', 'Left', 'Right'],
     },
 
     // string
-    "defTags": {
-      "type": "string",
-      "default": "rating:safe",
+    'defTags': {
+      'type': 'string',
+      'default': 'rating:safe',
     },
-    "prefBooru": {
-      "type": "string",
-      "default": "",
+    'prefBooru': {
+      'type': 'string',
+      'default': '',
     },
-    "extPathOverride": {
-      "type": "string",
-      "default": "",
+    'extPathOverride': {
+      'type': 'string',
+      'default': '',
     },
-    "drawerMascotPathOverride": {
-      "type": "string",
-      "default": "",
+    'drawerMascotPathOverride': {
+      'type': 'string',
+      'default': '',
     },
-    "lastSyncIp": {
-      "type": "string",
-      "default": "",
+    'lastSyncIp': {
+      'type': 'string',
+      'default': '',
     },
-    "lastSyncPort": {
-      "type": "string",
-      "default": "",
+    'lastSyncPort': {
+      'type': 'string',
+      'default': '',
     },
-    "customUserAgent": {
-      "type": "string",
-      "default": "",
+    'customUserAgent': {
+      'type': 'string',
+      'default': '',
     },
 
     // stringList
-    "hatedTags": {
-      "type": "stringList",
-      "default": <String>[],
+    'hatedTags': {
+      'type': 'stringList',
+      'default': <String>[],
     },
-    "lovedTags": {
-      "type": "stringList",
-      "default": <String>[],
+    'lovedTags': {
+      'type': 'stringList',
+      'default': <String>[],
     },
-    "enabledLogTypes": {
-      "type": "logTypesList",
-      "default": <LogTypes>[],
+    'enabledLogTypes': {
+      'type': 'logTypesList',
+      'default': <LogTypes>[],
     },
 
     // int
-    "limit": {
-      "type": "int",
-      "default": Constants.defaultItemLimit,
-      "upperLimit": 100,
-      "lowerLimit": 10,
+    'limit': {
+      'type': 'int',
+      'default': Constants.defaultItemLimit,
+      'upperLimit': 100,
+      'lowerLimit': 10,
     },
-    "portraitColumns": {
-      "type": "int",
-      "default": 2,
-      "upperLimit": 100,
-      "lowerLimit": 1,
+    'portraitColumns': {
+      'type': 'int',
+      'default': 2,
+      'upperLimit': 100,
+      'lowerLimit': 1,
     },
-    "landscapeColumns": {
-      "type": "int",
-      "default": 4,
-      "upperLimit": 100,
-      "lowerLimit": 1,
+    'landscapeColumns': {
+      'type': 'int',
+      'default': 4,
+      'upperLimit': 100,
+      'lowerLimit': 1,
     },
-    "preloadCount": {
-      "type": "int",
-      "default": 1,
-      "upperLimit": 3,
-      "lowerLimit": 0,
+    'preloadCount': {
+      'type': 'int',
+      'default': 1,
+      'upperLimit': 3,
+      'lowerLimit': 0,
     },
-    "snatchCooldown": {
-      "type": "int",
-      "default": 250,
-      "upperLimit": 10000,
-      "lowerLimit": 0,
+    'snatchCooldown': {
+      'type': 'int',
+      'default': 250,
+      'upperLimit': 10000,
+      'lowerLimit': 0,
     },
-    "volumeButtonsScrollSpeed": {
-      "type": "int",
-      "default": 200,
-      "upperLimit": 1000000,
-      "lowerLimit": 0,
+    'volumeButtonsScrollSpeed': {
+      'type': 'int',
+      'default': 200,
+      'upperLimit': 1000000,
+      'lowerLimit': 0,
     },
-    "mousewheelScrollSpeed": {
-      "type": "double",
-      "default": 10.0,
-      "upperLimit": 20.0,
-      "lowerLimit": 0.1,
+    'mousewheelScrollSpeed': {
+      'type': 'double',
+      'default': 10.0,
+      'upperLimit': 20.0,
+      'lowerLimit': 0.1,
     },
-    "galleryAutoScrollTime": {
-      "type": "int",
-      "default": 4000,
-      "upperLimit": 100000,
-      "lowerLimit": 100,
+    'galleryAutoScrollTime': {
+      'type': 'int',
+      'default': 4000,
+      'upperLimit': 100000,
+      'lowerLimit': 100,
     },
-    "cacheSize": {
-      "type": "int",
-      "default": 3,
-      "upperLimit": 10,
-      "lowerLimit": 0,
+    'cacheSize': {
+      'type': 'int',
+      'default': 3,
+      'upperLimit': 10,
+      'lowerLimit': 0,
     },
 
     // double
 
     // bool
-    "jsonWrite": {
-      "type": "bool",
-      "default": false,
+    'jsonWrite': {
+      'type': 'bool',
+      'default': false,
     },
-    "autoPlayEnabled": {
-      "type": "bool",
-      "default": true,
+    'autoPlayEnabled': {
+      'type': 'bool',
+      'default': true,
     },
-    "loadingGif": {
-      "type": "bool",
-      "default": false,
+    'loadingGif': {
+      'type': 'bool',
+      'default': false,
     },
-    "thumbnailCache": {
-      "type": "bool",
-      "default": true,
+    'thumbnailCache': {
+      'type': 'bool',
+      'default': true,
     },
-    "mediaCache": {
-      "type": "bool",
-      "default": false,
+    'mediaCache': {
+      'type': 'bool',
+      'default': false,
     },
-    "autoHideImageBar": {
-      "type": "bool",
-      "default": false,
+    'autoHideImageBar': {
+      'type': 'bool',
+      'default': false,
     },
-    "dbEnabled": {
-      "type": "bool",
-      "default": true,
+    'dbEnabled': {
+      'type': 'bool',
+      'default': true,
     },
-    "searchHistoryEnabled": {
-      "type": "bool",
-      "default": true,
+    'indexesEnabled': {
+      'type': 'bool',
+      'default': false,
     },
-    "filterHated": {
-      "type": "bool",
-      "default": false,
+    'searchHistoryEnabled': {
+      'type': 'bool',
+      'default': true,
     },
-    "filterFavourites": {
-      "type": "bool",
-      "default": false,
+    'filterHated': {
+      'type': 'bool',
+      'default': false,
     },
-    "useVolumeButtonsForScroll": {
-      "type": "bool",
-      "default": false,
+    'filterFavourites': {
+      'type': 'bool',
+      'default': false,
     },
-    "shitDevice": {
-      "type": "bool",
-      "default": false,
+    'useVolumeButtonsForScroll': {
+      'type': 'bool',
+      'default': false,
     },
-    "disableVideo": {
-      "type": "bool",
-      "default": false,
+    'shitDevice': {
+      'type': 'bool',
+      'default': false,
     },
-    "enableDrawerMascot": {
-      "type": "bool",
-      "default": false,
+    'disableVideo': {
+      'type': 'bool',
+      'default': false,
     },
-    "allowSelfSignedCerts": {
-      "type": "bool",
-      "default": false,
+    'enableDrawerMascot': {
+      'type': 'bool',
+      'default': false,
     },
-    "disableImageScaling": {
-      "type": "bool",
-      "default": false,
+    'allowSelfSignedCerts': {
+      'type': 'bool',
+      'default': false,
     },
-    "gifsAsThumbnails": {
-      "type": "bool",
-      "default": false,
+    'disableImageScaling': {
+      'type': 'bool',
+      'default': false,
     },
-    "desktopListsDrag": {
-      "type": "bool",
-      "default": false,
+    'gifsAsThumbnails': {
+      'type': 'bool',
+      'default': false,
     },
-    "wakeLockEnabled": {
-      "type": "bool",
-      "default": true,
+    'desktopListsDrag': {
+      'type': 'bool',
+      'default': false,
     },
-    "tagTypeFetchEnabled": {
-      "type": "bool",
-      "default": true,
+    'wakeLockEnabled': {
+      'type': 'bool',
+      'default': true,
     },
-    "downloadNotifications": {
-      "type": "bool",
-      "default": true,
+    'tagTypeFetchEnabled': {
+      'type': 'bool',
+      'default': true,
+    },
+    'downloadNotifications': {
+      'type': 'bool',
+      'default': true,
     },
 
     // other
-    "buttonOrder": {
-      "type": "other",
-      "default": <List<String>>[
-        ["autoscroll", "AutoScroll"],
-        ["snatch", "Save"],
-        ["favourite", "Favourite"],
-        ["info", "Display Info"],
-        ["share", "Share"],
-        ["open", "Open in Browser"],
-        ["reloadnoscale", "Reload w/out scaling"]
+    'buttonOrder': {
+      'type': 'other',
+      'default': <List<String>>[
+        ['autoscroll', 'AutoScroll'],
+        ['snatch', 'Save'],
+        ['favourite', 'Favourite'],
+        ['info', 'Display Info'],
+        ['share', 'Share'],
+        ['open', 'Open in Browser'],
+        ['reloadnoscale', 'Reload w/out scaling']
       ],
     },
-    "cacheDuration": {
-      "type": "duration",
-      "default": Duration.zero,
-      "options": <Map<String, dynamic>>[
+    'cacheDuration': {
+      'type': 'duration',
+      'default': Duration.zero,
+      'options': <Map<String, dynamic>>[
         {'label': 'Never', 'value': Duration.zero},
         {'label': '30 minutes', 'value': const Duration(minutes: 30)},
         {'label': '1 hour', 'value': const Duration(hours: 1)},
@@ -471,58 +477,58 @@ class SettingsHandler extends GetxController {
     },
 
     // theme
-    "appMode": {
-      "type": "appMode",
-      "default": AppMode.defaultValue,
-      "options": AppMode.values,
+    'appMode': {
+      'type': 'appMode',
+      'default': AppMode.defaultValue,
+      'options': AppMode.values,
     },
-    "handSide": {
-      "type": "handSide",
-      "default": HandSide.defaultValue,
-      "options": HandSide.values,
+    'handSide': {
+      'type': 'handSide',
+      'default': HandSide.defaultValue,
+      'options': HandSide.values,
     },
-    "theme": {
-      "type": "theme",
-      "default": ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
-      "options": <ThemeItem>[
-        ThemeItem(name: "Pink", primary: Colors.pink[200], accent: Colors.pink[600]),
-        ThemeItem(name: "Purple", primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
-        ThemeItem(name: "Blue", primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
-        ThemeItem(name: "Teal", primary: Colors.teal, accent: Colors.teal[600]),
-        ThemeItem(name: "Red", primary: Colors.red[700], accent: Colors.red[800]),
-        ThemeItem(name: "Green", primary: Colors.green, accent: Colors.green[700]),
-        ThemeItem(name: "Custom", primary: null, accent: null),
+    'theme': {
+      'type': 'theme',
+      'default': ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
+      'options': <ThemeItem>[
+        ThemeItem(name: 'Pink', primary: Colors.pink[200], accent: Colors.pink[600]),
+        ThemeItem(name: 'Purple', primary: Colors.deepPurple[600], accent: Colors.deepPurple[800]),
+        ThemeItem(name: 'Blue', primary: Colors.lightBlue, accent: Colors.lightBlue[600]),
+        ThemeItem(name: 'Teal', primary: Colors.teal, accent: Colors.teal[600]),
+        ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
+        ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
+        ThemeItem(name: 'Custom', primary: null, accent: null),
       ]
     },
-    "themeMode": {
-      "type": "themeMode",
-      "default": ThemeMode.dark,
-      "options": ThemeMode.values,
+    'themeMode': {
+      'type': 'themeMode',
+      'default': ThemeMode.dark,
+      'options': ThemeMode.values,
     },
-    "useMaterial3": {
-      "type": "rxbool",
-      "default": false.obs,
+    'useMaterial3': {
+      'type': 'rxbool',
+      'default': false.obs,
     },
-    "useDynamicColor": {
-      "type": "rxbool",
-      "default": false.obs,
+    'useDynamicColor': {
+      'type': 'rxbool',
+      'default': false.obs,
     },
-    "isAmoled": {
-      "type": "rxbool",
-      "default": false.obs,
+    'isAmoled': {
+      'type': 'rxbool',
+      'default': false.obs,
     },
-    "customPrimaryColor": {
-      "type": "rxcolor",
-      "default": Colors.pink[200],
+    'customPrimaryColor': {
+      'type': 'rxcolor',
+      'default': Colors.pink[200],
     },
-    "customAccentColor": {
-      "type": "rxcolor",
-      "default": Colors.pink[600],
+    'customAccentColor': {
+      'type': 'rxcolor',
+      'default': Colors.pink[600],
     },
   };
 
   dynamic validateValue(String name, dynamic value, {bool toJSON = false}) {
-    Map<String, dynamic>? settingParams = map[name];
+    final Map<String, dynamic>? settingParams = map[name];
 
     if (toJSON) {
       value = getByString(name);
@@ -537,32 +543,32 @@ class SettingsHandler extends GetxController {
     }
 
     try {
-      switch (settingParams["type"]) {
+      switch (settingParams['type']) {
         case 'stringFromList':
-          final String validValue = List<String>.from(settingParams["options"]!).firstWhere((el) => el == value, orElse: () => '');
+          final String validValue = List<String>.from(settingParams['options']!).firstWhere((el) => el == value, orElse: () => '');
           if (validValue != '') {
             return validValue;
           } else {
-            return settingParams["default"];
+            return settingParams['default'];
           }
 
         case 'string':
           if (value is! String) {
-            throw 'value "$value" for $name is not a String';
+            throw Exception('value "$value" for $name is not a String');
           } else {
             return value;
           }
 
         case 'int':
-          int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
+          final int? parse = (value is String) ? int.tryParse(value) : (value is int ? value : null);
           if (parse == null) {
-            throw 'value "$value" of type ${value.runtimeType} for $name is not an int';
-          } else if (parse < settingParams["lowerLimit"] || parse > settingParams["upperLimit"]) {
+            throw Exception('value "$value" of type ${value.runtimeType} for $name is not an int');
+          } else if (parse < settingParams['lowerLimit'] || parse > settingParams['upperLimit']) {
             if (toJSON) {
               // force default value when not passing validation when saving
-              setByString(name, settingParams["default"]);
+              setByString(name, settingParams['default']);
             }
-            return settingParams["default"];
+            return settingParams['default'];
           } else {
             return parse;
           }
@@ -570,9 +576,9 @@ class SettingsHandler extends GetxController {
         case 'bool':
           if (value is! bool) {
             if (value is String && (value == 'true' || value == 'false')) {
-              return value == 'true' ? true : false;
+              return value == 'true';
             } else {
-              throw 'value "$value" for $name is not a bool';
+              throw Exception('value "$value" for $name is not a bool');
             }
           } else {
             return value;
@@ -589,7 +595,7 @@ class SettingsHandler extends GetxController {
             } else if (value is bool) {
               return value.obs;
             } else {
-              throw 'value "$value" for $name is not a rxbool';
+              throw Exception('value "$value" for $name is not a rxbool');
             }
           }
 
@@ -602,7 +608,7 @@ class SettingsHandler extends GetxController {
               // string to rxobject
               return AppMode.fromString(value);
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -615,7 +621,7 @@ class SettingsHandler extends GetxController {
               // string to rxobject
               return HandSide.fromString(value);
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -626,9 +632,9 @@ class SettingsHandler extends GetxController {
           } else {
             if (value is List) {
               // list<string> to list<LogTypes>
-              return List<String>.from(value).map((el) => LogTypes.fromString(el)).toList();
+              return List<String>.from(value).map(LogTypes.fromString).toList();
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -640,10 +646,10 @@ class SettingsHandler extends GetxController {
             if (value is String) {
               // string to rxobject
               final ThemeItem findTheme =
-                  List<ThemeItem>.from(settingParams["options"]!).firstWhere((el) => el.name == value, orElse: () => settingParams["default"]);
+                  List<ThemeItem>.from(settingParams['options']!).firstWhere((el) => el.name == value, orElse: () => settingParams['default']);
               return findTheme;
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -660,10 +666,10 @@ class SettingsHandler extends GetxController {
                 return findMode[0];
               } else {
                 // if not theme mode with given name
-                return settingParams["default"];
+                return settingParams['default'];
               }
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -676,7 +682,7 @@ class SettingsHandler extends GetxController {
             if (value is int) {
               return Color(value);
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -690,7 +696,7 @@ class SettingsHandler extends GetxController {
               // int to Duration
               return Duration(seconds: value);
             } else {
-              return settingParams["default"];
+              return settingParams['default'];
             }
           }
 
@@ -700,14 +706,18 @@ class SettingsHandler extends GetxController {
       }
     } catch (err) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err', "SettingsHandler", "validateValue", null);
-      return settingParams["default"];
+      Logger.Inst().log('value validation error: $err', 'SettingsHandler', 'validateValue', null);
+      return settingParams['default'];
     }
   }
 
   Future<bool> loadSettings() async {
-    if (path == "") await setConfigDir();
-    if (cachePath == "") cachePath = await ServiceHandler.getCacheDir();
+    if (path == '') {
+      await setConfigDir();
+    }
+    if (cachePath == '') {
+      cachePath = await ServiceHandler.getCacheDir();
+    }
 
     if (await checkForSettings()) {
       await loadSettingsJson();
@@ -717,7 +727,7 @@ class SettingsHandler extends GetxController {
 
     if (!Tools.isTestMode) {
       if (dbEnabled) {
-        await dbHandler.dbConnect(path);
+        await dbHandler.dbConnect(path, indexesEnabled);
       } else {
         dbHandler = DBHandler();
       }
@@ -725,13 +735,13 @@ class SettingsHandler extends GetxController {
     return true;
   }
 
-  Future<bool> checkForSettings() async {
-    final File settingsFile = File("${path}settings.json");
-    return await settingsFile.exists();
+  Future<bool> checkForSettings() {
+    final File settingsFile = File('${path}settings.json');
+    return settingsFile.exists();
   }
 
   Future<void> loadSettingsJson() async {
-    final File settingsFile = File("${path}settings.json");
+    final File settingsFile = File('${path}settings.json');
     final String settings = await settingsFile.readAsString();
     // print('loadJSON $settings');
     await loadFromJSON(settings, true);
@@ -784,6 +794,8 @@ class SettingsHandler extends GetxController {
         return autoHideImageBar;
       case 'dbEnabled':
         return dbEnabled;
+      case 'indexesEnabled':
+        return indexesEnabled;
       case 'searchHistoryEnabled':
         return searchHistoryEnabled;
       case 'filterHated':
@@ -939,6 +951,9 @@ class SettingsHandler extends GetxController {
       case 'dbEnabled':
         dbEnabled = validatedValue;
         break;
+      case 'indexesEnabled':
+        indexesEnabled = validatedValue;
+        break;
       case 'searchHistoryEnabled':
         searchHistoryEnabled = validatedValue;
         break;
@@ -1061,73 +1076,74 @@ class SettingsHandler extends GetxController {
   }
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = {
-      "defTags": validateValue("defTags", null, toJSON: true),
-      "previewMode": validateValue("previewMode", null, toJSON: true),
-      "videoCacheMode": validateValue("videoCacheMode", null, toJSON: true),
-      "previewDisplay": validateValue("previewDisplay", null, toJSON: true),
-      "galleryMode": validateValue("galleryMode", null, toJSON: true),
-      "shareAction": validateValue("shareAction", null, toJSON: true),
-      "limit": validateValue("limit", null, toJSON: true),
-      "portraitColumns": validateValue("portraitColumns", null, toJSON: true),
-      "landscapeColumns": validateValue("landscapeColumns", null, toJSON: true),
-      "preloadCount": validateValue("preloadCount", null, toJSON: true),
-      "snatchCooldown": validateValue("snatchCooldown", null, toJSON: true),
-      "galleryBarPosition": validateValue("galleryBarPosition", null, toJSON: true),
-      "galleryScrollDirection": validateValue("galleryScrollDirection", null, toJSON: true),
-      "jsonWrite": validateValue("jsonWrite", null, toJSON: true),
-      "autoPlayEnabled": validateValue("autoPlayEnabled", null, toJSON: true),
-      "loadingGif": validateValue("loadingGif", null, toJSON: true),
-      "thumbnailCache": validateValue("thumbnailCache", null, toJSON: true),
-      "mediaCache": validateValue("mediaCache", null, toJSON: true),
-      "autoHideImageBar": validateValue("autoHideImageBar", null, toJSON: true),
-      "dbEnabled": validateValue("dbEnabled", null, toJSON: true),
-      "searchHistoryEnabled": validateValue("searchHistoryEnabled", null, toJSON: true),
-      "filterHated": validateValue("filterHated", null, toJSON: true),
-      "filterFavourites": validateValue("filterFavourites", null, toJSON: true),
-      "useVolumeButtonsForScroll": validateValue("useVolumeButtonsForScroll", null, toJSON: true),
-      "volumeButtonsScrollSpeed": validateValue("volumeButtonsScrollSpeed", null, toJSON: true),
-      "mousewheelScrollSpeed": validateValue("mousewheelScrollSpeed", null, toJSON: true),
-      "disableVideo": validateValue("disableVideo", null, toJSON: true),
-      "shitDevice": validateValue("shitDevice", null, toJSON: true),
-      "galleryAutoScrollTime": validateValue("galleryAutoScrollTime", null, toJSON: true),
-      "zoomButtonPosition": validateValue("zoomButtonPosition", null, toJSON: true),
-      "changePageButtonsPosition": validateValue("changePageButtonsPosition", null, toJSON: true),
-      "disableImageScaling": validateValue("disableImageScaling", null, toJSON: true),
-      "gifsAsThumbnails": validateValue("gifsAsThumbnails", null, toJSON: true),
-      "desktopListsDrag": validateValue("desktopListsDrag", null, toJSON: true),
-      "cacheDuration": validateValue("cacheDuration", null, toJSON: true),
-      "cacheSize": validateValue("cacheSize", null, toJSON: true),
-      "allowSelfSignedCerts": validateValue("allowSelfSignedCerts", null, toJSON: true),
-      "enabledLogTypes": validateValue("enabledLogTypes", null, toJSON: true),
-      "wakeLockEnabled": validateValue("wakeLockEnabled", null, toJSON: true),
-      "tagTypeFetchEnabled": validateValue("tagTypeFetchEnabled", null, toJSON: true),
-      "downloadNotifications": validateValue("downloadNotifications", null, toJSON: true),
+    final Map<String, dynamic> json = {
+      'defTags': validateValue('defTags', null, toJSON: true),
+      'previewMode': validateValue('previewMode', null, toJSON: true),
+      'videoCacheMode': validateValue('videoCacheMode', null, toJSON: true),
+      'previewDisplay': validateValue('previewDisplay', null, toJSON: true),
+      'galleryMode': validateValue('galleryMode', null, toJSON: true),
+      'shareAction': validateValue('shareAction', null, toJSON: true),
+      'limit': validateValue('limit', null, toJSON: true),
+      'portraitColumns': validateValue('portraitColumns', null, toJSON: true),
+      'landscapeColumns': validateValue('landscapeColumns', null, toJSON: true),
+      'preloadCount': validateValue('preloadCount', null, toJSON: true),
+      'snatchCooldown': validateValue('snatchCooldown', null, toJSON: true),
+      'galleryBarPosition': validateValue('galleryBarPosition', null, toJSON: true),
+      'galleryScrollDirection': validateValue('galleryScrollDirection', null, toJSON: true),
+      'jsonWrite': validateValue('jsonWrite', null, toJSON: true),
+      'autoPlayEnabled': validateValue('autoPlayEnabled', null, toJSON: true),
+      'loadingGif': validateValue('loadingGif', null, toJSON: true),
+      'thumbnailCache': validateValue('thumbnailCache', null, toJSON: true),
+      'mediaCache': validateValue('mediaCache', null, toJSON: true),
+      'autoHideImageBar': validateValue('autoHideImageBar', null, toJSON: true),
+      'dbEnabled': validateValue('dbEnabled', null, toJSON: true),
+      'indexesEnabled': validateValue('indexesEnabled', null, toJSON: true),
+      'searchHistoryEnabled': validateValue('searchHistoryEnabled', null, toJSON: true),
+      'filterHated': validateValue('filterHated', null, toJSON: true),
+      'filterFavourites': validateValue('filterFavourites', null, toJSON: true),
+      'useVolumeButtonsForScroll': validateValue('useVolumeButtonsForScroll', null, toJSON: true),
+      'volumeButtonsScrollSpeed': validateValue('volumeButtonsScrollSpeed', null, toJSON: true),
+      'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
+      'disableVideo': validateValue('disableVideo', null, toJSON: true),
+      'shitDevice': validateValue('shitDevice', null, toJSON: true),
+      'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
+      'zoomButtonPosition': validateValue('zoomButtonPosition', null, toJSON: true),
+      'changePageButtonsPosition': validateValue('changePageButtonsPosition', null, toJSON: true),
+      'disableImageScaling': validateValue('disableImageScaling', null, toJSON: true),
+      'gifsAsThumbnails': validateValue('gifsAsThumbnails', null, toJSON: true),
+      'desktopListsDrag': validateValue('desktopListsDrag', null, toJSON: true),
+      'cacheDuration': validateValue('cacheDuration', null, toJSON: true),
+      'cacheSize': validateValue('cacheSize', null, toJSON: true),
+      'allowSelfSignedCerts': validateValue('allowSelfSignedCerts', null, toJSON: true),
+      'enabledLogTypes': validateValue('enabledLogTypes', null, toJSON: true),
+      'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
+      'tagTypeFetchEnabled': validateValue('tagTypeFetchEnabled', null, toJSON: true),
+      'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
 
       //TODO
-      "buttonOrder": buttonOrder.map((e) => e[0]).toList(),
-      "hatedTags": cleanTagsList(hatedTags),
-      "lovedTags": cleanTagsList(lovedTags),
+      'buttonOrder': buttonOrder.map((e) => e[0]).toList(),
+      'hatedTags': cleanTagsList(hatedTags),
+      'lovedTags': cleanTagsList(lovedTags),
 
-      "prefBooru": validateValue("prefBooru", null, toJSON: true),
-      "appMode": validateValue("appMode", null, toJSON: true),
-      "handSide": validateValue("handSide", null, toJSON: true),
-      "extPathOverride": validateValue("extPathOverride", null, toJSON: true),
-      "lastSyncIp": validateValue("lastSyncIp", null, toJSON: true),
-      "lastSyncPort": validateValue("lastSyncPort", null, toJSON: true),
-      "customUserAgent": validateValue("customUserAgent", null, toJSON: true),
+      'prefBooru': validateValue('prefBooru', null, toJSON: true),
+      'appMode': validateValue('appMode', null, toJSON: true),
+      'handSide': validateValue('handSide', null, toJSON: true),
+      'extPathOverride': validateValue('extPathOverride', null, toJSON: true),
+      'lastSyncIp': validateValue('lastSyncIp', null, toJSON: true),
+      'lastSyncPort': validateValue('lastSyncPort', null, toJSON: true),
+      'customUserAgent': validateValue('customUserAgent', null, toJSON: true),
 
-      "theme": validateValue("theme", null, toJSON: true),
-      "themeMode": validateValue("themeMode", null, toJSON: true),
-      "useMaterial3": validateValue("useMaterial3", null, toJSON: true),
-      "useDynamicColor": validateValue("useDynamicColor", null, toJSON: true),
-      "isAmoled": validateValue("isAmoled", null, toJSON: true),
-      "enableDrawerMascot": validateValue("enableDrawerMascot", null, toJSON: true),
-      "drawerMascotPathOverride": validateValue("drawerMascotPathOverride", null, toJSON: true),
-      "customPrimaryColor": validateValue("customPrimaryColor", null, toJSON: true),
-      "customAccentColor": validateValue("customAccentColor", null, toJSON: true),
-      "version": Constants.appVersion,
-      "build": Constants.appBuildNumber,
+      'theme': validateValue('theme', null, toJSON: true),
+      'themeMode': validateValue('themeMode', null, toJSON: true),
+      'useMaterial3': validateValue('useMaterial3', null, toJSON: true),
+      'useDynamicColor': validateValue('useDynamicColor', null, toJSON: true),
+      'isAmoled': validateValue('isAmoled', null, toJSON: true),
+      'enableDrawerMascot': validateValue('enableDrawerMascot', null, toJSON: true),
+      'drawerMascotPathOverride': validateValue('drawerMascotPathOverride', null, toJSON: true),
+      'customPrimaryColor': validateValue('customPrimaryColor', null, toJSON: true),
+      'customAccentColor': validateValue('customAccentColor', null, toJSON: true),
+      'version': Constants.appVersion,
+      'build': Constants.appBuildNumber,
     };
 
     // print('JSON $json');
@@ -1146,7 +1162,7 @@ class SettingsHandler extends GetxController {
     // (don't allow user to exit the page until the value is correct? or just set to default (current behaviour)? mix of both?)
 
     try {
-      dynamic tempBtnOrder = json["buttonOrder"];
+      dynamic tempBtnOrder = json['buttonOrder'];
       if (tempBtnOrder is List) {
         // print('btnorder is a list');
       } else if (tempBtnOrder is String) {
@@ -1156,9 +1172,9 @@ class SettingsHandler extends GetxController {
         // print('btnorder is a ${tempBtnOrder.runtimeType} type');
         tempBtnOrder = [];
       }
-      List<List<String>> btnOrder = List<String>.from(tempBtnOrder)
+      final List<List<String>> btnOrder = List<String>.from(tempBtnOrder)
           .map((bstr) {
-            List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
+            final List<String> button = buttonList.singleWhere((el) => el[0] == bstr, orElse: () => ['null', 'null']);
             return button;
           })
           .where((el) => el[0] != 'null')
@@ -1174,7 +1190,7 @@ class SettingsHandler extends GetxController {
     }
 
     try {
-      dynamic tempHatedTags = json["hatedTags"];
+      dynamic tempHatedTags = json['hatedTags'];
       if (tempHatedTags is List) {
         // print('hatedTags is a list');
       } else if (tempHatedTags is String) {
@@ -1184,7 +1200,7 @@ class SettingsHandler extends GetxController {
         // print('hatedTags is a ${tempHatedTags.runtimeType} type');
         tempHatedTags = [];
       }
-      List<String> hateTags = List<String>.from(tempHatedTags);
+      final List<String> hateTags = List<String>.from(tempHatedTags);
       for (int i = 0; i < hateTags.length; i++) {
         if (!hatedTags.contains(hateTags.elementAt(i))) {
           hatedTags.add(hateTags.elementAt(i));
@@ -1195,7 +1211,7 @@ class SettingsHandler extends GetxController {
     }
 
     try {
-      dynamic tempLovedTags = json["lovedTags"];
+      dynamic tempLovedTags = json['lovedTags'];
       if (tempLovedTags is List) {
         // print('lovedTags is a list');
       } else if (tempLovedTags is String) {
@@ -1205,7 +1221,7 @@ class SettingsHandler extends GetxController {
         // print('lovedTags is a ${tempLovedTags.runtimeType} type');
         tempLovedTags = [];
       }
-      List<String> loveTags = List<String>.from(tempLovedTags);
+      final List<String> loveTags = List<String>.from(tempLovedTags);
       for (int i = 0; i < loveTags.length; i++) {
         if (!lovedTags.contains(loveTags.elementAt(i))) {
           lovedTags.add(loveTags.elementAt(i));
@@ -1215,8 +1231,8 @@ class SettingsHandler extends GetxController {
       Logger.Inst().log('Failed to parse loved tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
     }
 
-    List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
-    for (String key in leftoverKeys) {
+    final List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
+    for (final String key in leftoverKeys) {
       // TODO something causes rare exception which causes settings to reset
       try {
         setByString(key, json[key]);
@@ -1242,9 +1258,11 @@ class SettingsHandler extends GetxController {
 
   Future<bool> saveSettings({required bool restate}) async {
     await getPerms();
-    if (path == "") await setConfigDir();
+    if (path == '') {
+      await setConfigDir();
+    }
     await Directory(path).create(recursive: true);
-    final File settingsFile = File("${path}settings.json");
+    final File settingsFile = File('${path}settings.json');
     final writer = settingsFile.openWrite();
     writer.write(jsonEncode(toJson()));
     await writer.close();
@@ -1256,9 +1274,11 @@ class SettingsHandler extends GetxController {
   }
 
   Future<bool> loadBoorus() async {
-    List<Booru> tempList = [];
+    final List<Booru> tempList = [];
     try {
-      if (path == "") await setConfigDir();
+      if (path == '') {
+        await setConfigDir();
+      }
 
       final Directory directory = Directory(boorusPath);
       List<FileSystemEntity> files = [];
@@ -1268,7 +1288,7 @@ class SettingsHandler extends GetxController {
 
       if (files.isNotEmpty) {
         for (int i = 0; i < files.length; i++) {
-          if (files[i].path.contains(".json")) {
+          if (files[i].path.contains('.json')) {
             // && files[i].path != 'settings.json'
             // print(files[i].toString());
             final File booruFile = files[i] as File;
@@ -1288,7 +1308,7 @@ class SettingsHandler extends GetxController {
       }
 
       if (dbEnabled && tempList.isNotEmpty) {
-        tempList.add(Booru("Favourites", BooruType.Favourites, "", "", ""));
+        tempList.add(Booru('Favourites', BooruType.Favourites, '', '', ''));
       }
     } catch (e) {
       Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
@@ -1297,13 +1317,13 @@ class SettingsHandler extends GetxController {
     booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
 
     if (tempList.isNotEmpty) {
-      sortBooruList();
+      unawaited(sortBooruList());
     }
     return true;
   }
 
-  void sortBooruList() async {
-    List<Booru> sorted = [...booruList]; // spread the array just in case, to guarantee that we don't affect the original value
+  Future<void> sortBooruList() async {
+    final List<Booru> sorted = [...booruList]; // spread the array just in case, to guarantee that we don't affect the original value
     sorted.sort((a, b) {
       // sort alphabetically
       return a.name!.toLowerCase().compareTo(b.name!.toLowerCase());
@@ -1337,10 +1357,12 @@ class SettingsHandler extends GetxController {
   }
 
   Future saveBooru(Booru booru, {bool onlySave = false}) async {
-    if (path == "") await setConfigDir();
+    if (path == '') {
+      await setConfigDir();
+    }
 
     await Directory(boorusPath).create(recursive: true);
-    final File booruFile = File("$boorusPath${booru.name}.json");
+    final File booruFile = File('$boorusPath${booru.name}.json');
     final writer = booruFile.openWrite();
     writer.write(jsonEncode(booru.toJson()));
     await writer.close();
@@ -1349,28 +1371,28 @@ class SettingsHandler extends GetxController {
       // used only to avoid duplication after migration to json format
       // TODO remove condition when migration logic is removed
       booruList.add(booru);
-      sortBooruList();
+      unawaited(sortBooruList());
     }
     return true;
   }
 
   Future<bool> deleteBooru(Booru booru) async {
-    final File booruFile = File("$boorusPath${booru.name}.json");
+    final File booruFile = File('$boorusPath${booru.name}.json');
     await booruFile.delete();
     if (prefBooru == booru.name) {
-      prefBooru = "";
+      prefBooru = '';
       await saveSettings(restate: true);
     }
     booruList.remove(booru);
-    sortBooruList();
+    unawaited(sortBooruList());
     return true;
   }
 
   List<List<String>> parseTagsList(List<String> itemTags, {bool isCapped = true}) {
-    List<String> cleanItemTags = cleanTagsList(itemTags);
-    List<String> hatedInItem = hatedTags.where((tag) => cleanItemTags.contains(tag)).toList();
-    List<String> lovedInItem = lovedTags.where((tag) => cleanItemTags.contains(tag)).toList();
-    List<String> soundInItem = ['sound', 'sound_edit', 'has_audio', 'voice_acted'].where((tag) => cleanItemTags.contains(tag)).toList();
+    final List<String> cleanItemTags = cleanTagsList(itemTags);
+    List<String> hatedInItem = hatedTags.where(cleanItemTags.contains).toList();
+    List<String> lovedInItem = lovedTags.where(cleanItemTags.contains).toList();
+    final List<String> soundInItem = ['sound', 'sound_edit', 'has_audio', 'voice_acted'].where(cleanItemTags.contains).toList();
     // TODO add more sound tags?
 
     if (isCapped) {
@@ -1428,28 +1450,29 @@ class SettingsHandler extends GetxController {
     return cleanTags;
   }
 
-  void checkUpdate({bool withMessage = false}) async {
+  Future<void> checkUpdate({bool withMessage = false}) async {
     if (Tools.isTestMode) {
       return;
     }
 
-    const String changelog = r"""Changelog""";
-    Map<String, dynamic> fakeUpdate = {
-      "version_name": "2.2.0",
-      "build_number": 170,
-      "title": "Title",
-      "changelog": changelog,
-      "is_in_store": true, // is app still in store
-      "is_update_in_store":
+    const String changelog = '''Changelog''';
+    // ignore: unused_local_variable
+    final Map<String, dynamic> fakeUpdate = {
+      'version_name': '2.2.0',
+      'build_number': 170,
+      'title': 'Title',
+      'changelog': changelog,
+      'is_in_store': true, // is app still in store
+      'is_update_in_store':
           true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
-      "is_important": false, // is update important => force open dialog on start
-      "store_package": "com.noaisu.play.loliSnatcher", // custom app package name, to allow to redirect store users to new app if it will be needed
-      "github_url": "https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest"
+      'is_important': false, // is update important => force open dialog on start
+      'store_package': 'com.noaisu.play.loliSnatcher', // custom app package name, to allow to redirect store users to new app if it will be needed
+      'github_url': 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest'
     }; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
 
     try {
-      const String updateFileName = EnvironmentConfig.isFromStore ? "update_store.json" : "update.json";
+      const String updateFileName = EnvironmentConfig.isFromStore ? 'update_store.json' : 'update.json';
       final response = await DioNetwork.get('https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/$updateFileName');
       final json = jsonDecode(response.data);
       // final json = jsonDecode(jsonEncode(fakeUpdate));
@@ -1458,17 +1481,17 @@ class SettingsHandler extends GetxController {
       Logger.Inst().log(jsonEncode(json), 'SettingsHandler', 'checkUpdate', LogTypes.settingsError);
 
       updateInfo.value = UpdateInfo(
-        versionName: json["version_name"] ?? '0.0.0',
-        buildNumber: json["build_number"] ?? 0,
-        title: json["title"] ?? '...',
-        changelog: json["changelog"] ?? '...',
-        isInStore: json["is_in_store"] ?? false,
-        isImportant: json["is_important"] ?? false,
-        storePackage: json["store_package"] ?? '',
-        githubURL: json["github_url"] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
+        versionName: json['version_name'] ?? '0.0.0',
+        buildNumber: json['build_number'] ?? 0,
+        title: json['title'] ?? '...',
+        changelog: json['changelog'] ?? '...',
+        isInStore: json['is_in_store'] ?? false,
+        isImportant: json['is_important'] ?? false,
+        storePackage: json['store_package'] ?? '',
+        githubURL: json['github_url'] ?? 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
       );
 
-      String? discordFromGithub = json["discord_url"];
+      final String? discordFromGithub = json['discord_url'];
       if (discordFromGithub != null && discordFromGithub.isNotEmpty) {
         // overwrite included discord url if it's not the same as the one in update info
         if (discordFromGithub != discordURL.value) {
@@ -1501,7 +1524,7 @@ class SettingsHandler extends GetxController {
       if (withMessage) {
         FlashElements.showSnackbar(
           title: const Text(
-            "Update Check Error!",
+            'Update Check Error!',
             style: TextStyle(fontSize: 20),
           ),
           content: Text(
@@ -1519,7 +1542,7 @@ class SettingsHandler extends GetxController {
     if (withMessage) {
       FlashElements.showSnackbar(
         title: const Text(
-          "You already have the latest version!",
+          'You already have the latest version!',
           style: TextStyle(fontSize: 20),
         ),
         sideColor: Colors.green,
@@ -1564,7 +1587,7 @@ class SettingsHandler extends GetxController {
                     // } on PlatformException catch(e) {
                     //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
                     // }
-                    ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}");
+                    ServiceHandler.launchURL('https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}');
                     Navigator.of(context).pop(true);
                   },
                   icon: const Icon(Icons.play_arrow),
@@ -1614,7 +1637,7 @@ class SettingsHandler extends GetxController {
       Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
       FlashElements.showSnackbar(
         title: const Text(
-          "Initialization Error!",
+          'Initialization Error!',
           style: TextStyle(fontSize: 20),
         ),
         content: Text(
@@ -1635,7 +1658,7 @@ class SettingsHandler extends GetxController {
       darkTheme: false, // TODO on true - throws theme exception when opening inspector?
     );
 
-    checkUpdate(withMessage: false);
+    unawaited(checkUpdate(withMessage: false));
     isInit.value = true;
     return;
   }

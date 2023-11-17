@@ -1,4 +1,8 @@
+// ignore_for_file: constant_identifier_names
+
 enum BooruType {
+  AutoDetect,
+  // 
   AGNPH,
   BooruOnRails,
   Danbooru,
@@ -7,7 +11,6 @@ enum BooruType {
   Gelbooru,
   GelbooruV1,
   Hydrus,
-  IdolSankaku,
   InkBunny,
   Moebooru,
   NyanPals,
@@ -15,14 +18,16 @@ enum BooruType {
   Rainbooru,
   R34Hentai,
   Sankaku,
+  IdolSankaku,
   Shimmie,
   Szurubooru,
   WildCritters,
   World,
-  AutoDetect,
+
+  // [Special types]
+  GelbooruAlike,
   Merge,
-  Favourites,
-  GelbooruAlike;
+  Favourites;
 
   static List<BooruType> get dropDownValues {
     return [...values]
@@ -37,5 +42,16 @@ enum BooruType {
       ..remove(BooruType.Merge)
       ..remove(BooruType.AutoDetect)
       ..remove(BooruType.Hydrus);
+  }
+
+  String get alias {
+    switch (this) {
+      case World:
+        return 'World/XYZ';
+      case IdolSankaku:
+        return 'Sankaku Idol';
+      default:
+        return name;
+    }
   }
 }

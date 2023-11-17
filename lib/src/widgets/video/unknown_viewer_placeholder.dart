@@ -7,14 +7,17 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class UnknownViewerPlaceholder extends StatelessWidget {
-  const UnknownViewerPlaceholder({required this.item, super.key,});
+  const UnknownViewerPlaceholder({
+    required this.item,
+    super.key,
+  });
 
   final BooruItem item;
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
+      child: ColoredBox(
         color: Colors.black,
         child: Stack(
           alignment: Alignment.center,

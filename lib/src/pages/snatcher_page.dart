@@ -9,10 +9,9 @@ import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
-
 /// This is the page which allows the user to batch download images
 class SnatcherPage extends StatefulWidget {
-  const SnatcherPage({Key? key}) : super(key: key);
+  const SnatcherPage({super.key});
 
   @override
   State<SnatcherPage> createState() => _SnatcherPageState();
@@ -44,7 +43,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Snatcher")
+        title: const Text('Snatcher'),
       ),
       resizeToAvoidBottomInset: true,
       body: Center(
@@ -53,18 +52,16 @@ class _SnatcherPageState extends State<SnatcherPage> {
             SettingsTextInput(
               controller: snatcherTagsController,
               title: 'Tags',
-              hintText: "Enter Tags",
+              hintText: 'Enter Tags',
               inputType: TextInputType.text,
               clearable: true,
             ),
             SettingsTextInput(
               controller: snatcherAmountController,
               title: 'Amount',
-              hintText: "Amount of Files to Snatch",
+              hintText: 'Amount of Files to Snatch',
               inputType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly
-              ],
+              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               resetText: () => 10.toString(),
               numberButtons: true,
               numberStep: 10,
@@ -74,11 +71,9 @@ class _SnatcherPageState extends State<SnatcherPage> {
             SettingsTextInput(
               controller: snatcherSleepController,
               title: 'Delay (in ms)',
-              hintText: "Delay between each download",
+              hintText: 'Delay between each download',
               inputType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly
-              ],
+              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
               resetText: () => settingsHandler.snatchCooldown.toString(),
               numberButtons: true,
               numberStep: 50,
@@ -94,21 +89,20 @@ class _SnatcherPageState extends State<SnatcherPage> {
               },
               title: 'Booru',
             ),
-
             const SettingsButton(name: '', enabled: false),
             SettingsButton(
               name: 'Snatch Files',
               icon: const Icon(Icons.download),
               action: () {
-                if (snatcherSleepController.text.isEmpty){
+                if (snatcherSleepController.text.isEmpty) {
                   snatcherSleepController.text = 0.toString();
                 }
-                if(selectedBooru == null) {
+                if (selectedBooru == null) {
                   FlashElements.showSnackbar(
                     context: context,
                     title: const Text(
-                      "No Booru Selected!",
-                      style: TextStyle(fontSize: 18)
+                      'No Booru Selected!',
+                      style: TextStyle(fontSize: 18),
                     ),
                     leadingIcon: Icons.error_outline,
                     leadingIconColor: Colors.red,
@@ -123,7 +117,6 @@ class _SnatcherPageState extends State<SnatcherPage> {
                   int.parse(snatcherSleepController.text),
                   selectedBooru,
                 );
-
 
                 Navigator.of(context).pop();
                 // TODO make a page which shows progress of all files + list of previous downloads

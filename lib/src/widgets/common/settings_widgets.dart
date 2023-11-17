@@ -3,8 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
@@ -15,7 +15,6 @@ const double borderWidth = 1;
 
 class SettingsButton extends StatelessWidget {
   const SettingsButton({
-    Key? key,
     required this.name,
     this.icon,
     this.subtitle,
@@ -29,7 +28,8 @@ class SettingsButton extends StatelessWidget {
     this.enabled = true, // disable button interaction (will also change text color to grey)
     this.iconOnly = false,
     this.dense = false,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String name;
   final Widget? icon;
@@ -113,13 +113,15 @@ class SettingsPageOpen {
   final bool asBottomSheet;
 
   Future<dynamic> open() async {
-    if (!condition) return null;
+    if (!condition) {
+      return null;
+    }
 
-    SettingsHandler settingsHandler = SettingsHandler.instance;
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    bool isTooNarrow = MediaQuery.of(context).size.width < 550;
-    bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-    bool useDesktopMode = !isTooNarrow && isDesktop;
+    final bool isTooNarrow = MediaQuery.of(context).size.width < 550;
+    final bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+    final bool useDesktopMode = !isTooNarrow && isDesktop;
 
     dynamic result;
     if (useDesktopMode) {
@@ -172,7 +174,6 @@ class SettingsPageOpen {
 
 class SettingsToggle extends StatelessWidget {
   const SettingsToggle({
-    Key? key,
     required this.value,
     required this.onChanged,
     required this.title,
@@ -180,7 +181,8 @@ class SettingsToggle extends StatelessWidget {
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon,
-  }) : super(key: key);
+    super.key,
+  });
 
   final bool value;
   final void Function(bool) onChanged;
@@ -222,7 +224,6 @@ class SettingsToggle extends StatelessWidget {
 
 class SettingsDropdown<T> extends StatelessWidget {
   const SettingsDropdown({
-    Key? key,
     required this.value,
     required this.items,
     required this.onChanged,
@@ -233,7 +234,8 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.trailingIcon,
     this.itemBuilder,
     this.itemTitleBuilder,
-  }) : super(key: key);
+    super.key,
+  });
 
   final T value;
   final List<T> items;
@@ -285,7 +287,7 @@ class SettingsDropdown<T> extends StatelessWidget {
             }).toList();
           },
           items: items.map<DropdownMenuItem<T>>((T item) {
-            bool isCurrent = item == value;
+            final bool isCurrent = item == value;
 
             return DropdownMenuItem<T>(
               value: item,
@@ -322,14 +324,14 @@ class SettingsDropdown<T> extends StatelessWidget {
 
 class SettingsBooruDropdown extends StatelessWidget {
   const SettingsBooruDropdown({
-    Key? key,
     required this.value,
     required this.onChanged,
     required this.title,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.trailingIcon,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Booru? value;
   final void Function(Booru?)? onChanged;
@@ -340,7 +342,7 @@ class SettingsBooruDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Booru> boorus = SettingsHandler.instance.booruList;
+    final List<Booru> boorus = SettingsHandler.instance.booruList;
 
     return SettingsDropdown<Booru?>(
       value: value,
@@ -353,7 +355,10 @@ class SettingsBooruDropdown extends StatelessWidget {
       itemBuilder: (Booru? booru) {
         return Row(
           children: <Widget>[
-            booru == null ? const Icon(null) : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)),
+            if (booru == null)
+              const Icon(null)
+            else
+              booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru),
             Text(" ${booru?.name ?? ''}".trim()),
           ],
         );
@@ -364,12 +369,11 @@ class SettingsBooruDropdown extends StatelessWidget {
 
 class SettingsTextInput extends StatefulWidget {
   const SettingsTextInput({
-    Key? key,
     required this.controller,
+    required this.title,
     this.inputType = TextInputType.text,
     this.inputFormatters,
     this.validator,
-    required this.title,
     this.hintText = '',
     this.autofocus = false,
     this.onChanged,
@@ -385,13 +389,14 @@ class SettingsTextInput extends StatefulWidget {
     this.numberMax = 100,
     this.trailingIcon,
     this.onlyInput = false,
-  }) : super(key: key);
+    super.key,
+  });
 
   final TextEditingController controller;
+  final String title;
   final TextInputType inputType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
-  final String title;
   final String hintText;
   final bool autofocus;
   final void Function(String)? onChanged;
@@ -407,6 +412,7 @@ class SettingsTextInput extends StatefulWidget {
   final double numberMax;
   final Widget? trailingIcon;
   final bool onlyInput;
+
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
 }
@@ -439,8 +445,8 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void stepNumberDown() {
     if (widget.numberButtons) {
-      double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) - widget.numberStep;
-      double newValue = valueWithStep >= widget.numberMin ? valueWithStep : widget.numberMin;
+      final double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) - widget.numberStep;
+      final double newValue = valueWithStep >= widget.numberMin ? valueWithStep : widget.numberMin;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
       onChangedCallback(widget.controller.text);
     }
@@ -448,8 +454,8 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void stepNumberUp() {
     if (widget.numberButtons) {
-      double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) + widget.numberStep;
-      double newValue = valueWithStep <= widget.numberMax ? valueWithStep : widget.numberMax;
+      final double valueWithStep = (double.tryParse(widget.controller.text) ?? 0) + widget.numberStep;
+      final double newValue = valueWithStep <= widget.numberMax ? valueWithStep : widget.numberMax;
       widget.controller.text = newValue.toStringAsFixed(newValue.truncateToDouble() == newValue ? 0 : 1);
       onChangedCallback(widget.controller.text);
     }
@@ -504,22 +510,23 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               onChangedCallback(widget.controller.text);
             },
           ),
-        isFocused
-            ? IconButton(
-                key: const Key('submit-button'),
-                icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
-                onPressed: () {
-                  if (widget.onSubmitted != null) widget.onSubmitted!(widget.controller.text);
-                  _focusNode.unfocus();
-                },
-              )
-            : IconButton(
-                key: const Key('edit-button'),
-                icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
-                onPressed: () {
-                  _focusNode.requestFocus();
-                },
-              ),
+        if (isFocused)
+          IconButton(
+            key: const Key('submit-button'),
+            icon: Icon(widget.onSubmitted != null ? Icons.send : Icons.done, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () {
+              if (widget.onSubmitted != null) {
+                widget.onSubmitted?.call(widget.controller.text);
+              }
+              _focusNode.unfocus();
+            },
+          )
+        else
+          IconButton(
+            key: const Key('edit-button'),
+            icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: _focusNode.requestFocus,
+          ),
       ],
     );
   }
@@ -572,7 +579,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
 class SettingsDialog extends StatelessWidget {
   const SettingsDialog({
-    Key? key,
     this.title,
     this.content,
     this.contentItems,
@@ -580,12 +586,13 @@ class SettingsDialog extends StatelessWidget {
     this.titlePadding,
     this.contentPadding = const EdgeInsets.fromLTRB(16, 20, 16, 16),
     this.buttonPadding,
-    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40.0, vertical: 24.0),
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
     this.borderRadius,
     this.backgroundColor,
     this.surfaceTintColor,
     this.scrollable = true,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget? title;
   final Widget? content;
@@ -625,7 +632,6 @@ class SettingsDialog extends StatelessWidget {
 
 class SettingsBottomSheet extends StatelessWidget {
   const SettingsBottomSheet({
-    Key? key,
     this.title,
     this.content,
     this.contentItems,
@@ -636,7 +642,8 @@ class SettingsBottomSheet extends StatelessWidget {
     this.borderRadius,
     this.backgroundColor,
     this.showCloseButton = true,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget? title;
   final Widget? content;
@@ -713,12 +720,12 @@ class SettingsBottomSheet extends StatelessWidget {
 
 class SettingsPageDialog extends StatelessWidget {
   const SettingsPageDialog({
-    Key? key,
     this.title,
     this.content,
     this.actions,
     this.fab,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Widget? title;
   final Widget? content;

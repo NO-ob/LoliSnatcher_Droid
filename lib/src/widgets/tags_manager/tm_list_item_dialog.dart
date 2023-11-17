@@ -12,14 +12,14 @@ import 'package:lolisnatcher/src/widgets/tags_manager/tm_list_item.dart';
 
 class TagsManagerListItemDialog extends StatefulWidget {
   const TagsManagerListItemDialog({
-    Key? key,
     required this.tag,
     required this.onDelete,
     required this.onChangedType,
     required this.onSetStale,
     required this.onResetStale,
     required this.onSetUnstaleable,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Tag tag;
   final void Function() onDelete;
@@ -40,7 +40,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-    String staleText = DateTime.fromMillisecondsSinceEpoch(widget.tag.updatedAt).add(const Duration(milliseconds: Constants.tagStaleTime)).toString();
+    final String staleText = DateTime.fromMillisecondsSinceEpoch(widget.tag.updatedAt).add(const Duration(milliseconds: Constants.tagStaleTime)).toString();
 
     return SettingsDialog(
       contentItems: <Widget>[
@@ -74,7 +74,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             FlashElements.showSnackbar(
               context: context,
               duration: const Duration(seconds: 2),
-              title: const Text("Added a tab!", style: TextStyle(fontSize: 20)),
+              title: const Text('Added a tab!', style: TextStyle(fontSize: 20)),
               content: Text(widget.tag.fullString, style: const TextStyle(fontSize: 16)),
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
@@ -97,7 +97,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
             FlashElements.showSnackbar(
               context: context,
               duration: const Duration(seconds: 2),
-              title: const Text("Copied to clipboard!", style: TextStyle(fontSize: 20)),
+              title: const Text('Copied to clipboard!', style: TextStyle(fontSize: 20)),
               content: Text(widget.tag.fullString, style: const TextStyle(fontSize: 16)),
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
@@ -119,7 +119,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
         //   leading: Icon(Icons.delete_forever, color: Theme.of(context).errorColor),
         //   title: const Text('Delete'),
         // ),
-        // 
+        //
         const SizedBox(height: 10),
         ListTile(
           shape: RoundedRectangleBorder(
@@ -130,7 +130,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           leading: const Icon(Icons.timer_off),
           title: const Text('Set Stale'),
         ),
-        // 
+        //
         const SizedBox(height: 10),
         ListTile(
           shape: RoundedRectangleBorder(
@@ -141,7 +141,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           leading: const Icon(Icons.restore),
           title: const Text('Reset Stale'),
         ),
-        // 
+        //
         const SizedBox(height: 10),
         ListTile(
           shape: RoundedRectangleBorder(

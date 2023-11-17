@@ -2,7 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ScrollingText extends StatefulWidget {
-  const ScrollingText(this.text, this.size, this.mode, this.textColor, {Key? key}) : super(key: key);
+  const ScrollingText(
+    this.text,
+    this.size,
+    this.mode,
+    this.textColor, {
+    super.key,
+  });
   final String text;
   final int size;
   final String mode;
@@ -15,92 +21,93 @@ class ScrollingText extends StatefulWidget {
 class _ScrollingTextState extends State<ScrollingText> {
   String? displayText;
   int counter = 0, pauseCounter = 0, pauseThreshold = 8, maxAllowedSize = 0;
-  String bufferText = "";
+  String bufferText = '';
   bool forward = true, disposed = false;
   static const int stepDelay = 200;
   @override
-  void initState(){
+  void initState() {
+    super.initState();
     counter = 0;
     pauseCounter = 0;
     maxAllowedSize = widget.size;
-    bufferText = "";
+    bufferText = '';
     forward = true;
-    super.initState();
   }
+
   @override
-  void dispose(){
+  void dispose() {
     disposed = true;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if ((counter + maxAllowedSize) > widget.text.length){
-      if(counter != 0) {
-        setState(() {
-          initState();
-        });
+    if ((counter + maxAllowedSize) > widget.text.length) {
+      if (counter != 0) {
+        setState(initState);
       } else {
         return Text(
-          widget.text, 
-          textAlign: TextAlign.left, 
+          widget.text,
+          textAlign: TextAlign.left,
           style: TextStyle(
             color: widget.textColor,
-          )
+          ),
         );
       }
     } else {
-      switch(widget.mode){
-        case ("bounce"):
+      switch (widget.mode) {
+        case 'bounce':
           bounce();
           break;
-        case ("scroll"):
+        case 'scroll':
           scroll();
           break;
-        case ("infinite"):
+        case 'infinite':
           infinite();
           break;
-        case ("infiniteWithPause"):
+        case 'infiniteWithPause':
           infiniteWithPause();
           break;
       }
     }
     return Text(
-      displayText!, 
-      textAlign: TextAlign.left, 
+      displayText!,
+      textAlign: TextAlign.left,
       style: TextStyle(
         color: widget.textColor,
-      )
+      ),
     );
   }
-  void bounce(){
+
+  void bounce() {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
-      if (!disposed){
+      if (!disposed) {
         if ((counter + maxAllowedSize) >= widget.text.length) {
           setState(() {
             forward = false;
           });
-        } else if (!forward && counter == 0){
+        } else if (!forward && counter == 0) {
           setState(() {
             forward = true;
           });
         }
-        if (forward){
+        if (forward) {
           setState(() {
-            counter ++;
+            counter++;
           });
         } else {
           setState(() {
-            counter --;
+            counter--;
           });
         }
       }
     });
     displayText = widget.text.substring(counter, counter + maxAllowedSize);
   }
+
   void scroll() {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
-      if (!disposed){
+      if (!disposed) {
         if ((counter + maxAllowedSize) < widget.text.length) {
           setState(() {
             counter++;
@@ -112,10 +119,11 @@ class _ScrollingTextState extends State<ScrollingText> {
     });
     displayText = widget.text.substring(counter, counter + maxAllowedSize);
   }
+
   void infinite() {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
-      if (!disposed){
-        if (bufferText.isEmpty){
+      if (!disposed) {
+        if (bufferText.isEmpty) {
           if ((counter + maxAllowedSize) < widget.text.length) {
             setState(() {
               counter++;
@@ -126,33 +134,34 @@ class _ScrollingTextState extends State<ScrollingText> {
             });
           }
         } else {
-          if (bufferText.length > 1){
+          if (bufferText.length > 1) {
             setState(() {
-              bufferText = bufferText.substring(1,bufferText.length);
+              bufferText = bufferText.substring(1, bufferText.length);
             });
           } else {
             setState(() {
-              bufferText = "";
+              bufferText = '';
               counter = 0;
             });
           }
         }
       }
     });
-    if (bufferText.isEmpty){
+    if (bufferText.isEmpty) {
       displayText = widget.text.substring(counter, counter + maxAllowedSize);
     } else {
-      displayText = "$bufferText ${widget.text.substring(0, maxAllowedSize - (bufferText.length - 1))}";
+      displayText = '$bufferText ${widget.text.substring(0, maxAllowedSize - (bufferText.length - 1))}';
     }
   }
-  void infiniteWithPause() async {
+
+  Future<void> infiniteWithPause() async {
     Future.delayed(const Duration(milliseconds: stepDelay), () {
       if (!disposed) {
-        if(counter == 0 && pauseCounter <= pauseThreshold) {
+        if (counter == 0 && pauseCounter <= pauseThreshold) {
           setState(() {
             pauseCounter++;
           });
-        } else if (bufferText.isEmpty){
+        } else if (bufferText.isEmpty) {
           if ((counter + maxAllowedSize) < widget.text.length) {
             setState(() {
               counter++;
@@ -163,13 +172,13 @@ class _ScrollingTextState extends State<ScrollingText> {
             });
           }
         } else {
-          if (bufferText.length > 1){
+          if (bufferText.length > 1) {
             setState(() {
-              bufferText = bufferText.substring(1,bufferText.length);
+              bufferText = bufferText.substring(1, bufferText.length);
             });
           } else {
             setState(() {
-              bufferText = "";
+              bufferText = '';
               counter = 0;
               pauseCounter = 0;
             });
@@ -178,15 +187,14 @@ class _ScrollingTextState extends State<ScrollingText> {
       }
     });
 
-    if (bufferText.isEmpty){
+    if (bufferText.isEmpty) {
       displayText = widget.text.substring(counter, counter + maxAllowedSize);
     } else {
-      displayText = "$bufferText ${widget.text.substring(0, maxAllowedSize - (bufferText.length - 1))}";
+      displayText = '$bufferText ${widget.text.substring(0, maxAllowedSize - (bufferText.length - 1))}';
     }
 
-    if(counter == 0 && pauseCounter <= pauseThreshold) {
+    if (counter == 0 && pauseCounter <= pauseThreshold) {
       displayText = '${displayText!}...';
     }
-    
   }
 }

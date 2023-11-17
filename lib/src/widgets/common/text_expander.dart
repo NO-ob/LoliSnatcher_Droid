@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class TextExpander extends StatefulWidget {
-  const TextExpander({Key? key, required this.title, required this.bodyList}) : super(key: key);
+  const TextExpander({
+    required this.title,
+    required this.bodyList,
+    super.key,
+  });
+
   final String title;
   final List<Widget> bodyList;
 
@@ -43,15 +48,10 @@ class _TextExpanderState extends State<TextExpander> {
           duration: const Duration(milliseconds: 200),
           child: showText
               ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: widget.bodyList,
-              )
-              : const Center(
-                  child: SizedBox(
-                    width: 0,
-                    height: 0,
-                  ),
-                ),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widget.bodyList,
+                )
+              : const Center(child: SizedBox.shrink()),
         ),
         Divider(
           height: 10,

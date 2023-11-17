@@ -26,11 +26,11 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 /// Then settings page is pretty self explanatory it will display, allow the user to edit and save settings
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   Future<bool> _onWillPop() async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
-    bool result = await settingsHandler.saveSettings(restate: true);
+    final bool result = await settingsHandler.saveSettings(restate: true);
     await settingsHandler.loadSettings();
     // await settingsHandler.getBooru();
     return result;
@@ -45,14 +45,15 @@ class SettingsPage extends StatelessWidget {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text("Settings"),
+          title: const Text('Settings'),
           leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () async {
-                if (await _onWillPop()) {
-                  Navigator.of(context).pop();
-                }
-              }),
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              if (await _onWillPop()) {
+                Navigator.of(context).pop();
+              }
+            },
+          ),
         ),
         body: Center(
           child: ListView(
@@ -106,19 +107,18 @@ class SettingsPage extends StatelessWidget {
                         FlashElements.showSnackbar(
                           context: context,
                           title: const Text(
-                            "Error!",
+                            'Error!',
                             style: TextStyle(fontSize: 20),
                           ),
                           content: const Text(
-                              "Database must be enabled to use LoliSync"),
+                            'Database must be enabled to use LoliSync',
+                          ),
                           leadingIcon: Icons.error_outline,
                           leadingIconColor: Colors.red,
                           sideColor: Colors.red,
                         );
                       },
-                page: settingsHandler.dbEnabled
-                    ? () => const LoliSyncPage()
-                    : null,
+                page: settingsHandler.dbEnabled ? () => const LoliSyncPage() : null,
               ),
               const DiscordButton(),
               SettingsButton(
@@ -138,7 +138,8 @@ class SettingsPage extends StatelessWidget {
                 icon: const Icon(Icons.help_center_outlined),
                 action: () {
                   ServiceHandler.launchURL(
-                      "https://github.com/NO-ob/LoliSnatcher_Droid/wiki");
+                    'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
+                  );
                 },
                 trailingIcon: const Icon(Icons.exit_to_app),
               ),
@@ -165,7 +166,7 @@ class SettingsPage extends StatelessWidget {
 }
 
 class VersionButton extends StatefulWidget {
-  const VersionButton({Key? key}) : super(key: key);
+  const VersionButton({super.key});
 
   @override
   State<VersionButton> createState() => _VersionButtonState();
@@ -178,21 +179,20 @@ class _VersionButtonState extends State<VersionButton> {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    final String verText =
-        "Version: ${Constants.appVersion} (${Constants.appBuildNumber})";
-    const String buildTypeText = EnvironmentConfig.isFromStore
-        ? "/ Play"
-        : (kDebugMode ? "/ Debug" : "");
+    const String verText = 'Version: ${Constants.appVersion} (${Constants.appBuildNumber})';
+    const String buildTypeText = EnvironmentConfig.isFromStore ? '/ Play' : (kDebugMode ? '/ Debug' : '');
 
     return SettingsButton(
-      name: "$verText $buildTypeText".trim(),
+      name: '$verText $buildTypeText'.trim(),
       icon: const Icon(null), // to align with other items
       action: () {
         if (settingsHandler.isDebug.value) {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text("Debug mode is already enabled!",
-                style: TextStyle(fontSize: 18)),
+            title: const Text(
+              'Debug mode is already enabled!',
+              style: TextStyle(fontSize: 18),
+            ),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,
@@ -203,8 +203,10 @@ class _VersionButtonState extends State<VersionButton> {
             settingsHandler.isDebug.value = true;
             FlashElements.showSnackbar(
               context: context,
-              title: const Text("Debug mode is enabled!",
-                  style: TextStyle(fontSize: 18)),
+              title: const Text(
+                'Debug mode is enabled!',
+                style: TextStyle(fontSize: 18),
+              ),
               leadingIcon: Icons.warning_amber,
               leadingIconColor: Colors.green,
               sideColor: Colors.green,
@@ -215,14 +217,16 @@ class _VersionButtonState extends State<VersionButton> {
         setState(() {});
       },
       onLongPress: () {
-        if (!settingsHandler.isDebug.value) return;
+        if (!settingsHandler.isDebug.value) {
+          return;
+        }
         //
         debugTaps = 0;
         settingsHandler.isDebug.value = false;
         FlashElements.showSnackbar(
           context: context,
           title: const Text(
-            "Debug mode is disabled!",
+            'Debug mode is disabled!',
             style: TextStyle(fontSize: 18),
           ),
           leadingIcon: Icons.warning_amber,
@@ -236,7 +240,7 @@ class _VersionButtonState extends State<VersionButton> {
 }
 
 class LogsEnabledWarning extends StatelessWidget {
-  const LogsEnabledWarning({Key? key}) : super(key: key);
+  const LogsEnabledWarning({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -250,7 +254,7 @@ class LogsEnabledWarning extends StatelessWidget {
       }
 
       return SettingsButton(
-        name: "You have enabled logging for:",
+        name: 'You have enabled logging for:',
         subtitle: Text(
           '${enabledLogTypes.map((e) => e.toString())}',
           style: const TextStyle(fontSize: 12),
@@ -260,11 +264,10 @@ class LogsEnabledWarning extends StatelessWidget {
           FlashElements.showSnackbar(
             context: context,
             title: const Text(
-              "Logging enabled",
+              'Logging enabled',
               style: TextStyle(fontSize: 18),
             ),
-            content:
-                const Text("You can disable logging in the debug settings"),
+            content: const Text('You can disable logging in the debug settings'),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.yellow,
             sideColor: Colors.yellow,

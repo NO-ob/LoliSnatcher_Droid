@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class CancelButton extends StatelessWidget {
   const CancelButton({
-    Key? key,
     this.text = 'Cancel',
     this.returnData,
     this.withIcon = false,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String text;
   final dynamic returnData;

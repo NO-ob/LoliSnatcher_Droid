@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 class MascotImage extends StatelessWidget {
-  const MascotImage({Key? key}) : super(key: key);
+  const MascotImage({super.key});
 
   @override
   Widget build(BuildContext context) {

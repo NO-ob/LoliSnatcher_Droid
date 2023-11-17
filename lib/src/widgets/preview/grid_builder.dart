@@ -14,8 +14,8 @@ class GridBuilder extends StatelessWidget {
     this.onDoubleTap,
     this.onLongPress,
     this.onSecondaryTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final void Function(int, BooruItem)? onTap;
   final void Function(int, BooruItem)? onDoubleTap;
@@ -28,10 +28,9 @@ class GridBuilder extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     return Obx(() {
-      int columnCount =
-          (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+      final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
-      bool isDesktop = settingsHandler.appMode.value.isDesktop;
+      final bool isDesktop = settingsHandler.appMode.value.isDesktop;
 
       return GridView.builder(
         controller: searchHandler.gridScrollController,
@@ -42,7 +41,9 @@ class GridBuilder extends StatelessWidget {
         itemCount: searchHandler.currentFetched.length,
         padding: EdgeInsets.fromLTRB(2, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 2, 80),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columnCount, childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16),
+          crossAxisCount: columnCount,
+          childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16,
+        ),
         itemBuilder: (BuildContext context, int index) {
           final BooruItem item = searchHandler.currentFetched[index];
 

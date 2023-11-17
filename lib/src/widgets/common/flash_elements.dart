@@ -46,8 +46,8 @@ class FlashElements {
   ///
   /// [ignoreDesktopCheck] - should we ignore desktop specific style checks
   static FutureOr<void> showSnackbar({
-    BuildContext? context,
     required Widget title,
+    BuildContext? context,
     Widget content = const SizedBox(height: 20),
     Color sideColor = Colors.red,
     IconData? leadingIcon = Icons.info_outline,
@@ -65,9 +65,11 @@ class FlashElements {
     Widget? Function(FlashController)? primaryActionBuilder,
   }) async {
     // do nothing if in test mode
-    if (Tools.isTestMode) return;
+    if (Tools.isTestMode) {
+      return;
+    }
 
-    bool inViewer = ViewerHandler.instance.inViewer.value;
+    final bool inViewer = ViewerHandler.instance.inViewer.value;
     if (!allowInViewer && inViewer) {
       return;
     }
@@ -76,27 +78,27 @@ class FlashElements {
       return;
     }
 
-    BuildContext contextToUse = context ?? NavigationHandler.instance.navigatorKey.currentContext!;
+    final BuildContext contextToUse = context ?? NavigationHandler.instance.navigatorKey.currentContext!;
     // TODO can this cause an exception? maybe change to WidgetsBinding ?
-    MediaQueryData mediaQueryData = MediaQuery.of(contextToUse);
+    final MediaQueryData mediaQueryData = MediaQuery.of(contextToUse);
     // Get theme here instead of inside the dialogs themselves, since the dialog could close after the page is changed
     // therefore causing an exception, because this context is not available anymore
-    ThemeData themeData = Theme.of(contextToUse);
+    final ThemeData themeData = Theme.of(contextToUse);
 
-    bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux);
-    bool isDark = themeData.brightness == Brightness.dark;
+    final bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux);
+    final bool isDark = themeData.brightness == Brightness.dark;
 
-    FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
+    final FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
 
     if (asDialog) {
       return showModalFlash(
         context: contextToUse,
         builder: (context, controller) {
           return SettingsDialog(
-            titlePadding: const EdgeInsets.all(0),
-            buttonPadding: const EdgeInsets.all(0),
-            contentPadding: const EdgeInsets.all(0),
-            insetPadding: const EdgeInsets.all(0),
+            titlePadding: EdgeInsets.zero,
+            buttonPadding: EdgeInsets.zero,
+            contentPadding: EdgeInsets.zero,
+            insetPadding: EdgeInsets.zero,
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,

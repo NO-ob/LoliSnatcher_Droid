@@ -11,24 +11,21 @@ import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
-
-
 class SnatchHandler extends GetxController {
-  static SnatchHandler get instance => Get.find<SnatchHandler>();
-
-  RxBool active = false.obs;
-  RxString status = "".obs;
-  RxInt queueProgress = 0.obs;
-  RxInt received = 0.obs;
-  RxInt total = 0.obs;
-
-  RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
-
   SnatchHandler() {
     queuedList.listen((List<SnatchItem> list) {
       trySnatch();
     });
   }
+  static SnatchHandler get instance => Get.find<SnatchHandler>();
+
+  RxBool active = false.obs;
+  RxString status = ''.obs;
+  RxInt queueProgress = 0.obs;
+  RxInt received = 0.obs;
+  RxInt total = 0.obs;
+
+  RxList<SnatchItem> queuedList = RxList<SnatchItem>([]);
 
   Stream<Map<String, int>> writeMultipleFake(List<BooruItem> items, Booru booru, int cooldown) async* {
     int snatchedCounter = 0;
@@ -36,14 +33,14 @@ class SnatchHandler extends GetxController {
       await Future.delayed(const Duration(milliseconds: 2000), () async {});
       snatchedCounter++;
       yield {
-        "snatched": snatchedCounter,
+        'snatched': snatchedCounter,
       };
     }
 
     yield {
-      "snatched": snatchedCounter,
-      "exists": 0,
-      "failed": 0,
+      'snatched': snatchedCounter,
+      'exists': 0,
+      'failed': 0,
     };
   }
 
@@ -54,7 +51,7 @@ class SnatchHandler extends GetxController {
 
   Future snatch(SnatchItem item) async {
     active.value = true;
-    status.value = queuedList.isNotEmpty ? "0/${item.booruItems.length}/${queuedList.length}" : "0/${item.booruItems.length}";
+    status.value = queuedList.isNotEmpty ? '0/${item.booruItems.length}/${queuedList.length}' : '0/${item.booruItems.length}';
 
     // writeMultipleFake(item.booruItems, item.booru, item.cooldown).listen(
     ImageWriter()
@@ -67,11 +64,11 @@ class SnatchHandler extends GetxController {
     )
         .listen(
       (Map<String, dynamic> data) {
-        final int snatched = data["snatched"]! as int;
-        final List<BooruItem>? exists = data["exists"];
-        final List<BooruItem>? failed = data["failed"];
+        final int snatched = data['snatched']! as int;
+        final List<BooruItem>? exists = data['exists'];
+        final List<BooruItem>? failed = data['failed'];
 
-        status.value = queuedList.isNotEmpty ? "$snatched/${item.booruItems.length}/${queuedList.length}" : "$snatched/${item.booruItems.length}";
+        status.value = queuedList.isNotEmpty ? '$snatched/${item.booruItems.length}/${queuedList.length}' : '$snatched/${item.booruItems.length}';
 
         if (exists == null && failed == null) {
           // record progress only when snatched changes
@@ -88,7 +85,7 @@ class SnatchHandler extends GetxController {
             FlashElements.showSnackbar(
               duration: const Duration(seconds: 2),
               position: Positions.top,
-              title: const Text("Snatching Complete", style: TextStyle(fontSize: 20)),
+              title: const Text('Snatching Complete', style: TextStyle(fontSize: 20)),
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -110,7 +107,7 @@ class SnatchHandler extends GetxController {
           snatch(queuedList.removeLast());
         } else {
           active.value = false;
-          status.value = "";
+          status.value = '';
           queueProgress.value = 0;
           received.value = 0;
           total.value = 0;
@@ -136,13 +133,13 @@ class SnatchHandler extends GetxController {
     bool ignoreExists,
   ) {
     if (booruItems.isNotEmpty) {
-      SnatchItem item = SnatchItem(booruItems, cooldown, booru, ignoreExists);
+      final SnatchItem item = SnatchItem(booruItems, cooldown, booru, ignoreExists);
       queuedList.add(item);
 
       if (booruItems.length > 1) {
         if (SettingsHandler.instance.downloadNotifications) {
           FlashElements.showSnackbar(
-            title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
+            title: const Text('Added to snatch queue', style: TextStyle(fontSize: 20)),
             position: Positions.top,
             duration: const Duration(seconds: 2),
             content: Column(
@@ -159,7 +156,7 @@ class SnatchHandler extends GetxController {
       } else {
         if (SettingsHandler.instance.downloadNotifications) {
           FlashElements.showSnackbar(
-            title: const Text("Added to snatch queue", style: TextStyle(fontSize: 20)),
+            title: const Text('Added to snatch queue', style: TextStyle(fontSize: 20)),
             position: Positions.top,
             duration: const Duration(seconds: 2),
             content: Column(
@@ -187,17 +184,17 @@ class SnatchHandler extends GetxController {
       limit = 100;
     }
 
-    List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
+    final List temp = BooruHandlerFactory().getBooruHandler([booru], limit);
     booruHandler = temp[0] as BooruHandler;
     booruHandler.pageNum = temp[1] as int;
     booruHandler.pageNum++;
 
     FlashElements.showSnackbar(
-      title: const Text("Snatching Images", style: TextStyle(fontSize: 20)),
+      title: const Text('Snatching Images', style: TextStyle(fontSize: 20)),
       position: Positions.top,
-      content: Column(
+      content: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Text('Do not close the app!'),
         ],
       ),
@@ -207,7 +204,7 @@ class SnatchHandler extends GetxController {
     );
 
     while (count < int.parse(amount) && !booruHandler.locked) {
-      booruItems = (await booruHandler.search(tags, null) ?? []);
+      booruItems = await booruHandler.search(tags, null) ?? [];
       booruHandler.pageNum++;
       count = booruItems.length;
       // TODO error handling?

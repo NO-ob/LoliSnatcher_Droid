@@ -138,8 +138,8 @@ class ImageViewerState extends State<ImageViewer> {
     initViewer(false);
   }
 
-  void initViewer(bool ignoreTagsCheck) async {
-    if ((settingsHandler.galleryMode == "Sample" && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
+  Future<void> initViewer(bool ignoreTagsCheck) async {
+    if ((settingsHandler.galleryMode == 'Sample' && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
         widget.booruItem.sampleURL == widget.booruItem.fileURL) {
       // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
       imageFolder = 'samples';
@@ -153,7 +153,7 @@ class ImageViewerState extends State<ImageViewer> {
     });
 
     if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
-      List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+      final List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
       if (hatedAndLovedTags[0].isNotEmpty) {
         killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
         return;
@@ -170,7 +170,7 @@ class ImageViewerState extends State<ImageViewer> {
     mainProvider ??= await getImageProvider();
 
     imageStream?.removeListener(imageListener!);
-    imageStream = mainProvider!.resolve(const ImageConfiguration());
+    imageStream = mainProvider!.resolve(ImageConfiguration.empty);
     imageListener = ImageStreamListener(
       (imageInfo, syncCall) {
         isLoaded = true;
@@ -195,7 +195,7 @@ class ImageViewerState extends State<ImageViewer> {
     ImageProvider provider;
     cancelToken = CancelToken();
     provider = CustomNetworkImage(
-      (settingsHandler.galleryMode == "Sample") ? widget.booruItem.sampleURL : widget.booruItem.fileURL,
+      (settingsHandler.galleryMode == 'Sample') ? widget.booruItem.sampleURL : widget.booruItem.fileURL,
       cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(
         searchHandler.currentBooru,

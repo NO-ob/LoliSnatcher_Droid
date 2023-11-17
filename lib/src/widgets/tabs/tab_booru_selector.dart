@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -11,7 +11,7 @@ import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 
 class TabBooruSelector extends StatelessWidget {
-  const TabBooruSelector(this.isPrimary, {Key? key}) : super(key: key);
+  const TabBooruSelector(this.isPrimary, {super.key});
   final bool isPrimary;
 
   @override
@@ -71,8 +71,8 @@ class TabBooruSelector extends StatelessWidget {
               ),
               dropdownDecoratorProps: DropDownDecoratorProps(
                 dropdownSearchDecoration: InputDecoration(
-                  labelText: "Secondary Boorus",
-                  hintText: "Secondary Boorus",
+                  labelText: 'Secondary Boorus',
+                  hintText: 'Secondary Boorus',
                   contentPadding: settingsHandler.appMode.value.isDesktop
                       ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
                       : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -81,9 +81,9 @@ class TabBooruSelector extends StatelessWidget {
               dropdownBuilder: (BuildContext context, List<Booru> selectedItems) {
                 if (selectedItems.isEmpty) {
                   return const ListTile(
-                    contentPadding: EdgeInsets.all(0),
+                    contentPadding: EdgeInsets.zero,
                     leading: Icon(null),
-                    title: Text("No boorus selected"),
+                    title: Text('No boorus selected'),
                   );
                 }
 
@@ -129,7 +129,7 @@ class TabBooruSelector extends StatelessWidget {
             onChanged: (Booru? newValue) {
               if (searchHandler.currentBooru != newValue) {
                 // if not already selected
-                searchHandler.searchAction(searchHandler.searchTextController.text, newValue!);
+                searchHandler.searchAction(searchHandler.searchTextController.text, newValue);
               }
             },
             selectedItemBuilder: (BuildContext context) {
@@ -172,17 +172,17 @@ class TabBooruSelector extends StatelessWidget {
 
 class TabBooruSelectorItem extends StatelessWidget {
   const TabBooruSelectorItem({
-    Key? key,
     required this.booru,
     this.withFavicon = true,
-  }) : super(key: key);
+    super.key,
+  });
 
   final Booru booru;
   final bool withFavicon;
 
   @override
   Widget build(BuildContext context) {
-    String name = " ${booru.name}";
+    final String name = ' ${booru.name}';
 
     return Row(
       children: <Widget>[

@@ -8,7 +8,10 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class VideoViewerPlaceholder extends StatelessWidget {
-  const VideoViewerPlaceholder({required this.item, super.key,});
+  const VideoViewerPlaceholder({
+    required this.item,
+    super.key,
+  });
 
   final BooruItem item;
 
@@ -30,7 +33,7 @@ class VideoViewerPlaceholder extends StatelessWidget {
               name: Platform.isLinux ? 'Open Video in External Player' : 'Open Video in Browser',
               action: () {
                 if (Platform.isLinux) {
-                  Process.run('mpv', ["--loop", item.fileURL]);
+                  Process.run('mpv', ['--loop', item.fileURL]);
                 } else {
                   ServiceHandler.launchURL(item.fileURL);
                 }

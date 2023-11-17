@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 
 class ZoomButton extends StatelessWidget {
-  const ZoomButton({Key? key}) : super(key: key);
+  const ZoomButton({super.key});
 
   @override
   Widget build(BuildContext context) {

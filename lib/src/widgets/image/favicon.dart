@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
-import 'package:get/get_connect/http/src/status/http_status.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -10,13 +9,13 @@ import 'package:lolisnatcher/src/widgets/image/custom_network_image.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 
 class Favicon extends StatefulWidget {
-  final Booru booru;
   const Favicon(
     this.booru, {
     this.color,
     super.key,
   });
 
+  final Booru booru;
   final Color? color;
 
   @override
@@ -63,27 +62,25 @@ class _FaviconState extends State<Favicon> {
     );
   }
 
-  void onError(Object error) async {
+  Future<void> onError(Object error) async {
     //// Error handling
     if (error is DioException && CancelToken.isCancel(error)) {
       //
     } else {
       if (error is Exception && (error as dynamic).message == 'Invalid image data') {
-        ((mainProvider as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
+        await ((mainProvider! as ResizeImage).imageProvider as CustomNetworkImage).deleteCacheFile();
         disposables();
       }
       if (error is DioException && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
-          await Tools.checkForCaptcha(error.response!, error.requestOptions.uri);
+          await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
           manualReloadTapped = false;
         }
         errorCode = error.response!.statusCode.toString();
       }
 
       isFailed = true;
-      Future.delayed(const Duration(milliseconds: 300), () {
-        updateState();
-      });
+      Future.delayed(const Duration(milliseconds: 300), updateState);
     }
   }
 
@@ -97,7 +94,7 @@ class _FaviconState extends State<Favicon> {
     if (mounted) setState(() {});
   }
 
-  void restartLoading() async {
+  Future<void> restartLoading() async {
     if (mounted) {
       await mainProvider?.evict();
     }
@@ -111,7 +108,7 @@ class _FaviconState extends State<Favicon> {
     mainProvider ??= await getImageProvider();
 
     imageStream?.removeListener(imageListener!);
-    imageStream = mainProvider!.resolve(const ImageConfiguration());
+    imageStream = mainProvider!.resolve(ImageConfiguration.empty);
     imageListener = ImageStreamListener(
       (imageInfo, syncCall) {
         isLoaded = true;
@@ -120,7 +117,7 @@ class _FaviconState extends State<Favicon> {
         }
       },
       onError: (e, stack) {
-        Logger.Inst().log("Failed to load favicon: ${widget.booru.faviconURL}", "Favicon", "build", null); // LogTypes.imageLoadingError);
+        Logger.Inst().log('Failed to load favicon: ${widget.booru.faviconURL}', 'Favicon', 'build', LogTypes.imageLoadingError);
         onError(e);
       },
     );

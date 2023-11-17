@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -11,7 +12,6 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 
@@ -90,7 +90,7 @@ void main() async {
 }
 
 class MainApp extends StatefulWidget {
-  const MainApp({Key? key}) : super(key: key);
+  const MainApp({super.key});
 
   @override
   State<MainApp> createState() => _MainAppState();
@@ -119,12 +119,10 @@ class _MainAppState extends State<MainApp> {
     initHandlers();
 
     if (Platform.isAndroid || Platform.isIOS) {
-      var window = WidgetsBinding.instance.window;
-      window.onPlatformBrightnessChanged = () {
-        // This callback is called every time the brightness changes and forces the app root to restate.
-        // This allows to not use darkTheme to avoid coloring bugs on AppBars
-        updateState();
-      };
+      final PlatformDispatcher window = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher;
+      // This callback is called every time the brightness changes and forces the app root to restate.
+      // This allows to not use darkTheme to avoid coloring bugs on AppBars
+      window.onPlatformBrightnessChanged = updateState;
     }
 
     // TODO
@@ -148,17 +146,18 @@ class _MainAppState extends State<MainApp> {
     setMaxFPS();
   }
 
-  void initHandlers() async {
+  Future<void> initHandlers() async {
     // should init earlier than tabs so tags color properly on first render of search box
     // TODO but this possibly could lead to bad preformance on start if tag storage is too big?
-    await tagHandler.initialize();
-
-    await searchHandler.restoreTabs();
+    await Future.wait([
+      tagHandler.initialize(),
+      searchHandler.restoreTabs(),
+    ]);
 
     settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
   }
 
-  void setMaxFPS() async {
+  Future<void> setMaxFPS() async {
     // enable higher refresh rate
     // TODO make this a setting?
     // TODO make it work on ios, desktop?
@@ -168,7 +167,7 @@ class _MainAppState extends State<MainApp> {
 
     if (Platform.isAndroid) {
       await FlutterDisplayMode.setHighRefreshRate();
-      DisplayMode currentMode = await FlutterDisplayMode.active;
+      final DisplayMode currentMode = await FlutterDisplayMode.active;
 
       if (currentMode.refreshRate > maxFps) {
         maxFps = currentMode.refreshRate.round();
@@ -207,7 +206,7 @@ class _MainAppState extends State<MainApp> {
       final bool useDynamicColor = settingsHandler.useDynamicColor.value;
       final bool isAmoled = settingsHandler.isAmoled.value;
 
-      ThemeHandler themeHandler = ThemeHandler(
+      final ThemeHandler themeHandler = ThemeHandler(
         theme: theme,
         themeMode: themeMode,
         useMaterial3: useMaterial3,
@@ -245,24 +244,26 @@ class _MainAppState extends State<MainApp> {
           width: 110,
           height: 80,
           align: Alignment.centerLeft,
-          child: DynamicColorBuilder(builder: (lightDynamic, darkDynamic) {
-            themeHandler.setDynamicColors(
-              useDynamicColor ? lightDynamic : null,
-              useDynamicColor ? darkDynamic : null,
-            );
+          child: DynamicColorBuilder(
+            builder: (lightDynamic, darkDynamic) {
+              themeHandler.setDynamicColors(
+                useDynamicColor ? lightDynamic : null,
+                useDynamicColor ? darkDynamic : null,
+              );
 
-            return MaterialApp(
-              title: 'LoliSnatcher',
-              debugShowCheckedModeBanner: false, // hide debug banner in the corner
-              showPerformanceOverlay: settingsHandler.showPerf.value,
-              scrollBehavior: const CustomScrollBehavior(),
-              theme: themeHandler.lightTheme(),
-              darkTheme: themeHandler.darkTheme(),
-              themeMode: themeMode,
-              navigatorKey: navigationHandler.navigatorKey,
-              home: const Home(),
-            );
-          }),
+              return MaterialApp(
+                title: 'LoliSnatcher',
+                debugShowCheckedModeBanner: false, // hide debug banner in the corner
+                showPerformanceOverlay: settingsHandler.showPerf.value,
+                scrollBehavior: const CustomScrollBehavior(),
+                theme: themeHandler.lightTheme(),
+                darkTheme: themeHandler.darkTheme(),
+                themeMode: themeMode,
+                navigatorKey: navigationHandler.navigatorKey,
+                home: const Home(),
+              );
+            },
+          ),
         ),
       );
     });
@@ -270,7 +271,7 @@ class _MainAppState extends State<MainApp> {
 }
 
 class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -295,8 +296,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     initDeepLinks();
 
-    // searchHandler.restoreTabs();
-
     // force cache clear every minute + perform tabs backup
     cacheClearTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       // TODO we don't need to clear cache so much, since all images are cleared on dispose
@@ -309,13 +308,11 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       }
     });
 
-    imageWriter.clearStaleCache();
-    imageWriter.clearCacheOverflow();
+    clearCache();
     // run check for stale cache files
     // TODO find a better way and/or cases when it will be better to call these
     cacheStaleTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
-      imageWriter.clearStaleCache();
-      imageWriter.clearCacheOverflow();
+      clearCache();
     });
 
     // consider app launch as return to the app
@@ -323,14 +320,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     // localAuthHandler.onReturn();
   }
 
-  void initDeepLinks() async {
+  Future<void> clearCache() async {
+    await Future.wait([
+      imageWriter.clearStaleCache(),
+      imageWriter.clearCacheOverflow(),
+    ]);
+  }
+
+  Future<void> initDeepLinks() async {
     if (Platform.isAndroid || Platform.isIOS) {
       appLinks = AppLinks();
 
       // check if there is a deep link on app start
       final Uri? initialLink = await appLinks!.getInitialAppLink();
       if (initialLink != null) {
-        openAppLink(initialLink.toString());
+        unawaited(openAppLink(initialLink.toString()));
       }
 
       // listen for deep links
@@ -340,12 +344,12 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
   }
 
-  void openAppLink(String url) async {
+  Future<void> openAppLink(String url) async {
     Logger.Inst().log(url, 'AppLinks', 'openAppLink', LogTypes.settingsLoad);
     // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
 
     if (url.contains('loli.snatcher')) {
-      Booru booru = Booru.fromLink(url);
+      final Booru booru = Booru.fromLink(url);
       if (booru.name != null && booru.name!.isNotEmpty) {
         if (settingsHandler.booruList.indexWhere((b) => b.name == booru.name) != -1) {
           // Rename config if its already in the list

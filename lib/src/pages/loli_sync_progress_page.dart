@@ -9,7 +9,6 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class LoliSyncProgressPage extends StatefulWidget {
   const LoliSyncProgressPage({
-    super.key, 
     required this.type, // sender or receiver
     required this.ip,
     required this.port,
@@ -19,9 +18,10 @@ class LoliSyncProgressPage extends StatefulWidget {
     this.settings = false,
     this.booru = false,
     this.tabs = false,
-    this.tabsMode = "Merge",
+    this.tabsMode = 'Merge',
     this.tags = false,
-    this.tagsMode = "PreferTypeIfNone",
+    this.tagsMode = 'PreferTypeIfNone',
+    super.key,
   });
 
   final String type, port, tabsMode, tagsMode;
@@ -60,22 +60,22 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
     super.initState();
     if (widget.type == 'sender') {
       if (widget.favourites) {
-        toSync.add("Favourites");
+        toSync.add('Favourites');
       }
       if (widget.favouritesv2) {
-        toSync.add("Favouritesv2");
+        toSync.add('Favouritesv2');
       }
       if (widget.settings) {
-        toSync.add("Settings");
+        toSync.add('Settings');
       }
       if (widget.booru) {
-        toSync.add("Booru");
+        toSync.add('Booru');
       }
       if (widget.tabs) {
-        toSync.add("Tabs");
+        toSync.add('Tabs');
       }
       if (widget.tags) {
-        toSync.add("Tags");
+        toSync.add('Tags');
       }
 
       progressStream = loliSync.startSync(widget.ip!, widget.port, toSync, widget.favSkip, widget.tabsMode, widget.tagsMode);
@@ -135,7 +135,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text("LoliSync"),
+          title: const Text('LoliSync'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -149,24 +149,24 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
           child: StreamBuilder<String>(
             stream: progressStream,
             builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-              String status = "";
+              String status = '';
               if (snapshot.hasError) {
-                status = "Error ${snapshot.error}";
+                status = 'Error ${snapshot.error}';
               } else {
                 switch (snapshot.connectionState) {
                   case ConnectionState.none:
-                    status = "No connection";
+                    status = 'No connection';
                     break;
                   case ConnectionState.waiting:
                     if (widget.type == 'sender') {
-                      status = "Waiting for connection...";
+                      status = 'Waiting for connection...';
                     } else {
-                      status = "Starting server...";
+                      status = 'Starting server...';
                     }
                     break;
                   case ConnectionState.active:
                   case ConnectionState.done:
-                    status = "${snapshot.data}";
+                    status = '${snapshot.data}';
                     break;
                 }
               }
@@ -187,7 +187,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
                         },
                       ),
                     Padding(
-                      padding: const EdgeInsets.all(4.0),
+                      padding: const EdgeInsets.all(4),
                       child: Text(status, style: const TextStyle(fontSize: 18)),
                     ),
                     // show history of messages
@@ -198,8 +198,13 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
                           itemBuilder: (BuildContext context, int index) {
                             final int indexWoutStart = index + 1;
                             return Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Center(child: Text(messagesHistory[indexWoutStart], style: const TextStyle(fontSize: 18))),
+                              padding: const EdgeInsets.all(4),
+                              child: Center(
+                                child: Text(
+                                  messagesHistory[indexWoutStart],
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
                             );
                           },
                         ),

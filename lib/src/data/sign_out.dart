@@ -1,0 +1,3 @@
+class SignOutData {
+  const SignOutData();
+}

@@ -8,10 +8,10 @@ import 'package:lolisnatcher/src/utils/timed_progress_controller.dart';
 
 class RestartableProgressIndicator extends StatefulWidget {
   const RestartableProgressIndicator({
-    Key? key,
     required this.controller,
     this.onTimeout,
-  }) : super(key: key);
+    super.key,
+  });
 
   final TimedProgressController controller;
   final VoidCallback? onTimeout;
@@ -45,7 +45,7 @@ class _RestartableProgressIndicatorState extends State<RestartableProgressIndica
   }
 
   void updateState() {
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
   }

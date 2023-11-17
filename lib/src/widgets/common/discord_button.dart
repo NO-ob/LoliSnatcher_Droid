@@ -9,9 +9,9 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class DiscordButton extends StatelessWidget {
   const DiscordButton({
-    Key? key,
     this.overrideText,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String? overrideText;
 

@@ -5,9 +5,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
@@ -15,7 +15,7 @@ import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 // Experimental: attempt to do chrome-like tabs list for desktop view
 
 class DesktopTabs extends StatefulWidget {
-  const DesktopTabs({Key? key}) : super(key: key);
+  const DesktopTabs({super.key});
 
   @override
   State<DesktopTabs> createState() => _DesktopTabsState();
@@ -40,7 +40,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
     super.dispose();
   }
 
-  void jumpToTab(int index) async {
+  Future<void> jumpToTab(int index) async {
     scrollController.jumpTo(index * (scrollController.position.maxScrollExtent / searchHandler.list.length));
     await Future.delayed(const Duration(milliseconds: 50));
     await scrollController.scrollToIndex(
@@ -57,13 +57,13 @@ class _DesktopTabsState extends State<DesktopTabs> {
   }
 
   Widget buildRow(SearchTab tab) {
-    bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
+    final bool isNotEmptyBooru = tab.selectedBooru.value.faviconURL != null;
 
-    int? totalCount = tab.booruHandler.totalCount.value;
-    String totalCountText = (totalCount > 0) ? " ($totalCount)" : "";
-    String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
+    final int totalCount = tab.booruHandler.totalCount.value;
+    final String totalCountText = (totalCount > 0) ? ' ($totalCount)' : '';
+    final String tagText = "${tab.tags == "" ? "[No Tags]" : tab.tags}$totalCountText";
 
-    bool isSelected = searchHandler.currentIndex == searchHandler.list.indexOf(tab);
+    final bool isSelected = searchHandler.currentIndex == searchHandler.list.indexOf(tab);
 
     return Container(
       decoration: BoxDecoration(
@@ -77,17 +77,16 @@ class _DesktopTabsState extends State<DesktopTabs> {
       width: double.maxFinite,
       child: Row(
         children: [
-          isNotEmptyBooru
-              ? (tab.selectedBooru.value.type == BooruType.Favourites
-                  ? const Icon(Icons.favorite, color: Colors.red, size: 18)
-                  : Favicon(tab.selectedBooru.value))
-              : const Icon(CupertinoIcons.question, size: 18),
+          if (isNotEmptyBooru)
+            tab.selectedBooru.value.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(tab.selectedBooru.value)
+          else
+            const Icon(CupertinoIcons.question, size: 18),
           const SizedBox(width: 3),
           MarqueeText(
             key: ValueKey(tagText),
             text: tagText,
             fontSize: 16,
-            color: tab.tags == "" ? Colors.grey : null,
+            color: tab.tags == '' ? Colors.grey : null,
           ),
           const SizedBox(width: 3),
           IconButton(

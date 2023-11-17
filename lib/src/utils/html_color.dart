@@ -153,7 +153,9 @@ const _kColorMap = <String, Color>{
 
 Color parse(String text) {
   text = text.trim();
-  if (text.isEmpty) throw FormatException('Empty html color: $text');
+  if (text.isEmpty) {
+    throw FormatException('Empty html color: $text');
+  }
 
   if (text.codeUnitAt(0) == '#'.codeUnitAt(0)) {
     if (text.length >= 7) {
@@ -170,8 +172,8 @@ Color parse(String text) {
   } else if (text.startsWith('rgb(') && text.endsWith(')')) {
     // rgb(255, 0, 0)
     // rgb(100%, 0%, 0%)
-    String str = text.substring(4, text.length - 1);
-    List<String> colors = str.split(',');
+    final String str = text.substring(4, text.length - 1);
+    final List<String> colors = str.split(',');
     if (colors.length >= 3) {
       final r = _parseRGB(colors[0]);
       final g = _parseRGB(colors[1]);
@@ -181,19 +183,19 @@ Color parse(String text) {
   } else if (text.startsWith('rgba(') && text.endsWith(')')) {
     // rgba(255, 0, 0, 0.6)
     // rgba(100%, 0%, 0%, 0.6)
-    String str = text.substring(5, text.length - 1);
-    List<String> colors = str.split(',');
+    final String str = text.substring(5, text.length - 1);
+    final List<String> colors = str.split(',');
     if (colors.length >= 4) {
-      int r = _parseRGB(colors[0]);
-      int g = _parseRGB(colors[1]);
-      int b = _parseRGB(colors[2]);
-      int a = _parseA(colors[3]);
+      final int r = _parseRGB(colors[0]);
+      final int g = _parseRGB(colors[1]);
+      final int b = _parseRGB(colors[2]);
+      final int a = _parseA(colors[3]);
       return Color.fromARGB(a, r, g, b);
     }
   } else if (text.startsWith('hsl(') && text.endsWith(')')) {
     // hsl(120, 100%, 50%)
-    String str = text.substring(4, text.length - 1);
-    List<String> colors = str.split(',');
+    final String str = text.substring(4, text.length - 1);
+    final List<String> colors = str.split(',');
     if (colors.length >= 3) {
       final h = _parseH(colors[0]);
       final s = _parseSL(colors[1]);
@@ -202,8 +204,8 @@ Color parse(String text) {
     }
   } else if (text.startsWith('hsla(') && text.endsWith(')')) {
     // hsla(120, 100%, 25%, 0.3)
-    String str = text.substring(5, text.length - 1);
-    List<String> colors = str.split(',');
+    final String str = text.substring(5, text.length - 1);
+    final List<String> colors = str.split(',');
     if (colors.length >= 4) {
       final h = _parseH(colors[0]);
       final s = _parseSL(colors[1]);
@@ -214,7 +216,9 @@ Color parse(String text) {
   }
 
   final color = _kColorMap[text.toLowerCase()];
-  if (color == null) throw FormatException('Invalid html color: $text');
+  if (color == null) {
+    throw FormatException('Invalid html color: $text');
+  }
   return color;
 }
 
