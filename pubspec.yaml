@@ -25,7 +25,7 @@ dependencies:
   alice_lightweight: ^3.4.0
   app_links: ^3.4.3
   auto_size_text: ^3.0.0
-  awesome_notifications: 0.7.4+1
+  awesome_notifications: ^0.8.2
   chewie: ^1.5.0
   crypto: ^3.0.2
   cupertino_icons: ^1.0.5
@@ -55,18 +55,18 @@ dependencies:
   flutter_linkify: ^6.0.0
   font_awesome_flutter: ^10.4.0
   get: ^4.6.5
-  google_fonts: ^4.0.4
+  google_fonts: ^6.1.0
   html: ^0.15.4
   huge_listview: ^2.0.10
   image: ^4.0.15
-  intl: ^0.17.0
+  intl: ^0.18.1
   keyboard_actions: ^4.2.0
   logger_fork: ^1.2.0
   logger_flutter_fork: ^1.3.1
   # local_auth: ^2.1.0
   # marquee: ^2.2.2 # replaced with fast_marquee
   path_provider: ^2.0.14
-  permission_handler: ^10.3.0
+  permission_handler: ^11.0.1
   photo_view: # ^0.12.0
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
@@ -78,7 +78,7 @@ dependencies:
   sqflite: ^2.2.8+4
   statsfl: ^2.3.0
   transparent_image: ^2.0.1
-  uuid: ^3.0.7
+  uuid: ^4.2.1
   vibration: ^1.7.5
   video_player: ^2.6.1
   waterfall_flow: ^3.0.2
@@ -97,7 +97,7 @@ flutter_icons:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^3.0.1
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # TODO/reminder don't forget to check if the dependencies are updated when changing versions of other packages
