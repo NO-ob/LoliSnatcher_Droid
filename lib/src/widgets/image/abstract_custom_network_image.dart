@@ -18,8 +18,5 @@ abstract class CustomNetworkImage extends ImageProvider<CustomNetworkImage> {
   Map<String, String>? get headers;
 
   @override
-  ImageStreamCompleter load(CustomNetworkImage key, DecoderCallback decode);
-
-  @override
-  ImageStreamCompleter loadBuffer(CustomNetworkImage key, DecoderBufferCallback decode);
+  ImageStreamCompleter loadImage(CustomNetworkImage key, ImageDecoderCallback decode);
 }

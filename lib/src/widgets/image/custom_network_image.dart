@@ -61,27 +61,11 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   }
 
   @override
-  ImageStreamCompleter load(custom_network_image.CustomNetworkImage key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(custom_network_image.CustomNetworkImage key, ImageDecoderCallback decode) {
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as CustomNetworkImage, chunkEvents, null, decode),
-      chunkEvents: chunkEvents.stream,
-      scale: key.scale,
-      debugLabel: key.url,
-      informationCollector: () => <DiagnosticsNode>[
-        DiagnosticsProperty<ImageProvider>('Image provider', this),
-        DiagnosticsProperty<custom_network_image.CustomNetworkImage>('Image key', key),
-      ],
-    );
-  }
-
-  @override
-  ImageStreamCompleter loadBuffer(custom_network_image.CustomNetworkImage key, DecoderBufferCallback decode) {
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key as CustomNetworkImage, chunkEvents, decode, null),
+      codec: _loadAsync(key as CustomNetworkImage, chunkEvents, decode),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       debugLabel: key.url,
@@ -125,8 +109,7 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   Future<ui.Codec> _loadAsync(
     CustomNetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
-    DecoderBufferCallback? decode,
-    DecoderCallback? decodeDepreacted,
+    ImageDecoderCallback decode,
   ) async {
     final Uri resolved = Uri.base.resolve(key.url);
     final String cacheFilePath = await ImageWriter().getCachePathString(
@@ -236,13 +219,8 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
         throw Exception('CustomNetworkImage is an empty file: $resolved');
       }
 
-      if (decode != null) {
-        final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
-        return decode(buffer);
-      } else {
-        assert(decodeDepreacted != null, 'decodeDepreacted must not be null');
-        return decodeDepreacted!(bytes);
-      }
+      final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      return decode(buffer);
     } catch (e) {
       if (onError != null) {
         onError?.call(e);
