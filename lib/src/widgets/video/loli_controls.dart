@@ -193,7 +193,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -816,7 +816,7 @@ class _PlaybackSpeedDialog extends StatelessWidget {
             );
           },
           itemCount: _speeds.length,
-        )
+        ),
       ],
     );
   }

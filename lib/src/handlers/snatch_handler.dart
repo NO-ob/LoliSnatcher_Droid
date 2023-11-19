@@ -22,6 +22,7 @@ class SnatchHandler extends GetxController {
   RxBool active = false.obs;
   RxString status = ''.obs;
   RxInt queueProgress = 0.obs;
+  Rx<SnatchItem?> current = Rx<SnatchItem?>(null);
   RxInt received = 0.obs;
   RxInt total = 0.obs;
 
@@ -52,6 +53,7 @@ class SnatchHandler extends GetxController {
   Future snatch(SnatchItem item) async {
     active.value = true;
     status.value = queuedList.isNotEmpty ? '0/${item.booruItems.length}/${queuedList.length}' : '0/${item.booruItems.length}';
+    current.value = item;
 
     // writeMultipleFake(item.booruItems, item.booru, item.cooldown).listen(
     ImageWriter()
@@ -103,12 +105,13 @@ class SnatchHandler extends GetxController {
         }
       },
       onDone: () {
-        if (queuedList.isNotEmpty) {
+        if (queuedList.isNotEmpty && active.value) {
           snatch(queuedList.removeLast());
         } else {
           active.value = false;
           status.value = '';
           queueProgress.value = 0;
+          current.value = null;
           received.value = 0;
           total.value = 0;
         }
@@ -117,7 +120,7 @@ class SnatchHandler extends GetxController {
   }
 
   void trySnatch() {
-    if (!active.value) {
+    if (!active.value && current.value == null) {
       if (queuedList.isNotEmpty) {
         snatch(queuedList.removeLast());
       } else if (queuedList.isEmpty) {

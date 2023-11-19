@@ -78,15 +78,22 @@ class _DesktopTabsState extends State<DesktopTabs> {
       child: Row(
         children: [
           if (isNotEmptyBooru)
-            tab.selectedBooru.value.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(tab.selectedBooru.value)
+            if (tab.selectedBooru.value.type == BooruType.Downloads)
+              const Icon(Icons.file_download_outlined, size: 18)
+            else if (tab.selectedBooru.value.type == BooruType.Favourites)
+              const Icon(Icons.favorite, color: Colors.red, size: 18)
+            else
+              Favicon(tab.selectedBooru.value)
           else
             const Icon(CupertinoIcons.question, size: 18),
           const SizedBox(width: 3),
           MarqueeText(
             key: ValueKey(tagText),
             text: tagText,
-            fontSize: 16,
-            color: tab.tags == '' ? Colors.grey : null,
+            style: TextStyle(
+              fontSize: 16,
+              color: tab.tags == '' ? Colors.grey : null,
+            ),
           ),
           const SizedBox(width: 3),
           IconButton(
@@ -161,7 +168,7 @@ class _DesktopTabsState extends State<DesktopTabs> {
                   );
                 }).toList();
               },
-            )
+            ),
           ],
         );
       }),

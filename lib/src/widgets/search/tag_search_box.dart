@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
@@ -19,7 +20,6 @@ import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
 
 // TODO
 // - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
-// - debounce searches [In progress: needs rewrite of tagSearch to dio to use requests cancelling]
 // - parse tag type from search if possible
 
 class TagSearchBox extends StatefulWidget {
@@ -53,6 +53,8 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   RxList<List<String>> historyResults = RxList([]);
   RxList<List<String>> databaseResults = RxList([]);
   RxList<List<String>> modifiersResults = RxList([]);
+
+  CancelToken? cancelToken;
 
   @override
   void initState() {
@@ -136,6 +138,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
     searchHandler.searchBoxFocus.removeListener(onFocusChange);
     searchHandler.searchTextController.removeListener(onTextChanged);
 
+    cancelToken?.cancel();
     Debounce.cancel('tag_search_box');
 
     suggestionsScrollController.dispose();
@@ -272,20 +275,23 @@ class _TagSearchBoxState extends State<TagSearchBox> {
         continue;
       }
       tags.add(
-        TagChip(
-          tagString: stringContent,
-          gestureDetector: GestureDetector(
-            onTap: () {
-              splitInput.removeAt(i);
-              searchHandler.searchTextController.text = splitInput.join(' ');
-              tagStuff();
-              combinedSearch();
-            },
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: TagChip(
+            tagString: stringContent,
+            trailing: GestureDetector(
+              onTap: () {
+                splitInput.removeAt(i);
+                searchHandler.searchTextController.text = splitInput.join(' ');
+                tagStuff();
+                combinedSearch();
+              },
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  child: Icon(Icons.cancel, size: 24, color: Colors.white.withOpacity(0.9)),
+                ),
               ),
             ),
           ),
@@ -352,15 +358,17 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   Future<void> searchBooru() async {
     booruResults.value = [
-      [' ', 'loading']
+      [' ', 'loading'],
     ];
     // TODO cancel previous search when new starts
     List<String?> getFromBooru = [];
+    cancelToken?.cancel();
+    cancelToken = CancelToken();
     if (multiIndex != -1) {
       final MergebooruHandler handler = searchHandler.currentBooruHandler as MergebooruHandler;
-      getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag);
+      getFromBooru = await handler.booruHandlers[multiIndex].tagSearch(lastTag, cancelToken: cancelToken);
     } else {
-      getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag);
+      getFromBooru = await searchHandler.currentBooruHandler.tagSearch(lastTag, cancelToken: cancelToken);
     }
 
     booruResults.value = getFromBooru.map((tag) {
@@ -371,7 +379,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   Future<void> searchHistory() async {
     historyResults.value = [
-      [' ', 'loading']
+      [' ', 'loading'],
     ];
     historyResults.value = lastTag.isNotEmpty
         ? (await settingsHandler.dbHandler.getSearchHistoryByInput(lastTag, 2)).map((tag) {
@@ -384,7 +392,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
 
   Future<void> searchDatabase() async {
     databaseResults.value = [
-      [' ', 'loading']
+      [' ', 'loading'],
     ];
     databaseResults.value = lastTag.isNotEmpty
         ? (await settingsHandler.dbHandler.getTags(lastTag, 2)).map((tag) {
@@ -405,7 +413,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   void combinedSearch() {
     // drop previous list even if new search didn't start yet
     booruResults.value = [
-      [' ', 'loading']
+      [' ', 'loading'],
     ];
     Debounce.debounce(
       tag: 'tag_search_box',
@@ -452,7 +460,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                 leading: null,
                 title: const MarqueeText(
                   text: 'No Suggestions!',
-                  fontSize: 16,
                   isExpanded: false,
                 ),
                 onTap: () {
@@ -513,7 +520,6 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         title: MarqueeText(
                           key: ValueKey(tag),
                           text: tag,
-                          fontSize: 16,
                           isExpanded: false,
                         ),
                         onTap: () {

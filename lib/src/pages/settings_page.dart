@@ -28,6 +28,20 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
+  Future<void> _onPopInvoked(BuildContext context, bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
+    final bool result = await settingsHandler.saveSettings(restate: true);
+    await settingsHandler.loadSettings();
+    // await settingsHandler.getBooru();
+    if (result) {
+      Navigator.of(context).pop();
+    }
+  }
+
   Future<bool> _onWillPop() async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final bool result = await settingsHandler.saveSettings(restate: true);
@@ -40,8 +54,9 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async => _onPopInvoked(context, didPop),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(

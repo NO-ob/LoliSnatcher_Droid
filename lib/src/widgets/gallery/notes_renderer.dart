@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
@@ -28,7 +27,6 @@ class _NotesRendererState extends State<NotesRenderer> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   final ViewerHandler viewerHandler = ViewerHandler.instance;
-  final NavigationHandler navigationHandler = NavigationHandler.instance;
 
   late BooruItem item;
   late double screenWidth,
@@ -37,16 +35,14 @@ class _NotesRendererState extends State<NotesRenderer> {
       imageWidth,
       imageHeight,
       imageRatio,
-      ratioDiff,
-      widthLimit,
-      viewScale,
       screenToImageRatio,
       offsetX,
       offsetY,
       viewOffsetX,
       viewOffsetY,
-      pageOffset;
-  bool loading = false;
+      pageOffset,
+      resizeScale;
+  bool loading = false, shouldScale = false;
 
   StreamSubscription<BooruItem>? itemListener;
   StreamSubscription? viewStateListener;
@@ -54,6 +50,8 @@ class _NotesRendererState extends State<NotesRenderer> {
   @override
   void initState() {
     super.initState();
+
+    shouldScale = settingsHandler.galleryMode == 'Sample' || !settingsHandler.disableImageScaling;
 
     screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width;
     screenHeight = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height;
@@ -69,8 +67,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       loadNotes();
     });
 
-    viewStateListener = viewerHandler.viewState.listen((viewState) {
-      // TODO when second double tap zoom scale is entered - no state sent?
+    viewStateListener = viewerHandler.viewState.listen((_) {
       triggerCalculations();
     });
 
@@ -132,28 +129,17 @@ class _NotesRendererState extends State<NotesRenderer> {
 
   void doCalculations() {
     // do the calculations depending on the current item here
-    imageWidth = item.fileWidth ?? 100;
-    imageHeight = item.fileHeight ?? 100;
+    imageWidth = viewerHandler.viewState.value?.scaleBoundaries?.childSize.width ?? item.fileWidth ?? screenWidth;
+    imageHeight = viewerHandler.viewState.value?.scaleBoundaries?.childSize.height ?? item.fileHeight ?? screenHeight;
     imageRatio = imageWidth / imageHeight;
 
-    ratioDiff = 1;
-    widthLimit = 0;
-    if (settingsHandler.disableImageScaling || item.isNoScale.value || !item.mediaType.value.isImageOrAnimation) {
-      //  do nothing
-    } else {
-      final Size screenSize = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
-      final double pixelRatio = WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
-      // image size can change if scaling is allowed and it's size is too big
-      widthLimit = screenSize.width * pixelRatio * 2;
-      if (imageWidth > widthLimit) {
-        ratioDiff = widthLimit / imageWidth;
-        imageWidth = widthLimit;
-        imageHeight = imageHeight * ratioDiff;
-      }
+    resizeScale = 1;
+    if (shouldScale && item.fileWidth != null && item.fileHeight != null && imageWidth != 0 && imageHeight != 0) {
+      resizeScale = imageWidth / item.fileWidth!;
     }
 
-    viewScale = viewerHandler.viewState.value?.scale ?? 1;
-    screenToImageRatio = viewScale == 1 ? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight)) : viewScale;
+    final viewScale = viewerHandler.viewState.value?.scale;
+    screenToImageRatio = viewScale ?? (screenRatio > imageRatio ? (screenWidth / imageWidth) : (screenHeight / imageHeight));
 
     final double page = widget.pageController?.hasClients == true ? (widget.pageController!.page ?? 0) : 0;
     pageOffset = ((page * 10000).toInt() % 10000) / 10000;
@@ -210,14 +196,13 @@ class _NotesRendererState extends State<NotesRenderer> {
                     ),
                   )
                 else
-                  // TODO change to animated transform?
                   ...item.notes.map(
                     (note) => NoteBuild(
                       text: note.content,
-                      left: (note.posX * screenToImageRatio * ratioDiff) + offsetX + viewOffsetX,
-                      top: (note.posY * screenToImageRatio * ratioDiff) + offsetY + viewOffsetY,
-                      width: note.width * screenToImageRatio * ratioDiff,
-                      height: note.height * screenToImageRatio * ratioDiff,
+                      left: (note.posX * resizeScale * screenToImageRatio) + offsetX + viewOffsetX,
+                      top: (note.posY * resizeScale * screenToImageRatio) + offsetY + viewOffsetY,
+                      width: note.width * resizeScale * screenToImageRatio,
+                      height: note.height * resizeScale * screenToImageRatio,
                     ),
                   ),
               ],
@@ -263,7 +248,8 @@ class _NoteBuildState extends State<NoteBuild> {
     //   return const SizedBox.shrink();
     // }
 
-    return Positioned(
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 10),
       left: widget.left,
       top: widget.top,
       child: TransparentPointer(
@@ -365,7 +351,7 @@ class NotesDialog extends StatelessWidget {
                       false,
                     ),
                   ),
-                  subtitle: Text('X:${note.posX}/${item.fileWidth!.round()}, Y:${note.posY}/${item.fileHeight!.round()}'),
+                  subtitle: Text('X:${note.posX}, Y:${note.posY}'),
                   shape: Border(
                     bottom: BorderSide(
                       color: Colors.grey.shade600,

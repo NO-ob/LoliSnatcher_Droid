@@ -735,9 +735,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                     },
                     leading: const Icon(Icons.file_present),
                     title: const Text('Hydrus'),
-                  )
-                else
-                  Container()
+                  ),
               ],
             ),
             const SizedBox(height: 15),
@@ -785,21 +783,18 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      onPopInvoked: (bool didPop) {
         // clear currently loading item from cache to avoid creating broken files
         // TODO move sharing download routine to somewhere in global context?
         shareCancelToken?.cancel();
         if (sharedItem != null) {
-          unawaited(
-            imageWriter.deleteFileFromCache(
-              sharedItem!.fileURL,
-              'media',
-              fileNameExtras: sharedItem!.fileNameExtras,
-            ),
+          imageWriter.deleteFileFromCache(
+            sharedItem!.fileURL,
+            'media',
+            fileNameExtras: sharedItem!.fileNameExtras,
           );
         }
-        return true;
       },
       child: SafeArea(
         // to fix height bug when bar on top

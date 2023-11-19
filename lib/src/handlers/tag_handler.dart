@@ -59,7 +59,12 @@ class TagHandler extends GetxController {
     return tag ?? Tag(tagString, tagType: TagType.none);
   }
 
-  Future<void> putTag(Tag tag, {bool useDB = true, bool preferTypeIfNone = false}) async {
+  Future<void> putTag(
+    Tag tag, {
+    required bool dbEnabled,
+    bool useDB = true,
+    bool preferTypeIfNone = false,
+  }) async {
     // TODO sanitize tagString?
     if (tag.fullString.isEmpty) {
       return;
@@ -78,7 +83,7 @@ class TagHandler extends GetxController {
     }
     _tagMap[tag.fullString] = tag;
 
-    if (SettingsHandler.instance.dbEnabled && useDB) {
+    if (dbEnabled && useDB) {
       await SettingsHandler.instance.dbHandler.updateTagsFromObjects([tag]);
     }
     return;
@@ -94,6 +99,8 @@ class TagHandler extends GetxController {
 
   Future getTagTypes(UntypedCollection untyped) async {
     if (SettingsHandler.instance.tagTypeFetchEnabled) {
+      final bool dbEnabled = SettingsHandler.instance.dbEnabled;
+
       Logger.Inst().log('Snatching tags: ${untyped.tags}', 'TagHandler', 'getTagTypes', LogTypes.tagHandlerInfo);
       tagFetchActive.value = true;
       final List temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
@@ -116,7 +123,7 @@ class TagHandler extends GetxController {
         if (workingTags.isNotEmpty) {
           final List<Tag> newTags = await booruHandler.genTagObjects(workingTags);
           for (final Tag tag in newTags) {
-            await putTag(tag);
+            await putTag(tag, dbEnabled: dbEnabled);
 
             //TODO write tag to database
             tagCounter++;
@@ -132,12 +139,14 @@ class TagHandler extends GetxController {
 
   /// Stores given tags list with given type, if tag is already in the tag map - update it's type, but only if the type was "none"
   Future<void> addTagsWithType(List<String> tags, TagType type) async {
+    final dbEnabled = SettingsHandler.instance.dbEnabled;
+
     for (final String tag in tags) {
       if (!hasTagAndNotStale(tag)) {
-        await putTag(Tag(tag, tagType: type));
+        await putTag(Tag(tag, tagType: type), dbEnabled: dbEnabled);
       } else if (type != TagType.none) {
         if (getTag(tag).tagType == TagType.none) {
-          await putTag(Tag(tag, tagType: type));
+          await putTag(Tag(tag, tagType: type), dbEnabled: dbEnabled);
         }
       }
     }
@@ -159,10 +168,11 @@ class TagHandler extends GetxController {
 
   Future<bool> loadTags() async {
     try {
-      if (SettingsHandler.instance.dbEnabled) {
+      final bool dbEnabled = SettingsHandler.instance.dbEnabled;
+      if (dbEnabled) {
         final List<Tag> tags = await SettingsHandler.instance.dbHandler.getAllTags();
         for (final Tag tag in tags) {
-          await putTag(tag, useDB: false);
+          await putTag(tag, useDB: false, dbEnabled: dbEnabled);
         }
       } else {
         if (await checkForTagsFile()) {
@@ -190,11 +200,17 @@ class TagHandler extends GetxController {
 
   Future<bool> loadFromJSON(String jsonString, {bool preferTagTypeIfNone = false}) async {
     try {
+      final bool dbEnabled = SettingsHandler.instance.dbEnabled;
+
       final List jsonList = jsonDecode(jsonString);
       for (final Map<String, dynamic> rawTag in jsonList) {
         try {
           final Tag tagObject = Tag.fromJson(rawTag);
-          await putTag(tagObject, preferTypeIfNone: preferTagTypeIfNone);
+          await putTag(
+            tagObject,
+            preferTypeIfNone: preferTagTypeIfNone,
+            dbEnabled: dbEnabled,
+          );
         } catch (e) {
           Logger.Inst().log(
             'Error parsing tag: $rawTag',

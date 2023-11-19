@@ -102,7 +102,6 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
           Thumbnail(
             item: widget.item,
             isStandalone: false,
-            ignoreColumnsCount: true,
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),

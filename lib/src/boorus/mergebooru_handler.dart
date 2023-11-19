@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -146,8 +147,8 @@ class MergebooruHandler extends BooruHandler {
   }
 
   @override
-  Future<List<String>> tagSearch(String input) async {
-    return booruHandlers[0].tagSearch(input);
+  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
+    return booruHandlers[0].tagSearch(input, cancelToken: cancelToken);
   }
 
   @override

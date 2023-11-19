@@ -28,6 +28,7 @@ InlineSpan _parseRecursive(dynamic node, TextStyle style, bool styleChanged, boo
 
 // TODO the method always remove whitespace at leading,
 //  but it should check the tail of the previous span
+// ignore: unused_element
 String _fixWhitespaceInText(String text) {
   final sb = StringBuffer();
   int pre = ' '.codeUnitAt(0);
@@ -119,7 +120,7 @@ InlineSpan _parseElement(dom.Element element, TextStyle style, bool styleChanged
       }
       break;
     default:
-      print('Unhandled tag: $tag');
+      // print('Unhandled tag: $tag');
       break;
   }
 

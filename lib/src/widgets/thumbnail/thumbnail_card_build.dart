@@ -34,21 +34,21 @@ class ThumbnailCardBuild extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     // print('ThumbnailCardBuild: $index');
-    return Obx(() {
-      final bool isSelected = searchHandler.currentTab.selected.contains(index);
-      final bool isCurrent = settingsHandler.appMode.value.isDesktop && (searchHandler.viewedIndex.value == index);
 
-      // print('ThumbnailCardBuild obx: $index');
+    return AutoScrollTag(
+      highlightColor: Colors.red,
+      key: ValueKey(index),
+      controller: searchHandler.gridScrollController,
+      index: index,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(4),
+        child: Obx(() {
+          // print('ThumbnailCardBuild obx: $index');
+          final bool isSelected = searchHandler.currentTab.selected.contains(item);
+          final bool isCurrent = settingsHandler.appMode.value.isDesktop && (searchHandler.viewedIndex.value == index);
 
-      return AutoScrollTag(
-        highlightColor: Colors.red,
-        key: ValueKey(index),
-        controller: searchHandler.gridScrollController,
-        index: index,
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          child: Ink(
+          return Ink(
             decoration: (isCurrent || isSelected)
                 ? BoxDecoration(
                     borderRadius: BorderRadius.circular(4),
@@ -79,9 +79,9 @@ class ThumbnailCardBuild extends StatelessWidget {
               // TODO make inkwell ripple work with thumbnail (currently can't just use stack because thumbnail must be clickable too (i.e. checkbox))
               child: ThumbnailBuild(item: item),
             ),
-          ),
-        ),
-      );
-    });
+          );
+        }),
+      ),
+    );
   }
 }

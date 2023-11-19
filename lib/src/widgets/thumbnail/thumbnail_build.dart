@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -23,19 +24,15 @@ class ThumbnailBuild extends StatelessWidget {
       final SettingsHandler settingsHandler = SettingsHandler.instance;
       final IconData itemIcon = Tools.getFileIcon(item.possibleExt.value ?? item.mediaType.toJson());
 
-      final List<List<String>> parsedTags = settingsHandler.parseTagsList(
+      final tagsData = settingsHandler.parseTagsList(
         item.tagsList,
         isCapped: false,
       );
-      final bool isHated = parsedTags[0].isNotEmpty;
-      final bool isLoved = parsedTags[1].isNotEmpty;
-      final bool isSound = parsedTags[2].isNotEmpty;
+      // final bool isHated = tagsData.hatedTags.isNotEmpty;
+      final bool isLoved = tagsData.lovedTags.isNotEmpty;
+      final bool isSound = tagsData.soundTags.isNotEmpty;
+      final bool isAi = tagsData.aiTags.isNotEmpty;
       final bool hasNotes = item.hasNotes == true;
-      final bool hasComments = item.hasComments == true;
-
-      // reset the isHated and isLoved values since we already re-check them on every render
-      item.isHated.value = isHated;
-      item.isLoved.value = isLoved;
 
       // print('ThumbnailBuild $index');
 
@@ -49,7 +46,8 @@ class ThumbnailBuild extends StatelessWidget {
               isStandalone: true,
             ),
             // Image(
-            //   image: ResizeImage(NetworkImage(item.thumbnailURL), width: (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio / 3).round()),
+            //   image: ResizeImage(NetworkImage(item.thumbnailURL),
+            //   width: (MediaQuery.of(context).size.width * MediaQuery.of(context).devicePixelRatio / 3).round()),
             //   fit: BoxFit.cover,
             //   isAntiAlias: true,
             //   filterQuality: FilterQuality.medium,
@@ -64,109 +62,117 @@ class ThumbnailBuild extends StatelessWidget {
                 children: [
                   Obx(() {
                     final selected = searchHandler.currentTab.selected;
-                    if (selected.isNotEmpty) {
-                      final itemIndex = searchHandler.getItemIndex(item);
 
-                      return Checkbox(
-                        value: selected.contains(itemIndex),
-                        onChanged: (bool? value) {
-                          if (value != null) {
-                            if (value) {
-                              searchHandler.currentTab.selected.add(itemIndex);
-                            } else {
-                              searchHandler.currentTab.selected.remove(itemIndex);
-                            }
-                          }
-                        },
+                    Widget checkboxWidget = const SizedBox.shrink();
+                    if (selected.isNotEmpty) {
+                      final isSelected = selected.contains(item);
+                      final int selectedIndex = selected.indexOf(item);
+
+                      checkboxWidget = Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.66),
+                          borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
+                        ),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: isSelected,
+                              onChanged: (bool? value) {
+                                if (value != null) {
+                                  if (value) {
+                                    searchHandler.currentTab.selected.add(item);
+                                  } else {
+                                    searchHandler.currentTab.selected.remove(item);
+                                  }
+                                }
+                              },
+                            ),
+                            if (isSelected)
+                              Text(
+                                (selectedIndex + 1).toString(),
+                                style: const TextStyle(fontSize: 12, color: Colors.white),
+                              ),
+                          ],
+                        ),
                       );
-                    } else {
-                      return const SizedBox();
                     }
+
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: checkboxWidget,
+                    );
                   }),
                   //
-                  Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.66),
-                      borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
-                    ),
-                    child: Obx(
-                      () => Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Text('  ${(index + 1)}  ', style: TextStyle(fontSize: 10, color: Colors.white)),
-
-                          if (item.isFavourite.value == null) const Text('.'),
-
-                          AnimatedCrossFade(
-                            duration: const Duration(milliseconds: 200),
-                            crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-                            firstChild: AnimatedSwitcher(
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.66),
+                        borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
+                      ),
+                      child: Obx(
+                        () => Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 1.5,
+                          runSpacing: 2,
+                          children: [
+                            AnimatedCrossFade(
                               duration: const Duration(milliseconds: 200),
-                              child: Icon(
-                                item.isFavourite.value == true ? Icons.favorite : Icons.star,
-                                color: item.isFavourite.value == true ? Colors.red : Colors.grey,
-                                key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
+                              crossFadeState: (item.isFavourite.value == true || isLoved) ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                              firstChild: AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 200),
+                                child: (settingsHandler.dbEnabled && item.isFavourite.value == null)
+                                    ? const SizedBox(
+                                        height: 14,
+                                        width: 14,
+                                        child: Center(
+                                          child: Text(
+                                            '.',
+                                            style: TextStyle(fontSize: 14, height: 1),
+                                          ),
+                                        ),
+                                      )
+                                    : Icon(
+                                        item.isFavourite.value == true ? Icons.favorite : Icons.star,
+                                        color: item.isFavourite.value == true ? Colors.red : Colors.grey,
+                                        key: ValueKey<Color>(item.isFavourite.value == true ? Colors.red : Colors.grey),
+                                        size: 14,
+                                      ),
+                              ),
+                              secondChild: const SizedBox(),
+                            ),
+                            if (item.isSnatched.value == true)
+                              const Icon(
+                                Icons.save_alt,
+                                color: Colors.white,
                                 size: 14,
                               ),
-                            ),
-                            secondChild: const SizedBox(),
-                          ),
-
-                          if (item.isSnatched.value == true)
-                            const Icon(
-                              Icons.save_alt,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-
-                          if (isSound)
-                            const Icon(
-                              Icons.volume_up_rounded,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-
-                          if (hasNotes)
-                            const Icon(
-                              Icons.note_add,
-                              color: Colors.white,
-                              size: 14,
-                            ),
-
-                          Icon(
-                            itemIcon,
-                            color: Colors.white,
-                            size: 14,
-                          ),
-
-                          if (settingsHandler.isDebug.value)
-                            Container(
-                              color: Colors.grey,
-                              width: 1,
-                              height: 10,
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
-                            ),
-
-                          if (settingsHandler.isDebug.value)
+                            if (isAi)
+                              const FaIcon(
+                                FontAwesomeIcons.robot,
+                                color: Colors.white,
+                                size: 13,
+                              ),
+                            if (hasNotes)
+                              const Icon(
+                                Icons.note_add,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                            if (isSound)
+                              const Icon(
+                                Icons.volume_up_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
                             Icon(
-                              Icons.crop_original,
-                              color: (item.sampleURL == item.thumbnailURL
-                                      ? Colors.red
-                                      : item.sampleURL == item.fileURL
-                                          ? Colors.green
-                                          : Colors.white)
-                                  .withOpacity(0.66),
-                              size: 14,
-                            ),
-
-                          if (settingsHandler.isDebug.value && hasComments)
-                            const Icon(
-                              Icons.comment,
+                              itemIcon,
                               color: Colors.white,
                               size: 14,
                             ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

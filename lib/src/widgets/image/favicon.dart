@@ -149,9 +149,14 @@ class _FaviconState extends State<Favicon> {
   Widget build(BuildContext context) {
     // print('Favicon build ${widget.faviconURL}');
 
-    return SizedBox(
+    return Container(
       width: iconSize,
       height: iconSize,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(iconSize / 5),
+      ),
+      clipBehavior: Clip.hardEdge,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -186,19 +191,21 @@ class _FaviconState extends State<Favicon> {
             else
               const SizedBox.shrink(),
           ],
-
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: (isLoaded || isFailed)
                 ? const SizedBox.shrink()
-                : ShimmerCard(
-                    isLoading: !isLoaded && !isFailed,
-                    child: !isLoaded && !isFailed ? null : Container(),
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(iconSize / 5),
+                    child: ShimmerCard(
+                      isLoading: !isLoaded && !isFailed,
+                      child: !isLoaded && !isFailed ? null : Container(),
+                    ),
                   ),
           ),
 
           // Image(
-          //   image: NetworkImage(widget.faviconURL),
+          //   image: NetworkImage(widget.booru.faviconURL!),
           //   width: iconSize,
           //   height: iconSize,
           //   errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {

@@ -58,7 +58,7 @@ class ThemeHandler {
   ThemeData lightTheme() {
     final ColorScheme lightColorScheme = colorScheme();
 
-    return ThemeData.light().copyWith(
+    return ThemeData.light(useMaterial3: useMaterial3).copyWith(
       brightness: Brightness.light,
       appBarTheme: appBarTheme(lightColorScheme),
 
@@ -67,7 +67,6 @@ class ThemeHandler {
       textSelectionTheme: textSelectionTheme(lightColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(lightColorScheme),
 
-      useMaterial3: useMaterial3,
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -76,8 +75,8 @@ class ThemeHandler {
 
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(lightColorScheme),
-      cardColor: lightColorScheme.background,
-      // dividerColor: lightColorScheme.onBackground,
+      cardColor: Color.lerp(lightColorScheme.background, Colors.black, 0.04),
+      dividerColor: lightColorScheme.onSurface.withOpacity(0.12),
       dialogBackgroundColor: lightColorScheme.background,
       floatingActionButtonTheme: floatingActionButtonTheme(lightColorScheme),
       iconTheme: iconTheme(lightColorScheme),
@@ -102,7 +101,7 @@ class ThemeHandler {
   ThemeData darkTheme() {
     final ColorScheme darkColorScheme = colorScheme();
 
-    return ThemeData.dark().copyWith(
+    return ThemeData.dark(useMaterial3: useMaterial3).copyWith(
       brightness: Brightness.dark,
       appBarTheme: appBarTheme(darkColorScheme),
 
@@ -114,7 +113,6 @@ class ThemeHandler {
       textSelectionTheme: textSelectionTheme(darkColorScheme),
       elevatedButtonTheme: elevatedButtonTheme(darkColorScheme),
 
-      useMaterial3: useMaterial3,
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
@@ -124,7 +122,7 @@ class ThemeHandler {
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(darkColorScheme),
       cardColor: darkColorScheme.background,
-      // // dividerColor: darkColorScheme.onBackground,
+      dividerColor: darkColorScheme.onSurface.withOpacity(0.12),
       dialogBackgroundColor: darkColorScheme.background,
       floatingActionButtonTheme: floatingActionButtonTheme(darkColorScheme),
       iconTheme: iconTheme(darkColorScheme),
@@ -161,9 +159,12 @@ class ThemeHandler {
       return ColorScheme.fromSeed(
         seedColor: theme.accent!,
         primary: theme.primary,
+        onPrimary: primaryIsDark ? Colors.white : Colors.black,
         secondary: theme.accent,
-        brightness: isDark ? Brightness.dark : Brightness.light,
+        onSecondary: accentIsDark ? Colors.white : Colors.black,
         error: Colors.redAccent,
+        onError: Colors.white,
+        brightness: isDark ? Brightness.dark : Brightness.light,
       );
     }
 
@@ -194,8 +195,8 @@ class ThemeHandler {
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.secondary,
           foregroundColor: accentIsDark ? Colors.white : Colors.black,
-          disabledForegroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.38),
-          disabledBackgroundColor: isDark ? Colors.white : Colors.black.withOpacity(0.12),
+          disabledForegroundColor: Colors.black,
+          disabledBackgroundColor: Colors.grey,
           textStyle: TextStyle(
             color: accentIsDark ? Colors.white : Colors.black,
             fontSize: 16,

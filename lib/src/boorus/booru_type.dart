@@ -2,7 +2,7 @@
 
 enum BooruType {
   AutoDetect,
-  // 
+  //
   AGNPH,
   BooruOnRails,
   Danbooru,
@@ -27,10 +27,12 @@ enum BooruType {
   // [Special types]
   GelbooruAlike,
   Merge,
+  Downloads,
   Favourites;
 
   static List<BooruType> get dropDownValues {
     return [...values]
+      ..remove(BooruType.Downloads)
       ..remove(BooruType.Favourites)
       ..remove(BooruType.Merge)
       ..remove(BooruType.GelbooruAlike);
@@ -38,6 +40,7 @@ enum BooruType {
 
   static List<BooruType> get detectable {
     return [...values]
+      ..remove(BooruType.Downloads)
       ..remove(BooruType.Favourites)
       ..remove(BooruType.Merge)
       ..remove(BooruType.AutoDetect)

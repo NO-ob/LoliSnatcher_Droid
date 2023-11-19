@@ -8,11 +8,7 @@ import 'package:fast_marquee/fast_marquee.dart';
 class MarqueeText extends StatelessWidget {
   const MarqueeText({
     required this.text,
-    required this.fontSize,
-    this.fontWeight = FontWeight.normal,
-    this.fontStyle = FontStyle.normal,
-    this.addedHeight = 6,
-    this.color,
+    this.style,
     this.velocity = 45.0,
     this.curve = Curves.linear,
     this.blankSpace = 50.0,
@@ -20,12 +16,16 @@ class MarqueeText extends StatelessWidget {
     this.startAfter = const Duration(milliseconds: 1000),
     this.pauseAfterRound = const Duration(milliseconds: 1500),
     this.isExpanded = true,
+    this.reverse = false,
+    this.allowDownscale = true,
+    this.fadingEdgeStartFraction = 0,
+    this.fadingEdgeEndFraction = 0.15,
     super.key,
   }) : textSpan = null;
 
   const MarqueeText.rich({
     required this.textSpan,
-    this.addedHeight = 6,
+    required TextStyle this.style,
     this.velocity = 45.0,
     this.curve = Curves.linear,
     this.blankSpace = 50.0,
@@ -33,20 +33,16 @@ class MarqueeText extends StatelessWidget {
     this.startAfter = const Duration(milliseconds: 1000),
     this.pauseAfterRound = const Duration(milliseconds: 1500),
     this.isExpanded = true,
+    this.reverse = false,
+    this.allowDownscale = true,
+    this.fadingEdgeStartFraction = 0,
+    this.fadingEdgeEndFraction = 0.15,
     super.key,
-  })  : text = null,
-        fontSize = 0,
-        fontWeight = FontWeight.normal,
-        fontStyle = FontStyle.normal,
-        color = null;
+  }) : text = null;
 
   final String? text;
+  final TextStyle? style;
   final TextSpan? textSpan;
-  final double fontSize;
-  final FontWeight fontWeight;
-  final FontStyle fontStyle;
-  final double addedHeight;
-  final Color? color;
   final double velocity;
   final Curve curve;
   final double blankSpace;
@@ -54,11 +50,31 @@ class MarqueeText extends StatelessWidget {
   final Duration startAfter;
   final Duration pauseAfterRound;
   final bool isExpanded;
+  final bool reverse;
+  final bool allowDownscale;
+  final double fadingEdgeStartFraction;
+  final double fadingEdgeEndFraction;
 
   @override
   Widget build(BuildContext context) {
-    return isExpanded ? Expanded(child: innerBox(context)) : innerBox(context);
+    if (isExpanded) {
+      return Expanded(child: innerBox(context));
+    }
+
+    return innerBox(context);
   }
+
+  TextStyle get defaultStyle {
+    return const TextStyle(
+      fontSize: 16,
+      color: Colors.white,
+      fontWeight: FontWeight.w400,
+      fontStyle: FontStyle.normal,
+    );
+  }
+
+  double get fontSize => style?.fontSize ?? defaultStyle.fontSize!;
+  double get lineHeight => fontSize * 1.2;
 
   Widget marquee(BuildContext context) {
     // This one can detect when text overflows by itself, but I'll leave AutoSize to resize text a bit when nearing overflow
@@ -68,17 +84,18 @@ class MarqueeText extends StatelessWidget {
       curve: curve,
       velocity: velocity,
       startPadding: startPadding,
-      fadingEdgeStartFraction: 0,
-      fadingEdgeEndFraction: 0.15,
+      fadingEdgeStartFraction: fadingEdgeStartFraction,
+      fadingEdgeEndFraction: fadingEdgeEndFraction,
+      reverse: reverse,
       showFadingOnlyWhenScrolling: false,
       startAfter: startAfter,
       pauseAfterRound: pauseAfterRound,
-      style: TextStyle(
-        fontSize: fontSize,
-        color: color ?? Theme.of(context).colorScheme.onBackground,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-      ),
+      style: style?.copyWith(
+            color: style?.color ?? Theme.of(context).colorScheme.onBackground,
+          ) ??
+          defaultStyle.copyWith(
+            color: Theme.of(context).colorScheme.onBackground,
+          ),
     );
   }
 
@@ -89,8 +106,9 @@ class MarqueeText extends StatelessWidget {
       curve: curve,
       velocity: velocity,
       startPadding: startPadding,
-      fadingEdgeStartFraction: 0,
-      fadingEdgeEndFraction: 0.15,
+      fadingEdgeStartFraction: fadingEdgeStartFraction,
+      fadingEdgeEndFraction: fadingEdgeEndFraction,
+      reverse: reverse,
       showFadingOnlyWhenScrolling: false,
       startAfter: startAfter,
       pauseAfterRound: pauseAfterRound,
@@ -98,28 +116,46 @@ class MarqueeText extends StatelessWidget {
   }
 
   Widget innerBox(BuildContext context) {
+    // allow text to shrink a bit, so that strings can exceed a few symbols in length before starting to scroll
+    const double stepGranularity = 0.1;
+    double minFontSize = double.parse((fontSize * 0.85).toStringAsFixed(1));
+    // make sure that minFontSize is dividable by stepGranularity
+    minFontSize = (minFontSize / stepGranularity).ceil() * stepGranularity;
+
     if (textSpan != null) {
       return Container(
         alignment: Alignment.centerLeft,
-        child: marqueeRich(context),
+        child: AutoSizeText.rich(
+          textSpan!,
+          minFontSize: allowDownscale ? minFontSize : fontSize,
+          maxFontSize: fontSize,
+          maxLines: 1,
+          stepGranularity: stepGranularity,
+          style: style?.copyWith(
+                color: style?.color ?? Theme.of(context).colorScheme.onBackground,
+              ) ??
+              defaultStyle.copyWith(
+                color: Theme.of(context).colorScheme.onBackground,
+              ),
+          overflowReplacement: marqueeRich(context),
+        ),
       );
     }
 
     return Container(
       alignment: Alignment.centerLeft,
-      height: (fontSize + addedHeight) * MediaQuery.of(context).textScaleFactor, // +X to not trigger overflow on short strings
       child: AutoSizeText(
         text!,
-        minFontSize:
-            (fontSize * 0.8).ceilToDouble(), // allow text to shrink a bit, so that strings can exceed a few symbols in length before starting to scroll
+        minFontSize: allowDownscale ? minFontSize : fontSize,
         maxFontSize: fontSize,
-        maxLines: 2,
-        style: TextStyle(
-          fontSize: fontSize,
-          color: color ?? Theme.of(context).colorScheme.onBackground,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-        ),
+        maxLines: 1,
+        stepGranularity: stepGranularity,
+        style: style?.copyWith(
+              color: style?.color ?? Theme.of(context).colorScheme.onBackground,
+            ) ??
+            defaultStyle.copyWith(
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
         overflowReplacement: marquee(context),
       ),
     );

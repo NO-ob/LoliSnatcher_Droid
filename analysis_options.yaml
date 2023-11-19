@@ -78,14 +78,12 @@ linter:
     implementation_imports: true
     implicit_reopen: true
     invalid_case_patterns: true
-    iterable_contains_unrelated_type: true
     join_return_with_assignment: true
     leading_newlines_in_multiline_strings: true
     library_annotations: true
     library_names: true
     library_prefixes: true
     library_private_types_in_public_api: true
-    list_remove_unrelated_type: true
     literal_only_boolean_expressions: true
     missing_whitespace_between_adjacent_strings: true
     no_adjacent_strings_in_list: true

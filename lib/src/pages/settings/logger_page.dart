@@ -31,17 +31,22 @@ class _LoggerPageState extends State<LoggerPage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.enabledLogTypes.value = enabledLogTypes;
-    return true;
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final bool allLogTypesEnabled = enabledLogTypes.toSet().toList().length == LogTypes.values.length;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

@@ -156,7 +156,7 @@ class SankakuHandler extends BooruHandler {
       // 'User-Agent': 'SCChannelApp/4.0',
       'User-Agent': Constants.defaultBrowserUserAgent,
       'Referer': 'https://sankaku.app/',
-      'Origin': 'https://sankaku.app'
+      'Origin': 'https://sankaku.app',
     };
   }
 

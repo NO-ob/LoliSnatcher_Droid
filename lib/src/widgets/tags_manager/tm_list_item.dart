@@ -39,22 +39,23 @@ class TagsManagerListItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(5),
           ),
         ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (onTap != null)
-              Checkbox(
+        trailing: onTap != null
+            ? Checkbox(
                 value: isSelected,
                 onChanged: onSelect,
-              ),
-          ],
-        ),
-        title: MarqueeText(
-          key: ValueKey(tag.fullString),
-          text: tag.fullString,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          isExpanded: false,
+              )
+            : null,
+        title: SizedBox(
+          height: 16,
+          child: MarqueeText(
+            key: ValueKey(tag.fullString),
+            text: tag.fullString,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            isExpanded: false,
+          ),
         ),
         subtitle: Text('${tag.tagType} $staleText'.trim()),
       ),

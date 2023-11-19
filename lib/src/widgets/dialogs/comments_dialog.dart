@@ -241,7 +241,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                           ),
                         ),
                       ],
-                    )
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),

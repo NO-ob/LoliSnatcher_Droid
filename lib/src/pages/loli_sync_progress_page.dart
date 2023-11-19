@@ -95,8 +95,8 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
     setState(() {});
   }
 
-  Future<bool> _onWillPop() async {
-    final bool? shouldPop = await showDialog(
+  Future<bool?> showPopDialog() async {
+    return showDialog(
       context: context,
       builder: (context) {
         return SettingsDialog(
@@ -125,13 +125,29 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
         );
       },
     );
+  }
+
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
+    final bool? shouldPop = await showPopDialog();
+    if (shouldPop ?? false) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<bool> _onWillPop() async {
+    final bool? shouldPop = await showPopDialog();
     return shouldPop ?? false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(

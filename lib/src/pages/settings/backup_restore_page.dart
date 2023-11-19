@@ -73,16 +73,23 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     if (!Platform.isAndroid) {
-      return WillPopScope(
-        onWillPop: _onWillPop,
+      return PopScope(
+        canPop: false,
+        onPopInvoked: _onPopInvoked,
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
@@ -97,7 +104,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   child: const Text(
                     "This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system",
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -105,8 +112,9 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       );
     }
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -249,7 +257,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 }
 
                                 settingsHandler.dbHandler = DBHandler();
-                                await settingsHandler.dbHandler.dbConnect(newFile.path, settingsHandler.indexesEnabled);
+                                await settingsHandler.dbHandler.dbConnect(newFile.path);
                                 //
                                 showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
                                 await Future.delayed(const Duration(seconds: 3));
@@ -267,7 +275,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           name: 'Backup Boorus',
                           action: () async {
                             try {
-                              final List<Booru> booruList = settingsHandler.booruList.where((e) => e.type != BooruType.Favourites).toList();
+                              final List<Booru> booruList =
+                                  settingsHandler.booruList.where((e) => e.type != BooruType.Favourites && e.type != BooruType.Downloads).toList();
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
                                 final bool res = await detectedDuplicateFile('boorus.json');
                                 if (!res) {
@@ -306,7 +315,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                       final Booru booru = Booru.fromMap(json[i]);
                                       final bool alreadyExists =
                                           settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
-                                      final bool isAllowed = booru.type != BooruType.Favourites;
+                                      final bool isAllowed = booru.type != BooruType.Favourites && booru.type != BooruType.Downloads;
                                       if (!alreadyExists && isAllowed) {
                                         final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
                                         final writer = booruFile.openWrite();

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 extension UIExtras on Widget {
-  Widget withBorder({Color? color, double? strokeWidth, BorderRadius? borderRadius}) => Container(
+  Widget withBorder({
+    Color? color,
+    double? strokeWidth,
+    BorderRadius? borderRadius,
+  }) =>
+      Container(
         decoration: BoxDecoration(
           border: Border.all(color: color ?? Colors.black, width: strokeWidth ?? 1),
           borderRadius: borderRadius,
@@ -37,7 +42,7 @@ extension StringExtras on String {
 
   String toPascalCase() => toTitleCase().replaceAll(' ', '');
 
-  bool stringToBool() => this == 'true' || this == '1';
+  bool toBool() => this == 'true' || this == '1';
 }
 
 extension IntExtras on int {
@@ -47,11 +52,23 @@ extension IntExtras on int {
 
   int clamp(int min, int max) => (min > this ? min : (max < this ? max : this));
 
-  bool intToBool() => this == 1;
+  bool toBool() => this == 1;
+
+  String toFormattedString() => formatNumber(this);
 }
 
 extension DoubleExtras on double {
   double clamp(double min, double max) => (min > this ? min : (max < this ? max : this));
 
   String toStringAsFixed(int digits) => toStringAsFixed(digits);
+
+  String toFormattedString() => formatNumber(this);
+}
+
+String formatNumber(num number) {
+  final String formattedPart = number.toString().replaceAllMapped(
+        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+        (Match match) => '${match[1]} ',
+      );
+  return formattedPart.trim();
 }

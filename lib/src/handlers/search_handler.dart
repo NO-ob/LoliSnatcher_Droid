@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -23,6 +24,18 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 Uuid uuid = const Uuid();
 
 EventChannel? volumeKeyChannel = Platform.isAndroid ? const EventChannel('com.noaisu.loliSnatcher/volume') : null;
+
+// special strings used to separate parts of tab backup string
+const String tabDivider = '|||', listDivider = '~~~';
+List<List<String>> decodeBackupString(String input) {
+  final List<List<String>> result = [];
+  final List<String> splitInput = input.split(listDivider);
+  for (final String str in splitInput) {
+    final List<String> booruAndTags = str.split(tabDivider);
+    result.add(booruAndTags);
+  }
+  return result;
+}
 
 class SearchHandler extends GetxController {
   SearchHandler(this.rootRestate);
@@ -128,9 +141,6 @@ class SearchHandler extends GetxController {
     }
 
     // move tab
-    if (fromIndex < toIndex) {
-      toIndex -= 1;
-    }
     final SearchTab tab = list[fromIndex];
     list.removeAt(fromIndex);
     list.insert(toIndex, tab);
@@ -303,13 +313,20 @@ class SearchHandler extends GetxController {
   }
 
   HasTabWithTagResult hasTabWithTag(String tag) {
-    for (final SearchTab tab in list) {
-      if (tab.tags.toLowerCase().trim() == tag.toLowerCase().trim()) {
+    final tabsWithOnlyTag = list.where((tab) => tab.tags.toLowerCase().trim() == tag.toLowerCase().trim());
+    if (tabsWithOnlyTag.isNotEmpty) {
+      if (tabsWithOnlyTag.any((tab) => tab.selectedBooru.value == currentBooru)) {
         return HasTabWithTagResult.onlyTag;
-      } else if (tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim())) {
-        return HasTabWithTagResult.containsTag;
+      } else {
+        return HasTabWithTagResult.onlyTagDifferentBooru;
       }
     }
+
+    final tabsContainingTag = list.where((tab) => tab.tags.toLowerCase().trim().split(' ').contains(tag.toLowerCase().trim()));
+    if (tabsContainingTag.isNotEmpty) {
+      return HasTabWithTagResult.containsTag;
+    }
+
     return HasTabWithTagResult.noTag;
   }
 
@@ -329,6 +346,9 @@ class SearchHandler extends GetxController {
   BooruHandler get currentBooruHandler => currentTab.booruHandler;
   Booru get currentBooru => currentTab.selectedBooru.value;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
+  void filterCurrentFetched() {
+    currentBooruHandler.filterFetched();
+  }
 
   RxInt viewedIndex = (-1).obs;
   Rx<BooruItem> viewedItem = BooruItem(
@@ -368,7 +388,16 @@ class SearchHandler extends GetxController {
       ServiceHandler.vibrate();
 
       item.isFavourite.value = item.isFavourite.value == true ? false : true;
-      await SettingsHandler.instance.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
+      await SettingsHandler.instance.dbHandler.updateBooruItem(
+        item,
+        BooruUpdateMode.local,
+      );
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // update filtered items list in case user has favourites filter enabled
+        await Future.delayed(const Duration(milliseconds: 200));
+        filterCurrentFetched();
+      });
     }
     return item.isFavourite.value;
   }
@@ -570,7 +599,7 @@ class SearchHandler extends GetxController {
   StreamSubscription? _rootVolumeListener;
 
   // hack to allow global restates to force refresh of everything (mainly used when saving settings when exiting settings page)
-  Function rootRestate;
+  VoidCallback rootRestate;
 
   @override
   void onInit() {
@@ -601,21 +630,9 @@ class SearchHandler extends GetxController {
   DateTime lastBackupTime = DateTime.now();
 
   // TODO rework to use json structure instead
-  // special strings used to separate parts of tab backup string
-  final String tabDivider = '|||', listDivider = '~~~';
   // example of backup string: "booruName1|||tags1|||tab~~~booruName2|||tags2|||selected~~~booruName3|||tags3|||tab"
 
   // Restores tabs from a string saved in DB
-  List<List<String>> decodeBackupString(String input) {
-    final List<List<String>> result = [];
-    final List<String> splitInput = input.split(listDivider);
-    for (final String str in splitInput) {
-      final List<String> booruAndTags = str.split(tabDivider);
-      result.add(booruAndTags);
-    }
-    return result;
-  }
-
   Future<void> restoreTabs() async {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
     final List<String> result = await settingsHandler.dbHandler.getTabRestore();
@@ -626,7 +643,8 @@ class SearchHandler extends GetxController {
     int newIndex = 0;
     if (result.length == 2) {
       // split list into tabs
-      final List<List<String>> splitInput = decodeBackupString(result[1]);
+      final List<List<String>> splitInput =
+          await compute(decodeBackupString, result[1]); // decodeBackupString(result[1]) // await compute(decodeBackupString, result[1])
       // print('restoreTabs: ${splitInput}');
       for (final List<String> booruAndTags in splitInput) {
         // check for parsing errors
@@ -692,6 +710,7 @@ class SearchHandler extends GetxController {
         ),
         sideColor: foundBrokenItem ? Colors.yellow : Colors.green,
         leadingIcon: foundBrokenItem ? Icons.warning_amber : Icons.settings_backup_restore,
+        duration: Duration(seconds: brokenItems.isEmpty ? 4 : 10),
       );
 
       list.value = restoredGlobals;
@@ -872,29 +891,23 @@ class SearchTab {
     tagsList: [],
     postURL: '',
   ).obs;
-  RxList<int> selected = RxList<int>.from([]);
+  RxList<BooruItem> selected = RxList<BooruItem>.from([]);
 
   @override
   String toString() {
     return 'tags: $tags selectedBooru: $selectedBooru booruHandler: $booruHandler';
   }
-
-  List<BooruItem> getSelected() {
-    final List<BooruItem> selectedItems = [];
-    for (int i = 0; i < selected.length; i++) {
-      selectedItems.add(booruHandler.filteredFetched.elementAt(selected[i]));
-    }
-    return selectedItems;
-  }
 }
 
 enum HasTabWithTagResult {
   onlyTag,
+  onlyTagDifferentBooru,
   containsTag,
   noTag;
 
   bool get isOnlyTag => this == HasTabWithTagResult.onlyTag;
+  bool get isOnlyTagDifferentBooru => this == HasTabWithTagResult.onlyTagDifferentBooru;
   bool get isContainsTag => this == HasTabWithTagResult.containsTag;
   bool get isNoTag => this == HasTabWithTagResult.noTag;
-  bool get hasTag => this == HasTabWithTagResult.containsTag || this == HasTabWithTagResult.onlyTag;
+  bool get hasTag => this == HasTabWithTagResult.onlyTag || this == HasTabWithTagResult.onlyTagDifferentBooru || this == HasTabWithTagResult.containsTag;
 }

@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:get/get.dart';
+
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -34,9 +36,9 @@ class SettingsButton extends StatelessWidget {
   final String name;
   final Widget? icon;
   final Widget? subtitle;
-  final Widget Function()? page;
-  final void Function()? action;
-  final void Function()? onLongPress;
+  final WidgetCallback? page;
+  final VoidCallback? action;
+  final VoidCallback? onLongPress;
   final Widget? trailingIcon;
   final bool drawTopBorder;
   final bool drawBottomBorder;
@@ -197,10 +199,7 @@ class SettingsToggle extends StatelessWidget {
     return ListTile(
       title: Row(
         children: [
-          MarqueeText(
-            text: title,
-            fontSize: 16,
-          ),
+          MarqueeText(text: title),
           trailingIcon ?? const SizedBox(width: 8),
         ],
       ),
@@ -233,6 +232,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.drawBottomBorder = true,
     this.trailingIcon,
     this.itemBuilder,
+    this.selectedItemBuilder,
     this.itemTitleBuilder,
     super.key,
   });
@@ -246,6 +246,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final bool drawBottomBorder;
   final Widget? trailingIcon;
   final Widget Function(T)? itemBuilder;
+  final DropdownMenuItem Function(T)? selectedItemBuilder;
   final String Function(T)? itemTitleBuilder;
 
   String getTitle(T value) {
@@ -276,14 +277,15 @@ class SettingsDropdown<T> extends StatelessWidget {
           dropdownColor: Theme.of(context).colorScheme.surface,
           selectedItemBuilder: (BuildContext context) {
             return items.map<DropdownMenuItem<T>>((T item) {
-              return DropdownMenuItem<T>(
-                value: item,
-                child: Row(
-                  children: <Widget>[
-                    getItemWidget(item),
-                  ],
-                ),
-              );
+              return (selectedItemBuilder?.call(item) ??
+                  DropdownMenuItem<T>(
+                    value: item,
+                    child: Row(
+                      children: <Widget>[
+                        getItemWidget(item),
+                      ],
+                    ),
+                  )) as DropdownMenuItem<T>;
             }).toList();
           },
           items: items.map<DropdownMenuItem<T>>((T item) {
@@ -329,6 +331,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.title,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
+    this.nullable = false,
     this.trailingIcon,
     super.key,
   });
@@ -338,7 +341,24 @@ class SettingsBooruDropdown extends StatelessWidget {
   final String title;
   final bool drawTopBorder;
   final bool drawBottomBorder;
+  final bool nullable;
   final Widget? trailingIcon;
+
+  Widget itemBuilder(Booru? booru) {
+    return Row(
+      children: <Widget>[
+        if (booru == null)
+          Icon(nullable ? Icons.question_mark : null, size: 18)
+        else if (booru.type == BooruType.Downloads)
+          const Icon(Icons.file_download_outlined, size: 18)
+        else if (booru.type == BooruType.Favourites)
+          const Icon(Icons.favorite, color: Colors.red, size: 18)
+        else
+          Favicon(booru),
+        Text(" ${booru?.name ?? (nullable ? 'Select a Booru' : '')}".trim()),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -346,21 +366,20 @@ class SettingsBooruDropdown extends StatelessWidget {
 
     return SettingsDropdown<Booru?>(
       value: value,
-      items: boorus,
+      items: [
+        if (nullable) null,
+        ...boorus,
+      ],
       onChanged: onChanged,
       title: title,
       drawTopBorder: drawTopBorder,
       drawBottomBorder: drawBottomBorder,
       trailingIcon: trailingIcon,
-      itemBuilder: (Booru? booru) {
-        return Row(
-          children: <Widget>[
-            if (booru == null)
-              const Icon(null)
-            else
-              booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru),
-            Text(" ${booru?.name ?? ''}".trim()),
-          ],
+      itemBuilder: itemBuilder,
+      selectedItemBuilder: (Booru? booru) {
+        return DropdownMenuItem<Booru?>(
+          value: booru,
+          child: itemBuilder(booru),
         );
       },
     );
@@ -371,6 +390,7 @@ class SettingsTextInput extends StatefulWidget {
   const SettingsTextInput({
     required this.controller,
     required this.title,
+    this.focusNode,
     this.inputType = TextInputType.text,
     this.inputFormatters,
     this.validator,
@@ -394,6 +414,7 @@ class SettingsTextInput extends StatefulWidget {
 
   final TextEditingController controller;
   final String title;
+  final FocusNode? focusNode;
   final TextInputType inputType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
@@ -419,11 +440,12 @@ class SettingsTextInput extends StatefulWidget {
 
 class _SettingsTextInputState extends State<SettingsTextInput> {
   bool isFocused = false;
-  final FocusNode _focusNode = FocusNode();
+  late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(focusListener);
   }
 

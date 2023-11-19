@@ -2,87 +2,72 @@ name: lolisnatcher
 description: Booru Client with the ability to batch download Images.
 publish_to: none
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 2.3.3+183
 
 environment:
   sdk: ">=2.17.0 <3.0.0"
-  flutter: ^3.10.6
+  flutter: ^3.16.0
 
 dependencies:
   flutter:
     sdk: flutter
 
-  alice_lightweight: ^3.4.0
-  app_links: ^3.4.3
+  alice_lightweight: ^3.5.1
+  app_links: ^3.4.5
   auto_size_text: ^3.0.0
   awesome_notifications: ^0.8.2
-  chewie: ^1.5.0
-  crypto: ^3.0.2
-  cupertino_icons: ^1.0.5
-  # dart_vlc: ^0.3.0
-  dart_vlc:
-    git:
-      # 0.3.0 - synced with original github repo, they now use higher version of vlclib
-      url: "https://github.com/NANI-SORE/dart_vlc.git"
-      ref: 5fbe5c8fb2dd9991ccc440347e51110001aa9435
-  dio: ^5.3.2
+  chewie: ^1.7.1
+  crypto: ^3.0.3
+  cupertino_icons: ^1.0.6
+  dart_vlc: ^0.4.0 # TODO move to media_kit (see relevant PR)
+  dio: ^5.3.3
   dropdown_search: ^5.0.6
-  dynamic_color: ^1.6.6
+  dynamic_color: ^1.6.8
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original
       url: "https://github.com/NANI-SORE/fast_marquee.git"
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
-  flash: ^3.0.5+1
+  flash: ^3.0.5+2
   flex_color_picker: ^3.3.0
   flutter_displaymode: ^0.6.0
   flutter_improved_scrolling: ^0.0.3
-  flutter_inappwebview: ^5.7.2+3
+  flutter_inappwebview: ^5.8.0
   flutter_inner_drawer:
     git:
       url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
-      ref: 8e50920055dcb04b6b58560629daced7b86be36e # master
+      ref: 781d16e05e987e3873c1f1562465079f10e390e7 # master
   flutter_linkify: ^6.0.0
-  font_awesome_flutter: ^10.5.0
-  get: ^4.6.5
+  font_awesome_flutter: ^10.6.0
+  get: ^4.6.6
   google_fonts: ^6.1.0
   html: ^0.15.4
   huge_listview: ^2.0.11
-  image: ^4.0.15
+  image: ^4.1.3
   intl: ^0.18.1
   keyboard_actions: ^4.2.0
   logger_fork: ^1.2.0
   logger_flutter_fork: ^1.3.1
-  # local_auth: ^2.1.0
-  # marquee: ^2.2.2 # replaced with fast_marquee
-  path_provider: ^2.1.0
+  # local_auth: ^2.1.7
+  path_provider: ^2.1.1
   permission_handler: ^11.0.1
   photo_view: # ^0.12.0
     git:
       url: "https://github.com/NANI-SORE/photo_view.git"
-      ref: a1cf7f4f964c3e58e513d4171159851bbe991ed7 # master
+      ref: 233a392a891000bd674a0cf91fae9771ffccf9f9 # master
   preload_page_view: ^0.2.0
   scroll_to_index: ^3.0.1
-  scrollable_positioned_list: ^0.3.5
-  sqflite_common_ffi: ^2.3.0+2
+  scrollable_positioned_list: ^0.3.8
+  share_plus: ^7.2.1 # not used directly, but is part of some deps (i.e. alice)
+  sqflite_common_ffi: ^2.3.0+4
   sqflite: ^2.3.0
   statsfl: ^2.3.0
   transparent_image: ^2.0.1
   uuid: ^4.2.1
-  vibration: ^1.7.5
-  video_player: ^2.7.0
+  vibration: ^1.8.3
+  video_player: ^2.8.1
   waterfall_flow: ^3.0.2
-  xml: ^6.1.0
+  xml: ^6.4.2
 
 
 
@@ -95,24 +80,12 @@ flutter_icons:
 
 
 dev_dependencies:
-  flutter_lints: ^2.0.2
+  flutter_lints: ^3.0.1
   flutter_test:
     sdk: flutter
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# TODO/reminder don't forget to check if the dependencies are updated when changing versions of other packages
-# Current list of affected packages:
-#   - dart_vlc
-dependency_overrides:
-  ffi: ^2.0.1 # to override dart_vlc to use newer ffi to allow installing alice
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter.
 flutter:
 
   # The following line ensures that the Material Icons font is
@@ -122,34 +95,3 @@ flutter:
   assets:
     - assets/images/drawer_icon.png
     - assets/images/loading.gif
-
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #  - images/a_dot_burr.jpeg
-  #  - images/a_dot_ham.jpeg
-
-  # An image asset can refer to one or more resolution-specific "variants", see
-  # https://flutter.dev/assets-and-images/#resolution-aware.
-
-  # For details regarding adding assets from package dependencies, see
-  # https://flutter.dev/assets-and-images/#from-packages
-
-  # To add custom fonts to your application, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
-  # list giving the asset and other descriptors for the font. For
-  # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
-  #
-  # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/custom-fonts/#from-packages

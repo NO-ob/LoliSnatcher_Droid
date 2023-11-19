@@ -12,6 +12,7 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 class Logger {
   static Logger? _loggerInstance;
 
+  // ignore: non_constant_identifier_names
   static Logger Inst() {
     _loggerInstance ??= Logger();
     return _loggerInstance!;
@@ -487,37 +488,26 @@ enum LogTypes {
   LogLib.Level get logLevel {
     switch (this) {
       case LogTypes.booruHandlerFetchFailed:
-        return LogLib.Level.error;
-      case LogTypes.booruHandlerInfo:
-        return LogLib.Level.info;
       case LogTypes.booruHandlerParseFailed:
-        return LogLib.Level.error;
-      case LogTypes.booruHandlerRawFetched:
-        return LogLib.Level.info;
-      case LogTypes.booruHandlerSearchURL:
-        return LogLib.Level.info;
-      case LogTypes.booruHandlerTagInfo:
-        return LogLib.Level.info;
-      case LogTypes.booruItemLoad:
-        return LogLib.Level.info;
       case LogTypes.exception:
-        return LogLib.Level.error;
-      case LogTypes.imageInfo:
-        return LogLib.Level.info;
       case LogTypes.imageLoadingError:
-        return LogLib.Level.error;
-      case LogTypes.loliSyncInfo:
-        return LogLib.Level.info;
       case LogTypes.networkError:
-        return LogLib.Level.error;
       case LogTypes.settingsError:
         return LogLib.Level.error;
+      //
+      case LogTypes.booruHandlerInfo:
+      case LogTypes.booruHandlerRawFetched:
+      case LogTypes.booruHandlerSearchURL:
+      case LogTypes.booruHandlerTagInfo:
+      case LogTypes.booruItemLoad:
+      case LogTypes.imageInfo:
+      case LogTypes.loliSyncInfo:
       case LogTypes.settingsLoad:
-        return LogLib.Level.info;
       case LogTypes.tagHandlerInfo:
         return LogLib.Level.info;
-      default:
-        return LogLib.Level.wtf;
+      //
+      // default:
+      // return LogLib.Level.wtf;
     }
   }
 }

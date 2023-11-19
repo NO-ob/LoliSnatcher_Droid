@@ -222,7 +222,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

@@ -32,7 +32,7 @@ class GelbooruHandler extends BooruHandler {
   Map<String, String> getHeaders() {
     return {
       ...super.getHeaders(),
-      'Cookie': 'fringeBenefits=yup;' // unlocks restricted content (but it's probably not necessary)
+      'Cookie': 'fringeBenefits=yup;', // unlocks restricted content (but it's probably not necessary)
     };
   }
 
@@ -118,6 +118,7 @@ class GelbooruHandler extends BooruHandler {
   Future<void> afterParseResponse(List<BooruItem> newItems) async {
     final int lengthBefore = fetched.length;
     fetched.addAll(newItems);
+    filterFetched();
     await populateTagHandler(newItems); // difference from default afterParse
     unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
   }

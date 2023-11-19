@@ -113,7 +113,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.snatchCooldown = int.parse(snatchCooldownController.text);
     settingsHandler.jsonWrite = jsonWrite;
     settingsHandler.mediaCache = mediaCache;
@@ -125,7 +129,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.downloadNotifications = downloadNotifications;
     settingsHandler.customUserAgent = userAgentController.text;
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   void setPath(String path) {
@@ -184,8 +190,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -339,7 +346,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                             Text(''),
                             Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
                             Text(''),
-                            Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.')
+                            Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.'),
                           ],
                         );
                       },

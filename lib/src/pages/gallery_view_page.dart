@@ -59,7 +59,6 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     // enable volume buttons if opened page is a video AND appbar is visible
     final BooruItem item = searchHandler.currentFetched[widget.initialIndex];
     final bool isVideo = item.mediaType.value.isVideo;
-    // bool isHated = item.isHated.value;
     final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
     setVolumeListener();
@@ -111,7 +110,7 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
             DismissDirection.up: 0.2,
             DismissDirection.down: 0.2,
             DismissDirection.startToEnd: 0.3,
-            DismissDirection.endToStart: 0.3
+            DismissDirection.endToStart: 0.3,
           }, // Amount of swiped away which triggers dismiss
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(

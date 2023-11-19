@@ -94,7 +94,11 @@ class WorldXyzHandler extends BooruHandler {
   }
 
   @override
-  Future<Response> fetchTagSuggestions(Uri uri, String input) {
+  Future<Response> fetchTagSuggestions(
+    Uri uri,
+    String input, {
+    CancelToken? cancelToken,
+  }) {
     return DioNetwork.post(
       uri.toString(),
       headers: {

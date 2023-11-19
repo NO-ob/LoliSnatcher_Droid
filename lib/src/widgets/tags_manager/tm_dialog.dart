@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_add_dialog.dart';
@@ -19,6 +20,7 @@ class TagsManagerDialog extends StatefulWidget {
 }
 
 class _TagsManagerDialogState extends State<TagsManagerDialog> {
+  final SettingsHandler settingsHandler = SettingsHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
 
   List<Tag> tags = [], filteredTags = [], selected = [];
@@ -78,6 +80,8 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
   }
 
   void showItemActions(Widget row, Tag item) {
+    final bool dbEnabled = settingsHandler.dbEnabled;
+
     showDialog(
       context: context,
       builder: (context) {
@@ -91,23 +95,23 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
           onChangedType: (TagType? newValue) {
             if (newValue != null && item.tagType != newValue) {
               item.tagType = newValue;
-              tagHandler.putTag(item);
+              tagHandler.putTag(item, dbEnabled: dbEnabled);
               filterTags();
             }
           },
           onSetStale: () {
             item.updatedAt = 100;
-            tagHandler.putTag(item);
+            tagHandler.putTag(item, dbEnabled: dbEnabled);
             filterTags();
           },
           onResetStale: () {
             item.updatedAt = DateTime.now().millisecondsSinceEpoch;
-            tagHandler.putTag(item);
+            tagHandler.putTag(item, dbEnabled: dbEnabled);
             filterTags();
           },
           onSetUnstaleable: () {
             item.updatedAt = DateTime.now().millisecondsSinceEpoch * 10;
-            tagHandler.putTag(item);
+            tagHandler.putTag(item, dbEnabled: dbEnabled);
             filterTags();
           },
         );
@@ -124,7 +128,7 @@ class _TagsManagerDialogState extends State<TagsManagerDialog> {
     );
 
     if (tag != null && !tagHandler.hasTag(tag.fullString)) {
-      await tagHandler.putTag(tag);
+      await tagHandler.putTag(tag, dbEnabled: settingsHandler.dbEnabled);
       tags.add(tag);
       filterTags();
     }

@@ -15,7 +15,7 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 class HydrusHandler extends BooruHandler {
   HydrusHandler(super.booru, super.limit);
 
-  var _fileIDs;
+  dynamic _fileIDs;
 
   @override
   Map<String, String> getHeaders() {
