@@ -425,7 +425,7 @@ class ImageViewerState extends State<ImageViewer> {
                               minScale: PhotoViewComputedScale.contained,
                               maxScale: PhotoViewComputedScale.covered * 8,
                               initialScale: PhotoViewComputedScale.contained,
-                              enableRotation: false,
+                              enableRotation: settingsHandler.allowRotation,
                               basePosition: Alignment.center,
                               controller: viewController,
                               scaleStateController: scaleController,

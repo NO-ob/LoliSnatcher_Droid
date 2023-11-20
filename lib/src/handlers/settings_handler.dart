@@ -144,6 +144,7 @@ class SettingsHandler extends GetxController {
   bool wakeLockEnabled = true;
   bool tagTypeFetchEnabled = true;
   bool downloadNotifications = true;
+  bool allowRotation = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -456,6 +457,10 @@ class SettingsHandler extends GetxController {
     'downloadNotifications': {
       'type': 'bool',
       'default': true,
+    },
+    'allowRotation': {
+      'type': 'bool',
+      'default': false,
     },
 
     // other
@@ -898,6 +903,8 @@ class SettingsHandler extends GetxController {
         return tagTypeFetchEnabled;
       case 'downloadNotifications':
         return downloadNotifications;
+      case 'allowRotation':
+        return allowRotation;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -1084,6 +1091,9 @@ class SettingsHandler extends GetxController {
       case 'downloadNotifications':
         downloadNotifications = validatedValue;
         break;
+      case 'allowRotation':
+        allowRotation = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1170,6 +1180,7 @@ class SettingsHandler extends GetxController {
       'wakeLockEnabled': validateValue('wakeLockEnabled', null, toJSON: true),
       'tagTypeFetchEnabled': validateValue('tagTypeFetchEnabled', null, toJSON: true),
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
+      'allowRotation': validateValue('allowRotation', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),

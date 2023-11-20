@@ -15,6 +15,7 @@ class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   bool autoHideImageBar = false,
       autoPlay = true,
+      allowRotation = false,
       loadingGif = false,
       useVolumeButtonsForScroll = false,
       shitDevice = false,
@@ -44,6 +45,7 @@ class _GalleryPageState extends State<GalleryPage> {
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
     autoPlay = settingsHandler.autoPlayEnabled;
+    allowRotation = settingsHandler.allowRotation;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
@@ -70,6 +72,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
     settingsHandler.changePageButtonsPosition = changePageButtonsPosition;
     settingsHandler.autoPlayEnabled = autoPlay;
+    settingsHandler.allowRotation = allowRotation;
     settingsHandler.loadingGif = loadingGif;
     settingsHandler.shitDevice = shitDevice;
     settingsHandler.disableVideo = disableVideo;
@@ -250,6 +253,16 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: 'Auto Hide Gallery Bar',
+              ),
+              SettingsToggle(
+                value: allowRotation,
+                onChanged: (newValue) {
+                  setState(() {
+                    allowRotation = newValue;
+                  });
+                },
+                title: 'Enable rotation',
+                subtitle: const Text('Double tap to reset (only works on images)'),
               ),
 
               Container(
