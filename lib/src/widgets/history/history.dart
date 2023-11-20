@@ -341,7 +341,9 @@ class _HistoryListState extends State<HistoryList> {
         onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
         minLeadingWidth: 20,
         leading: booru != null
-            ? (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru))
+            ? (booru.type == BooruType.Downloads
+                ? const Icon(Icons.file_download_outlined, size: 18)
+                : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)))
             : const Icon(CupertinoIcons.question, size: 18),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -354,12 +356,17 @@ class _HistoryListState extends State<HistoryList> {
             if (showCheckbox) checkbox,
           ],
         ),
-        title: MarqueeText(
-          key: ValueKey(currentEntry.searchText),
-          text: currentEntry.searchText,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          isExpanded: false,
+        title: SizedBox(
+          height: 16,
+          child: MarqueeText(
+            key: ValueKey(currentEntry.searchText),
+            text: currentEntry.searchText,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            isExpanded: false,
+          ),
         ),
         subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
       ),

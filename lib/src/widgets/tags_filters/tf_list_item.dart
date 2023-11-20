@@ -26,10 +26,12 @@ class TagsFiltersListItem extends StatelessWidget {
         ),
         onTap: () => onTap?.call(tag),
         leading: overrideIcon ?? const Icon(CupertinoIcons.tag),
-        title: MarqueeText(
-          text: tag,
-          fontSize: 16,
-          isExpanded: false,
+        title: SizedBox(
+          height: 16,
+          child: MarqueeText(
+            text: tag,
+            isExpanded: false,
+          ),
         ),
       ),
     );

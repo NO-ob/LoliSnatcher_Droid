@@ -4,8 +4,8 @@ import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 
-class FavouritesHandler extends BooruHandler {
-  FavouritesHandler(super.booru, super.limit);
+class DownloadsHandler extends BooruHandler {
+  DownloadsHandler(super.booru, super.limit);
 
   @override
   String validateTags(String tags) {
@@ -37,14 +37,14 @@ class FavouritesHandler extends BooruHandler {
       limit.toString(),
       'DESC',
       'Favourites',
+      isDownloads: true,
     );
 
     await afterParseResponse(newItems);
-
     prevTags = tags;
 
     if (fetched.isEmpty || fetched.length == length) {
-      Logger.Inst().log('dbhandler dbLocked', 'FavouritesHandler', 'search', LogTypes.booruHandlerInfo);
+      Logger.Inst().log('dbhandler dbLocked', 'DownloadsHandler', 'search', LogTypes.booruHandlerInfo);
       locked = true;
     }
 
@@ -59,7 +59,10 @@ class FavouritesHandler extends BooruHandler {
 
   @override
   Future<void> searchCount(String input) async {
-    totalCount.value = await SettingsHandler.instance.dbHandler.searchDBCount(input);
+    totalCount.value = await SettingsHandler.instance.dbHandler.searchDBCount(
+      input,
+      isDownloads: true,
+    );
     return;
   }
 }

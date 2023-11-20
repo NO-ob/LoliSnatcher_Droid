@@ -6,7 +6,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 /// This is the page which allows the user to batch download images
@@ -34,7 +33,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
     getPerms();
     //If the user has searched tags on the main window they will be loaded into the tags field
     snatcherTagsController.text = searchHandler.currentTab.tags;
-    snatcherAmountController.text = 10.toString();
+    snatcherAmountController.text = settingsHandler.limit.toString();
     selectedBooru = searchHandler.currentBooru;
     snatcherSleepController.text = settingsHandler.snatchCooldown.toString();
   }
@@ -96,19 +95,6 @@ class _SnatcherPageState extends State<SnatcherPage> {
               action: () {
                 if (snatcherSleepController.text.isEmpty) {
                   snatcherSleepController.text = 0.toString();
-                }
-                if (selectedBooru == null) {
-                  FlashElements.showSnackbar(
-                    context: context,
-                    title: const Text(
-                      'No Booru Selected!',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    leadingIcon: Icons.error_outline,
-                    leadingIconColor: Colors.red,
-                    sideColor: Colors.red,
-                  );
-                  return;
                 }
 
                 snatchHandler.searchSnatch(

@@ -143,30 +143,24 @@ class _WaterfallViewState extends State<WaterfallView> {
     super.dispose();
   }
 
-  Future<void> jumpTo(int newIndex) async {
-    if (!searchHandler.gridScrollController.hasClients) {
-      return;
-    }
-    if (newIndex == -1) {
+  void jumpTo(int newIndex) {
+    if (!searchHandler.gridScrollController.hasClients || newIndex == -1 || (!viewerHandler.inViewer.value && isMobile)) {
       return;
     }
 
-    if (!viewerHandler.inViewer.value && isMobile) {
-      return;
-      // await Future.delayed(Duration(milliseconds: 500));
-    }
-
-    if (newIndex == 0) {
-      // viewedIndex == 0 when tab is first created, so we should scroll to top on 0th item (not to the item itself, because there is padding on top of it) to avoid bugs with appbar
-      searchHandler.gridScrollController.jumpTo(0);
-    } else {
-      // scroll to viewed item
-      await searchHandler.gridScrollController.scrollToIndex(
-        newIndex,
-        duration: Duration(milliseconds: isMobile ? 10 : 100),
-        preferPosition: AutoScrollPosition.begin,
-      );
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (newIndex == 0) {
+        // viewedIndex == 0 when tab is first created, so we should scroll to top on 0th item (not to the item itself, because there is padding on top of it) to avoid bugs with appbar
+        searchHandler.gridScrollController.jumpTo(0);
+      } else {
+        // scroll to viewed item
+        searchHandler.gridScrollController.scrollToIndex(
+          newIndex,
+          duration: Duration(milliseconds: isMobile ? 10 : 100),
+          preferPosition: AutoScrollPosition.begin,
+        );
+      }
+    });
   }
 
   void afterSearch() {
@@ -195,8 +189,7 @@ class _WaterfallViewState extends State<WaterfallView> {
       kbFocusNode.unfocus();
       viewerHandler.inViewer.value = true;
 
-      await Navigator.push(
-        context,
+      await Navigator.of(context).push(
         PageRouteBuilder(
           pageBuilder: (context, anim1, anim2) =>
               // Opacity(opacity: 0.5, child: GalleryViewPage(index)),
@@ -220,10 +213,10 @@ class _WaterfallViewState extends State<WaterfallView> {
   Future<void> onLongPress(int index, BooruItem item) async {
     ServiceHandler.vibrate(duration: 5);
 
-    if (searchHandler.currentTab.selected.contains(index)) {
-      searchHandler.currentTab.selected.remove(index);
+    if (searchHandler.currentTab.selected.contains(item)) {
+      searchHandler.currentTab.selected.remove(item);
     } else {
-      searchHandler.currentTab.selected.add(index);
+      searchHandler.currentTab.selected.add(item);
     }
   }
 
@@ -316,6 +309,9 @@ class _WaterfallViewState extends State<WaterfallView> {
           NotificationListener<ScrollUpdateNotification>(
             child: Scrollbar(
               controller: searchHandler.gridScrollController,
+              interactive: true,
+              thickness: 8,
+              thumbVisibility: true,
               child: RefreshIndicator(
                 triggerMode: RefreshIndicatorTriggerMode.anywhere,
                 displacement: 80,

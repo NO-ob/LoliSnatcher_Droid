@@ -36,7 +36,8 @@ class SettingsHandler extends GetxController {
   late Alice alice;
 
   // service vars
-  RxBool isInit = false.obs;
+  RxBool isInit = false.obs, isPostInit = false.obs;
+  RxString postInitMessage = ''.obs;
   String cachePath = '';
   String path = '';
   String boorusPath = '';
@@ -110,7 +111,7 @@ class SettingsHandler extends GetxController {
     ['info', 'Display Info'],
     ['share', 'Share'],
     ['open', 'Open in Browser'],
-    ['reloadnoscale', 'Reload w/out scaling']
+    ['reloadnoscale', 'Reload w/out scaling'],
   ];
   List<List<String>> buttonOrder = [
     ['autoscroll', 'AutoScroll'],
@@ -119,7 +120,7 @@ class SettingsHandler extends GetxController {
     ['info', 'Display Info'],
     ['share', 'Share'],
     ['open', 'Open in Browser'],
-    ['reloadnoscale', 'Reload w/out scaling']
+    ['reloadnoscale', 'Reload w/out scaling'],
   ];
 
   bool jsonWrite = false;
@@ -133,6 +134,8 @@ class SettingsHandler extends GetxController {
   bool searchHistoryEnabled = true;
   bool filterHated = false;
   bool filterFavourites = false;
+  bool filterSnatched = false;
+  bool filterAi = false;
   bool useVolumeButtonsForScroll = false;
   bool shitDevice = false;
   bool disableVideo = false;
@@ -202,7 +205,7 @@ class SettingsHandler extends GetxController {
     'showImageStats',
     'isDebug',
     'showURLOnThumb',
-    'desktopListsDrag'
+    'desktopListsDrag',
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -402,6 +405,14 @@ class SettingsHandler extends GetxController {
       'type': 'bool',
       'default': false,
     },
+    'filterSnatched': {
+      'type': 'bool',
+      'default': false,
+    },
+    'filterAi': {
+      'type': 'bool',
+      'default': false,
+    },
     'useVolumeButtonsForScroll': {
       'type': 'bool',
       'default': false,
@@ -457,7 +468,7 @@ class SettingsHandler extends GetxController {
         ['info', 'Display Info'],
         ['share', 'Share'],
         ['open', 'Open in Browser'],
-        ['reloadnoscale', 'Reload w/out scaling']
+        ['reloadnoscale', 'Reload w/out scaling'],
       ],
     },
     'cacheDuration': {
@@ -498,7 +509,7 @@ class SettingsHandler extends GetxController {
         ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
         ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
         ThemeItem(name: 'Custom', primary: null, accent: null),
-      ]
+      ],
     },
     'themeMode': {
       'type': 'themeMode',
@@ -724,15 +735,43 @@ class SettingsHandler extends GetxController {
     } else {
       await saveSettings(restate: true);
     }
-
-    if (!Tools.isTestMode) {
-      if (dbEnabled) {
-        await dbHandler.dbConnect(path, indexesEnabled);
-      } else {
-        dbHandler = DBHandler();
-      }
-    }
     return true;
+  }
+
+  Future<bool> loadDatabase() async {
+    try {
+      if (!Tools.isTestMode) {
+        if (dbEnabled) {
+          await dbHandler.dbConnect(path);
+        } else {
+          dbHandler = DBHandler();
+        }
+      }
+      return true;
+    } catch (err) {
+      Logger.Inst().log('loadDatabase error: $err', 'SettingsHandler', 'loadDatabase', LogTypes.exception);
+      return false;
+    }
+  }
+
+  Future<bool> indexDatabase() async {
+    try {
+      if (!Tools.isTestMode) {
+        if (dbEnabled) {
+          if (indexesEnabled) {
+            postInitMessage.value = 'Indexing database...\nThis may take a while';
+            await dbHandler.createIndexes();
+          } else {
+            postInitMessage.value = 'Dropping indexes...\nThis may take a while';
+            await dbHandler.dropIndexes();
+          }
+        }
+      }
+      return true;
+    } catch (err) {
+      Logger.Inst().log('indexDatabase error: $err', 'SettingsHandler', 'indexDatabase', LogTypes.exception);
+      return false;
+    }
   }
 
   Future<bool> checkForSettings() {
@@ -802,6 +841,10 @@ class SettingsHandler extends GetxController {
         return filterHated;
       case 'filterFavourites':
         return filterFavourites;
+      case 'filterSnatched':
+        return filterSnatched;
+      case 'filterAi':
+        return filterAi;
       case 'useVolumeButtonsForScroll':
         return useVolumeButtonsForScroll;
       case 'volumeButtonsScrollSpeed':
@@ -963,6 +1006,12 @@ class SettingsHandler extends GetxController {
       case 'filterFavourites':
         filterFavourites = validatedValue;
         break;
+      case 'filterSnatched':
+        filterSnatched = validatedValue;
+        break;
+      case 'filterAi':
+        filterAi = validatedValue;
+        break;
       case 'useVolumeButtonsForScroll':
         useVolumeButtonsForScroll = validatedValue;
         break;
@@ -1101,6 +1150,8 @@ class SettingsHandler extends GetxController {
       'searchHistoryEnabled': validateValue('searchHistoryEnabled', null, toJSON: true),
       'filterHated': validateValue('filterHated', null, toJSON: true),
       'filterFavourites': validateValue('filterFavourites', null, toJSON: true),
+      'filterSnatched': validateValue('filterSnatched', null, toJSON: true),
+      'filterAi': validateValue('filterAi', null, toJSON: true),
       'useVolumeButtonsForScroll': validateValue('useVolumeButtonsForScroll', null, toJSON: true),
       'volumeButtonsScrollSpeed': validateValue('volumeButtonsScrollSpeed', null, toJSON: true),
       'mousewheelScrollSpeed': validateValue('mousewheelScrollSpeed', null, toJSON: true),
@@ -1268,7 +1319,9 @@ class SettingsHandler extends GetxController {
     await writer.close();
 
     if (restate) {
-      SearchHandler.instance.rootRestate(); // force global state update to redraw stuff
+      final searchHandler = SearchHandler.instance;
+      searchHandler.filterCurrentFetched(); // refilter fetched because user could have changed the filtering settings
+      searchHandler.rootRestate(); // force global state update to redraw stuff
     }
     return true;
   }
@@ -1293,7 +1346,7 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             final File booruFile = files[i] as File;
             final Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            final bool isAllowed = booruFromFile.type != BooruType.Favourites;
+            final bool isAllowed = booruFromFile.type != BooruType.Favourites && booruFromFile.type != BooruType.Downloads;
             if (isAllowed) {
               tempList.add(booruFromFile);
             } else {
@@ -1309,6 +1362,7 @@ class SettingsHandler extends GetxController {
 
       if (dbEnabled && tempList.isNotEmpty) {
         tempList.add(Booru('Favourites', BooruType.Favourites, '', '', ''));
+        tempList.add(Booru('Downloads', BooruType.Downloads, '', '', ''));
       }
     } catch (e) {
       Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
@@ -1353,6 +1407,15 @@ class SettingsHandler extends GetxController {
       sorted.remove(tmp);
       sorted.add(tmp);
     }
+
+    final int dlsIndex = sorted.indexWhere((el) => el.type == BooruType.Downloads);
+    if (dlsIndex != -1) {
+      // move downloads to the end
+      final Booru tmp = sorted.elementAt(dlsIndex);
+      sorted.remove(tmp);
+      sorted.add(tmp);
+    }
+
     booruList.value = sorted;
   }
 
@@ -1388,12 +1451,29 @@ class SettingsHandler extends GetxController {
     return true;
   }
 
-  List<List<String>> parseTagsList(List<String> itemTags, {bool isCapped = true}) {
+  // TODO add more tags?
+  static const List<String> soundTags = [
+    'sound',
+    'sound_edit',
+    'has_audio',
+    'voice_acted',
+  ];
+  static const List<String> aiTags = [
+    'ai_generated',
+    'ai-generated',
+    'ai_created',
+    'ai-created',
+    'novelai',
+    'stable_diffusion',
+    'stable-diffusion',
+  ];
+
+  TagsListData parseTagsList(List<String> itemTags, {bool isCapped = true}) {
     final List<String> cleanItemTags = cleanTagsList(itemTags);
     List<String> hatedInItem = hatedTags.where(cleanItemTags.contains).toList();
     List<String> lovedInItem = lovedTags.where(cleanItemTags.contains).toList();
-    final List<String> soundInItem = ['sound', 'sound_edit', 'has_audio', 'voice_acted'].where(cleanItemTags.contains).toList();
-    // TODO add more sound tags?
+    final List<String> soundInItem = soundTags.where(cleanItemTags.contains).toList();
+    final List<String> aiInItem = aiTags.where(cleanItemTags.contains).toList();
 
     if (isCapped) {
       if (hatedInItem.length > 5) {
@@ -1404,7 +1484,23 @@ class SettingsHandler extends GetxController {
       }
     }
 
-    return [hatedInItem, lovedInItem, soundInItem];
+    return TagsListData(hatedInItem, lovedInItem, soundInItem, aiInItem);
+  }
+
+  bool containsHated(List<String> itemTags) {
+    return hatedTags.where(itemTags.contains).isNotEmpty;
+  }
+
+  bool containsLoved(List<String> itemTags) {
+    return lovedTags.where(itemTags.contains).isNotEmpty;
+  }
+
+  bool containsSound(List<String> itemTags) {
+    return soundTags.where(itemTags.contains).isNotEmpty;
+  }
+
+  bool containsAI(List<String> itemTags) {
+    return aiTags.where(itemTags.contains).isNotEmpty;
   }
 
   void addTagToList(String type, String tag) {
@@ -1467,7 +1563,7 @@ class SettingsHandler extends GetxController {
           true, // is update available in store [LEGACY], after 2.2.0 hits the store - left this in update.json as true for backwards compatibility with pre-2.2
       'is_important': false, // is update important => force open dialog on start
       'store_package': 'com.noaisu.play.loliSnatcher', // custom app package name, to allow to redirect store users to new app if it will be needed
-      'github_url': 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest'
+      'github_url': 'https://github.com/NO-ob/LoliSnatcher_Droid/releases/latest',
     }; // fake update json for tests
     // String fakeUpdate = '123'; // broken string
 
@@ -1627,9 +1723,6 @@ class SettingsHandler extends GetxController {
       await getPerms();
       await loadSettings();
 
-      if (booruList.isEmpty) {
-        await loadBoorus();
-      }
       if (allowSelfSignedCerts) {
         HttpOverrides.global = MyHttpOverrides();
       }
@@ -1662,6 +1755,42 @@ class SettingsHandler extends GetxController {
     isInit.value = true;
     return;
   }
+
+  Future<void> postInit(AsyncCallback externalAction) async {
+    if (isPostInit.value == true) {
+      return;
+    }
+
+    try {
+      postInitMessage.value = 'Loading Database...';
+      await loadDatabase();
+      await indexDatabase();
+      if (booruList.isEmpty) {
+        postInitMessage.value = 'Loading Boorus...';
+        await loadBoorus();
+      }
+      await externalAction();
+    } catch (e) {
+      postInitMessage.value = 'Error!';
+      Logger.Inst().log(e.toString(), 'SettingsHandler', 'postInit', LogTypes.settingsError);
+      FlashElements.showSnackbar(
+        title: const Text(
+          'Post Initialization Error!',
+          style: TextStyle(fontSize: 20),
+        ),
+        content: Text(
+          e.toString(),
+        ),
+        sideColor: Colors.red,
+        leadingIcon: Icons.error,
+        leadingIconColor: Colors.red,
+      );
+    }
+
+    isPostInit.value = true;
+    postInitMessage.value = '';
+    return;
+  }
 }
 
 class EnvironmentConfig {
@@ -1669,4 +1798,18 @@ class EnvironmentConfig {
     'LS_IS_STORE',
     defaultValue: false,
   );
+}
+
+class TagsListData {
+  const TagsListData([
+    this.hatedTags = const [],
+    this.lovedTags = const [],
+    this.soundTags = const [],
+    this.aiTags = const [],
+  ]);
+
+  final List<String> hatedTags;
+  final List<String> lovedTags;
+  final List<String> soundTags;
+  final List<String> aiTags;
 }

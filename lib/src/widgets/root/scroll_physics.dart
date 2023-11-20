@@ -10,7 +10,7 @@ class CustomScrollBehavior extends MaterialScrollBehavior {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
-      // case TargetPlatform.android:
+        // case TargetPlatform.android:
         return const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics());
       case TargetPlatform.fuchsia:
       case TargetPlatform.android:
@@ -24,7 +24,7 @@ class CustomScrollBehavior extends MaterialScrollBehavior {
   // Override behavior methods and getters like dragDevices
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        ...PointerDeviceKind.values
+        ...PointerDeviceKind.values,
         // PointerDeviceKind.touch,
         // PointerDeviceKind.mouse,
       };

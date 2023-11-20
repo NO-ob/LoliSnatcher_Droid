@@ -75,7 +75,11 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.defTags = defaultTagsController.text;
     if (int.parse(limitController.text) > 100) {
       limitController.text = '100';
@@ -93,13 +97,15 @@ class _BooruPageState extends State<BooruPage> {
       } else if (res == false && initPrefBooru != null) {
         settingsHandler.prefBooru = initPrefBooru?.name ?? '';
       } else if (res == null) {
-        return false;
+        return;
       }
     }
     settingsHandler.limit = int.parse(limitController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
     await settingsHandler.sortBooruList();
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   Widget addButton() {
@@ -148,7 +154,7 @@ class _BooruPageState extends State<BooruPage> {
       name: 'Share Selected Booru',
       icon: const Icon(Icons.share),
       action: () {
-        if (selectedBooru?.type == BooruType.Favourites) {
+        if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
           return;
         }
 
@@ -218,10 +224,12 @@ class _BooruPageState extends State<BooruPage> {
     return SettingsButton(
       name: 'Edit Selected Booru',
       icon: const Icon(Icons.edit),
-      // do nothing if no selected or selected "Favourites"
+      // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
       // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
-      page: (selectedBooru != null && selectedBooru?.type != BooruType.Favourites) ? () => BooruEdit(selectedBooru!) : null,
+      page: (selectedBooru != null && selectedBooru?.type != BooruType.Favourites && selectedBooru?.type != BooruType.Downloads)
+          ? () => BooruEdit(selectedBooru!)
+          : null,
     );
   }
 
@@ -230,7 +238,7 @@ class _BooruPageState extends State<BooruPage> {
       name: 'Delete Selected Booru',
       icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
       action: () {
-        // do nothing if no selected or selected "Favourites" or there are tabs with it
+        // do nothing if no selected or selected "Favourites/Downloads" or there are tabs with it
         if (selectedBooru == null) {
           FlashElements.showSnackbar(
             context: context,
@@ -241,7 +249,7 @@ class _BooruPageState extends State<BooruPage> {
           );
           return;
         }
-        if (selectedBooru?.type == BooruType.Favourites) {
+        if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
           FlashElements.showSnackbar(
             context: context,
             title: const Text("Can't delete this Booru!", style: TextStyle(fontSize: 20)),
@@ -438,8 +446,9 @@ class _BooruPageState extends State<BooruPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

@@ -27,6 +27,7 @@ import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/handlers/theme_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/desktop_home_page.dart';
+import 'package:lolisnatcher/src/pages/init_home_page.dart';
 import 'package:lolisnatcher/src/pages/mobile_home_page.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -39,7 +40,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
-    await DartVLC.initialize();
+    DartVLC.initialize();
 
     // Init db stuff
     sqfliteFfiInit();
@@ -149,12 +150,13 @@ class _MainAppState extends State<MainApp> {
   Future<void> initHandlers() async {
     // should init earlier than tabs so tags color properly on first render of search box
     // TODO but this possibly could lead to bad preformance on start if tag storage is too big?
-    await Future.wait([
-      tagHandler.initialize(),
-      searchHandler.restoreTabs(),
-    ]);
-
     settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
+    await settingsHandler.postInit(() async {
+      settingsHandler.postInitMessage.value = 'Loading tags...';
+      await tagHandler.initialize();
+      settingsHandler.postInitMessage.value = 'Restoring tabs...';
+      await searchHandler.restoreTabs();
+    });
   }
 
   Future<void> setMaxFPS() async {
@@ -399,13 +401,28 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       }
     }
 
-    return Obx(() {
-      if (settingsHandler.appMode.value.isMobile) {
-        return const MobileHome();
-      } else {
-        return const DesktopHome();
-      }
-    });
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.background,
+      child: Obx(() {
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: Builder(
+            key: ValueKey('init:${settingsHandler.isPostInit.value}-mobile:${settingsHandler.appMode.value.isMobile}'),
+            builder: (context) {
+              if (settingsHandler.isPostInit.value == false) {
+                return const InitHomePage();
+              }
+
+              if (settingsHandler.appMode.value.isMobile) {
+                return const MobileHome();
+              } else {
+                return const DesktopHome();
+              }
+            },
+          ),
+        );
+      }),
+    );
 
     // with lockscreen:
     // return Obx(() {

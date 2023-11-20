@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class BooruItem {
@@ -62,7 +63,7 @@ class BooruItem {
   late Rx<MediaType> mediaType;
   RxnString possibleExt = RxnString(null);
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
-  RxBool isHated = false.obs, isLoved = false.obs, isNoScale = false.obs;
+  RxBool isNoScale = false.obs;
 
   String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
   String fileNameExtras;
@@ -74,6 +75,22 @@ class BooruItem {
 
   bool get isLong {
     return fileAspectRatio != null && fileAspectRatio! < 0.3;
+  }
+
+  bool get isHated {
+    return SettingsHandler.instance.containsHated(tagsList);
+  }
+
+  bool get isLoved {
+    return SettingsHandler.instance.containsLoved(tagsList);
+  }
+
+  bool get isSound {
+    return SettingsHandler.instance.containsSound(tagsList);
+  }
+
+  bool get isAI {
+    return SettingsHandler.instance.containsAI(tagsList);
   }
 
   Map<String, dynamic> toJson() {

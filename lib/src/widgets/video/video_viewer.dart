@@ -52,7 +52,7 @@ class VideoViewerState extends State<VideoViewer> {
   final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
   int lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false;
+  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false;
   List<String> stopReason = [];
 
   StreamSubscription? indexListener;
@@ -217,6 +217,7 @@ class VideoViewerState extends State<VideoViewer> {
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
+        didAutoplay = false;
         isViewed = false;
       }
 
@@ -241,9 +242,9 @@ class VideoViewerState extends State<VideoViewer> {
   }
 
   void initVideo(bool ignoreTagsCheck) {
-    if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
-      final List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
+    if (widget.booruItem.isHated && !ignoreTagsCheck) {
+      final tagsData = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+      killLoading(['Contains Hated tags:', ...tagsData.hatedTags]);
     } else {
       downloadVideo();
     }
@@ -317,7 +318,7 @@ class VideoViewerState extends State<VideoViewer> {
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
-    viewerHandler.setViewState(widget.key, viewState);
+    viewerHandler.setViewValue(widget.key, viewState);
   }
 
   void resetZoom() {
@@ -507,9 +508,12 @@ class VideoViewerState extends State<VideoViewer> {
         if (needsRestart) {
           videoController!.seekTo(Duration.zero);
         }
-        if (settingsHandler.autoPlayEnabled) {
-          // autoplay if viewed and setting is enabled
-          videoController!.play();
+        if (!didAutoplay) {
+          if (settingsHandler.autoPlayEnabled) {
+            // autoplay if viewed and setting is enabled
+            videoController!.play();
+          }
+          didAutoplay = true;
         }
         if (viewerHandler.videoAutoMute) {
           videoController!.setVolume(0);
@@ -543,7 +547,6 @@ class VideoViewerState extends State<VideoViewer> {
                   : Thumbnail(
                       item: widget.booruItem,
                       isStandalone: false,
-                      ignoreColumnsCount: true,
                     ),
             ),
             AnimatedSwitcher(
@@ -595,6 +598,7 @@ class VideoViewerState extends State<VideoViewer> {
                             basePosition: Alignment.center,
                             controller: viewController,
                             scaleStateController: scaleController,
+                            enableTapDragZoom: true,
                             child: Chewie(controller: chewieController!),
                           ),
                           ChewieControllerProvider(
@@ -604,7 +608,7 @@ class VideoViewerState extends State<VideoViewer> {
                                 child: LoliControls(),
                               ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     )

@@ -2,6 +2,7 @@ import 'package:lolisnatcher/src/boorus/agnph_handler.dart';
 import 'package:lolisnatcher/src/boorus/booru_on_rails_handler.dart';
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/danbooru_handler.dart';
+import 'package:lolisnatcher/src/boorus/downloads_handler.dart';
 import 'package:lolisnatcher/src/boorus/e621_handler.dart';
 import 'package:lolisnatcher/src/boorus/empty_handler.dart';
 import 'package:lolisnatcher/src/boorus/favourites_handler.dart';
@@ -92,6 +93,9 @@ class BooruHandlerFactory {
         case BooruType.BooruOnRails:
           pageNum = 0;
           booruHandler = BooruOnRailsHandler(booru, limit);
+          break;
+        case BooruType.Downloads:
+          booruHandler = DownloadsHandler(booru, limit);
           break;
         case BooruType.Favourites:
           booruHandler = FavouritesHandler(booru, limit);

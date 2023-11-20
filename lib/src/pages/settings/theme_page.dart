@@ -69,7 +69,11 @@ class _ThemePageState extends State<ThemePage> {
   }
 
   //called when page is closed or to debounce theme change, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop({bool withRestate = false}) async {
+  Future<void> _onPopInvoked(bool didPop, {bool? withRestate}) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
     settingsHandler.useMaterial3.value = useMaterial3;
@@ -92,8 +96,10 @@ class _ThemePageState extends State<ThemePage> {
     } else {
       settingsHandler.drawerMascotPathOverride = mascotPathOverride;
     }
-    final bool result = await settingsHandler.saveSettings(restate: withRestate);
-    return result;
+    final bool result = await settingsHandler.saveSettings(restate: withRestate ?? false);
+    if (result && withRestate == null) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> updateTheme({bool withRestate = false}) async {
@@ -104,7 +110,7 @@ class _ThemePageState extends State<ThemePage> {
     Debounce.debounce(
       tag: 'theme_change',
       callback: () async {
-        await _onWillPop(withRestate: withRestate);
+        await _onPopInvoked(false, withRestate: withRestate);
         setState(() {});
       },
       duration: const Duration(milliseconds: 500),
@@ -174,8 +180,9 @@ class _ThemePageState extends State<ThemePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

@@ -17,16 +17,23 @@ class _SettingsTemplateState extends State<SettingsTemplate> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     // Set settingshandler values here
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(

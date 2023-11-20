@@ -59,13 +59,18 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   String selectedInterface = 'Auto';
   String? selectedAddress;
 
-  Future<bool> _onWillPop() async {
-    testSync.killSync();
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
 
+    testSync.killSync();
     settingsHandler.lastSyncIp = ipController.text;
     settingsHandler.lastSyncPort = portController.text;
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -255,7 +260,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
                               Text('Example: You have X amount of favs, set this field to 100, sync will start from item #100 and go until it reaches X'),
-                              Text('Order of favs: From oldest (0) to newest (X)')
+                              Text('Order of favs: From oldest (0) to newest (X)'),
                             ],
                           );
                         },
@@ -534,8 +539,9 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

@@ -23,7 +23,7 @@ class DBHandler {
   Database? db;
 
   /// Connects to the database file and create the database if the tables dont exist
-  Future<bool> dbConnect(String path, bool indexesEnabled) async {
+  Future<bool> dbConnect(String path) async {
     // await Sqflite.devSetDebugModeOn(true);
     if (Platform.isAndroid || Platform.isIOS) {
       db = await openDatabase('${path}store.db', version: 1, singleInstance: false);
@@ -31,11 +31,6 @@ class DBHandler {
       db = await databaseFactory.openDatabase('${path}store.db');
     }
     await updateTable();
-    if (indexesEnabled) {
-      await createIndexes();
-    } else {
-      await dropIndexes();
-    }
     await deleteUntracked();
     return true;
   }
@@ -124,16 +119,18 @@ class DBHandler {
     String? itemID = await getItemID(item.postURL);
     String resultStr = '';
     if (itemID == null || itemID.isEmpty) {
-      final result =
-          await db?.rawInsert('INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)', [
-        item.thumbnailURL,
-        item.sampleURL,
-        item.fileURL,
-        item.postURL,
-        item.mediaType.toJson(),
-        Tools.boolToInt(item.isSnatched.value == true),
-        Tools.boolToInt(item.isFavourite.value == true)
-      ]);
+      final result = await db?.rawInsert(
+        'INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)',
+        [
+          item.thumbnailURL,
+          item.sampleURL,
+          item.fileURL,
+          item.postURL,
+          item.mediaType.toJson(),
+          Tools.boolToInt(item.isSnatched.value == true),
+          Tools.boolToInt(item.isFavourite.value == true),
+        ],
+      );
       itemID = result?.toString();
       await updateTags(item.tagsList, itemID);
       resultStr = 'Inserted';
@@ -165,16 +162,18 @@ class DBHandler {
       String? itemID = (itemIDs.isNotEmpty && itemIndex != -1) ? itemIDs[itemIndex] : null;
 
       if (itemID == null || itemID.isEmpty) {
-        final result =
-            await db?.rawInsert('INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)', [
-          item.thumbnailURL,
-          item.sampleURL,
-          item.fileURL,
-          item.postURL,
-          item.mediaType.toJson(),
-          Tools.boolToInt(item.isSnatched.value == true),
-          Tools.boolToInt(item.isFavourite.value == true)
-        ]);
+        final result = await db?.rawInsert(
+          'INSERT INTO BooruItem(thumbnailURL, sampleURL, fileURL, postURL, mediaType, isSnatched, isFavourite) VALUES(?,?,?,?,?,?,?)',
+          [
+            item.thumbnailURL,
+            item.sampleURL,
+            item.fileURL,
+            item.postURL,
+            item.mediaType.toJson(),
+            Tools.boolToInt(item.isSnatched.value == true),
+            Tools.boolToInt(item.isFavourite.value == true),
+          ],
+        );
         itemID = result?.toString();
         await updateTags(item.tagsList, itemID);
         saved++;
@@ -257,6 +256,7 @@ class DBHandler {
     String order,
     String mode, {
     List<String> customConditions = const [],
+    bool isDownloads = false,
   }) async {
     // TODO multiple tags in search can lead to wrong results
     List<String> searchTags = [], excludeTags = [];
@@ -285,6 +285,8 @@ class DBHandler {
     // benchmark reqest time
     // final DateTime start = DateTime.now();
 
+    final filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
+
     if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
       final String searchPart = searchTags.isNotEmpty ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) " : '';
 
@@ -301,8 +303,8 @@ class DBHandler {
               '  JOIN Tag AS t ON it.tagID = t.id '
               "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
               ') AS ei ON bi.id = ei.id '
-              'WHERE ei.id IS NULL AND bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr '
-          : 'WHERE                   bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr ';
+              'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr '
+          : 'WHERE                   $filterMode $andStr1 $siteQuery $andStr2 $searchPart $customConditionsStr ';
 
       final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
 
@@ -325,7 +327,7 @@ class DBHandler {
       result = await db?.rawQuery(
         'SELECT bi.id as dbid, bi.thumbnailURL, bi.sampleURL, bi.fileURL, bi.postURL, bi.mediaType, bi.isSnatched, bi.isFavourite '
         'FROM BooruItem AS bi '
-        'WHERE $siteQuery $andStr1 bi.isFavourite = 1 '
+        'WHERE $siteQuery $andStr1 $filterMode '
         'GROUP BY bi.id '
         'ORDER BY bi.id $order '
         'LIMIT $limit '
@@ -391,7 +393,7 @@ class DBHandler {
   }
 
   /// Gets amount of BooruItems from the database
-  Future<int> searchDBCount(String searchTagsString) async {
+  Future<int> searchDBCount(String searchTagsString, {bool isDownloads = false}) async {
     List<String> searchTags = [], excludeTags = [];
     List? result;
 
@@ -414,6 +416,8 @@ class DBHandler {
       excludeTags = [];
     }
 
+    final filterMode = isDownloads ? 'bi.isSnatched = 1' : 'bi.isFavourite = 1';
+
     if (searchTags.isNotEmpty || excludeTags.isNotEmpty) {
       final String searchPart = searchTags.isNotEmpty ? "t.name IN (${List.generate(searchTags.length, (_) => '?').join(',')}) " : '';
 
@@ -428,8 +432,8 @@ class DBHandler {
               '  JOIN Tag AS t ON it.tagID = t.id '
               "  WHERE t.name IN (${List.generate(excludeTags.length, (_) => '?').join(',')}) "
               ') AS ei ON bi.id = ei.id '
-              'WHERE ei.id IS NULL AND bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart '
-          : 'WHERE                   bi.isFavourite = 1 $andStr1 $siteQuery $andStr2 $searchPart ';
+              'WHERE ei.id IS NULL AND $filterMode $andStr1 $siteQuery $andStr2 $searchPart '
+          : 'WHERE                   $filterMode $andStr1 $siteQuery $andStr2 $searchPart ';
 
       final String havingPart = searchTags.isNotEmpty ? 'HAVING COUNT(DISTINCT t.id) = ${searchTags.length} ' : '';
 
@@ -448,7 +452,7 @@ class DBHandler {
 
       result = await db?.rawQuery('SELECT COUNT(*) as count '
           'FROM BooruItem AS bi '
-          'WHERE $siteQuery $andStr1 bi.isFavourite = 1 '
+          'WHERE $siteQuery $andStr1 $filterMode '
           'GROUP BY bi.id;');
     }
 

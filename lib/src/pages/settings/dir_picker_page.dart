@@ -30,9 +30,13 @@ class _DirPickerState extends State<DirPicker> {
     path = widget.path;
   }
 
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     if (path == '/storage') {
-      final shouldPop = await showDialog(
+      final bool? shouldPop = await showDialog(
         context: context,
         builder: (context) {
           return SettingsDialog(
@@ -57,7 +61,10 @@ class _DirPickerState extends State<DirPicker> {
           );
         },
       );
-      return shouldPop;
+
+      if (shouldPop ?? false) {
+        Navigator.of(context).pop();
+      }
     } else {
       if (path.lastIndexOf('/') > -1) {
         setState(() {
@@ -65,7 +72,7 @@ class _DirPickerState extends State<DirPicker> {
           print(path);
         });
       }
-      return false;
+      return;
     }
   }
 
@@ -142,8 +149,9 @@ class _DirPickerState extends State<DirPicker> {
     if (path != widget.path) {
       title = path.substring(path.lastIndexOf('/') + 1);
     }
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(

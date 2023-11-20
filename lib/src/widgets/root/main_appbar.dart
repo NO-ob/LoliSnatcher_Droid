@@ -3,15 +3,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/services/get_perms.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
-import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/root/active_title.dart';
 
 class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -112,81 +107,6 @@ class _MainAppBarState extends State<MainAppBar> {
     // });
   }
 
-  Widget devButton() {
-    return IconButton(
-      icon: Icon(Icons.timelapse, color: Theme.of(context).appBarTheme.iconTheme?.color),
-      onPressed: () {
-        sinceLastBackup();
-        Tools.forceClearMemoryCache(withLive: true);
-      },
-    );
-  }
-
-  Widget saveButton() {
-    return Obx(() {
-      if (searchHandler.list.isNotEmpty) {
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: Icon(Icons.save, color: Theme.of(context).appBarTheme.iconTheme?.color),
-              onPressed: () {
-                getPerms();
-                // call a function to save the currently viewed image when the save button is pressed
-                if (searchHandler.currentTab.selected.isNotEmpty) {
-                  snatchHandler.queue(
-                    searchHandler.currentTab.getSelected(),
-                    searchHandler.currentBooru,
-                    settingsHandler.snatchCooldown,
-                    false,
-                  );
-                  searchHandler.currentTab.selected.value = [];
-                } else {
-                  FlashElements.showSnackbar(
-                    context: context,
-                    title: const Text('No items selected', style: TextStyle(fontSize: 20)),
-                    overrideLeadingIconWidget: const Text(' (」°ロ°)」 ', style: TextStyle(fontSize: 18)),
-                  );
-                }
-              },
-            ),
-            if (searchHandler.currentTab.selected.isNotEmpty)
-              Positioned(
-                right: 2,
-                bottom: 5,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary,
-                    border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Center(
-                    child: FittedBox(
-                      child: Text(
-                        '${searchHandler.currentTab.selected.length}',
-                        style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        );
-      } else {
-        return const SizedBox.shrink();
-      }
-    });
-  }
-
-  void sinceLastBackup() {
-    FlashElements.showSnackbar(
-      title: Text('Since last backup: ${searchHandler.lastBackupTime.difference(DateTime.now()).inSeconds * -1} seconds'),
-      duration: const Duration(seconds: 3),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final double barHeight = _scrollOffset * (widget.defaultHeight + MediaQuery.of(context).padding.top);
@@ -203,9 +123,8 @@ class _MainAppBarState extends State<MainAppBar> {
         title: const ActiveTitle(),
         actions: [
           // lockButton(),
-          // devButton(),
-          saveButton(),
           widget.trailing ?? const SizedBox.shrink(),
+          const SizedBox(width: 8),
         ],
       ),
     );

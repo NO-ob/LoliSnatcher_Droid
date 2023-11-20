@@ -8,6 +8,12 @@ enum TagType {
   species,
   none;
 
+  bool get isArtist => this == TagType.artist;
+  bool get isCharacter => this == TagType.character;
+  bool get isSpecies => this == TagType.species;
+  bool get isMeta => this == TagType.meta;
+  bool get isNone => this == TagType.none;
+
   static TagType fromString(String string) {
     switch (string) {
       case 'artist':

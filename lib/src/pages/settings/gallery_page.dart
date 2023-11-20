@@ -56,7 +56,11 @@ class _GalleryPageState extends State<GalleryPage> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.autoHideImageBar = autoHideImageBar;
     settingsHandler.galleryMode = galleryMode;
     settingsHandler.galleryBarPosition = galleryBarPosition;
@@ -85,7 +89,9 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.preloadCount = int.parse(preloadController.text);
     // Set settingshandler values here
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -96,8 +102,9 @@ class _GalleryPageState extends State<GalleryPage> {
 
     final bool hasHydrus = settingsHandler.hasHydrus;
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -197,7 +204,7 @@ class _GalleryPageState extends State<GalleryPage> {
                               '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network which can take some time.',
                             ),
                             const Text(''),
-                            const Text('[Tip]: You can open Share Actions Menu by long pressing Share button.')
+                            const Text('[Tip]: You can open Share Actions Menu by long pressing Share button.'),
                           ],
                         );
                       },
@@ -305,7 +312,7 @@ class _GalleryPageState extends State<GalleryPage> {
                           buttonOrder!.insert(newIndex, item);
                         });
                       },
-                    )
+                    ),
                   ],
                 ),
               ),

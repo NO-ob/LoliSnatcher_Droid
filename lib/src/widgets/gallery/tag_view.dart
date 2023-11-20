@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -37,7 +38,7 @@ class _TagViewState extends State<TagView> {
   final ViewerHandler viewerHandler = ViewerHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
 
-  List<List<String>> hatedAndLovedTags = [];
+  TagsListData tagsData = const TagsListData();
   ScrollController scrollController = ScrollController();
 
   late BooruItem item;
@@ -45,11 +46,15 @@ class _TagViewState extends State<TagView> {
   bool? sortTags;
   late StreamSubscription<BooruItem> itemSubscription;
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
+  final GlobalKey searchKey = GlobalKey(debugLabel: 'tagsSearchKey');
 
   @override
   void initState() {
     super.initState();
     searchHandler.searchTextController.addListener(onMainSearchTextChanged);
+
+    searchFocusNode.addListener(searchFocusListener);
 
     item = searchHandler.viewedItem.value;
     // copy tags to avoid changing the original array
@@ -66,12 +71,13 @@ class _TagViewState extends State<TagView> {
   @override
   void dispose() {
     searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
+    searchFocusNode.removeListener(searchFocusListener);
     itemSubscription.cancel();
     super.dispose();
   }
 
   void parseTags() {
-    hatedAndLovedTags = settingsHandler.parseTagsList(tags, isCapped: false);
+    tagsData = settingsHandler.parseTagsList(tags, isCapped: false);
   }
 
   List<String> filterTags(List<String> tagsToFilter) {
@@ -136,12 +142,23 @@ class _TagViewState extends State<TagView> {
     setState(() {});
   }
 
+  void searchFocusListener() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (searchFocusNode.hasFocus) {
+        Scrollable.ensureVisible(
+          searchKey.currentContext!,
+          alignment: 0.1,
+          duration: const Duration(milliseconds: 300),
+        );
+      }
+    });
+  }
+
   Widget infoBuild() {
     final String fileName = Tools.getFileName(item.fileURL);
     final String fileUrl = item.fileURL;
     final String fileRes = (item.fileWidth != null && item.fileHeight != null) ? '${item.fileWidth?.toInt() ?? ''}x${item.fileHeight?.toInt() ?? ''}' : '';
     final String fileSize = item.fileSize != null ? Tools.formatBytes(item.fileSize!, 2) : '';
-    final String hasNotes = item.hasNotes != null ? item.hasNotes.toString() : '';
     final String itemId = item.serverId ?? '';
     final String rating = item.rating ?? '';
     final String score = item.score ?? '';
@@ -180,7 +197,6 @@ class _TagViewState extends State<TagView> {
           infoText('Resolution', fileRes),
           infoText('Size', fileSize),
           infoText('MD5', md5),
-          infoText('Has Notes', hasNotes, canCopy: false),
           infoText('Posted', formattedDate, canCopy: false),
           commentsButton(),
           notesButton(),
@@ -195,7 +211,9 @@ class _TagViewState extends State<TagView> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: SettingsTextInput(
+                key: searchKey,
                 controller: searchController,
+                focusNode: searchFocusNode,
                 title: 'Search tags',
                 onlyInput: true,
                 clearable: true,
@@ -438,8 +456,10 @@ class _TagViewState extends State<TagView> {
                 title: MarqueeText(
                   key: ValueKey(tag),
                   text: tag,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                   isExpanded: false,
                 ),
               ),
@@ -604,21 +624,18 @@ class _TagViewState extends State<TagView> {
         tagsItemBuilder,
         addAutomaticKeepAlives: false,
         // add empty items to allow a bit of overscroll for easier reachability
-        childCount: filteredTags.length + 6,
+        childCount: filteredTags.length,
       ),
     );
   }
 
   Widget tagsItemBuilder(BuildContext context, int index) {
-    if (index >= filteredTags.length) {
-      return const SizedBox(height: 50);
-    }
-
     final String currentTag = filteredTags[index];
 
-    final bool isHated = hatedAndLovedTags[0].contains(currentTag);
-    final bool isLoved = hatedAndLovedTags[1].contains(currentTag);
-    final bool isSound = hatedAndLovedTags[2].contains(currentTag);
+    final bool isHated = tagsData.hatedTags.contains(currentTag);
+    final bool isLoved = tagsData.lovedTags.contains(currentTag);
+    final bool isSound = tagsData.soundTags.contains(currentTag);
+    final bool isAi = tagsData.aiTags.contains(currentTag);
     final bool isInSearch = searchHandler.searchTextController.text
             .toLowerCase()
             .split(' ')
@@ -627,6 +644,9 @@ class _TagViewState extends State<TagView> {
     final HasTabWithTagResult hasTabWithTag = searchHandler.hasTabWithTag(currentTag);
 
     final List<TagInfoIcon> tagIconAndColor = [];
+    if (isAi) {
+      tagIconAndColor.add(TagInfoIcon(FontAwesomeIcons.robot, Theme.of(context).colorScheme.onBackground));
+    }
     if (isSound) {
       tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
     }
@@ -655,24 +675,40 @@ class _TagViewState extends State<TagView> {
                   width: 6,
                   height: 50,
                   decoration: BoxDecoration(
-                    border: Border(left: BorderSide(width: 6, color: tagHandler.getTag(currentTag).getColour())),
+                    border: Border(
+                      left: BorderSide(
+                        width: 6,
+                        color: tagHandler.getTag(currentTag).getColour(),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 MarqueeText(
                   key: ValueKey(currentTag),
                   text: tagHandler.getTag(currentTag).fullString,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
                   isExpanded: true,
                 ),
                 if (tagIconAndColor.isNotEmpty) ...[
                   ...tagIconAndColor.map(
-                    (t) => Icon(
-                      t.icon,
-                      color: t.color,
-                      size: 20,
-                    ),
+                    (t) => t.icon == FontAwesomeIcons.robot
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: FaIcon(
+                              t.icon,
+                              color: t.color,
+                              size: 18,
+                            ),
+                          )
+                        : Icon(
+                            t.icon,
+                            color: t.color,
+                            size: 20,
+                          ),
                   ),
                   const SizedBox(width: 5),
                 ],
@@ -739,7 +775,9 @@ class _TagViewState extends State<TagView> {
                             child: Icon(
                               Icons.circle,
                               size: 6,
-                              color: hasTabWithTag.isOnlyTag ? Theme.of(context).colorScheme.onBackground : Colors.blue,
+                              color: hasTabWithTag.isOnlyTag
+                                  ? Theme.of(context).colorScheme.onBackground
+                                  : (hasTabWithTag.isOnlyTagDifferentBooru ? Colors.yellow : Colors.blue),
                             ),
                           ),
                       ],
@@ -817,6 +855,11 @@ class _TagViewState extends State<TagView> {
             slivers: [
               infoBuild(),
               tagsBuild(),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).viewInsets.bottom,
+                ),
+              ),
             ],
           ),
         ),

@@ -39,7 +39,7 @@ class GridBuilder extends StatelessWidget {
         cacheExtent: 200,
         shrinkWrap: false,
         itemCount: searchHandler.currentFetched.length,
-        padding: EdgeInsets.fromLTRB(2, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 2, 80),
+        padding: EdgeInsets.fromLTRB(10, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 10, 80),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,
           childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16,

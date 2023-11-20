@@ -9,6 +9,7 @@ import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_image_listener.dart';
 import 'package:lolisnatcher/src/widgets/desktop/resizable_split_view.dart';
@@ -87,7 +88,7 @@ class DesktopHome extends StatelessWidget {
             page: () => const SettingsPage(),
           ),
           Obx(() {
-            if (searchHandler.list.isNotEmpty) {
+            if (searchHandler.list.isNotEmpty && searchHandler.currentTab.selected.isNotEmpty) {
               return Stack(
                 alignment: Alignment.center,
                 children: [
@@ -100,7 +101,7 @@ class DesktopHome extends StatelessWidget {
                       // call a function to save the currently viewed image when the save button is pressed
                       if (searchHandler.currentTab.selected.isNotEmpty) {
                         snatchHandler.queue(
-                          searchHandler.currentTab.getSelected(),
+                          searchHandler.currentTab.selected,
                           searchHandler.currentBooru,
                           settingsHandler.snatchCooldown,
                           false,
@@ -110,7 +111,10 @@ class DesktopHome extends StatelessWidget {
                         FlashElements.showSnackbar(
                           context: context,
                           title: const Text('No items selected', style: TextStyle(fontSize: 20)),
-                          overrideLeadingIconWidget: const Text(' (」°ロ°)」 ', style: TextStyle(fontSize: 18)),
+                          overrideLeadingIconWidget: const Kaomoji(
+                            type: KaomojiType.angryHandsUp,
+                            style: TextStyle(fontSize: 18),
+                          ),
                         );
                       }
                     },

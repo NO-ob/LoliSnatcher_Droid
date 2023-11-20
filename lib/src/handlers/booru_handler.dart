@@ -47,20 +47,40 @@ abstract class BooruHandler {
       };
 
   getx.RxList<BooruItem> fetched = getx.RxList<BooruItem>([]);
-  List<BooruItem> get filteredFetched => fetched.where((el) {
-        final SettingsHandler settingsHandler = SettingsHandler.instance;
+  getx.RxList<BooruItem> filteredFetched = getx.RxList<BooruItem>([]);
 
-        if (settingsHandler.filterHated && el.isHated.value) {
-          return false;
-        }
+  /// Filters the list of fetched items and stores them in filteredFetched
+  ///
+  /// Should always be called after fetched changed (so don't forget to add it in custom afterParseResponse or search methods)
+  /// (See gelbooru of favourites handlers for example)
+  void filterFetched() {
+    final SettingsHandler settingsHandler = SettingsHandler.instance;
 
-        final bool filterFavourites = settingsHandler.filterFavourites && booru.type != BooruType.Favourites;
-        if (filterFavourites && el.isFavourite.value == true) {
-          return false;
-        }
+    final List<BooruItem> filteredItems = [];
+    for (final item in fetched) {
+      if (settingsHandler.filterHated && item.isHated) {
+        continue;
+      }
 
-        return true;
-      }).toList();
+      if (settingsHandler.filterAi && item.isAI) {
+        continue;
+      }
+
+      final bool filterFavourites = settingsHandler.filterFavourites && booru.type != BooruType.Favourites;
+      if (filterFavourites && item.isFavourite.value == true) {
+        continue;
+      }
+
+      final bool filterSnatched = settingsHandler.filterSnatched && booru.type != BooruType.Downloads;
+      if (filterSnatched && item.isSnatched.value == true) {
+        continue;
+      }
+
+      filteredItems.add(item);
+    }
+
+    filteredFetched.value = filteredItems;
+  }
 
   String get className => runtimeType.toString();
 
@@ -141,8 +161,6 @@ abstract class BooruHandler {
         errorString = e.toString();
       }
     }
-
-    // print('Fetched: ${filteredFetched.length}');
     return fetched;
   }
 
@@ -182,9 +200,6 @@ abstract class BooruHandler {
         try {
           final BooruItem? item = await parseItemFromResponse(post, i);
           if (item != null) {
-            final List<List<String>> hatedAndLovedTags = SettingsHandler.instance.parseTagsList(item.tagsList);
-            item.isHated.value = hatedAndLovedTags[0].isNotEmpty;
-            item.isLoved.value = hatedAndLovedTags[1].isNotEmpty;
             newItems.add(item);
           }
         } catch (e) {
@@ -213,6 +228,7 @@ abstract class BooruHandler {
   Future<void> afterParseResponse(List<BooruItem> newItems) async {
     final int lengthBefore = fetched.length;
     fetched.addAll(newItems);
+    filterFetched();
     unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
     // TODO
     // notifyAboutFailed();
@@ -232,7 +248,7 @@ abstract class BooruHandler {
   ////////////////////////////////////////////////////////////////////////
 
   // TODO rename to getTagSuggestions
-  Future<List<String>> tagSearch(String input) async {
+  Future<List<String>> tagSearch(String input, {CancelToken? cancelToken}) async {
     final List<String> tags = [];
 
     final String url = makeTagURL(input);
@@ -251,7 +267,7 @@ abstract class BooruHandler {
     Response response;
     const int limit = 10;
     try {
-      response = await fetchTagSuggestions(uri, input);
+      response = await fetchTagSuggestions(uri, input, cancelToken: cancelToken);
       if (response.statusCode == 200) {
         Logger.Inst().log('fetchTagSuggestions response: ${response.data}', className, 'tagSearch', null);
         final rawTags = await parseTagSuggestionsList(response);
@@ -281,14 +297,14 @@ abstract class BooruHandler {
     return tags;
   }
 
-  Future<Response<dynamic>> fetchTagSuggestions(Uri uri, String input) async {
+  Future<Response<dynamic>> fetchTagSuggestions(Uri uri, String input, {CancelToken? cancelToken}) async {
     final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return DioNetwork.get(uri.toString(), headers: headers);
+    return DioNetwork.get(uri.toString(), headers: headers, cancelToken: cancelToken);
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -583,9 +599,6 @@ abstract class BooruHandler {
       fetched[fetchedIndex].isSnatched.value = values[0];
       fetched[fetchedIndex].isFavourite.value = values[1];
     }
-    // List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndex].tagsList);
-    // fetched[fetchedIndex].isHated.value = tagLists[0].isNotEmpty;
-    // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
     return;
   }
 
@@ -614,12 +627,6 @@ abstract class BooruHandler {
       valuesList.asMap().forEach((index, values) {
         fetched[fetchedIndexes[index]].isSnatched.value = values[0];
         fetched[fetchedIndexes[index]].isFavourite.value = values[1];
-
-        // TODO probably leads to worse performance on page loads, change to isolate or async maybe?
-        // TODO causes freezes on page load, currently moved directly to where item is created, but could cause performance issues there too?
-        // List<List<String>> tagLists = settingsHandler.parseTagsList(fetched[fetchedIndexes[index]].tagsList);
-        // fetched[fetchedIndexes[index]].isHated.value = tagLists[0].isNotEmpty;
-        // fetched[fetchedIndex].isLoved.value = tagLists[1].length > 0;
       });
     }
 

@@ -25,7 +25,7 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   List<String> hatedList = [];
   List<String> lovedList = [];
-  bool filterHated = false, filterFavourites = false;
+  bool filterHated = false, filterFavourites = false, filterSnatched = false, filterAi = false;
 
   @override
   void initState() {
@@ -36,6 +36,8 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     lovedList.sort(sortTags);
     filterHated = settingsHandler.filterHated;
     filterFavourites = settingsHandler.filterFavourites;
+    filterSnatched = settingsHandler.filterSnatched;
+    filterAi = settingsHandler.filterAi;
 
     tabController = TabController(vsync: this, length: 3)..addListener(updateState);
   }
@@ -53,13 +55,21 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
     super.dispose();
   }
 
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.hatedTags = settingsHandler.cleanTagsList(hatedList);
     settingsHandler.lovedTags = settingsHandler.cleanTagsList(lovedList);
     settingsHandler.filterHated = filterHated;
     settingsHandler.filterFavourites = filterFavourites;
+    settingsHandler.filterSnatched = filterSnatched;
+    settingsHandler.filterAi = filterAi;
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   List<String> getTagsList(String type) {
@@ -150,8 +160,9 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -229,6 +240,16 @@ class _TagsFiltersPageState extends State<TagsFiltersPage> with SingleTickerProv
               filterFavourites: filterFavourites,
               onFilterFavouritesChanged: (bool newValue) {
                 filterFavourites = newValue;
+                updateState();
+              },
+              filterSnatched: filterSnatched,
+              onFilterSnatchedChanged: (bool newValue) {
+                filterSnatched = newValue;
+                updateState();
+              },
+              filterAi: filterAi,
+              onFilterAiChanged: (bool newValue) {
+                filterAi = newValue;
                 updateState();
               },
             ),

@@ -112,7 +112,7 @@ class BooruOnRailsHandler extends BooruHandler {
     ['-fwslash-', '/'],
     ['-bwslash-', r'\'],
     ['-dot-', '.'],
-    ['-plus-', '+']
+    ['-plus-', '+'],
   ];
 
   @override

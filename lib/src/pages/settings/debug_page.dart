@@ -19,7 +19,6 @@ import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/common/text_expander.dart';
 import 'package:lolisnatcher/src/widgets/tags_manager/tm_dialog.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
@@ -54,7 +53,11 @@ class _DebugPageState extends State<DebugPage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (allowSelfSignedCerts) {
@@ -62,13 +65,17 @@ class _DebugPageState extends State<DebugPage> {
     } else {
       HttpOverrides.global = null;
     }
-    return result;
+
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -174,12 +181,10 @@ class _DebugPageState extends State<DebugPage> {
                 },
               ),
 
-              if (kDebugMode) const SettingsButton(name: '', enabled: false),
-
-              if (kDebugMode)
-                TextExpander(
-                  title: 'Vibration',
-                  bodyList: [
+              if (kDebugMode && (Platform.isAndroid || Platform.isIOS)) ...[
+                const SettingsButton(name: 'Vibration', enabled: false),
+                Column(
+                  children: [
                     const SettingsButton(
                       name: 'Vibration tests',
                     ),
@@ -299,8 +304,7 @@ class _DebugPageState extends State<DebugPage> {
                     ),
                   ],
                 ),
-
-              const SettingsButton(name: '', enabled: false),
+              ],
 
               SettingsButton(name: 'Res: ${MediaQuery.of(context).size.width.toPrecision(4)}x${MediaQuery.of(context).size.height.toPrecision(4)}'),
               SettingsButton(name: 'Pixel Ratio: ${MediaQuery.of(context).devicePixelRatio.toPrecision(4)}'),

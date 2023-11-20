@@ -36,8 +36,8 @@ class StaggeredBuilder extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (ctx, constraints) {
-        final double itemMaxWidth = constraints.maxWidth / columnCount; //MediaQuery.of(context).size.width / columnCount;
-        final double itemMaxHeight = itemMaxWidth * (16 / 9); //MediaQuery.of(context).size.height * 0.6;
+        final double itemMaxWidth = (constraints.maxWidth - 20) / columnCount;
+        final double itemMaxHeight = itemMaxWidth * (16 / 9);
         return Obx(() {
           return WaterfallFlow.builder(
             controller: searchHandler.gridScrollController,
@@ -46,7 +46,7 @@ class StaggeredBuilder extends StatelessWidget {
             addAutomaticKeepAlives: false,
             cacheExtent: 200,
             itemCount: searchHandler.currentFetched.length,
-            padding: EdgeInsets.fromLTRB(2, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 2, 80),
+            padding: EdgeInsets.fromLTRB(10, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 10, 80),
             gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
               crossAxisCount: columnCount,
               mainAxisSpacing: 4,

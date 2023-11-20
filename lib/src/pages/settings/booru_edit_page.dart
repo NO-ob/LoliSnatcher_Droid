@@ -22,15 +22,13 @@ import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
-/// This is the booru editor page.
 class BooruEdit extends StatefulWidget {
-  BooruEdit(
+  const BooruEdit(
     this.booru, {
     super.key,
   });
 
-  Booru booru;
-  BooruType? booruType;
+  final Booru booru;
 
   @override
   State<BooruEdit> createState() => _BooruEditState();
@@ -47,6 +45,7 @@ class _BooruEditState extends State<BooruEdit> {
   final booruUserIDController = TextEditingController();
   final booruDefTagsController = TextEditingController();
 
+  BooruType? booruType;
   BooruType selectedBooruType = BooruType.AutoDetect;
 
   // TODO make standalone / move to handlers themselves
@@ -262,6 +261,9 @@ class _BooruEditState extends State<BooruEdit> {
         if (!booruURLController.text.contains('http://') && !booruURLController.text.contains('https://')) {
           booruURLController.text = 'https://${booruURLController.text}';
         }
+        if (booruURLController.text.endsWith('/')) {
+          booruURLController.text = booruURLController.text.substring(0, booruURLController.text.length - 1);
+        }
         // autofill favicon if not specified
         if (booruFaviconController.text == '') {
           booruFaviconController.text = '${booruURLController.text}/favicon.ico';
@@ -279,7 +281,7 @@ class _BooruEditState extends State<BooruEdit> {
         if (booruAPIKeyController.text == '') {
           testBooru = Booru(
             booruNameController.text,
-            widget.booruType,
+            booruType,
             booruFaviconController.text,
             booruURLController.text,
             booruDefTagsController.text,
@@ -287,7 +289,7 @@ class _BooruEditState extends State<BooruEdit> {
         } else {
           testBooru = Booru.withKey(
             booruNameController.text,
-            widget.booruType,
+            booruType,
             booruFaviconController.text,
             booruURLController.text,
             booruDefTagsController.text,
@@ -298,18 +300,18 @@ class _BooruEditState extends State<BooruEdit> {
         isTesting = true;
         setState(() {});
         final List<dynamic> testResults = await booruTest(testBooru, selectedBooruType);
-        final BooruType? booruType = testResults[0];
+        final BooruType? testBooruType = testResults[0];
         final String errorString = testResults[1].isNotEmpty ? 'Error text: "${testResults[1]}"' : '';
 
         // If a booru type is returned set the widget state
-        if (booruType != null) {
-          widget.booruType = booruType;
-          selectedBooruType = booruType;
+        if (testBooruType != null) {
+          booruType = testBooruType;
+          selectedBooruType = testBooruType;
           // Alert user about the results of the test
           FlashElements.showSnackbar(
             context: context,
             title: Text(
-              'Booru Type is ${booruType.alias}',
+              'Booru Type is ${testBooruType.alias}',
               style: const TextStyle(fontSize: 20),
             ),
             content: const Text(
@@ -343,15 +345,15 @@ class _BooruEditState extends State<BooruEdit> {
   /// allowing the user to save the booru config otherwise an empty container is returned
   Widget saveButton() {
     return SettingsButton(
-      name: "Save Booru${widget.booruType == null ? ' (Run Test First)' : ''}",
+      name: "Save Booru${booruType == null ? ' (Run Test First)' : ''}",
       icon: Icon(
         Icons.save,
-        color: widget.booruType == null ? Colors.red : Colors.green,
+        color: booruType == null ? Colors.red : Colors.green,
       ),
       action: () async {
         sanitizeBooruName();
 
-        if (widget.booruType == null) {
+        if (booruType == null) {
           FlashElements.showSnackbar(
             context: context,
             title: const Text('Run Test First!', style: TextStyle(fontSize: 20)),
@@ -366,14 +368,14 @@ class _BooruEditState extends State<BooruEdit> {
         final Booru newBooru = (booruAPIKeyController.text == '' && booruUserIDController.text == '')
             ? Booru(
                 booruNameController.text,
-                widget.booruType,
+                booruType,
                 booruFaviconController.text,
                 booruURLController.text,
                 booruDefTagsController.text,
               )
             : Booru.withKey(
                 booruNameController.text,
-                widget.booruType,
+                booruType,
                 booruFaviconController.text,
                 booruURLController.text,
                 booruDefTagsController.text,

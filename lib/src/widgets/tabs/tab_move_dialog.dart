@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 
 class TabMoveDialog extends StatefulWidget {
   const TabMoveDialog({
@@ -58,7 +59,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             side: BorderSide(color: Theme.of(context).colorScheme.secondary),
           ),
           onTap: () async {
-            searchHandler.moveTab(widget.index, searchHandler.total);
+            searchHandler.moveTab(widget.index, searchHandler.total - 1);
             Navigator.of(context).pop(true);
             Navigator.of(context).pop(true);
           },
@@ -102,7 +103,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
                 ),
               );
             } else {
-              if (enteredIndex < 0 || enteredIndex > searchHandler.total) {
+              if (enteredIndex < 1 || enteredIndex > searchHandler.total) {
                 return await FlashElements.showSnackbar(
                   title: const Text('Invalid Tab Number'),
                   content: const Column(
@@ -134,6 +135,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
         TabMovePreview(
           index: widget.index,
           indexController: indexController,
+          setState: setState,
         ),
       ],
     );
@@ -144,11 +146,13 @@ class TabMovePreview extends StatelessWidget {
   const TabMovePreview({
     required this.index,
     required this.indexController,
+    required this.setState,
     super.key,
   });
 
   final int index;
   final TextEditingController indexController;
+  final Function(VoidCallback) setState;
 
   @override
   Widget build(BuildContext context) {
@@ -157,104 +161,107 @@ class TabMovePreview extends StatelessWidget {
     int enteredIndex = int.tryParse(indexController.text) ?? index;
 
     if (enteredIndex < 1) {
-      enteredIndex = index;
+      enteredIndex = 1;
     } else if (enteredIndex > searchHandler.total) {
-      enteredIndex = index;
+      enteredIndex = searchHandler.total;
     }
 
-    final int prevTabIndex = enteredIndex - 2;
-    final SearchTab? prevTab = searchHandler.getTabByIndex(prevTabIndex);
+    // to make calculations easier
+    enteredIndex -= 1;
 
-    final int nextTabIndex = enteredIndex;
-    final SearchTab? nextTab = searchHandler.getTabByIndex(nextTabIndex);
+    const double dotsSize = 20;
+    const dotsWidget = Text('...', style: TextStyle(fontSize: dotsSize, height: 1));
+    const dotsHeightPlaceholder = SizedBox(height: dotsSize);
+    const tabHeightPlaceholder = SizedBox(height: 80);
 
-    final SearchTab currentTab = searchHandler.getTabByIndex(index)!;
-    final SearchTab firstTab = searchHandler.getTabByIndex(0)!;
-    final SearchTab lastTab = searchHandler.getTabByIndex(searchHandler.total - 1)!;
-
-    final bool showFirst = enteredIndex > 2;
-    final bool showFirstDots = showFirst &&
-        (enteredIndex > 1) &&
-        (enteredIndex - 1 > 2); // is first tab shown and entered number is bigger than 2 and possible prev tab number is bigger than 2
-    final bool showLast = enteredIndex < searchHandler.total - 1;
-    final bool showLastDots = showLast &&
-        (enteredIndex < searchHandler.total) &&
-        (enteredIndex + 1 <
-            searchHandler.total - 1); // is last tab shown and entered number is smaller than total and possible next tab number is smaller than total - 1
+    final List<Widget> children = <Widget>[];
+    // first tab - show only when input is not on first
+    if (enteredIndex != 0) {
+      children.add(
+        TabManagerItem(
+          tab: searchHandler.getTabByIndex(index == 0 ? 1 : 0)!,
+          index: 0,
+          onTap: () {
+            indexController.text = 1.toString();
+            setState(() {});
+          },
+        ),
+      );
+    } else {
+      children.add(tabHeightPlaceholder);
+    }
+    // show dots if more than 2 tabs away from first
+    if (enteredIndex > 2) {
+      children.add(dotsWidget);
+    } else {
+      children.add(dotsHeightPlaceholder);
+    }
+    // show prev tab if more than 1 tab away from first
+    if (enteredIndex > 1) {
+      children.add(
+        TabManagerItem(
+          tab: searchHandler.getTabByIndex(index < enteredIndex ? enteredIndex : enteredIndex - 1)!,
+          index: enteredIndex - 1,
+          onTap: () {
+            indexController.text = enteredIndex.toString();
+            setState(() {});
+          },
+        ),
+      );
+    } else {
+      children.add(tabHeightPlaceholder);
+    }
+    // current tab at entered position
+    children.add(
+      TabManagerItem(
+        tab: searchHandler.getTabByIndex(index)!,
+        index: enteredIndex,
+        isCurrent: true,
+        onTap: () {
+          // do nothing
+        },
+      ),
+    );
+    // show next tab if more than 1 tab away from last
+    if (enteredIndex < searchHandler.total - 2) {
+      children.add(
+        TabManagerItem(
+          tab: searchHandler.getTabByIndex(index <= enteredIndex ? enteredIndex + 1 : enteredIndex)!,
+          index: enteredIndex + 1,
+          onTap: () {
+            indexController.text = (enteredIndex + 2).toString();
+            setState(() {});
+          },
+        ),
+      );
+    } else {
+      children.add(tabHeightPlaceholder);
+    }
+    // show dots if more than 2 tabs away from last
+    if (enteredIndex < searchHandler.total - 3) {
+      children.add(dotsWidget);
+    } else {
+      children.add(dotsHeightPlaceholder);
+    }
+    // last tab - show only when input is not on last
+    if (enteredIndex < searchHandler.total - 1) {
+      children.add(
+        TabManagerItem(
+          tab: searchHandler.getTabByIndex(searchHandler.total - (index + 1 == searchHandler.total ? 2 : 1))!,
+          index: searchHandler.total - 1,
+          onTap: () {
+            indexController.text = searchHandler.total.toString();
+            setState(() {});
+          },
+        ),
+      );
+    } else {
+      children.add(tabHeightPlaceholder);
+    }
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showFirst)
-          Container(
-            margin: const EdgeInsets.only(left: 10, bottom: 10),
-            child: ElevatedButton(
-              child: Text('#1 - ${firstTab.tags}'),
-              onPressed: () {
-                indexController.text = '1';
-              },
-            ),
-          ),
-        if (showFirstDots)
-          Container(
-            margin: const EdgeInsets.only(left: 10, bottom: 5),
-            child: const Text('...'),
-          ),
-        //
-        if (prevTab != null)
-          Container(
-            margin: const EdgeInsets.only(left: 10, bottom: 10),
-            child: ElevatedButton(
-              child: Text('#${prevTabIndex + 1} - ${prevTab.tags}'),
-              onPressed: () {
-                indexController.text = (prevTabIndex + 1).toString();
-              },
-            ),
-          ),
-        //
-        Container(
-          margin: const EdgeInsets.only(left: 10, bottom: 10),
-          child: ElevatedButton(
-            style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
-                  backgroundColor: MaterialStateProperty.all<Color>(Colors.transparent),
-                  side: MaterialStateProperty.all<BorderSide>(BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2)),
-                ),
-            child: Text(
-              '#$enteredIndex - ${currentTab.tags}',
-            ),
-            onPressed: () {
-              indexController.text = (index + 1).toString();
-            },
-          ),
-        ),
-        //
-        if (nextTab != null)
-          Container(
-            margin: const EdgeInsets.only(left: 10, bottom: 10),
-            child: ElevatedButton(
-              child: Text('#${nextTabIndex + 1} - ${nextTab.tags}'),
-              onPressed: () {
-                indexController.text = (nextTabIndex + 1).toString();
-              },
-            ),
-          ),
-        //
-        if (showLastDots)
-          Container(
-            margin: const EdgeInsets.only(left: 10, bottom: 5),
-            child: const Text('...'),
-          ),
-        if (showLast)
-          Container(
-            margin: const EdgeInsets.only(left: 10),
-            child: ElevatedButton(
-              child: Text('#${searchHandler.total} - ${lastTab.tags}'),
-              onPressed: () {
-                indexController.text = searchHandler.total.toString();
-              },
-            ),
-          ),
-      ],
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: children,
     );
   }
 }

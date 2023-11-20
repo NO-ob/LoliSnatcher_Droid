@@ -4,10 +4,14 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 
 class TagChip extends StatelessWidget {
-  TagChip({required this.gestureDetector, super.key, this.tagString = ''});
+  TagChip({
+    required this.tagString,
+    this.trailing,
+    super.key,
+  });
 
   final String tagString;
-  final GestureDetector gestureDetector;
+  final Widget? trailing;
 
   final SearchHandler searchHandler = SearchHandler.instance;
   final TagHandler tagHandler = TagHandler.instance;
@@ -54,9 +58,9 @@ class TagChip extends StatelessWidget {
         color: chipColour,
         borderRadius: BorderRadius.circular(16),
       ),
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 3, 0, 3),
@@ -73,7 +77,7 @@ class TagChip extends StatelessWidget {
               ],
             ),
           ),
-          gestureDetector,
+          if (trailing != null) trailing! else const SizedBox(width: 10),
         ],
       ),
     );

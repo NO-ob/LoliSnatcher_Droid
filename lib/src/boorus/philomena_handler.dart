@@ -107,7 +107,7 @@ class PhilomenaHandler extends BooruHandler {
       ['-fwslash-', '/'],
       ['-bwslash-', r'\'],
       ['-dot-', '.'],
-      ['-plus-', '+']
+      ['-plus-', '+'],
     ];
 
     String tag = responseItem['slug'].toString();

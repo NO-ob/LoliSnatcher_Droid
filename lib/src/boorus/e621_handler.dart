@@ -67,7 +67,7 @@ class e621Handler extends BooruHandler {
           ...current['tags']['artist'],
           ...current['tags']['meta'],
           ...current['tags']['general'],
-          ...current['tags']['species']
+          ...current['tags']['species'],
         ],
         postURL: makePostURL(current['id'].toString()),
         fileExt: current['file']['ext'],

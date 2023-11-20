@@ -92,39 +92,49 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
       ),
       body: Stack(
         children: [
-          InAppWebView(
-            initialUrlRequest: URLRequest(url: Uri.parse(widget.initialUrl)),
-            initialOptions: options,
-            pullToRefreshController: pullToRefreshController,
-            onWebViewCreated: (webViewController) {
-              controller.complete(webViewController);
-              // webViewController.clearCache();
-            },
-            onLoadStart: (controller, url) {
-              setState(() {
-                loadingPercentage = 0;
-              });
-            },
-            onProgressChanged: (controller, progress) {
-              setState(() {
-                loadingPercentage = progress;
-              });
-            },
-            onLoadResource: (controller, res) {
-              setState(() {
-                loadingPercentage = 100;
-              });
-            },
-            onUpdateVisitedHistory: (controller, url, isReload) {
-              setState(() {
-                loadingPercentage = 0;
-              });
-            },
-          ),
+          if (Platform.isAndroid || Platform.isIOS)
+            InAppWebView(
+              initialUrlRequest: URLRequest(url: Uri.parse(widget.initialUrl)),
+              initialOptions: options,
+              pullToRefreshController: pullToRefreshController,
+              onWebViewCreated: (webViewController) {
+                controller.complete(webViewController);
+                // webViewController.clearCache();
+              },
+              onLoadStart: (controller, url) {
+                setState(() {
+                  loadingPercentage = 0;
+                });
+              },
+              onProgressChanged: (controller, progress) {
+                setState(() {
+                  loadingPercentage = progress;
+                });
+              },
+              onLoadResource: (controller, res) {
+                setState(() {
+                  loadingPercentage = 100;
+                });
+              },
+              onUpdateVisitedHistory: (controller, url, isReload) {
+                setState(() {
+                  loadingPercentage = 0;
+                });
+              },
+            )
+          else
+            SizedBox(
+              height: MediaQuery.sizeOf(context).height * 0.8,
+              child: const Center(
+                child: Text('Not supported on this device'),
+              ),
+            ),
+          //
           if (loadingPercentage < 100)
             LinearProgressIndicator(
               value: loadingPercentage / 100.0,
             ),
+          //
           if (widget.subtitle != null && !hideSubtitle)
             Positioned(
               bottom: MediaQuery.of(context).padding.bottom + 8,

@@ -61,7 +61,10 @@ class CustomNetworkImage extends ImageProvider<custom_network_image.CustomNetwor
   }
 
   @override
-  ImageStreamCompleter loadImage(custom_network_image.CustomNetworkImage key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+    custom_network_image.CustomNetworkImage key,
+    ImageDecoderCallback decode,
+  ) {
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(

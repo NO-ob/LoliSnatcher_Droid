@@ -28,7 +28,7 @@ class RainbooruHandler extends BooruHandler {
   @override
   Future<BooruItem?> parseItemFromResponse(dynamic responseItem, int index) async {
     String thumbURL = '';
-    final urlElem = responseItem.firstChild!;
+    final urlElem = responseItem.firstChild;
     thumbURL += urlElem.firstChild!.attributes['src']!;
     final String url = makePostURL(urlElem.attributes['href']!.split('img/')[1]);
     final responseInner = await DioNetwork.get(url, headers: getHeaders());
@@ -97,7 +97,7 @@ class RainbooruHandler extends BooruHandler {
       ['-fwslash-', '/'],
       ['-bwslash-', r'\'],
       ['-dot-', '.'],
-      ['-plus-', '+']
+      ['-plus-', '+'],
     ];
 
     String tag = responseItem['slug'].toString();

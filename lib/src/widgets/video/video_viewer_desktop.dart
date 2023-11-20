@@ -41,7 +41,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  bool isFromCache = false, isStopped = false, firstViewFix = false, isViewed = false, isZoomed = false, isLoaded = false;
+  bool isFromCache = false, isStopped = false, firstViewFix = false, isViewed = false, isZoomed = false, isLoaded = false, didAutoplay = false;
   List<String> stopReason = [];
 
   StreamSubscription? indexListener;
@@ -226,6 +226,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       if (settingsHandler.appMode.value.isMobile ? isCurrentIndex : isCurrentItem) {
         isViewed = true;
       } else {
+        didAutoplay = false;
         isViewed = false;
       }
 
@@ -248,9 +249,9 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   void initVideo(bool ignoreTagsCheck) {
-    if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
-      final List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
+    if (widget.booruItem.isHated && !ignoreTagsCheck) {
+      final tagsData = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
+      killLoading(['Contains Hated tags:', ...tagsData.hatedTags]);
     } else {
       _downloadVideo();
     }
@@ -321,7 +322,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
-    viewerHandler.setViewState(widget.key, viewState);
+    viewerHandler.setViewValue(widget.key, viewState);
   }
 
   void resetZoom() {
@@ -362,7 +363,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         widget.booruItem.fileURL,
-        extras: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
@@ -388,7 +388,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('uri: ${widget.booruItem.fileURL}');
       media = Media.network(
         Uri.encodeFull(widget.booruItem.fileURL),
-        extras: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
         startTime: const Duration(milliseconds: 50),
       );
     }
@@ -452,12 +451,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
           firstViewFix = true;
         }
 
-        // TODO managed to fix videos starting, but needs more fixing to make sure everything is okay
-        if (settingsHandler.autoPlayEnabled) {
-          // autoplay if viewed and setting is enabled
-          videoController!.play();
-        } else {
-          videoController!.pause();
+        if (!didAutoplay) {
+          if (settingsHandler.autoPlayEnabled) {
+            // autoplay if viewed and setting is enabled
+            videoController!.play();
+          } else {
+            videoController!.pause();
+          }
+          didAutoplay = true;
         }
 
         if (viewerHandler.videoAutoMute) {
@@ -497,7 +498,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                 Thumbnail(
                   item: widget.booruItem,
                   isStandalone: false,
-                  ignoreColumnsCount: true,
                 ),
                 MediaLoading(
                   item: widget.booruItem,
@@ -532,7 +532,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                     volumeThumbColor: accentColor,
                     volumeActiveColor: accentColor,
                     showControls: true,
-                    showFullscreenButton: true,
                     filterQuality: FilterQuality.medium,
                     showTimeLeft: true,
                   ),

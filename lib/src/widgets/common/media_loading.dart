@@ -176,7 +176,9 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     if (settingsHandler.shitDevice) {
       if (settingsHandler.loadingGif) {
-        return const Center(child: Image(image: AssetImage('assets/images/loading.gif')));
+        return const Center(
+          child: Image(image: AssetImage('assets/images/loading.gif')),
+        );
       } else {
         return const Center(
           child: CircularProgressIndicator(),
@@ -234,7 +236,7 @@ class _MediaLoadingState extends State<MediaLoading> {
     final int sinceStartSeconds = (sinceStart / 1000).floor();
     final String sinceStartText = (!widget.isDone && percentDone < 1) ? 'Started ${sinceStartSeconds}s ago' : '';
 
-    final bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated.value;
+    final bool isMovedBelow = settingsHandler.previewMode == 'Sample' && !widget.item.isHated;
 
     // print('$percentDone | $percentDoneText');
 
@@ -259,7 +261,7 @@ class _MediaLoadingState extends State<MediaLoading> {
             backgroundColor: MaterialStateProperty.all(Colors.black54),
           ),
           label: LoadingText(
-            text: (widget.isTooBig || widget.item.isHated.value) ? 'Load Anyway' : 'Restart Loading',
+            text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
             fontSize: 16,
             color: Colors.blue,
           ),

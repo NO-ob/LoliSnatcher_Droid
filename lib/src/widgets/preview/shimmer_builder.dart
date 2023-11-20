@@ -40,7 +40,7 @@ class ShimmerList extends StatelessWidget {
             addAutomaticKeepAlives: false,
             cacheExtent: 200,
             shrinkWrap: false,
-            padding: EdgeInsets.fromLTRB(2, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 2, 80),
+            padding: EdgeInsets.fromLTRB(10, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 10, 80),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columnCount, childAspectRatio: displayType == 'Square' ? 1 : 9 / 16),
             children: List.generate(
               previewCount,

@@ -28,7 +28,10 @@ class ActiveTitle extends StatelessWidget {
         if (searchHandler.list.isEmpty) {
           return const Text('LoliSnatcher');
         } else {
-          return const TabSelectorHeader();
+          return TabSelector(
+            withBorder: false,
+            color: Theme.of(context).appBarTheme.foregroundColor,
+          );
         }
       }
     });

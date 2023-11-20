@@ -116,7 +116,7 @@ class TabBooruSelector extends StatelessWidget {
           return DropdownButtonFormField<Booru>(
             isExpanded: true,
             value: selectedBooru,
-            icon: const Icon(Icons.arrow_drop_down),
+            icon: const Icon(null, size: 0),
             itemHeight: kMinInteractiveDimension,
             decoration: InputDecoration(
               labelText: 'Booru',
@@ -187,12 +187,18 @@ class TabBooruSelectorItem extends StatelessWidget {
     return Row(
       children: <Widget>[
         //Booru Icon
-        if (withFavicon) booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru),
+        if (withFavicon) ...[
+          if (booru.type == BooruType.Downloads)
+            const Icon(Icons.file_download_outlined, size: 18)
+          else if (booru.type == BooruType.Favourites)
+            const Icon(Icons.favorite, color: Colors.red, size: 18)
+          else
+            Favicon(booru),
+        ],
         //Booru name
         MarqueeText(
           key: ValueKey(name),
           text: name,
-          fontSize: 16,
         ),
         // Text(name),
       ],

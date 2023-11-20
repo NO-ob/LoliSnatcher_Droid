@@ -39,7 +39,7 @@ class ImageViewerState extends State<ImageViewer> {
   PhotoViewController viewController = PhotoViewController();
 
   final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
-  bool isStopped = false, isFromCache = false, isLoaded = false, isViewed = false, isZoomed = false;
+  bool isStopped = false, isFromCache = false, isLoaded = false, isViewed = false, isZoomed = false, firstBuild = true;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
   List<String> stopReason = [];
 
@@ -134,8 +134,6 @@ class ImageViewerState extends State<ImageViewer> {
     // debug output
     viewController.outputStateStream.listen(onViewStateChanged);
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
-
-    initViewer(false);
   }
 
   Future<void> initViewer(bool ignoreTagsCheck) async {
@@ -152,10 +150,12 @@ class ImageViewerState extends State<ImageViewer> {
       initViewer(false);
     });
 
-    if (widget.booruItem.isHated.value && !ignoreTagsCheck) {
-      final List<List<String>> hatedAndLovedTags = settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true);
-      if (hatedAndLovedTags[0].isNotEmpty) {
-        killLoading(['Contains Hated tags:', ...hatedAndLovedTags[0]]);
+    if (widget.booruItem.isHated && !ignoreTagsCheck) {
+      if (widget.booruItem.isHated) {
+        killLoading([
+          'Contains Hated tags:',
+          ...settingsHandler.parseTagsList(widget.booruItem.tagsList, isCapped: true).hatedTags,
+        ]);
         return;
       }
     }
@@ -189,6 +189,14 @@ class ImageViewerState extends State<ImageViewer> {
     imageStream!.addListener(imageListener!);
 
     updateState();
+  }
+
+  void calcWidthLimit(BoxConstraints constraints) {
+    final int? prevWidthLimit = widthLimit;
+    widthLimit = settingsHandler.disableImageScaling ? null : (constraints.maxWidth * MediaQuery.of(context).devicePixelRatio * 2).round();
+    if (prevWidthLimit != widthLimit) {
+      updateState(postFrame: true);
+    }
   }
 
   Future<ImageProvider> getImageProvider() async {
@@ -256,8 +264,18 @@ class ImageViewerState extends State<ImageViewer> {
     super.dispose();
   }
 
-  void updateState() {
-    if (mounted) setState(() {});
+  void updateState({bool postFrame = false}) {
+    if (postFrame) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+    } else {
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 
   void disposables() {
@@ -298,7 +316,7 @@ class ImageViewerState extends State<ImageViewer> {
 
   void onViewStateChanged(PhotoViewControllerValue viewState) {
     // print(viewState);
-    viewerHandler.setViewState(widget.key, viewState);
+    viewerHandler.setViewValue(widget.key, viewState);
   }
 
   void resetZoom() {
@@ -331,85 +349,97 @@ class ImageViewerState extends State<ImageViewer> {
   Widget build(BuildContext context) {
     // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
-    return Hero(
-      tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
-      // without this every text element will have broken styles on first frames
-      child: Material(
-        color: Colors.black,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
-            Thumbnail(
-              item: widget.booruItem,
-              isStandalone: false,
-              ignoreColumnsCount: true,
-            ),
-            //
-            MediaLoading(
-              item: widget.booruItem,
-              hasProgress: true,
-              isFromCache: isFromCache,
-              isDone: isLoaded,
-              isTooBig: isTooBig > 0,
-              isStopped: isStopped,
-              stopReasons: stopReason,
-              isViewed: isViewed,
-              total: total,
-              received: received,
-              startedAt: startedAt,
-              startAction: () {
-                if (isTooBig == 1) {
-                  isTooBig = 2;
-                }
-                initViewer(true);
-              },
-              stopAction: () {
-                killLoading(['Stopped by User']);
-              },
-            ),
-            //
-            AnimatedSwitcher(
-              duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-              child: mainProvider != null
-                  ? Listener(
-                      onPointerSignal: (pointerSignal) {
-                        if (pointerSignal is PointerScrollEvent) {
-                          scrollZoomImage(pointerSignal.scrollDelta.dy);
-                        }
-                      },
-                      child: AnimatedOpacity(
-                        opacity: isLoaded ? 1 : 0,
-                        duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
-                        child: PhotoView(
-                          imageProvider: mainProvider,
-                          gaplessPlayback: true,
-                          loadingBuilder: (context, event) {
-                            return const SizedBox.shrink();
+    const double fullOpacity = 1;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        calcWidthLimit(constraints);
+        if (firstBuild) {
+          firstBuild = false;
+          initViewer(false);
+        }
+
+        return Hero(
+          tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
+          // without this every text element will have broken styles on first frames
+          child: Material(
+            color: Colors.black,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // TODO find a way to detect when main image is fully rendered to dispose this widget to free up memory
+                Thumbnail(
+                  item: widget.booruItem,
+                  isStandalone: false,
+                ),
+                //
+                MediaLoading(
+                  item: widget.booruItem,
+                  hasProgress: true,
+                  isFromCache: isFromCache,
+                  isDone: isLoaded,
+                  isTooBig: isTooBig > 0,
+                  isStopped: isStopped,
+                  stopReasons: stopReason,
+                  isViewed: isViewed,
+                  total: total,
+                  received: received,
+                  startedAt: startedAt,
+                  startAction: () {
+                    if (isTooBig == 1) {
+                      isTooBig = 2;
+                    }
+                    initViewer(true);
+                  },
+                  stopAction: () {
+                    killLoading(['Stopped by User']);
+                  },
+                ),
+                //
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                  child: mainProvider != null
+                      ? Listener(
+                          onPointerSignal: (pointerSignal) {
+                            if (pointerSignal is PointerScrollEvent) {
+                              scrollZoomImage(pointerSignal.scrollDelta.dy);
+                            }
                           },
-                          errorBuilder: (context, error, stackTrace) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              onError(error);
-                            });
-                            return const SizedBox.shrink();
-                          },
-                          // TODO FilterQuality.high somehow leads to a worse looking image on desktop
-                          filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
-                          minScale: PhotoViewComputedScale.contained,
-                          maxScale: PhotoViewComputedScale.covered * 8,
-                          initialScale: PhotoViewComputedScale.contained,
-                          enableRotation: false,
-                          basePosition: Alignment.center,
-                          controller: viewController,
-                          scaleStateController: scaleController,
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+                          child: AnimatedOpacity(
+                            opacity: isLoaded ? fullOpacity : 0,
+                            duration: Duration(milliseconds: settingsHandler.appMode.value.isDesktop ? 50 : 300),
+                            child: PhotoView(
+                              imageProvider: mainProvider,
+                              gaplessPlayback: true,
+                              loadingBuilder: (context, event) {
+                                return const SizedBox.shrink();
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  onError(error);
+                                });
+                                return const SizedBox.shrink();
+                              },
+                              // TODO FilterQuality.high somehow leads to a worse looking image on desktop
+                              filterQuality: widget.booruItem.isLong ? FilterQuality.medium : FilterQuality.medium,
+                              minScale: PhotoViewComputedScale.contained,
+                              maxScale: PhotoViewComputedScale.covered * 8,
+                              initialScale: PhotoViewComputedScale.contained,
+                              enableRotation: false,
+                              basePosition: Alignment.center,
+                              controller: viewController,
+                              scaleStateController: scaleController,
+                              enableTapDragZoom: true,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

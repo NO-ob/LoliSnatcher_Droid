@@ -54,7 +54,11 @@ class _DatabasePageState extends State<DatabasePage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     if (isUpdating) {
       FlashElements.showSnackbar(
         title: const Text("Can't leave the page right now!", style: TextStyle(fontSize: 20)),
@@ -63,7 +67,7 @@ class _DatabasePageState extends State<DatabasePage> {
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
       );
-      return false;
+      return;
     }
 
     if (changingIndexes) {
@@ -74,7 +78,7 @@ class _DatabasePageState extends State<DatabasePage> {
         leadingIconColor: Colors.yellow,
         sideColor: Colors.yellow,
       );
-      return false;
+      return;
     }
 
     // Set settingshandler values here
@@ -83,7 +87,9 @@ class _DatabasePageState extends State<DatabasePage> {
     settingsHandler.searchHistoryEnabled = searchHistoryEnabled;
     settingsHandler.tagTypeFetchEnabled = tagTypeFetchEnabled;
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   List<Booru> getSankakuBoorus() {
@@ -252,8 +258,9 @@ class _DatabasePageState extends State<DatabasePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -294,47 +301,79 @@ class _DatabasePageState extends State<DatabasePage> {
                   children: [
                     IgnorePointer(
                       ignoring: changingIndexes,
-                      child: SettingsToggle(
-                        value: indexesEnabled,
-                        onChanged: changeIndexes,
-                        title: 'Enable Indexes',
-                        trailingIcon: IconButton(
-                          icon: const Icon(Icons.help_outline),
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return const SettingsDialog(
-                                  title: Text('Indexes'),
-                                  contentItems: [
-                                    Text('Indexes help make searching database faster,'),
-                                    Text('but they take up more space on disk (possibly doubling the size of the database)'),
-                                    Text("Don't leave the page while indexes are being changed to avoid database corruption"),
-                                  ],
+                      child: Column(
+                        children: [
+                          SettingsToggle(
+                            value: indexesEnabled,
+                            onChanged: changeIndexes,
+                            title: 'Enable Indexes',
+                            trailingIcon: IconButton(
+                              icon: const Icon(Icons.help_outline),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return const SettingsDialog(
+                                      title: Text('Indexes'),
+                                      contentItems: [
+                                        Text('Indexes help make searching database faster,'),
+                                        Text('but they take up more space on disk (possibly doubling the size of the database)'),
+                                        Text("Don't leave the page while indexes are being changed to avoid database corruption"),
+                                      ],
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
-                        ),
+                            ),
+                          ),
+                          if (settingsHandler.isDebug.value) ...[
+                            SettingsButton(
+                              name: 'Create Indexes [Debug]',
+                              icon: const Icon(Icons.create_new_folder_rounded),
+                              action: () async {
+                                changingIndexes = true;
+                                setState(() {});
+                                await settingsHandler.dbHandler.createIndexes();
+                                changingIndexes = false;
+                                setState(() {});
+                              },
+                            ),
+                            SettingsButton(
+                              name: 'Drop Indexes [Debug]',
+                              icon: const Icon(Icons.delete_forever),
+                              action: () async {
+                                changingIndexes = true;
+                                setState(() {});
+                                await settingsHandler.dbHandler.dropIndexes();
+                                changingIndexes = false;
+                                setState(() {});
+                              },
+                            ),
+                            const SettingsButton(name: '', enabled: false),
+                          ],
+                        ],
                       ),
                     ),
-                    if (changingIndexes) ...[
+                    if (changingIndexes)
                       Positioned.fill(
-                        child: ColoredBox(
-                          color: Colors.black.withOpacity(0.5),
+                        child: Stack(
+                          children: [
+                            Positioned.fill(
+                              child: ColoredBox(
+                                color: Colors.black.withOpacity(0.5),
+                              ),
+                            ),
+                            const Align(
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Positioned.fill(
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
                 SettingsToggle(

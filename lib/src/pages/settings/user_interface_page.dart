@@ -39,7 +39,11 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<bool> _onWillPop() async {
+  Future<void> _onPopInvoked(bool didPop) async {
+    if (didPop) {
+      return;
+    }
+
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
     settingsHandler.previewMode = previewMode;
@@ -54,13 +58,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.portraitColumns = int.parse(columnsPortraitController.text);
     settingsHandler.mousewheelScrollSpeed = double.parse(mouseSpeedController.text);
     final bool result = await settingsHandler.saveSettings(restate: false);
-    return result;
+    if (result) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -122,7 +129,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                           contentItems: [
                             Text('Moves some parts of the UI to the selected side of the screen'),
                             Text('Currently only changes the position of the main drawer button'),
-                            Text('[This is a WIP feature, will include more changes in the future versions]')
+                            Text('[This is a WIP feature, will include more changes in the future versions]'),
                           ],
                         );
                       },
@@ -201,7 +208,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             Text(' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads'),
                             Text(' - Thumbnail - Low resolution'),
                             Text(' '),
-                            Text('[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid')
+                            Text('[Note]: Sample quality can noticeably degrade performance, especially if you have too many columns in preview grid'),
                           ],
                         );
                       },
@@ -219,30 +226,31 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                 },
                 title: 'Preview Display',
               ),
-              SettingsTextInput(
-                controller: mouseSpeedController,
-                title: 'Mouse Wheel Scroll Modifer',
-                hintText: 'Scroll modifier',
-                inputType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-                resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
-                numberButtons: true,
-                numberStep: 0.5,
-                numberMin: 0.1,
-                numberMax: 20,
-                validator: (String? value) {
-                  final double? parse = double.tryParse(value ?? '');
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a value';
-                  } else if (parse == null) {
-                    return 'Please enter a valid numeric value';
-                  } else if (parse > 20.0) {
-                    return 'Please enter a value between 0.1 and 20.0';
-                  } else {
-                    return null;
-                  }
-                },
-              ),
+              if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
+                SettingsTextInput(
+                  controller: mouseSpeedController,
+                  title: 'Mouse Wheel Scroll Modifer',
+                  hintText: 'Scroll modifier',
+                  inputType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                  resetText: () => settingsHandler.map['mousewheelScrollSpeed']!['default']!.toString(),
+                  numberButtons: true,
+                  numberStep: 0.5,
+                  numberMin: 0.1,
+                  numberMax: 20,
+                  validator: (String? value) {
+                    final double? parse = double.tryParse(value ?? '');
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a value';
+                    } else if (parse == null) {
+                      return 'Please enter a valid numeric value';
+                    } else if (parse > 20.0) {
+                      return 'Please enter a value between 0.1 and 20.0';
+                    } else {
+                      return null;
+                    }
+                  },
+                ),
             ],
           ),
         ),

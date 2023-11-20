@@ -11,9 +11,10 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 /// it is called before every operation which would require writing to storage which is why its in its own function
 ///
 /// The dialog will not show if the user has already accepted perms or android sdk is below 33
-Future getPerms() async {
+Future<bool> getPerms() async {
   if ((Platform.isAndroid && await ServiceHandler.getAndroidSDKVersion() < 33) || Platform.isIOS) {
     return Permission.storage.request().isGranted;
   }
+  return true;
   // print(Platform.environment['HOME']);
 }
