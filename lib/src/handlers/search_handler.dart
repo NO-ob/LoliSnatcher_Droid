@@ -347,7 +347,9 @@ class SearchHandler extends GetxController {
   Booru get currentBooru => currentTab.selectedBooru.value;
   List<BooruItem> get currentFetched => currentBooruHandler.filteredFetched;
   void filterCurrentFetched() {
-    currentBooruHandler.filterFetched();
+    if (list.isNotEmpty) {
+      currentBooruHandler.filterFetched();
+    }
   }
 
   RxInt viewedIndex = (-1).obs;
