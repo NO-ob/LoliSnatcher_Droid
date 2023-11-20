@@ -598,6 +598,7 @@ class VideoViewerState extends State<VideoViewer> {
                             basePosition: Alignment.center,
                             controller: viewController,
                             scaleStateController: scaleController,
+                            enableDoubleTapZoom: false,
                             enableTapDragZoom: true,
                             child: Chewie(controller: chewieController!),
                           ),
