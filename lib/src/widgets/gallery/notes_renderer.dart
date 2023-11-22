@@ -169,7 +169,7 @@ class _NotesRendererState extends State<NotesRenderer> {
 
         return Obx(() {
           if (!viewerHandler.isLoaded.value || !viewerHandler.showNotes.value || item.fileURL.isEmpty) {
-            return const SizedBox();
+            return const SizedBox.shrink();
           } else {
             return Stack(
               children: [
@@ -183,8 +183,10 @@ class _NotesRendererState extends State<NotesRenderer> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          const CircularProgressIndicator(
-                            strokeWidth: 2,
+                          const RepaintBoundary(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           ),
                           Icon(
                             Icons.note_add,

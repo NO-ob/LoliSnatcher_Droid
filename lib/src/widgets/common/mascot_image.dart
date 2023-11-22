@@ -13,16 +13,11 @@ class MascotImage extends StatelessWidget {
 
     return Align(
       alignment: FractionalOffset.bottomCenter,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        child: Image(
-          fit: BoxFit.contain,
-          image: settingsHandler.drawerMascotPathOverride.isEmpty
-              ? const AssetImage('assets/images/drawer_icon.png')
-              : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
-        ),
+      child: Image(
+        fit: BoxFit.contain,
+        image: settingsHandler.drawerMascotPathOverride.isEmpty
+            ? const AssetImage('assets/images/drawer_icon.png')
+            : FileImage(File(settingsHandler.drawerMascotPathOverride)) as ImageProvider,
       ),
     );
   }

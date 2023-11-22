@@ -148,6 +148,14 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   KeyboardActionsConfig _buildConfig(BuildContext context) {
+    const double buttonHeight = 44;
+
+    final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
+          fixedSize: MaterialStateProperty.all<Size>(
+            const Size(buttonHeight, buttonHeight),
+          ),
+        );
+
     return KeyboardActionsConfig(
       keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
       keyboardBarColor: Colors.grey[200],
@@ -159,101 +167,94 @@ class _TagSearchBoxState extends State<TagSearchBox> {
           displayArrows: false,
           displayDoneButton: false,
           footerBuilder: (_) => PreferredSize(
-            preferredSize: const Size.fromHeight(44),
+            preferredSize: const Size.fromHeight(buttonHeight),
             child: Container(
               color: Theme.of(context).colorScheme.background,
-              height: 44,
+              height: buttonHeight,
               child: Row(
                 children: [
-                  const SizedBox(width: 10),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Container(
-                        height: 40,
-                        color: Theme.of(context).colorScheme.secondary,
-                        child: TextButton(
-                          onPressed: () {
-                            // Add '_' at current cursor position
-                            final String beforeSelection = searchHandler.searchTextController.selection.textBefore(searchHandler.searchTextController.text);
-                            // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
-                            final String afterSelection = searchHandler.searchTextController.selection.textAfter(searchHandler.searchTextController.text);
-                            searchHandler.searchTextController.text = '${beforeSelection}_$afterSelection';
-                            // set cursor to the end when tapped unfocused
-                            searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: beforeSelection.length + 1));
-                            // animateTransition();
-                            createOverlay();
-                          },
-                          child: Text('__', style: TextStyle(fontSize: 20, color: Theme.of(context).colorScheme.onSecondary)),
+                  const SizedBox(width: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Add '_' at current cursor position
+                      final String beforeSelection = searchHandler.searchTextController.selection.textBefore(searchHandler.searchTextController.text);
+                      // final String insideSelection = searchHandler.searchTextController.selection.textInside(searchHandler.searchTextController.text);
+                      final String afterSelection = searchHandler.searchTextController.selection.textAfter(searchHandler.searchTextController.text);
+                      searchHandler.searchTextController.text = '${beforeSelection}_$afterSelection';
+                      // set cursor to the end when tapped unfocused
+                      searchHandler.searchTextController.selection = TextSelection.fromPosition(TextPosition(offset: beforeSelection.length + 1));
+                      // animateTransition();
+                      createOverlay();
+                    },
+                    style: buttonStyle,
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: SizedBox(
+                          width: 24,
+                          height: 3,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
                   const Spacer(),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Container(
-                        height: 40,
-                        color: Theme.of(context).colorScheme.secondary,
-                        child: TextButton(
-                          onPressed: () async {
-                            final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
-                            final String copied = cdata?.text ?? '';
-                            if (copied.isNotEmpty) {
-                              searchHandler.searchTextController.text += ' $copied ';
-                              searchHandler.searchTextController.selection =
-                                  TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
-                              animateTransition();
-                              createOverlay();
-                            }
-                          },
-                          child: Icon(Icons.paste, color: Theme.of(context).colorScheme.onSecondary),
-                        ),
-                      ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final ClipboardData? cdata = await Clipboard.getData(Clipboard.kTextPlain);
+                      final String copied = cdata?.text ?? '';
+                      if (copied.isNotEmpty) {
+                        searchHandler.searchTextController.text += ' $copied ';
+                        searchHandler.searchTextController.selection =
+                            TextSelection.fromPosition(TextPosition(offset: searchHandler.searchTextController.text.length));
+                        animateTransition();
+                        createOverlay();
+                      }
+                    },
+                    style: buttonStyle,
+                    child: Icon(
+                      Icons.paste,
+                      color: Theme.of(context).colorScheme.onSecondary,
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Container(
-                        height: 40,
-                        color: Theme.of(context).colorScheme.secondary,
-                        child: TextButton(
-                          onPressed: () {
-                            searchHandler.searchBoxFocus.unfocus();
-                          },
-                          child: Icon(Icons.keyboard_hide, color: Theme.of(context).colorScheme.onSecondary),
-                        ),
-                      ),
+                  ElevatedButton(
+                    onPressed: () {
+                      searchHandler.searchBoxFocus.unfocus();
+                    },
+                    style: buttonStyle,
+                    child: Icon(
+                      Icons.keyboard_hide,
+                      color: Theme.of(context).colorScheme.onSecondary,
                     ),
                   ),
                   const SizedBox(width: 10),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: Container(
-                        height: 40,
-                        color: Theme.of(context).colorScheme.secondary,
-                        child: TextButton(
-                          onPressed: () {
-                            searchHandler.searchTextController.clearComposing();
-                            searchHandler.searchBoxFocus.unfocus();
-                            searchHandler.searchAction(searchHandler.searchTextController.text, null);
-                          },
-                          onLongPress: () {
-                            ServiceHandler.vibrate();
-                            searchHandler.searchTextController.clearComposing();
-                            searchHandler.searchBoxFocus.unfocus();
-                            searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
-                          },
-                          child: Icon(Icons.search, color: Theme.of(context).colorScheme.onSecondary),
-                        ),
-                      ),
+                  ElevatedButton(
+                    onPressed: () {
+                      searchHandler.searchTextController.clearComposing();
+                      searchHandler.searchBoxFocus.unfocus();
+                      searchHandler.searchAction(searchHandler.searchTextController.text, null);
+                    },
+                    onLongPress: () {
+                      ServiceHandler.vibrate();
+                      searchHandler.searchTextController.clearComposing();
+                      searchHandler.searchBoxFocus.unfocus();
+                      searchHandler.addTabByString(searchHandler.searchTextController.text, switchToNew: true);
+                    },
+                    style: buttonStyle,
+                    child: Icon(
+                      Icons.search,
+                      color: Theme.of(context).colorScheme.onSecondary,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 16),
                 ],
               ),
             ),

@@ -328,18 +328,6 @@ class _MediaLoadingState extends State<MediaLoading> {
       }
     }
 
-    return buildIndicator(
-      context,
-      percentDone,
-      Column(
-        // move loading info lower if preview is of sample quality (except when item is hated)
-        mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
-        children: children,
-      ),
-    );
-  }
-
-  Widget buildIndicator(BuildContext context, double percentDone, Widget child) {
     final Widget progressIndicator = percentDone == 0
         ? const LinearProgressIndicator()
         : AnimatedProgressIndicator(
@@ -353,23 +341,33 @@ class _MediaLoadingState extends State<MediaLoading> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        RotatedBox(
-          quarterTurns: -1,
-          child: progressIndicator,
-        ),
-        //
-        //
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
-            child: child,
+        RepaintBoundary(
+          child: RotatedBox(
+            quarterTurns: -1,
+            child: progressIndicator,
           ),
         ),
         //
         //
-        RotatedBox(
-          quarterTurns: percentDone != 0 ? -1 : 1,
-          child: progressIndicator,
+        Expanded(
+          child: RepaintBoundary(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
+              child: Column(
+                // move loading info lower if preview is of sample quality (except when item is hated)
+                mainAxisAlignment: isMovedBelow ? MainAxisAlignment.end : MainAxisAlignment.center,
+                children: children,
+              ),
+            ),
+          ),
+        ),
+        //
+        //
+        RepaintBoundary(
+          child: RotatedBox(
+            quarterTurns: percentDone != 0 ? -1 : 1,
+            child: progressIndicator,
+          ),
         ),
       ],
     );

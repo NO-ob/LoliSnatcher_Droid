@@ -289,7 +289,7 @@ class MainDrawer extends StatelessWidget {
               Obx(() {
                 if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                   return Container(
-                    margin: const EdgeInsets.fromLTRB(2, 15, 2, 15),
+                    margin: const EdgeInsets.fromLTRB(2, 20, 2, 12),
                     width: double.infinity,
                     child: const Row(
                       mainAxisSize: MainAxisSize.max,
@@ -304,6 +304,7 @@ class MainDrawer extends StatelessWidget {
                   return const SizedBox.shrink();
                 }
               }),
+              const TabSelector(),
               Expanded(
                 child: Listener(
                   onPointerDown: (event) {
@@ -314,8 +315,8 @@ class MainDrawer extends StatelessWidget {
                   },
                   child: ListView(
                     controller: ScrollController(), // needed to avoid exception when list overflows into a scrollable size
+                    clipBehavior: Clip.antiAlias,
                     children: [
-                      const TabSelector(),
                       const TabButtons(true, WrapAlignment.spaceEvenly),
                       const TabBooruSelector(true),
                       const MergeBooruToggle(),
@@ -337,7 +338,6 @@ class MainDrawer extends StatelessWidget {
                             action: () {
                               settingsHandler.alice.showInspector();
                             },
-                            drawTopBorder: true,
                           );
                         } else {
                           return const SizedBox.shrink();

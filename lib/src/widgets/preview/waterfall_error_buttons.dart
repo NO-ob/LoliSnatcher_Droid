@@ -67,14 +67,6 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
     super.dispose();
   }
 
-  Widget wrapButton(Widget child) {
-    return Container(
-      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-      child: child,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final String clickName = (Platform.isWindows || Platform.isLinux) ? 'Click' : 'Tap';
@@ -87,8 +79,8 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
         // if last page...
         if (searchHandler.currentFetched.isEmpty) {
           // ... and no items loaded
-          return wrapButton(
-            SettingsButton(
+          return _ButtonWrapper(
+            child: SettingsButton(
               name: 'No Data Loaded',
               subtitle: Text('$clickName Here to Reload'),
               icon: const Icon(Icons.refresh),
@@ -101,8 +93,8 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           // .. has items loaded
           if (isVisible) {
             final int pageNum = searchHandler.pageNum.value;
-            return wrapButton(
-              SettingsButton(
+            return _ButtonWrapper(
+              child: SettingsButton(
                 name: 'You Reached the End ($pageNum ${Tools.pluralize('page', pageNum)})',
                 subtitle: Text('$clickName Here to Reload Last Page'),
                 icon: const Icon(Icons.refresh),
@@ -125,43 +117,46 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
               ),
             );
           } else {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background.withOpacity(0.66),
-                    borderRadius: BorderRadius.circular(8),
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        searchHandler.retrySearch();
+                        if (!isVisible) {
+                          isVisible = !isVisible;
+                          updateState();
+                        }
+                      },
+                      iconSize: 28,
+                      icon: const Icon(Icons.refresh),
+                    ),
                   ),
-                  child: IconButton(
-                    onPressed: () {
-                      searchHandler.retrySearch();
-                      if (!isVisible) {
+                  const SizedBox(width: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
                         isVisible = !isVisible;
                         updateState();
-                      }
-                    },
-                    iconSize: 28,
-                    icon: const Icon(Icons.refresh),
+                      },
+                      iconSize: 28,
+                      icon: const Icon(Icons.arrow_drop_up),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.background.withOpacity(0.66),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: IconButton(
-                    onPressed: () {
-                      isVisible = !isVisible;
-                      updateState();
-                    },
-                    iconSize: 28,
-                    icon: const Icon(Icons.arrow_drop_up),
-                  ),
-                ),
-                const SizedBox(width: 16),
-              ],
+                  const SizedBox(width: 16),
+                ],
+              ),
             );
           }
         }
@@ -169,18 +164,20 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
         // if not last page...
         if (searchHandler.isLoading.value) {
           // ... and is currently loading
-          return wrapButton(
-            SettingsButton(
+          return _ButtonWrapper(
+            child: SettingsButton(
               name: 'Loading Page #${searchHandler.pageNum}',
               subtitle: AnimatedOpacity(
                 opacity: sinceStartText.isNotEmpty ? 1.0 : 0.0,
                 duration: const Duration(milliseconds: 200),
                 child: Text(sinceStartText),
               ),
-              icon: const SizedBox(
-                width: 30,
-                height: 30,
-                child: CircularProgressIndicator(),
+              icon: const RepaintBoundary(
+                child: SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: CircularProgressIndicator(),
+                ),
               ),
               dense: true,
               action: searchHandler.retrySearch,
@@ -191,8 +188,8 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
           if (searchHandler.errorString.isNotEmpty) {
             final String errorFormatted = searchHandler.errorString.isNotEmpty ? '\n${searchHandler.errorString}' : '';
             // ... if error happened
-            return wrapButton(
-              SettingsButton(
+            return _ButtonWrapper(
+              child: SettingsButton(
                 name: 'Error happened when Loading Page #${searchHandler.pageNum}: $errorFormatted',
                 subtitle: Text('$clickName Here to Retry'),
                 icon: const Icon(Icons.refresh),
@@ -203,8 +200,8 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             );
           } else if (searchHandler.currentFetched.isEmpty) {
             // ... no items loaded
-            return wrapButton(
-              SettingsButton(
+            return _ButtonWrapper(
+              child: SettingsButton(
                 name: 'Error, no data loaded:',
                 subtitle: Text('$clickName Here to Retry'),
                 icon: const Icon(Icons.refresh),
@@ -217,10 +214,30 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             // return const SizedBox.shrink();
 
             // add a small container to avoid scrolling when swiping from the bottom of the screen (navigation gestures)
-            return Container(height: 10, color: Colors.transparent);
+            return Container(
+              height: MediaQuery.systemGestureInsetsOf(context).bottom,
+              color: Colors.transparent,
+            );
           }
         }
       }
     });
+  }
+}
+
+class _ButtonWrapper extends StatelessWidget {
+  const _ButtonWrapper({
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      child: child,
+    );
   }
 }

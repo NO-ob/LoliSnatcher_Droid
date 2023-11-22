@@ -49,7 +49,11 @@ class _HistoryListState extends State<HistoryList> {
   @override
   void initState() {
     super.initState();
-    getHistory();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 100));
+      await getHistory();
+    });
   }
 
   Future<void> getHistory() async {

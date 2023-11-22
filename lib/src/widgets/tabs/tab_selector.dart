@@ -353,35 +353,37 @@ class _TabManagerPageState extends State<TabManagerPage> {
       ),
     ).open();
 
-    final int tabsBeforeFilters = totalFilteredTabs;
     if (result == 'apply') {
       //
-    } else if (result == 'clear') {
+    }
+    if (result == 'clear' || (loadedFilter == null && booruFilter == null && duplicateFilter == false && emptyFilter == false)) {
       loadedFilter = null;
       booruFilter = null;
       duplicateFilter = false;
       emptyFilter = false;
+
+      firstRender = true;
     }
 
     if (result != null) {
       showPlaceholders = true;
       setState(() {});
+      await Future.delayed(const Duration(milliseconds: 20));
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         getTabs();
+        await Future.delayed(const Duration(milliseconds: 20));
         WidgetsBinding.instance.addPostFrameCallback((_) async {
           if (filteredTabs.contains(searchHandler.currentTab)) {
             await jumpToCurrent();
           } else {
             scrollToTop();
           }
-          showPlaceholders = false;
-          setState(() {});
 
-          if (totalFilteredTabs > tabsBeforeFilters) {
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await jumpToCurrent();
-            });
-          }
+          await Future.delayed(const Duration(milliseconds: 20));
+
+          showPlaceholders = false;
+          firstRender = false;
+          setState(() {});
         });
       });
     }
@@ -469,98 +471,64 @@ class _TabManagerPageState extends State<TabManagerPage> {
       key: ValueKey('item-$index-${tab.id}'),
       index: index,
       enabled: !selectMode && !isFilterActive && sortTabs == null,
-      child: Dismissible(
-        key: ValueKey('dismiss-item-$index-${tab.id}'),
-        direction: selectMode ? DismissDirection.none : DismissDirection.horizontal,
-        confirmDismiss: (direction) async {
-          if (direction == DismissDirection.endToStart) {
-            return true;
-          } else {
-            return false;
-          }
-        },
-        onDismissed: (direction) {
-          if (direction == DismissDirection.endToStart) {
-            selectedTabs.remove(tab);
-            searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
-            getTabs();
-          }
-        },
-        background: Container(),
-        secondaryBackground: selectMode
-            ? const SizedBox.shrink()
-            : Container(
-                alignment: Alignment.centerRight,
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                padding: const EdgeInsets.only(right: 10),
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                ),
-              ),
-        child: TabManagerItem(
-          tab: tab,
-          index: index,
-          isFiltered: isFilterActive || sortTabs != null,
-          originalIndex: (isFilterActive || sortTabs != null) ? searchHandler.list.indexOf(tab) : null,
-          isCurrent: isCurrent,
-          showPlaceholders: showPlaceholders,
-          firstRender: firstRender,
-          filterText: filterController.text,
-          onTap: selectMode
-              ? () {
-                  if (isSelected || isCurrent) {
-                    selectedTabs.removeWhere((item) => item == tab);
-                  } else {
-                    selectedTabs.add(tab);
-                  }
-                  setState(() {});
+      child: TabManagerItem(
+        tab: tab,
+        index: index,
+        isFiltered: isFilterActive || sortTabs != null,
+        originalIndex: (isFilterActive || sortTabs != null) ? searchHandler.list.indexOf(tab) : null,
+        isCurrent: isCurrent,
+        showPlaceholders: showPlaceholders,
+        firstRender: firstRender,
+        filterText: filterController.text,
+        onTap: selectMode
+            ? () {
+                if (isSelected || isCurrent) {
+                  selectedTabs.removeWhere((item) => item == tab);
+                } else {
+                  selectedTabs.add(tab);
                 }
-              : () {
-                  searchHandler.changeTabIndex(
-                    searchHandler.list.indexOf(tab),
-                  );
-                  Navigator.of(context).pop();
-                },
-          optionsWidgetBuilder: selectMode
-              ? (_, onTap) {
-                  if (isCurrent) {
-                    return const SizedBox.shrink();
-                  }
+                setState(() {});
+              }
+            : () {
+                searchHandler.changeTabIndex(
+                  searchHandler.list.indexOf(tab),
+                );
+                Navigator.of(context).pop();
+              },
+        optionsWidgetBuilder: selectMode
+            ? (_, onTap) {
+                if (isCurrent) {
+                  return const SizedBox.shrink();
+                }
 
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: Checkbox(
-                      value: isSelected,
-                      onChanged: (bool? newValue) {
-                        if (isSelected) {
-                          selectedTabs.removeWhere((item) => item == tab);
-                        } else {
-                          selectedTabs.add(tab);
-                        }
-                        setState(() {});
-                      },
-                    ),
-                  );
-                }
-              : null,
-          onOptionsTap: () {
-            if (!selectMode) {
-              showOptionsDialog(index);
-            }
-          },
-          onCloseTap: selectMode
-              ? null
-              : () {
-                  selectedTabs.remove(tab);
-                  searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
-                  getTabs();
-                },
-        ),
+                return Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Checkbox(
+                    value: isSelected,
+                    onChanged: (bool? newValue) {
+                      if (isSelected) {
+                        selectedTabs.removeWhere((item) => item == tab);
+                      } else {
+                        selectedTabs.add(tab);
+                      }
+                      setState(() {});
+                    },
+                  ),
+                );
+              }
+            : null,
+        onOptionsTap: () {
+          if (!selectMode) {
+            showOptionsDialog(index);
+          }
+        },
+        onCloseTap: selectMode
+            ? null
+            : () {
+                selectedTabs.remove(tab);
+                searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
+                getTabs();
+              },
       ),
     );
   }
@@ -868,31 +836,49 @@ class _TabManagerPageState extends State<TabManagerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: RichText(
-          text: TextSpan(
-            style: Theme.of(context).appBarTheme.titleTextStyle,
-            children: [
-              const TextSpan(text: 'Tabs | '),
-              if (sortTabs != null) ...[
-                WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Transform(
-                    alignment: Alignment.center,
-                    transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-                    child: const Icon(Icons.sort, size: 18),
-                  ),
-                ),
-              ],
-              if (isFilterActive) ...[
-                const WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Icon(Icons.filter_alt, size: 18),
-                ),
-                TextSpan(text: '${totalFilteredTabs.toFormattedString()}/'),
-              ],
-              TextSpan(text: totalTabs.toFormattedString()),
-            ],
-          ),
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: Theme.of(context).appBarTheme.titleTextStyle,
+                children: [
+                  const TextSpan(text: 'Tabs'),
+                  if (sortTabs != null) ...[
+                    const TextSpan(text: ' | '),
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Transform(
+                        alignment: Alignment.center,
+                        transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+                        child: const Icon(Icons.sort, size: 18),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            RichText(
+              text: TextSpan(
+                style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                    ),
+                children: [
+                  if (isFilterActive) ...[
+                    const WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Icon(Icons.filter_alt, size: 16),
+                    ),
+                    TextSpan(text: '${totalFilteredTabs.toFormattedString()}/'),
+                  ],
+                  TextSpan(text: totalTabs.toFormattedString()),
+                ],
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -1281,16 +1267,15 @@ class TabManagerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // print('tab selector item build $index $showPlaceholders');
+    if (firstRender) {
+      return const SizedBox(height: 80);
+    }
 
     final BorderRadius radius = BorderRadius.circular(10);
 
     final subtitleStyle = Theme.of(context).textTheme.bodySmall!.copyWith(
           color: Theme.of(context).textTheme.bodySmall!.color,
         );
-
-    if (firstRender) {
-      return const SizedBox(height: 80);
-    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
