@@ -46,7 +46,8 @@ class SearchHandler extends GetxController {
   // search globals list
   RxList<SearchTab> list = RxList<SearchTab>([]);
   // current tab index
-  Rx<int> index = 0.obs;
+  RxInt index = 0.obs;
+  RxnString tabId = RxnString(null);
 
   // add new tab by the given search string
   void addTabByString(
@@ -242,6 +243,7 @@ class SearchHandler extends GetxController {
     // change index only when it's different
     if (!ignoreSameIndexCheck && newIndex != currentIndex) {
       index.value = newIndex;
+      tabId.value = list[newIndex].id;
       Tools.forceClearMemoryCache(withLive: true);
     }
 
@@ -266,11 +268,15 @@ class SearchHandler extends GetxController {
     // print('isNEW: $isNewSearch ${currentIndex}');
     // trigger search if there are items inside booruHandler
     if (isNewSearch) {
-      runSearch();
+      runSearch().then((_) {
+        setViewedItem(currentTab.viewedIndex.value);
+        tabId.value = list[currentIndex].id;
+      });
+    } else {
+      // set current viewed index and item of the tab
+      setViewedItem(currentTab.viewedIndex.value);
+      tabId.value = list[currentIndex].id;
     }
-
-    // set current viewed index and item of the tab
-    setViewedItem(currentTab.viewedIndex.value);
 
     // print('changed index from $oldIndex to $newIndex');
   }
@@ -341,6 +347,7 @@ class SearchHandler extends GetxController {
   }
 
   int get currentIndex => index.value;
+  String? get currentTabId => tabId.value;
   int get total => list.length;
   SearchTab get currentTab => list[currentIndex];
   BooruHandler get currentBooruHandler => currentTab.booruHandler;

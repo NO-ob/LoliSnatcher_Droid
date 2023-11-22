@@ -35,7 +35,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   FocusNode kbFocusNode = FocusNode();
   StreamSubscription? volumeListener;
   bool scrollDone = true;
-  late StreamSubscription tabIndexListener, viewedIndexListener, isLoadingListener;
+  late StreamSubscription tabIndexListener, tabIdListener, viewedIndexListener, isLoadingListener;
 
   bool isStaggered = false;
 
@@ -52,6 +52,8 @@ class _WaterfallViewState extends State<WaterfallView> {
 
     // listen to current tab change to restore the scroll value
     tabIndexListener = searchHandler.index.listen(tabChanged);
+
+    tabIdListener = searchHandler.tabId.listen(tabIdChanged);
 
     // listen to isLoading to select first loaded item for desktop
     isLoadingListener = searchHandler.isLoading.listen((bool isLoading) {
@@ -79,6 +81,12 @@ class _WaterfallViewState extends State<WaterfallView> {
     } else {
       // don't auto scroll on viewed index change on desktop
       // call jumpTo only when viewed item is possibly out of view (i.e. selected by arrow keys)
+    }
+  }
+
+  void tabIdChanged(String? newTabId) {
+    if (newTabId != null) {
+      tabChanged(searchHandler.currentIndex);
     }
   }
 
@@ -135,6 +143,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   @override
   void dispose() {
     tabIndexListener.cancel();
+    tabIdListener.cancel();
     viewedIndexListener.cancel();
     isLoadingListener.cancel();
     kbFocusNode.dispose();
