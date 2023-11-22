@@ -253,6 +253,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
         // TODO move all this higher? make global handler for hotkeys?
         // TODO arrows move node focus around, so they are removed for now
+        // TODO move into separate widget (and only use it on desktop?)
 
         BooruItem? item;
         int oldIndex = 0, newIndex = 0, columnCount = 0;

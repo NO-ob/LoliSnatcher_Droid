@@ -161,7 +161,7 @@ class InkBunnyHandler extends BooruHandler {
           score: current['favorites_count'],
           postDate: current['create_datetime'].split('.')[0],
           rating: current['rating_name'],
-          postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+          postDateFormat: 'iso',
           fileNameExtras: (i > 0) ? 'p${i + 1}_' : '',
         );
 

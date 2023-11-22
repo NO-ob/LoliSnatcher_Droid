@@ -206,7 +206,7 @@ class SearchHandler extends GetxController {
   // search box focus node
   FocusNode searchBoxFocus = FocusNode();
 
-  late GlobalKey<InnerDrawerState> mainDrawerKey;
+  final GlobalKey<InnerDrawerState> mainDrawerKey = GlobalKey<InnerDrawerState>();
 
   Future<void> openAndFocusSearch() async {
     mainDrawerKey.currentState?.open();

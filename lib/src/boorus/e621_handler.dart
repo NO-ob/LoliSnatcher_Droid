@@ -85,7 +85,7 @@ class e621Handler extends BooruHandler {
         sources: List<String>.from(current['sources'] ?? []),
         md5String: current['file']['md5'],
         postDate: dateStr, // 2021-06-13t02:09:45.138-04:00
-        postDateFormat: "yyyy-MM-dd't'HH:mm:ss.SSS", // when timezone support added: "yyyy-MM-dd't'HH:mm:ss.SSSZ",
+        postDateFormat: 'iso',
       );
 
       return item;

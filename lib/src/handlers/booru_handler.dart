@@ -177,8 +177,13 @@ abstract class BooruHandler {
       uri.toString(),
       headers: headers,
       queryParameters: queryParams,
+      options: fetchSearchOptions(),
       customInterceptor: withCaptchaCheck ? DioNetwork.captchaInterceptor : null,
     );
+  }
+
+  Options? fetchSearchOptions() {
+    return null;
   }
 
   FutureOr<List<BooruItem>> parseResponse(dynamic response) async {

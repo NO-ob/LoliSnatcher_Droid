@@ -39,6 +39,7 @@ class FurAffinityHandler extends BooruHandler {
       uri.toString(),
       headers: headers,
       queryParameters: queryParams,
+      options: fetchSearchOptions(),
       customInterceptor: withCaptchaCheck ? DioNetwork.captchaInterceptor : null,
       data: FormData.fromMap(body!),
     );

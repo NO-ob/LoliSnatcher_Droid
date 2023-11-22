@@ -175,6 +175,9 @@ class _TagViewState extends State<TagView> {
         DateTime parsedDate;
         if (postDateFormat == 'unix') {
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(postDate) * 1000);
+        } else if (postDateFormat == 'iso') {
+          postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateTime.parse(postDate).toLocal();
         } else {
           postDate = postDate.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
           parsedDate = DateFormat(postDateFormat).parseLoose(postDate).toLocal();

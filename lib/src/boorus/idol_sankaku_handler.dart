@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
@@ -7,8 +11,14 @@ class IdolSankakuHandler extends SankakuHandler {
   IdolSankakuHandler(super.booru, super.limit);
 
   @override
+  Options? fetchSearchOptions() {
+    // TODO without this and manual decode requests fail with endless redirect error. why it happens? dio doesn't consider the response data as json? some missing header in response?
+    return Options(responseType: ResponseType.plain);
+  }
+
+  @override
   List parseListFromResponse(dynamic response) {
-    final List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = jsonDecode(response.data);
     return parsedResponse;
   }
 
@@ -32,6 +42,12 @@ class IdolSankakuHandler extends SankakuHandler {
         addTagsWithType(tagMap.entries.elementAt(i).value, tagMap.entries.elementAt(i).key);
       }
       const String protocol = 'https:';
+
+      final postDateIsString = current['created_at'] is String;
+      // ISO string or unix time without in seconds (need to x1000?)
+      final postDate = postDateIsString ? current['created_at'] : current['created_at']['s'].toString();
+      final postDateFormat = postDateIsString ? 'iso' : 'unix';
+
       final BooruItem item = BooruItem(
         fileURL: protocol + current['file_url'],
         sampleURL: protocol + current['sample_url'],
@@ -52,8 +68,8 @@ class IdolSankakuHandler extends SankakuHandler {
         score: current['total_score'].toString(),
         sources: [current['source']],
         md5String: current['md5'],
-        postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
-        postDateFormat: 'unix',
+        postDate: postDate,
+        postDateFormat: postDateFormat,
       );
 
       return item;
@@ -69,7 +85,9 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   String makeURL(String tags) {
-    return '${booru.baseURL}/post/index.json?tags=$tags&limit=$limit&page=$pageNum';
+    final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
+
+    return '${booru.baseURL}/post/index.json?${tagsStr}limit=$limit&page=$pageNum';
   }
 
   @override

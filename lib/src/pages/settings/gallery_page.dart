@@ -31,6 +31,8 @@ class _GalleryPageState extends State<GalleryPage> {
 
   @override
   void initState() {
+    super.initState();
+
     autoHideImageBar = settingsHandler.autoHideImageBar;
     galleryMode = settingsHandler.galleryMode;
     galleryBarPosition = settingsHandler.galleryBarPosition;
@@ -54,7 +56,6 @@ class _GalleryPageState extends State<GalleryPage> {
     disableVideo = settingsHandler.disableVideo;
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
-    super.initState();
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk

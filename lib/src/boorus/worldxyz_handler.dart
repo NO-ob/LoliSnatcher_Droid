@@ -58,7 +58,7 @@ class WorldXyzHandler extends BooruHandler {
       score: current['views'].toString(),
       sources: List<String>.from(current['sources'] ?? []),
       postDate: dateString, // 2021-06-18T06:09:02.63366 // microseconds?
-      postDateFormat: "yyyy-MM-dd'T'hh:mm:ss",
+      postDateFormat: 'iso',
     );
 
     return item;

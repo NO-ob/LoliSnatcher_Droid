@@ -56,7 +56,7 @@ class PhilomenaHandler extends BooruHandler {
         score: current['score'].toString(),
         sources: [current['source_url'].toString()],
         postDate: current['created_at'],
-        postDateFormat: "yyyy-MM-dd'T'HH:mm:ss'Z'",
+        postDateFormat: 'iso',
         fileNameExtras: "${booru.name}_${current['id']}_",
       );
 

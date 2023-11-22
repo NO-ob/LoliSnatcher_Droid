@@ -54,12 +54,6 @@ class _MobileHomeState extends State<MobileHome> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    searchHandler.mainDrawerKey = GlobalKey<InnerDrawerState>();
-  }
-
   Future<void> _onPopInvoked(bool didPop) async {
     if (didPop) {
       return;

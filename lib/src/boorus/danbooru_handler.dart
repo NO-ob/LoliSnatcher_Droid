@@ -60,6 +60,7 @@ class DanbooruHandler extends BooruHandler {
       uri.toString(),
       headers: headers,
       queryParameters: queryParams,
+      options: fetchSearchOptions(),
       customInterceptor: withCaptchaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Tools.appUserAgent) : null,
     );
   }
@@ -119,7 +120,7 @@ class DanbooruHandler extends BooruHandler {
           sources: [current['source'].toString()],
           md5String: current['md5'].toString(),
           postDate: dateStr, // 2021-06-17T16:27:45.743-04:00
-          postDateFormat: "yyyy-MM-dd't'HH:mm:ss'.'SSSZ", // when timezone support added: "yyyy-MM-dd't'HH:mm:ssZ",
+          postDateFormat: 'iso',
         );
         return item;
       } else {
@@ -199,7 +200,7 @@ class DanbooruHandler extends BooruHandler {
       postID: responseItem['post_id'].toString(),
       createDate: dateStr, // 2021-11-29T01:42:28.351-05:00
       // TODO throws exception when parsing date, fix this
-      createDateFormat: "yyyy-MM-dd't'HH:mm:ss'.'SSS",
+      createDateFormat: 'iso',
     );
   }
 

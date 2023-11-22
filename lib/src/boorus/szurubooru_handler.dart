@@ -49,7 +49,7 @@ class SzurubooruHandler extends BooruHandler {
         postURL: makePostURL(current['id'].toString()),
         rating: current['safety'],
         postDate: (current['creationTime'].replaceAll('Z', '') + '.0000').substring(0, 22),
-        postDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS",
+        postDateFormat: 'iso',
       );
 
       return item;

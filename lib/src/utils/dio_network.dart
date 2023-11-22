@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
 class DioNetwork {
@@ -17,20 +18,23 @@ class DioNetwork {
     // dio.options.connectTimeout = Duration(seconds: 10);
     // dio.options.receiveTimeout = Duration(seconds: 30);
     // dio.options.sendTimeout = Duration(seconds: 10);
-    // dio.interceptors.add(
-    //   CustomPrettyDioLogger(
-    //     request: true,
-    //     requestBody: true,
-    //     requestHeader: true,
-    //     responseBody: true,
-    //     responseHeader: true,
-    //     logPrint: (Object object) {
-    //       if(Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
-    //         return print(object);
-    //       }
-    //     },
-    //   ),
-    // );
+
+    if (Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
+      dio.interceptors.add(
+        CustomPrettyDioLogger(
+          request: true,
+          requestBody: true,
+          requestHeader: true,
+          responseBody: true,
+          responseHeader: true,
+          logPrint: (Object object) {
+            if (Tools.isTestMode || SettingsHandler.instance.isDebug.value) {
+              return print(object);
+            }
+          },
+        ),
+      );
+    }
     if (!Tools.isTestMode && SettingsHandler.instance.isDebug.value) {
       dio.interceptors.add(SettingsHandler.instance.alice.getDioInterceptor());
     }
@@ -70,6 +74,7 @@ class DioNetwork {
     client.interceptors.add(
       InterceptorsWrapper(
         onResponse: (Response response, ResponseInterceptorHandler handler) async {
+          // print('[response]');
           final bool captchaWasDetected = await Tools.checkForCaptcha(response, response.realUri, customUserAgent: customUserAgent);
           if (!captchaWasDetected) {
             return handler.next(response);
@@ -101,6 +106,7 @@ class DioNetwork {
           }
         },
         onError: (DioException error, ErrorInterceptorHandler handler) async {
+          // print('[error]: ${error.message} ${error.response?.statusCode}');
           final bool captchaWasDetected = await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
           if (!captchaWasDetected) {
             return handler.next(error);

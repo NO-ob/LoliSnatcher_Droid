@@ -53,6 +53,7 @@ class SankakuHandler extends BooruHandler {
       uri.toString(),
       headers: getHeaders(),
       queryParameters: queryParams,
+      options: fetchSearchOptions(),
       customInterceptor: withCaptchaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
     );
   }
@@ -87,6 +88,13 @@ class SankakuHandler extends BooruHandler {
       }
 
       // String fileExt = current["file_type"].split("/")[1]; // image/jpeg
+
+      // backwards compatibility with possible future change (first seen in idol)
+      final postDateIsString = current['created_at'] is String;
+      // ISO string or unix time without in seconds (need to x1000?)
+      final postDate = postDateIsString ? current['created_at'] : current['created_at']['s'].toString();
+      final postDateFormat = postDateIsString ? 'iso' : 'unix';
+
       final BooruItem item = BooruItem(
         fileURL: current['file_url'],
         sampleURL: current['sample_url'],
@@ -105,10 +113,9 @@ class SankakuHandler extends BooruHandler {
         serverId: current['id'].toString(),
         rating: current['rating'],
         score: current['total_score'].toString(),
-        sources: [if (current['source'] == null) '' else current['source']!],
         md5String: current['md5'],
-        postDate: current['created_at']['s'].toString(), // unix time without in seconds (need to x1000?)
-        postDateFormat: 'unix',
+        postDate: postDate,
+        postDateFormat: postDateFormat,
       );
       return item;
     } else {
@@ -167,7 +174,9 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    return '${booru.baseURL}/posts?tags=${tags.trim()}&limit=$limit&page=$pageNum';
+    final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
+
+    return '${booru.baseURL}/posts?${tagsStr}limit=$limit&page=$pageNum';
   }
 
   String makeApiPostURL(String id) {
@@ -255,7 +264,7 @@ class SankakuHandler extends BooruHandler {
       score: current['score'] ?? 0,
       postID: current['post_id'].toString(),
       createDate: current['created_at'].toString(), // unix time without in seconds (need to x1000?)
-      createDateFormat: "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+      createDateFormat: 'iso',
     );
   }
 

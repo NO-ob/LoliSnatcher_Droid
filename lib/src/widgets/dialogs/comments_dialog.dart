@@ -54,6 +54,9 @@ class _CommentsDialogState extends State<CommentsDialog> {
         DateTime parsedDate;
         if (format == 'unix') {
           parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(date) * 1000);
+        } else if (format == 'iso') {
+          date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateTime.parse(date).toLocal();
         } else {
           date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
           parsedDate = DateFormat(format).parseLoose(date).toLocal();

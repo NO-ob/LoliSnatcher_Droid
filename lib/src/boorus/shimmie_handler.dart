@@ -65,8 +65,8 @@ class ShimmieHandler extends BooruHandler {
         score: current.getAttribute('score'),
         sources: [current.getAttribute('source') ?? ''],
         md5String: current.getAttribute('md5'),
-        postDate: dateString.substring(0, dateString.length - 3), // 2021-06-18 04:37:31.471007 // microseconds?
-        postDateFormat: 'yyyy-MM-dd HH:mm:ss.SSSSSS',
+        postDate: dateString, // 2021-06-18 04:37:31
+        postDateFormat: 'yyyy-MM-dd HH:mm:ss',
       );
 
       return item;
@@ -138,7 +138,7 @@ class ShimmieHandler extends BooruHandler {
       authorName: current.querySelector('.username')?.text.toString(),
       // postID: postID,
       createDate: current.querySelector('time')?.attributes['datetime']?.split('+')[0].toString(), // 2021-12-25t10:02:28+00:00
-      createDateFormat: "yyyy-MM-dd't'HH:mm:ss'Z'",
+      createDateFormat: 'iso',
     );
   }
 }
