@@ -152,7 +152,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   List<Widget> getActions() {
     final List<List<String>> filteredButtonOrder = settingsHandler.buttonOrder.where((btn) {
-      if (searchHandler.viewedIndex.value == -1) {
+      if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
         return false;
       }
 
@@ -282,7 +282,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         // icon = isFav == true ? Icons.favorite : Icons.favorite_border;
         // early return to override with animated icon
         return Obx(() {
-          if (searchHandler.viewedIndex.value == -1) {
+          if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
             return const Icon(Icons.favorite_border);
           }
 
@@ -308,7 +308,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     switch (action) {
       case 'snatch':
         return Obx(() {
-          if (searchHandler.viewedIndex.value == -1) {
+          if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
             return Container();
           }
 

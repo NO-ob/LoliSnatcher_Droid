@@ -760,8 +760,7 @@ class _TagViewState extends State<TagView> {
                   onLongPress: () async {
                     ServiceHandler.vibrate();
                     if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
-                      Navigator.of(context).pop(true); // exit drawer
-                      Navigator.of(context).pop(true); // exit viewer
+                      Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                     }
                     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                       searchHandler.addTabByString(currentTag, switchToNew: true);
@@ -802,8 +801,7 @@ class _TagViewState extends State<TagView> {
                                 onPressed: () {
                                   ServiceHandler.vibrate();
                                   if (settingsHandler.appMode.value.isMobile && viewerHandler.inViewer.value) {
-                                    Navigator.of(context).pop(true); // exit drawer
-                                    Navigator.of(context).pop(true); // exit viewer
+                                    Navigator.of(context).popUntil((route) => route.isFirst); // exit viewer
                                   }
                                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                                     searchHandler.changeTabIndex(searchHandler.list.length - 1);

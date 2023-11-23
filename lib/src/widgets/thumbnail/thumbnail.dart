@@ -106,6 +106,10 @@ class _ThumbnailState extends State<Thumbnail> {
   }
 
   void calcThumbWidth(BoxConstraints constraints) {
+    if (!mounted) {
+      return;
+    }
+
     final double? prevThumbWidth = thumbWidth, prevThumbHeight = thumbHeight;
 
     final double widthLimit = constraints.maxWidth * MediaQuery.of(context).devicePixelRatio * 1;
@@ -341,11 +345,13 @@ class _ThumbnailState extends State<Thumbnail> {
   Widget build(BuildContext context) {
     final Widget imageStack = LayoutBuilder(
       builder: (context, constraints) {
-        calcThumbWidth(constraints);
-        if (firstBuild) {
-          firstBuild = false;
-          selectThumbProvider();
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          calcThumbWidth(constraints);
+          if (firstBuild) {
+            firstBuild = false;
+            selectThumbProvider();
+          }
+        });
 
         final double iconSize = constraints.maxWidth * 0.75;
 

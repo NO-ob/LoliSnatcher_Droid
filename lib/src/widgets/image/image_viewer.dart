@@ -192,6 +192,10 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   void calcWidthLimit(BoxConstraints constraints) {
+    if (!mounted) {
+      return;
+    }
+
     final int? prevWidthLimit = widthLimit;
     widthLimit = settingsHandler.disableImageScaling ? null : (constraints.maxWidth * MediaQuery.of(context).devicePixelRatio * 2).round();
     if (prevWidthLimit != widthLimit) {
@@ -353,11 +357,13 @@ class ImageViewerState extends State<ImageViewer> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        calcWidthLimit(constraints);
-        if (firstBuild) {
-          firstBuild = false;
-          initViewer(false);
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          calcWidthLimit(constraints);
+          if (firstBuild) {
+            firstBuild = false;
+            initViewer(false);
+          }
+        });
 
         return Hero(
           tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
