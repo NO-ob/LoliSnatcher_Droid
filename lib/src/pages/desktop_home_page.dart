@@ -39,7 +39,7 @@ class DesktopHome extends StatelessWidget {
           //   if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
           //     return const DesktopTabs();
           //   } else {
-          //     return const SizedBox();
+          //     return const SizedBox.shrink();
           //   }
           // }),
           Obx(() {
@@ -59,7 +59,7 @@ class DesktopHome extends StatelessWidget {
                 ),
               );
             } else {
-              return const SizedBox();
+              return const SizedBox.shrink();
             }
           }),
           Obx(() {
@@ -71,14 +71,14 @@ class DesktopHome extends StatelessWidget {
                 page: () => const SnatcherPage(),
               );
             } else {
-              return const SizedBox();
+              return const SizedBox.shrink();
             }
           }),
           Obx(() {
             if (settingsHandler.booruList.isEmpty || searchHandler.list.isEmpty) {
               return const Center(child: Text('Add Boorus in Settings'));
             } else {
-              return const SizedBox();
+              return const SizedBox.shrink();
             }
           }),
           SettingsButton(
@@ -141,7 +141,7 @@ class DesktopHome extends StatelessWidget {
                 ],
               );
             } else {
-              return const SizedBox();
+              return const SizedBox.shrink();
             }
           }),
         ],
@@ -159,7 +159,13 @@ class DesktopHome extends StatelessWidget {
               // TODO save to settings, but debounce the saving to file
             },
           ),
-          secondChild: Obx(() => searchHandler.list.isEmpty ? const SizedBox() : DesktopImageListener(searchHandler.currentTab)),
+          secondChild: Obx(
+            () => searchHandler.list.isEmpty
+                ? const SizedBox.shrink()
+                : DesktopImageListener(
+                    searchHandler.currentTab,
+                  ),
+          ),
           startRatio: 0.33,
           minRatio: 0.2,
           maxRatio: 0.8,

@@ -543,7 +543,7 @@ class VideoViewerState extends State<VideoViewer> {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: isVideoInited
-                  ? Container()
+                  ? const SizedBox.shrink()
                   : Thumbnail(
                       item: widget.booruItem,
                       isStandalone: false,
@@ -552,7 +552,7 @@ class VideoViewerState extends State<VideoViewer> {
             AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
               child: isVideoInited
-                  ? Container()
+                  ? const SizedBox.shrink()
                   : MediaLoading(
                       item: widget.booruItem,
                       hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
@@ -613,7 +613,7 @@ class VideoViewerState extends State<VideoViewer> {
                         ],
                       ),
                     )
-                  : Container(),
+                  : const SizedBox.shrink(),
             ),
           ],
         ),

@@ -781,7 +781,7 @@ class SettingsPageDialog extends StatelessWidget {
       ),
       floatingActionButton: fab,
       body: SafeArea(
-        child: content ?? Container(),
+        child: content ?? const SizedBox.shrink(),
       ),
     );
   }

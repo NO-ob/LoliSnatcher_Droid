@@ -41,7 +41,7 @@ class TagsManagerListBottom extends StatelessWidget {
           ],
         );
       } else {
-        return const SizedBox();
+        return const SizedBox.shrink();
       }
     }
 

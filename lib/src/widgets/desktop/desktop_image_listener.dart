@@ -124,15 +124,11 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
 
   @override
   Widget build(BuildContext context) {
-    if (searchHandler.list.isEmpty) {
-      return const SizedBox();
+    if (searchHandler.list.isEmpty || item.fileURL == '') {
+      return const SizedBox.shrink();
     }
 
-    if (item.fileURL == '') {
-      return const SizedBox();
-    }
-
-    final Widget itemWidget = isDelayed ? const SizedBox() : getImageWidget(item);
+    final Widget itemWidget = isDelayed ? const SizedBox.shrink() : getImageWidget(item);
 
     return Stack(
       children: [
@@ -192,7 +188,7 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
                       builder: (BuildContext context) {
                         return Stack(
                           children: [
-                            Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox()),
+                            Obx(() => viewerHandler.isDesktopFullscreen.value ? itemWidget : const SizedBox.shrink()),
                             const NotesRenderer(null),
                             Container(
                               padding: const EdgeInsets.all(10),

@@ -92,7 +92,7 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   Widget lockButton() {
-    return Container();
+    return const SizedBox.shrink();
     // return Obx(() {
     //   if (LocalAuthHandler.instance.deviceSupportsBiometrics.value == true) {
     //     return IconButton(
@@ -102,7 +102,7 @@ class _MainAppBarState extends State<MainAppBar> {
     //       },
     //     );
     //   } else {
-    //     return Container();
+    //     return const SizedBox.shrink();
     //   }
     // });
   }

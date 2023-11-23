@@ -157,7 +157,7 @@ class _GalleryButtonsState extends State<GalleryButtons> {
                   ),
                 ],
               )
-            : const SizedBox(),
+            : const SizedBox.shrink(),
       ),
     );
   }

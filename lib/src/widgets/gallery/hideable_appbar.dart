@@ -309,7 +309,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'snatch':
         return Obx(() {
           if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
-            return Container();
+            return const SizedBox.shrink();
           }
 
           final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
@@ -317,7 +317,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
           final bool isSnatched = item.isSnatched.value == true;
           if (!isSnatched) {
-            return const SizedBox();
+            return const SizedBox.shrink();
           } else {
             return Positioned(
               right: 2,
@@ -328,7 +328,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         });
 
       default:
-        return const SizedBox();
+        return const SizedBox.shrink();
     }
   }
 

@@ -134,7 +134,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
 
   Widget buildElement(BuildContext context) {
     if (widget.isDone) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     if (widget.isFailed) {
@@ -201,7 +201,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     //     : (isFromCache == true ? '...' : null);
 
     if (widget.isFromCache != false) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     return Row(

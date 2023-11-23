@@ -444,7 +444,7 @@ class _HistoryListState extends State<HistoryList> {
             ],
           )
         else
-          const SizedBox(),
+          const SizedBox.shrink(),
       ],
     );
   }
@@ -471,7 +471,7 @@ class _HistoryListState extends State<HistoryList> {
           ],
         );
       } else {
-        return const SizedBox();
+        return const SizedBox.shrink();
       }
     }
 

@@ -270,7 +270,7 @@ class _TagViewState extends State<TagView> {
     final IconData icon = hasComments ? CupertinoIcons.text_bubble_fill : CupertinoIcons.text_bubble;
 
     if (!hasSupport || item.fileURL.isEmpty) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     return SettingsButton(
@@ -297,7 +297,7 @@ class _TagViewState extends State<TagView> {
     final bool hasNotes = item.hasNotes == true;
 
     if (!hasSupport || !hasNotes) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     return Obx(() {
@@ -402,7 +402,7 @@ class _TagViewState extends State<TagView> {
         ],
       );
     } else {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
   }
 
@@ -436,7 +436,7 @@ class _TagViewState extends State<TagView> {
         ),
       );
     } else {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
   }
 
@@ -837,7 +837,7 @@ class _TagViewState extends State<TagView> {
       );
     } else {
       // Render nothing if currentTag is an empty string
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
   }
 

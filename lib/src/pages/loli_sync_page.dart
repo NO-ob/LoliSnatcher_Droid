@@ -268,7 +268,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     },
                   ),
                 )
-              : Container(),
+              : const SizedBox.shrink(),
         ),
         SettingsToggle(
           value: settings,
@@ -333,7 +333,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     },
                   ),
                 )
-              : Container(),
+              : const SizedBox.shrink(),
         ),
         SettingsToggle(
           value: tags,
@@ -379,7 +379,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                     },
                   ),
                 )
-              : Container(),
+              : const SizedBox.shrink(),
         ),
         const SettingsButton(name: '', enabled: false),
         SettingsButton(
@@ -533,7 +533,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
       return receiverBuild();
     } else {
       // Should never happen but just in case
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
   }
 

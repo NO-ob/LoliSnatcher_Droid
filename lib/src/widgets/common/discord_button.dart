@@ -21,7 +21,7 @@ class DiscordButton extends StatelessWidget {
 
     if (EnvironmentConfig.isFromStore) {
       // don't render the button if app is installed from the store
-      return Container();
+      return const SizedBox.shrink();
     }
 
     return Obx(() {

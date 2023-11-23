@@ -205,7 +205,7 @@ class _DirPickerState extends State<DirPicker> {
                     ],
                   );
                 } else {
-                  return Container();
+                  return const SizedBox.shrink();
                 }
               } else {
                 return const Center(
@@ -220,7 +220,7 @@ class _DirPickerState extends State<DirPicker> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             if (path == widget.path)
-              Container()
+              const SizedBox.shrink()
             else
               FloatingActionButton(
                 heroTag: null,

@@ -212,7 +212,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           height: 5,
           child: Row(
             children: [
-              if (chewieController.isLive) const SizedBox() else _buildProgressBar(),
+              if (chewieController.isLive == false) _buildProgressBar(),
             ],
           ),
         ),
@@ -280,11 +280,11 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           ),
           child: Row(
             children: <Widget>[
-              if (_lastDoubleTapSide < 0) msgWidget else const SizedBox(),
+              if (_lastDoubleTapSide < 0) msgWidget,
               //
               const Spacer(),
               //
-              if (_lastDoubleTapSide > 0) msgWidget else const SizedBox(),
+              if (_lastDoubleTapSide > 0) msgWidget,
             ],
           ),
         ),

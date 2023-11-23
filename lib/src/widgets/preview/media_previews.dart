@@ -96,7 +96,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
             const CircularProgressIndicator(),
             Obx(() {
               if (searchHandler.isRestored.value) {
-                return const SizedBox();
+                return const SizedBox.shrink();
               } else {
                 return const Text('Restoring previous session...');
               }

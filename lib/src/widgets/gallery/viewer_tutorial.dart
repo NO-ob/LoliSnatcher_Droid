@@ -44,7 +44,7 @@ class _ViewerTutorialState extends State<ViewerTutorial> {
   @override
   Widget build(BuildContext context) {
     if (!_isVisible) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     return LayoutBuilder(

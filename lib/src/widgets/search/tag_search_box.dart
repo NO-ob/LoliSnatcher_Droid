@@ -485,7 +485,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                     final Color tagColor = tagHandler.getTag(tag).getColour();
 
                     if (tag.isNotEmpty) {
-                      Widget itemIcon = const SizedBox();
+                      Widget itemIcon = const SizedBox.shrink();
                       switch (type) {
                         case 'history':
                           itemIcon = const Icon(Icons.history);
@@ -565,7 +565,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
                         },
                       );
                     } else {
-                      return const SizedBox();
+                      return const SizedBox.shrink();
                     }
                   },
                 ),

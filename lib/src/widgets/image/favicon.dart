@@ -199,7 +199,7 @@ class _FaviconState extends State<Favicon> {
                     borderRadius: BorderRadius.circular(iconSize / 5),
                     child: ShimmerCard(
                       isLoading: !isLoaded && !isFailed,
-                      child: !isLoaded && !isFailed ? null : Container(),
+                      child: !isLoaded && !isFailed ? null : const SizedBox.shrink(),
                     ),
                   ),
           ),

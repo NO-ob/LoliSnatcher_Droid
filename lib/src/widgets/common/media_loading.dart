@@ -171,7 +171,7 @@ class _MediaLoadingState extends State<MediaLoading> {
   Widget buildElement(BuildContext context, int nowMils, int sinceStart) {
     if (widget.isDone && !isVisible) {
       //  Don't do or render anything after file is loaded and widget faded out
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     if (settingsHandler.shitDevice) {
@@ -242,7 +242,7 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     if (!widget.isViewed) {
       // Do the calculations, but don't render anything if not viewed
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     List<Widget> children = [];
@@ -389,7 +389,7 @@ class LoadingText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (text.isEmpty) {
-      return const SizedBox();
+      return const SizedBox.shrink();
     }
 
     return BorderedText(

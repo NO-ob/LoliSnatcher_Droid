@@ -140,7 +140,7 @@ class ThumbnailBuild extends StatelessWidget {
                                         size: 14,
                                       ),
                               ),
-                              secondChild: const SizedBox(),
+                              secondChild: const SizedBox.shrink(),
                             ),
                             if (item.isSnatched.value == true)
                               const Icon(

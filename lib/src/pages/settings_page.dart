@@ -167,7 +167,7 @@ class SettingsPage extends StatelessWidget {
                     page: () => const DebugPage(),
                   );
                 } else {
-                  return const SizedBox();
+                  return const SizedBox.shrink();
                 }
               }),
               const VersionButton(),
@@ -265,7 +265,7 @@ class LogsEnabledWarning extends StatelessWidget {
       ];
 
       if (enabledLogTypes.isEmpty) {
-        return const SizedBox();
+        return const SizedBox.shrink();
       }
 
       return SettingsButton(

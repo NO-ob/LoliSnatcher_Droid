@@ -435,7 +435,7 @@ class _ThumbnailState extends State<Thumbnail> {
                   ? const SizedBox.shrink()
                   : ShimmerCard(
                       isLoading: showShimmer,
-                      child: showShimmer ? null : Container(),
+                      child: showShimmer ? null : const SizedBox.shrink(),
                     ),
             ),
             if (widget.isStandalone)
