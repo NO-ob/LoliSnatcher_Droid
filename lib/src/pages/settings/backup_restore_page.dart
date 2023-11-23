@@ -202,76 +202,6 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                         ),
                         const SettingsButton(name: '', enabled: false),
                         SettingsButton(
-                          name: 'Backup Database',
-                          action: () async {
-                            try {
-                              final File file = File('${await ServiceHandler.getConfigDir()}store.db');
-                              if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
-                                final bool res = await detectedDuplicateFile('store.db');
-                                if (!res) {
-                                  showSnackbar(context, 'Backup cancelled!', true);
-                                  return;
-                                }
-                              }
-                              if (backupPath.isNotEmpty) {
-                                await ServiceHandler.writeImage(await file.readAsBytes(), 'store', 'application/x-sqlite3', 'db', backupPath);
-                                showSnackbar(context, 'Database saved to store.db', false);
-                              } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
-                              }
-                            } catch (e) {
-                              showSnackbar(context, 'Error while saving database! $e', true);
-                            }
-                          },
-                        ),
-                        SettingsButton(
-                          name: 'Restore Database',
-                          subtitle: const Text('store.db'),
-                          action: () async {
-                            try {
-                              if (backupPath.isNotEmpty) {
-                                final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
-                                if (!fileExists) {
-                                  showSnackbar(context, 'No Restore File Found!', true);
-                                  return;
-                                }
-
-                                // disable backupping while restoring the db
-                                searchHandler.canBackup.value = false;
-
-                                final bool res = await ServiceHandler.copySafFileToDir(
-                                  backupPath,
-                                  'store.db',
-                                  await ServiceHandler.getConfigDir(),
-                                );
-
-                                if (!res) {
-                                  showSnackbar(context, 'Error while restoring database!', true);
-                                  return;
-                                }
-
-                                final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
-                                if (!(await newFile.exists())) {
-                                  showSnackbar(context, 'Error while restoring database!', true);
-                                  return;
-                                }
-
-                                settingsHandler.dbHandler = DBHandler();
-                                await settingsHandler.dbHandler.dbConnect(newFile.path);
-                                //
-                                showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
-                                await Future.delayed(const Duration(seconds: 3));
-                                unawaited(ServiceHandler.restartApp());
-                              } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
-                              }
-                            } catch (e) {
-                              showSnackbar(context, 'Error while restoring database! $e', true);
-                            }
-                          },
-                        ),
-                        const SettingsButton(name: '', enabled: false),
-                        SettingsButton(
                           name: 'Backup Boorus',
                           action: () async {
                             try {
@@ -378,6 +308,76 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                               }
                             } catch (e) {
                               showSnackbar(context, 'Error while restoring tags! $e', true);
+                            }
+                          },
+                        ),
+                        const SettingsButton(name: '', enabled: false),
+                        SettingsButton(
+                          name: 'Backup Database',
+                          action: () async {
+                            try {
+                              final File file = File('${await ServiceHandler.getConfigDir()}store.db');
+                              if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
+                                final bool res = await detectedDuplicateFile('store.db');
+                                if (!res) {
+                                  showSnackbar(context, 'Backup cancelled!', true);
+                                  return;
+                                }
+                              }
+                              if (backupPath.isNotEmpty) {
+                                await ServiceHandler.writeImage(await file.readAsBytes(), 'store', 'application/x-sqlite3', 'db', backupPath);
+                                showSnackbar(context, 'Database saved to store.db', false);
+                              } else {
+                                showSnackbar(context, 'No Access to backup folder!', true);
+                              }
+                            } catch (e) {
+                              showSnackbar(context, 'Error while saving database! $e', true);
+                            }
+                          },
+                        ),
+                        SettingsButton(
+                          name: 'Restore Database',
+                          subtitle: const Text('store.db'),
+                          action: () async {
+                            try {
+                              if (backupPath.isNotEmpty) {
+                                final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
+                                if (!fileExists) {
+                                  showSnackbar(context, 'No Restore File Found!', true);
+                                  return;
+                                }
+
+                                // disable backupping while restoring the db
+                                searchHandler.canBackup.value = false;
+
+                                final bool res = await ServiceHandler.copySafFileToDir(
+                                  backupPath,
+                                  'store.db',
+                                  await ServiceHandler.getConfigDir(),
+                                );
+
+                                if (!res) {
+                                  showSnackbar(context, 'Error while restoring database!', true);
+                                  return;
+                                }
+
+                                final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
+                                if (!(await newFile.exists())) {
+                                  showSnackbar(context, 'Error while restoring database!', true);
+                                  return;
+                                }
+
+                                settingsHandler.dbHandler = DBHandler();
+                                await settingsHandler.dbHandler.dbConnect(newFile.path);
+                                //
+                                showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
+                                await Future.delayed(const Duration(seconds: 3));
+                                unawaited(ServiceHandler.restartApp());
+                              } else {
+                                showSnackbar(context, 'No Access to backup folder!', true);
+                              }
+                            } catch (e) {
+                              showSnackbar(context, 'Error while restoring database! $e', true);
                             }
                           },
                         ),
