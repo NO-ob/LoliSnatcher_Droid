@@ -169,14 +169,6 @@ class MainActivity: FlutterActivity() {
             } else if(call.method == "setVolumeButtons") {
                 val state: Boolean? = call.argument("setActive")
                 isSinkingVolume = !state!!
-            } else if(call.method == "launchURL") {
-                val urlString: String? = call.argument("url");
-                if (!urlString.isNullOrBlank()) {
-                    val uri = Uri.parse(urlString);
-                    val urlLauncher = Intent(CATEGORY_BROWSABLE, uri);
-                    urlLauncher.action = ACTION_VIEW;
-                    startActivity(urlLauncher);
-                }
             } else if (call.method == "disableSleep"){
                 window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             } else if (call.method == "enableSleep"){

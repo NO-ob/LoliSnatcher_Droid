@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
@@ -31,7 +31,10 @@ class DiscordButton extends StatelessWidget {
         name: overrideText ?? 'Discord',
         icon: const FaIcon(FontAwesomeIcons.discord),
         action: () {
-          ServiceHandler.launchURL(discordURL);
+          launchUrlString(
+            discordURL,
+            mode: LaunchMode.externalApplication,
+          );
         },
         trailingIcon: const Icon(Icons.exit_to_app),
       );

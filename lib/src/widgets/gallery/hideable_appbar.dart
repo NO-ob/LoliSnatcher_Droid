@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
@@ -390,7 +391,12 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'open':
         // url to html encoded
         final String url = Uri.encodeFull(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
-        ServiceHandler.launchURL(url);
+        unawaited(
+          launchUrlString(
+            url,
+            mode: LaunchMode.externalApplication,
+          ),
+        );
         break;
       case 'autoscroll':
         autoScrollState(!autoScroll);

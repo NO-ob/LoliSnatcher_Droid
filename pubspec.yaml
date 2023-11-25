@@ -63,6 +63,7 @@ dependencies:
   sqflite: ^2.3.0
   statsfl: ^2.3.0
   transparent_image: ^2.0.1
+  url_launcher: ^6.2.1
   uuid: ^4.2.1
   vibration: ^1.8.3
   video_player: ^2.8.1

@@ -411,18 +411,6 @@ class ServiceHandler {
     }
   }
 
-  static void launchURL(String url) {
-    if (Platform.isAndroid) {
-      platform.invokeMethod('launchURL', {'url': url});
-    } else if (Platform.isIOS) {
-      // ???
-    } else if (Platform.isLinux) {
-      Process.run('xdg-open', [url]);
-    } else if (Platform.isWindows) {
-      Process.run('start', [url], runInShell: true);
-    }
-  }
-
   static Future<Uint8List?> makeVidThumb(String videoURL) async {
     Uint8List? thumbnail;
     if (Platform.isAndroid) {

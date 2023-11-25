@@ -15,6 +15,8 @@ class Constants {
 
   static const String discordURL = 'https://discord.gg/r9E4HDx9dz';
 
+  static const String email = 'no.aisu@protonmail.com';
+
   static const String defaultBrowserUserAgent =
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36';
 }

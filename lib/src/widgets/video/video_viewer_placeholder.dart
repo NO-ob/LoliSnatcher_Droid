@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher_string.dart';
+
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
@@ -34,7 +35,10 @@ class VideoViewerPlaceholder extends StatelessWidget {
                 if (Platform.isLinux) {
                   Process.run('mpv', ['--loop', item.fileURL]);
                 } else {
-                  ServiceHandler.launchURL(item.fileURL);
+                  launchUrlString(
+                    item.fileURL,
+                    mode: LaunchMode.externalApplication,
+                  );
                 }
               },
               icon: const Icon(Icons.play_arrow),

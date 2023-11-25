@@ -1,10 +1,14 @@
 import 'dart:core';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/discord_button.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class AboutPage extends StatelessWidget {
@@ -12,8 +16,6 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const String email = 'no.aisu@protonmail.com';
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('LoliSnatcher'),
@@ -32,17 +34,34 @@ class AboutPage extends StatelessWidget {
               icon: const Icon(Icons.public),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
-                ServiceHandler.launchURL('https://github.com/NO-ob/LoliSnatcher_Droid');
+                launchUrlString(
+                  'https://github.com/NO-ob/LoliSnatcher_Droid',
+                  mode: LaunchMode.externalApplication,
+                );
               },
             ),
             const DiscordButton(overrideText: 'Visit our Discord Server'),
             SettingsButton(
-              name: 'Contact: $email',
+              name: 'Contact: ${Constants.email}',
               icon: const Icon(Icons.email),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
-                ServiceHandler.launchURL('mailto:$email');
-                // Clipboard.setData(ClipboardData(text: email));
+                launchUrlString(
+                  'mailto:${Constants.email}',
+                  mode: LaunchMode.externalApplication,
+                );
+              },
+              onLongPress: () {
+                Clipboard.setData(const ClipboardData(text: Constants.email));
+                FlashElements.showSnackbar(
+                  context: context,
+                  title: const Text('Copied!', style: TextStyle(fontSize: 20)),
+                  content: const Text('Email address copied to clipboard'),
+                  sideColor: Colors.green,
+                  leadingIcon: Icons.check,
+                  leadingIconColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                );
               },
             ),
             //
@@ -56,7 +75,10 @@ class AboutPage extends StatelessWidget {
                 icon: const Icon(Icons.public),
                 trailingIcon: const Icon(Icons.exit_to_app),
                 action: () {
-                  ServiceHandler.launchURL('https://www.pixiv.net/en/users/28366691');
+                  launchUrlString(
+                    'https://www.pixiv.net/en/users/28366691',
+                    mode: LaunchMode.externalApplication,
+                  );
                 },
               ),
             //
@@ -69,7 +91,10 @@ class AboutPage extends StatelessWidget {
               icon: const Icon(Icons.public),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
-                ServiceHandler.launchURL('https://github.com/NO-ob');
+                launchUrlString(
+                  'https://github.com/NO-ob',
+                  mode: LaunchMode.externalApplication,
+                );
               },
             ),
             SettingsButton(
@@ -77,7 +102,10 @@ class AboutPage extends StatelessWidget {
               icon: const Icon(Icons.public),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
-                ServiceHandler.launchURL('https://github.com/NANI-SORE');
+                launchUrlString(
+                  'https://github.com/NANI-SORE',
+                  mode: LaunchMode.externalApplication,
+                );
               },
             ),
             //
@@ -90,7 +118,10 @@ class AboutPage extends StatelessWidget {
               icon: const Icon(Icons.public),
               trailingIcon: const Icon(Icons.exit_to_app),
               action: () {
-                ServiceHandler.launchURL('https://github.com/NO-ob/LoliSnatcher_Droid/releases');
+                launchUrlString(
+                  'https://github.com/NO-ob/LoliSnatcher_Droid/releases',
+                  mode: LaunchMode.externalApplication,
+                );
               },
             ),
             SettingsButton(

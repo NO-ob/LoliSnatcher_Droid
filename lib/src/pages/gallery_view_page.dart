@@ -27,7 +27,11 @@ import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 class GalleryViewPage extends StatefulWidget {
-  const GalleryViewPage(this.initialIndex, {super.key});
+  const GalleryViewPage(
+    this.initialIndex, {
+    super.key,
+  });
+
   final int initialIndex;
 
   @override
@@ -64,6 +68,15 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     setVolumeListener();
   }
 
+  @override
+  void dispose() {
+    volumeListener?.cancel();
+    ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
+    kbFocusNode.dispose();
+    ServiceHandler.enableSleep();
+    super.dispose();
+  }
+
   void toggleToolbar(bool isLongTap) {
     final bool newAppbarVisibility = !viewerHandler.displayAppbar.value;
     viewerHandler.displayAppbar.value = newAppbarVisibility;
@@ -78,17 +91,41 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
     ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
 
+  void setVolumeListener() {
+    volumeListener?.cancel();
+    volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
+  }
+
+  void volumeCallback(String event) {
+    // print('in gallery $event');
+    int dir = 0;
+    if (event == 'up') {
+      dir = -1;
+    } else if (event == 'down') {
+      dir = 1;
+    }
+
+    if (kbFocusNode.hasFocus && dir != 0) {
+      // disable volume scrolling when not in focus
+      // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, searchHandler.currentFetched.length), 0);
+      final int toPage = searchHandler.viewedIndex.value + dir; // lastScrolledTo;
+      // controller.animateToPage(toPage, duration: Duration(milliseconds: 30), curve: Curves.easeInOut);
+      if (toPage >= 0 && toPage < searchHandler.currentFetched.length) {
+        controller.jumpToPage(toPage);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // print('!!! GalleryViewPage build ${searchHandler.viewedIndex.value} !!!');
-    // kbFocusNode.requestFocus();
-
     final appBar = HideableAppBar(
       pageController: controller,
       onOpenDrawer: () {
         viewerScaffoldKey.currentState?.openEndDrawer();
       },
     );
+
+    final double maxWidth = MediaQuery.sizeOf(context).shortestSide * 0.8;
 
     return Scaffold(
       key: viewerScaffoldKey,
@@ -266,55 +303,14 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                 backgroundColor: Theme.of(context).canvasColor.withOpacity(0.66),
               ),
         ),
-        child: renderDrawer(),
-      ),
-    );
-  }
-
-  void setVolumeListener() {
-    volumeListener?.cancel();
-    volumeListener = searchHandler.volumeStream?.listen(volumeCallback);
-  }
-
-  void volumeCallback(String event) {
-    // print('in gallery $event');
-    int dir = 0;
-    if (event == 'up') {
-      dir = -1;
-    } else if (event == 'down') {
-      dir = 1;
-    }
-
-    if (kbFocusNode.hasFocus && dir != 0) {
-      // disable volume scrolling when not in focus
-      // lastScrolledTo = math.max(math.min(lastScrolledTo + dir, searchHandler.currentFetched.length), 0);
-      final int toPage = searchHandler.viewedIndex.value + dir; // lastScrolledTo;
-      // controller.animateToPage(toPage, duration: Duration(milliseconds: 30), curve: Curves.easeInOut);
-      if (toPage >= 0 && toPage < searchHandler.currentFetched.length) {
-        controller.jumpToPage(toPage);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    volumeListener?.cancel();
-    ServiceHandler.setVolumeButtons(!settingsHandler.useVolumeButtonsForScroll);
-    kbFocusNode.dispose();
-    ServiceHandler.enableSleep();
-    super.dispose();
-  }
-
-  Widget renderDrawer() {
-    final MediaQueryData mQuery = MediaQuery.of(context);
-    final double maxWidth = mQuery.orientation == Orientation.portrait ? (mQuery.size.width * 0.8) : (mQuery.size.height * 0.8);
-
-    return SizedBox(
-      width: maxWidth,
-      child: Drawer(
-        width: maxWidth,
-        child: const SafeArea(
-          child: TagView(),
+        child: SizedBox(
+          width: maxWidth,
+          child: Drawer(
+            width: maxWidth,
+            child: const SafeArea(
+              child: TagView(),
+            ),
+          ),
         ),
       ),
     );

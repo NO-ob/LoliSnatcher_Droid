@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -79,7 +79,10 @@ class _MediaPreviewsState extends State<MediaPreviews> {
               name: 'Help',
               icon: const Icon(Icons.help_center_outlined),
               action: () {
-                ServiceHandler.launchURL('https://github.com/NO-ob/LoliSnatcher_Droid/wiki');
+                launchUrlString(
+                  'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
+                  mode: LaunchMode.externalApplication,
+                );
               },
               trailingIcon: const Icon(Icons.exit_to_app),
             ),

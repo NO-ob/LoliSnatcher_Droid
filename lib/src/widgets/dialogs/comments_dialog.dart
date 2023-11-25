@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
@@ -265,7 +266,16 @@ class _CommentsDialogState extends State<CommentsDialog> {
                     ),
                     scrollPhysics: const NeverScrollableScrollPhysics(),
                     onOpen: (link) async {
-                      ServiceHandler.launchURL(link.url);
+                      final res = await launchUrlString(
+                        link.url,
+                        mode: LaunchMode.externalApplication,
+                      );
+                      if (!res) {
+                        FlashElements.showSnackbar(
+                          title: const Text('Error'),
+                          content: const Text('Failed to open link'),
+                        );
+                      }
                     },
                     style: const TextStyle(
                       fontSize: 16,
@@ -354,8 +364,10 @@ class _CommentsDialogState extends State<CommentsDialog> {
         if (widget.item.postURL.isNotEmpty)
           IconButton(
             onPressed: () {
-              ServiceHandler.launchURL(widget.item.postURL);
-              // Navigator.of(context).pop(false);
+              launchUrlString(
+                widget.item.postURL,
+                mode: LaunchMode.externalApplication,
+              );
             },
             icon: const Icon(Icons.public),
           ),

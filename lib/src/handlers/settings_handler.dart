@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import 'package:alice_lightweight/alice.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -1688,13 +1689,16 @@ class SettingsHandler extends GetxController {
               ),
               if (isFromStore && updateInfo.value!.isInStore)
                 ElevatedButton.icon(
-                  onPressed: () async {
+                  onPressed: () {
                     // try {
-                    //   ServiceHandler.launchURL("market://details?id=" + updateInfo.value!.storePackage);
+                    //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
                     // } on PlatformException catch(e) {
-                    //   ServiceHandler.launchURL("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                    //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
                     // }
-                    ServiceHandler.launchURL('https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}');
+                    launchUrlString(
+                      'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
+                      mode: LaunchMode.externalApplication,
+                    );
                     Navigator.of(context).pop(true);
                   },
                   icon: const Icon(Icons.play_arrow),
@@ -1703,7 +1707,10 @@ class SettingsHandler extends GetxController {
               else
                 ElevatedButton.icon(
                   onPressed: () {
-                    ServiceHandler.launchURL(updateInfo.value!.githubURL);
+                    launchUrlString(
+                      updateInfo.value!.githubURL,
+                      mode: LaunchMode.externalApplication,
+                    );
                     Navigator.of(context).pop(true);
                   },
                   icon: const Icon(Icons.exit_to_app),

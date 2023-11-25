@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
@@ -353,43 +354,28 @@ class _TagViewState extends State<TagView> {
                       await showDialog(
                         context: context,
                         builder: (context) {
-                          return AlertDialog(
-                            title: const Text('Open source?'),
-                            content: Text(link),
-                            actionsOverflowDirection: VerticalDirection.up,
-                            actions: [
-                              ElevatedButton.icon(
-                                onPressed: () async {
-                                  await Clipboard.setData(ClipboardData(text: link));
-                                  FlashElements.showSnackbar(
-                                    context: context,
-                                    duration: const Duration(seconds: 2),
-                                    title: const Text('Copied source to clipboard!', style: TextStyle(fontSize: 20)),
-                                    content: Text(link, style: const TextStyle(fontSize: 16)),
-                                    leadingIcon: Icons.copy,
-                                    sideColor: Colors.green,
-                                  );
-                                  Navigator.of(context).pop();
-                                },
-                                label: const Text('Copy'),
-                                icon: const Icon(Icons.copy),
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  ServiceHandler.launchURL(link);
-                                  Navigator.of(context).pop();
-                                },
-                                label: const Text('Open'),
-                                icon: const Icon(Icons.open_in_new),
-                              ),
-                              const CancelButton(withIcon: true),
-                            ],
-                          );
+                          return SourceLinkErrorDialog(link: link, fromError: false);
                         },
                       );
                     },
-                    onTap: () {
-                      ServiceHandler.launchURL(link);
+                    onTap: () async {
+                      if (!link.startsWith('https://') && !link.startsWith('http://')) {
+                        link = 'https://$link';
+                      }
+
+                      if (await canLaunchUrlString(link)) {
+                        await launchUrlString(
+                          link,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } else {
+                        await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return SourceLinkErrorDialog(link: link);
+                          },
+                        );
+                      }
                     },
                     title: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -875,4 +861,125 @@ class TagInfoIcon {
 
   final IconData icon;
   final Color color;
+}
+
+class SourceLinkErrorDialog extends StatefulWidget {
+  const SourceLinkErrorDialog({
+    required this.link,
+    this.fromError = true,
+    super.key,
+  });
+
+  final String link;
+  final bool fromError;
+
+  @override
+  State<SourceLinkErrorDialog> createState() => _SourceLinkErrorDialogState();
+}
+
+class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
+  String selectedText = '';
+  bool get hasSelected => selectedText.isNotEmpty;
+
+  Future<void> copy() async {
+    final link = hasSelected ? selectedText : widget.link;
+
+    await Clipboard.setData(ClipboardData(text: link));
+    FlashElements.showSnackbar(
+      context: context,
+      duration: const Duration(seconds: 2),
+      title: Text(
+        'Copied ${hasSelected ? 'selected text' : 'source'} to clipboard!',
+        style: const TextStyle(fontSize: 20),
+      ),
+      content: Text(link, style: const TextStyle(fontSize: 16)),
+      leadingIcon: Icons.copy,
+      sideColor: Colors.green,
+    );
+  }
+
+  Future<void> open() async {
+    String link = hasSelected ? selectedText : widget.link;
+    if (!link.startsWith('https://') && !link.startsWith('http://')) {
+      link = 'https://$link';
+    }
+
+    if (await canLaunchUrlString(link)) {
+      await launchUrlString(
+        link,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      FlashElements.showSnackbar(
+        context: context,
+        duration: const Duration(seconds: 2),
+        title: const Text(
+          'Failed to open link!',
+          style: TextStyle(fontSize: 20),
+        ),
+        content: Text(link, style: const TextStyle(fontSize: 16)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Source'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.fromError) const Text("The text in source field can't be open as a link"),
+          const Text('You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:'),
+          const SizedBox(height: 16),
+          SelectableText(
+            widget.link,
+            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+              setState(() {
+                selectedText = selection.textInside(widget.link);
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.select_all, size: 30),
+                const SizedBox(width: 8),
+                if (selectedText.isNotEmpty) Text(selectedText) else const Text('[No text selected]'),
+              ],
+            ),
+          ),
+        ],
+      ),
+      actionsOverflowDirection: VerticalDirection.up,
+      actions: [
+        SizedBox(
+          height: 40,
+          child: ElevatedButton.icon(
+            onPressed: copy,
+            label: Text('Copy ${hasSelected ? 'selected' : ''}'.trim()),
+            icon: const Icon(Icons.copy),
+          ),
+        ),
+        SizedBox(
+          height: 40,
+          child: ElevatedButton.icon(
+            onPressed: open,
+            label: Text('Open ${hasSelected ? 'selected' : ''}'.trim()),
+            icon: const Icon(Icons.open_in_new),
+          ),
+        ),
+        const SizedBox(
+          height: 40,
+          child: CancelButton(withIcon: true),
+        ),
+      ],
+    );
+  }
 }

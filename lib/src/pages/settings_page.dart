@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/about_page.dart';
 import 'package:lolisnatcher/src/pages/loli_sync_page.dart';
@@ -152,8 +152,9 @@ class SettingsPage extends StatelessWidget {
                 name: 'Help',
                 icon: const Icon(Icons.help_center_outlined),
                 action: () {
-                  ServiceHandler.launchURL(
+                  launchUrlString(
                     'https://github.com/NO-ob/LoliSnatcher_Droid/wiki',
+                    mode: LaunchMode.externalApplication,
                   );
                 },
                 trailingIcon: const Icon(Icons.exit_to_app),

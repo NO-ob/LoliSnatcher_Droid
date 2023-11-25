@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher_string.dart';
+
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
@@ -40,7 +41,10 @@ class UnknownViewerPlaceholder extends StatelessWidget {
                       child: SettingsButton(
                         name: 'Unknown file format (.${item.fileExt}), tap here to open in browser',
                         action: () {
-                          ServiceHandler.launchURL(item.postURL);
+                          launchUrlString(
+                            item.postURL,
+                            mode: LaunchMode.externalApplication,
+                          );
                         },
                         icon: const Icon(CupertinoIcons.question),
                         drawTopBorder: true,
