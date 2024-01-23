@@ -91,21 +91,21 @@ class ViewerHandler extends GetxController {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = currentKey.value?.currentState;
       switch (state?.widget.runtimeType) {
-        case ImageViewer:
+        case ImageViewer _:
           final widgetState = state! as ImageViewerState;
           isZoomed.value = widgetState.isZoomed;
           isLoaded.value = widgetState.isLoaded;
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
-        case VideoViewer:
+        case VideoViewer _:
           final widgetState = state! as VideoViewerState;
           isZoomed.value = widgetState.isZoomed;
           isLoaded.value = widgetState.isVideoInited;
           isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
-        case VideoViewerDesktop:
+        case VideoViewerDesktop _:
           final widgetState = state! as VideoViewerDesktopState;
           isZoomed.value = widgetState.isZoomed;
           // TODO find a way to get video loaded state
@@ -113,8 +113,8 @@ class ViewerHandler extends GetxController {
           isFullscreen.value = false;
           viewState.value = widgetState.viewController.value;
           break;
-        case VideoViewerPlaceholder:
-        case UnknownViewerPlaceholder:
+        case VideoViewerPlaceholder _:
+        case UnknownViewerPlaceholder _:
           isLoaded.value = true;
           isFullscreen.value = false;
           viewState.value = null;

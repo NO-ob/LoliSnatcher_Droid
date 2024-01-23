@@ -9,15 +9,11 @@ import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 class GuessExtensionViewer extends StatefulWidget {
   const GuessExtensionViewer({
     required this.item,
-    required this.index,
-    required this.itemKey,
     required this.onMediaTypeGuessed,
     super.key,
   });
 
   final BooruItem item;
-  final int index;
-  final Key itemKey;
   final Function(MediaType) onMediaTypeGuessed;
 
   @override
@@ -46,6 +42,40 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
   }
 
   Future<void> startGuessing() async {
+    // check mimetype of original file url
+    try {
+      final mimeRes = await client.head(
+        widget.item.fileURL,
+        cancelToken: cancelToken,
+      );
+      if (mimeRes.statusCode == 200) {
+        if (mimeRes.headers['content-type'] != null) {
+          final contentType = mimeRes.headers['content-type']?[0];
+          MediaType? mediaType;
+          if (contentType?.contains('video') == true) {
+            mediaType = MediaType.video;
+          } else if (contentType?.contains('image') == true) {
+            if (contentType?.contains('gif') == true) {
+              mediaType = MediaType.animation;
+            } else {
+              mediaType = MediaType.image;
+            }
+          }
+          //
+          if (mediaType != null) {
+            widget.item.fileExt = contentType!.split('/')[1];
+            widget.onMediaTypeGuessed(mediaType);
+            setState(() {});
+            return;
+          }
+        }
+      }
+    } catch (e) {
+      //
+    }
+    await Future.delayed(const Duration(milliseconds: 30));
+
+    // or go through each possible file ext until one of them loads successfully
     final videoExtensions = ['webm', 'mp4'];
     final gifExtensions = ['gif'];
     final imageExtensions = ['jpg', 'png', 'jpeg'];

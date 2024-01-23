@@ -33,7 +33,7 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
   final TextEditingController _urlController = TextEditingController();
 
   Future<void> _onGoToInitial(InAppWebViewController controller) async {
-    await controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(widget.initialUrl)));
+    await controller.loadUrl(urlRequest: URLRequest(url: WebUri(widget.initialUrl)));
   }
 
   Future<void> _onEnterCustomUrl(InAppWebViewController controller) async {
@@ -77,12 +77,12 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
       if (!url.startsWith('https')) {
         url = 'https://$url';
       }
-      await controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
+      await controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
     }
   }
 
   Future<void> _onListCookies(InAppWebViewController controller) async {
-    final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? Uri.parse('https://flutter.dev'));
+    final List<Cookie> cookies = await cookieManager.getCookies(url: await controller.getUrl() ?? WebUri('https://flutter.dev'));
     if (!mounted) return;
 
     await showDialog(
@@ -110,9 +110,9 @@ class _WebviewNavigationMenuState extends State<WebviewNavigationMenu> {
 
   Future<void> _onClearCookies(InAppWebViewController controller) async {
     // TODO doesn't work? maybe something related to android 12?
-    final Uri url = await controller.getUrl() ?? Uri.parse('https://flutter.dev');
+    final Uri url = await controller.getUrl() ?? WebUri('https://flutter.dev');
     print('Clearing cookies for $url');
-    await cookieManager.deleteCookies(url: url);
+    await cookieManager.deleteCookies(url: WebUri.uri(url));
     const String message = 'There were cookies. Now, they are gone!';
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(

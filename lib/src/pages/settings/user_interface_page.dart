@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/data/settings/app_mode.dart';
 import 'package:lolisnatcher/src/data/settings/hand_side.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
+import 'package:lolisnatcher/src/widgets/common/confirm_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class UserInterfacePage extends StatefulWidget {
@@ -127,9 +130,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                         return const SettingsDialog(
                           title: Text('Hand Side'),
                           contentItems: [
-                            Text('Moves some parts of the UI to the selected side of the screen'),
-                            Text('Currently only changes the position of the main drawer button'),
-                            Text('[This is a WIP feature, will include more changes in the future versions]'),
+                            Text('Changes position of some UI elements according to selected side'),
                           ],
                         );
                       },
@@ -157,8 +158,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     return 'Please enter a value';
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
-                  } else if (parse > 3 && (Platform.isAndroid || Platform.isIOS)) {
-                    return 'More than 3 columns could affect performance';
+                  } else if (parse > 4 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
+                    return 'Using more than 4 columns could affect performance';
                   } else {
                     return null;
                   }
@@ -181,6 +182,8 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     return 'Please enter a value';
                   } else if (parse == null) {
                     return 'Please enter a valid numeric value';
+                  } else if (parse > 8 && (Platform.isAndroid || Platform.isIOS || kDebugMode)) {
+                    return 'Using more than 8 columns could affect performance';
                   } else {
                     return null;
                   }
@@ -225,6 +228,68 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   });
                 },
                 title: 'Preview Display',
+              ),
+              SettingsToggle(
+                value: settingsHandler.disableImageScaling,
+                onChanged: (newValue) async {
+                  if (newValue) {
+                    final res = await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const SettingsDialog(
+                          title: Text('Warning'),
+                          contentItems: [
+                            Text(
+                              'Are you sure you want to disable image scaling?',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'This can negatively impact the performance, especially on older devices',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                          actionButtons: [
+                            CancelButton(),
+                            ConfirmButton(),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (res != true) {
+                      return;
+                    }
+                  }
+
+                  setState(() {
+                    settingsHandler.disableImageScaling = newValue;
+                  });
+                },
+                title: "Don't scale images",
+                leadingIcon: const Icon(Icons.close_fullscreen),
+                subtitle: const Text('Disables image scaling which is used to improve performance'),
+              ),
+              Stack(
+                children: [
+                  SettingsToggle(
+                    value: !settingsHandler.disableImageScaling ? false : settingsHandler.gifsAsThumbnails,
+                    onChanged: (newValue) {
+                      setState(() {
+                        settingsHandler.gifsAsThumbnails = newValue;
+                      });
+                    },
+                    title: 'GIF thumbnails',
+                    leadingIcon: const Icon(Icons.gif),
+                    subtitle: const Text('Requires "Don\'t scale images"'),
+                  ),
+                  if (!settingsHandler.disableImageScaling)
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Colors.black.withOpacity(0.4),
+                      ),
+                    ),
+                ],
               ),
               if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
                 SettingsTextInput(

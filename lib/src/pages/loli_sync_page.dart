@@ -151,7 +151,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
   Widget selectBuild() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
+      children: [
         const SettingsButton(
           name: 'Select what you want to do',
           icon: Icon(Icons.help_center_outlined),
@@ -183,7 +183,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   Widget senderBuild() {
     return ListView(
-      children: <Widget>[
+      children: [
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: const Text(
@@ -255,7 +255,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                         builder: (context) {
                           return const SettingsDialog(
                             title: Text('Start Favs Sync from #...'),
-                            contentItems: <Widget>[
+                            contentItems: [
                               Text('Allows to set from where the sync should start from'),
                               Text('If you want to sync from the beginning leave this field blank'),
                               Text(''),
@@ -320,7 +320,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                         builder: (context) {
                           return const SettingsDialog(
                             title: Text('Tabs Sync Mode'),
-                            contentItems: <Widget>[
+                            contentItems: [
                               Text(
                                 'Merge: Merge the tabs from this device on the other device, tabs with unknown boorus and already existing tabs will be ignored',
                               ),
@@ -366,7 +366,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                         builder: (context) {
                           return const SettingsDialog(
                             title: Text('Tabs Sync Mode'),
-                            contentItems: <Widget>[
+                            contentItems: [
                               Text("PreferTypeIfNone: If the tag exists with a tag type on the other device and it doesn't on this device it will be skipped"),
                               Text(''),
                               Text(
@@ -394,7 +394,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
                 builder: (context) {
                   return const SettingsDialog(
                     title: Text('Test Connection'),
-                    contentItems: <Widget>[
+                    contentItems: [
                       Text('This will send a test request to the other device.'),
                       Text('There will be a notification stating if the request was successful or not.'),
                     ],
@@ -460,7 +460,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
 
   Widget receiverBuild() {
     return ListView(
-      children: <Widget>[
+      children: [
         Container(
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: Column(

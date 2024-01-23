@@ -31,7 +31,7 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   final GlobalKey webViewKey = GlobalKey();
 
   Completer<InAppWebViewController> controller = Completer<InAppWebViewController>();
-  late final InAppWebViewGroupOptions options;
+  late final InAppWebViewSettings settings;
 
   late PullToRefreshController pullToRefreshController;
   int loadingPercentage = 0;
@@ -41,24 +41,18 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
   void initState() {
     super.initState();
 
-    options = InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(
-        userAgent: widget.userAgent ?? Tools.browserUserAgent,
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: false,
-        javaScriptEnabled: true,
-        cacheEnabled: false,
-      ),
-      android: AndroidInAppWebViewOptions(
-        useHybridComposition: true,
-      ),
-      ios: IOSInAppWebViewOptions(
-        allowsInlineMediaPlayback: true,
-      ),
+    settings = InAppWebViewSettings(
+      userAgent: widget.userAgent ?? Tools.browserUserAgent,
+      useShouldOverrideUrlLoading: true,
+      mediaPlaybackRequiresUserGesture: false,
+      javaScriptEnabled: true,
+      cacheEnabled: false,
+      useHybridComposition: true,
+      allowsInlineMediaPlayback: true,
     );
 
     pullToRefreshController = PullToRefreshController(
-      options: PullToRefreshOptions(
+      settings: PullToRefreshSettings(
         color: Colors.blue,
       ),
       onRefresh: () async {
@@ -94,8 +88,8 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
         children: [
           if (Platform.isAndroid || Platform.isIOS)
             InAppWebView(
-              initialUrlRequest: URLRequest(url: Uri.parse(widget.initialUrl)),
-              initialOptions: options,
+              initialUrlRequest: URLRequest(url: WebUri(widget.initialUrl)),
+              initialSettings: settings,
               pullToRefreshController: pullToRefreshController,
               onWebViewCreated: (webViewController) {
                 controller.complete(webViewController);

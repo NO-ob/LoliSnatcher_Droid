@@ -152,7 +152,7 @@ linter:
     type_init_formals: true
     unawaited_futures: true
     unnecessary_await_in_return: true
-    unnecessary_breaks: true
+    # unnecessary_breaks: true # fluter/dart doesn't have case fallthrough in switches after dart 3.0
     unnecessary_brace_in_string_interps: true
     unnecessary_const: true
     unnecessary_constructor_name: true

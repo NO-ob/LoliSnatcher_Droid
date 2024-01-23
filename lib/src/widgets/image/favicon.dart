@@ -11,12 +11,16 @@ import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
 class Favicon extends StatefulWidget {
   const Favicon(
     this.booru, {
+    this.size = iconSize,
     this.color,
     super.key,
   });
 
   final Booru booru;
+  final double size;
   final Color? color;
+
+  static const double iconSize = 20;
 
   @override
   State<Favicon> createState() => _FaviconState();
@@ -30,7 +34,7 @@ class _FaviconState extends State<Favicon> {
   ImageStreamListener? imageListener;
   String? errorCode;
 
-  static const double iconSize = 20;
+  double get size => widget.size;
 
   @override
   void didUpdateWidget(Favicon oldWidget) {
@@ -57,8 +61,8 @@ class _FaviconState extends State<Favicon> {
         receiveTimeout: const Duration(seconds: 5),
         onError: onError,
       ),
-      width: 200,
-      height: 200,
+      width: (size * 5).toInt(),
+      height: (size * 5).toInt(),
     );
   }
 
@@ -150,11 +154,11 @@ class _FaviconState extends State<Favicon> {
     // print('Favicon build ${widget.faviconURL}');
 
     return Container(
-      width: iconSize,
-      height: iconSize,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(iconSize / 5),
+        borderRadius: BorderRadius.circular(size / 5),
       ),
       clipBehavior: Clip.hardEdge,
       child: Stack(
@@ -163,11 +167,14 @@ class _FaviconState extends State<Favicon> {
           if (mainProvider != null)
             Image(
               image: mainProvider!,
-              width: iconSize,
-              height: iconSize,
+              width: size,
+              height: size,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.medium,
+              isAntiAlias: true,
               errorBuilder: (_, Object exception, ___) {
                 return FaviconError(
-                  iconSize: iconSize,
+                  iconSize: size,
                   color: widget.color ?? Theme.of(context).colorScheme.onBackground,
                   code: errorCode,
                   onRestart: () {
@@ -180,7 +187,7 @@ class _FaviconState extends State<Favicon> {
           else ...[
             if (isFailed)
               FaviconError(
-                iconSize: iconSize,
+                iconSize: size,
                 color: Colors.grey,
                 code: errorCode,
                 onRestart: () {
@@ -196,7 +203,7 @@ class _FaviconState extends State<Favicon> {
             child: (isLoaded || isFailed)
                 ? const SizedBox.shrink()
                 : ClipRRect(
-                    borderRadius: BorderRadius.circular(iconSize / 5),
+                    borderRadius: BorderRadius.circular(size / 5),
                     child: ShimmerCard(
                       isLoading: !isLoaded && !isFailed,
                       child: !isLoaded && !isFailed ? null : const SizedBox.shrink(),
@@ -206,10 +213,10 @@ class _FaviconState extends State<Favicon> {
 
           // Image(
           //   image: NetworkImage(widget.booru.faviconURL!),
-          //   width: iconSize,
-          //   height: iconSize,
+          //   width: size,
+          //   height: size,
           //   errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-          //     return const Icon(Icons.broken_image, size: iconSize);
+          //     return const Icon(Icons.broken_image, size: size);
           //   },
           // ),
         ],
@@ -220,7 +227,7 @@ class _FaviconState extends State<Favicon> {
 
 class FaviconError extends StatelessWidget {
   const FaviconError({
-    this.iconSize = 20,
+    this.iconSize = Favicon.iconSize,
     this.color = Colors.grey,
     this.code,
     this.onRestart,

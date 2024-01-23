@@ -51,7 +51,6 @@ class SnatchHandler extends GetxController {
   }
 
   Future snatch(SnatchItem item) async {
-    active.value = true;
     status.value = queuedList.isNotEmpty ? '0/${item.booruItems.length}/${queuedList.length}' : '0/${item.booruItems.length}';
     current.value = item;
 
@@ -70,50 +69,68 @@ class SnatchHandler extends GetxController {
         final List<BooruItem>? exists = data['exists'];
         final List<BooruItem>? failed = data['failed'];
 
-        status.value = queuedList.isNotEmpty ? '$snatched/${item.booruItems.length}/${queuedList.length}' : '$snatched/${item.booruItems.length}';
-
-        if (exists == null && failed == null) {
-          // record progress only when snatched changes
-          queueProgress.value = queueProgress.value + 1;
-        }
-
-        received.value = 0;
-        total.value = 0;
-
-        if (exists != null && failed != null && queuedList.isEmpty) {
+        if (exists != null && failed != null) {
           // last yield in stream will send exists and failed counts
           // but show this message only when queue is empty => snatching is complete
           if (SettingsHandler.instance.downloadNotifications) {
-            FlashElements.showSnackbar(
-              duration: const Duration(seconds: 2),
-              position: Positions.top,
-              title: const Text('Snatching Complete', style: TextStyle(fontSize: 20)),
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Snatched: ${queueProgress.value} ${Tools.pluralize('item', queueProgress.value)}"),
-                  if (exists.isNotEmpty)
-                    Text('${exists.length} ${Tools.pluralize('file', exists.length)} ${exists.length == 1 ? 'was' : 'were'} already snatched'),
-                  if (failed.isNotEmpty) Text('Failed to snatch ${failed.length} ${Tools.pluralize('file', exists.length)}'),
-                ],
-              ),
-              leadingIcon: Icons.done_all,
-              sideColor: (exists.isNotEmpty || failed.isNotEmpty) ? Colors.yellow : Colors.green,
-              //TODO restart/retry buttons for failed items?
-            );
+            if (current.value!.booruItems.length == 1) {
+              FlashElements.showSnackbar(
+                duration: const Duration(seconds: 2),
+                position: Positions.top,
+                title: const Text('Item Snatched', style: TextStyle(fontSize: 20)),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (exists.isNotEmpty) const Text('Item was already snatched before'),
+                    if (failed.isNotEmpty) const Text('Failed to snatch the item'),
+                    if (queuedList.isNotEmpty) const Text('Starting next queue...'),
+                  ],
+                ),
+                leadingIcon: Icons.done_all,
+                sideColor: failed.isNotEmpty ? Colors.red : (exists.isNotEmpty ? Colors.yellow : Colors.green),
+                //TODO restart/retry buttons for failed items?
+              );
+            } else {
+              FlashElements.showSnackbar(
+                duration: const Duration(seconds: 2),
+                position: Positions.top,
+                title: const Text('Queue Snatched', style: TextStyle(fontSize: 20)),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Snatched: ${queueProgress.value} ${Tools.pluralize('item', queueProgress.value)}"),
+                    if (exists.isNotEmpty)
+                      Text('${exists.length} ${Tools.pluralize('file', exists.length)} ${exists.length == 1 ? 'was' : 'were'} already snatched'),
+                    if (failed.isNotEmpty) Text('Failed to snatch ${failed.length} ${Tools.pluralize('file', exists.length)}'),
+                    if (queuedList.isNotEmpty) const Text('Starting next queue...'),
+                  ],
+                ),
+                leadingIcon: Icons.done_all,
+                sideColor: (exists.isEmpty && failed.isNotEmpty) ? Colors.red : (exists.isNotEmpty ? Colors.yellow : Colors.green),
+                //TODO restart/retry buttons for failed items?
+              );
+            }
           }
         }
+
+        status.value = queuedList.isNotEmpty ? '$snatched/${item.booruItems.length}/${queuedList.length}' : '$snatched/${item.booruItems.length}';
+        queueProgress.value = queueProgress.value + 1;
+        received.value = 0;
+        total.value = 0;
       },
       onDone: () {
-        if (queuedList.isNotEmpty && active.value) {
-          snatch(queuedList.removeLast());
-        } else {
-          active.value = false;
-          status.value = '';
-          queueProgress.value = 0;
-          current.value = null;
-          received.value = 0;
-          total.value = 0;
+        status.value = '';
+        current.value = null;
+        queueProgress.value = 0;
+        received.value = 0;
+        total.value = 0;
+
+        if (active.value) {
+          if (queuedList.isNotEmpty) {
+            snatch(queuedList.removeAt(0));
+          } else {
+            active.value = false;
+          }
         }
       },
     );
@@ -122,9 +139,8 @@ class SnatchHandler extends GetxController {
   void trySnatch() {
     if (!active.value && current.value == null) {
       if (queuedList.isNotEmpty) {
-        snatch(queuedList.removeLast());
-      } else if (queuedList.isEmpty) {
-        //
+        active.value = true;
+        snatch(queuedList.removeAt(0));
       }
     }
   }

@@ -63,7 +63,7 @@ class BooruItem {
   late Rx<MediaType> mediaType;
   RxnString possibleExt = RxnString(null);
   RxnBool isSnatched = RxnBool(null), isFavourite = RxnBool(null);
-  RxBool isNoScale = false.obs;
+  RxBool isNoScale = false.obs, toggleQuality = false.obs;
 
   String? fileExt, serverId, rating, score, uploaderName, description, md5String, postDate, postDateFormat;
   String fileNameExtras;

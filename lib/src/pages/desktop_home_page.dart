@@ -34,7 +34,7 @@ class DesktopHome extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         toolbarHeight: 60,
-        actions: <Widget>[
+        actions: [
           // Obx(() {
           //   if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
           //     return const DesktopTabs();
@@ -48,11 +48,11 @@ class DesktopHome extends StatelessWidget {
               return const Expanded(
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
+                  children: [
                     SizedBox(width: 15),
                     TagSearchBox(),
                     TagSearchButton(),
-                    Expanded(flex: 1, child: TabBooruSelector(true)),
+                    Expanded(flex: 1, child: TabBooruSelector()),
                     Expanded(flex: 2, child: TabSelector()),
                     Expanded(flex: 2, child: TabButtons(false, WrapAlignment.start)),
                   ],

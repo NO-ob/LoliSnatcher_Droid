@@ -93,7 +93,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: const Text('Backup & Restore'),
+            title: const Text('Backup & Restore [BETA]'),
           ),
           body: Center(
             child: ListView(
@@ -118,7 +118,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Backup & Restore'),
+          title: const Text('Backup & Restore [BETA]'),
         ),
         body: Center(
           child: ListView(

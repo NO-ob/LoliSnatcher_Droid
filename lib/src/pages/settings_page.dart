@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/pages/settings/booru_page.dart';
 import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
+import 'package:lolisnatcher/src/pages/settings/network_page.dart';
 import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
 import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
@@ -72,7 +73,7 @@ class SettingsPage extends StatelessWidget {
         ),
         body: Center(
           child: ListView(
-            children: <Widget>[
+            children: [
               SettingsButton(
                 name: 'Boorus & Search',
                 icon: const Icon(Icons.image_search),
@@ -95,7 +96,7 @@ class SettingsPage extends StatelessWidget {
               ),
               SettingsButton(
                 name: 'Snatching & Caching',
-                icon: const Icon(Icons.settings),
+                icon: const Icon(Icons.sd_storage_sharp),
                 page: () => const SaveCachePage(),
               ),
               SettingsButton(
@@ -109,9 +110,14 @@ class SettingsPage extends StatelessWidget {
                 page: () => const DatabasePage(),
               ),
               SettingsButton(
-                name: 'Backup & Restore [Beta]',
+                name: 'Backup & Restore',
                 icon: const Icon(Icons.restore_page),
                 page: () => const BackupRestorePage(),
+              ),
+              SettingsButton(
+                name: 'Network',
+                icon: const Icon(Icons.network_check),
+                page: () => const NetworkPage(),
               ),
               SettingsButton(
                 name: 'LoliSync',

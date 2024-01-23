@@ -20,7 +20,8 @@ class _GalleryPageState extends State<GalleryPage> {
       useVolumeButtonsForScroll = false,
       shitDevice = false,
       disableVideo = false,
-      wakeLockEnabled = true;
+      wakeLockEnabled = true,
+      enableHeroTransitions = true;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
@@ -56,6 +57,7 @@ class _GalleryPageState extends State<GalleryPage> {
     disableVideo = settingsHandler.disableVideo;
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
+    enableHeroTransitions = settingsHandler.enableHeroTransitions;
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
@@ -79,6 +81,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.disableVideo = disableVideo;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
+    settingsHandler.enableHeroTransitions = enableHeroTransitions;
     if (int.parse(scrollSpeedController.text) < 100) {
       scrollSpeedController.text = '100';
     }
@@ -158,7 +161,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       builder: (context) {
                         return const SettingsDialog(
                           title: Text('Gallery Quality'),
-                          contentItems: <Widget>[
+                          contentItems: [
                             Text('The gallery quality changes the resolution of images in the gallery viewer.'),
                             Text(''),
                             Text(' - Sample - Medium resolution'),
@@ -197,7 +200,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       builder: (context) {
                         return SettingsDialog(
                           title: const Text('Share Actions'),
-                          contentItems: <Widget>[
+                          contentItems: [
                             const Text('- Ask - always ask what to share'),
                             const Text('- Post URL'),
                             const Text('- File URL - shares direct link to the original file (may not work with some sites, e.g. Sankaku)'),
@@ -281,7 +284,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             builder: (context) {
                               return const SettingsDialog(
                                 title: Text('Buttons Order'),
-                                contentItems: <Widget>[
+                                contentItems: [
                                   Text('Long press to change item order.'),
                                   Text('First 4 buttons from this list will be always visible on Toolbar.'),
                                   Text('Other buttons will be in overflow (three dots) menu.'),
@@ -348,7 +351,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       builder: (context) {
                         return const SettingsDialog(
                           title: Text('Disable Video'),
-                          contentItems: <Widget>[
+                          contentItems: [
                             Text('Useful on low end devices that crash when trying to load videos.'),
                             Text("Replaces video with text that says 'Video disabled'."),
                           ],
@@ -388,7 +391,8 @@ class _GalleryPageState extends State<GalleryPage> {
                       preloadController.text = '0';
                       galleryMode = 'Sample';
                       autoPlay = false;
-                      // TODO set thumbnails quality to low?
+                      settingsHandler.disableImageScaling = false;
+                      settingsHandler.previewMode = 'Thumbnail';
                     }
                   });
                 },
@@ -401,7 +405,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       builder: (context) {
                         return const SettingsDialog(
                           title: Text('Low Performance Mode'),
-                          contentItems: <Widget>[
+                          contentItems: [
                             Text('Recommended for old devices and devices with RAM < 2GB.'),
                             Text(''),
                             Text('- Disables loading progress information'),
@@ -409,6 +413,7 @@ class _GalleryPageState extends State<GalleryPage> {
                             Text('   - Gallery Quality'),
                             Text('   - Gallery Preload'),
                             Text('   - Video Auto Play'),
+                            Text("   - Don't scale images"),
                           ],
                         );
                       },
@@ -434,7 +439,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       builder: (context) {
                         return const SettingsDialog(
                           title: Text('Volume Buttons Scrolling'),
-                          contentItems: <Widget>[
+                          contentItems: [
                             Text('Allows to scroll through previews grid and gallery items using volume buttons'),
                             Text(''),
                             Text(' - Volume Down - next item'),
@@ -504,7 +509,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       builder: (context) {
                         return const SettingsDialog(
                           title: Text('AutoScroll / Slideshow'),
-                          contentItems: <Widget>[
+                          contentItems: [
                             Text('[WIP] Videos and gifs must be scrolled manually for now.'),
                           ],
                         );
@@ -521,6 +526,18 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: 'Prevent Device From Sleeping',
+              ),
+              SettingsToggle(
+                value: enableHeroTransitions,
+                onChanged: (newValue) {
+                  setState(() {
+                    enableHeroTransitions = newValue;
+                  });
+                },
+                title: 'Gallery Transitions',
+                subtitle: Text(
+                  'Animation during opening/closing of gallery is ${enableHeroTransitions ? 'enabled' : 'disabled'}',
+                ),
               ),
             ],
           ),

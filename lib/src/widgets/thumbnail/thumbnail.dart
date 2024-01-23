@@ -353,7 +353,8 @@ class _ThumbnailState extends State<Thumbnail> {
           }
         });
 
-        final double iconSize = constraints.maxWidth * 0.75;
+        // take smallest dimension for hated icon container
+        final double iconSize = (constraints.maxHeight < constraints.maxWidth ? constraints.maxHeight : constraints.maxWidth) * 0.75;
 
         final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
         final bool useExtra = isThumbQuality == false && !widget.item.isHated;
@@ -463,12 +464,10 @@ class _ThumbnailState extends State<Thumbnail> {
                 ),
                 width: iconSize,
                 height: iconSize,
-                child: const Icon(CupertinoIcons.eye_slash, color: Colors.white),
-              ),
-            if (settingsHandler.showURLOnThumb)
-              ColoredBox(
-                color: Colors.black,
-                child: Text(thumbURL),
+                child: const Icon(
+                  CupertinoIcons.eye_slash,
+                  color: Colors.white,
+                ),
               ),
           ],
         );
@@ -478,14 +477,17 @@ class _ThumbnailState extends State<Thumbnail> {
     // print('building thumb ${searchHandler.getItemIndex(widget.item)}');
 
     if (widget.isStandalone) {
-      return Hero(
-        tag: 'imageHero${searchHandler.getItemIndex(widget.item)}#${widget.item.fileURL}',
-        placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
-          // keep building the image since the images can be visible in the
-          // background of the image gallery
-          return child;
-        },
-        child: imageStack,
+      return HeroMode(
+        enabled: settingsHandler.enableHeroTransitions,
+        child: Hero(
+          tag: 'imageHero${searchHandler.getItemIndex(widget.item)}#${widget.item.fileURL}',
+          placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
+            // keep building the image since the images can be visible in the
+            // background of the image gallery
+            return child;
+          },
+          child: imageStack,
+        ),
       );
     } else {
       return ColoredBox(

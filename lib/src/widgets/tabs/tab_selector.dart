@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -129,9 +130,20 @@ class TabSelector extends StatelessWidget {
                   ),
                 ),
               ),
-              child: TabRow(
-                tab: currentTab,
-                color: color,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TabRow(
+                      tab: currentTab,
+                      color: color,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: theme.iconTheme.color,
+                  ),
+                ],
               ),
             ),
           ),
@@ -155,10 +167,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
   List<SearchTab> tabs = [], filteredTabs = [], selectedTabs = [];
   late final ScrollController scrollController;
 
-  final TextEditingController filterController = TextEditingController();
+  final TextEditingController filterTextController = TextEditingController();
   bool? sortTabs, loadedFilter;
   Booru? booruFilter;
-  bool duplicateFilter = false, emptyFilter = false;
+  bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
   bool selectMode = false;
 
   bool showPlaceholders = false, firstRender = true;
@@ -167,7 +179,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
   int get totalTabs => searchHandler.total;
   int get totalFilteredTabs => filteredTabs.length;
-  bool get isFilterActive => totalFilteredTabs != totalTabs || filterController.text.isNotEmpty || filtersCount > 0;
+  bool get isFilterActive => totalFilteredTabs != totalTabs || filterTextController.text.isNotEmpty || filtersCount > 0;
   int get currentTabIndex => filteredTabs.indexOf(searchHandler.currentTab);
 
   int get filtersCount {
@@ -305,9 +317,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
     if (duplicateFilter) {
       // tabs where booru and tags are the same
       filteredTabs = filteredTabs.where((tab) {
-        final List<SearchTab> sameBooru = filteredTabs.where((t) => t.selectedBooru.value == tab.selectedBooru.value).toList();
-        final List<SearchTab> sameTags = sameBooru.where((t) => t.tags == tab.tags).toList();
-        return sameTags.length > 1;
+        final List<SearchTab> booruTabs = filteredTabs.where((t) => duplicateBooruFilter ? t.selectedBooru.value == tab.selectedBooru.value : true).toList();
+        final List<SearchTab> sameTagsTabs = booruTabs.where((t) => t.tags.toLowerCase().trim() == tab.tags.toLowerCase().trim()).toList();
+        return sameTagsTabs.length > 1;
       }).toList();
     }
 
@@ -315,9 +327,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
       filteredTabs = filteredTabs.where((tab) => tab.tags.trim().isEmpty).toList();
     }
 
-    if (filterController.text.isNotEmpty) {
+    if (filterTextController.text.isNotEmpty) {
       filteredTabs = filteredTabs.where((t) {
-        final String filterText = filterController.text.toLowerCase().trim();
+        final String filterText = filterTextController.text.toLowerCase().trim();
         return t.tags.toLowerCase().contains(filterText);
       }).toList();
     }
@@ -345,6 +357,13 @@ class _TabManagerPageState extends State<TabManagerPage> {
         duplicateFilter: duplicateFilter,
         duplicateFilterChanged: (bool newValue) {
           duplicateFilter = newValue;
+          if (!duplicateFilter) {
+            duplicateBooruFilter = true;
+          }
+        },
+        duplicateBooruFilter: duplicateBooruFilter,
+        duplicateBooruFilterChanged: (bool newValue) {
+          duplicateBooruFilter = newValue;
         },
         emptyFilter: emptyFilter,
         emptyFilterChanged: (bool newValue) {
@@ -360,6 +379,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
       loadedFilter = null;
       booruFilter = null;
       duplicateFilter = false;
+      duplicateBooruFilter = true;
       emptyFilter = false;
 
       firstRender = true;
@@ -395,11 +415,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
       width: double.infinity,
       child: Row(
         mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
+        children: [
           Expanded(
             child: SettingsTextInput(
-              title: 'Search Tabs',
-              controller: filterController,
+              title: 'Filter Tabs',
+              controller: filterTextController,
               inputType: TextInputType.text,
               clearable: true,
               onlyInput: true,
@@ -479,7 +499,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
         isCurrent: isCurrent,
         showPlaceholders: showPlaceholders,
         firstRender: firstRender,
-        filterText: filterController.text,
+        filterText: filterTextController.text,
         onTap: selectMode
             ? () {
                 if (isSelected || isCurrent) {
@@ -580,8 +600,8 @@ class _TabManagerPageState extends State<TabManagerPage> {
                 row: TabManagerItem(
                   tab: tab,
                   index: searchHandler.list.indexOf(tab),
-                  isFiltered: isFilterActive,
-                  originalIndex: isFilterActive ? originalIndex : null,
+                  isFiltered: false,
+                  originalIndex: null,
                 ),
                 index: searchHandler.list.indexOf(tab),
               ),
@@ -661,25 +681,19 @@ class _TabManagerPageState extends State<TabManagerPage> {
         ),
       ),
       actionButtons: [
-        const SizedBox(
-          height: 40,
-          child: CancelButton(),
-        ),
-        SizedBox(
-          height: 40,
-          child: ElevatedButton.icon(
-            label: const Text('Delete'),
-            icon: const Icon(Icons.delete_forever),
-            onPressed: () {
-              for (int i = 0; i < selectedTabs.length; i++) {
-                final int index = searchHandler.list.indexOf(selectedTabs[i]);
-                searchHandler.removeTabAt(tabIndex: index);
-              }
-              selectedTabs.clear();
-              getTabs();
-              Navigator.of(context).pop();
-            },
-          ),
+        const CancelButton(withIcon: true),
+        ElevatedButton.icon(
+          label: const Text('Delete'),
+          icon: const Icon(Icons.delete_forever),
+          onPressed: () {
+            for (int i = 0; i < selectedTabs.length; i++) {
+              final int index = searchHandler.list.indexOf(selectedTabs[i]);
+              searchHandler.removeTabAt(tabIndex: index);
+            }
+            selectedTabs.clear();
+            getTabs();
+            Navigator.of(context).pop();
+          },
         ),
       ],
     );
@@ -697,7 +711,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
       builder: (context) {
         return SettingsDialog(
           title: const Text('Tabs Manager'),
-          contentItems: <Widget>[
+          contentItems: [
             const Text('Scrolling:'),
             const SizedBox(height: 6),
             const Row(
@@ -792,7 +806,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             const SizedBox(height: 6),
             const Row(
               children: [
-                Icon(Icons.delete),
+                Icon(Icons.delete_forever),
                 SizedBox(width: 10),
                 Expanded(child: Text('Delete selected tabs')),
               ],
@@ -812,12 +826,12 @@ class _TabManagerPageState extends State<TabManagerPage> {
             const Text('Second number - tab index in current list order, appears when filtering/sorting is active'),
             const Divider(),
             const Text('Special filters:'),
-            const Text('"loaded" - show tabs which have loaded items'),
-            const Text('"unloaded" - show tabs which are not loaded and/or have zero items'),
+            const Text('"Loaded" - show tabs which have loaded items'),
+            const Text('"Not loaded" - show tabs which are not loaded and/or have zero items'),
             RichText(
               text: const TextSpan(
                 children: [
-                  TextSpan(text: 'Unloaded tabs have '),
+                  TextSpan(text: 'Not loaded tabs have '),
                   TextSpan(
                     text: 'italic',
                     style: TextStyle(fontStyle: FontStyle.italic),
@@ -915,23 +929,17 @@ class _TabManagerPageState extends State<TabManagerPage> {
                                 const Text('Shuffle tabs randomly?'),
                               ],
                         actionButtons: [
-                          const SizedBox(
-                            height: 40,
-                            child: CancelButton(),
-                          ),
-                          SizedBox(
-                            height: 40,
-                            child: ElevatedButton.icon(
-                              label: Text(sortTabs != null ? 'Sort' : 'Shuffle'),
-                              icon: Transform(
-                                alignment: Alignment.center,
-                                transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
-                                child: Icon(sortTabs != null ? Icons.sort : Icons.sort_by_alpha),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop('allow');
-                              },
+                          const CancelButton(withIcon: true),
+                          ElevatedButton.icon(
+                            label: Text(sortTabs != null ? 'Sort' : 'Shuffle'),
+                            icon: Transform(
+                              alignment: Alignment.center,
+                              transform: sortTabs == true ? Matrix4.rotationX(pi) : Matrix4.rotationX(0),
+                              child: Icon(sortTabs != null ? Icons.sort : Icons.sort_by_alpha),
                             ),
+                            onPressed: () {
+                              Navigator.of(context).pop('allow');
+                            },
                           ),
                         ],
                       );
@@ -1014,6 +1022,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       controller: scrollController,
                       child: ReorderableListView.builder(
                         scrollController: scrollController,
+                        itemExtent: tabHeight,
                         onReorder: (oldIndex, newIndex) {
                           if (oldIndex == newIndex) {
                             return;
@@ -1057,106 +1066,90 @@ class _TabManagerPageState extends State<TabManagerPage> {
           Builder(
             builder: (context) {
               const double iconSize = 28;
-              const double btnHeight = 50;
 
-              final toTopBtn = SizedBox(
-                height: btnHeight,
-                child: ElevatedButton(
-                  onPressed: scrollToTop,
-                  child: const Icon(
-                    Icons.arrow_circle_up_rounded,
-                    size: iconSize,
-                  ),
+              final toTopBtn = ElevatedButton(
+                onPressed: scrollToTop,
+                child: const Icon(
+                  Icons.arrow_circle_up_rounded,
+                  size: iconSize,
                 ),
               );
 
               final filteredTabsMinusCurrent = [...filteredTabs]..remove(searchHandler.currentTab);
               final selectedAll = selectedTabs.length == filteredTabsMinusCurrent.length;
 
-              final selectAllBtn = SizedBox(
-                height: btnHeight,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (selectedAll) {
-                      selectedTabs.clear();
-                    } else {
-                      selectedTabs = [...filteredTabs];
-                      selectedTabs.remove(searchHandler.currentTab);
-                    }
-                    setState(() {});
-                  },
-                  child: Icon(
-                    selectedAll ? Icons.border_clear : Icons.select_all,
-                    size: iconSize,
-                  ),
+              final selectAllBtn = ElevatedButton(
+                onPressed: () {
+                  if (selectedAll) {
+                    selectedTabs.clear();
+                  } else {
+                    selectedTabs = [...filteredTabs];
+                    selectedTabs.remove(searchHandler.currentTab);
+                  }
+                  setState(() {});
+                },
+                child: Icon(
+                  selectedAll ? Icons.border_clear : Icons.select_all,
+                  size: iconSize,
                 ),
               );
 
-              final toCurrentBtn = SizedBox(
-                height: btnHeight,
-                child: ElevatedButton(
-                  onPressed: currentTabIndex != -1 ? scrollToCurrent : null,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.subdirectory_arrow_left_outlined,
-                        size: iconSize,
+              final toCurrentBtn = ElevatedButton(
+                onPressed: currentTabIndex != -1 ? scrollToCurrent : null,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.subdirectory_arrow_left_outlined,
+                      size: iconSize,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      (searchHandler.currentIndex + 1).toFormattedString(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: currentTabIndex == -1 ? Colors.transparent : null,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        (searchHandler.currentIndex + 1).toFormattedString(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: currentTabIndex == -1 ? Colors.transparent : null,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
 
               final bool hasSelected = selectedTabs.isNotEmpty;
-              final deleteSelectedBtn = SizedBox(
-                height: btnHeight,
-                child: ElevatedButton(
-                  onPressed: hasSelected ? showDeleteDialog : null,
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.delete,
-                        size: iconSize,
-                      ),
-                      const SizedBox(width: 4),
-                      Stack(
-                        children: [
-                          Text(
-                            selectedTabs.length.toFormattedString(),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const Text(
-                            '00',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.transparent),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+              final deleteSelectedBtn = ElevatedButton(
+                onPressed: hasSelected ? showDeleteDialog : null,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.delete_forever,
+                      size: iconSize,
+                    ),
+                    const SizedBox(width: 4),
+                    Stack(
+                      children: [
+                        Text(
+                          selectedTabs.length.toFormattedString(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const Text(
+                          '00',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(color: Colors.transparent),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               );
 
-              final toBottomBtn = SizedBox(
-                height: btnHeight,
-                child: ElevatedButton(
-                  onPressed: scrollToBottom,
-                  child: const Icon(
-                    Icons.arrow_circle_down_rounded,
-                    size: iconSize,
-                  ),
+              final toBottomBtn = ElevatedButton(
+                onPressed: scrollToBottom,
+                child: const Icon(
+                  Icons.arrow_circle_down_rounded,
+                  size: iconSize,
                 ),
               );
 
@@ -1168,7 +1161,6 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   10 + MediaQuery.of(context).padding.bottom,
                 ),
                 width: double.infinity,
-                height: btnHeight,
                 child: Row(
                   children: [
                     if (settingsHandler.handSide.value.isLeft) ...[
@@ -1187,21 +1179,18 @@ class _TabManagerPageState extends State<TabManagerPage> {
                       ],
                     ],
                     Expanded(
-                      child: SizedBox(
-                        height: btnHeight,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          icon: const Icon(
-                            Icons.close,
-                            size: iconSize,
-                          ),
-                          label: const AutoSizeText(
-                            'Close',
-                            maxLines: 1,
-                            overflowReplacement: SizedBox.shrink(),
-                          ),
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: const Icon(
+                          Icons.close,
+                          size: iconSize,
+                        ),
+                        label: const AutoSizeText(
+                          'Close',
+                          maxLines: 1,
+                          overflowReplacement: SizedBox.shrink(),
                         ),
                       ),
                     ),
@@ -1362,7 +1351,10 @@ class TabManagerItem extends StatelessWidget {
                                         child: Builder(
                                           builder: (context) {
                                             final List<String> booruNames = [
-                                              tab.booruHandler.booru.name ?? '',
+                                              if (tab.booruHandler is MergebooruHandler)
+                                                (tab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
+                                              else
+                                                tab.booruHandler.booru.name ?? '',
                                               if (tab.secondaryBoorus != null)
                                                 for (final booru in tab.secondaryBoorus!) booru.name ?? '',
                                             ];

@@ -101,8 +101,12 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
       builder: (context) {
         return SettingsDialog(
           title: const Text('Are you sure?'),
-          contentItems: <Widget>[Text(widget.type == 'sender' ? 'Do you want to stop syncing?' : 'Do you want to stop the server?')],
-          actionButtons: <Widget>[
+          contentItems: [
+            Text(
+              widget.type == 'sender' ? 'Do you want to stop syncing?' : 'Do you want to stop the server?',
+            ),
+          ],
+          actionButtons: [
             ElevatedButton(
               child: const Text('Yes'),
               onPressed: () {

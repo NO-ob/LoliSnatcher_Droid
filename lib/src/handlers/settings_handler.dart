@@ -57,7 +57,6 @@ class SettingsHandler extends GetxController {
   RxBool showFPS = false.obs;
   RxBool showPerf = false.obs;
   RxBool showImageStats = false.obs;
-  bool showURLOnThumb = false;
   bool disableImageScaling = false;
   bool gifsAsThumbnails = false;
   bool desktopListsDrag = false;
@@ -113,6 +112,7 @@ class SettingsHandler extends GetxController {
     ['share', 'Share'],
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
+    ['toggle_quality', 'Toggle Quality'],
   ];
   List<List<String>> buttonOrder = [
     ['autoscroll', 'AutoScroll'],
@@ -122,6 +122,7 @@ class SettingsHandler extends GetxController {
     ['share', 'Share'],
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
+    ['toggle_quality', 'Toggle Quality'],
   ];
 
   bool jsonWrite = false;
@@ -146,6 +147,7 @@ class SettingsHandler extends GetxController {
   bool tagTypeFetchEnabled = true;
   bool downloadNotifications = true;
   bool allowRotation = false;
+  bool enableHeroTransitions = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -206,7 +208,6 @@ class SettingsHandler extends GetxController {
     'showPerf',
     'showImageStats',
     'isDebug',
-    'showURLOnThumb',
     'desktopListsDrag',
   ];
   // default values and possible options map for validation
@@ -463,6 +464,10 @@ class SettingsHandler extends GetxController {
       'type': 'bool',
       'default': false,
     },
+    'enableHeroTransitions': {
+      'type': 'bool',
+      'default': true,
+    },
 
     // other
     'buttonOrder': {
@@ -475,6 +480,7 @@ class SettingsHandler extends GetxController {
         ['share', 'Share'],
         ['open', 'Open in Browser'],
         ['reloadnoscale', 'Reload w/out scaling'],
+        ['toggle_quality', 'Toggle Quality'],
       ],
     },
     'cacheDuration': {
@@ -906,6 +912,8 @@ class SettingsHandler extends GetxController {
         return downloadNotifications;
       case 'allowRotation':
         return allowRotation;
+      case 'enableHeroTransitions':
+        return enableHeroTransitions;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -1095,6 +1103,9 @@ class SettingsHandler extends GetxController {
       case 'allowRotation':
         allowRotation = validatedValue;
         break;
+      case 'enableHeroTransitions':
+        enableHeroTransitions = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1182,6 +1193,7 @@ class SettingsHandler extends GetxController {
       'tagTypeFetchEnabled': validateValue('tagTypeFetchEnabled', null, toJSON: true),
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
       'allowRotation': validateValue('allowRotation', null, toJSON: true),
+      'enableHeroTransitions': validateValue('enableHeroTransitions', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),

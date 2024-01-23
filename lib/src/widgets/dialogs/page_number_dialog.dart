@@ -24,7 +24,7 @@ class PageNumberDialog extends StatelessWidget {
 
     return SettingsBottomSheet(
       title: const Text('Page changer'),
-      contentItems: <Widget>[
+      contentItems: [
         SettingsTextInput(
           title: 'Page #',
           hintText: 'Page #',
@@ -64,7 +64,7 @@ class PageNumberDialog extends StatelessWidget {
             },
           ),
       ],
-      actionButtons: <Widget>[
+      actionButtons: [
         ElevatedButton(
           child: const Text('Jump to page'),
           onPressed: () {

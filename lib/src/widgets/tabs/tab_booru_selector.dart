@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 
 class TabBooruSelector extends StatelessWidget {
-  const TabBooruSelector(this.isPrimary, {super.key});
-  final bool isPrimary;
+  const TabBooruSelector({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,137 +35,54 @@ class TabBooruSelector extends StatelessWidget {
         );
       }
 
-      // dropdown for secondary boorus
-      if (!isPrimary) {
-        return Container(
-          padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
-          child: Obx(
-            () => DropdownSearch<Booru>.multiSelection(
-              // showSearchBox: true,
-              items: settingsHandler.booruList,
-              onChanged: (List<Booru> newList) {
-                // if no secondary boorus selected, disable merge mode
-                searchHandler.mergeAction(newList.isNotEmpty ? newList : null);
-                // TODO add .drawerRestate()
-                searchHandler.rootRestate();
-              },
-              popupProps: PopupPropsMultiSelection.menu(
-                itemBuilder: (BuildContext context, Booru? value, bool isSelected) {
-                  if (value == null) {
-                    return const Text('???');
-                  }
-
-                  return Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: TabBooruSelectorItem(booru: value),
-                  );
-                },
-                selectionWidget: (BuildContext context, Booru item, bool isSelected) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Checkbox(
-                      value: isSelected,
-                      onChanged: (bool? value) {},
-                    ),
-                  );
-                },
-              ),
-              dropdownDecoratorProps: DropDownDecoratorProps(
-                dropdownSearchDecoration: InputDecoration(
-                  labelText: 'Secondary Boorus',
-                  hintText: 'Secondary Boorus',
-                  contentPadding: settingsHandler.appMode.value.isDesktop
-                      ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
-                      : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-              ),
-              dropdownBuilder: (BuildContext context, List<Booru> selectedItems) {
-                if (selectedItems.isEmpty) {
-                  return const ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(null),
-                    title: Text('No boorus selected'),
-                  );
-                }
-
-                return Wrap(
-                  children: selectedItems.map((value) {
-                    return Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: TabBooruSelectorItem(booru: value),
-                    );
-                  }).toList(),
-                );
-              },
-              selectedItems: searchHandler.currentTab.secondaryBoorus ?? [],
-            ),
-          ),
-        );
+      Booru? selectedBooru = searchHandler.currentBooru;
+      // protection from exceptions when somehow selected booru is not on the list
+      if (!settingsHandler.booruList.contains(selectedBooru)) {
+        selectedBooru = null;
       }
 
-      // dropdown for primary booru
-      return Container(
-        // constraints: settingsHandler.appMode.value.isDesktop ? BoxConstraints(maxHeight: 40, minHeight: 20) : null,
-        padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8),
-        child: Obx(() {
-          Booru? selectedBooru = searchHandler.currentBooru;
-          // protection from exceptions when somehow selected booru is not on the list
-          if (!settingsHandler.booruList.contains(isPrimary ? selectedBooru : searchHandler.currentTab.secondaryBoorus?[0])) {
-            selectedBooru = null;
-          }
+      final bool isDesktop = settingsHandler.appMode.value.isDesktop;
+      final EdgeInsetsGeometry margin = isDesktop ? const EdgeInsets.fromLTRB(2, 5, 2, 2) : const EdgeInsets.fromLTRB(5, 8, 5, 8);
 
-          return DropdownButtonFormField<Booru>(
-            isExpanded: true,
-            value: selectedBooru,
-            icon: const Icon(null, size: 0),
-            itemHeight: kMinInteractiveDimension,
-            decoration: InputDecoration(
-              labelText: 'Booru',
-              hintText: 'Booru',
-              contentPadding: settingsHandler.appMode.value.isDesktop
-                  ? const EdgeInsets.symmetric(horizontal: 12, vertical: 2)
-                  : const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            borderRadius: BorderRadius.circular(8),
-            onChanged: (Booru? newValue) {
-              if (searchHandler.currentBooru != newValue) {
-                // if not already selected
-                searchHandler.searchAction(searchHandler.searchTextController.text, newValue);
-              }
-            },
-            selectedItemBuilder: (BuildContext context) {
-              return settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
-                return DropdownMenuItem<Booru>(
-                  value: value,
-                  child: TabBooruSelectorItem(booru: value, withFavicon: searchHandler.currentBooru == value),
-                );
-              }).toList();
-            },
-            items: settingsHandler.booruList.map<DropdownMenuItem<Booru>>((Booru value) {
-              bool isCurrent = false;
-              if (isPrimary) {
-                isCurrent = searchHandler.currentBooru == value;
-              } else {
-                isCurrent = searchHandler.currentTab.secondaryBoorus?[0] == value;
-              }
+      return Padding(
+        padding: margin,
+        child: LoliDropdown(
+          value: selectedBooru,
+          onChanged: (Booru? newValue) {
+            if (searchHandler.currentBooru != newValue) {
+              // if not already selected
+              searchHandler.searchAction(searchHandler.searchTextController.text, newValue);
+            }
+          },
+          items: settingsHandler.booruList,
+          itemExtent: kMinInteractiveDimension,
+          itemBuilder: (item) {
+            final bool isCurrent = selectedBooru == item;
 
-              // Return a dropdown item
-              return DropdownMenuItem<Booru>(
-                value: value,
-                child: Container(
-                  padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.fromLTRB(5, 10, 5, 10),
-                  decoration: isCurrent
-                      ? BoxDecoration(
-                          border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                          borderRadius: BorderRadius.circular(5),
-                        )
-                      : null,
-                  child: TabBooruSelectorItem(booru: value),
-                ),
-              );
-            }).toList(),
-          );
-        }),
+            if (item == null) {
+              return const SizedBox.shrink();
+            }
+
+            return Container(
+              padding: settingsHandler.appMode.value.isDesktop ? const EdgeInsets.all(5) : const EdgeInsets.only(left: 16, right: 16),
+              height: kMinInteractiveDimension,
+              decoration: isCurrent
+                  ? BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    )
+                  : null,
+              child: TabBooruSelectorItem(booru: item),
+            );
+          },
+          selectionBuilder: (value) {
+            if (value == null) {
+              return const Text('Select a Booru');
+            }
+
+            return TabBooruSelectorItem(booru: value);
+          },
+          labelText: 'Booru',
+        ),
       );
     });
   }
@@ -174,33 +92,37 @@ class TabBooruSelectorItem extends StatelessWidget {
   const TabBooruSelectorItem({
     required this.booru,
     this.withFavicon = true,
+    this.compact = false,
     super.key,
   });
 
   final Booru booru;
   final bool withFavicon;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final String name = ' ${booru.name}';
 
     return Row(
-      children: <Widget>[
+      mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+      children: [
         //Booru Icon
         if (withFavicon) ...[
           if (booru.type == BooruType.Downloads)
-            const Icon(Icons.file_download_outlined, size: 18)
+            const Icon(Icons.file_download_outlined, size: 20)
           else if (booru.type == BooruType.Favourites)
-            const Icon(Icons.favorite, color: Colors.red, size: 18)
+            const Icon(Icons.favorite, color: Colors.red, size: 20)
           else
             Favicon(booru),
+          const SizedBox(width: 4),
         ],
         //Booru name
         MarqueeText(
           key: ValueKey(name),
           text: name,
+          isExpanded: !compact,
         ),
-        // Text(name),
       ],
     );
   }

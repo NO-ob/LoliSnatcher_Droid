@@ -65,7 +65,7 @@ class _MediaPreviewsState extends State<MediaPreviews> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
+          children: [
             const SettingsButton(
               name: 'No Booru Configs Found',
               icon: Icon(null),

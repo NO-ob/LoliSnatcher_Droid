@@ -15,7 +15,6 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
-import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -31,7 +30,6 @@ class DebugPage extends StatefulWidget {
 
 class _DebugPageState extends State<DebugPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
-  bool allowSelfSignedCerts = false;
 
   double vDuration = 0;
   double vAmplitude = -1;
@@ -42,7 +40,6 @@ class _DebugPageState extends State<DebugPage> {
   @override
   void initState() {
     super.initState();
-    allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
   }
 
   Future<dynamic> showTagsManager(BuildContext context) async {
@@ -58,13 +55,7 @@ class _DebugPageState extends State<DebugPage> {
       return;
     }
 
-    settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     final bool result = await settingsHandler.saveSettings(restate: false);
-    if (allowSelfSignedCerts) {
-      HttpOverrides.global = MyHttpOverrides();
-    } else {
-      HttpOverrides.global = null;
-    }
 
     if (result) {
       Navigator.of(context).pop();
@@ -110,43 +101,6 @@ class _DebugPageState extends State<DebugPage> {
                   });
                 },
                 title: 'Show Image Stats',
-              ),
-              SettingsToggle(
-                value: settingsHandler.disableImageScaling,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.disableImageScaling = newValue;
-                  });
-                },
-                title: "Don't scale images",
-              ),
-              SettingsToggle(
-                value: settingsHandler.gifsAsThumbnails,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.gifsAsThumbnails = newValue;
-                  });
-                },
-                title: 'GIF thumbnails',
-                subtitle: const Text('Requires "Don\'t scale images"'),
-              ),
-              SettingsToggle(
-                value: settingsHandler.showURLOnThumb,
-                onChanged: (newValue) {
-                  setState(() {
-                    settingsHandler.showURLOnThumb = newValue;
-                  });
-                },
-                title: 'Show URL on thumb',
-              ),
-              SettingsToggle(
-                value: allowSelfSignedCerts,
-                onChanged: (newValue) {
-                  setState(() {
-                    allowSelfSignedCerts = newValue;
-                  });
-                },
-                title: 'Enable Self Signed SSL Certificates',
               ),
               SettingsToggle(
                 value: settingsHandler.desktopListsDrag,

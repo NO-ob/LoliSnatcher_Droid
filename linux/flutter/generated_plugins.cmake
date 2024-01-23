@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   awesome_notifications
   dart_vlc
   dynamic_color
+  gtk
   url_launcher_linux
 )
 

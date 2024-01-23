@@ -17,7 +17,7 @@ class WebviewNavigationControls extends StatelessWidget {
         final InAppWebViewController? controller = snapshot.data;
         if (snapshot.connectionState != ConnectionState.done || controller == null) {
           return const Row(
-            children: <Widget>[
+            children: [
               Icon(Icons.arrow_back_ios),
               Icon(Icons.arrow_forward_ios),
               Icon(Icons.replay),
@@ -26,7 +26,7 @@ class WebviewNavigationControls extends StatelessWidget {
         }
 
         return Row(
-          children: <Widget>[
+          children: [
             GestureDetector(
               onLongPress: () {
                 showDialog(
@@ -34,7 +34,7 @@ class WebviewNavigationControls extends StatelessWidget {
                   builder: (context) => WebviewHistoryDialog(
                     controller: controller,
                     onSelect: (String url) {
-                      controller.loadUrl(urlRequest: URLRequest(url: Uri.parse(url)));
+                      controller.loadUrl(urlRequest: URLRequest(url: WebUri(url)));
                     },
                   ),
                 );

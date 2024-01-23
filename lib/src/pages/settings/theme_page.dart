@@ -199,22 +199,28 @@ class _ThemePageState extends State<ThemePage> {
                   updateTheme();
                 },
                 title: 'Theme Mode',
-                itemBuilder: (ThemeMode item) {
-                  final String prettyValue = item.name.capitalizeFirst!;
+                itemBuilder: (ThemeMode? item) {
+                  final String prettyValue = item!.name.capitalizeFirst!;
                   const double size = 40;
 
                   switch (prettyValue) {
                     case 'Dark':
                       return Row(
                         children: [
-                          const SizedBox(width: size, child: Icon(Icons.dark_mode)),
+                          const SizedBox(
+                            width: size,
+                            child: Icon(Icons.dark_mode),
+                          ),
                           Text(prettyValue),
                         ],
                       );
                     case 'Light':
                       return Row(
                         children: [
-                          const SizedBox(width: size, child: Icon(Icons.light_mode)),
+                          const SizedBox(
+                            width: size,
+                            child: Icon(Icons.light_mode),
+                          ),
                           Text(prettyValue),
                         ],
                       );
@@ -227,12 +233,18 @@ class _ThemePageState extends State<ThemePage> {
                               alignment: Alignment.center,
                               children: [
                                 ClipPath(
-                                  clipper: SunClipper(),
-                                  child: const Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.light_mode)),
+                                  clipper: _SunClipper(),
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(right: 8),
+                                    child: Icon(Icons.light_mode),
+                                  ),
                                 ),
                                 ClipPath(
-                                  clipper: MoonClipper(),
-                                  child: const Padding(padding: EdgeInsets.only(left: 5), child: Icon(Icons.dark_mode)),
+                                  clipper: _MoonClipper(),
+                                  child: const Padding(
+                                    padding: EdgeInsets.only(left: 5),
+                                    child: Icon(Icons.dark_mode),
+                                  ),
                                 ),
                               ],
                             ),
@@ -285,10 +297,12 @@ class _ThemePageState extends State<ThemePage> {
                     updateTheme(withRestate: true);
                   },
                   title: 'Theme',
-                  itemBuilder: (String value) {
+                  itemBuilder: (String? value) {
                     final ThemeItem theme = settingsHandler.map['theme']!['options'].firstWhere((e) => e.name == value);
                     final Color? primary = theme.name == 'Custom' ? primaryPickerColor : theme.primary;
                     final Color? accent = theme.name == 'Custom' ? accentPickerColor : theme.accent;
+
+                    const double themeSize = 40;
 
                     return Row(
                       children: [
@@ -296,24 +310,34 @@ class _ThemePageState extends State<ThemePage> {
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey.shade500, width: 1.5),
+                              border: Border.all(
+                                color: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white).withOpacity(0.6),
+                                width: 1,
+                              ),
                               shape: BoxShape.rectangle,
                               color: primary,
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                              clipBehavior: Clip.antiAlias,
+                              child: Stack(
+                                alignment: Alignment.center,
                                 children: [
-                                  Container(
-                                    color: primary,
-                                    height: 10,
-                                    width: 60,
+                                  ClipPath(
+                                    clipper: _ThemeLeftClipper(),
+                                    child: Container(
+                                      color: primary,
+                                      height: themeSize,
+                                      width: themeSize,
+                                    ),
                                   ),
-                                  Container(
-                                    color: accent,
-                                    height: 10,
-                                    width: 60,
+                                  ClipPath(
+                                    clipper: _ThemeRightClipper(),
+                                    child: Container(
+                                      color: accent,
+                                      height: themeSize,
+                                      width: themeSize,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -321,7 +345,7 @@ class _ThemePageState extends State<ThemePage> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Text(value),
+                        Text(value ?? ''),
                       ],
                     );
                   },
@@ -355,7 +379,7 @@ class _ThemePageState extends State<ThemePage> {
                     height: 44,
                     hasBorder: true,
                     borderRadius: 4,
-                    borderColor: Colors.grey,
+                    borderColor: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white).withOpacity(0.6),
                     color: primaryPickerColor!,
                   ),
                 ),
@@ -388,7 +412,7 @@ class _ThemePageState extends State<ThemePage> {
                     height: 44,
                     hasBorder: true,
                     borderRadius: 4,
-                    borderColor: Colors.grey,
+                    borderColor: (Theme.of(context).brightness == Brightness.light ? Colors.black : Colors.white).withOpacity(0.6),
                     color: accentPickerColor!,
                   ),
                 ),
@@ -446,7 +470,7 @@ class _ThemePageState extends State<ThemePage> {
   }
 }
 
-class SunClipper extends CustomClipper<Path> {
+class _SunClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
@@ -462,7 +486,7 @@ class SunClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
 
-class MoonClipper extends CustomClipper<Path> {
+class _MoonClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final path = Path();
@@ -470,6 +494,39 @@ class MoonClipper extends CustomClipper<Path> {
     path.lineTo(size.width, size.height);
     path.lineTo(size.width * 0.45, size.height);
     path.lineTo(size.width * 0.45, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class _ThemeLeftClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(0, size.height);
+    path.lineTo(size.width * 0.7, size.height);
+    path.lineTo(size.width * 0.3, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
+}
+
+class _ThemeRightClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width * 0.3, size.height);
+    path.lineTo(size.width * 0.7, 0);
     path.close();
 
     return path;

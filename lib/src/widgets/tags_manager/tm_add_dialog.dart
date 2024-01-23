@@ -20,7 +20,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
   Widget build(BuildContext context) {
     return SettingsDialog(
       title: const Text('Add Tag'),
-      contentItems: <Widget>[
+      contentItems: [
         SettingsTextInput(
           controller: _controller,
           title: 'Name',

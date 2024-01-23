@@ -69,7 +69,7 @@ class BorderedText extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       textDirection: child.textDirection,
-      children: <Widget>[
+      children: [
         Text(
           child.data!,
           style: style,

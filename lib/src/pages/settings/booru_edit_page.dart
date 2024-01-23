@@ -91,7 +91,7 @@ class _BooruEditState extends State<BooruEdit> {
       ),
       body: Center(
         child: ListView(
-          children: <Widget>[
+          children: [
             testButton(),
             webviewButton(),
             saveButton(),
@@ -118,7 +118,7 @@ class _BooruEditState extends State<BooruEdit> {
                 });
               },
               title: 'Booru Type',
-              itemTitleBuilder: (BooruType p0) => p0.alias,
+              itemTitleBuilder: (BooruType? type) => type?.alias ?? '',
             ),
             SettingsTextInput(
               controller: booruFaviconController,
@@ -198,7 +198,7 @@ class _BooruEditState extends State<BooruEdit> {
 
   Widget webviewButton() {
     return SettingsButton(
-      name: 'Open url to get cookies [BETA]',
+      name: 'Open webview to get cookies',
       icon: const Icon(Icons.public),
       action: () {
         if (booruURLController.text.isNotEmpty) {
@@ -741,7 +741,7 @@ class _R34HSignInWidget extends StatelessWidget {
                 }
 
                 final CookieManager cookieManager = CookieManager.instance();
-                final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(Uri.parse(urlController.text).host));
+                final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(urlController.text));
 
                 if (cookies.isNotEmpty) {
                   await showDialog(

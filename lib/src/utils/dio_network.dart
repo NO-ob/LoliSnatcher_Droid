@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -81,7 +82,7 @@ class DioNetwork {
           }
 
           final String oldCookie = response.requestOptions.headers['Cookie'] as String? ?? '';
-          final String newCookie = await Tools.getCookies(response.requestOptions.uri);
+          final String newCookie = await Tools.getCookies(WebUri.uri(response.requestOptions.uri));
           final headers = {
             ...response.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),
@@ -113,7 +114,7 @@ class DioNetwork {
           }
 
           final String oldCookie = error.requestOptions.headers['Cookie'] as String? ?? '';
-          final String newCookie = await Tools.getCookies(error.requestOptions.uri);
+          final String newCookie = await Tools.getCookies(WebUri.uri(error.requestOptions.uri));
           final headers = {
             ...error.requestOptions.headers,
             'Cookie': '${oldCookie.replaceAll('cf_clearance', 'cf_clearance_old')} $newCookie'.trim(),

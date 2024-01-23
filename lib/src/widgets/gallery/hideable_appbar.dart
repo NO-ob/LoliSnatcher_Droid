@@ -45,7 +45,7 @@ class HideableAppBar extends StatefulWidget implements PreferredSizeWidget {
   final PreloadPageController pageController;
   final VoidCallback onOpenDrawer;
 
-  double get defaultHeight => kToolbarHeight; //56.0
+  double get defaultHeight => kToolbarHeight; // 56
 
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
@@ -66,6 +66,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
   double shareProgress = 0;
   int shareProgressLastTick = 0;
   CancelToken? shareCancelToken;
+  bool isOnTop = true;
 
   late StreamSubscription<bool> appbarListener;
 
@@ -157,15 +158,21 @@ class _HideableAppBarState extends State<HideableAppBar> {
         return false;
       }
 
-      final bool isImageItem = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isImageOrAnimation;
+      final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
+      final bool isImageItem = item.mediaType.value.isImageOrAnimation;
       final bool isScaleButton = btn[0] == 'reloadnoscale';
       final bool isScaleAllowed =
           isScaleButton ? (isImageItem && !settingsHandler.disableImageScaling) : true; // allow reloadnoscale button if not a video and scaling is not disabled
 
+      final bool isQualityButton = btn[0] == 'toggle_quality';
+      final bool isQualityAllowed =
+          isQualityButton ? (isImageItem && item.sampleURL != item.fileURL) : true; // allow toggle_quality button if image and sample != full
+
       final bool isFavButton = btn[0] == 'favourite';
       final bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
 
-      return isScaleAllowed && isFavAllowed;
+      return isScaleAllowed && isFavAllowed && isQualityAllowed;
     }).toList();
 
     final List<Widget> actions = [];
@@ -266,6 +273,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   Widget buttonIcon(String action) {
     late IconData icon;
+
+    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
     switch (action) {
       case 'info':
         icon = Icons.info;
@@ -287,7 +297,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
             return const Icon(Icons.favorite_border);
           }
 
-          final bool? isFav = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value;
+          final bool? isFav = item.isFavourite.value;
           return AnimatedCrossFade(
             duration: const Duration(milliseconds: 200),
             crossFadeState: isFav == true ? CrossFadeState.showFirst : CrossFadeState.showSecond,
@@ -301,6 +311,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'reloadnoscale':
         icon = Icons.refresh;
         break;
+      case 'toggle_quality':
+        final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
+        icon = isHq ? Icons.high_quality : Icons.high_quality_outlined;
     }
     return Icon(icon);
   }
@@ -365,16 +378,21 @@ class _HideableAppBarState extends State<HideableAppBar> {
       return defaultLabel;
     }
 
+    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
     switch (action) {
       case 'autoscroll':
         label = "${autoScroll ? 'Pause' : 'Start'} $defaultLabel";
         break;
       case 'favourite':
-        label = searchHandler.currentFetched[searchHandler.viewedIndex.value].isFavourite.value == true ? 'Unfavourite' : defaultLabel;
+        label = item.isFavourite.value == true ? 'Unfavourite' : defaultLabel;
         break;
       case 'reloadnoscale':
-        label = searchHandler.currentFetched[searchHandler.viewedIndex.value].isNoScale.value ? 'Reload with scaling' : defaultLabel;
+        label = item.isNoScale.value ? 'Reload with scaling' : defaultLabel;
         break;
+      case 'toggle_quality':
+        final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
+        label = isHq ? 'Load Sample Quality' : 'Load High Quality';
       default:
         // use default text
         label = defaultLabel;
@@ -384,13 +402,15 @@ class _HideableAppBarState extends State<HideableAppBar> {
   }
 
   Future<void> buttonClick(String action) async {
+    final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+
     switch (action) {
       case 'info':
         widget.onOpenDrawer();
         break;
       case 'open':
         // url to html encoded
-        final String url = Uri.encodeFull(searchHandler.currentFetched[searchHandler.viewedIndex.value].postURL);
+        final String url = Uri.encodeFull(item.postURL);
         unawaited(
           launchUrlString(
             url,
@@ -405,7 +425,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         await getPerms();
         // call a function to save the currently viewed image when the save button is pressed
         snatchHandler.queue(
-          [searchHandler.currentFetched[searchHandler.viewedIndex.value]],
+          [item],
           searchHandler.currentBooru,
           settingsHandler.snatchCooldown,
           false,
@@ -423,8 +443,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
         onShareClick();
         break;
       case 'reloadnoscale':
-        searchHandler.currentFetched[searchHandler.viewedIndex.value].isNoScale.toggle();
+        item.isNoScale.toggle();
         break;
+      case 'toggle_quality':
+        item.toggleQuality.toggle();
     }
   }
 
@@ -564,7 +586,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
                 SizedBox(
                   width: 100,
                   height: 150,
-                  child: ThumbnailBuild(item: item),
+                  child: ThumbnailBuild(
+                    item: item,
+                    selectable: false,
+                  ),
                 ),
               ],
             ),
@@ -685,7 +710,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       builder: (context) {
         return SettingsDialog(
           title: const Text('What you want to Share?'),
-          contentItems: <Widget>[
+          contentItems: [
             const SizedBox(height: 15),
             Column(
               children: [
@@ -761,6 +786,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
   void initState() {
     super.initState();
 
+    isOnTop = settingsHandler.galleryBarPosition == 'Top';
+
     ServiceHandler.setSystemUiVisibility(!settingsHandler.autoHideImageBar);
     viewerHandler.displayAppbar.value = !settingsHandler.autoHideImageBar;
 
@@ -789,6 +816,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final double extraPadding = isOnTop ? 0 : MediaQuery.paddingOf(context).bottom;
+
     return PopScope(
       onPopInvoked: (bool didPop) {
         // clear currently loading item from cache to avoid creating broken files
@@ -802,34 +831,44 @@ class _HideableAppBarState extends State<HideableAppBar> {
           );
         }
       },
-      child: SafeArea(
-        // to fix height bug when bar on top
+      child: Material(
+        color: Colors.transparent,
+        elevation: 1,
+        clipBehavior: Clip.antiAlias,
+        shadowColor: Colors.black54,
+        surfaceTintColor: Colors.transparent,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           curve: Curves.linear,
           color: Colors.transparent,
-          height: viewerHandler.displayAppbar.value ? widget.defaultHeight : 0.0,
-          child: AppBar(
-            // toolbarHeight: widget.defaultHeight,
-            elevation: 1, // set to zero to disable a shadow behind
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            shadowColor: Colors.black54,
-            surfaceTintColor: Colors.transparent,
-            leading: IconButton(
-              // to ignore icon change
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
+          height: viewerHandler.displayAppbar.value ? (isOnTop ? null : (widget.defaultHeight + extraPadding)) : 0,
+          padding: isOnTop ? null : EdgeInsets.only(bottom: extraPadding),
+          child: Obx(
+            () => AppBar(
+              // toolbarHeight: widget.defaultHeight,
+              elevation: searchHandler.viewedIndex.value == 0 ? 0 : 0, // hack to force restate to rebuild actions // set to zero to disable a shadow behind
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.white,
+              shadowColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              leading: IconButton(
+                // to ignore icon change
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: FittedBox(
+                fit: BoxFit.fitWidth,
+                child: Obx(() {
+                  final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
+                  final String formattedTotal = searchHandler.currentFetched.length.toString();
+                  return Text(
+                    '$formattedViewedIndex/$formattedTotal',
+                    style: const TextStyle(color: Colors.white),
+                  );
+                }),
+              ),
+              actions: getActions(),
             ),
-            title: FittedBox(
-              fit: BoxFit.fitWidth,
-              child: Obx(() {
-                final String formattedViewedIndex = (searchHandler.viewedIndex.value + 1).toString();
-                final String formattedTotal = searchHandler.currentFetched.length.toString();
-                return Text('$formattedViewedIndex/$formattedTotal', style: const TextStyle(color: Colors.white));
-              }),
-            ),
-            actions: getActions(),
           ),
         ),
       ),

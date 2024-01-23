@@ -85,7 +85,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           // children elements won't receive gestures until they are visible
           absorbing: _hideStuff,
           child: Column(
-            children: <Widget>[
+            children: [
               _buildDoubleTapMessage(),
               _buildHitArea(),
               Stack(
@@ -143,13 +143,13 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       opacity: _hideStuff ? 0.0 : 1.0,
       duration: const Duration(milliseconds: 300),
       child: Column(
-        children: <Widget>[
+        children: [
           if (drawProgressBar)
             Container(
               height: barHeight / 1.5,
               color: Colors.black38, //Theme.of(context).backgroundColor.withOpacity(0.33),
               child: Row(
-                children: <Widget>[
+                children: [
                   const SizedBox(width: 10),
                   _buildProgressBar(),
                   const SizedBox(width: 10),
@@ -162,12 +162,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             // Split into two parts: play + position | other buttons in 3:2 split
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
+              children: [
                 Expanded(
                   flex: 6,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
+                    children: [
                       _buildPlayPause(controller),
                       Container(
                         width: 130,
@@ -181,7 +181,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                   flex: 4,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
+                    children: [
                       if (chewieController.allowPlaybackSpeedChanging) _buildSpeedButton(controller),
                       // Container(child: _buildSpeedButton(controller), decoration: BoxDecoration(color: Colors.red)),
                       if (chewieController.allowMuting) _buildMuteButton(controller),
@@ -279,7 +279,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
             bottom: 10,
           ),
           child: Row(
-            children: <Widget>[
+            children: [
               if (_lastDoubleTapSide < 0) msgWidget,
               //
               const Spacer(),

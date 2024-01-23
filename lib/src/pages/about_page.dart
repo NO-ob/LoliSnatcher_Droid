@@ -22,7 +22,7 @@ class AboutPage extends StatelessWidget {
       ),
       body: Center(
         child: ListView(
-          children: <Widget>[
+          children: [
             Container(
               margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
               child: const Text(

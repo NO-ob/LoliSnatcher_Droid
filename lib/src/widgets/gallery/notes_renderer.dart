@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 
@@ -9,7 +10,6 @@ import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
-import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/utils/html_parse.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -44,14 +44,21 @@ class _NotesRendererState extends State<NotesRenderer> {
       resizeScale;
   bool loading = false, shouldScale = false;
 
+  CancelToken? cancelToken;
+  final List<NoteBuild> notesMap = [];
+
   StreamSubscription<BooruItem>? itemListener;
   StreamSubscription? viewStateListener;
+
+  bool get currentItemHasNotes => item.fileURL.isNotEmpty && searchHandler.currentBooruHandler.hasNotesSupport && item.hasNotes == true;
 
   @override
   void initState() {
     super.initState();
 
     shouldScale = settingsHandler.galleryMode == 'Sample' || !settingsHandler.disableImageScaling;
+    resizeScale = 1;
+    screenToImageRatio = 1;
 
     screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width;
     screenHeight = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.height;
@@ -63,6 +70,7 @@ class _NotesRendererState extends State<NotesRenderer> {
     itemListener = searchHandler.viewedItem.listen((BooruItem item) {
       // TODO doesn't trigger for the first item after changing tabs on desktop
       this.item = item;
+      notesMap.clear();
       updateState();
       loadNotes();
     });
@@ -75,27 +83,24 @@ class _NotesRendererState extends State<NotesRenderer> {
   }
 
   void updateState() {
-    if (mounted) {
-      setState(() {});
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
   }
 
   @override
   void dispose() {
+    cancelToken?.cancel();
     widget.pageController?.removeListener(triggerCalculations);
     itemListener?.cancel();
     viewStateListener?.cancel();
-    Debounce.cancel('notes_calculations');
     super.dispose();
   }
 
   Future<void> loadNotes() async {
-    final handler = searchHandler.currentBooruHandler;
-    final bool hasSupport = handler.hasNotesSupport;
-    final bool hasNotes = item.hasNotes == true;
-    // final bool alreadyLoaded = item.notes.isNotEmpty;
-
-    if (item.fileURL.isEmpty || !hasSupport || !hasNotes) {
+    if (!currentItemHasNotes) {
       loading = false;
       updateState();
       return;
@@ -106,28 +111,54 @@ class _NotesRendererState extends State<NotesRenderer> {
     }
     loading = true;
 
-    item.notes.value = await searchHandler.currentBooruHandler.getNotes(item.serverId!);
+    if (cancelToken != null && !cancelToken!.isCancelled) {
+      cancelToken!.cancel();
+    }
+    cancelToken = CancelToken();
+    item.notes.value = await searchHandler.currentBooruHandler.getNotes(
+      item.serverId!,
+      cancelToken: cancelToken,
+    );
+    cancelToken = null;
 
     triggerCalculations();
+
+    rebuildNotesMap();
 
     loading = false;
     updateState();
   }
 
+  void rebuildNotesMap() {
+    // cache notes widgets
+    notesMap.clear();
+
+    final scale = resizeScale * screenToImageRatio;
+
+    for (int i = 0; i < item.notes.length; i++) {
+      final note = item.notes[i];
+      notesMap.add(
+        NoteBuild(
+          text: note.content,
+          width: note.width * scale,
+          height: note.height * scale,
+        ),
+      );
+    }
+  }
+
   void triggerCalculations() {
-    // debounce to prevent unnecessary calculations, especially when resizing
-    // lessens the impact on performance, but causes notes to be a bit shake-ey when resizing
-    Debounce.delay(
-      tag: 'notes_calculations',
-      callback: () {
-        doCalculations();
-        updateState();
-      },
-      duration: const Duration(milliseconds: 50),
-    );
+    if (!currentItemHasNotes) {
+      return;
+    }
+
+    doCalculations();
+    updateState();
   }
 
   void doCalculations() {
+    final prevResizeScale = resizeScale, prevScreenToImageRatio = screenToImageRatio;
+
     // do the calculations depending on the current item here
     imageWidth = viewerHandler.viewState.value?.scaleBoundaries?.childSize.width ?? item.fileWidth ?? screenWidth;
     imageHeight = viewerHandler.viewState.value?.scaleBoundaries?.childSize.height ?? item.fileHeight ?? screenHeight;
@@ -154,64 +185,73 @@ class _NotesRendererState extends State<NotesRenderer> {
 
     viewOffsetX = viewerHandler.viewState.value?.position.dx ?? 0;
     viewOffsetY = viewerHandler.viewState.value?.position.dy ?? 0;
+
+    if (prevResizeScale != resizeScale || prevScreenToImageRatio != screenToImageRatio) {
+      rebuildNotesMap();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        if (screenWidth != constraints.maxWidth || screenHeight != constraints.maxHeight) {
-          screenWidth = constraints.maxWidth;
-          screenHeight = constraints.maxHeight;
-          screenRatio = screenWidth / screenHeight;
-          triggerCalculations();
-        }
-
-        return Obx(() {
-          if (!viewerHandler.isLoaded.value || !viewerHandler.showNotes.value || item.fileURL.isEmpty) {
-            return const SizedBox.shrink();
-          } else {
-            return Stack(
-              children: [
-                if (loading)
-                  Positioned(
-                    left: 60,
-                    top: kToolbarHeight * 1.5,
-                    child: SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          const RepaintBoundary(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          ),
-                          Icon(
-                            Icons.note_add,
-                            size: 18,
-                            color: Theme.of(context).colorScheme.secondary,
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else
-                  ...item.notes.map(
-                    (note) => NoteBuild(
-                      text: note.content,
-                      left: (note.posX * resizeScale * screenToImageRatio) + offsetX + viewOffsetX,
-                      top: (note.posY * resizeScale * screenToImageRatio) + offsetY + viewOffsetY,
-                      width: note.width * resizeScale * screenToImageRatio,
-                      height: note.height * resizeScale * screenToImageRatio,
-                    ),
-                  ),
-              ],
-            );
+    return RepaintBoundary(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          if (screenWidth != constraints.maxWidth || screenHeight != constraints.maxHeight) {
+            screenWidth = constraints.maxWidth;
+            screenHeight = constraints.maxHeight;
+            screenRatio = screenWidth / screenHeight;
+            triggerCalculations();
           }
-        });
-      },
+
+          return Obx(() {
+            if (!viewerHandler.isLoaded.value || !viewerHandler.showNotes.value || !currentItemHasNotes) {
+              return const SizedBox.shrink();
+            } else {
+              final scale = resizeScale * screenToImageRatio;
+              final totalOffsetX = offsetX + viewOffsetX;
+              final totalOffsetY = offsetY + viewOffsetY;
+
+              return Stack(
+                children: [
+                  if (loading)
+                    Positioned(
+                      left: 60,
+                      top: kToolbarHeight * 1.5,
+                      child: SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const RepaintBoundary(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            Icon(
+                              Icons.note_add,
+                              size: 18,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    ...item.notes.map((note) {
+                      return AnimatedPositioned(
+                        duration: const Duration(milliseconds: 10),
+                        left: (note.posX * scale) + totalOffsetX,
+                        top: (note.posY * scale) + totalOffsetY,
+                        child: notesMap[item.notes.indexOf(note)],
+                      );
+                    }),
+                ],
+              );
+            }
+          });
+        },
+      ),
     );
   }
 }
@@ -219,16 +259,12 @@ class _NotesRendererState extends State<NotesRenderer> {
 class NoteBuild extends StatefulWidget {
   const NoteBuild({
     required this.text,
-    required this.left,
-    required this.top,
     required this.width,
     required this.height,
     super.key,
   });
 
   final String? text;
-  final double left;
-  final double top;
   final double width;
   final double height;
 
@@ -250,74 +286,50 @@ class _NoteBuildState extends State<NoteBuild> {
     //   return const SizedBox.shrink();
     // }
 
-    return AnimatedPositioned(
-      duration: const Duration(milliseconds: 10),
-      left: widget.left,
-      top: widget.top,
-      child: TransparentPointer(
-        child: GestureDetector(
-          onLongPressStart: (details) {
-            setState(() {
-              isVisible = false;
-            });
-          },
-          onLongPressEnd: (details) {
-            setState(() {
-              isVisible = true;
-            });
-          },
-          onLongPressCancel: () {
-            setState(() {
-              isVisible = true;
-            });
-          },
-          onTap: () {
-            FlashElements.showSnackbar(
-              title: const Text('Note'),
-              content: Text.rich(
-                parse(
-                  widget.text ?? '',
-                  const TextStyle(
-                    fontSize: 14,
-                  ),
-                  false,
+    return TransparentPointer(
+      child: GestureDetector(
+        onLongPressStart: (details) {
+          setState(() {
+            isVisible = false;
+          });
+        },
+        onLongPressEnd: (details) {
+          setState(() {
+            isVisible = true;
+          });
+        },
+        onLongPressCancel: () {
+          setState(() {
+            isVisible = true;
+          });
+        },
+        onTap: () {
+          FlashElements.showSnackbar(
+            title: const Text('Note'),
+            content: Text.rich(
+              parse(
+                widget.text ?? '',
+                const TextStyle(
+                  fontSize: 14,
                 ),
-                overflow: TextOverflow.fade,
+                false,
               ),
-              duration: null,
-              sideColor: Colors.blue,
-              shouldLeadingPulse: false,
-              asDialog: true,
-            );
-          },
-          behavior: HitTestBehavior.translucent,
-          child: AnimatedOpacity(
-            opacity: isVisible ? 1 : 0,
-            duration: const Duration(milliseconds: 100),
-            child: Container(
-              width: widget.width,
-              height: widget.height,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFF300).withOpacity(0.25),
-                borderRadius: BorderRadius.circular(2),
-                border: Border.all(
-                  color: const Color(0xFFFFF176).withOpacity(0.5),
-                ),
-              ),
-              child: (widget.width > 30 && widget.height > 30) // don't show if too small
-                  ? Text.rich(
-                      parse(
-                        widget.text ?? '',
-                        const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                        true,
-                      ),
-                      overflow: TextOverflow.fade,
-                    )
-                  : null,
+              overflow: TextOverflow.fade,
             ),
+            duration: null,
+            sideColor: Colors.blue,
+            shouldLeadingPulse: false,
+            asDialog: true,
+          );
+        },
+        behavior: HitTestBehavior.translucent,
+        child: AnimatedOpacity(
+          opacity: isVisible ? 1 : 0,
+          duration: const Duration(milliseconds: 100),
+          child: _NoteBuildContent(
+            text: widget.text,
+            width: widget.width,
+            height: widget.height,
           ),
         ),
       ),
@@ -325,8 +337,58 @@ class _NoteBuildState extends State<NoteBuild> {
   }
 }
 
+class _NoteBuildContent extends StatelessWidget {
+  const _NoteBuildContent({
+    required this.text,
+    required this.width,
+    required this.height,
+  });
+
+  final String? text;
+  final double width;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF300).withOpacity(0.25),
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(
+            width: 1,
+            color: const Color(0xFFFFF176).withOpacity(0.5),
+          ),
+        ),
+        child: (width > 30 && height > 30) // don't show if too small
+            ? Padding(
+                padding: const EdgeInsets.all(1),
+                child: Text.rich(
+                  parse(
+                    text ?? '',
+                    const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                    true,
+                  ),
+                  overflow: TextOverflow.fade,
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+}
+
 class NotesDialog extends StatelessWidget {
-  const NotesDialog(this.item, {super.key});
+  const NotesDialog(
+    this.item, {
+    super.key,
+  });
+
   final BooruItem item;
 
   @override

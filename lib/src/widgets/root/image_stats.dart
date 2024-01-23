@@ -104,7 +104,7 @@ class _ImageStatsState extends State<ImageStats> {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
-          children: <Widget>[
+          children: [
             widget.child,
             if (widget.isEnabled)
               IgnorePointer(

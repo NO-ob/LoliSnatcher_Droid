@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/widgets/common/clear_button.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class TabManagerFiltersDialog extends StatefulWidget {
@@ -11,6 +12,8 @@ class TabManagerFiltersDialog extends StatefulWidget {
     required this.booruFilterChanged,
     required this.duplicateFilter,
     required this.duplicateFilterChanged,
+    required this.duplicateBooruFilter,
+    required this.duplicateBooruFilterChanged,
     required this.emptyFilter,
     required this.emptyFilterChanged,
     super.key,
@@ -22,6 +25,8 @@ class TabManagerFiltersDialog extends StatefulWidget {
   final ValueChanged<Booru?> booruFilterChanged;
   final bool duplicateFilter;
   final ValueChanged<bool> duplicateFilterChanged;
+  final bool duplicateBooruFilter;
+  final ValueChanged<bool> duplicateBooruFilterChanged;
   final bool emptyFilter;
   final ValueChanged<bool> emptyFilterChanged;
 
@@ -32,7 +37,7 @@ class TabManagerFiltersDialog extends StatefulWidget {
 class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
   bool? loadedFilter;
   Booru? booruFilter;
-  bool duplicateFilter = false, emptyFilter = false;
+  bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
 
   @override
   void initState() {
@@ -41,13 +46,18 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
     loadedFilter = widget.loadedFilter;
     booruFilter = widget.booruFilter;
     duplicateFilter = widget.duplicateFilter;
+    duplicateBooruFilter = widget.duplicateBooruFilter;
     emptyFilter = widget.emptyFilter;
   }
 
   @override
   Widget build(BuildContext context) {
     return SettingsBottomSheet(
-      title: const Text('Tab Filters'),
+      title: const Text(
+        'Tab Filters',
+        style: TextStyle(fontSize: 20),
+      ),
+      titlePadding: const EdgeInsets.fromLTRB(32, 16, 16, 0),
       contentPadding: const EdgeInsets.all(16),
       buttonPadding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
       contentItems: [
@@ -74,12 +84,12 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             true,
             false,
           ],
-          itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Loaded' : 'Unloaded'),
+          itemBuilder: (item) => item == null ? const Text('All') : Text(item ? 'Loaded' : 'Not loaded'),
           itemTitleBuilder: (item) => item == null
               ? 'All'
               : item
                   ? 'Loaded'
-                  : 'Unloaded',
+                  : 'Not loaded',
         ),
         SettingsToggle(
           title: 'Duplicates',
@@ -88,6 +98,30 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             duplicateFilter = newValue;
             setState(() {});
           },
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: duplicateFilter
+              ? Row(
+                  children: [
+                    const SizedBox(width: 16),
+                    const Icon(
+                      Icons.subdirectory_arrow_right_rounded,
+                      size: 20,
+                    ),
+                    Expanded(
+                      child: SettingsToggle(
+                        title: 'Check duplicates on same Booru',
+                        value: duplicateBooruFilter,
+                        onChanged: (bool newValue) {
+                          duplicateBooruFilter = newValue;
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(),
         ),
         SettingsToggle(
           title: 'Empty tags',
@@ -99,30 +133,19 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
       ],
       actionButtons: [
-        SizedBox(
-          height: 40,
-          child: ElevatedButton.icon(
-            label: const Text('Clear'),
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              Navigator.of(context).pop('clear');
-            },
-          ),
-        ),
+        const ClearButton(withIcon: true),
         const SizedBox(width: 10),
-        SizedBox(
-          height: 40,
-          child: ElevatedButton.icon(
-            label: const Text('Apply'),
-            icon: const Icon(Icons.check),
-            onPressed: () {
-              widget.loadedFilterChanged(loadedFilter);
-              widget.booruFilterChanged(booruFilter);
-              widget.duplicateFilterChanged(duplicateFilter);
-              widget.emptyFilterChanged(emptyFilter);
-              Navigator.of(context).pop('apply');
-            },
-          ),
+        ElevatedButton.icon(
+          label: const Text('Apply'),
+          icon: const Icon(Icons.check),
+          onPressed: () {
+            widget.loadedFilterChanged(loadedFilter);
+            widget.booruFilterChanged(booruFilter);
+            widget.duplicateFilterChanged(duplicateFilter);
+            widget.duplicateBooruFilterChanged(duplicateBooruFilter);
+            widget.emptyFilterChanged(emptyFilter);
+            Navigator.of(context).pop('apply');
+          },
         ),
       ],
     );

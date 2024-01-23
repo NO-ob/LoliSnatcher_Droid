@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +11,7 @@ import 'package:logger_flutter_fork/logger_flutter_fork.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -17,6 +20,7 @@ import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/mascot_image.dart';
@@ -27,6 +31,7 @@ import 'package:lolisnatcher/src/widgets/search/tag_search_box.dart';
 import 'package:lolisnatcher/src/widgets/search/tag_search_button.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_buttons.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_secondary_booru_selector.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
@@ -86,7 +91,7 @@ class _MobileHomeState extends State<MobileHome> {
           contentItems: const [
             Text('Do you want to exit the App?'),
           ],
-          actionButtons: <Widget>[
+          actionButtons: [
             ElevatedButton.icon(
               label: const Text('Yes'),
               icon: const Icon(Icons.exit_to_app_sharp),
@@ -142,6 +147,21 @@ class _MobileHomeState extends State<MobileHome> {
           alignment: Alignment.center,
           clipBehavior: Clip.none,
           children: [
+            Obx(() {
+              if (snatchHandler.active.value == false || snatchHandler.current.value == null) {
+                return const SizedBox.shrink();
+              }
+
+              final double singleToTotalProgress = 1 / snatchHandler.current.value!.booruItems.length;
+              final double currentCompleteProgress = snatchHandler.queueProgress.value * singleToTotalProgress;
+
+              final double downloadProgress = snatchHandler.total.value == 0 ? 0 : (snatchHandler.received.value / snatchHandler.total.value);
+              final double downloadToTotalProgress = singleToTotalProgress * downloadProgress;
+
+              return CircularProgressIndicator(
+                value: currentCompleteProgress + downloadToTotalProgress,
+              );
+            }),
             IconButton(
               icon: Icon(
                 Icons.save,
@@ -285,7 +305,7 @@ class MainDrawer extends StatelessWidget {
       child: SafeArea(
         child: Drawer(
           child: Column(
-            children: <Widget>[
+            children: [
               Obx(() {
                 if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
                   return Container(
@@ -293,7 +313,7 @@ class MainDrawer extends StatelessWidget {
                     width: double.infinity,
                     child: const Row(
                       mainAxisSize: MainAxisSize.max,
-                      children: <Widget>[
+                      children: [
                         //Tags/Search field
                         TagSearchBox(),
                         TagSearchButton(),
@@ -318,16 +338,19 @@ class MainDrawer extends StatelessWidget {
                     clipBehavior: Clip.antiAlias,
                     children: [
                       const TabButtons(true, WrapAlignment.spaceEvenly),
-                      const TabBooruSelector(true),
+                      const TabBooruSelector(),
                       const MergeBooruToggle(),
                       Obx(() {
                         final bool hasTabsAndTabHasSecondaryBoorus =
                             searchHandler.list.isNotEmpty && (searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false);
-                        if (settingsHandler.booruList.length > 1 && hasTabsAndTabHasSecondaryBoorus) {
-                          return const TabBooruSelector(false);
-                        } else {
-                          return const SizedBox.shrink();
-                        }
+
+                        return AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          alignment: Alignment.topCenter,
+                          child: (settingsHandler.booruList.length > 1 && hasTabsAndTabHasSecondaryBoorus)
+                              ? const TabSecondaryBooruSelector()
+                              : const SizedBox.shrink(),
+                        );
                       }),
                       //
                       Obx(() {
@@ -354,7 +377,7 @@ class MainDrawer extends StatelessWidget {
                                 context,
                                 showCloseButton: true,
                                 showClearButton: true,
-                                dark: Theme.of(context).brightness == Brightness.dark,
+                                dark: false, // Theme.of(context).brightness == Brightness.dark,
                                 onExport: (String text) {
                                   Clipboard.setData(ClipboardData(text: text));
                                 },
@@ -471,9 +494,12 @@ class DownloadsDrawer extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     // TODO better design?
+    // TODO detailed dl speed info
     // TODO rework snatchhandler? drop the queue and just use a single list?
 
     // print('build downloads drawer');
+
+    final ScrollController scrollController = ScrollController();
 
     return ColoredBox(
       color: Theme.of(context).colorScheme.background,
@@ -481,42 +507,14 @@ class DownloadsDrawer extends StatelessWidget {
         child: Drawer(
           child: Column(
             children: [
-              Obx(() {
-                if (snatchHandler.queuedList.isEmpty && snatchHandler.current.value == null) {
-                  return const SizedBox.shrink();
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: ElevatedButton(
-                    onPressed: (snatchHandler.active.value == false && snatchHandler.current.value != null)
-                        ? null
-                        : () {
-                            if (snatchHandler.active.value) {
-                              snatchHandler.active.value = false;
-                            } else {
-                              snatchHandler.trySnatch();
-                            }
-                          },
-                    child: Text(
-                      snatchHandler.active.value
-                          ? 'Pause (from next queue)'
-                          : snatchHandler.current.value != null
-                              ? 'Wait'
-                              : 'Continue',
-                    ),
-                  ),
-                );
-              }),
               Expanded(
                 child: Obx(() {
-                  // final queuedLengths = snatchHandler.queuedList.map((e) => e.booruItems.length);
-                  // final int queuedItemsLength = queuedLengths.isEmpty ? 0 : queuedLengths.reduce((value, e) => value + e);
-                  final int queuesAmount = snatchHandler.queuedList.length;
+                  final int queuesLength = snatchHandler.queuedList.length;
                   final int activeLength =
                       snatchHandler.current.value != null ? snatchHandler.current.value!.booruItems.length - snatchHandler.queueProgress.value : 0;
+                  final int totalAmount = queuesLength + activeLength;
 
-                  if (activeLength == 0 && queuesAmount == 0) {
+                  if (totalAmount == 0) {
                     return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -536,10 +534,11 @@ class DownloadsDrawer extends StatelessWidget {
                   }
 
                   return ListView.builder(
-                    // controller: ScrollController(),
-                    itemCount: activeLength + queuesAmount,
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    itemCount: totalAmount,
                     itemBuilder: (BuildContext context, int index) {
-                      if (index < activeLength) {
+                      if (activeLength != 0 && index < activeLength) {
                         final item = snatchHandler.current.value!.booruItems[snatchHandler.queueProgress.value + index];
                         return Stack(
                           children: [
@@ -567,32 +566,59 @@ class DownloadsDrawer extends StatelessWidget {
                                     height: 150,
                                     child: ThumbnailBuild(
                                       item: item,
-                                      // isStandalone: true,
-                                      // ignoreColumnsCount: true,
+                                      selectable: false,
                                     ),
                                   ),
                                 ),
-                                Text(
-                                  '${snatchHandler.queueProgress.value + index + 1}/${snatchHandler.current.value!.booruItems.length}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                                if (index == 0) ...[
-                                  const Spacer(),
-                                  Obx(
-                                    () => Text(
-                                      snatchHandler.total.value == 0
-                                          ? '...%'
-                                          : '${((snatchHandler.received.value / snatchHandler.total.value) * 100.0).toStringAsFixed(2)}%',
-                                      style: const TextStyle(fontSize: 16),
+                                if (snatchHandler.current.value!.booruItems.length != 1)
+                                  Text(
+                                    '${snatchHandler.queueProgress.value + index + 1}/${snatchHandler.current.value!.booruItems.length}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                if (index == 0)
+                                  Expanded(
+                                    child: Obx(
+                                      () => Padding(
+                                        padding: const EdgeInsets.only(right: 16),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              snatchHandler.total.value == 0
+                                                  ? '...%'
+                                                  : '${((snatchHandler.received.value / snatchHandler.total.value) * 100.0).toStringAsFixed(2)}%',
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                            Text(
+                                              snatchHandler.total.value == 0
+                                                  ? ''
+                                                  : '${Tools.formatBytes(
+                                                      snatchHandler.received.value,
+                                                      1,
+                                                      withSpace: false,
+                                                    )}/${Tools.formatBytes(
+                                                      snatchHandler.total.value,
+                                                      1,
+                                                      withSpace: false,
+                                                    )}',
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ],
                               ],
                             ),
                           ],
                         );
                       } else {
-                        final int queueIndex = (queuesAmount - 1) + (index - activeLength - (activeLength == 0 ? 0 : 1));
+                        final int queueIndex = lerpDouble(
+                          0,
+                          max(0, queuesLength - 1),
+                          (index - activeLength) / (queuesLength - 1),
+                        )!
+                            .toInt();
                         final queue = snatchHandler.queuedList[queueIndex];
                         final firstItem = queue.booruItems.first;
                         final lastItem = queue.booruItems.last;
@@ -609,8 +635,7 @@ class DownloadsDrawer extends StatelessWidget {
                                       height: 134,
                                       child: ThumbnailBuild(
                                         item: lastItem,
-                                        // isStandalone: true,
-                                        // ignoreColumnsCount: true,
+                                        selectable: false,
                                       ),
                                     ),
                                   ),
@@ -622,8 +647,7 @@ class DownloadsDrawer extends StatelessWidget {
                                     height: 150,
                                     child: ThumbnailBuild(
                                       item: firstItem,
-                                      // isStandalone: true,
-                                      // ignoreColumnsCount: true,
+                                      selectable: false,
                                     ),
                                   ),
                                 ),
@@ -641,76 +665,175 @@ class DownloadsDrawer extends StatelessWidget {
                 }),
               ),
               //
-              Obx(() {
-                if (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty) {
-                  return Container(
-                    margin: const EdgeInsets.only(top: 16),
-                    child: Column(
-                      children: [
-                        Obx(() {
-                          final selected = searchHandler.currentTab.selected;
-                          if (selected.isNotEmpty) {
-                            return Column(
-                              children: [
-                                SettingsButton(
-                                  name: 'Snatch selected items (${searchHandler.currentTab.selected.length.toFormattedString()})',
-                                  icon: const Icon(Icons.download_sharp),
-                                  action: () => onStartSnatching(context, false),
-                                  onLongPress: () => onStartSnatching(context, true),
-                                  drawTopBorder: true,
-                                  drawBottomBorder: false,
-                                ),
-                                SettingsButton(
-                                  name: 'Clear selected items',
-                                  icon: const Icon(Icons.delete_forever),
-                                  action: () => searchHandler.currentTab.selected.clear(),
-                                  drawTopBorder: true,
-                                  drawBottomBorder: false,
-                                ),
-                              ],
-                            );
-                          } else {
-                            return SettingsButton(
-                              name: 'Select all items',
-                              icon: const Icon(Icons.select_all),
-                              action: () => searchHandler.currentTab.selected.addAll(searchHandler.currentFetched),
-                              drawTopBorder: true,
-                              drawBottomBorder: false,
-                            );
-                          }
-                        }),
-                        SettingsButton(
-                          name: 'Snatcher',
-                          icon: const Icon(Icons.download_sharp),
-                          page: () => const SnatcherPage(),
-                          drawTopBorder: true,
-                        ),
-                        SettingsButton(
-                          name: 'Snatching History',
-                          icon: const Icon(Icons.file_download_outlined),
-                          action: () {
-                            final Booru? downloadsBooru = settingsHandler.booruList.firstWhereOrNull((booru) => booru.type == BooruType.Downloads);
-                            final bool hasDownloads = downloadsBooru != null;
+              Obx(
+                () => AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  alignment: Alignment.bottomCenter,
+                  child: (settingsHandler.booruList.isNotEmpty && searchHandler.list.isNotEmpty)
+                      ? ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight: MediaQuery.sizeOf(context).height * (snatchHandler.queuedList.isEmpty ? 0.7 : 0.5),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Scrollbar(
+                              controller: scrollController,
+                              thumbVisibility: true,
+                              child: SingleChildScrollView(
+                                controller: scrollController,
+                                clipBehavior: Clip.antiAlias,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Obx(
+                                      () => AnimatedSize(
+                                        duration: const Duration(milliseconds: 200),
+                                        alignment: Alignment.bottomCenter,
+                                        child: snatchHandler.queuedList.isEmpty
+                                            ? const SizedBox.shrink()
+                                            : SettingsButton(
+                                                drawBottomBorder: false,
+                                                drawTopBorder: true,
+                                                action: () {
+                                                  if (snatchHandler.active.value) {
+                                                    snatchHandler.active.value = false;
+                                                  } else {
+                                                    if (snatchHandler.current.value == null) {
+                                                      snatchHandler.trySnatch();
+                                                    } else {
+                                                      snatchHandler.active.value = true;
+                                                    }
+                                                  }
+                                                },
+                                                icon: snatchHandler.active.value ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
+                                                name: snatchHandler.active.value ? 'Pause' : 'Unpause',
+                                                subtitle: snatchHandler.active.value ? const Text('(from next queue)') : null,
+                                              ),
+                                      ),
+                                    ),
+                                    Obx(() {
+                                      final selected = searchHandler.currentTab.selected;
+                                      if (selected.isNotEmpty) {
+                                        final int favSelectedCount = selected.where((item) => item.isFavourite.value == true).length;
+                                        final int unfavSelectedCount = selected.where((item) => item.isFavourite.value == false).length;
+                                        final bool hasFavsSelected = favSelectedCount > 0;
+                                        final bool isAllSelectedFavs = selected.length == favSelectedCount;
 
-                            if (!hasDownloads) {
-                              return;
-                            }
+                                        final int downloadsSelectedCount = selected.where((item) => item.isSnatched.value == true).length;
+                                        final bool hasDownloadsSelected = downloadsSelectedCount > 0;
 
-                            searchHandler.addTabByString(
-                              '',
-                              switchToNew: true,
-                              customBooru: downloadsBooru,
-                            );
-                            toggleDrawer();
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                } else {
-                  return const SizedBox.shrink();
-                }
-              }),
+                                        return Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SettingsButton(
+                                              name: 'Snatch selected (${selected.length.toFormattedString()})',
+                                              icon: const Icon(Icons.download_sharp),
+                                              action: () => onStartSnatching(context, false),
+                                              onLongPress: () => onStartSnatching(context, true),
+                                              drawTopBorder: true,
+                                            ),
+                                            if (hasDownloadsSelected)
+                                              SettingsButton(
+                                                name: 'Remove snatched status from selected (${downloadsSelectedCount.toFormattedString()})',
+                                                icon: const Icon(Icons.file_download_off_outlined),
+                                                action: () async {
+                                                  final onlySnatched = searchHandler.currentTab.selected.where((e) => e.isSnatched.value == true).toList();
+                                                  if (onlySnatched.length > 20) {
+                                                    // TODO confirm dialog
+                                                  }
+                                                  for (final item in onlySnatched) {
+                                                    item.isSnatched.value = false;
+                                                    await settingsHandler.dbHandler.updateBooruItem(item, BooruUpdateMode.local);
+                                                  }
+                                                  searchHandler.currentTab.selected.clear();
+                                                },
+                                              ),
+                                            if (!isAllSelectedFavs)
+                                              SettingsButton(
+                                                name: 'Favourite selected (${unfavSelectedCount.toFormattedString()})',
+                                                icon: const Icon(Icons.favorite, color: Colors.red),
+                                                action: () async {
+                                                  final onlyUnfavs = searchHandler.currentTab.selected.where((e) => e.isFavourite.value == false).toList();
+                                                  if (onlyUnfavs.length > 20) {
+                                                    // TODO confirm dialog
+                                                  }
+                                                  for (final item in onlyUnfavs) {
+                                                    await searchHandler.toggleItemFavourite(
+                                                      searchHandler.currentFetched.indexOf(item),
+                                                      forcedValue: true,
+                                                    );
+                                                  }
+                                                  searchHandler.currentTab.selected.clear();
+                                                },
+                                              ),
+                                            if (hasFavsSelected)
+                                              SettingsButton(
+                                                name: 'Unfavourite selected (${favSelectedCount.toFormattedString()})',
+                                                icon: const Icon(Icons.favorite_border),
+                                                action: () async {
+                                                  final onlyFavs = searchHandler.currentTab.selected.where((e) => e.isFavourite.value == true).toList();
+                                                  if (onlyFavs.length > 20) {
+                                                    // TODO confirm dialog
+                                                  }
+                                                  for (final item in onlyFavs) {
+                                                    await searchHandler.toggleItemFavourite(
+                                                      searchHandler.currentFetched.indexOf(item),
+                                                      forcedValue: false,
+                                                    );
+                                                  }
+                                                  searchHandler.currentTab.selected.clear();
+                                                },
+                                              ),
+                                            SettingsButton(
+                                              name: 'Clear selected',
+                                              icon: const Icon(Icons.delete_forever),
+                                              action: () => searchHandler.currentTab.selected.clear(),
+                                            ),
+                                          ],
+                                        );
+                                      } else {
+                                        return SettingsButton(
+                                          name: 'Select all',
+                                          icon: const Icon(Icons.select_all),
+                                          action: () => searchHandler.currentTab.selected.addAll(searchHandler.currentFetched),
+                                          drawTopBorder: true,
+                                        );
+                                      }
+                                    }),
+                                    SettingsButton(
+                                      name: 'Snatcher',
+                                      icon: const Icon(Icons.download_sharp),
+                                      page: () => const SnatcherPage(),
+                                    ),
+                                    SettingsButton(
+                                      name: 'Snatching History',
+                                      icon: const Icon(Icons.file_download_outlined),
+                                      action: () {
+                                        final Booru? downloadsBooru = settingsHandler.booruList.firstWhereOrNull((booru) => booru.type == BooruType.Downloads);
+                                        final bool hasDownloads = downloadsBooru != null;
+
+                                        if (!hasDownloads) {
+                                          return;
+                                        }
+
+                                        searchHandler.addTabByString(
+                                          '',
+                                          switchToNew: true,
+                                          customBooru: downloadsBooru,
+                                        );
+                                        toggleDrawer();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ),
             ],
           ),
         ),
@@ -735,6 +858,7 @@ class MergeBooruToggle extends StatelessWidget {
       return SettingsToggle(
         title: 'Multibooru Mode',
         value: searchHandler.currentTab.secondaryBoorus?.isNotEmpty ?? false,
+        drawBottomBorder: searchHandler.currentTab.secondaryBoorus?.isEmpty ?? true,
         onChanged: (newValue) {
           if (settingsHandler.booruList.length < 2) {
             FlashElements.showSnackbar(

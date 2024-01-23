@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
+import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail.dart';
 
 class ThumbnailBuild extends StatelessWidget {
   const ThumbnailBuild({
     required this.item,
+    this.selectable = true,
     super.key,
   });
 
   final BooruItem item;
+  final bool selectable;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +40,7 @@ class ThumbnailBuild extends StatelessWidget {
       final bool isSound = tagsData.soundTags.isNotEmpty;
       final bool isAi = tagsData.aiTags.isNotEmpty;
       final bool hasNotes = item.hasNotes == true;
+      final bool hasComments = item.hasComments == true;
 
       // print('ThumbnailBuild $index');
 
@@ -55,54 +63,131 @@ class ThumbnailBuild extends StatelessWidget {
             //   height: double.infinity,
             // ),
             Container(
+              alignment: Alignment.topCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Builder(
+                    builder: (context) {
+                      if (settingsHandler.isDebug.value == true) {
+                        return InkWell(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: item.toString()));
+                            FlashElements.showSnackbar(
+                              context: context,
+                              title: const Text('Copied!', style: TextStyle(fontSize: 20)),
+                              content: const Text('Booru item copied to clipboard'),
+                              sideColor: Colors.green,
+                              leadingIcon: Icons.copy,
+                              leadingIconColor: Colors.white,
+                              duration: const Duration(seconds: 2),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.66),
+                              borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
+                            ),
+                            child: const Icon(
+                              Icons.copy,
+                              size: 16,
+                            ),
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                  const Spacer(),
+                  Builder(
+                    builder: (context) {
+                      if (searchHandler.currentTab.secondaryBoorus?.isNotEmpty == true) {
+                        final handler = searchHandler.currentBooruHandler as MergebooruHandler;
+                        final fetchedMap = handler.fetchedMap;
+
+                        Booru? booru;
+                        for (final entry in fetchedMap.entries) {
+                          if (entry.value.contains(item)) {
+                            booru = entry.key;
+                            break;
+                          }
+                        }
+
+                        if (booru == null) {
+                          return const SizedBox.shrink();
+                        }
+
+                        return Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.66),
+                            borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
+                          ),
+                          child: Favicon(booru, size: 16),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Container(
               alignment: Alignment.bottomCenter,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Obx(() {
-                    final selected = searchHandler.currentTab.selected;
+                  if (selectable)
+                    Obx(() {
+                      final selected = searchHandler.currentTab.selected;
 
-                    Widget checkboxWidget = const SizedBox.shrink();
-                    if (selected.isNotEmpty) {
-                      final isSelected = selected.contains(item);
-                      final int selectedIndex = selected.indexOf(item);
+                      Widget checkboxWidget = const SizedBox.shrink();
+                      if (selected.isNotEmpty) {
+                        final isSelected = selected.contains(item);
+                        final int selectedIndex = selected.indexOf(item);
 
-                      checkboxWidget = Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.66),
-                          borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
-                        ),
-                        child: Row(
-                          children: [
-                            Checkbox(
-                              value: isSelected,
-                              onChanged: (bool? value) {
-                                if (value != null) {
-                                  if (value) {
-                                    searchHandler.currentTab.selected.add(item);
-                                  } else {
-                                    searchHandler.currentTab.selected.remove(item);
+                        checkboxWidget = Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.66),
+                            borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
+                          ),
+                          child: Row(
+                            children: [
+                              Checkbox(
+                                value: isSelected,
+                                onChanged: (bool? value) {
+                                  if (value != null) {
+                                    if (value) {
+                                      searchHandler.currentTab.selected.add(item);
+                                    } else {
+                                      searchHandler.currentTab.selected.remove(item);
+                                    }
                                   }
-                                }
-                              },
-                            ),
-                            if (isSelected)
-                              Text(
-                                (selectedIndex + 1).toString(),
-                                style: const TextStyle(fontSize: 12, color: Colors.white),
+                                },
                               ),
-                          ],
-                        ),
-                      );
-                    }
+                              if (isSelected)
+                                Text(
+                                  (selectedIndex + 1).toString(),
+                                  style: const TextStyle(fontSize: 12, color: Colors.white),
+                                ),
+                            ],
+                          ),
+                        );
+                      }
 
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: checkboxWidget,
-                    );
-                  }),
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: checkboxWidget,
+                      );
+                    })
+                  else
+                    const SizedBox.shrink(),
                   //
                   Flexible(
                     child: Container(
@@ -153,6 +238,12 @@ class ThumbnailBuild extends StatelessWidget {
                                 FontAwesomeIcons.robot,
                                 color: Colors.white,
                                 size: 13,
+                              ),
+                            if (settingsHandler.isDebug.value && hasComments)
+                              const Icon(
+                                Icons.comment,
+                                color: Colors.white,
+                                size: 14,
                               ),
                             if (hasNotes)
                               const Icon(

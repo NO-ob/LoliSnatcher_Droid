@@ -123,7 +123,7 @@ class R34HentaiHandler extends ShimmieHandler {
         final value = cookie.split(';')[0].split('=')[1];
 
         await cookieManager.setCookie(
-          url: Uri.parse(Uri.parse(booru.baseURL!).host),
+          url: WebUri(booru.baseURL!),
           name: name,
           value: value,
         );
@@ -137,7 +137,7 @@ class R34HentaiHandler extends ShimmieHandler {
   @override
   Future<bool> isSignedIn() async {
     final CookieManager cookieManager = CookieManager.instance();
-    final cookies = await cookieManager.getCookies(url: Uri.parse(Uri.parse(booru.baseURL!).host));
+    final cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
     final bool hasCookies = cookies.any((e) => e.name == 'shm_user') && cookies.any((e) => e.name == 'shm_session');
 
     if (!hasCookies) {
@@ -178,7 +178,7 @@ class R34HentaiHandler extends ShimmieHandler {
 
     final CookieManager cookieManager = CookieManager.instance();
     await cookieManager.deleteCookies(
-      url: Uri.parse(Uri.parse(booru.baseURL!).host),
+      url: WebUri(booru.baseURL!),
     );
 
     return success;

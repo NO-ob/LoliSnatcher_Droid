@@ -42,7 +42,7 @@ class ShimmieHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
-    final current = responseItem;
+    final current = responseItem as XmlElement;
     if (current.getAttribute('file_url') != null) {
       String preURL = '';
       if (booru.baseURL!.contains('https://whyneko.com/booru')) {
@@ -50,9 +50,17 @@ class ShimmieHandler extends BooruHandler {
         preURL = booru.baseURL!.split('/booru')[0];
       }
 
+      String? possibleFileExt;
+      if (booru.baseURL!.contains('rule34.paheal.net')) {
+        // they now use cdn which hides file names, but it is still given through api in new file_name field
+        final fileName = current.getAttribute('file_name');
+        possibleFileExt = fileName?.split('.').last;
+      }
+
       final String dateString = current.getAttribute('date').toString();
       final BooruItem item = BooruItem(
         fileURL: preURL + current.getAttribute('file_url')!,
+        fileExt: possibleFileExt,
         sampleURL: preURL + current.getAttribute('file_url')!,
         thumbnailURL: preURL + current.getAttribute('preview_url')!,
         tagsList: current.getAttribute('tags')!.split(' '),

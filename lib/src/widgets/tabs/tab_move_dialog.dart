@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_selector.dart';
@@ -33,8 +34,18 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
 
   @override
   Widget build(BuildContext context) {
+    int? controllerNumber = int.tryParse(indexController.text);
+    if (controllerNumber != null) {
+      if (controllerNumber < 1) {
+        indexController.text = '1';
+      } else if (controllerNumber > searchHandler.total) {
+        indexController.text = searchHandler.total.toString();
+      }
+      controllerNumber = int.tryParse(indexController.text);
+    }
+
     return SettingsDialog(
-      contentItems: <Widget>[
+      contentItems: [
         SizedBox(width: double.maxFinite, child: widget.row),
         //
         const SizedBox(height: 10),
@@ -49,7 +60,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             Navigator.of(context).pop(true);
           },
           leading: const Icon(Icons.vertical_align_top),
-          title: const Text('To Top'),
+          title: const Text('Move To Top'),
         ),
         //
         const SizedBox(height: 10),
@@ -64,7 +75,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             Navigator.of(context).pop(true);
           },
           leading: const Icon(Icons.vertical_align_bottom),
-          title: const Text('To Bottom'),
+          title: const Text('Move To Bottom'),
         ),
         //
         const SizedBox(height: 30),
@@ -88,35 +99,26 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             borderRadius: BorderRadius.circular(5),
             side: BorderSide(color: Theme.of(context).colorScheme.secondary),
           ),
+          enabled: controllerNumber != null && controllerNumber != widget.index + 1,
           onTap: () async {
             final int? enteredIndex = int.tryParse(indexController.text);
-            if (enteredIndex == null) {
+            if (enteredIndex == null || (enteredIndex < 1 || enteredIndex > searchHandler.total)) {
               return await FlashElements.showSnackbar(
                 title: const Text('Invalid Tab Number'),
-                content: const Column(
+                content: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('Invalid Input'),
-                    SizedBox(height: 10),
-                    Text('Please enter a valid tab number'),
+                  children: [
+                    if (enteredIndex == null)
+                      const Text('Invalid Input')
+                    else if (enteredIndex < 1 || enteredIndex > searchHandler.total)
+                      const Text('Out of range'),
+                    //
+                    const SizedBox(height: 10),
+                    const Text('Please enter a valid tab number'),
                   ],
                 ),
               );
             } else {
-              if (enteredIndex < 1 || enteredIndex > searchHandler.total) {
-                return await FlashElements.showSnackbar(
-                  title: const Text('Invalid Tab Number'),
-                  content: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text('Out of range'),
-                      SizedBox(height: 10),
-                      Text('Please enter a valid tab number'),
-                    ],
-                  ),
-                );
-              }
-
               searchHandler.moveTab(widget.index, enteredIndex - 1);
 
               // close move dialog
@@ -126,7 +128,7 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             }
           },
           leading: const Icon(Icons.vertical_align_center),
-          title: const Text('To Set Number'),
+          title: Text('Move To #${controllerNumber ?? '?'}'),
         ),
         //
         const SizedBox(height: 10),
@@ -137,6 +139,9 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
           indexController: indexController,
           setState: setState,
         ),
+        const SizedBox(height: 20),
+        const CancelButton(),
+        const SizedBox(height: 20),
       ],
     );
   }
@@ -158,7 +163,7 @@ class TabMovePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final SearchHandler searchHandler = SearchHandler.instance;
 
-    int enteredIndex = int.tryParse(indexController.text) ?? index;
+    int enteredIndex = int.tryParse(indexController.text) ?? index + 1;
 
     if (enteredIndex < 1) {
       enteredIndex = 1;

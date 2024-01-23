@@ -104,7 +104,15 @@ class TagHandler extends GetxController {
       Logger.Inst().log('Snatching tags: ${untyped.tags}', 'TagHandler', 'getTagTypes', LogTypes.tagHandlerInfo);
       tagFetchActive.value = true;
       final List temp = BooruHandlerFactory().getBooruHandler([untyped.booru], null);
-      final BooruHandler booruHandler = temp[0];
+
+      BooruHandler booruHandler = temp[0];
+      if (booruHandler.shouldPopulateTags == false) {
+        // if current booru doesn't support tag data, use other booru (if available) that supports it
+        final boorusWithTagPopulation =
+            SettingsHandler.instance.booruList.where((b) => (BooruHandlerFactory().getBooruHandler([b], null)[0] as BooruHandler?)?.shouldPopulateTags == true);
+        booruHandler = boorusWithTagPopulation.isEmpty ? temp[0] : BooruHandlerFactory().getBooruHandler([boorusWithTagPopulation.first], null)[0];
+      }
+
       int tagCounter = 0;
       while (untyped.tags.isNotEmpty) {
         final List<String> workingTags = [];
@@ -131,7 +139,12 @@ class TagHandler extends GetxController {
           await Future.delayed(Duration(milliseconds: untyped.cooldown), () async {});
         }
       }
-      Logger.Inst().log('Got $tagCounter tag types, untyped list length was: ${untyped.tags.length}', 'TagHandler', 'getTagTypes', LogTypes.tagHandlerInfo);
+      Logger.Inst().log(
+        'Got $tagCounter tag types, untyped list length was: ${untyped.tags.length}',
+        'TagHandler',
+        'getTagTypes',
+        LogTypes.tagHandlerInfo,
+      );
       tagFetchActive.value = false;
     }
     tryGetTagTypes();

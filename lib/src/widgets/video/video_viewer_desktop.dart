@@ -200,7 +200,10 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       // print('Canceled by user: $imageURL | $error');
     } else {
       if (error is DioException) {
-        killLoading(['Loading Error: ${error.message}']);
+        killLoading([
+          'Loading Error: ${error.type.name}',
+          if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
+        ]);
       } else {
         killLoading(['Loading Error: $error']);
       }
@@ -473,6 +476,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       _lastViewedIndex = viewedIndex;
     }
 
+    const double fullOpacity = 1;
+
     // TODO move controls outside, to exclude them from zoom
 
     return Hero(
@@ -525,19 +530,22 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                   },
                 ),
                 if (isViewed && initialized)
-                  Padding(
-                    padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-                    child: Video(
-                      player: videoController,
-                      scale: 1,
-                      progressBarInactiveColor: Colors.grey,
-                      progressBarActiveColor: accentColor,
-                      progressBarThumbColor: accentColor,
-                      volumeThumbColor: accentColor,
-                      volumeActiveColor: accentColor,
-                      showControls: true,
-                      filterQuality: FilterQuality.medium,
-                      showTimeLeft: true,
+                  Opacity(
+                    opacity: fullOpacity,
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+                      child: Video(
+                        player: videoController,
+                        scale: 1,
+                        progressBarInactiveColor: Colors.grey,
+                        progressBarActiveColor: accentColor,
+                        progressBarThumbColor: accentColor,
+                        volumeThumbColor: accentColor,
+                        volumeActiveColor: accentColor,
+                        showControls: true,
+                        filterQuality: FilterQuality.medium,
+                        showTimeLeft: true,
+                      ),
                     ),
                   ),
               ],

@@ -47,7 +47,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
       resizeToAvoidBottomInset: true,
       body: Center(
         child: ListView(
-          children: <Widget>[
+          children: [
             SettingsTextInput(
               controller: snatcherTagsController,
               title: 'Tags',

@@ -17,13 +17,13 @@ import 'package:lolisnatcher/src/widgets/webview/webview_page.dart';
 
 class Tools {
   // code taken from: https://gist.github.com/zzpmaster/ec51afdbbfa5b2bf6ced13374ff891d9
-  static String formatBytes(int bytes, int decimals) {
+  static String formatBytes(int bytes, int decimals, {bool withSpace = true}) {
     if (bytes <= 0) {
       return '0 B';
     }
     const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     final i = (log(bytes) / log(1024)).floor();
-    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
+    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)}${withSpace ? ' ' : ''}${suffixes[i]}';
   }
 
   static int boolToInt(bool boolean) {
@@ -85,7 +85,7 @@ class Tools {
 
     if (!isTestMode) {
       try {
-        final cookiesStr = await getCookies(Uri.parse(booru.baseURL!));
+        final cookiesStr = await getCookies(WebUri(booru.baseURL!));
         if (cookiesStr.isNotEmpty) {
           headers['Cookie'] = cookiesStr;
         }
@@ -179,7 +179,7 @@ class Tools {
     return false;
   }
 
-  static Future<String> getCookies(Uri uri) async {
+  static Future<String> getCookies(WebUri uri) async {
     String cookieString = '';
     if (Platform.isAndroid || Platform.isIOS) {
       // TODO add when there is desktop support?

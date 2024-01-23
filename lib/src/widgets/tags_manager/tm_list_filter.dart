@@ -21,7 +21,7 @@ class TagsManagerListFilter extends StatelessWidget {
       width: double.infinity,
       child: Row(
         mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
+        children: [
           Expanded(
             child: SettingsTextInput(
               onlyInput: true,

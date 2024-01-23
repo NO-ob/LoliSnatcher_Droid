@@ -62,8 +62,6 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     } else if (value.mediaType.value.isNeedsExtraRequest) {
       return GuessExtensionViewer(
         item: value,
-        index: 1,
-        itemKey: value.key,
         onMediaTypeGuessed: (MediaType mediaType) {
           value.mediaType.value = mediaType;
           updateState();

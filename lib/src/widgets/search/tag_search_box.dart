@@ -148,7 +148,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
   }
 
   KeyboardActionsConfig _buildConfig(BuildContext context) {
-    const double buttonHeight = 44;
+    const double buttonHeight = kMinInteractiveDimension;
 
     final buttonStyle = Theme.of(context).elevatedButtonTheme.style?.copyWith(
           fixedSize: MaterialStateProperty.all<Size>(

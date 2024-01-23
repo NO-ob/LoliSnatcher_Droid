@@ -19,7 +19,7 @@ class MainAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Widget? leading;
   final Widget? trailing;
 
-  double get defaultHeight => kToolbarHeight; //56.0
+  double get defaultHeight => kToolbarHeight; // 56
 
   @override
   Size get preferredSize => Size.fromHeight(defaultHeight);
@@ -37,20 +37,20 @@ class _MainAppBarState extends State<MainAppBar> {
   double _scrollOffset = 1;
   double _lastScrollPosition = 0;
 
-  StreamSubscription<double>? scrollListener;
-  // StreamSubscription<int>? indexListener;
+  late StreamSubscription<double> scrollListener;
+  late StreamSubscription<int> tabIndexListener;
 
   @override
   void initState() {
     super.initState();
     scrollListener = searchHandler.scrollOffset.listen(updatePosition);
-    // indexListener = searchHandler.index.listen(updateIndex);
+    tabIndexListener = searchHandler.index.listen(updateIndex);
   }
 
   @override
   void dispose() {
-    scrollListener?.cancel();
-    // indexListener?.cancel();
+    scrollListener.cancel();
+    tabIndexListener.cancel();
     super.dispose();
   }
 
@@ -69,12 +69,12 @@ class _MainAppBarState extends State<MainAppBar> {
 
     if (viewerHandler.inViewer.value) {
       // always show toolbar when in viewer
-      _scrollOffset = 1.0;
+      _scrollOffset = 1;
     }
 
     if (newOffset < (viewportDimension / 3)) {
       // always show toolbar when close to top
-      _scrollOffset = 1.0;
+      _scrollOffset = 1;
     }
 
     if (prevOffset != _scrollOffset) {
@@ -86,8 +86,11 @@ class _MainAppBarState extends State<MainAppBar> {
   void updateIndex(int newIndex) {
     if (searchHandler.gridScrollController.hasClients) {
       _lastScrollPosition = searchHandler.currentTab.scrollPosition;
-      _scrollOffset = 1.0;
-      updatePosition(_lastScrollPosition);
+      final double prevOffset = _scrollOffset;
+      _scrollOffset = 1;
+      if (prevOffset != 1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => setState(() {}));
+      }
     }
   }
 

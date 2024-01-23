@@ -256,9 +256,14 @@ class _MediaLoadingState extends State<MediaLoading> {
         }),
         const SizedBox(height: 10),
         ElevatedButton.icon(
-          icon: const Icon(Icons.play_arrow, size: 44, color: Colors.blue),
+          icon: const Icon(
+            Icons.play_arrow,
+            size: 40,
+            color: Colors.blue,
+          ),
           style: ButtonStyle(
             backgroundColor: MaterialStateProperty.all(Colors.black54),
+            fixedSize: const MaterialStatePropertyAll(Size(double.infinity, 54)),
           ),
           label: LoadingText(
             text: (widget.isTooBig || widget.item.isHated) ? 'Load Anyway' : 'Restart Loading',
@@ -308,11 +313,12 @@ class _MediaLoadingState extends State<MediaLoading> {
             ElevatedButton.icon(
               icon: Icon(
                 Icons.stop,
-                size: 44,
+                size: 40,
                 color: Theme.of(context).colorScheme.error,
               ),
               style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(Colors.black54),
+                fixedSize: const MaterialStatePropertyAll(Size(double.infinity, 54)),
               ),
               label: LoadingText(
                 text: 'Stop Loading',

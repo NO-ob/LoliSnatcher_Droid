@@ -50,7 +50,7 @@ class ImageViewerState extends State<ImageViewer> {
   int? widthLimit;
   CancelToken? cancelToken;
 
-  StreamSubscription? noScaleListener, indexListener;
+  StreamSubscription? noScaleListener, toggleQualityListener, indexListener;
 
   @override
   void didUpdateWidget(ImageViewer oldWidget) {
@@ -97,7 +97,10 @@ class ImageViewerState extends State<ImageViewer> {
       //
     } else {
       if (error is DioException) {
-        killLoading(['Loading Error: ${error.message}']);
+        killLoading([
+          'Loading Error: ${error.type.name}',
+          if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
+        ]);
       } else {
         killLoading(['Loading Error: $error']);
       }
@@ -136,16 +139,15 @@ class ImageViewerState extends State<ImageViewer> {
     scaleController.outputScaleStateStream.listen(onScaleStateChanged);
   }
 
-  Future<void> initViewer(bool ignoreTagsCheck) async {
-    if ((settingsHandler.galleryMode == 'Sample' && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
-        widget.booruItem.sampleURL == widget.booruItem.fileURL) {
-      // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
-      imageFolder = 'samples';
-    } else {
-      imageFolder = 'media';
-    }
+  bool get useFullImage => settingsHandler.galleryMode == 'Full Res' ? !widget.booruItem.toggleQuality.value : widget.booruItem.toggleQuality.value;
 
+  Future<void> initViewer(bool ignoreTagsCheck) async {
     noScaleListener = widget.booruItem.isNoScale.listen((bool value) {
+      killLoading([]);
+      initViewer(false);
+    });
+
+    toggleQualityListener = widget.booruItem.toggleQuality.listen((bool value) {
       killLoading([]);
       initViewer(false);
     });
@@ -175,6 +177,7 @@ class ImageViewerState extends State<ImageViewer> {
       (imageInfo, syncCall) {
         isLoaded = true;
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          resetZoom();
           viewerHandler.setLoaded(widget.key, true);
         });
         if (!syncCall) {
@@ -204,10 +207,28 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   Future<ImageProvider> getImageProvider() async {
+    if ((settingsHandler.galleryMode == 'Sample' && widget.booruItem.sampleURL.isNotEmpty && widget.booruItem.sampleURL != widget.booruItem.thumbnailURL) ||
+        widget.booruItem.sampleURL == widget.booruItem.fileURL) {
+      // use sample file if (sample gallery quality && sampleUrl exists && sampleUrl is not the same as thumbnailUrl) OR sampleUrl is the same as full res fileUrl
+      imageFolder = 'samples';
+    } else {
+      imageFolder = 'media';
+    }
+
+    if (useFullImage) {
+      if (imageFolder != 'media') {
+        imageFolder = 'media';
+      }
+    } else {
+      if (imageFolder != 'samples') {
+        imageFolder = 'samples';
+      }
+    }
+
     ImageProvider provider;
     cancelToken = CancelToken();
     provider = CustomNetworkImage(
-      (settingsHandler.galleryMode == 'Sample') ? widget.booruItem.sampleURL : widget.booruItem.fileURL,
+      useFullImage ? widget.booruItem.fileURL : widget.booruItem.sampleURL,
       cancelToken: cancelToken,
       headers: await Tools.getFileCustomHeaders(
         searchHandler.currentBooru,
@@ -307,6 +328,9 @@ class ImageViewerState extends State<ImageViewer> {
 
     noScaleListener?.cancel();
     noScaleListener = null;
+
+    toggleQualityListener?.cancel();
+    toggleQualityListener = null;
   }
 
   // debug functions
@@ -327,6 +351,7 @@ class ImageViewerState extends State<ImageViewer> {
     // Don't zoom until image is loaded
     if (!isLoaded) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
+    viewerHandler.setZoomed(widget.key, false);
   }
 
   void scrollZoomImage(double value) {

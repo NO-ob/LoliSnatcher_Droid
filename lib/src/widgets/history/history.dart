@@ -18,6 +18,7 @@ import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/custom_scroll_bar_thumb.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/image/favicon.dart';
@@ -146,7 +147,7 @@ class _HistoryListState extends State<HistoryList> {
       context: context,
       builder: (context) {
         return SettingsDialog(
-          contentItems: <Widget>[
+          contentItems: [
             SizedBox(width: double.maxFinite, child: row),
             Text('Last searched on: ${formatDate(entry.timestamp)}', textAlign: TextAlign.center),
             //
@@ -306,7 +307,7 @@ class _HistoryListState extends State<HistoryList> {
   Widget listEntryBuild(BuildContext context, int index) {
     return Row(
       key: Key(index.toString()),
-      children: <Widget>[
+      children: [
         Expanded(child: buildEntry(index, true, true)),
       ],
     );
@@ -343,12 +344,12 @@ class _HistoryListState extends State<HistoryList> {
           side: const BorderSide(color: Colors.grey),
         ),
         onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
-        minLeadingWidth: 20,
+        minLeadingWidth: 24,
         leading: booru != null
             ? (booru.type == BooruType.Downloads
-                ? const Icon(Icons.file_download_outlined, size: 18)
-                : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 18) : Favicon(booru)))
-            : const Icon(CupertinoIcons.question, size: 18),
+                ? const Icon(Icons.file_download_outlined, size: 20)
+                : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 20) : Favicon(booru)))
+            : const Icon(CupertinoIcons.question, size: 20),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -381,13 +382,13 @@ class _HistoryListState extends State<HistoryList> {
     return Container(
       margin: const EdgeInsets.fromLTRB(10, 2, 10, 2),
       child: Row(
-        children: <Widget>[
+        children: [
           Expanded(
             child: SettingsTextInput(
               onlyInput: true,
               controller: filterSearchController,
               onChanged: (String? input) {
-                filterHistory();
+                getHistory();
               },
               title: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
               hintText: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
@@ -435,10 +436,27 @@ class _HistoryListState extends State<HistoryList> {
               const SizedBox(height: 60),
               if (isLoading)
                 const CircularProgressIndicator()
-              else if (history.isEmpty)
-                const Text('Search History is empty')
-              else if (filteredHistory.isEmpty)
-                const Text('Nothing found'),
+              else if (history.isEmpty) ...[
+                const Kaomoji(
+                  type: KaomojiType.shrug,
+                  style: TextStyle(fontSize: 40),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Search History is empty',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ] else if (filteredHistory.isEmpty) ...[
+                const Kaomoji(
+                  type: KaomojiType.shrug,
+                  style: TextStyle(fontSize: 40),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Nothing found',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ],
               if (!settingsHandler.searchHistoryEnabled) const Text('Search History is disabled.'),
               if (!settingsHandler.dbEnabled) const Text('Search History requires enabling Database in settings.'),
             ],

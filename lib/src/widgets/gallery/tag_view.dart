@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:dio/dio.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -20,11 +22,19 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
+
+class _TagInfoIcon {
+  _TagInfoIcon(this.icon, this.color);
+
+  final IconData icon;
+  final Color color;
+}
 
 class TagView extends StatefulWidget {
   const TagView({super.key});
@@ -50,6 +60,8 @@ class _TagViewState extends State<TagView> {
   final FocusNode searchFocusNode = FocusNode();
   final GlobalKey searchKey = GlobalKey(debugLabel: 'tagsSearchKey');
 
+  CancelToken? cancelToken;
+
   @override
   void initState() {
     super.initState();
@@ -67,14 +79,30 @@ class _TagViewState extends State<TagView> {
       this.item = item;
       parseSortGroupTags();
     });
+
+    reloadItemData();
   }
 
   @override
   void dispose() {
+    cancelToken?.cancel();
     searchHandler.searchTextController.removeListener(onMainSearchTextChanged);
     searchFocusNode.removeListener(searchFocusListener);
     itemSubscription.cancel();
     super.dispose();
+  }
+
+  Future<void> reloadItemData() async {
+    // TODO wip, currently no boorus which support this
+    // I planned to use it for r34xxx, but they don't(?) have any api for detailed single item info with typed tags
+    if (searchHandler.currentBooruHandler.hasLoadItemSupport && searchHandler.currentBooruHandler.shouldUpdateIteminTagView) {
+      cancelToken = CancelToken();
+      await searchHandler.currentBooruHandler.loadItem(
+        item: item,
+        cancelToken: cancelToken,
+      );
+      parseSortGroupTags();
+    }
   }
 
   void parseTags() {
@@ -195,6 +223,7 @@ class _TagViewState extends State<TagView> {
         [
           if (settingsHandler.isDebug.value) infoText('Filename', fileName),
           infoText('URL', fileUrl),
+          infoText('Post URL', item.postURL),
           infoText('ID', itemId),
           infoText('Rating', rating),
           infoText('Score', score),
@@ -209,7 +238,7 @@ class _TagViewState extends State<TagView> {
             Divider(
               height: 2,
               thickness: 2,
-              color: Colors.grey[800],
+              color: Colors.grey[800]!.withOpacity(0.66),
             ),
             tagsButton(),
             Padding(
@@ -343,7 +372,11 @@ class _TagViewState extends State<TagView> {
     if (sources.isNotEmpty) {
       return Column(
         children: [
-          Divider(height: 2, thickness: 2, color: Colors.grey[800]),
+          Divider(
+            height: 2,
+            thickness: 2,
+            color: Colors.grey[800]!.withOpacity(0.66),
+          ),
           infoText(Tools.pluralize('Source', sources.length), ' ', canCopy: false),
           Column(
             children: sources
@@ -561,6 +594,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Add to Loved'),
                 onTap: () {
                   settingsHandler.addTagToList('loved', tag);
+                  searchHandler.filterCurrentFetched();
                   parseSortGroupTags();
                   Navigator.of(context).pop(true);
                 },
@@ -571,6 +605,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Add to Hated'),
                 onTap: () {
                   settingsHandler.addTagToList('hated', tag);
+                  searchHandler.filterCurrentFetched();
                   parseSortGroupTags();
                   Navigator.of(context).pop(true);
                 },
@@ -607,17 +642,6 @@ class _TagViewState extends State<TagView> {
     );
   }
 
-  Widget tagsBuild() {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        tagsItemBuilder,
-        addAutomaticKeepAlives: false,
-        // add empty items to allow a bit of overscroll for easier reachability
-        childCount: filteredTags.length,
-      ),
-    );
-  }
-
   Widget tagsItemBuilder(BuildContext context, int index) {
     final String currentTag = filteredTags[index];
 
@@ -632,23 +656,23 @@ class _TagViewState extends State<TagView> {
         -1;
     final HasTabWithTagResult hasTabWithTag = searchHandler.hasTabWithTag(currentTag);
 
-    final List<TagInfoIcon> tagIconAndColor = [];
+    final List<_TagInfoIcon> tagIconAndColor = [];
     if (isAi) {
-      tagIconAndColor.add(TagInfoIcon(FontAwesomeIcons.robot, Theme.of(context).colorScheme.onBackground));
+      tagIconAndColor.add(_TagInfoIcon(FontAwesomeIcons.robot, Theme.of(context).colorScheme.onBackground));
     }
     if (isSound) {
-      tagIconAndColor.add(TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
+      tagIconAndColor.add(_TagInfoIcon(Icons.volume_up_rounded, Theme.of(context).colorScheme.onBackground));
     }
     if (isHated) {
-      tagIconAndColor.add(TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
+      tagIconAndColor.add(_TagInfoIcon(CupertinoIcons.eye_slash, Colors.red));
     }
     if (isLoved) {
-      tagIconAndColor.add(TagInfoIcon(Icons.star, Colors.yellow));
+      tagIconAndColor.add(_TagInfoIcon(Icons.star, Colors.yellow));
     }
 
     if (currentTag != '') {
       return Column(
-        children: <Widget>[
+        children: [
           InkWell(
             onTap: () {
               tagDialog(
@@ -673,14 +697,10 @@ class _TagViewState extends State<TagView> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                MarqueeText(
+                _TagText(
                   key: ValueKey(currentTag),
-                  text: tagHandler.getTag(currentTag).fullString,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
-                  isExpanded: true,
+                  tag: tagHandler.getTag(currentTag).fullString,
+                  filterText: searchController.text,
                 ),
                 if (tagIconAndColor.isNotEmpty) ...[
                   ...tagIconAndColor.map(
@@ -810,12 +830,12 @@ class _TagViewState extends State<TagView> {
                     },
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
               ],
             ),
           ),
           Divider(
-            color: Colors.grey[800],
+            color: Colors.grey[800]!.withOpacity(0.66),
             height: 1,
             thickness: 1,
           ),
@@ -829,38 +849,108 @@ class _TagViewState extends State<TagView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-      child: Scrollbar(
-        interactive: false,
+    return Scrollbar(
+      interactive: false,
+      controller: scrollController,
+      child: DesktopScrollWrap(
         controller: scrollController,
-        child: DesktopScrollWrap(
+        child: CustomScrollView(
           controller: scrollController,
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-            slivers: [
-              infoBuild(),
-              tagsBuild(),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).viewInsets.bottom,
-                ),
+          physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            infoBuild(),
+            SliverToBoxAdapter(
+              child: (filteredTags.isEmpty && tags.isNotEmpty)
+                  ? const Column(
+                      children: [
+                        Kaomoji(
+                          type: KaomojiType.shrug,
+                          style: TextStyle(fontSize: 40),
+                        ),
+                        Text(
+                          'No tags found',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(height: 60),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                tagsItemBuilder,
+                addAutomaticKeepAlives: false,
+                // add empty items to allow a bit of overscroll for easier reachability
+                childCount: filteredTags.length,
               ),
-            ],
-          ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: MediaQuery.of(context).viewInsets.bottom,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// TODO move to own/model file
-class TagInfoIcon {
-  TagInfoIcon(this.icon, this.color);
+class _TagText extends StatelessWidget {
+  const _TagText({
+    required this.tag,
+    this.filterText,
+    super.key,
+  });
 
-  final IconData icon;
-  final Color color;
+  final String tag;
+  final String? filterText;
+
+  @override
+  Widget build(BuildContext context) {
+    const style = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w700,
+    );
+
+    if (filterText?.isNotEmpty == true) {
+      final List<TextSpan> spans = [];
+      final List<String> split = tag.split(filterText!);
+
+      for (int i = 0; i < split.length; i++) {
+        spans.add(
+          TextSpan(
+            text: split[i],
+            style: style,
+          ),
+        );
+        if (i < split.length - 1) {
+          spans.add(
+            TextSpan(
+              text: filterText,
+              style: style.copyWith(
+                backgroundColor: Colors.green,
+              ),
+            ),
+          );
+        }
+      }
+
+      return MarqueeText.rich(
+        textSpan: TextSpan(
+          children: spans,
+        ),
+        isExpanded: true,
+        style: style,
+      );
+    } else {
+      return MarqueeText(
+        text: tag,
+        isExpanded: true,
+        style: style,
+      );
+    }
+  }
 }
 
 class SourceLinkErrorDialog extends StatefulWidget {
@@ -880,6 +970,9 @@ class SourceLinkErrorDialog extends StatefulWidget {
 class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
   String selectedText = '';
   bool get hasSelected => selectedText.isNotEmpty;
+
+  // crutch to reset the selection
+  int selectionKeyIndex = 0;
 
   Future<void> copy() async {
     final link = hasSelected ? selectedText : widget.link;
@@ -926,59 +1019,100 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Source'),
+      scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.fromError) const Text("The text in source field can't be open as a link"),
+          if (widget.fromError)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 24),
+              child: Text(
+                "The text in source field can't be opened as a link, either because it's not a link or there are multiple URLs in a single string.",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           const Text('You can select any text below by long tapping it and then press "Open selected" to try opening it as a link:'),
           const SizedBox(height: 16),
-          SelectableText(
-            widget.link,
+          SelectableLinkify(
+            key: ValueKey('selection-$selectionKeyIndex'),
+            text: widget.link,
+            options: const LinkifyOptions(
+              humanize: false,
+              removeWww: true,
+              looseUrl: true,
+              defaultToHttps: true,
+              excludeLastPeriod: true,
+            ),
+            scrollPhysics: const NeverScrollableScrollPhysics(),
+            useMouseRegion: true,
             onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
               setState(() {
                 selectedText = selection.textInside(widget.link);
               });
             },
+            onOpen: (link) async {
+              final res = await launchUrlString(
+                link.url,
+                mode: LaunchMode.externalApplication,
+              );
+              if (!res) {
+                FlashElements.showSnackbar(
+                  title: const Text('Error'),
+                  content: const Text('Failed to open link'),
+                );
+              }
+            },
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.select_all, size: 30),
-                const SizedBox(width: 8),
-                if (selectedText.isNotEmpty) Text(selectedText) else const Text('[No text selected]'),
-              ],
+          Material(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: selectedText.isEmpty
+                  ? null
+                  : () {
+                      setState(() {
+                        selectionKeyIndex++;
+                        selectedText = '';
+                      });
+                    },
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.select_all, size: 30),
+                    const SizedBox(width: 8),
+                    if (selectedText.isNotEmpty) Expanded(child: Text(selectedText)) else const Text('[No text selected]'),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
       actionsOverflowDirection: VerticalDirection.up,
+      actionsOverflowButtonSpacing: 8,
       actions: [
-        SizedBox(
-          height: 40,
-          child: ElevatedButton.icon(
-            onPressed: copy,
-            label: Text('Copy ${hasSelected ? 'selected' : ''}'.trim()),
-            icon: const Icon(Icons.copy),
-          ),
+        ElevatedButton.icon(
+          onPressed: copy,
+          label: Text('Copy ${hasSelected ? 'selected' : ''}'.trim()),
+          icon: const Icon(Icons.copy),
         ),
-        SizedBox(
-          height: 40,
-          child: ElevatedButton.icon(
-            onPressed: open,
-            label: Text('Open ${hasSelected ? 'selected' : ''}'.trim()),
-            icon: const Icon(Icons.open_in_new),
-          ),
+        ElevatedButton.icon(
+          onPressed: open,
+          label: Text('Open ${hasSelected ? 'selected' : ''}'.trim()),
+          icon: const Icon(Icons.open_in_new),
         ),
-        const SizedBox(
-          height: 40,
-          child: CancelButton(withIcon: true),
-        ),
+        const CancelButton(withIcon: true),
       ],
     );
   }

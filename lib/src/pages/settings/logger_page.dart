@@ -80,7 +80,7 @@ class _LoggerPageState extends State<LoggerPage> {
                       context,
                       showCloseButton: true,
                       showClearButton: true,
-                      dark: Theme.of(context).brightness == Brightness.dark,
+                      dark: false, // Theme.of(context).brightness == Brightness.dark,
                       onExport: (String text) {
                         Clipboard.setData(ClipboardData(text: text));
                       },

@@ -69,7 +69,12 @@ class _WaterfallViewState extends State<WaterfallView> {
     // TODO reset the controller when appMode changes
     searchHandler.gridScrollController = AutoScrollController(
       initialScrollOffset: searchHandler.currentTab.scrollPosition,
-      viewportBoundaryGetter: () => Rect.fromLTRB(0, !isMobile ? 0 : (kToolbarHeight + 2), 0, 0),
+      viewportBoundaryGetter: () => Rect.fromLTRB(
+        0,
+        isMobile ? (kToolbarHeight + 4 + MediaQuery.paddingOf(context).top) : 0,
+        0,
+        MediaQuery.paddingOf(context).bottom,
+      ),
     );
 
     isStaggered = settingsHandler.previewDisplay == 'Staggered' && searchHandler.currentBooruHandler.hasSizeData;
@@ -186,6 +191,19 @@ class _WaterfallViewState extends State<WaterfallView> {
   void viewerCallback() {
     kbFocusNode.requestFocus();
     viewerHandler.dropCurrent();
+
+    // clear all quality toggles to default
+    for (final item in searchHandler.currentTab.booruHandler.fetched) {
+      if (item.toggleQuality.value) {
+        item.toggleQuality.value = false;
+      }
+    }
+    for (final item in searchHandler.currentFetched) {
+      if (item.toggleQuality.value) {
+        item.toggleQuality.value = false;
+      }
+    }
+    searchHandler.filterCurrentFetched();
   }
 
   Future<void> onTap(int index, BooruItem item) async {
@@ -200,12 +218,15 @@ class _WaterfallViewState extends State<WaterfallView> {
 
       await Navigator.of(context).push(
         PageRouteBuilder(
-          pageBuilder: (context, anim1, anim2) =>
+          pageBuilder: (_, __, ___) =>
               // Opacity(opacity: 0.5, child: GalleryViewPage(index)),
               GalleryViewPage(index),
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),
           barrierColor: Colors.black26,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return const ZoomPageTransitionsBuilder().buildTransitions(null, context, animation, secondaryAnimation, child);
+          },
         ),
       );
 

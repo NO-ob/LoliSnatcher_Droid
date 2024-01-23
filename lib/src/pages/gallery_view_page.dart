@@ -192,100 +192,101 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
               },
               child: Stack(
                 children: [
-                  Obx(() {
-                    if (searchHandler.currentFetched.isEmpty) {
-                      return const Center(
-                        child: Text('No items', style: TextStyle(color: Colors.white)),
-                      );
-                    }
+                  ScrollConfiguration(
+                    behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                    child: Obx(() {
+                      if (searchHandler.currentFetched.isEmpty) {
+                        return const Center(
+                          child: Text('No items', style: TextStyle(color: Colors.white)),
+                        );
+                      }
 
-                    return PreloadPageView.builder(
-                      controller: controller,
-                      preloadPagesCount: settingsHandler.preloadCount,
-                      // allowImplicitScrolling: true,
-                      scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
-                      physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
-                      itemCount: searchHandler.currentFetched.length,
-                      itemBuilder: (context, index) {
-                        final BooruItem item = searchHandler.currentFetched[index];
-                        // String fileURL = item.fileURL;
-                        final bool isVideo = item.mediaType.value.isVideo;
-                        final bool isImage = item.mediaType.value.isImageOrAnimation;
-                        final bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
-                        // print(fileURL);
-                        // print('isVideo: '+isVideo.toString());
+                      return PreloadPageView.builder(
+                        controller: controller,
+                        preloadPagesCount: settingsHandler.preloadCount,
+                        // allowImplicitScrolling: true,
+                        scrollDirection: settingsHandler.galleryScrollDirection == 'Vertical' ? Axis.vertical : Axis.horizontal,
+                        physics: const AlwaysScrollableScrollPhysics(parent: ClampingScrollPhysics()),
+                        itemCount: searchHandler.currentFetched.length,
+                        itemBuilder: (context, index) {
+                          final BooruItem item = searchHandler.currentFetched[index];
+                          // String fileURL = item.fileURL;
+                          final bool isVideo = item.mediaType.value.isVideo;
+                          final bool isImage = item.mediaType.value.isImageOrAnimation;
+                          final bool isNeedsExtraRequest = item.mediaType.value.isNeedsExtraRequest;
+                          // print(fileURL);
+                          // print('isVideo: '+isVideo.toString());
 
-                        late Widget itemWidget;
-                        if (isImage) {
-                          itemWidget = ImageViewer(item, key: item.key);
-                        } else if (isVideo) {
-                          if (settingsHandler.disableVideo) {
-                            itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
-                          } else {
-                            if (Platform.isAndroid || Platform.isIOS) {
-                              itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
-                            } else if (Platform.isWindows || Platform.isLinux) {
-                              // itemWidget = VideoViewerPlaceholder(item: item);
-                              itemWidget = VideoViewerDesktop(item, key: item.key);
+                          late Widget itemWidget;
+                          if (isImage) {
+                            itemWidget = ImageViewer(item, key: item.key);
+                          } else if (isVideo) {
+                            if (settingsHandler.disableVideo) {
+                              itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                             } else {
-                              itemWidget = VideoViewerPlaceholder(item: item);
+                              if (Platform.isAndroid || Platform.isIOS) {
+                                itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
+                              } else if (Platform.isWindows || Platform.isLinux) {
+                                // itemWidget = VideoViewerPlaceholder(item: item);
+                                itemWidget = VideoViewerDesktop(item, key: item.key);
+                              } else {
+                                itemWidget = VideoViewerPlaceholder(item: item);
+                              }
                             }
-                          }
-                        } else if (isNeedsExtraRequest) {
-                          itemWidget = GuessExtensionViewer(
-                            itemKey: item.key,
-                            item: item,
-                            index: index,
-                            onMediaTypeGuessed: (MediaType mediaType) {
-                              item.mediaType.value = mediaType;
-                              setState(() {});
-                            },
-                          );
-                        } else {
-                          itemWidget = UnknownViewerPlaceholder(item: item);
-                        }
-
-                        return Obx(() {
-                          final bool isViewed = index == searchHandler.viewedIndex.value;
-                          final bool isNear = (searchHandler.viewedIndex.value - index).abs() <= settingsHandler.preloadCount;
-                          // print('!! preloadpageview item build $index $isViewed $isNear !!');
-                          if (!isViewed && !isNear) {
-                            // don't render if out of preload range
-                            return Center(child: Container(color: Colors.black));
+                          } else if (isNeedsExtraRequest) {
+                            itemWidget = GuessExtensionViewer(
+                              item: item,
+                              onMediaTypeGuessed: (MediaType mediaType) {
+                                item.mediaType.value = mediaType;
+                                setState(() {});
+                              },
+                            );
+                          } else {
+                            itemWidget = UnknownViewerPlaceholder(item: item);
                           }
 
-                          // Cut to the size of the container, prevents overlapping
-                          return ClipRect(
-                            // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
-                            child: GestureDetector(
-                              onTap: () {
-                                toggleToolbar(false);
-                              },
-                              onLongPress: () {
-                                toggleToolbar(true);
-                              },
-                              child: itemWidget,
-                            ),
-                          );
-                        });
-                      },
-                      onPageChanged: (int index) {
-                        // rehide system ui on every page change
-                        ServiceHandler.disableSleep();
+                          return Obx(() {
+                            final bool isViewed = index == searchHandler.viewedIndex.value;
+                            final bool isNear = (searchHandler.viewedIndex.value - index).abs() <= settingsHandler.preloadCount;
+                            // print('!! preloadpageview item build $index $isViewed $isNear !!');
+                            if (!isViewed && !isNear) {
+                              // don't render if out of preload range
+                              return Center(child: Container(color: Colors.black));
+                            }
 
-                        searchHandler.setViewedItem(index);
-                        kbFocusNode.requestFocus();
+                            // Cut to the size of the container, prevents overlapping
+                            return ClipRect(
+                              // Stack/Buttons Temp fix for desktop pageview only scrollable on like 2px at edges of screen. Think its a windows only bug
+                              child: GestureDetector(
+                                onTap: () {
+                                  toggleToolbar(false);
+                                },
+                                onLongPress: () {
+                                  toggleToolbar(true);
+                                },
+                                child: itemWidget,
+                              ),
+                            );
+                          });
+                        },
+                        onPageChanged: (int index) {
+                          // rehide system ui on every page change
+                          ServiceHandler.disableSleep();
 
-                        viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
+                          searchHandler.setViewedItem(index);
+                          kbFocusNode.requestFocus();
 
-                        // enable volume buttons if new page is a video AND appbar is visible
-                        final bool isVideo = searchHandler.currentFetched[index].mediaType.value.isVideo;
-                        final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
-                        ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                        // print('Page changed ' + index.toString());
-                      },
-                    );
-                  }),
+                          viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
+
+                          // enable volume buttons if new page is a video AND appbar is visible
+                          final bool isVideo = searchHandler.currentFetched[index].mediaType.value.isVideo;
+                          final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
+                          ServiceHandler.setVolumeButtons(isVolumeAllowed);
+                          // print('Page changed ' + index.toString());
+                        },
+                      );
+                    }),
+                  ),
                   NotesRenderer(controller),
                   GalleryButtons(pageController: controller),
                   const ViewerTutorial(),

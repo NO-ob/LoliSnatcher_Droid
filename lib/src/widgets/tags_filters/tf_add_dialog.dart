@@ -40,7 +40,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
   @override
   Widget build(BuildContext context) {
     return SettingsDialog(
-      contentItems: <Widget>[
+      contentItems: [
         SizedBox(
           width: double.maxFinite,
           child: AbsorbPointer(

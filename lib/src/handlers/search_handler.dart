@@ -391,12 +391,14 @@ class SearchHandler extends GetxController {
     return newItem;
   }
 
-  Future<bool?> toggleItemFavourite(int itemIndex) async {
+  Future<bool?> toggleItemFavourite(int itemIndex, {bool? forcedValue}) async {
     final BooruItem item = currentFetched[itemIndex];
     if (item.isFavourite.value != null) {
-      ServiceHandler.vibrate();
+      if (forcedValue == null) {
+        ServiceHandler.vibrate();
+      }
 
-      item.isFavourite.value = item.isFavourite.value == true ? false : true;
+      item.isFavourite.value = forcedValue ?? (item.isFavourite.value == true ? false : true);
       await SettingsHandler.instance.dbHandler.updateBooruItem(
         item,
         BooruUpdateMode.local,

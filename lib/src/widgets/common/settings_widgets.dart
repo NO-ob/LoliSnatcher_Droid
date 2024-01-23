@@ -1,17 +1,18 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 
-import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
 import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
-import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/tabs/tab_booru_selector.dart';
 
 const double borderWidth = 1;
 
@@ -105,6 +106,7 @@ class SettingsPageOpen {
     this.barrierDismissible = true,
     this.asDialog = false,
     this.asBottomSheet = false,
+    this.useFloatingDialog = false,
   }) : assert(!(asDialog && asBottomSheet), "asDialog and asBottomSheet can't be true at the same time");
 
   final Widget Function() page;
@@ -113,6 +115,7 @@ class SettingsPageOpen {
   final bool barrierDismissible;
   final bool asDialog;
   final bool asBottomSheet;
+  final bool useFloatingDialog;
 
   Future<dynamic> open() async {
     if (!condition) {
@@ -123,7 +126,7 @@ class SettingsPageOpen {
 
     final bool isTooNarrow = MediaQuery.of(context).size.width < 550;
     final bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-    final bool useDesktopMode = !isTooNarrow && isDesktop;
+    final bool useDesktopMode = (!isTooNarrow && isDesktop) || useFloatingDialog;
 
     dynamic result;
     if (useDesktopMode) {
@@ -132,7 +135,7 @@ class SettingsPageOpen {
         builder: (BuildContext context) {
           return Dialog(
             child: SizedBox(
-              width: 500,
+              width: min(MediaQuery.sizeOf(context).width, 500),
               child: page(),
             ),
           );
@@ -182,6 +185,7 @@ class SettingsToggle extends StatelessWidget {
     this.subtitle,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
+    this.leadingIcon,
     this.trailingIcon,
     super.key,
   });
@@ -192,6 +196,7 @@ class SettingsToggle extends StatelessWidget {
   final Widget? subtitle;
   final bool drawTopBorder;
   final bool drawBottomBorder;
+  final Widget? leadingIcon;
   final Widget? trailingIcon;
 
   @override
@@ -199,6 +204,11 @@ class SettingsToggle extends StatelessWidget {
     return ListTile(
       title: Row(
         children: [
+          if (leadingIcon != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: leadingIcon,
+            ),
           MarqueeText(text: title),
           trailingIcon ?? const SizedBox(width: 8),
         ],
@@ -234,10 +244,12 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemBuilder,
     this.selectedItemBuilder,
     this.itemTitleBuilder,
+    this.clearable = false,
+    this.itemExtent,
     super.key,
   });
 
-  final T value;
+  final T? value;
   final List<T> items;
   final void Function(T?)? onChanged;
   final String title;
@@ -245,71 +257,52 @@ class SettingsDropdown<T> extends StatelessWidget {
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final Widget? trailingIcon;
-  final Widget Function(T)? itemBuilder;
-  final DropdownMenuItem Function(T)? selectedItemBuilder;
-  final String Function(T)? itemTitleBuilder;
+  final Widget Function(T?)? itemBuilder;
+  final Widget Function(T?)? selectedItemBuilder;
+  final String Function(T?)? itemTitleBuilder;
+  final bool clearable;
+  final double? itemExtent;
 
-  String getTitle(T value) {
+  String getTitle(T? value) {
     return itemTitleBuilder?.call(value) ?? value.toString();
   }
 
-  Widget getItemWidget(T value) {
+  Widget getItemWidget(T? value) {
     return itemBuilder?.call(value) ?? Text(getTitle(value));
   }
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: DropdownButtonFormField<T>(
-          value: value,
-          icon: const Icon(Icons.arrow_drop_down),
-          onChanged: onChanged,
-          menuMaxHeight: MediaQuery.of(context).size.height * 0.66,
-          isExpanded: true,
-          decoration: InputDecoration(
-            hintText: title,
-            labelText: title,
-            contentPadding: const EdgeInsets.fromLTRB(12, 6, 12, 6),
-          ),
-          borderRadius: BorderRadius.circular(8),
-          dropdownColor: Theme.of(context).colorScheme.surface,
-          selectedItemBuilder: (BuildContext context) {
-            return items.map<DropdownMenuItem<T>>((T item) {
-              return (selectedItemBuilder?.call(item) ??
-                  DropdownMenuItem<T>(
-                    value: item,
-                    child: Row(
-                      children: <Widget>[
-                        getItemWidget(item),
-                      ],
-                    ),
-                  )) as DropdownMenuItem<T>;
-            }).toList();
-          },
-          items: items.map<DropdownMenuItem<T>>((T item) {
-            final bool isCurrent = item == value;
+      title: LoliDropdown(
+        value: value,
+        onChanged: onChanged ?? (item) {},
+        items: items,
+        clearable: clearable,
+        itemExtent: itemExtent,
+        itemBuilder: (item) {
+          final bool isCurrent = value == item;
 
-            return DropdownMenuItem<T>(
-              value: item,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: isCurrent
-                    ? BoxDecoration(
-                        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 1),
-                        borderRadius: BorderRadius.circular(5),
-                      )
-                    : null,
-                child: Row(
-                  children: [
-                    getItemWidget(item),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ),
+          return Container(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+            alignment: Alignment.centerLeft,
+            decoration: isCurrent
+                ? BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  )
+                : null,
+            child: getItemWidget(item),
+          );
+        },
+        selectionBuilder: (item) =>
+            selectedItemBuilder?.call(item) ??
+            Row(
+              children: [
+                getItemWidget(item),
+              ],
+            ),
+        labelText: title,
       ),
       subtitle: subtitle,
       trailing: trailingIcon,
@@ -344,44 +337,49 @@ class SettingsBooruDropdown extends StatelessWidget {
   final bool nullable;
   final Widget? trailingIcon;
 
-  Widget itemBuilder(Booru? booru) {
-    return Row(
-      children: <Widget>[
-        if (booru == null)
-          Icon(nullable ? Icons.question_mark : null, size: 18)
-        else if (booru.type == BooruType.Downloads)
-          const Icon(Icons.file_download_outlined, size: 18)
-        else if (booru.type == BooruType.Favourites)
-          const Icon(Icons.favorite, color: Colors.red, size: 18)
-        else
-          Favicon(booru),
-        Text(" ${booru?.name ?? (nullable ? 'Select a Booru' : '')}".trim()),
-      ],
+  Widget selectionBuilder(Booru? item) {
+    if (item == null) {
+      return const Text('Select a Booru');
+    }
+
+    return TabBooruSelectorItem(booru: item);
+  }
+
+  Widget itemBuilder(BuildContext context, Booru? item) {
+    final bool isCurrent = value == item;
+
+    if (item == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: const EdgeInsets.only(left: 16, right: 16),
+      height: kMinInteractiveDimension,
+      decoration: isCurrent
+          ? BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+            )
+          : null,
+      child: TabBooruSelectorItem(booru: item),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Booru> boorus = SettingsHandler.instance.booruList;
-
     return SettingsDropdown<Booru?>(
       value: value,
       items: [
-        if (nullable) null,
-        ...boorus,
+        ...SettingsHandler.instance.booruList,
       ],
       onChanged: onChanged,
       title: title,
       drawTopBorder: drawTopBorder,
       drawBottomBorder: drawBottomBorder,
       trailingIcon: trailingIcon,
-      itemBuilder: itemBuilder,
-      selectedItemBuilder: (Booru? booru) {
-        return DropdownMenuItem<Booru?>(
-          value: booru,
-          child: itemBuilder(booru),
-        );
-      },
+      itemBuilder: (item) => itemBuilder(context, item),
+      selectedItemBuilder: selectionBuilder,
+      clearable: nullable,
+      itemExtent: kMinInteractiveDimension,
     );
   }
 }
@@ -503,7 +501,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
   Widget buildSuffixIcons() {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
+      children: [
         if (widget.numberButtons && isFocused)
           Container(
             key: const Key('number-button-down'),
@@ -710,11 +708,7 @@ class SettingsBottomSheet extends StatelessWidget {
                 ),
             ],
           ),
-          if (content != null)
-            Padding(
-              padding: contentPadding,
-              child: content,
-            ),
+          if (content != null) content!,
           if (contentItems != null)
             Flexible(
               child: Padding(
@@ -746,6 +740,7 @@ class SettingsPageDialog extends StatelessWidget {
     this.content,
     this.actions,
     this.fab,
+    this.backgroundColor,
     super.key,
   });
 
@@ -753,6 +748,7 @@ class SettingsPageDialog extends StatelessWidget {
   final Widget? content;
   final List<Widget>? actions;
   final Widget? fab;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -760,6 +756,7 @@ class SettingsPageDialog extends StatelessWidget {
       // extendBodyBehindAppBar: true,
       // extendBody: true,
       // resizeToAvoidBottomInset: true,
+      backgroundColor: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: title,
         actions: [

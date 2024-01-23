@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -9,6 +11,7 @@ import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
@@ -46,29 +49,136 @@ class _CommentsDialogState extends State<CommentsDialog> {
     getComments();
   }
 
-  String formatDate(String date, String format) {
-    String formattedDate = '';
-    if (date.isNotEmpty && format.isNotEmpty) {
-      try {
-        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
-        // remove timezones from strings until they fix it
-        DateTime parsedDate;
-        if (format == 'unix') {
-          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(date) * 1000);
-        } else if (format == 'iso') {
-          date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateTime.parse(date).toLocal();
-        } else {
-          date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
-          parsedDate = DateFormat(format).parseLoose(date).toLocal();
-        }
-        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
-      } catch (e) {
-        print('formatDate: $date $format $e');
-      }
+  Future<void> getComments() async {
+    isLoading = true;
+    if (widget.item.serverId != null) {
+      setState(() {}); // set state to update the loading indicator
+      final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
+      comments = fetched;
+    } else {
+      notSupported = true;
     }
-    return formattedDate;
+
+    // comments = [
+    //   ...comments,
+    //   ...List.generate(4000, (i) => CommentItem(
+    //     id: 'id',
+    //     title: 'title',
+    //     content: 'Comment content',
+    //     authorID: "creator_id",
+    //     authorName: "creator",
+    //     avatarUrl: null,
+    //     postID: "post_id",
+    //   ))
+    // ];
+
+    isLoading = false;
+    setState(() {});
   }
+
+  Widget errorEntryBuild(BuildContext context, int index) {
+    return Column(
+      children: [
+        if (isLoading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(18, 50, 18, 18),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (notSupported)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(18, 50, 18, 18),
+              child: Text("This Booru doesn't have comments or there is no API for them"),
+            ),
+          )
+        else if (comments.isEmpty)
+          const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(height: 50),
+                Kaomoji(
+                  type: KaomojiType.shrug,
+                  style: TextStyle(fontSize: 40),
+                ),
+                Text(
+                  'No comments',
+                  style: TextStyle(fontSize: 20),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool areThereErrors = isLoading || notSupported || comments.isEmpty;
+
+    return SettingsPageDialog(
+      title: const Text('Comments'),
+      content: Scrollbar(
+        controller: scrollController,
+        child: RefreshIndicator(
+          triggerMode: RefreshIndicatorTriggerMode.anywhere,
+          strokeWidth: 4,
+          color: Theme.of(context).colorScheme.secondary,
+          onRefresh: () async {
+            await getComments();
+          },
+          child: DesktopScrollWrap(
+            controller: scrollController,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              controller: scrollController,
+              physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+              itemCount: areThereErrors ? 2 : comments.length + 1,
+              scrollDirection: Axis.vertical,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _CommentsHeader(item: widget.item);
+                }
+
+                return areThereErrors
+                    ? errorEntryBuild(context, index)
+                    : _CommentEntry(
+                        comment: comments[index - 1],
+                      );
+              },
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        IconButton(
+          onPressed: getComments,
+          icon: const Icon(Icons.refresh),
+        ),
+        if (widget.item.postURL.isNotEmpty)
+          IconButton(
+            onPressed: () {
+              launchUrlString(
+                widget.item.postURL,
+                mode: LaunchMode.externalApplication,
+              );
+            },
+            icon: const Icon(Icons.public),
+          ),
+      ],
+    );
+  }
+}
+
+class _CommentEntry extends StatelessWidget {
+  const _CommentEntry({
+    required this.comment,
+  });
+
+  final CommentItem comment;
 
   String parseContent(String? content) {
     if (content == null) {
@@ -114,133 +224,93 @@ class _CommentsDialogState extends State<CommentsDialog> {
     }
   }
 
-  Future<void> getComments() async {
-    isLoading = true;
-    if (widget.item.serverId != null) {
-      setState(() {}); // set state to update the loading indicator
-      final List<CommentItem> fetched = await searchHandler.currentBooruHandler.getComments(widget.item.serverId!, 0);
-      comments = fetched;
-    } else {
-      notSupported = true;
+  String formatDate(String date, String format) {
+    String formattedDate = '';
+    if (date.isNotEmpty && format.isNotEmpty) {
+      try {
+        // no timezone support in DateFormat? see: https://stackoverflow.com/questions/56189407/dart-parse-date-timezone-gives-unimplementederror/56190055
+        // remove timezones from strings until they fix it
+        DateTime parsedDate;
+        if (format == 'unix') {
+          parsedDate = DateTime.fromMillisecondsSinceEpoch(int.parse(date) * 1000);
+        } else if (format == 'iso') {
+          date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateTime.parse(date).toLocal();
+        } else {
+          date = date.replaceAll(RegExp(r'(?:\+|\-)\d{4}'), '');
+          parsedDate = DateFormat(format).parseLoose(date).toLocal();
+        }
+        formattedDate = DateFormat('dd.MM.yyyy HH:mm').format(parsedDate);
+      } catch (e) {
+        print('formatDate: $date $format $e');
+      }
     }
-
-    // comments = [
-    //   ...comments,
-    //   ...List.generate(4000, (i) => CommentItem(
-    //     id: 'id',
-    //     title: 'title',
-    //     content: 'Comment content',
-    //     authorID: "creator_id",
-    //     authorName: "creator",
-    //     avatarUrl: null,
-    //     postID: "post_id",
-    //   ))
-    // ];
-
-    isLoading = false;
-    setState(() {});
+    return formattedDate;
   }
 
-  Widget mainBuild() {
-    final bool areThereErrors = isLoading || notSupported || comments.isEmpty;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
       child: Material(
-        child: SizedBox(
-          width: double.maxFinite,
-          child: Scrollbar(
-            controller: scrollController,
-            child: RefreshIndicator(
-              triggerMode: RefreshIndicatorTriggerMode.anywhere,
-              displacement: 80,
-              strokeWidth: 4,
-              color: Theme.of(context).colorScheme.secondary,
-              onRefresh: () async {
-                await getComments();
-              },
-              child: DesktopScrollWrap(
-                controller: scrollController,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(5),
-                  controller: scrollController,
-                  physics: getListPhysics(), // const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                  itemCount: areThereErrors ? 2 : comments.length + 1,
-                  scrollDirection: Axis.vertical,
-                  itemBuilder: areThereErrors ? errorEntryBuild : listEntryBuild,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget listEntryBuild(BuildContext context, int index) {
-    if (index == 0) {
-      return listHeader();
-    }
-
-    index = index - 1;
-
-    final CommentItem currentEntry = comments[index];
-
-    final Widget entryRow = Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      child: Ink(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(10),
         child: InkWell(
+          borderRadius: BorderRadius.circular(10),
           onTap: () {},
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
                     Container(
-                      width: currentEntry.avatarUrl != null ? 60 : 40,
-                      height: currentEntry.avatarUrl != null ? 60 : 40,
+                      width: comment.avatarUrl != null ? 60 : 40,
+                      height: comment.avatarUrl != null ? 60 : 40,
                       margin: const EdgeInsets.only(right: 10),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(currentEntry.avatarUrl != null ? 10 : 20),
-                        child: currentEntry.avatarUrl != null
+                        borderRadius: BorderRadius.circular(comment.avatarUrl != null ? 10 : 20),
+                        child: comment.avatarUrl != null
                             ? Image.network(
-                                currentEntry.avatarUrl!,
+                                comment.avatarUrl!,
                                 fit: BoxFit.cover,
                                 filterQuality: FilterQuality.medium,
                                 errorBuilder: (context, url, error) {
-                                  return Center(child: Text(currentEntry.authorName?.substring(0, 2) ?? '?'));
+                                  return Center(child: Text(comment.authorName?.substring(0, 2) ?? '?'));
                                 },
                               )
-                            : Center(child: Text(currentEntry.authorName?.substring(0, 2) ?? '?')),
+                            : Center(child: Text(comment.authorName?.substring(0, 2) ?? '?')),
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (currentEntry.authorName?.isNotEmpty == true)
+                        if (comment.authorName?.isNotEmpty == true)
                           Padding(
                             padding: const EdgeInsets.all(4),
-                            child: SelectableText(currentEntry.authorName!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            child: SelectableText(comment.authorName!, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         Padding(
                           padding: const EdgeInsets.all(4),
                           child: Row(
                             children: [
-                              if (currentEntry.title?.isNotEmpty == true)
-                                SelectableText(currentEntry.title!, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              if (comment.title?.isNotEmpty == true)
+                                SelectableText(
+                                  comment.title!,
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
                               const SizedBox(width: 5),
-                              if (currentEntry.createDate?.isNotEmpty == true)
+                              if (comment.createDate?.isNotEmpty == true)
                                 Text(
-                                  formatDate(currentEntry.createDate!, currentEntry.createDateFormat!),
+                                  formatDate(comment.createDate!, comment.createDateFormat!),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                                   ),
                                 ),
                               const SizedBox(width: 15),
-                              scoreText(currentEntry.score),
+                              scoreText(comment.score),
                             ],
                           ),
                         ),
@@ -252,16 +322,13 @@ class _CommentsDialogState extends State<CommentsDialog> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   width: double.maxFinite,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
                   child: SelectableLinkify(
-                    text: parseContent(currentEntry.content),
+                    text: parseContent(comment.content?.trim()),
                     options: const LinkifyOptions(
-                      humanize: true,
+                      humanize: false,
                       removeWww: true,
                       looseUrl: true,
+                      defaultToHttps: true,
                       excludeLastPeriod: true,
                     ),
                     scrollPhysics: const NeverScrollableScrollPhysics(),
@@ -289,89 +356,41 @@ class _CommentsDialogState extends State<CommentsDialog> {
         ),
       ),
     );
-
-    return Column(
-      children: <Widget>[
-        Row(
-          children: [
-            Expanded(child: entryRow),
-          ],
-        ),
-        Divider(height: 1, thickness: 1, color: Colors.grey[800]),
-      ],
-    );
   }
+}
 
-  Widget listHeader() {
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Container(
-            constraints: const BoxConstraints(
-              maxHeight: 150,
-              maxWidth: 100,
-            ),
-            child: ThumbnailBuild(item: widget.item),
-          ),
-        ),
-      ],
-    );
-  }
+class _CommentsHeader extends StatelessWidget {
+  const _CommentsHeader({
+    required this.item,
+  });
 
-  Widget errorEntryBuild(BuildContext context, int index) {
-    if (index == 0) {
-      return listHeader();
-    }
-
-    return Column(
-      children: [
-        if (isLoading)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(18),
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (notSupported)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Text("This Booru doesn't have comments or there is no API for them."),
-            ),
-          )
-        else if (comments.isEmpty)
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Text('No comments.'),
-            ),
-          ),
-      ],
-    );
-  }
+  final BooruItem item;
 
   @override
   Widget build(BuildContext context) {
-    return SettingsPageDialog(
-      title: const Text('Comments'),
-      content: mainBuild(),
-      actions: [
-        IconButton(
-          onPressed: getComments,
-          icon: const Icon(Icons.refresh),
-        ),
-        if (widget.item.postURL.isNotEmpty)
-          IconButton(
-            onPressed: () {
-              launchUrlString(
-                widget.item.postURL,
-                mode: LaunchMode.externalApplication,
-              );
-            },
-            icon: const Icon(Icons.public),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final ratio = item.fileAspectRatio ?? 16 / 9;
+        final double width = constraints.maxWidth * (ratio < 1 ? 0.4 : 0.6);
+        final double height = min(constraints.maxHeight * 0.4, width / ratio);
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: height,
+                width: width,
+                child: ThumbnailBuild(
+                  item: item,
+                  selectable: false,
+                ),
+              ),
+            ],
           ),
-      ],
+        );
+      },
     );
   }
 }

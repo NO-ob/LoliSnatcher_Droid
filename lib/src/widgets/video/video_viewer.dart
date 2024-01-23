@@ -191,7 +191,10 @@ class VideoViewerState extends State<VideoViewer> {
       // print('Canceled by user: $imageURL | $error');
     } else {
       if (error is DioException) {
-        killLoading(['Loading Error: ${error.message}']);
+        killLoading([
+          'Loading Error: ${error.type.name}',
+          if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
+        ]);
       } else {
         killLoading(['Loading Error: $error']);
       }
@@ -534,6 +537,8 @@ class VideoViewerState extends State<VideoViewer> {
       aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
     );
 
+    const double fullOpacity = 1;
+
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
       child: Material(
@@ -589,18 +594,21 @@ class VideoViewerState extends State<VideoViewer> {
                       },
                       child: Stack(
                         children: [
-                          PhotoView.customChild(
-                            childSize: childSize,
-                            minScale: PhotoViewComputedScale.contained,
-                            maxScale: PhotoViewComputedScale.covered * 8,
-                            initialScale: PhotoViewComputedScale.contained,
-                            basePosition: Alignment.center,
-                            controller: viewController,
-                            scaleStateController: scaleController,
-                            enableRotation: settingsHandler.allowRotation,
-                            enableDoubleTapZoom: false,
-                            enableTapDragZoom: true,
-                            child: Chewie(controller: chewieController!),
+                          Opacity(
+                            opacity: fullOpacity,
+                            child: PhotoView.customChild(
+                              childSize: childSize,
+                              minScale: PhotoViewComputedScale.contained,
+                              maxScale: PhotoViewComputedScale.covered * 8,
+                              initialScale: PhotoViewComputedScale.contained,
+                              basePosition: Alignment.center,
+                              controller: viewController,
+                              scaleStateController: scaleController,
+                              enableRotation: settingsHandler.allowRotation,
+                              enableDoubleTapZoom: false,
+                              enableTapDragZoom: true,
+                              child: Chewie(controller: chewieController!),
+                            ),
                           ),
                           ChewieControllerProvider(
                             controller: chewieController!,

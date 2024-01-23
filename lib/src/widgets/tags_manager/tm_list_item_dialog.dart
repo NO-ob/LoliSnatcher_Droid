@@ -43,7 +43,7 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
     final String staleText = DateTime.fromMillisecondsSinceEpoch(widget.tag.updatedAt).add(const Duration(milliseconds: Constants.tagStaleTime)).toString();
 
     return SettingsDialog(
-      contentItems: <Widget>[
+      contentItems: [
         SizedBox(width: double.maxFinite, child: TagsManagerListItem(tag: widget.tag)),
         //
         const SizedBox(height: 10),

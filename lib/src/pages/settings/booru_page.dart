@@ -136,7 +136,7 @@ class _BooruPageState extends State<BooruPage> {
             builder: (context) {
               return const SettingsDialog(
                 title: Text('Booru'),
-                contentItems: <Widget>[
+                contentItems: [
                   Text('The Booru selected here will be set as default after saving.'),
                   Text(''),
                   Text('The default Booru will be first to appear in the dropdown boxes.'),
@@ -163,7 +163,7 @@ class _BooruPageState extends State<BooruPage> {
           builder: (context) {
             return SettingsDialog(
               title: const Text('Share Booru'),
-              contentItems: <Widget>[
+              contentItems: [
                 Text(
                   "Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
                 ),
@@ -197,7 +197,7 @@ class _BooruPageState extends State<BooruPage> {
             builder: (context) {
               return SettingsDialog(
                 title: const Text('Booru sharing'),
-                contentItems: <Widget>[
+                contentItems: [
                   // TODO more explanations about booru sharing
                   const Text(''),
                   if (Platform.isAndroid) ...[
@@ -341,7 +341,7 @@ class _BooruPageState extends State<BooruPage> {
   Widget webviewButton() {
     // TODO add help button and explain how to properly setup cookies
     return SettingsButton(
-      name: 'Open current booru to get cookies [BETA]',
+      name: 'Open current booru in webview to get cookies',
       icon: const Icon(Icons.public),
       page: () => InAppWebviewView(initialUrl: selectedBooru!.baseURL!),
     );

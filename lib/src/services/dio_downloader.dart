@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -122,7 +123,7 @@ class DioDownloader {
 
   Future<Map<String, dynamic>> getHeaders() async {
     final Map<String, dynamic> resultHeaders = {...headers ?? {}};
-    final String cookieString = await Tools.getCookies(Uri.parse(url));
+    final String cookieString = await Tools.getCookies(WebUri(url));
     if (cookieString.isNotEmpty) {
       resultHeaders['Cookie'] = cookieString;
     }
@@ -490,7 +491,11 @@ class DioDownloader {
 }
 
 class DioLoadException implements Exception {
-  DioLoadException({required this.url, this.statusCode, this.message});
+  DioLoadException({
+    required this.url,
+    this.statusCode,
+    this.message,
+  });
 
   final int? statusCode;
   final String? message;

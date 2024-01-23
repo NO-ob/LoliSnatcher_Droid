@@ -156,7 +156,7 @@ abstract class BooruHandler {
     } catch (e) {
       Logger.Inst().log(e.toString(), className, 'Search', LogTypes.booruHandlerFetchFailed);
       if (e is DioException) {
-        errorString = e.message ?? e.toString();
+        errorString = e.response?.statusCode != null ? '${e.response?.statusCode} - ${e.response?.statusMessage}' : (e.message ?? e.toString());
       } else {
         errorString = e.toString();
       }
@@ -217,10 +217,10 @@ abstract class BooruHandler {
     return newItems;
   }
 
-  /// [SHOULD BE OVERRIDDEN]
-  ///
-  /// parse raw response into a list of posts,
+  /// Parse raw response into a list of posts,
   /// here you should also parse any other info included with the response (i.e. totalcount)
+  ///
+  /// [SHOULD BE OVERRIDDEN]
   FutureOr<List> parseListFromResponse(dynamic response) {
     return [];
   }
@@ -235,6 +235,8 @@ abstract class BooruHandler {
     fetched.addAll(newItems);
     filterFetched();
     unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
+    unawaited(populateTagHandler(newItems));
+
     // TODO
     // notifyAboutFailed();
     failedItems.clear();
@@ -334,7 +336,11 @@ abstract class BooruHandler {
   ////////////////////////////////////////////////////////////////////////
 
   bool get hasCommentsSupport => false;
-  Future<List<CommentItem>> getComments(String postID, int pageNum) async {
+  Future<List<CommentItem>> getComments(
+    String postID,
+    int pageNum, {
+    CancelToken? cancelToken,
+  }) async {
     final List<CommentItem> comments = [];
 
     final String url = makeCommentsURL(postID, pageNum);
@@ -352,7 +358,7 @@ abstract class BooruHandler {
 
     Response response;
     try {
-      response = await fetchComments(uri);
+      response = await fetchComments(uri, cancelToken: cancelToken);
       if (response.statusCode == 200) {
         final rawComments = await parseCommentsList(response);
         for (int i = 0; i < rawComments.length; i++) {
@@ -377,14 +383,21 @@ abstract class BooruHandler {
     return comments;
   }
 
-  Future<Response<dynamic>> fetchComments(Uri uri) async {
+  Future<Response<dynamic>> fetchComments(
+    Uri uri, {
+    CancelToken? cancelToken,
+  }) async {
     final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return DioNetwork.get(uri.toString(), headers: headers);
+    return DioNetwork.get(
+      uri.toString(),
+      headers: headers,
+      cancelToken: cancelToken,
+    );
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -417,7 +430,10 @@ abstract class BooruHandler {
   ////////////////////////////////////////////////////////////////////////
 
   bool get hasNotesSupport => false;
-  Future<List<NoteItem>> getNotes(String postID) async {
+  Future<List<NoteItem>> getNotes(
+    String postID, {
+    CancelToken? cancelToken,
+  }) async {
     final List<NoteItem> notes = [];
 
     final String url = makeNotesURL(postID);
@@ -435,7 +451,7 @@ abstract class BooruHandler {
 
     Response response;
     try {
-      response = await fetchNotes(uri);
+      response = await fetchNotes(uri, cancelToken: cancelToken);
       if (response.statusCode == 200) {
         final rawNotes = await parseNotesList(response);
         for (int i = 0; i < rawNotes.length; i++) {
@@ -460,14 +476,21 @@ abstract class BooruHandler {
     return notes;
   }
 
-  Future<Response<dynamic>> fetchNotes(Uri uri) async {
+  Future<Response<dynamic>> fetchNotes(
+    Uri uri, {
+    CancelToken? cancelToken,
+  }) async {
     final String cookies = await getCookies() ?? '';
     final Map<String, String> headers = {
       ...getHeaders(),
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return DioNetwork.get(uri.toString(), headers: headers);
+    return DioNetwork.get(
+      uri.toString(),
+      headers: headers,
+      cancelToken: cancelToken,
+    );
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -522,7 +545,7 @@ abstract class BooruHandler {
       // TODO add when there is desktop support?
       try {
         final CookieManager cookieManager = CookieManager.instance();
-        final List<Cookie> cookies = await cookieManager.getCookies(url: Uri.parse(booru.baseURL!));
+        final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(booru.baseURL!));
         for (final Cookie cookie in cookies) {
           cookieString += '${cookie.name}=${cookie.value}; ';
         }
@@ -544,6 +567,8 @@ abstract class BooruHandler {
   void addTagsWithType(List<String> tags, TagType type) {
     TagHandler.instance.addTagsWithType(tags, type);
   }
+
+  bool get shouldPopulateTags => false;
 
   Future<void> populateTagHandler(List<BooruItem> items) async {
     final List<String> unTyped = [];

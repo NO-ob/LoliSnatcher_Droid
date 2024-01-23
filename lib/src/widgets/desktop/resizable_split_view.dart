@@ -93,7 +93,7 @@ class _ResizableSplitViewState extends State<ResizableSplitView> {
           width: widget.direction == SplitDirection.horizontal ? constraints.maxWidth : null,
           height: widget.direction == SplitDirection.horizontal ? null : constraints.maxHeight,
           child: directionWidget(
-            children: <Widget>[
+            children: [
               SizedBox(
                 width: widget.direction == SplitDirection.horizontal ? _size1 : null,
                 height: widget.direction == SplitDirection.horizontal ? null : _size1,

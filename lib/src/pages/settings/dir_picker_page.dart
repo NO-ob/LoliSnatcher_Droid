@@ -44,7 +44,7 @@ class _DirPickerState extends State<DirPicker> {
             contentItems: const [
               Text('Do you want to close the picker without choosing a directory?'),
             ],
-            actionButtons: <Widget>[
+            actionButtons: [
               ElevatedButton(
                 child: const Text('Yes'),
                 onPressed: () {
@@ -250,7 +250,7 @@ class _DirPickerState extends State<DirPicker> {
                         onlyInput: true,
                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[aA-zZ]'))],
                       ),
-                      actionButtons: <Widget>[
+                      actionButtons: [
                         const CancelButton(),
                         ElevatedButton(
                           child: const Text('Create'),

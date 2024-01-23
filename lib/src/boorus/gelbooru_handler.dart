@@ -115,15 +115,6 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
-  Future<void> afterParseResponse(List<BooruItem> newItems) async {
-    final int lengthBefore = fetched.length;
-    fetched.addAll(newItems);
-    filterFetched();
-    await populateTagHandler(newItems); // difference from default afterParse
-    unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
-  }
-
-  @override
   String makePostURL(String id) {
     // EXAMPLE: https://gelbooru.com/index.php?page=post&s=view&id=7296350
     return '${booru.baseURL}/index.php?page=post&s=view&id=$id';
@@ -173,10 +164,13 @@ class GelbooruHandler extends BooruHandler {
   }
 
   @override
+  bool get shouldPopulateTags => true;
+
+  @override
   String makeDirectTagURL(List<String> tags) {
     final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
     final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=500&json=1$apiKeyStr$userIdStr";
+    return "${booru.baseURL}/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=100&json=1$apiKeyStr$userIdStr";
   }
 
   @override

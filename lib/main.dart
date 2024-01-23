@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -119,13 +118,6 @@ class _MainAppState extends State<MainApp> {
     // localAuthHandler = Get.put(LocalAuthHandler(), permanent: true);
     initHandlers();
 
-    if (Platform.isAndroid || Platform.isIOS) {
-      final PlatformDispatcher window = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher;
-      // This callback is called every time the brightness changes and forces the app root to restate.
-      // This allows to not use darkTheme to avoid coloring bugs on AppBars
-      window.onPlatformBrightnessChanged = updateState;
-    }
-
     // TODO
     // AwesomeNotifications().setListeners(
     //   onActionReceivedMethod: NotifyHandler.onActionReceivedMethod,
@@ -148,11 +140,10 @@ class _MainAppState extends State<MainApp> {
   }
 
   Future<void> initHandlers() async {
-    // should init earlier than tabs so tags color properly on first render of search box
-    // TODO but this possibly could lead to bad preformance on start if tag storage is too big?
     settingsHandler.alice.setNavigatorKey(navigationHandler.navigatorKey);
     await settingsHandler.postInit(() async {
       settingsHandler.postInitMessage.value = 'Loading tags...';
+      // should init earlier than tabs so tags color properly on first render of search box
       await tagHandler.initialize();
       settingsHandler.postInitMessage.value = 'Restoring tabs...';
       await searchHandler.restoreTabs();
