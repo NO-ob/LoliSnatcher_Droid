@@ -119,6 +119,7 @@ class _BooruEditState extends State<BooruEdit> {
               },
               title: 'Booru Type',
               itemTitleBuilder: (BooruType? type) => type?.alias ?? '',
+              expendableByScroll: true,
             ),
             SettingsTextInput(
               controller: booruFaviconController,

@@ -21,6 +21,7 @@ class LoliDropdown<T> extends StatelessWidget {
     this.itemExtent,
     this.withBorder = true,
     this.clearable = false,
+    this.expandableByScroll = false,
     super.key,
   });
 
@@ -37,6 +38,7 @@ class LoliDropdown<T> extends StatelessWidget {
   final double? itemExtent;
   final bool withBorder;
   final bool clearable;
+  final bool expandableByScroll;
 
   @override
   Widget build(BuildContext context) {
@@ -55,25 +57,7 @@ class LoliDropdown<T> extends StatelessWidget {
       child: InkWell(
         borderRadius: withBorder ? const BorderRadius.all(Radius.circular(radius)) : null,
         onTap: () async {
-          if (items.length <= 4) {
-            await showModalBottomSheet(
-              context: context,
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              isScrollControlled: true,
-              isDismissible: true,
-              useSafeArea: true,
-              builder: (BuildContext context) => LoliDropdownBottomSheet<T>(
-                value: value,
-                onChanged: onChanged,
-                items: items,
-                itemBuilder: itemBuilder,
-                labelText: labelText,
-                itemExtent: itemExtent,
-                clearable: clearable,
-              ),
-            );
-          } else {
+          if (expandableByScroll) {
             await showModalBottomSheet(
               context: context,
               backgroundColor: Colors.transparent,
@@ -107,6 +91,24 @@ class LoliDropdown<T> extends StatelessWidget {
                   ),
                 );
               },
+            );
+          } else {
+            await showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              isScrollControlled: true,
+              isDismissible: true,
+              useSafeArea: true,
+              builder: (BuildContext context) => LoliDropdownBottomSheet<T>(
+                value: value,
+                onChanged: onChanged,
+                items: items,
+                itemBuilder: itemBuilder,
+                labelText: labelText,
+                itemExtent: itemExtent,
+                clearable: clearable,
+              ),
             );
           }
         },

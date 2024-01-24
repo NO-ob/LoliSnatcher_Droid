@@ -54,6 +54,7 @@ class TabBooruSelector extends StatelessWidget {
               searchHandler.searchAction(searchHandler.searchTextController.text, newValue);
             }
           },
+          expandableByScroll: true,
           items: settingsHandler.booruList,
           itemExtent: kMinInteractiveDimension,
           itemBuilder: (item) {

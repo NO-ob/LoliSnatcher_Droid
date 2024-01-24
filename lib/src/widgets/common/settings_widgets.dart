@@ -246,6 +246,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.itemTitleBuilder,
     this.clearable = false,
     this.itemExtent,
+    this.expendableByScroll = false,
     super.key,
   });
 
@@ -262,6 +263,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final String Function(T?)? itemTitleBuilder;
   final bool clearable;
   final double? itemExtent;
+  final bool expendableByScroll;
 
   String getTitle(T? value) {
     return itemTitleBuilder?.call(value) ?? value.toString();
@@ -279,6 +281,7 @@ class SettingsDropdown<T> extends StatelessWidget {
         onChanged: onChanged ?? (item) {},
         items: items,
         clearable: clearable,
+        expandableByScroll: expendableByScroll,
         itemExtent: itemExtent,
         itemBuilder: (item) {
           final bool isCurrent = value == item;
@@ -380,6 +383,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       selectedItemBuilder: selectionBuilder,
       clearable: nullable,
       itemExtent: kMinInteractiveDimension,
+      expendableByScroll: true,
     );
   }
 }
@@ -402,6 +406,7 @@ class SettingsTextInput extends StatefulWidget {
     this.clearable = false,
     this.resetText,
     this.numberButtons = false,
+    this.alwaysShowNumberButtons = false,
     this.numberStep = 1,
     this.numberMin = 0,
     this.numberMax = 100,
@@ -426,6 +431,7 @@ class SettingsTextInput extends StatefulWidget {
   final bool clearable;
   final String Function()? resetText;
   final bool numberButtons;
+  final bool alwaysShowNumberButtons;
   final double numberStep;
   final double numberMin;
   final double numberMax;
@@ -502,12 +508,12 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (widget.numberButtons && isFocused)
+        if (widget.numberButtons && (isFocused || widget.alwaysShowNumberButtons))
           Container(
             key: const Key('number-button-down'),
             child: buildNumberButton(stepNumberDown, Icons.remove),
           ),
-        if (widget.numberButtons && isFocused)
+        if (widget.numberButtons && (isFocused || widget.alwaysShowNumberButtons))
           Container(
             key: const Key('number-button-up'),
             child: buildNumberButton(stepNumberUp, Icons.add),
