@@ -850,7 +850,7 @@ class _TagViewState extends State<TagView> {
   @override
   Widget build(BuildContext context) {
     return Scrollbar(
-      interactive: false,
+      interactive: true,
       controller: scrollController,
       child: DesktopScrollWrap(
         controller: scrollController,
