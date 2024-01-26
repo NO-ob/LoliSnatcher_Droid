@@ -62,6 +62,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
             autofocus: true,
             inputType: TextInputType.text,
             clearable: true,
+            forceLabelOnTop: true,
             onSubmitted: onSubmit,
           ),
         ),

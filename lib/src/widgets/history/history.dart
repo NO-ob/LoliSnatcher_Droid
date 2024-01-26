@@ -394,6 +394,7 @@ class _HistoryListState extends State<HistoryList> {
               hintText: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
               inputType: TextInputType.text,
               clearable: true,
+              forceLabelOnTop: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
           ),

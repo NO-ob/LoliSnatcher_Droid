@@ -76,6 +76,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 controller: userAgentController,
                 title: 'Custom User Agent',
                 clearable: true,
+                forceLabelOnTop: true,
                 resetText: () => '',
                 drawBottomBorder: false,
                 trailingIcon: IconButton(

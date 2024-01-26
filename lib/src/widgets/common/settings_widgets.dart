@@ -412,6 +412,7 @@ class SettingsTextInput extends StatefulWidget {
     this.numberMax = 100,
     this.trailingIcon,
     this.onlyInput = false,
+    this.forceLabelOnTop = false,
     super.key,
   });
 
@@ -437,6 +438,7 @@ class SettingsTextInput extends StatefulWidget {
   final double numberMax;
   final Widget? trailingIcon;
   final bool onlyInput;
+  final bool forceLabelOnTop;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -580,6 +582,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
             padding: const EdgeInsets.only(left: 2, right: 10),
             child: buildSuffixIcons(),
           ),
+          floatingLabelBehavior: widget.forceLabelOnTop ? FloatingLabelBehavior.always : FloatingLabelBehavior.auto,
         ),
       ),
     );

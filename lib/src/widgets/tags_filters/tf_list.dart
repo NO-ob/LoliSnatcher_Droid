@@ -44,6 +44,7 @@ class TagsFiltersList extends StatelessWidget {
           SettingsTextInput(
             controller: tagSearchController,
             title: 'Search Tags Filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
+            forceLabelOnTop: true,
             onChanged: onSearchTextChanged,
           ),
           //
