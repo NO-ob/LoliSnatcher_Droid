@@ -175,11 +175,18 @@ class ImageViewerState extends State<ImageViewer> {
     imageStream = mainProvider!.resolve(ImageConfiguration.empty);
     imageListener = ImageStreamListener(
       (imageInfo, syncCall) {
+        final prevIsLoaded = isLoaded;
         isLoaded = true;
+
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          resetZoom();
+          // without this check gifs will keep resetting zoom on every frame change
+          // because every frame is considered as new image
+          if (prevIsLoaded == false) {
+            resetZoom();
+          }
           viewerHandler.setLoaded(widget.key, true);
         });
+
         if (!syncCall) {
           updateState();
         }
@@ -273,8 +280,6 @@ class ImageViewerState extends State<ImageViewer> {
 
     viewerHandler.setLoaded(widget.key, false);
 
-    resetZoom();
-
     updateState();
   }
 
@@ -348,8 +353,6 @@ class ImageViewerState extends State<ImageViewer> {
   }
 
   void resetZoom() {
-    // Don't zoom until image is loaded
-    if (!isLoaded) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
     viewerHandler.setZoomed(widget.key, false);
   }
