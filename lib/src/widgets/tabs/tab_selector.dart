@@ -381,11 +381,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
       duplicateFilter = false;
       duplicateBooruFilter = true;
       emptyFilter = false;
-
-      firstRender = true;
     }
 
     if (result != null) {
+      firstRender = true;
       showPlaceholders = true;
       setState(() {});
       await Future.delayed(const Duration(milliseconds: 20));
