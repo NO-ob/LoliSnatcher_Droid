@@ -540,7 +540,7 @@ class VideoViewerState extends State<VideoViewer> {
     const double fullOpacity = 1;
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
         child: Stack(
           alignment: Alignment.center,

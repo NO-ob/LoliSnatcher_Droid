@@ -81,7 +81,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
 
     final bool isDone = _total > 0 && _received >= _total;
     Debounce.delay(
-      tag: 'loading_thumbnail_progress_${widget.item.thumbnailURL}',
+      tag: 'loading_thumbnail_progress_${widget.item.hashCode}',
       callback: updateState,
       duration: Duration(milliseconds: isDone ? 0 : 250),
     );
@@ -101,7 +101,7 @@ class _ThumbnailLoadingState extends State<ThumbnailLoading> {
     _totalListener?.cancel();
     _receivedListener?.cancel();
     _startedAtListener?.cancel();
-    Debounce.cancel('loading_thumbnail_progress_${widget.item.thumbnailURL}');
+    Debounce.cancel('loading_thumbnail_progress_${widget.item.hashCode}');
   }
 
   @override

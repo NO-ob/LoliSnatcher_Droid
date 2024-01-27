@@ -166,7 +166,7 @@ class _ThumbnailState extends State<Thumbnail> {
       if (restartedCount < 5) {
         // attempt to reload 5 times with a second delay
         Debounce.debounce(
-          tag: 'thumbnail_reload_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}',
+          tag: 'thumbnail_reload_${widget.item.hashCode}',
           callback: () {
             restartLoading();
             restartedCount++;
@@ -203,7 +203,7 @@ class _ThumbnailState extends State<Thumbnail> {
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
     Debounce.debounce(
-      tag: 'thumbnail_start_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}',
+      tag: 'thumbnail_start_${widget.item.hashCode}',
       callback: startDownloading,
       duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
     );
@@ -337,8 +337,8 @@ class _ThumbnailState extends State<Thumbnail> {
       extraProvider = null;
     }
 
-    Debounce.cancel('thumbnail_start_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}');
-    Debounce.cancel('thumbnail_reload_${searchHandler.currentTab.id}#${searchHandler.getItemIndex(widget.item)}');
+    Debounce.cancel('thumbnail_start_${widget.item.hashCode}');
+    Debounce.cancel('thumbnail_reload_${widget.item.hashCode}');
   }
 
   @override
@@ -480,7 +480,7 @@ class _ThumbnailState extends State<Thumbnail> {
       return HeroMode(
         enabled: settingsHandler.enableHeroTransitions,
         child: Hero(
-          tag: 'imageHero${searchHandler.getItemIndex(widget.item)}#${widget.item.fileURL}',
+          tag: 'imageHero${widget.item.hashCode}',
           placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
             // keep building the image since the images can be visible in the
             // background of the image gallery

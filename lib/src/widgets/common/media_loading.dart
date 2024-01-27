@@ -106,7 +106,7 @@ class _MediaLoadingState extends State<MediaLoading> {
 
     final bool isDone = _total > 0 && _received >= _total;
     Debounce.delay(
-      tag: 'loading_media_progress_${widget.item.fileURL}',
+      tag: 'loading_media_progress_${widget.item.hashCode}',
       callback: () {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           updateState();
@@ -138,7 +138,7 @@ class _MediaLoadingState extends State<MediaLoading> {
     _receivedListener?.cancel();
     _startedAtListener?.cancel();
     _checkInterval?.cancel();
-    Debounce.cancel('loading_media_progress_${widget.item.fileURL}');
+    Debounce.cancel('loading_media_progress_${widget.item.hashCode}');
   }
 
   @override

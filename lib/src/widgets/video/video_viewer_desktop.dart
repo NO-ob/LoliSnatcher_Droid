@@ -481,7 +481,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     // TODO move controls outside, to exclude them from zoom
 
     return Hero(
-      tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
+      tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
         child: Listener(
           onPointerSignal: (pointerSignal) {

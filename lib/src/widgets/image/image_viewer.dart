@@ -394,7 +394,7 @@ class ImageViewerState extends State<ImageViewer> {
         });
 
         return Hero(
-          tag: 'imageHero${isViewed ? '' : '-ignore-'}${searchHandler.getItemIndex(widget.booruItem)}#${widget.booruItem.fileURL}',
+          tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
           // without this every text element will have broken styles on first frames
           child: Material(
             color: Colors.black,
