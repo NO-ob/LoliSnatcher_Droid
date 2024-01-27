@@ -93,6 +93,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
         ),
         SettingsToggle(
           title: 'Duplicates',
+          subtitle: duplicateFilter ? const Text('Will also enable sorting') : null,
           value: duplicateFilter,
           onChanged: (bool newValue) {
             duplicateFilter = newValue;
@@ -111,7 +112,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                     ),
                     Expanded(
                       child: SettingsToggle(
-                        title: 'Check duplicates on same Booru',
+                        title: 'Check for duplicates on same Booru',
                         value: duplicateBooruFilter,
                         onChanged: (bool newValue) {
                           duplicateBooruFilter = newValue;

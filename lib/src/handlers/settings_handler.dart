@@ -1679,6 +1679,7 @@ class SettingsHandler extends GetxController {
 
       showDialog(
         context: NavigationHandler.instance.navigatorKey.currentContext!,
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return SettingsDialog(
             title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
@@ -1731,7 +1732,6 @@ class SettingsHandler extends GetxController {
             ],
           );
         },
-        barrierDismissible: false,
       );
     }
   }

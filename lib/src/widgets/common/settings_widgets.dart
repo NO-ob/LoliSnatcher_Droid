@@ -126,7 +126,7 @@ class SettingsPageOpen {
 
     final bool isTooNarrow = MediaQuery.of(context).size.width < 550;
     final bool isDesktop = settingsHandler.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-    final bool useDesktopMode = (!isTooNarrow && isDesktop) || useFloatingDialog;
+    final bool useDesktopMode = (!isTooNarrow && isDesktop && !asBottomSheet) || useFloatingDialog;
 
     dynamic result;
     if (useDesktopMode) {

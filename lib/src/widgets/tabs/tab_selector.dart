@@ -25,8 +25,6 @@ import 'package:lolisnatcher/src/widgets/tabs/tab_filters_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_move_dialog.dart';
 import 'package:lolisnatcher/src/widgets/tabs/tab_row.dart';
 
-// TODO improve scrolling performance when tapping scroll to top/bottom/current buttons and freezing after input in search when there are a lot of tabs (+ add debounce?)
-
 class TabSelector extends StatelessWidget {
   const TabSelector({
     this.withBorder = true,
@@ -173,8 +171,6 @@ class _TabManagerPageState extends State<TabManagerPage> {
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
   bool selectMode = false;
 
-  bool showPlaceholders = false, firstRender = true;
-
   static const double tabHeight = 72 + 8;
 
   int get totalTabs => searchHandler.total;
@@ -210,8 +206,6 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await jumpToCurrent();
-      firstRender = false;
-      setState(() {});
     });
   }
 
@@ -252,53 +246,34 @@ class _TabManagerPageState extends State<TabManagerPage> {
   }
 
   void scrollToCurrent() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      showPlaceholders = true;
-      setState(() {});
-      await jumpToCurrent(animated: true);
-      showPlaceholders = false;
-      setState(() {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      jumpToCurrent(animated: true);
     });
   }
 
   void jumpToTop() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      firstRender = true;
-      setState(() {});
-      await Future.delayed(const Duration(milliseconds: 20));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       scrollController.jumpTo(0);
-      firstRender = false;
-      setState(() {});
     });
   }
 
   void scrollToTop() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      showPlaceholders = true;
-      setState(() {});
-      await Future.delayed(const Duration(milliseconds: 20));
-      await scrollController.animateTo(
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollController.animateTo(
         0,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
-      showPlaceholders = false;
-      setState(() {});
     });
   }
 
   void scrollToBottom() {
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      showPlaceholders = true;
-      setState(() {});
-      await Future.delayed(const Duration(milliseconds: 20));
-      await scrollController.animateTo(
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      scrollController.animateTo(
         scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
-      showPlaceholders = false;
-      setState(() {});
     });
   }
 
@@ -316,11 +291,22 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     if (duplicateFilter) {
       // tabs where booru and tags are the same
-      filteredTabs = filteredTabs.where((tab) {
-        final List<SearchTab> booruTabs = filteredTabs.where((t) => duplicateBooruFilter ? t.selectedBooru.value == tab.selectedBooru.value : true).toList();
-        final List<SearchTab> sameTagsTabs = booruTabs.where((t) => t.tags.toLowerCase().trim() == tab.tags.toLowerCase().trim()).toList();
-        return sameTagsTabs.length > 1;
-      }).toList();
+      final Map<String, List<SearchTab>> freqMap = {};
+      for (final tab in filteredTabs) {
+        final tags = tab.tags.toLowerCase().trim();
+        final key = duplicateBooruFilter ? '${tab.selectedBooru.value.name}+$tags' : tags;
+
+        if (freqMap.containsKey(key)) {
+          freqMap[key]!.add(tab);
+        } else {
+          freqMap[key] = [tab];
+        }
+      }
+      filteredTabs = freqMap.entries.where((e) => e.value.length > 1).expand((e) => e.value).toList();
+      // restore tab order for sortTabs == null
+      filteredTabs.sort((a, b) {
+        return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
+      });
     }
 
     if (emptyFilter) {
@@ -336,7 +322,20 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
     if (sortTabs != null) {
       filteredTabs.sort(
-        (a, b) => sortTabs == true ? a.tags.toLowerCase().compareTo(b.tags.toLowerCase()) : b.tags.toLowerCase().compareTo(a.tags.toLowerCase()),
+        (a, b) {
+          final cleanA = a.tags.toLowerCase();
+          final cleanB = b.tags.toLowerCase();
+
+          if (cleanA != cleanB) {
+            if (sortTabs == true) {
+              return cleanA.compareTo(cleanB);
+            } else {
+              return cleanB.compareTo(cleanA);
+            }
+          } else {
+            return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
+          }
+        },
       );
     }
   }
@@ -373,7 +372,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
     ).open();
 
     if (result == 'apply') {
-      //
+      if (duplicateFilter) {
+        sortTabs = true;
+      }
     }
     if (result == 'clear' || (loadedFilter == null && booruFilter == null && duplicateFilter == false && emptyFilter == false)) {
       loadedFilter = null;
@@ -381,29 +382,20 @@ class _TabManagerPageState extends State<TabManagerPage> {
       duplicateFilter = false;
       duplicateBooruFilter = true;
       emptyFilter = false;
+
+      if (sortTabs != null) {
+        sortTabs = null;
+      }
     }
 
     if (result != null) {
-      firstRender = true;
-      showPlaceholders = true;
-      setState(() {});
-      await Future.delayed(const Duration(milliseconds: 20));
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        getTabs();
-        await Future.delayed(const Duration(milliseconds: 20));
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          if (filteredTabs.contains(searchHandler.currentTab)) {
-            await jumpToCurrent();
-          } else {
-            scrollToTop();
-          }
-
-          await Future.delayed(const Duration(milliseconds: 20));
-
-          showPlaceholders = false;
-          firstRender = false;
-          setState(() {});
-        });
+      getTabs();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (filteredTabs.contains(searchHandler.currentTab) && !duplicateFilter) {
+          jumpToCurrent();
+        } else {
+          scrollToTop();
+        }
       });
     }
   }
@@ -496,8 +488,6 @@ class _TabManagerPageState extends State<TabManagerPage> {
         isFiltered: isFilterActive || sortTabs != null,
         originalIndex: (isFilterActive || sortTabs != null) ? searchHandler.list.indexOf(tab) : null,
         isCurrent: isCurrent,
-        showPlaceholders: showPlaceholders,
-        firstRender: firstRender,
         filterText: filterTextController.text,
         onTap: selectMode
             ? () {
@@ -616,7 +606,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
             borderRadius: BorderRadius.circular(5),
             side: BorderSide(color: Theme.of(context).colorScheme.secondary),
           ),
-          onTap: () async {
+          onTap: () {
             selectedTabs.remove(tab);
             searchHandler.removeTabAt(tabIndex: searchHandler.list.indexOf(tab));
             getTabs();
@@ -915,18 +905,13 @@ class _TabManagerPageState extends State<TabManagerPage> {
 
                   final res = await showDialog(
                     context: context,
-                    barrierDismissible: false,
                     builder: (context) {
                       return SettingsDialog(
                         title: Text(sortTabs != null ? 'Sort tabs' : 'Shuffle tabs'),
-                        contentItems: sortTabs != null
-                            ? [
-                                const Text('Save current tabs sorting?'),
-                                Text(sortTabs == true ? 'Alphabetically' : 'Alphabetically (reversed)'),
-                              ]
-                            : [
-                                const Text('Shuffle tabs randomly?'),
-                              ],
+                        contentItems: [
+                          Text(sortTabs != null ? 'Save tabs in current sorting order?' : 'Shuffle tabs order randomly?'),
+                          if (sortTabs != null) Text(sortTabs == true ? 'Alphabetically' : 'Alphabetically (reversed)'),
+                        ],
                         actionButtons: [
                           const CancelButton(withIcon: true),
                           ElevatedButton.icon(
@@ -1224,8 +1209,6 @@ class TabManagerItem extends StatelessWidget {
     required this.tab,
     this.index,
     this.isCurrent = false,
-    this.showPlaceholders = false,
-    this.firstRender = false,
     this.isFiltered = false,
     this.originalIndex,
     this.onTap,
@@ -1242,8 +1225,6 @@ class TabManagerItem extends StatelessWidget {
   final SearchTab tab;
   final int? index;
   final bool isCurrent;
-  final bool showPlaceholders;
-  final bool firstRender;
   final bool isFiltered;
   final int? originalIndex;
   final VoidCallback? onTap;
@@ -1254,10 +1235,7 @@ class TabManagerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // print('tab selector item build $index $showPlaceholders');
-    if (firstRender) {
-      return const SizedBox(height: 80);
-    }
+    // print('tab selector item build $index');
 
     final BorderRadius radius = BorderRadius.circular(10);
 
@@ -1286,116 +1264,108 @@ class TabManagerItem extends StatelessWidget {
             borderRadius: radius,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 200),
-              child: showPlaceholders
-                  ? Container(
-                      decoration: BoxDecoration(
-                        borderRadius: radius,
-                      ),
-                      clipBehavior: Clip.hardEdge,
-                      child: const ShimmerCard(),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(
-                        left: 12,
-                        right: 12,
-                        top: 2,
-                        bottom: 6,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        mainAxisSize: MainAxisSize.min,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  right: 12,
+                  top: 2,
+                  bottom: 6,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Row(
                         children: [
                           Expanded(
-                            flex: 2,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TabRow(
-                                    tab: tab,
-                                    filterText: filterText,
-                                  ),
+                            child: TabRow(
+                              tab: tab,
+                              filterText: filterText,
+                            ),
+                          ),
+                          if (onOptionsTap != null) ...[
+                            const SizedBox(width: 4),
+                            optionsWidgetBuilder?.call(context, onOptionsTap) ??
+                                IconButton(
+                                  onPressed: onOptionsTap,
+                                  icon: const Icon(CupertinoIcons.slider_horizontal_3),
                                 ),
-                                if (onOptionsTap != null) ...[
-                                  const SizedBox(width: 4),
-                                  optionsWidgetBuilder?.call(context, onOptionsTap) ??
-                                      IconButton(
-                                        onPressed: onOptionsTap,
-                                        icon: const Icon(CupertinoIcons.slider_horizontal_3),
-                                      ),
-                                ],
-                                if (onCloseTap != null) ...[
-                                  if (onOptionsTap == null) const SizedBox(width: 4) else const SizedBox(width: 8),
-                                  IconButton(
-                                    onPressed: onCloseTap,
-                                    icon: const Icon(
-                                      Icons.close,
-                                    ),
-                                  ),
-                                ],
-                              ],
+                          ],
+                          if (onCloseTap != null) ...[
+                            if (onOptionsTap == null) const SizedBox(width: 4) else const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: onCloseTap,
+                              icon: const Icon(
+                                Icons.close,
+                              ),
                             ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Obx(
-                              () {
-                                final int totalCount = tab.booruHandler.totalCount.value;
-
-                                return Row(
-                                  children: [
-                                    Expanded(
-                                      child: SizedBox(
-                                        height: subtitleStyle.fontSize,
-                                        child: Builder(
-                                          builder: (context) {
-                                            final List<String> booruNames = [
-                                              if (tab.booruHandler is MergebooruHandler)
-                                                (tab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
-                                              else
-                                                tab.booruHandler.booru.name ?? '',
-                                              if (tab.secondaryBoorus != null)
-                                                for (final booru in tab.secondaryBoorus!) booru.name ?? '',
-                                            ];
-                                            final String booruNamesStr = booruNames.join(', ');
-
-                                            return MarqueeText(
-                                              text: booruNamesStr.trim(),
-                                              style: subtitleStyle,
-                                              allowDownscale: false,
-                                              isExpanded: false,
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    if (totalCount > 0) ...[
-                                      Icon(
-                                        Icons.image,
-                                        size: 16,
-                                        color: subtitleStyle.color,
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        '${totalCount.toFormattedString()} | ',
-                                        style: subtitleStyle,
-                                      ),
-                                    ],
-                                    if (index != null)
-                                      Text(
-                                        '#${(index! + 1).toFormattedString()}${originalIndex != null ? '|${(originalIndex! + 1).toFormattedString()}' : ''}',
-                                        style: subtitleStyle,
-                                      ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
+                          ],
                         ],
                       ),
                     ),
+                    Expanded(
+                      flex: 1,
+                      child: Obx(
+                        () {
+                          final int totalCount = tab.booruHandler.totalCount.value;
+
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: subtitleStyle.fontSize,
+                                  child: Builder(
+                                    builder: (context) {
+                                      final List<String> booruNames = [
+                                        if (tab.booruHandler is MergebooruHandler)
+                                          (tab.booruHandler as MergebooruHandler).booruList[0].name ?? ''
+                                        else
+                                          tab.booruHandler.booru.name ?? '',
+                                        if (tab.secondaryBoorus != null)
+                                          for (final booru in tab.secondaryBoorus!) booru.name ?? '',
+                                      ];
+                                      final String booruNamesStr = booruNames.join(', ');
+
+                                      return MarqueeText(
+                                        text: booruNamesStr.trim(),
+                                        style: subtitleStyle,
+                                        allowDownscale: false,
+                                        isExpanded: false,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              if (totalCount > 0) ...[
+                                Icon(
+                                  Icons.image,
+                                  size: 16,
+                                  color: subtitleStyle.color,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  '${totalCount.toFormattedString()} | ',
+                                  style: subtitleStyle,
+                                ),
+                              ],
+                              if (index != null)
+                                Text(
+                                  '#${(index! + 1).toFormattedString()}${originalIndex != null ? '|${(originalIndex! + 1).toFormattedString()}' : ''}',
+                                  style: subtitleStyle,
+                                ),
+                              const SizedBox(width: 8),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
