@@ -479,7 +479,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
     final bool isSelected = selectedTabs.contains(tab);
 
     return ReorderableDelayedDragStartListener(
-      key: ValueKey('item-$index-${tab.id}'),
+      key: ValueKey('item-${tab.id}'),
       index: index,
       enabled: !selectMode && !isFilterActive && sortTabs == null,
       child: TabManagerItem(

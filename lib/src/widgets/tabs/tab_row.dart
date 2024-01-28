@@ -94,7 +94,11 @@ class TabRow extends StatelessWidget {
           final List<String> split = tagText.trim().split(' ');
 
           for (int i = 0; i < split.length; i++) {
-            final tag = split[i].trim();
+            String tag = split[i].trim();
+            final String prefix = (tag.startsWith('-') || tag.startsWith('~')) ? tag.substring(0, 1) : '';
+            if (prefix.isNotEmpty) {
+              tag = tag.substring(1);
+            }
 
             final tagData = TagHandler.instance.getTag(tag);
 
@@ -111,7 +115,7 @@ class TabRow extends StatelessWidget {
             spans.add(
               TextSpan(
                 // add non-breaking space to the end of italics to hide text overflowing the bgColor,
-                text: '$tag${(hasItems || !isColored) ? '' : '\u{00A0}'}',
+                text: '$prefix$tag${(hasItems || !isColored) ? '' : '\u{00A0}'}',
                 style: spanStyle,
               ),
             );
