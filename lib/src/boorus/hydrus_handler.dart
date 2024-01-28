@@ -168,7 +168,7 @@ class HydrusHandler extends BooruHandler {
     return fetched;
   }
 
-  Future addURL(BooruItem item) async {
+  Future addURL(BooruItem item, {bool usePostUrl = false}) async {
     try {
       final String url = '${booru.baseURL}/add_urls/add_url';
       Logger.Inst().log(url, 'HydrusHandler', 'addURL', LogTypes.booruHandlerInfo);
@@ -187,7 +187,10 @@ class HydrusHandler extends BooruHandler {
           HttpHeaders.contentTypeHeader: 'application/json',
           if (booru.apiKey?.isNotEmpty == true) 'Hydrus-Client-API-Access-Key': booru.apiKey,
         },
-        data: {'url': item.fileURL, 'filterable_tags': item.tagsList},
+        data: {
+          'url': usePostUrl ? item.postURL : item.fileURL,
+          'filterable_tags': item.tagsList,
+        },
       );
     } catch (e) {
       FlashElements.showSnackbar(

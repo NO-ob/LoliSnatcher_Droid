@@ -561,11 +561,59 @@ class _HideableAppBarState extends State<HideableAppBar> {
     }
   }
 
-  void shareHydrusAction(BooruItem item) {
+  Future<void> shareHydrusAction(BooruItem item) async {
     if (settingsHandler.hasHydrus) {
       final Booru hydrus = settingsHandler.booruList.where((element) => element.type == BooruType.Hydrus).first;
       final HydrusHandler hydrusHandler = HydrusHandler(hydrus, 10);
-      hydrusHandler.addURL(item);
+
+      final res = await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Hydrus Share'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Which URL you want to share to Hydrus?'),
+                const SizedBox(height: 12),
+                ListTile(
+                  title: const Text('Post URL'),
+                  leading: const Icon(Icons.arrow_forward),
+                  onTap: () {
+                    Navigator.of(context).pop('post');
+                  },
+                ),
+                ListTile(
+                  title: const Text('File URL'),
+                  leading: const Icon(Icons.arrow_forward),
+                  onTap: () {
+                    Navigator.of(context).pop('file');
+                  },
+                ),
+                ListTile(
+                  title: const Text('Cancel'),
+                  leading: const Icon(Icons.cancel_outlined),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (res == null) {
+        return;
+      }
+
+      await hydrusHandler.addURL(item, usePostUrl: res == 'post');
+    } else {
+      FlashElements.showSnackbar(
+        context: context,
+        title: const Text('Hydrus is not configured!', style: TextStyle(fontSize: 20)),
+      );
     }
   }
 
@@ -760,9 +808,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       borderRadius: BorderRadius.circular(10),
                       side: BorderSide(color: Theme.of(context).colorScheme.secondary),
                     ),
-                    onTap: () {
+                    onTap: () async {
+                      await shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
                       Navigator.of(context).pop();
-                      shareHydrusAction(searchHandler.currentFetched[searchHandler.viewedIndex.value]);
                     },
                     leading: const Icon(Icons.file_present),
                     title: const Text('Hydrus'),
