@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class SnatchHandler extends GetxController {
   SnatchHandler() {
@@ -77,18 +78,39 @@ class SnatchHandler extends GetxController {
               FlashElements.showSnackbar(
                 duration: const Duration(seconds: 2),
                 position: Positions.top,
-                title: const Text('Item Snatched', style: TextStyle(fontSize: 20)),
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                title: const Text(
+                  'Item Snatched',
+                  style: TextStyle(fontSize: 20),
+                ),
+                content: Row(
                   children: [
-                    if (exists.isNotEmpty) const Text('Item was already snatched before'),
-                    if (failed.isNotEmpty) const Text('Failed to snatch the item'),
-                    if (queuedList.isNotEmpty) const Text('Starting next queue...'),
+                    if (exists.isNotEmpty || failed.isNotEmpty || queuedList.isNotEmpty)
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (exists.isNotEmpty) const Text('Item was already snatched before'),
+                            if (failed.isNotEmpty) const Text('Failed to snatch the item'),
+                            if (queuedList.isNotEmpty) const Text('Starting next queue...'),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: ThumbnailBuild(
+                        item: current.value!.booruItems.first,
+                        selectable: false,
+                        simple: true,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                   ],
                 ),
                 leadingIcon: Icons.done_all,
                 sideColor: failed.isNotEmpty ? Colors.red : (exists.isNotEmpty ? Colors.yellow : Colors.green),
-                //TODO restart/retry buttons for failed items?
+                // TODO restart/retry buttons for failed items?
               );
             } else {
               FlashElements.showSnackbar(
