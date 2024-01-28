@@ -1638,7 +1638,6 @@ class SettingsHandler extends GetxController {
       } else {
         // otherwise show latest version message
         showLastVersionMessage(withMessage);
-        updateInfo.value = null;
       }
     } catch (e) {
       if (withMessage) {
@@ -1668,6 +1667,18 @@ class SettingsHandler extends GetxController {
         sideColor: Colors.green,
         leadingIcon: Icons.update,
         leadingIconColor: Colors.green,
+        actionsBuilder: (controller) {
+          return [
+            ElevatedButton.icon(
+              onPressed: () {
+                controller.dismiss();
+                showUpdate(true);
+              },
+              icon: const Icon(Icons.list_alt_rounded),
+              label: const Text('View latest changelog'),
+            ),
+          ];
+        },
       );
     }
   }
@@ -1677,15 +1688,19 @@ class SettingsHandler extends GetxController {
       // TODO get from some external variable when building
       const bool isFromStore = EnvironmentConfig.isFromStore;
 
+      final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
+
       showDialog(
         context: NavigationHandler.instance.navigatorKey.currentContext!,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return SettingsDialog(
-            title: Text('Update Available: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
+            title: Text('Update ${isDiffVersion ? 'Available' : 'Changelog'}: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
             contentItems: [
-              const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
-              const Text(''),
+              if (isDiffVersion) ...[
+                const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+                const Text(''),
+              ],
               Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const Text(''),
               const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -1824,8 +1839,13 @@ class SettingsHandler extends GetxController {
 }
 
 class EnvironmentConfig {
-  static const isFromStore = bool.fromEnvironment(
+  static const bool isFromStore = bool.fromEnvironment(
     'LS_IS_STORE',
+    defaultValue: false,
+  );
+
+  static const bool isTesting = bool.fromEnvironment(
+    'LS_IS_TESTING',
     defaultValue: false,
   );
 }

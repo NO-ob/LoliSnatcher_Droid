@@ -11,6 +11,7 @@ import 'package:logger_flutter_fork/logger_flutter_fork.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -396,7 +397,7 @@ class MainDrawer extends StatelessWidget {
                       ),
                       //
                       Obx(() {
-                        if (settingsHandler.updateInfo.value != null) {
+                        if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {
                           return SettingsButton(
                             name: 'Update Available!',
                             icon: Stack(

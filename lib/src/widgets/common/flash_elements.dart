@@ -86,6 +86,7 @@ class FlashElements {
     final ThemeData themeData = Theme.of(contextToUse);
 
     final bool isDesktop = !ignoreDesktopCheck && (SettingsHandler.instance.appMode.value.isDesktop || Platform.isWindows || Platform.isLinux);
+    final bool isTooWide = mediaQueryData.size.width > 500;
     final bool isDark = themeData.brightness == Brightness.dark;
 
     final FlashPosition flashPosition = position == Positions.bottom ? FlashPosition.bottom : FlashPosition.top;
@@ -182,7 +183,7 @@ class FlashElements {
                 content: content,
                 indicatorColor: sideColor,
                 controller: controller,
-                margin: (isDesktop && mediaQueryData.size.width > 500)
+                margin: (isDesktop && isTooWide)
                     ? EdgeInsets.symmetric(horizontal: mediaQueryData.size.width / 4, vertical: 0)
                     : const EdgeInsets.symmetric(horizontal: 20, vertical: kToolbarHeight * 1.1),
                 behavior: !isDesktop ? FlashBehavior.floating : FlashBehavior.fixed,
@@ -191,8 +192,8 @@ class FlashElements {
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(8),
                     topRight: const Radius.circular(8),
-                    bottomLeft: !isDesktop ? const Radius.circular(8) : Radius.zero,
-                    bottomRight: !isDesktop ? const Radius.circular(8) : Radius.zero,
+                    bottomLeft: (isDesktop && isTooWide) ? Radius.zero : const Radius.circular(8),
+                    bottomRight: (isDesktop && isTooWide) ? Radius.zero : const Radius.circular(8),
                   ),
                   side: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                 ),

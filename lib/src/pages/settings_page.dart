@@ -202,7 +202,7 @@ class _VersionButtonState extends State<VersionButton> {
     final SettingsHandler settingsHandler = SettingsHandler.instance;
 
     const String verText = 'Version: ${Constants.appVersion} (${Constants.appBuildNumber})';
-    const String buildTypeText = EnvironmentConfig.isFromStore ? '/ Play' : (kDebugMode ? '/ Debug' : '');
+    const String buildTypeText = EnvironmentConfig.isFromStore ? '/ Play' : (EnvironmentConfig.isTesting ? '/ Test' : (kDebugMode ? '/ Debug' : ''));
 
     return SettingsButton(
       name: '$verText $buildTypeText'.trim(),
