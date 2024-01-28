@@ -28,6 +28,8 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/dialogs/comments_dialog.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
+import 'package:lolisnatcher/src/widgets/image/favicon.dart';
+import 'package:lolisnatcher/src/widgets/thumbnail/thumbnail_build.dart';
 
 class _TagInfoIcon {
   _TagInfoIcon(this.icon, this.color);
@@ -501,6 +503,7 @@ class _TagViewState extends State<TagView> {
               ],
             ),
             const SizedBox(height: 10),
+            TagContentPreview(tag: tag),
             ListTile(
               leading: Icon(
                 Icons.copy,
@@ -1114,6 +1117,115 @@ class _SourceLinkErrorDialogState extends State<SourceLinkErrorDialog> {
         ),
         const CancelButton(withIcon: true),
       ],
+    );
+  }
+}
+
+class TagContentPreview extends StatefulWidget {
+  const TagContentPreview({
+    required this.tag,
+    super.key,
+  });
+
+  final String tag;
+
+  @override
+  State<TagContentPreview> createState() => _TagContentPreviewState();
+}
+
+class _TagContentPreviewState extends State<TagContentPreview> {
+  final SearchHandler searchHandler = SearchHandler.instance;
+
+  SearchTab? preview;
+  bool loading = false, failed = false;
+
+  Future<void> loadPreview() async {
+    preview = SearchTab(
+      searchHandler.currentBooru.obs,
+      null,
+      widget.tag,
+    );
+    loading = true;
+    failed = false;
+    setState(() {});
+
+    await preview!.booruHandler.search(widget.tag, null);
+    loading = false;
+
+    if (preview!.booruHandler.errorString.isNotEmpty) {
+      failed = true;
+    }
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: preview == null
+            ? ListTile(
+                leading: Icon(
+                  Icons.search,
+                  color: Theme.of(context).iconTheme.color,
+                ),
+                title: const Text('Preview'),
+                onTap: loadPreview,
+              )
+            : ((loading || failed)
+                ? ListTile(
+                    leading: Icon(
+                      loading ? Icons.search : Icons.restart_alt,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    trailing: loading ? const CircularProgressIndicator() : null,
+                    title: loading ? const Text('Preview is loading...') : const Text('Failed to load preview'),
+                    subtitle: failed ? const Text('Tap to try again') : null,
+                    onTap: failed ? loadPreview : null,
+                  )
+                : Column(
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            'Preview:',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                          const SizedBox(width: 8),
+                          Favicon(preview!.booruHandler.booru),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: loadPreview,
+                            icon: const Icon(
+                              Icons.refresh,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 180,
+                        width: MediaQuery.of(context).size.width,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: preview!.booruHandler.filteredFetched.length,
+                          itemBuilder: (context, index) => Container(
+                            padding: const EdgeInsets.only(right: 8),
+                            height: 180,
+                            width: 120,
+                            child: ThumbnailBuild(
+                              item: preview!.booruHandler.filteredFetched[index],
+                              selectable: false,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  )),
+      ),
     );
   }
 }
