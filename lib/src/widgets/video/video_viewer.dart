@@ -13,6 +13,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -537,7 +538,7 @@ class VideoViewerState extends State<VideoViewer> {
       aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
     );
 
-    const double fullOpacity = 1;
+    const double fullOpacity = Constants.imageDefaultOpacity;
 
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',

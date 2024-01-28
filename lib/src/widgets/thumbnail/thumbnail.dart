@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/debouncer.dart';
@@ -359,7 +360,7 @@ class _ThumbnailState extends State<Thumbnail> {
         final bool showShimmer = !(isLoaded || isLoadedExtra) && !isFailed;
         final bool useExtra = isThumbQuality == false && !widget.item.isHated;
 
-        const double fullOpacity = 1;
+        const double fullOpacity = Constants.imageDefaultOpacity;
 
         return Stack(
           alignment: Alignment.center,

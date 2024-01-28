@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
@@ -476,7 +477,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       _lastViewedIndex = viewedIndex;
     }
 
-    const double fullOpacity = 1;
+    const double fullOpacity = Constants.imageDefaultOpacity;
 
     // TODO move controls outside, to exclude them from zoom
 

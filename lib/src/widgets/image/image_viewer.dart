@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -381,7 +382,7 @@ class ImageViewerState extends State<ImageViewer> {
   Widget build(BuildContext context) {
     // print('!!! Build media ${searchHandler.getItemIndex(widget.booruItem)} $isViewed !!!');
 
-    const double fullOpacity = 1;
+    const double fullOpacity = Constants.imageDefaultOpacity;
 
     return LayoutBuilder(
       builder: (context, constraints) {
