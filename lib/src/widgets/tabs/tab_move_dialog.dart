@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -128,9 +129,11 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             }
           },
           leading: const Icon(Icons.vertical_align_center),
-          title: Text('Move To #${controllerNumber ?? '?'}'),
+          title: Text('Move To #${controllerNumber?.toFormattedString() ?? '?'}'),
         ),
         //
+        const SizedBox(height: 20),
+        const CancelButton(text: 'Close', withIcon: true),
         const SizedBox(height: 10),
         const Text('Preview:'),
         const SizedBox(height: 10),
@@ -139,8 +142,6 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
           indexController: indexController,
           setState: setState,
         ),
-        const SizedBox(height: 20),
-        const CancelButton(),
         const SizedBox(height: 20),
       ],
     );

@@ -526,7 +526,7 @@ class _TagViewState extends State<TagView> {
                   leadingIcon: Icons.copy,
                   sideColor: Colors.green,
                 );
-                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
               },
             ),
             if (isInSearch)
@@ -538,7 +538,7 @@ class _TagViewState extends State<TagView> {
                 title: const Text('Remove from Search'),
                 onTap: () {
                   searchHandler.removeTagFromSearch(tag);
-                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop();
                 },
               ),
             if (!isInSearch)
@@ -563,7 +563,7 @@ class _TagViewState extends State<TagView> {
                     sideColor: Colors.green,
                   );
 
-                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop();
                 },
               ),
             if (!isInSearch)
@@ -588,7 +588,7 @@ class _TagViewState extends State<TagView> {
                     sideColor: Colors.green,
                   );
 
-                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop();
                 },
               ),
             if (!isHated && !isLoved)
@@ -610,7 +610,7 @@ class _TagViewState extends State<TagView> {
                   settingsHandler.addTagToList('hated', tag);
                   searchHandler.filterCurrentFetched();
                   parseSortGroupTags();
-                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop();
                 },
               ),
             if (isLoved)
@@ -623,7 +623,7 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.removeTagFromList('loved', tag);
                   parseSortGroupTags();
-                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop();
                 },
               ),
             if (isHated)
@@ -636,9 +636,20 @@ class _TagViewState extends State<TagView> {
                 onTap: () {
                   settingsHandler.removeTagFromList('hated', tag);
                   parseSortGroupTags();
-                  Navigator.of(context).pop(true);
+                  Navigator.of(context).pop();
                 },
               ),
+            //
+            ListTile(
+              leading: Icon(
+                Icons.cancel_outlined,
+                color: Theme.of(context).iconTheme.color,
+              ),
+              title: const Text('Close'),
+              onTap: () {
+                Navigator.of(context).pop();
+              },
+            ),
           ],
         );
       },

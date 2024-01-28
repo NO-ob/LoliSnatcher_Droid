@@ -571,7 +571,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
               leadingIcon: Icons.copy,
               sideColor: Colors.green,
             );
-            Navigator.of(context).pop(true);
+            Navigator.of(context).pop();
           },
           leading: const Icon(Icons.copy),
           title: const Text('Copy'),
@@ -613,6 +613,18 @@ class _TabManagerPageState extends State<TabManagerPage> {
           },
           leading: const Icon(Icons.close, color: Colors.red),
           title: const Text('Remove'),
+        ),
+        const SizedBox(height: 20),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () {
+            Navigator.of(context).pop();
+          },
+          leading: const Icon(Icons.cancel_outlined),
+          title: const Text('Close'),
         ),
         const SizedBox(height: 10),
         // TODO more stuff?
