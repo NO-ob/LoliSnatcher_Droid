@@ -142,7 +142,8 @@ class HydrusHandler extends BooruHandler {
                 thumbnailURL:
                     "${booru.baseURL}/get_files/thumbnail?file_id=${parsedResponse['metadata'][i]['file_id']}&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                 tagsList: tagList,
-                postURL: '',
+                postURL:
+                    "${booru.baseURL}/get_files/file_metadata?file_ids=[${parsedResponse['metadata'][i]['file_id']}]&Hydrus-Client-API-Access-Key=${booru.apiKey}",
                 fileExt: parsedResponse['metadata'][i]['ext'].toString().substring(1),
                 fileWidth: parsedResponse['metadata'][i]['width'].toDouble(),
                 fileHeight: parsedResponse['metadata'][i]['height'].toDouble(),
@@ -155,9 +156,7 @@ class HydrusHandler extends BooruHandler {
             }
           }
 
-          final int lengthBefore = fetched.length;
-          fetched.addAll(newItems);
-          unawaited(setMultipleTrackedValues(lengthBefore, fetched.length));
+          await afterParseResponse(newItems);
           return fetched;
         } else {
           Logger.Inst().log('Getting metadata failed', 'HydrusHandler', 'getResultsPage', LogTypes.booruHandlerInfo);
@@ -310,10 +309,5 @@ class HydrusHandler extends BooruHandler {
       default:
         return -1;
     }
-  }
-
-  @override
-  String makeTagURL(String input) {
-    return '${booru.baseURL}/index.php?page=dapi&s=tag&q=index&name_pattern=$input%&limit=10';
   }
 }

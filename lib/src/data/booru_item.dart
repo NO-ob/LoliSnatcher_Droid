@@ -149,6 +149,7 @@ class BooruItem {
       sampleURL: row['sampleURL'].toString(),
       thumbnailURL: row['thumbnailURL'].toString(),
       // use custom separator to avoid conflicts with tags containing commas
+      fileExt: row['fileURL'].toString().contains('Hydrus-Client-API') ? 'extra' : null,
       tagsList: tags,
       postURL: row['postURL'].toString(),
     );
@@ -215,6 +216,9 @@ enum MediaType {
 
       case 'apng':
         return MediaType.notSupportedAnimation;
+
+      case 'extra':
+        return MediaType.needsExtraRequest;
 
       default:
         return MediaType.unknown;
