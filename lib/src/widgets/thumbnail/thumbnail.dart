@@ -46,6 +46,8 @@ class _ThumbnailState extends State<Thumbnail> {
   String? errorCode;
   CancelToken? cancelToken;
 
+  Timer? debounceLoading;
+
   bool? isThumbQuality;
   late String thumbURL;
   late String thumbFolder;
@@ -203,10 +205,9 @@ class _ThumbnailState extends State<Thumbnail> {
     thumbFolder = isThumbQuality == true ? 'thumbnails' : 'samples';
 
     // delay loading a little to improve performance when scrolling fast, ignore delay if it's a standalone widget (i.e. not in a list)
-    Debounce.debounce(
-      tag: 'thumbnail_start_${widget.item.hashCode}',
-      callback: startDownloading,
-      duration: Duration(milliseconds: widget.isStandalone ? 200 : 0),
+    debounceLoading = Timer(
+      Duration(milliseconds: widget.isStandalone ? 200 : 0),
+      startDownloading,
     );
     return;
   }
@@ -338,7 +339,7 @@ class _ThumbnailState extends State<Thumbnail> {
       extraProvider = null;
     }
 
-    Debounce.cancel('thumbnail_start_${widget.item.hashCode}');
+    debounceLoading?.cancel();
     Debounce.cancel('thumbnail_reload_${widget.item.hashCode}');
   }
 
