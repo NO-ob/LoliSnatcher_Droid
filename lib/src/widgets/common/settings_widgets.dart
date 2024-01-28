@@ -615,7 +615,7 @@ class SettingsDialog extends StatelessWidget {
     this.titlePadding,
     this.contentPadding = const EdgeInsets.fromLTRB(16, 20, 16, 16),
     this.buttonPadding,
-    this.insetPadding = const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
+    this.insetPadding = const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     this.borderRadius,
     this.backgroundColor,
     this.surfaceTintColor,
