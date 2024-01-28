@@ -96,8 +96,9 @@ class _DatabasePageState extends State<DatabasePage> {
     final List<Booru> sankakuBoorus = [];
 
     for (int i = 0; i < settingsHandler.booruList.length; i++) {
-      if (settingsHandler.booruList[i].baseURL == 'https://capi-v2.sankakucomplex.com' ||
-          settingsHandler.booruList[i].baseURL == 'https://iapi.sankakucomplex.com') {
+      if (settingsHandler.booruList[i].baseURL == 'https://capi-v2.sankakucomplex.com') {
+        // TODO add support for idol (if possible, it seems that idol uses old api which doesn't allow what sankaku does)
+        // || settingsHandler.booruList[i].baseURL == 'https://iapi.sankakucomplex.com'
         sankakuBoorus.add(settingsHandler.booruList[i]);
       }
     }
@@ -615,17 +616,17 @@ class _DatabasePageState extends State<DatabasePage> {
                         ignoring: isUpdating,
                         child: Column(
                           children: [
-                            SettingsDropdown<BooruType?>(
-                              value: sankakuType,
-                              items: getSankakuBoorus().map((e) => e.type).toList(),
-                              itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
-                              onChanged: (BooruType? newValue) {
-                                setState(() {
-                                  sankakuType = newValue;
-                                });
-                              },
-                              title: 'Sankaku type to update',
-                            ),
+                            // SettingsDropdown<BooruType?>(
+                            //   value: sankakuType,
+                            //   items: getSankakuBoorus().map((e) => e.type).toList(),
+                            //   itemTitleBuilder: (BooruType? item) => item?.alias ?? '',
+                            //   onChanged: (BooruType? newValue) {
+                            //     setState(() {
+                            //       sankakuType = newValue;
+                            //     });
+                            //   },
+                            //   title: 'Sankaku type to update',
+                            // ),
                             SettingsTextInput(
                               controller: sankakuSearchController,
                               clearable: true,
