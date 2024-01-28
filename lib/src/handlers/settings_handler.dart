@@ -70,6 +70,7 @@ class SettingsHandler extends GetxController {
   String prefBooru = '';
   String previewDisplay = 'Square';
   String galleryMode = 'Full Res';
+  String snatchMode = 'Full Res';
   String shareAction = 'Ask';
   Rx<AppMode> appMode = AppMode.defaultValue.obs;
   Rx<HandSide> handSide = HandSide.defaultValue.obs;
@@ -148,6 +149,9 @@ class SettingsHandler extends GetxController {
   bool downloadNotifications = true;
   bool allowRotation = false;
   bool enableHeroTransitions = true;
+  bool hideNotes = false;
+  bool startVideosMuted = false;
+  bool snatchOnFavourite = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -236,6 +240,11 @@ class SettingsHandler extends GetxController {
       'options': <String>['Stream', 'Cache', 'Stream+Cache'],
     },
     'galleryMode': {
+      'type': 'stringFromList',
+      'default': 'Full Res',
+      'options': <String>['Sample', 'Full Res'],
+    },
+    'snatchMode': {
       'type': 'stringFromList',
       'default': 'Full Res',
       'options': <String>['Sample', 'Full Res'],
@@ -467,6 +476,18 @@ class SettingsHandler extends GetxController {
     'enableHeroTransitions': {
       'type': 'bool',
       'default': true,
+    },
+    'hideNotes': {
+      'type': 'bool',
+      'default': false,
+    },
+    'startVideosMuted': {
+      'type': 'bool',
+      'default': false,
+    },
+    'snatchOnFavourite': {
+      'type': 'bool',
+      'default': false,
     },
 
     // other
@@ -811,6 +832,8 @@ class SettingsHandler extends GetxController {
         return previewDisplay;
       case 'galleryMode':
         return galleryMode;
+      case 'snatchMode':
+        return snatchMode;
       case 'shareAction':
         return shareAction;
       case 'limit':
@@ -914,6 +937,12 @@ class SettingsHandler extends GetxController {
         return allowRotation;
       case 'enableHeroTransitions':
         return enableHeroTransitions;
+      case 'hideNotes':
+        return hideNotes;
+      case 'startVideosMuted':
+        return startVideosMuted;
+      case 'snatchOnFavourite':
+        return snatchOnFavourite;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -956,6 +985,9 @@ class SettingsHandler extends GetxController {
         break;
       case 'galleryMode':
         galleryMode = validatedValue;
+        break;
+      case 'snatchMode':
+        snatchMode = validatedValue;
         break;
       case 'shareAction':
         shareAction = validatedValue;
@@ -1106,6 +1138,15 @@ class SettingsHandler extends GetxController {
       case 'enableHeroTransitions':
         enableHeroTransitions = validatedValue;
         break;
+      case 'hideNotes':
+        hideNotes = validatedValue;
+        break;
+      case 'startVideosMuted':
+        startVideosMuted = validatedValue;
+        break;
+      case 'snatchOnFavourite':
+        snatchOnFavourite = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1153,6 +1194,7 @@ class SettingsHandler extends GetxController {
       'videoCacheMode': validateValue('videoCacheMode', null, toJSON: true),
       'previewDisplay': validateValue('previewDisplay', null, toJSON: true),
       'galleryMode': validateValue('galleryMode', null, toJSON: true),
+      'snatchMode': validateValue('snatchMode', null, toJSON: true),
       'shareAction': validateValue('shareAction', null, toJSON: true),
       'limit': validateValue('limit', null, toJSON: true),
       'portraitColumns': validateValue('portraitColumns', null, toJSON: true),
@@ -1194,6 +1236,9 @@ class SettingsHandler extends GetxController {
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
       'allowRotation': validateValue('allowRotation', null, toJSON: true),
       'enableHeroTransitions': validateValue('enableHeroTransitions', null, toJSON: true),
+      'hideNotes': validateValue('hideNotes', null, toJSON: true),
+      'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
+      'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),

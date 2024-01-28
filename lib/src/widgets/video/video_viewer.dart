@@ -409,7 +409,6 @@ class VideoViewerState extends State<VideoViewer> {
       );
     }
     // mixWithOthers: true, allows to not interrupt audio sources from other apps
-    await Future.wait([videoController!.initialize()]);
     videoController!.addListener(updateVideoState);
 
     final Color accentColor = Theme.of(context).colorScheme.secondary;
@@ -457,6 +456,12 @@ class VideoViewerState extends State<VideoViewer> {
       //     DeviceOrientation.portraitDown,
       // ],
     );
+
+    if (settingsHandler.startVideosMuted) {
+      await chewieController!.setVolume(0);
+    }
+
+    await Future.wait([videoController!.initialize()]);
 
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();

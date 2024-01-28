@@ -27,8 +27,8 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController snatchCooldownController = TextEditingController();
   final TextEditingController cacheSizeController = TextEditingController();
 
-  late String videoCacheMode, extPathOverride;
-  bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true;
+  late String videoCacheMode, extPathOverride, snatchMode;
+  bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true, snatchOnFavourite = false;
 
   static const List<_CacheType> cacheTypes = [
     _CacheType('Total', null),
@@ -53,6 +53,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     mediaCache = settingsHandler.mediaCache;
     videoCacheMode = settingsHandler.videoCacheMode;
     extPathOverride = settingsHandler.extPathOverride;
+    snatchMode = settingsHandler.snatchMode;
     jsonWrite = settingsHandler.jsonWrite;
     cacheDuration = settingsHandler.cacheDuration;
     cacheDurationSelected = settingsHandler.map['cacheDuration']!['options']!.firstWhere((dur) {
@@ -60,6 +61,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     });
     cacheSizeController.text = settingsHandler.cacheSize.toString();
     downloadNotifications = settingsHandler.downloadNotifications;
+    snatchOnFavourite = settingsHandler.snatchOnFavourite;
 
     getCacheStats(null);
   }
@@ -124,7 +126,9 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.cacheDuration = cacheDuration;
     settingsHandler.cacheSize = int.parse(cacheSizeController.text);
     settingsHandler.extPathOverride = extPathOverride;
+    settingsHandler.snatchMode = snatchMode;
     settingsHandler.downloadNotifications = downloadNotifications;
+    settingsHandler.snatchOnFavourite = snatchOnFavourite;
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
       Navigator.of(context).pop();
@@ -198,6 +202,16 @@ class _SaveCachePageState extends State<SaveCachePage> {
         body: Center(
           child: ListView(
             children: [
+              SettingsDropdown(
+                value: snatchMode,
+                items: settingsHandler.map['snatchMode']!['options'],
+                onChanged: (String? newValue) {
+                  setState(() {
+                    snatchMode = newValue ?? settingsHandler.map['snatchMode']!['default'];
+                  });
+                },
+                title: 'Snatch Quality',
+              ),
               SettingsTextInput(
                 controller: snatchCooldownController,
                 title: 'Snatch Cooldown (ms)',
@@ -230,6 +244,15 @@ class _SaveCachePageState extends State<SaveCachePage> {
                   });
                 },
                 title: 'Show Download Notifications',
+              ),
+              SettingsToggle(
+                value: snatchOnFavourite,
+                onChanged: (newValue) {
+                  setState(() {
+                    snatchOnFavourite = newValue;
+                  });
+                },
+                title: 'Snatch items on Favouriting',
               ),
               SettingsToggle(
                 value: jsonWrite,

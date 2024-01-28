@@ -399,7 +399,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
     videoController = Player(id: searchHandler.getItemIndex(widget.booruItem));
     videoController!.setUserAgent(Tools.browserUserAgent);
-    videoController!.setVolume(viewerHandler.videoVolume);
+    videoController!.setVolume(settingsHandler.startVideosMuted ? 0 : 1);
     // videoController!.open(
     //   media!,
     //   autoStart: settingsHandler.autoPlayEnabled,
@@ -417,7 +417,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     });
 
     videoController!.generalStream.listen((GeneralState state) {
-      viewerHandler.videoVolume = state.volume;
+      //
     });
 
     videoController!.errorStream.listen((String error) {

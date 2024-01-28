@@ -18,6 +18,7 @@ import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 
@@ -398,8 +399,19 @@ class SearchHandler extends GetxController {
         ServiceHandler.vibrate();
       }
 
-      item.isFavourite.value = forcedValue ?? (item.isFavourite.value == true ? false : true);
-      await SettingsHandler.instance.dbHandler.updateBooruItem(
+      final bool newValue = forcedValue ?? (item.isFavourite.value == true ? false : true);
+      item.isFavourite.value = newValue;
+
+      final SettingsHandler settingsHandler = SettingsHandler.instance;
+      if (settingsHandler.snatchOnFavourite && newValue && item.isSnatched.value != true) {
+        SnatchHandler.instance.queue(
+          [item],
+          currentBooru,
+          settingsHandler.snatchCooldown,
+          false,
+        );
+      }
+      await settingsHandler.dbHandler.updateBooruItem(
         item,
         BooruUpdateMode.local,
       );

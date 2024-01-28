@@ -180,16 +180,12 @@ class SnatchHandler extends GetxController {
       if (booruItems.length > 1) {
         if (SettingsHandler.instance.downloadNotifications) {
           FlashElements.showSnackbar(
-            title: const Text('Added to snatch queue', style: TextStyle(fontSize: 20)),
+            title: Text(
+              'Added ${booruItems.length} items to snatch queue',
+              style: const TextStyle(fontSize: 20),
+            ),
             position: Positions.top,
             duration: const Duration(seconds: 2),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Amount: ${booruItems.length}'),
-                Text('Position: ${queuedList.length}'),
-              ],
-            ),
             leadingIcon: Icons.info_outline,
             sideColor: Colors.green,
           );
@@ -197,15 +193,12 @@ class SnatchHandler extends GetxController {
       } else {
         if (SettingsHandler.instance.downloadNotifications) {
           FlashElements.showSnackbar(
-            title: const Text('Added to snatch queue', style: TextStyle(fontSize: 20)),
+            title: const Text(
+              'Added item to snatch queue',
+              style: TextStyle(fontSize: 20),
+            ),
             position: Positions.top,
             duration: const Duration(seconds: 2),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Position: ${queuedList.length}'),
-              ],
-            ),
             leadingIcon: Icons.info_outline,
             sideColor: Colors.green,
           );

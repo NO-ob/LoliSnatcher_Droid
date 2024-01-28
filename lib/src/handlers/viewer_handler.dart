@@ -158,7 +158,7 @@ class ViewerHandler extends GetxController {
   }
 
   void setLoaded(Key? key, bool value) {
-    if (key == null || currentKey.value != key) {
+    if (key == null || currentKey.value != key || isLoaded.value == value) {
       return;
     }
 
@@ -168,7 +168,6 @@ class ViewerHandler extends GetxController {
   // Related to videos
   // TODO check if mute is forced when there are two videos in a row and you mute on the first video and then go to the second video
   bool videoAutoMute = false; // hold volume button in VideoViewer to mute videos globally
-  double videoVolume = 1;
 
   // ViewerHandler() {
   //   // debug: print keys list changes

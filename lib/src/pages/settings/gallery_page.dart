@@ -15,6 +15,8 @@ class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
   bool autoHideImageBar = false,
       autoPlay = true,
+      startVideosMuted = false,
+      hideNotes = false,
       allowRotation = false,
       loadingGif = false,
       useVolumeButtonsForScroll = false,
@@ -48,6 +50,8 @@ class _GalleryPageState extends State<GalleryPage> {
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
     autoPlay = settingsHandler.autoPlayEnabled;
+    startVideosMuted = settingsHandler.startVideosMuted;
+    hideNotes = settingsHandler.hideNotes;
     allowRotation = settingsHandler.allowRotation;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
     scrollSpeedController.text = settingsHandler.volumeButtonsScrollSpeed.toString();
@@ -75,6 +79,8 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
     settingsHandler.changePageButtonsPosition = changePageButtonsPosition;
     settingsHandler.autoPlayEnabled = autoPlay;
+    settingsHandler.startVideosMuted = startVideosMuted;
+    settingsHandler.hideNotes = hideNotes;
     settingsHandler.allowRotation = allowRotation;
     settingsHandler.loadingGif = loadingGif;
     settingsHandler.shitDevice = shitDevice;
@@ -259,6 +265,15 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Auto Hide Gallery Bar',
               ),
               SettingsToggle(
+                value: hideNotes,
+                onChanged: (newValue) {
+                  setState(() {
+                    hideNotes = newValue;
+                  });
+                },
+                title: 'Hide translation notes by default',
+              ),
+              SettingsToggle(
                 value: allowRotation,
                 onChanged: (newValue) {
                   setState(() {
@@ -368,7 +383,16 @@ class _GalleryPageState extends State<GalleryPage> {
                     autoPlay = newValue;
                   });
                 },
-                title: 'Video Auto Play',
+                title: 'Auto play videos',
+              ),
+              SettingsToggle(
+                value: startVideosMuted,
+                onChanged: (newValue) {
+                  setState(() {
+                    startVideosMuted = newValue;
+                  });
+                },
+                title: 'Start videos muted',
               ),
 
               // TODO rework into loading element variant (small, verbose, gif...)

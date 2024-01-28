@@ -58,9 +58,11 @@ class ImageWriter {
         ...await Tools.getFileCustomHeaders(booru, checkForReferer: true),
       };
 
+      final String url = ((settingsHandler.snatchMode == 'Sample' && item.sampleURL.isNotEmpty) ? item.sampleURL : item.fileURL);
+
       if (Platform.isAndroid && settingsHandler.extPathOverride.isNotEmpty) {
         await DioNetwork.downloadCustom(
-          item.fileURL,
+          url,
           '${path!}/',
           fileNameWoutExt,
           item.fileExt!,
@@ -74,7 +76,7 @@ class ImageWriter {
         );
       } else {
         await DioNetwork.download(
-          item.fileURL,
+          url,
           '${path!}/$fileName',
           options: Options(
             responseType: ResponseType.bytes,

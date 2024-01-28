@@ -215,6 +215,7 @@ class _WaterfallViewState extends State<WaterfallView> {
     if (isMobile) {
       kbFocusNode.unfocus();
       viewerHandler.inViewer.value = true;
+      viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
       await Navigator.of(context).push(
         PageRouteBuilder(
@@ -229,6 +230,9 @@ class _WaterfallViewState extends State<WaterfallView> {
           },
         ),
       );
+
+      viewerHandler.inViewer.value = false;
+      viewerHandler.showNotes.value = !settingsHandler.hideNotes;
 
       viewerCallback();
     } else {
