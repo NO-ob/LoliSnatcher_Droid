@@ -323,14 +323,14 @@ class _TabManagerPageState extends State<TabManagerPage> {
     if (sortTabs != null) {
       filteredTabs.sort(
         (a, b) {
-          final cleanA = a.tags.toLowerCase();
-          final cleanB = b.tags.toLowerCase();
+          final cleanAtags = a.tags.toLowerCase().trim();
+          final cleanBtags = b.tags.toLowerCase().trim();
 
-          if (cleanA != cleanB) {
+          if (cleanAtags != cleanBtags) {
             if (sortTabs == true) {
-              return cleanA.compareTo(cleanB);
+              return cleanAtags.compareTo(cleanBtags);
             } else {
-              return cleanB.compareTo(cleanA);
+              return cleanBtags.compareTo(cleanAtags);
             }
           } else {
             return searchHandler.list.indexOf(a).compareTo(searchHandler.list.indexOf(b));
