@@ -72,6 +72,9 @@ class _NotesRendererState extends State<NotesRenderer> {
       this.item = item;
       notesMap.clear();
       updateState();
+      if (cancelToken != null && !cancelToken!.isCancelled) {
+        cancelToken!.cancel();
+      }
       loadNotes();
     });
 
@@ -110,6 +113,7 @@ class _NotesRendererState extends State<NotesRenderer> {
       return;
     }
     loading = true;
+    updateState();
 
     if (cancelToken != null && !cancelToken!.isCancelled) {
       cancelToken!.cancel();
@@ -217,23 +221,32 @@ class _NotesRendererState extends State<NotesRenderer> {
                     Positioned(
                       left: 60,
                       top: kToolbarHeight * 1.5,
-                      child: SizedBox(
-                        width: 30,
-                        height: 30,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            const RepaintBoundary(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
+                      child: GestureDetector(
+                        onTap: () async {
+                          if (cancelToken != null && !cancelToken!.isCancelled) {
+                            cancelToken!.cancel();
+                          }
+                          await Future.delayed(const Duration(milliseconds: 100));
+                          await loadNotes();
+                        },
+                        child: SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              const RepaintBoundary(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
-                            ),
-                            Icon(
-                              Icons.note_add,
-                              size: 18,
-                              color: Theme.of(context).colorScheme.secondary,
-                            ),
-                          ],
+                              Icon(
+                                Icons.note_add,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     )

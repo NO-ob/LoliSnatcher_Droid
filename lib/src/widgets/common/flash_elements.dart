@@ -130,6 +130,8 @@ class FlashElements {
                         ),
                       ),
                   shouldIconPulse: shouldLeadingPulse,
+                  primaryAction: primaryActionBuilder != null ? primaryActionBuilder(controller) : _defaultPrimaryAction(themeData, controller),
+                  actions: actionsBuilder != null ? actionsBuilder(controller) : null,
                 ),
               ),
             ),
@@ -210,12 +212,7 @@ class FlashElements {
                       ),
                     ),
                 shouldIconPulse: shouldLeadingPulse,
-                primaryAction: primaryActionBuilder != null
-                    ? primaryActionBuilder(controller)
-                    : IconButton(
-                        onPressed: () => controller.dismiss(),
-                        icon: Icon(Icons.close, color: themeData.colorScheme.onBackground),
-                      ),
+                primaryAction: primaryActionBuilder != null ? primaryActionBuilder(controller) : _defaultPrimaryAction(themeData, controller),
                 actions: actionsBuilder != null ? actionsBuilder(controller) : null,
               ),
             ),
@@ -224,4 +221,26 @@ class FlashElements {
       },
     );
   }
+}
+
+Widget _defaultPrimaryAction(
+  ThemeData themeData,
+  FlashController controller,
+) {
+  return Align(
+    alignment: Alignment.topRight,
+    child: Padding(
+      padding: const EdgeInsets.only(
+        top: 8,
+        right: 8,
+      ),
+      child: IconButton(
+        onPressed: () => controller.dismiss(),
+        icon: Icon(
+          Icons.close,
+          color: themeData.colorScheme.onBackground,
+        ),
+      ),
+    ),
+  );
 }

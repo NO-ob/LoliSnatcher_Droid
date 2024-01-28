@@ -270,19 +270,19 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                           });
                         },
                         onPageChanged: (int index) {
-                          // rehide system ui on every page change
                           ServiceHandler.disableSleep();
 
                           searchHandler.setViewedItem(index);
                           kbFocusNode.requestFocus();
 
-                          viewerHandler.setCurrent(searchHandler.currentFetched[index].key);
+                          final item = searchHandler.currentFetched[index];
+
+                          viewerHandler.setCurrent(item.key);
 
                           // enable volume buttons if new page is a video AND appbar is visible
-                          final bool isVideo = searchHandler.currentFetched[index].mediaType.value.isVideo;
+                          final bool isVideo = item.mediaType.value.isVideo;
                           final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && viewerHandler.displayAppbar.value);
                           ServiceHandler.setVolumeButtons(isVolumeAllowed);
-                          // print('Page changed ' + index.toString());
                         },
                       );
                     }),

@@ -489,6 +489,10 @@ abstract class BooruHandler {
     return DioNetwork.get(
       uri.toString(),
       headers: headers,
+      options: Options(
+        sendTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ),
       cancelToken: cancelToken,
     );
   }
