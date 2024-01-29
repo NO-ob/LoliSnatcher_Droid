@@ -781,7 +781,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
               ],
             ),
             const SizedBox(height: 6),
-            const Text('Long press on the sort button to save the current tabs order'),
+            const Text('Long press on the sort button to save tabs in the current order'),
             const Divider(),
             const Text('Select:'),
             const SizedBox(height: 6),
@@ -830,8 +830,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
             const Text('"Loaded" - show tabs which have loaded items'),
             const Text('"Not loaded" - show tabs which are not loaded and/or have zero items'),
             RichText(
-              text: const TextSpan(
-                children: [
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
+                children: const [
                   TextSpan(text: 'Not loaded tabs have '),
                   TextSpan(
                     text: 'italic',
