@@ -50,33 +50,25 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
         SizedBox(width: double.maxFinite, child: widget.row),
         //
         const SizedBox(height: 10),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-          ),
-          onTap: () async {
+        ElevatedButton.icon(
+          onPressed: () async {
             searchHandler.moveTab(widget.index, 0);
             Navigator.of(context).pop(true);
             Navigator.of(context).pop(true);
           },
-          leading: const Icon(Icons.vertical_align_top),
-          title: const Text('Move To Top'),
+          icon: const Icon(Icons.vertical_align_top),
+          label: const Text('Move To Top'),
         ),
         //
         const SizedBox(height: 10),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-          ),
-          onTap: () async {
+        ElevatedButton.icon(
+          onPressed: () async {
             searchHandler.moveTab(widget.index, searchHandler.total - 1);
             Navigator.of(context).pop(true);
             Navigator.of(context).pop(true);
           },
-          leading: const Icon(Icons.vertical_align_bottom),
-          title: const Text('Move To Bottom'),
+          icon: const Icon(Icons.vertical_align_bottom),
+          label: const Text('Move To Bottom'),
         ),
         //
         const SizedBox(height: 30),
@@ -95,41 +87,38 @@ class _TabMoveDialogState extends State<TabMoveDialog> {
             setState(() {});
           },
         ),
-        ListTile(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5),
-            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
-          ),
-          enabled: controllerNumber != null && controllerNumber != widget.index + 1,
-          onTap: () async {
-            final int? enteredIndex = int.tryParse(indexController.text);
-            if (enteredIndex == null || (enteredIndex < 1 || enteredIndex > searchHandler.total)) {
-              return await FlashElements.showSnackbar(
-                title: const Text('Invalid Tab Number'),
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (enteredIndex == null)
-                      const Text('Invalid Input')
-                    else if (enteredIndex < 1 || enteredIndex > searchHandler.total)
-                      const Text('Out of range'),
-                    //
-                    const SizedBox(height: 10),
-                    const Text('Please enter a valid tab number'),
-                  ],
-                ),
-              );
-            } else {
-              searchHandler.moveTab(widget.index, enteredIndex - 1);
+        ElevatedButton.icon(
+          onPressed: (controllerNumber != null && controllerNumber != widget.index + 1)
+              ? () async {
+                  final int? enteredIndex = int.tryParse(indexController.text);
+                  if (enteredIndex == null || (enteredIndex < 1 || enteredIndex > searchHandler.total)) {
+                    return await FlashElements.showSnackbar(
+                      title: const Text('Invalid Tab Number'),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (enteredIndex == null)
+                            const Text('Invalid Input')
+                          else if (enteredIndex < 1 || enteredIndex > searchHandler.total)
+                            const Text('Out of range'),
+                          //
+                          const SizedBox(height: 10),
+                          const Text('Please enter a valid tab number'),
+                        ],
+                      ),
+                    );
+                  } else {
+                    searchHandler.moveTab(widget.index, enteredIndex - 1);
 
-              // close move dialog
-              Navigator.of(context).pop(true);
-              // close tab options dialog
-              Navigator.of(context).pop(true);
-            }
-          },
-          leading: const Icon(Icons.vertical_align_center),
-          title: Text('Move To #${controllerNumber?.toFormattedString() ?? '?'}'),
+                    // close move dialog
+                    Navigator.of(context).pop(true);
+                    // close tab options dialog
+                    Navigator.of(context).pop(true);
+                  }
+                }
+              : null,
+          icon: const Icon(Icons.vertical_align_center),
+          label: Text('Move To #${controllerNumber?.toFormattedString() ?? '?'}'),
         ),
         //
         const SizedBox(height: 20),
