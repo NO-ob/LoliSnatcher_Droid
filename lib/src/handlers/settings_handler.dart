@@ -1527,11 +1527,14 @@ class SettingsHandler extends GetxController {
     'has_audio',
     'voice_acted',
   ];
+
   static const List<String> aiTags = [
-    'ai_generated',
-    'ai-generated',
+    'ai_assisted',
+    'ai-assisted',
     'ai_created',
     'ai-created',
+    'ai_generated',
+    'ai-generated',
     'novelai',
     'stable_diffusion',
     'stable-diffusion',
