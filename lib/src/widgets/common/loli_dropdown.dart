@@ -534,6 +534,8 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
 
   @override
   Widget build(BuildContext context) {
+    final isAllSelected = value.length == widget.items.length;
+
     List<Widget> actions = [
       const CancelButton(withIcon: true),
       ClearButton(
@@ -542,6 +544,23 @@ class _LoliMultiselectDropdownBottomSheetState<T> extends State<LoliMultiselectD
           value.clear();
           setState(() {});
         },
+      ),
+      ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        onPressed: isAllSelected
+            ? null
+            : () {
+                value.clear();
+                value.addAll(widget.items);
+                setState(() {});
+              },
+        icon: const Icon(Icons.select_all),
+        label: const Text('Select all'),
       ),
       ConfirmButton(
         text: 'OK ${value.isEmpty ? '' : '(${value.length})'.trim()}',
