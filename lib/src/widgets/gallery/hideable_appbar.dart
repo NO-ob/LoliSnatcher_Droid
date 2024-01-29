@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -138,7 +139,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
     // TODO check if item is loaded
     if (viewedIndex < (searchHandler.currentFetched.length - 1)) {
       if (isImage && autoScroll) {
-        // print("autoscrolling");
         widget.pageController.jumpToPage(viewedIndex + 1);
       }
     } else {
@@ -178,9 +178,8 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final List<Widget> actions = [];
     List<List<String>> overFlowList = [];
     List<List<String>> buttonList = [];
-    // first 4 buttons will show on toolbar
-    final int listSplit = (MediaQuery.of(context).size.width / 100).floor();
-    // print(MediaQuery.of(context).size.width);
+    // at least first 4 buttons will show on toolbar
+    final int listSplit = max(4, (MediaQuery.of(context).size.width / 100).floor());
     if (listSplit < filteredButtonOrder.length) {
       overFlowList = filteredButtonOrder.sublist(listSplit);
       buttonList = filteredButtonOrder.sublist(0, listSplit);
