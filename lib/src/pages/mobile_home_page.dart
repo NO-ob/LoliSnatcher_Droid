@@ -584,12 +584,14 @@ class DownloadsDrawer extends StatelessWidget {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
+                                            if (snatchHandler.total.value == 0)
+                                              const CircularProgressIndicator()
+                                            else
                                             Text(
-                                              snatchHandler.total.value == 0
-                                                  ? '...%'
-                                                  : '${((snatchHandler.received.value / snatchHandler.total.value) * 100.0).toStringAsFixed(2)}%',
+                                                '${((snatchHandler.received.value / snatchHandler.total.value) * 100.0).toStringAsFixed(2)}%',
                                               style: const TextStyle(fontSize: 16),
                                             ),
+                                            //
                                             Text(
                                               snatchHandler.total.value == 0
                                                   ? ''
