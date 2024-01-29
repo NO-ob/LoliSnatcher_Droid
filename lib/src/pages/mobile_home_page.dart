@@ -164,9 +164,23 @@ class _MobileHomeState extends State<MobileHome> {
               );
             }),
             IconButton(
-              icon: Icon(
-                Icons.save,
-                color: Theme.of(context).appBarTheme.iconTheme?.color,
+              icon: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.save,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Icon(
+                      Icons.keyboard_double_arrow_left_rounded,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
+                  ),
+                ],
               ),
               onPressed: () async {
                 _toggleDrawer(direction);
@@ -174,7 +188,7 @@ class _MobileHomeState extends State<MobileHome> {
             ),
             if (searchHandler.currentTab.selected.isNotEmpty)
               Positioned(
-                right: -0,
+                right: -6,
                 top: 8,
                 child: IgnorePointer(
                   child: Container(
@@ -587,10 +601,10 @@ class DownloadsDrawer extends StatelessWidget {
                                             if (snatchHandler.total.value == 0)
                                               const CircularProgressIndicator()
                                             else
-                                            Text(
+                                              Text(
                                                 '${((snatchHandler.received.value / snatchHandler.total.value) * 100.0).toStringAsFixed(2)}%',
-                                              style: const TextStyle(fontSize: 16),
-                                            ),
+                                                style: const TextStyle(fontSize: 16),
+                                              ),
                                             //
                                             Text(
                                               snatchHandler.total.value == 0
