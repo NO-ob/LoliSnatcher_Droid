@@ -390,11 +390,9 @@ class _HistoryListState extends State<HistoryList> {
               onChanged: (String? input) {
                 getHistory();
               },
-              title: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
-              hintText: "Filter Search History (${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'})",
+              title: 'Filter Search History',
               inputType: TextInputType.text,
               clearable: true,
-              forceLabelOnTop: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
           ),
@@ -403,12 +401,21 @@ class _HistoryListState extends State<HistoryList> {
               icon: Stack(
                 alignment: Alignment.center,
                 children: [
-                  const Icon(Icons.favorite, size: 40, color: Colors.red),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
+                  const Center(
                     child: Icon(
-                      showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
-                      color: showFavourites ? Colors.white : Colors.white60,
+                      Icons.favorite,
+                      size: 40,
+                      color: Colors.red,
+                    ),
+                  ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Icon(
+                        showFavourites ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
+                        color: showFavourites ? Colors.white : Colors.white60,
+                        size: 22,
+                      ),
                     ),
                   ),
                 ],
@@ -579,7 +586,21 @@ class _HistoryListState extends State<HistoryList> {
   @override
   Widget build(BuildContext context) {
     return SettingsPageDialog(
-      title: const Text('Search History'),
+      title: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Search History'),
+          Text(
+            '${filterSearchController.text.isEmpty ? history.length : '${filteredHistory.length}/${history.length}'}',
+            style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                ),
+          ),
+        ],
+      ),
       content: Column(
         children: [
           filterBuild(),
