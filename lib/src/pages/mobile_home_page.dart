@@ -164,27 +164,23 @@ class _MobileHomeState extends State<MobileHome> {
               );
             }),
             IconButton(
-              icon: Stack(
-                children: [
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Icon(
-                      Icons.save,
-                      color: Theme.of(context).appBarTheme.iconTheme?.color,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Icon(
-                      Icons.keyboard_double_arrow_left_rounded,
-                      color: Theme.of(context).appBarTheme.iconTheme?.color,
-                    ),
-                  ),
-                ],
-              ),
               onPressed: () async {
                 _toggleDrawer(direction);
               },
+              padding: EdgeInsets.zero,
+              icon: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Icon(
+                    Icons.keyboard_double_arrow_left_rounded,
+                    color: Theme.of(context).appBarTheme.iconTheme?.color,
+                  ),
+                  Icon(
+                    Icons.save,
+                    color: Theme.of(context).appBarTheme.iconTheme?.color,
+                  ),
+                ],
+              ),
             ),
             if (searchHandler.currentTab.selected.isNotEmpty)
               Positioned(
