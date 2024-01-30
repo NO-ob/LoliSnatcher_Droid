@@ -296,11 +296,11 @@ class VideoViewerState extends State<VideoViewer> {
   void disposables() {
     videoController?.setVolume(0);
     videoController?.pause();
-    chewieController?.dispose();
     videoController?.removeListener(updateVideoState);
     videoController?.dispose();
-    chewieController = null;
+    chewieController?.dispose();
     videoController = null;
+    chewieController = null;
 
     if (!(cancelToken != null && cancelToken!.isCancelled)) {
       cancelToken?.cancel();
