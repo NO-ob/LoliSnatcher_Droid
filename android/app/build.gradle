@@ -93,6 +93,14 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation 'androidx.documentfile:documentfile:1.0.1'
+    // force older exoplayer version to fix playback issues for some users on older/weaker devices
+    // TODO may cause issues in the future and we will be forced to update it
+    implementation('com.google.android.exoplayer:exoplayer') {
+        version { strictly '2.18.1' }
+    }
+    implementation('com.google.android.exoplayer:exoplayer-core') {
+        version { strictly '2.18.1' }
+    }
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
