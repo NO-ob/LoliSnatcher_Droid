@@ -18,6 +18,11 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   List parseListFromResponse(dynamic response) {
+    if (response.data is String && (response.data as String).contains('post-premium-browsing_error')) {
+      // after page 10 they redirect anon users to "buy premium or login" page
+      return [];
+    }
+
     final List<dynamic> parsedResponse = jsonDecode(response.data);
     return parsedResponse;
   }
@@ -128,4 +133,61 @@ class IdolSankakuHandler extends SankakuHandler {
   String makeNotesURL(String postID) {
     return '${booru.baseURL}/note/index.json?post_id=$postID';
   }
+
+  @override
+  Future<String> getAuthToken() async {
+    return '';
+  }
+
+  // attempt to crack idol's login process, idol.sankakucomplex.com works, but it doesn't carry to iapi. domain
+  // their own idol app has a login through api, but it uses appkey and password_hash, which I have no way of knowing
+  // @override
+  // Future<String> getAuthToken() async {
+  //   if (booru.userID?.isNotEmpty != true || booru.apiKey?.isNotEmpty != true) {
+  //     return '';
+  //   }
+
+  //   String? sessionCookie, authenticityToken, languageCookie;
+  //   final responseLogin = await DioNetwork.get(
+  //     'https://idol.sankakucomplex.com/users/login',
+  //     headers: {
+  //       'User-Agent': Constants.defaultBrowserUserAgent,
+  //     },
+  //     options: Options(responseType: ResponseType.plain),
+  //   );
+  //   if (responseLogin.statusCode == 200) {
+  //     sessionCookie = responseLogin.headers['set-cookie']?.map((e) => e.split(';').first).join(';');
+  //     languageCookie = responseLogin.headers['set-cookie']?.firstWhereOrNull((e) => e.contains('locale'))?.split(';').first;
+  //     if (sessionCookie != null) {
+  //       final document = parse(responseLogin.data);
+  //       authenticityToken = document.querySelector('form input[name=authenticity_token]')?.attributes['value'];
+  //     }
+  //   }
+  //   if (authenticityToken == null) {
+  //     return '';
+  //   }
+
+  //   final response = await DioNetwork.post(
+  //     'https://idol.sankakucomplex.com/${languageCookie?.split('=')[1] ?? 'en'}/users/authenticate',
+  //     headers: {
+  //       'User-Agent': Constants.defaultBrowserUserAgent,
+  //       'Cookie': '$sessionCookie;',
+  //     },
+  //     options: Options(
+  //       contentType: Headers.formUrlEncodedContentType,
+  //     ),
+  //     data: 'authenticity_token=$authenticityToken&url=&user%5Bname%5D=${booru.userID?.replaceAll('@', '%40')}&user%5Bpassword%5D=${booru.apiKey}&commit=Login',
+  //   );
+
+  //   String token = '';
+  //   if (response.statusCode == 200 || response.statusCode == 302) {
+  //     Logger.Inst().log('Sankaku idol auth token loaded', className, 'getAuthToken', LogTypes.booruHandlerInfo);
+  //     token = responseLogin.headers['set-cookie']?.map((e) => e.split(';').first).join(';') ?? '';
+  //   }
+  //   if (token == '') {
+  //     Logger.Inst().log('Sankaku auth error ${response.statusCode}', className, 'getAuthToken', LogTypes.booruHandlerInfo);
+  //   }
+
+  //   return token;
+  // }
 }
