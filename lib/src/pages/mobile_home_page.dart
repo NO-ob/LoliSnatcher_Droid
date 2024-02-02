@@ -169,7 +169,7 @@ class _MobileHomeState extends State<MobileHome> {
               },
               padding: EdgeInsets.zero,
               icon: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.keyboard_double_arrow_left_rounded,

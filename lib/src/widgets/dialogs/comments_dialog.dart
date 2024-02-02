@@ -371,8 +371,19 @@ class _CommentsHeader extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final ratio = item.fileAspectRatio ?? 16 / 9;
-        final double width = constraints.maxWidth * (ratio < 1 ? 0.4 : 0.6);
-        final double height = min(constraints.maxHeight * 0.4, width / ratio);
+        final minRatio = max(0.4, ratio);
+        final maxRatio = min(2, ratio);
+        double width = 100;
+        double height = 100;
+        if (ratio < 1) {
+          // height > width
+          height = MediaQuery.sizeOf(context).height * 0.4;
+          width = height * minRatio;
+        } else {
+          // width > height
+          width = constraints.maxWidth * 0.6;
+          height = width / maxRatio;
+        }
 
         return Padding(
           padding: const EdgeInsets.all(16),
