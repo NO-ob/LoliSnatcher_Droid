@@ -500,7 +500,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
             // tightMode: true,
             scaleStateController: scaleController,
             enableDoubleTapZoom: false,
-            enableTapDragZoom: true,
+            enableTapDragZoom: false,
             child: Stack(
               children: [
                 Thumbnail(

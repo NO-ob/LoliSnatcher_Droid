@@ -23,7 +23,8 @@ class _GalleryPageState extends State<GalleryPage> {
       shitDevice = false,
       disableVideo = false,
       wakeLockEnabled = true,
-      enableHeroTransitions = true;
+      enableHeroTransitions = true,
+      useDoubleTapDragZoom = true;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
@@ -62,6 +63,7 @@ class _GalleryPageState extends State<GalleryPage> {
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
+    useDoubleTapDragZoom = settingsHandler.useDoubleTapDragZoom;
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
@@ -88,6 +90,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     settingsHandler.enableHeroTransitions = enableHeroTransitions;
+    settingsHandler.useDoubleTapDragZoom = useDoubleTapDragZoom;
     if (int.parse(scrollSpeedController.text) < 100) {
       scrollSpeedController.text = '100';
     }
@@ -272,6 +275,15 @@ class _GalleryPageState extends State<GalleryPage> {
                   });
                 },
                 title: 'Hide translation notes by default',
+              ),
+              SettingsToggle(
+                value: useDoubleTapDragZoom,
+                onChanged: (newValue) {
+                  setState(() {
+                    useDoubleTapDragZoom = newValue;
+                  });
+                },
+                title: 'Use Double Tap-Hold-Drag zoom gesture',
               ),
               SettingsToggle(
                 value: allowRotation,

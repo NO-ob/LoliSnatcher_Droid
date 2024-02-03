@@ -152,6 +152,7 @@ class SettingsHandler extends GetxController {
   bool hideNotes = false;
   bool startVideosMuted = false;
   bool snatchOnFavourite = false;
+  bool useDoubleTapDragZoom = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -488,6 +489,10 @@ class SettingsHandler extends GetxController {
     'snatchOnFavourite': {
       'type': 'bool',
       'default': false,
+    },
+    'useDoubleTapDragZoom': {
+      'type': 'bool',
+      'default': true,
     },
 
     // other
@@ -943,6 +948,8 @@ class SettingsHandler extends GetxController {
         return startVideosMuted;
       case 'snatchOnFavourite':
         return snatchOnFavourite;
+      case 'useDoubleTapDragZoom':
+        return useDoubleTapDragZoom;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -1147,6 +1154,8 @@ class SettingsHandler extends GetxController {
       case 'snatchOnFavourite':
         snatchOnFavourite = validatedValue;
         break;
+      case 'useDoubleTapDragZoom':
+        useDoubleTapDragZoom = validatedValue;
 
       // theme stuff
       case 'appMode':
@@ -1239,6 +1248,7 @@ class SettingsHandler extends GetxController {
       'hideNotes': validateValue('hideNotes', null, toJSON: true),
       'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
+      'useDoubleTapDragZoom': validateValue('useDoubleTapDragZoom', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),

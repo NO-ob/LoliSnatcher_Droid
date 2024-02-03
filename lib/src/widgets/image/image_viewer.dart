@@ -464,7 +464,8 @@ class ImageViewerState extends State<ImageViewer> {
                               basePosition: Alignment.center,
                               controller: viewController,
                               scaleStateController: scaleController,
-                              enableTapDragZoom: true,
+                              enableDoubleTapZoom: true,
+                              enableTapDragZoom: settingsHandler.useDoubleTapDragZoom,
                             ),
                           ),
                         )

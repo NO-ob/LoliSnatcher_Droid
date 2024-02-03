@@ -612,7 +612,7 @@ class VideoViewerState extends State<VideoViewer> {
                               scaleStateController: scaleController,
                               enableRotation: settingsHandler.allowRotation,
                               enableDoubleTapZoom: false,
-                              enableTapDragZoom: true,
+                              enableTapDragZoom: settingsHandler.useDoubleTapDragZoom,
                               child: Chewie(controller: chewieController!),
                             ),
                           ),
