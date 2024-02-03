@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Create secrets config",
+            "type": "shell",
+            "command": "sh ./gen_config.sh",
+            "presentation": {
+                "reveal": "never",
+                "close": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

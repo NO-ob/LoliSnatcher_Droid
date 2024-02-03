@@ -28,19 +28,20 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-def dartEnvironmentVariables = [
-        LS_IS_STORE: false
+def dartEnvVars = [
+        LS_IS_STORE: false,
+        LS_IS_TESTING: false
 ];
 if (project.hasProperty('dart-defines')) {
-    dartEnvironmentVariables = dartEnvironmentVariables + project.property('dart-defines')
+    dartEnvVars = dartEnvVars + project.property('dart-defines')
         .split(',')
         .collectEntries { entry ->
             def pair = new String(entry.decodeBase64(), 'UTF-8').split('=')
             [(pair.first()): pair.last()]
         }
 }
-println("LS_IS_STORE=${dartEnvironmentVariables.LS_IS_STORE}")
-def packageName = dartEnvironmentVariables.LS_IS_STORE == "true" ? "com.noaisu.play.loliSnatcher" : "com.noaisu.loliSnatcher"
+println("LS_IS_STORE=${dartEnvVars.LS_IS_STORE}")
+def packageName = dartEnvVars.LS_IS_STORE == "true" ? "com.noaisu.play.loliSnatcher" : "com.noaisu.loliSnatcher"
 println("packageName=${packageName}")
 // Build example
 // flutter build apk --split-per-abi --dart-define=LS_IS_STORE=true

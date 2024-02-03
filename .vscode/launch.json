@@ -7,28 +7,42 @@
         {
             "name": "loliSnatcher",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "preLaunchTask": "Create secrets config",
+            "args": [
+                "--dart-define-from-file=./config/secrets.json"
+            ]
         },
         {
             "name": "loliSnatcher (play store)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
+            "preLaunchTask": "Create secrets config",
             "args": [
-                "--dart-define=LS_IS_STORE=true"
+                "--dart-define=LS_IS_STORE=true",
+                "--dart-define-from-file=./config/secrets.json"
             ]
         },
         {
             "name": "loliSnatcher (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "preLaunchTask": "Create secrets config",
+            "args": [
+                "--dart-define-from-file=./config/secrets.json"
+            ]
         },
         {
             "name": "loliSnatcher (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "preLaunchTask": "Create secrets config",
+            "args": [
+                "--dart-define-from-file=./config/secrets.json"
+            ]
         }
     ]
 }
