@@ -6,8 +6,6 @@ import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/shimmie_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/sign_in.dart';
-import 'package:lolisnatcher/src/data/sign_out.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 
@@ -20,17 +18,6 @@ class R34HentaiHandler extends ShimmieHandler {
   @override
   String validateTags(String tags) {
     return tags;
-  }
-
-  @override
-  Map<String, String> getHeaders() {
-    final Map<String, String> headers = {
-      ...super.getHeaders(),
-      if (booru.apiKey?.isNotEmpty == true && (booru.apiKey?.contains('shm_user') == true || booru.apiKey?.contains('shm_sesion') == true))
-        'Cookie': '${booru.apiKey};',
-    };
-
-    return headers;
   }
 
   @override
@@ -87,15 +74,15 @@ class R34HentaiHandler extends ShimmieHandler {
   bool get hasSignInSupport => true;
 
   @override
-  Future<bool> signIn(SignInData data) async {
+  Future<bool> signIn() async {
     final CookieManager cookieManager = CookieManager.instance();
     List<String>? setCookies;
     try {
       final res = await DioNetwork.post(
         '${booru.baseURL}/user_admin/login',
         data: {
-          'user': data.login,
-          'pass': data.password,
+          'user': booru.userID,
+          'pass': booru.apiKey,
           'gobu': 'Log+In',
         },
         options: Options(
@@ -143,36 +130,36 @@ class R34HentaiHandler extends ShimmieHandler {
     if (!hasCookies) {
       return false;
     } else {
-      // TODO here could be a check if the cookies are still valid/not expired, but webview lib doesn't support expire dates for cookies?
+      // TODO here could be a check if the cookies are still valid/not expired, but webview lib doesn't support expire dates for cookies? are they just dropping them if expired on next read?
       // or maybe do a network request to check if the cookies are still valid?
       return true;
     }
   }
 
   @override
-  Future<bool?> signOut(SignOutData? data) async {
-    if (!await isSignedIn()) {
-      return null;
-    }
-
+  Future<bool?> signOut({bool fromError = false}) async {
     bool success = false;
-    try {
-      await DioNetwork.get(
-        '${booru.baseURL}/user_admin/logout',
-        headers: await Tools.getFileCustomHeaders(
-          Booru(
-            'R34Hentai',
-            BooruType.R34Hentai,
-            '${booru.baseURL}/favicon.ico',
-            booru.baseURL,
-            '',
-          ),
-        ),
-      );
+    if (fromError) {
       success = true;
-    } catch (e) {
-      if (e is DioException) {
-        success = e.response?.statusCode == 200;
+    } else {
+      try {
+        final res = await DioNetwork.get(
+          '${booru.baseURL}/user_admin/logout',
+          headers: await Tools.getFileCustomHeaders(
+            Booru(
+              'R34Hentai',
+              BooruType.R34Hentai,
+              '${booru.baseURL}/favicon.ico',
+              booru.baseURL,
+              '',
+            ),
+          ),
+        );
+        success = res.statusCode == 200;
+      } catch (e) {
+        if (e is DioException) {
+          success = false;
+        }
       }
     }
 

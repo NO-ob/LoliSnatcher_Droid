@@ -1,11 +1,15 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/utils/dio_network.dart';
 
 class IdolSankakuHandler extends SankakuHandler {
   IdolSankakuHandler(super.booru, super.limit);
@@ -14,6 +18,13 @@ class IdolSankakuHandler extends SankakuHandler {
   Options? fetchSearchOptions() {
     // TODO without this and manual decode requests fail with endless redirect error. why it happens? dio doesn't consider the response data as json? some missing header in response?
     return Options(responseType: ResponseType.plain);
+  }
+
+  @override
+  Map<String, String> getHeaders() {
+    return {
+      'User-Agent': EnvironmentConfig.hasSiSecret ? 'SCChannelApp/4.0 (Android; idol)' : Constants.defaultBrowserUserAgent,
+    };
   }
 
   @override
@@ -92,7 +103,11 @@ class IdolSankakuHandler extends SankakuHandler {
   String makeURL(String tags) {
     final tagsStr = tags.trim().isEmpty ? '' : 'tags=${tags.trim()}&';
 
-    return '${booru.baseURL}/post/index.json?${tagsStr}limit=$limit&page=$pageNum';
+    final authPart = (booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true && login.isNotEmpty && passHash.isNotEmpty && appkey.isNotEmpty)
+        ? 'login=$login&password_hash=$passHash&appkey=$appkey&'
+        : '';
+
+    return '${booru.baseURL}/post/index.json?$authPart${tagsStr}limit=$limit&page=$pageNum';
   }
 
   @override
@@ -135,59 +150,69 @@ class IdolSankakuHandler extends SankakuHandler {
   }
 
   @override
-  Future<String> getAuthToken() async {
-    return '';
+  bool get hasSignInSupport => true;
+
+  String generateSha1(String str) {
+    return sha1.convert(utf8.encode(str)).toString();
   }
 
-  // attempt to crack idol's login process, idol.sankakucomplex.com works, but it doesn't carry to iapi. domain
-  // their own idol app has a login through api, but it uses appkey and password_hash, which I have no way of knowing
-  // @override
-  // Future<String> getAuthToken() async {
-  //   if (booru.userID?.isNotEmpty != true || booru.apiKey?.isNotEmpty != true) {
-  //     return '';
-  //   }
+  String login = '', appkey = '', passHash = '';
 
-  //   String? sessionCookie, authenticityToken, languageCookie;
-  //   final responseLogin = await DioNetwork.get(
-  //     'https://idol.sankakucomplex.com/users/login',
-  //     headers: {
-  //       'User-Agent': Constants.defaultBrowserUserAgent,
-  //     },
-  //     options: Options(responseType: ResponseType.plain),
-  //   );
-  //   if (responseLogin.statusCode == 200) {
-  //     sessionCookie = responseLogin.headers['set-cookie']?.map((e) => e.split(';').first).join(';');
-  //     languageCookie = responseLogin.headers['set-cookie']?.firstWhereOrNull((e) => e.contains('locale'))?.split(';').first;
-  //     if (sessionCookie != null) {
-  //       final document = parse(responseLogin.data);
-  //       authenticityToken = document.querySelector('form input[name=authenticity_token]')?.attributes['value'];
-  //     }
-  //   }
-  //   if (authenticityToken == null) {
-  //     return '';
-  //   }
+  @override
+  Future<bool> canSignIn() async {
+    return EnvironmentConfig.hasSiSecret && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true;
+  }
 
-  //   final response = await DioNetwork.post(
-  //     'https://idol.sankakucomplex.com/${languageCookie?.split('=')[1] ?? 'en'}/users/authenticate',
-  //     headers: {
-  //       'User-Agent': Constants.defaultBrowserUserAgent,
-  //       'Cookie': '$sessionCookie;',
-  //     },
-  //     options: Options(
-  //       contentType: Headers.formUrlEncodedContentType,
-  //     ),
-  //     data: 'authenticity_token=$authenticityToken&url=&user%5Bname%5D=${booru.userID?.replaceAll('@', '%40')}&user%5Bpassword%5D=${booru.apiKey}&commit=Login',
-  //   );
+  @override
+  Future<bool> isSignedIn() async {
+    return login.isNotEmpty && appkey.isNotEmpty && passHash.isNotEmpty;
+  }
 
-  //   String token = '';
-  //   if (response.statusCode == 200 || response.statusCode == 302) {
-  //     Logger.Inst().log('Sankaku idol auth token loaded', className, 'getAuthToken', LogTypes.booruHandlerInfo);
-  //     token = responseLogin.headers['set-cookie']?.map((e) => e.split(';').first).join(';') ?? '';
-  //   }
-  //   if (token == '') {
-  //     Logger.Inst().log('Sankaku auth error ${response.statusCode}', className, 'getAuthToken', LogTypes.booruHandlerInfo);
-  //   }
+  @override
+  Future<bool> signIn() async {
+    login = '';
+    appkey = '';
+    passHash = '';
 
-  //   return token;
-  // }
+    bool success = false;
+
+    try {
+      appkey = generateSha1(EnvironmentConfig.siSecret1.replaceAll('[username]', booru.userID!.toLowerCase()));
+      passHash = generateSha1(EnvironmentConfig.siSecret2.replaceAll('[password]', booru.apiKey!));
+
+      final res = await DioNetwork.post(
+        '${booru.baseURL}/user/authenticate.json',
+        headers: {
+          'Accept-Encoding': 'gzip',
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          'Connection': 'Keep-Alive',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'User-Agent': 'SCChannelApp/4.0 (Android; idol)',
+        },
+        options: Options(
+          contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+        ),
+        data: {
+          'appkey': appkey,
+          'login': booru.userID?.toLowerCase(),
+          'password_hash': passHash,
+        },
+      );
+      if (res.statusCode == 200) {
+        login = res.data['current_user']?['name'];
+        appkey = generateSha1(EnvironmentConfig.siSecret1.replaceAll('[username]', login.toLowerCase()));
+        success = true;
+      }
+    } catch (e) {
+      success = false;
+    }
+    return success;
+  }
+
+  @override
+  Future<void> signOut({bool fromError = false}) async {
+    login = '';
+    appkey = '';
+    passHash = '';
+  }
 }

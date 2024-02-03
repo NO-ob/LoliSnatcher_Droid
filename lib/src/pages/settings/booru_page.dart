@@ -8,9 +8,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
-import 'package:lolisnatcher/src/data/sign_in.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler.dart';
-import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -347,58 +344,6 @@ class _BooruPageState extends State<BooruPage> {
     );
   }
 
-  Widget loginButton() {
-    if (selectedBooru == null) {
-      return const SizedBox.shrink();
-    }
-
-    final List handlers = BooruHandlerFactory().getBooruHandler([selectedBooru!], 5);
-    final BooruHandler handler = handlers[0] as BooruHandler;
-
-    if (handler.hasSignInSupport == false) {
-      return const SizedBox.shrink();
-    }
-
-    return SettingsButton(
-      name: 'Login',
-      icon: const Icon(Icons.login),
-      action: () async {
-        if (selectedBooru?.userID?.isEmpty == true || selectedBooru?.apiKey?.isEmpty == true) {
-          FlashElements.showSnackbar(
-            context: context,
-            title: const Text(
-              'Need Login and Password',
-              style: TextStyle(fontSize: 20),
-            ),
-            content: const Text(
-              'Please change this booru config to have both login AND password fields!',
-              style: TextStyle(fontSize: 16),
-            ),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-          return;
-        }
-
-        await handler.signIn(
-          SignInData(
-            login: selectedBooru!.userID!,
-            password: selectedBooru!.apiKey!,
-          ),
-        );
-
-        FlashElements.showSnackbar(
-          context: context,
-          title: const Text('Relogin complete!', style: TextStyle(fontSize: 20)),
-          leadingIcon: Icons.login,
-          leadingIconColor: Colors.yellow,
-          sideColor: Colors.yellow,
-        );
-      },
-    );
-  }
-
   Widget addFromClipboardButton() {
     return SettingsButton(
       name: 'Add Booru from URL in Clipboard',
@@ -502,7 +447,6 @@ class _BooruPageState extends State<BooruPage> {
                   shareButton(),
                   editButton(),
                   webviewButton(),
-                  loginButton(),
                   deleteButton(),
                 ],
               ],

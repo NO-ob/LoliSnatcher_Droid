@@ -12,8 +12,6 @@ import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
-import 'package:lolisnatcher/src/data/sign_in.dart';
-import 'package:lolisnatcher/src/data/sign_out.dart';
 import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -87,6 +85,20 @@ abstract class BooruHandler {
   bool get hasSizeData => false;
 
   Future<bool> searchSetup() async {
+    if (hasSignInSupport) {
+      final bool canLogin = await canSignIn();
+      if (canLogin) {
+        final bool isLoggedIn = await isSignedIn();
+        if (isLoggedIn) {
+          //
+        } else {
+          // final bool didLogIn = await signIn();
+          await signIn();
+        }
+      } else {
+        //
+      }
+    }
     return true;
   }
 
@@ -607,7 +619,11 @@ abstract class BooruHandler {
   // TODO check which boorus could benefit from in-app sign in/sign out aside from rule34hentai
   bool get hasSignInSupport => false;
 
-  Future<dynamic> signIn(SignInData data) async {
+  Future<bool> canSignIn() async {
+    return booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true;
+  }
+
+  Future<dynamic> signIn() async {
     return;
   }
 
@@ -615,7 +631,7 @@ abstract class BooruHandler {
     return false;
   }
 
-  Future<dynamic> signOut(SignOutData? data) async {
+  Future<dynamic> signOut({bool fromError = false}) async {
     return;
   }
 

@@ -1896,6 +1896,12 @@ class EnvironmentConfig {
     'LS_IS_TESTING',
     defaultValue: false,
   );
+
+  //
+
+  static bool get hasSiSecret => siSecret1.isNotEmpty && siSecret2.isNotEmpty;
+  static const String siSecret1 = String.fromEnvironment('SI_SECRET_1', defaultValue: '');
+  static const String siSecret2 = String.fromEnvironment('SI_SECRET_2', defaultValue: '');
 }
 
 class TagsListData {

@@ -2,15 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/boorus/hydrus_handler.dart';
-import 'package:lolisnatcher/src/boorus/r34hentai_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
-import 'package:lolisnatcher/src/data/sign_in.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler_factory.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
@@ -46,7 +43,7 @@ class _BooruEditState extends State<BooruEdit> {
   final booruDefTagsController = TextEditingController();
 
   BooruType? booruType;
-  BooruType selectedBooruType = BooruType.AutoDetect;
+  BooruType selectedBooruType = BooruType.Autodetect;
 
   // TODO make standalone / move to handlers themselves
   String convertSiteUrlToApi() {
@@ -147,13 +144,6 @@ class _BooruEditState extends State<BooruEdit> {
                 urlController: booruURLController,
                 apiKeyController: booruAPIKeyController,
               ),
-
-            if (selectedBooruType == BooruType.R34Hentai)
-              _R34HSignInWidget(
-                urlController: booruURLController,
-                loginController: booruUserIDController,
-                passwordController: booruAPIKeyController,
-              ),
             //
             SettingsTextInput(
               controller: booruUserIDController,
@@ -178,9 +168,9 @@ class _BooruEditState extends State<BooruEdit> {
   String getApiKeyTitle() {
     switch (selectedBooruType) {
       case BooruType.Sankaku:
-        return 'Password';
+      case BooruType.IdolSankaku:
       case BooruType.R34Hentai:
-        return 'Password or Cookies(legacy)';
+        return 'Password';
       default:
         return 'API Key';
     }
@@ -189,6 +179,7 @@ class _BooruEditState extends State<BooruEdit> {
   String getUserIDTitle() {
     switch (selectedBooruType) {
       case BooruType.Sankaku:
+      case BooruType.IdolSankaku:
       case BooruType.Danbooru:
       case BooruType.R34Hentai:
         return 'Login';
@@ -443,6 +434,12 @@ class _BooruEditState extends State<BooruEdit> {
               'Booru Config Saved!',
               style: TextStyle(fontSize: 20),
             ),
+            content: widget.booru.name == 'New'
+                ? const SizedBox(height: 20)
+                : const Text(
+                    'Existing tabs with this Booru need to be reloaded in order to apply changes!',
+                    style: TextStyle(fontSize: 16),
+                  ),
             leadingIcon: Icons.done,
             leadingIconColor: Colors.green,
             sideColor: Colors.green,
@@ -501,7 +498,7 @@ class _BooruEditState extends State<BooruEdit> {
       return ['', 'Failed to verify api access for Hydrus'];
     }
 
-    if (userBooruType == BooruType.AutoDetect) {
+    if (userBooruType == BooruType.Autodetect) {
       final List<BooruType> typeList = BooruType.detectable;
       for (int i = 1; i < typeList.length; i++) {
         booruType ??= (await booruTest(
@@ -611,263 +608,6 @@ class _HydrusAccessKeyWidget extends StatelessWidget {
           width: double.infinity,
           child: const Text(
             'To get the Hydrus key you need to open the request dialog in the hydrus client. services > review services > client api > add > from api request',
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _R34HSignInWidget extends StatelessWidget {
-  const _R34HSignInWidget({
-    required this.urlController,
-    required this.loginController,
-    required this.passwordController,
-  });
-
-  final TextEditingController urlController;
-  final TextEditingController loginController;
-  final TextEditingController passwordController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-          width: double.infinity,
-          child: const Text(
-            "\nTo view restricted content you need to input your [Login] and [Password] below and press [Sign in].\n\nYou may need to redo this process from time to time, since session could break for different reasons (changed IP or User Agent, cookie expired...)\n\nIn previous versions you could get cookies yourself and input them here but that's no longer supported.",
-          ),
-        ),
-        Container(
-          margin: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () async {
-              // add https if not specified
-              if (!urlController.text.contains('http://') && !urlController.text.contains('https://')) {
-                urlController.text = 'https://${urlController.text}';
-              }
-
-              if (urlController.text.isEmpty || loginController.text.isEmpty || passwordController.text.isEmpty) {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'All fields (URL, Login, Password) are required',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.red,
-                  sideColor: Colors.red,
-                );
-                return;
-              }
-
-              final R34HentaiHandler r34h = R34HentaiHandler(
-                Booru(
-                  'R34Hentai',
-                  BooruType.R34Hentai,
-                  'R34Hentai',
-                  urlController.text,
-                  '',
-                ),
-                5,
-              );
-              final bool success = await r34h.signIn(
-                SignInData(
-                  login: loginController.text,
-                  password: passwordController.text,
-                ),
-              );
-              if (success) {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'Successfully signed in',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  content: const Text(
-                    'Now you can press test and save the config',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.yellow,
-                  sideColor: Colors.yellow,
-                );
-              } else {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'Failed to sign in',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  content: const Text(
-                    'It is possible that there is a captcha on the site or you entered the wrong login/password. Try pressing the [Open url to get cookies] button above and make sure you are not blocked by captcha.',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.red,
-                );
-              }
-            },
-            icon: const Icon(Icons.login),
-            label: const Text('Sign in'),
-          ),
-        ),
-        // button that shows simple cookie viewer dialog
-        if (SettingsHandler.instance.isDebug.value)
-          Container(
-            margin: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () async {
-                // add https if not specified
-                if (!urlController.text.contains('http://') && !urlController.text.contains('https://')) {
-                  urlController.text = 'https://${urlController.text}';
-                }
-
-                if (urlController.text.isEmpty) {
-                  FlashElements.showSnackbar(
-                    context: context,
-                    title: const Text(
-                      'URL is required',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    leadingIcon: Icons.warning_amber,
-                    leadingIconColor: Colors.red,
-                    sideColor: Colors.red,
-                  );
-                  return;
-                }
-
-                final CookieManager cookieManager = CookieManager.instance();
-                final List<Cookie> cookies = await cookieManager.getCookies(url: WebUri(urlController.text));
-
-                if (cookies.isNotEmpty) {
-                  await showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Cookies'),
-                        content: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: cookies.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 6),
-                                child: SelectableText('${cookies[index].name} = ${cookies[index].value}'),
-                              );
-                            },
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                } else {
-                  FlashElements.showSnackbar(
-                    context: context,
-                    title: const Text(
-                      'No cookies found',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    leadingIcon: Icons.warning_amber,
-                    leadingIconColor: Colors.red,
-                    sideColor: Colors.red,
-                  );
-                }
-              },
-              icon: const Icon(Icons.cookie),
-              label: const Text('View cookies'),
-            ),
-          ),
-        Container(
-          margin: const EdgeInsets.fromLTRB(10, 5, 10, 10),
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () async {
-              // add https if not specified
-              if (!urlController.text.contains('http://') && !urlController.text.contains('https://')) {
-                urlController.text = 'https://${urlController.text}';
-              }
-
-              if (urlController.text.isEmpty) {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'URL is required',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.red,
-                  sideColor: Colors.red,
-                );
-                return;
-              }
-
-              final R34HentaiHandler r34h = R34HentaiHandler(
-                Booru(
-                  'R34Hentai',
-                  BooruType.R34Hentai,
-                  'R34Hentai',
-                  urlController.text,
-                  '',
-                ),
-                5,
-              );
-              final bool? success = await r34h.signOut(null);
-
-              if (success == true) {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'Signed out and cleared all cookies for this booru',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  content: const Text(
-                    'You may need to redo the captcha to access the site again',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.green,
-                  sideColor: Colors.green,
-                );
-              } else if (success == false) {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'Failed to sign out, but cookies have been cleared',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.red,
-                  sideColor: Colors.red,
-                );
-              } else {
-                FlashElements.showSnackbar(
-                  context: context,
-                  title: const Text(
-                    'No cookies found',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  leadingIcon: Icons.warning_amber,
-                  leadingIconColor: Colors.red,
-                  sideColor: Colors.red,
-                );
-              }
-            },
-            icon: const Icon(Icons.logout),
-            label: const Text('Sign out and clear cookies'),
           ),
         ),
       ],

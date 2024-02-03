@@ -10,7 +10,6 @@ import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
-import 'package:lolisnatcher/src/utils/tools.dart';
 
 class SankakuHandler extends BooruHandler {
   SankakuHandler(super.booru, super.limit);
@@ -39,16 +38,10 @@ class SankakuHandler extends BooruHandler {
   bool get hasLoadItemSupport => true;
 
   @override
-  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
-    try {
-      if (authToken == '' && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
-        authToken = await getAuthToken();
-        Logger.Inst().log('Got authtoken: $authToken', className, 'fetchSearch', LogTypes.booruHandlerInfo);
-      }
-    } catch (e) {
-      Logger.Inst().log('Failed to get authtoken: $e', className, 'fetchSearch', LogTypes.booruHandlerInfo);
-    }
+  bool get hasSignInSupport => true;
 
+  @override
+  Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
     return DioNetwork.get(
       uri.toString(),
       headers: getHeaders(),
@@ -126,9 +119,7 @@ class SankakuHandler extends BooruHandler {
   @override
   Future<List> loadItem({required BooruItem item, CancelToken? cancelToken}) async {
     try {
-      if (authToken == '' && booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true) {
-        authToken = await getAuthToken();
-      }
+      await searchSetup();
       final response = await DioNetwork.get(
         makeApiPostURL(item.postURL.split('/').last),
         headers: getHeaders(),
@@ -183,31 +174,47 @@ class SankakuHandler extends BooruHandler {
     return '${booru.baseURL}/posts/$id';
   }
 
-  Future<String> getAuthToken() async {
-    String token = '';
-    final response = await DioNetwork.post(
-      '${booru.baseURL}/auth/token',
-      queryParameters: {'lang': 'english'},
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': Tools.browserUserAgent,
-      },
-      data: {'login': booru.userID, 'password': booru.apiKey},
-      // encoding: Encoding.getByName("utf-8"),
-    );
+  @override
+  Future<bool> isSignedIn() async {
+    return authToken.isNotEmpty;
+  }
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> parsedResponse = response.data;
-      if (parsedResponse['success']) {
-        Logger.Inst().log('Sankaku auth token loaded', className, 'getAuthToken', LogTypes.booruHandlerInfo);
-        token = "${parsedResponse["token_type"]} ${parsedResponse["access_token"]}";
+  @override
+  Future<bool> signIn() async {
+    bool success = false;
+    try {
+      final response = await DioNetwork.post(
+        '${booru.baseURL}/auth/token',
+        queryParameters: {'lang': 'english'},
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': Constants.defaultBrowserUserAgent,
+        },
+        data: {'login': booru.userID, 'password': booru.apiKey},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> parsedResponse = response.data;
+        if (parsedResponse['success']) {
+          authToken = "${parsedResponse["token_type"]} ${parsedResponse["access_token"]}";
+        }
       }
+    } catch (e) {
+      Logger.Inst().log('Sankaku auth error: $e', className, 'signIn', LogTypes.booruHandlerInfo);
     }
-    if (token == '') {
-      Logger.Inst().log('Sankaku auth error ${response.statusCode}', className, 'getAuthToken', LogTypes.booruHandlerInfo);
+    if (authToken == '') {
+      Logger.Inst().log('Sankaku auth error: empty token ', className, 'signIn', LogTypes.booruHandlerInfo);
+      success = false;
+    } else {
+      Logger.Inst().log('Sankaku auth Got authtoken: $authToken', className, 'signIn', LogTypes.booruHandlerInfo);
+      success = true;
     }
+    return success;
+  }
 
-    return token;
+  @override
+  Future<void> signOut({bool fromError = false}) async {
+    authToken = '';
   }
 
   @override

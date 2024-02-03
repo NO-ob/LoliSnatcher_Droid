@@ -1,7 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
 enum BooruType {
-  AutoDetect,
+  Autodetect,
   //
   AGNPH,
   BooruOnRails,
@@ -43,7 +43,7 @@ enum BooruType {
       ..remove(BooruType.Downloads)
       ..remove(BooruType.Favourites)
       ..remove(BooruType.Merge)
-      ..remove(BooruType.AutoDetect)
+      ..remove(BooruType.Autodetect)
       ..remove(BooruType.Hydrus);
   }
 
