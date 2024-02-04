@@ -325,6 +325,7 @@ class SettingsBooruDropdown extends StatelessWidget {
     required this.value,
     required this.onChanged,
     required this.title,
+    this.subtitle,
     this.drawTopBorder = false,
     this.drawBottomBorder = true,
     this.nullable = false,
@@ -335,6 +336,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   final Booru? value;
   final void Function(Booru?)? onChanged;
   final String title;
+  final Widget? subtitle;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final bool nullable;
@@ -376,6 +378,7 @@ class SettingsBooruDropdown extends StatelessWidget {
       ],
       onChanged: onChanged,
       title: title,
+      subtitle: subtitle,
       drawTopBorder: drawTopBorder,
       drawBottomBorder: drawBottomBorder,
       trailingIcon: trailingIcon,

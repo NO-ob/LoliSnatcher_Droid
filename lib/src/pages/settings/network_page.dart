@@ -2,10 +2,14 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
+import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/http_overrides.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
+import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 
 class NetworkPage extends StatefulWidget {
@@ -18,6 +22,8 @@ class _NetworkPageState extends State<NetworkPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   bool allowSelfSignedCerts = false;
+  Booru? selectedBooru;
+  List<Cookie> selectedBooruCookies = [];
 
   final TextEditingController userAgentController = TextEditingController();
 
@@ -104,6 +110,69 @@ class _NetworkPageState extends State<NetworkPage> {
                 subtitle: const Text(Constants.defaultBrowserUserAgent),
                 action: () {
                   userAgentController.text = Constants.defaultBrowserUserAgent;
+                },
+              ),
+              const SettingsButton(name: '', enabled: false),
+              const SettingsButton(
+                name: 'Cookie cleaner',
+                icon: Icon(Icons.cookie_rounded),
+              ),
+              SettingsBooruDropdown(
+                value: selectedBooru,
+                nullable: true,
+                onChanged: (newValue) async {
+                  selectedBooru = newValue;
+                  selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  setState(() {});
+                },
+                title: 'Booru',
+                subtitle: const Text('Select a booru to clear cookies for or leave empty to clear all'),
+              ),
+              if (selectedBooruCookies.isNotEmpty) ...[
+                SettingsButton(name: 'Cookies for ${selectedBooru?.name}:', enabled: false),
+                for (final Cookie cookie in selectedBooruCookies) ...[
+                  SettingsButton(
+                    name:
+                        '${cookie.name} = ${cookie.value}${cookie.expiresDate != null ? '\nExpires: ${DateTime.fromMillisecondsSinceEpoch(cookie.expiresDate!)}' : ''}',
+                    action: () {
+                      CookieManager.instance().deleteCookie(
+                        url: WebUri(selectedBooru!.baseURL!),
+                        name: cookie.name,
+                      );
+                      selectedBooruCookies.removeAt(selectedBooruCookies.indexOf(cookie));
+                      setState(() {});
+                      FlashElements.showSnackbar(
+                        context: context,
+                        title: Text('"${cookie.name}" cookie deleted'),
+                      );
+                    },
+                  ),
+                ],
+              ],
+              SettingsButton(
+                name: 'Clear cookies${selectedBooru != null ? ' for ${selectedBooru!.name}' : ''}',
+                icon: const Icon(
+                  Icons.delete_forever,
+                  color: Colors.red,
+                ),
+                action: () async {
+                  if (selectedBooru == null) {
+                    await CookieManager.instance().deleteCookies(url: WebUri(selectedBooru!.baseURL!));
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: Text('Cookies for ${selectedBooru?.name} deleted'),
+                    );
+                  } else {
+                    await CookieManager.instance().deleteAllCookies();
+                    FlashElements.showSnackbar(
+                      context: context,
+                      title: const Text('All cookies deleted'),
+                    );
+                  }
+
+                  selectedBooru = null;
+                  selectedBooruCookies.clear();
+                  setState(() {});
                 },
               ),
             ],
