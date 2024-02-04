@@ -10,21 +10,21 @@ menu_result="$?"
 
 echo
 
-build_arg="LS_IS_STORE=false"
-build_desc="Github"
+build_arg="LS_IS_TESTING=true"
+build_desc="Testing"
 build_mode="apk --split-per-abi"
-suffix="github"
+suffix="test"
 case "$menu_result"
 in
 	0)
-		build_arg="LS_IS_STORE=false"
-        build_desc="Github"
-		suffix="github"
-		;;
-	1)
 		build_arg="LS_IS_TESTING=true"
         build_desc="Testing"
 		suffix="test"
+		;;
+	1)
+		build_arg="LS_IS_STORE=false"
+        build_desc="Github"
+		suffix="github"
 		;;
 	2)
 		build_arg="LS_IS_STORE=true"
@@ -34,9 +34,12 @@ in
 		;;
 esac
 
+clear
+
 echo "Doing a ["$build_desc"] build - [$build_mode --$build_arg]"
+# Generate empty secret vars config if it's not there
 sh gen_config.sh
-flutter build $build_mode  --release --dart-define=$build_arg
+flutter build $build_mode --release --dart-define=$build_arg
 
 get_version_and_build() {
     version_and_build=$(grep "version:" pubspec.yaml | awk '{print $2}')
