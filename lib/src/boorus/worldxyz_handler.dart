@@ -123,26 +123,4 @@ class WorldXyzHandler extends BooruHandler {
   String? parseTagSuggestion(dynamic responseItem, int index) {
     return responseItem['value']?.replaceAll(RegExp(' '), '_');
   }
-
-  // TODO disabled because api has a limit of 600 items for any query
-  // @override
-  // Future<void> searchCount(String input) async {
-  //   int result = 0;
-  //   String url = makeURL(input);
-  //   url = url.replaceAll(RegExp(r''), '');
-  //   try {
-  //     final response = await DioNetwork.get(url, headers: getHeaders());
-  //     // 200 is the success http response code
-  //     if (response.statusCode == 200) {
-  //       Map<String, dynamic> parsedResponse = response.data;
-  //       result = parsedResponse['totalCount'];
-  //     } else {
-  //       Logger.Inst().log(response.statusCode.toString(), "WorldXyzHandler", "searchCount", LogTypes.booruHandlerInfo);
-  //     }
-  //   } catch (e) {
-  //     Logger.Inst().log(e.toString(), "WorldXyzHandler", "searchCount", LogTypes.exception);
-  //   }
-  //   totalCount.value = result;
-  //   return;
-  // }
 }

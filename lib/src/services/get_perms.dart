@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 
 // TODO expand to have more control over permissions
+// TODO handle denied permissions with a dialog blocking further action, check everywhere getPerms is used
 
 /// This launches the permissions dialogue to get storage permissions from the user
 ///

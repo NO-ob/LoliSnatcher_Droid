@@ -616,7 +616,6 @@ abstract class BooruHandler {
     return [];
   }
 
-  // TODO check which boorus could benefit from in-app sign in/sign out aside from rule34hentai
   bool get hasSignInSupport => false;
 
   Future<bool> canSignIn() async {
@@ -637,19 +636,6 @@ abstract class BooruHandler {
 
   List<String> searchModifiers() {
     return [];
-  }
-
-  //set the isSnatched and isFavourite booleans for a BooruItem in fetched
-  Future<void> setTrackedValues(int fetchedIndex) async {
-    final SettingsHandler settingsHandler = SettingsHandler.instance;
-
-    if (settingsHandler.dbHandler.db != null) {
-      // TODO make this work in batches, not calling it on every single item ???
-      final List<bool> values = await settingsHandler.dbHandler.getTrackedValues(fetched[fetchedIndex]);
-      fetched[fetchedIndex].isSnatched.value = values[0];
-      fetched[fetchedIndex].isFavourite.value = values[1];
-    }
-    return;
   }
 
   Future<void> setMultipleTrackedValues(int beforeLength, int afterLength) async {

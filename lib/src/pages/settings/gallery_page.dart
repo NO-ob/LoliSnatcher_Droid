@@ -407,8 +407,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 title: 'Start videos muted',
               ),
 
-              // TODO rework into loading element variant (small, verbose, gif...)
-              // TODO ...or remove completely, this gif is like 20% of the app's size
+              // TODO rework into loading element variant (small, verbose, gif...) or remove completely, this gif is like 20% of the app's size
               SettingsToggle(
                 value: loadingGif,
                 onChanged: (newValue) {

@@ -1,10 +1,7 @@
-// TODO add/move more stuff here
-
 class Constants {
   static const String appName = 'LoliSnatcher';
 
   // TODO don't forget to update on every new release
-  // TODO take these from smth like .env?
   static const String appVersion = '2.4.0';
   static const int appBuildNumber = 184;
   //

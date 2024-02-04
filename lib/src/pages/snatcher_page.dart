@@ -105,7 +105,6 @@ class _SnatcherPageState extends State<SnatcherPage> {
                 );
 
                 Navigator.of(context).pop();
-                // TODO make a page which shows progress of all files + list of previous downloads
               },
             ),
           ],

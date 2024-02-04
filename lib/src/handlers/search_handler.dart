@@ -857,7 +857,6 @@ class SearchHandler extends GetxController {
             : 'tab'; // 'tab' to always have controlled end of the string, to avoid broken strings (see kaguya anime full name as example)
         return '$booruName$tabDivider$tabTags$tabDivider$selected'; // booruName|searchTags|selected (last only if its the current tab)
       }).toList();
-      // TODO small indicator somewhere when tabs are saved?
       final String restoreString = dump.join(listDivider);
       return restoreString;
     } else {

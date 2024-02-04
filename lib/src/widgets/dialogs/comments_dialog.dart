@@ -186,7 +186,7 @@ class _CommentEntry extends StatelessWidget {
     }
 
     // TODO more rules
-    // TODO maybe there is a better/more optimized way to do this?
+    // TODO make a better/more optimized way to do this?
     return content
         // sankaku(?) quoting
         .replaceAll('[quote]', '[ ')

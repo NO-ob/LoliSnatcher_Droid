@@ -70,9 +70,6 @@ class ThemeHandler {
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
 
-      // TODO fill as much objects here as possible
-      // TODO maybe add custom extensions, since google added them in flutter3?
-
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(lightColorScheme),
       cardColor: Color.lerp(lightColorScheme.background, Colors.black, 0.04),
@@ -115,9 +112,6 @@ class ThemeHandler {
 
       splashFactory: InkSparkle.splashFactory,
       // androidOverscrollIndicator: AndroidOverscrollIndicator.stretch,
-
-      // TODO fill as much objects here as possible
-      // TODO maybe add custom extensions, since google added them in flutter3?
 
       applyElevationOverlayColor: true,
       buttonTheme: buttonTheme(darkColorScheme),

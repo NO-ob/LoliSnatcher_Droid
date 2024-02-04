@@ -1743,7 +1743,6 @@ class SettingsHandler extends GetxController {
 
   void showUpdate(bool withMessage) {
     if (withMessage && updateInfo.value != null) {
-      // TODO get from some external variable when building
       const bool isFromStore = EnvironmentConfig.isFromStore;
 
       final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;

@@ -18,9 +18,8 @@ import 'package:lolisnatcher/src/utils/debouncer.dart';
 import 'package:lolisnatcher/src/widgets/common/marquee_text.dart';
 import 'package:lolisnatcher/src/widgets/search/tag_chip.dart';
 
-// TODO
-// - make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
-// - parse tag type from search if possible
+// TODO make the search box wider? use the same OverlayEntry method? https://stackoverflow.com/questions/60884031/draw-outside-listview-bounds-in-flutter
+// TODO parse tag type and count from search if possible
 
 class TagSearchBox extends StatefulWidget {
   const TagSearchBox({super.key});

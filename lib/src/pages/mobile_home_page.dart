@@ -721,7 +721,7 @@ class DownloadsDrawer extends StatelessWidget {
                                                 },
                                                 icon: snatchHandler.active.value ? const Icon(Icons.pause) : const Icon(Icons.play_arrow),
                                                 name: snatchHandler.active.value ? 'Pause' : 'Unpause',
-                                                subtitle: snatchHandler.active.value ? const Text('(from next queue)') : null,
+                                                subtitle: snatchHandler.active.value ? const Text('(from next item in queue)') : null,
                                               ),
                                       ),
                                     ),

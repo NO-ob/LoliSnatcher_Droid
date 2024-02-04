@@ -166,7 +166,6 @@ class ViewerHandler extends GetxController {
   }
 
   // Related to videos
-  // TODO check if mute is forced when there are two videos in a row and you mute on the first video and then go to the second video
   bool videoAutoMute = false; // hold volume button in VideoViewer to mute videos globally
 
   // ViewerHandler() {
@@ -188,7 +187,7 @@ class ViewerHandler extends GetxController {
 
 
 
-// Stop video when audio output device changes/removed
+// TODO Stop video when audio output device changes/removed
 // pubspec: audio_session: ^0.1.6+1
 // import 'package:audio_session/audio_session.dart';
 

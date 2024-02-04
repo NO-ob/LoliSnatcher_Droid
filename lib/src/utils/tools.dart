@@ -144,7 +144,6 @@ class Tools {
     return statusCode != null && statusCode >= 200 && statusCode < 300;
   }
 
-  // TODO move to separate class (something with the name like "Constants")
   static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
   static String get browserUserAgent {
     return isTestMode ? appUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : appUserAgent);

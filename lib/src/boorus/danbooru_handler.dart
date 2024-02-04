@@ -45,7 +45,6 @@ class DanbooruHandler extends BooruHandler {
     return defaultHeaders;
   }
 
-  // TODO set booru useragent in the handler itself to avoid overriding fetch func?
   @override
   Future<Response<dynamic>> fetchSearch(Uri uri, {bool withCaptchaCheck = true, Map<String, dynamic>? queryParams}) async {
     final String cookies = await getCookies() ?? '';

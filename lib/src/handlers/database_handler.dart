@@ -258,7 +258,6 @@ class DBHandler {
     List<String> customConditions = const [],
     bool isDownloads = false,
   }) async {
-    // TODO multiple tags in search can lead to wrong results
     List<String> searchTags = [], excludeTags = [];
     List? result;
 

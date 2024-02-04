@@ -276,7 +276,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   final TagHandler tagHandler = TagHandler.instance;
   // final LocalAuthHandler localAuthHandler = LocalAuthHandler.instance;
 
-  Timer? cacheClearTimer;
+  Timer? backupTimer;
   Timer? cacheStaleTimer;
   ImageWriter imageWriter = ImageWriter();
 
@@ -290,7 +290,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     initDeepLinks();
 
     // force cache clear every minute + perform tabs backup
-    cacheClearTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    backupTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
       // TODO we don't need to clear cache so much, since all images are cleared on dispose
       // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
@@ -353,7 +353,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    cacheClearTimer?.cancel();
+    backupTimer?.cancel();
     cacheStaleTimer?.cancel();
     appLinksSubscription?.cancel();
     // WidgetsBinding.instance.removeObserver(this);
