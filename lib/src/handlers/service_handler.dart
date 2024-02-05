@@ -457,4 +457,10 @@ class ServiceHandler {
       }
     }
   }
+
+  static Future<void> openLinkDefaultsSettings() async {
+    if (Platform.isAndroid) {
+      await platform.invokeMethod('openLinkDefaults');
+    }
+  }
 }

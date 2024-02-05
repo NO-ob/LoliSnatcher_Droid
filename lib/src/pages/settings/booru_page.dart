@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:get/utils.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -107,7 +106,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget addButton() {
     return SettingsButton(
-      name: 'Add New Booru',
+      name: 'Add new Booru config',
       icon: const Icon(Icons.add),
       page: () => BooruEdit(Booru('New', null, '', '', '')),
     );
@@ -148,7 +147,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget shareButton() {
     return SettingsButton(
-      name: 'Share Selected Booru',
+      name: 'Share Booru config',
       icon: const Icon(Icons.share),
       action: () {
         if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
@@ -198,13 +197,12 @@ class _BooruPageState extends State<BooruPage> {
                   // TODO more explanations about booru sharing
                   const Text(''),
                   if (Platform.isAndroid) ...[
-                    const Text('How to automatically open booru config links in the app on Android 12 and higher:'),
-                    const Text('1) Tap button below to open system app settings'),
-                    const Text('2) Go to "Open by default"'),
-                    const Text('3) Tap on "Add link"/Plus icon and select all available options'),
+                    const Text('How to automatically open Booru config links in the app on Android 12 and higher:'),
+                    const Text('1) Tap button below to open system app link defaults settings'),
+                    const Text('2) Tap on "Add link" and select all available options'),
                     const SizedBox(height: 20),
                     const ElevatedButton(
-                      onPressed: openAppSettings,
+                      onPressed: ServiceHandler.openLinkDefaultsSettings,
                       child: Text('Go to settings'),
                     ),
                   ],
@@ -219,7 +217,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget editButton() {
     return SettingsButton(
-      name: 'Edit Selected Booru',
+      name: 'Edit Booru config',
       icon: const Icon(Icons.edit),
       // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
@@ -232,7 +230,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget deleteButton() {
     return SettingsButton(
-      name: 'Delete Selected Booru',
+      name: 'Delete ${selectedBooru?.name} Booru config',
       icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
       action: () {
         // do nothing if no selected or selected "Favourites/Downloads" or there are tabs with it
@@ -314,7 +312,7 @@ class _BooruPageState extends State<BooruPage> {
                       FlashElements.showSnackbar(
                         context: context,
                         title: const Text('Error!', style: TextStyle(fontSize: 20)),
-                        content: const Text('Something went wrong during deletion of a booru config!', style: TextStyle(fontSize: 16)),
+                        content: const Text('Something went wrong during deletion of a Booru config!', style: TextStyle(fontSize: 16)),
                         leadingIcon: Icons.warning_amber,
                         leadingIconColor: Colors.red,
                         sideColor: Colors.red,
@@ -338,7 +336,8 @@ class _BooruPageState extends State<BooruPage> {
   Widget webviewButton() {
     // TODO add help button and explain how to properly setup cookies
     return SettingsButton(
-      name: 'Open current booru in webview to get cookies',
+      name: 'Open webview to get cookies',
+      subtitle: const Text('[BETA]'),
       icon: const Icon(Icons.public),
       page: () => InAppWebviewView(initialUrl: selectedBooru!.baseURL!),
     );
@@ -346,7 +345,7 @@ class _BooruPageState extends State<BooruPage> {
 
   Widget addFromClipboardButton() {
     return SettingsButton(
-      name: 'Add Booru from URL in Clipboard',
+      name: 'Import Booru config from clipboard',
       icon: const Icon(Icons.paste),
       action: () async {
         // FlashElements.showSnackbar(title: Text('Deep Link: $url'), duration: null);
@@ -371,6 +370,7 @@ class _BooruPageState extends State<BooruPage> {
             FlashElements.showSnackbar(
               context: context,
               title: const Text('Invalid URL!', style: TextStyle(fontSize: 20)),
+              content: const Text('Only loli.snatcher URLs are supported!', style: TextStyle(fontSize: 16)),
               leadingIcon: Icons.warning_amber,
               leadingIconColor: Colors.red,
               sideColor: Colors.red,
@@ -379,7 +379,7 @@ class _BooruPageState extends State<BooruPage> {
         } else {
           FlashElements.showSnackbar(
             context: context,
-            title: const Text('No URL in Clipboard!', style: TextStyle(fontSize: 20)),
+            title: const Text('No text in clipboard!', style: TextStyle(fontSize: 20)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -436,16 +436,14 @@ class _BooruPageState extends State<BooruPage> {
                   }
                 },
               ),
-
               const SettingsButton(name: '', enabled: false),
               addFromClipboardButton(),
               addButton(),
-              //
               if (settingsHandler.booruList.isNotEmpty) ...[
                 booruSelector(),
                 if (selectedBooru != null) ...[
-                  shareButton(),
                   editButton(),
+                  shareButton(),
                   webviewButton(),
                   deleteButton(),
                 ],
@@ -464,7 +462,7 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
       context: NavigationHandler.instance.navigatorKey.currentContext!,
       builder: (BuildContext context) {
         return SettingsDialog(
-          title: const Text('Change default booru?'),
+          title: const Text('Change default Booru?'),
           contentItems: [
             RichText(
               text: TextSpan(

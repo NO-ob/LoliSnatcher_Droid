@@ -46,7 +46,7 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
           child: AbsorbPointer(
             absorbing: true,
             child: TagsFiltersListItem(
-              tag: '[Add New ${widget.tagFilterType} Filter]',
+              tag: '[Add new ${widget.tagFilterType} filter]',
               overrideIcon: const Icon(Icons.add),
             ),
           ),
@@ -55,8 +55,8 @@ class _TagsFiltersAddDialogState extends State<TagsFiltersAddDialog> {
         Container(
           margin: const EdgeInsets.symmetric(vertical: 20),
           child: SettingsTextInput(
-            title: 'New ${widget.tagFilterType} Tag Filter',
-            hintText: 'New Filter',
+            title: 'New ${widget.tagFilterType} tag filter',
+            hintText: 'New filter',
             onlyInput: true,
             controller: _controller,
             autofocus: true,
