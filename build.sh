@@ -13,6 +13,7 @@ echo
 build_arg="LS_IS_TESTING=true"
 build_desc="Testing"
 build_mode="apk --split-per-abi"
+build_extras="--dart-define-from-file=./config/secrets.json"
 suffix="test"
 case "$menu_result"
 in
@@ -36,10 +37,10 @@ esac
 
 clear
 
-echo "Doing a ["$build_desc"] build - [$build_mode --$build_arg]"
+echo "Doing a ["$build_desc"] build - [flutter build $build_mode --$build_arg $build_extras]"
 # Generate empty secret vars config if it's not there
 sh gen_config.sh
-flutter build $build_mode --release --dart-define=$build_arg
+flutter build $build_mode --release --dart-define=$build_arg $build_extras
 
 get_version_and_build() {
     version_and_build=$(grep "version:" pubspec.yaml | awk '{print $2}')
