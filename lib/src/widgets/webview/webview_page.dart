@@ -43,7 +43,6 @@ class _InAppWebviewViewState extends State<InAppWebviewView> {
 
     settings = InAppWebViewSettings(
       userAgent: widget.userAgent ?? Tools.browserUserAgent,
-      useShouldOverrideUrlLoading: true,
       mediaPlaybackRequiresUserGesture: false,
       javaScriptEnabled: true,
       cacheEnabled: false,
