@@ -13,6 +13,14 @@ class AGNPHHandler extends BooruHandler {
   @override
   bool get hasSizeData => true;
 
+  @override
+  Map<String, String> getHeaders() {
+    return {
+      ...super.getHeaders(),
+      'Cookie': 'confirmed_age=true;',
+    };
+  }
+
   /// Because the api doesn't return tags we will create fetched and have another function set tags at a later time.
   /// Seems to work for now but could cause a performance impact.
   /// Makes results show on screen faster than waiting on getDataByID
@@ -25,6 +33,8 @@ class AGNPHHandler extends BooruHandler {
 
   @override
   BooruItem? parseItemFromResponse(dynamic responseItem, int index) {
+    responseItem = responseItem as XmlElement;
+
     final String fileURL = responseItem.getElement('file_url')?.innerText ?? '';
     String sampleURL = responseItem.getElement('preview_url')?.innerText ?? '';
     final String thumbnailURL = responseItem.getElement('thumbnail_url')?.innerText ?? '';
