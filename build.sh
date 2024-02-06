@@ -52,25 +52,25 @@ get_version_and_build
 
 if [ "$build_mode" = "appbundle" ]; then
 	src_aab="build/app/outputs/bundle/release/app-release.aab"
-    dest_aab="build/app/outputs/bundle/release/ls_${version}_${build}_appbundle_${suffix}.aab"
+    dest_aab="build/app/outputs/bundle/release/LoliSnatcher_${version}_${build}_appbundle_${suffix}.aab"
     cp "$src_aab" "$dest_aab"
 
 	echo
-    echo "=> Built AAB: ls_${version}_${build}_appbundle_${suffix}.aab"
+    echo "=> Built AAB: LoliSnatcher_${version}_${build}_appbundle_${suffix}.aab"
 else
 	srcv8_apk="build/app/outputs/flutter-apk/app-arm64-v8a-release.apk"
-	destv8_apk="build/app/outputs/flutter-apk/ls_${version}_${build}_arm64-v8a_${suffix}.apk"
+	destv8_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_arm64-v8a_${suffix}.apk"
 	cp "$srcv8_apk" "$destv8_apk"
 
 	srcv7_apk="build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk"
-	destv7_apk="build/app/outputs/flutter-apk/ls_${version}_${build}_armeabi-v7a_${suffix}.apk"
+	destv7_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_armeabi-v7a_${suffix}.apk"
 	cp "$srcv7_apk" "$destv7_apk"
 
 	src64_apk="build/app/outputs/flutter-apk/app-x86_64-release.apk"
-	dest64_apk="build/app/outputs/flutter-apk/ls_${version}_${build}_x86_64_${suffix}.apk"
+	dest64_apk="build/app/outputs/flutter-apk/LoliSnatcher_${version}_${build}_x86_64_${suffix}.apk"
 	cp "$src64_apk" "$dest64_apk"
 
 	echo
-	echo "=> Built APKs: ls_${version}_${build}_[arch]_${suffix}.apk"
+	echo "=> Built APKs: LoliSnatcher_${version}_${build}_[arch]_${suffix}.apk"
 fi
 
