@@ -91,6 +91,7 @@ class MainActivity: FlutterActivity() {
                 val fileContentUri: Uri = Uri.parse("file://" + call.argument("path"))
                 mediaScannerIntent.data = fileContentUri
                 sendBroadcast(mediaScannerIntent)
+                result.success(true)
             } else if (call.method == "shareText") {
                 val text: String? = call.argument("text")
                 val title: String? = call.argument("title")
