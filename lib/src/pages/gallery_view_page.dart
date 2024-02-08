@@ -224,10 +224,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             if (settingsHandler.disableVideo) {
                               itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                             } else {
-                              if (Platform.isAndroid || Platform.isIOS) {
+                              if ((Platform.isAndroid || Platform.isIOS) && !settingsHandler.useAltVideoPlayer) {
                                 itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
-                              } else if (Platform.isWindows || Platform.isLinux) {
-                                // itemWidget = VideoViewerPlaceholder(item: item);
+                              } else if ((Platform.isWindows || Platform.isLinux) || settingsHandler.useAltVideoPlayer) {
                                 itemWidget = VideoViewerDesktop(item, key: item.key);
                               } else {
                                 itemWidget = VideoViewerPlaceholder(item: item);

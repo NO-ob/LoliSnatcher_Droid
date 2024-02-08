@@ -153,6 +153,7 @@ class SettingsHandler extends GetxController {
   bool startVideosMuted = false;
   bool snatchOnFavourite = false;
   bool useDoubleTapDragZoom = true;
+  bool useAltVideoPlayer = false;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -493,6 +494,10 @@ class SettingsHandler extends GetxController {
     'useDoubleTapDragZoom': {
       'type': 'bool',
       'default': true,
+    },
+    'useAltVideoPlayer': {
+      'type': 'bool',
+      'default': false,
     },
 
     // other
@@ -950,6 +955,8 @@ class SettingsHandler extends GetxController {
         return snatchOnFavourite;
       case 'useDoubleTapDragZoom':
         return useDoubleTapDragZoom;
+      case 'useAltVideoPlayer':
+        return useAltVideoPlayer;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -1156,6 +1163,10 @@ class SettingsHandler extends GetxController {
         break;
       case 'useDoubleTapDragZoom':
         useDoubleTapDragZoom = validatedValue;
+        break;
+      case 'useAltVideoPlayer':
+        useAltVideoPlayer = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1249,6 +1260,7 @@ class SettingsHandler extends GetxController {
       'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
       'useDoubleTapDragZoom': validateValue('useDoubleTapDragZoom', null, toJSON: true),
+      'useAltVideoPlayer': validateValue('useAltVideoPlayer', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),

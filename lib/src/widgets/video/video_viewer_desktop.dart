@@ -5,9 +5,10 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:dart_vlc/dart_vlc.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:photo_view/photo_view.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
@@ -36,13 +37,15 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   PhotoViewScaleStateController scaleController = PhotoViewScaleStateController();
   PhotoViewController viewController = PhotoViewController();
-  Player? videoController;
+
+  Player? player;
+  VideoController? controller;
   Media? media;
 
   final RxInt _total = 0.obs, _received = 0.obs, _startedAt = 0.obs;
   int _lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  bool isFromCache = false, isStopped = false, firstViewFix = false, isViewed = false, isZoomed = false, isLoaded = false, didAutoplay = false;
+  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, isLoaded = false, didAutoplay = false;
   List<String> stopReason = [];
 
   StreamSubscription? indexListener;
@@ -59,7 +62,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     if (oldWidget.booruItem != widget.booruItem) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // reset stuff here
-        firstViewFix = false;
         resetZoom();
         switch (settingsHandler.videoCacheMode) {
           case 'Cache':
@@ -123,7 +125,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       onDoneFile: (File file) async {
         _video = file;
         // save video from cache, but restate only if player is not initialized yet
-        if (videoController == null && !isLoaded) {
+        if (player == null && !isLoaded) {
           unawaited(initPlayer());
           updateState();
         }
@@ -276,8 +278,6 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     isStopped = true;
     stopReason = reason;
 
-    firstViewFix = false;
-
     resetZoom();
 
     updateState();
@@ -302,10 +302,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
   }
 
   void disposables() {
-    // videoController?.setVolume(0);
-    videoController?.pause();
-    videoController?.dispose();
-    videoController = null;
+    player?.pause();
+    player?.dispose();
 
     if (!(_cancelToken != null && _cancelToken!.isCancelled)) {
       _cancelToken?.cancel();
@@ -356,85 +354,83 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
 
   Future<void> changeNetworkVideo() async {
     if (_video != null) {
-      // if (settingsHandler.mediaCache || _video != null) {
       // Start from cache if was already cached or only caching is allowed
-      media = Media.file(
-        _video!,
-        startTime: const Duration(milliseconds: 50),
+      media = Media(
+        _video!.path,
       );
     } else {
       // Otherwise load from network
-      // print('uri: ${widget.booruItem.fileURL}');
-      media = Media.network(
-        widget.booruItem.fileURL,
-        startTime: const Duration(milliseconds: 50),
+      media = Media(
+        // widget.booruItem.fileURL,
+        Uri.encodeFull(widget.booruItem.fileURL),
+        httpHeaders: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       );
     }
-    isLoaded = true;
 
-    videoController!.open(
+    await player!.open(
       media!,
-      autoStart: settingsHandler.autoPlayEnabled,
+      play: settingsHandler.autoPlayEnabled && isViewed,
     );
   }
 
   Future<void> initPlayer() async {
     if (_video != null) {
-      // if (settingsHandler.mediaCache || _video != null) {
       // Start from cache if was already cached or only caching is allowed
-      media = Media.file(
-        _video!,
-        // move start a bit forward to help avoid playback start issues
-        startTime: const Duration(milliseconds: 50),
+      media = Media(
+        _video!.path,
       );
     } else {
       // Otherwise load from network
-      // print('uri: ${widget.booruItem.fileURL}');
-      media = Media.network(
+      media = Media(
         Uri.encodeFull(widget.booruItem.fileURL),
-        startTime: const Duration(milliseconds: 50),
+        httpHeaders: await Tools.getFileCustomHeaders(searchHandler.currentBooru, checkForReferer: true),
       );
     }
-    isLoaded = true;
 
-    videoController = Player(id: searchHandler.getItemIndex(widget.booruItem));
-    videoController!.setUserAgent(Tools.browserUserAgent);
-    videoController!.setVolume(settingsHandler.startVideosMuted ? 0 : 1);
-    // videoController!.open(
-    //   media!,
-    //   autoStart: settingsHandler.autoPlayEnabled,
-    // );
+    player = Player(
+      configuration: PlayerConfiguration(
+        muted: settingsHandler.startVideosMuted,
+        ready: () {
+          isLoaded = true;
+          updateState();
+        },
+      ),
+    );
+    await player!.setPlaylistMode(PlaylistMode.loop);
+    controller = VideoController(
+      player!,
+      configuration: const VideoControllerConfiguration(
+        enableHardwareAcceleration: true,
+        vo: 'mediacodec_embed',
+        hwdec: 'mediacodec',
+      ),
+    );
 
-    videoController!.playbackStream.listen((PlaybackState state) {
-      // dart_vlc has loop logic integrated into playlists, but it is not working?
-      // this will force restart videos on completion
-
-      if (state.isPlaying) {
-        if (state.isCompleted) {
-          videoController!.play();
-        }
-      }
-    });
-
-    videoController!.generalStream.listen((GeneralState state) {
-      //
-    });
-
-    videoController!.errorStream.listen((String error) {
+    player!.stream.error.listen((String error) {
       if (error.isNotEmpty) {
         killLoading(['Error:', error]);
       }
     });
 
+    await player!.open(
+      media!,
+      play: settingsHandler.autoPlayEnabled && isViewed,
+    );
+
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
   }
 
+  MaterialDesktopVideoControlsThemeData get _controlsTheme {
+    return MaterialDesktopVideoControlsThemeData(
+      seekBarPositionColor: accentColor,
+      seekBarThumbColor: accentColor,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // print('!!! Build video desktop ${widget.index}!!!');
-
-    final bool initialized = isLoaded; // videoController != null;
+    final bool initialized = player != null && controller != null && isLoaded;
 
     // protects from video restart when something forces restate here while video is active (example: favoriting from appbar)
     final int viewedIndex = searchHandler.viewedIndex.value;
@@ -444,32 +440,24 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
       if (isViewed) {
         // Reset video time if came into view
         if (needsRestart) {
-          videoController!.seek(Duration.zero);
-        }
-
-        if (!firstViewFix) {
-          videoController!.open(
-            media!,
-            autoStart: settingsHandler.autoPlayEnabled,
-          );
-          firstViewFix = true;
+          player?.seek(Duration.zero);
         }
 
         if (!didAutoplay) {
           if (settingsHandler.autoPlayEnabled) {
             // autoplay if viewed and setting is enabled
-            videoController!.play();
+            player?.play();
           } else {
-            videoController!.pause();
+            player?.pause();
           }
           didAutoplay = true;
         }
 
         if (viewerHandler.videoAutoMute) {
-          videoController!.setVolume(0);
+          player?.setVolume(0);
         }
       } else {
-        videoController!.pause();
+        player?.pause();
       }
     }
 
@@ -511,7 +499,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                   item: widget.booruItem,
                   hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
                   isFromCache: isFromCache,
-                  isDone: initialized && firstViewFix,
+                  isDone: initialized,
                   isTooBig: isTooBig > 0,
                   isStopped: isStopped,
                   stopReasons: stopReason,
@@ -535,17 +523,14 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                     opacity: fullOpacity,
                     child: Padding(
                       padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-                      child: Video(
-                        player: videoController,
-                        scale: 1,
-                        progressBarInactiveColor: Colors.grey,
-                        progressBarActiveColor: accentColor,
-                        progressBarThumbColor: accentColor,
-                        volumeThumbColor: accentColor,
-                        volumeActiveColor: accentColor,
-                        showControls: true,
-                        filterQuality: FilterQuality.medium,
-                        showTimeLeft: true,
+                      child: MaterialDesktopVideoControlsTheme(
+                        normal: _controlsTheme,
+                        fullscreen: _controlsTheme,
+                        child: Video(
+                          controller: controller!,
+                          filterQuality: FilterQuality.medium,
+                          controls: MaterialDesktopVideoControls,
+                        ),
                       ),
                     ),
                   ),

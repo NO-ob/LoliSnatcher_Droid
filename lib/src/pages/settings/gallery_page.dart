@@ -24,7 +24,8 @@ class _GalleryPageState extends State<GalleryPage> {
       disableVideo = false,
       wakeLockEnabled = true,
       enableHeroTransitions = true,
-      useDoubleTapDragZoom = true;
+      useDoubleTapDragZoom = true,
+      useAltVideoPlayer = false;
   late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
@@ -64,6 +65,7 @@ class _GalleryPageState extends State<GalleryPage> {
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
     useDoubleTapDragZoom = settingsHandler.useDoubleTapDragZoom;
+    useAltVideoPlayer = settingsHandler.useAltVideoPlayer;
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
@@ -91,6 +93,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     settingsHandler.enableHeroTransitions = enableHeroTransitions;
     settingsHandler.useDoubleTapDragZoom = useDoubleTapDragZoom;
+    settingsHandler.useAltVideoPlayer = useAltVideoPlayer;
     if (int.parse(scrollSpeedController.text) < 100) {
       scrollSpeedController.text = '100';
     }
@@ -361,6 +364,15 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
 
+              SettingsToggle(
+                value: useAltVideoPlayer,
+                onChanged: (newValue) {
+                  setState(() {
+                    useAltVideoPlayer = newValue;
+                  });
+                },
+                title: 'Use alternative video player [wip]',
+              ),
               SettingsToggle(
                 value: disableVideo,
                 onChanged: (newValue) {
