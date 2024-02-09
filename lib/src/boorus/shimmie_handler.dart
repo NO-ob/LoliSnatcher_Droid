@@ -50,11 +50,14 @@ class ShimmieHandler extends BooruHandler {
         preURL = booru.baseURL!.split('/booru')[0];
       }
 
-      String? possibleFileExt;
+      String thumbnailUrl = preURL + current.getAttribute('preview_url')!;
+      String? possibleFileExt, fileNameExtras;
       if (booru.baseURL!.contains('rule34.paheal.net')) {
         // they now use cdn which hides file names, but it is still given through api in new file_name field
         final fileName = current.getAttribute('file_name');
         possibleFileExt = fileName?.split('.').last;
+        thumbnailUrl = 'https://rule34.paheal.net/${current.getAttribute('preview_url')}';
+        fileNameExtras = fileName;
       }
 
       final String dateString = current.getAttribute('date').toString();
@@ -62,7 +65,7 @@ class ShimmieHandler extends BooruHandler {
         fileURL: preURL + current.getAttribute('file_url')!,
         fileExt: possibleFileExt,
         sampleURL: preURL + current.getAttribute('file_url')!,
-        thumbnailURL: preURL + current.getAttribute('preview_url')!,
+        thumbnailURL: thumbnailUrl,
         tagsList: current.getAttribute('tags')!.split(' '),
         postURL: makePostURL(current.getAttribute('id')!),
         fileWidth: double.tryParse(current.getAttribute('width') ?? ''),
@@ -75,6 +78,7 @@ class ShimmieHandler extends BooruHandler {
         md5String: current.getAttribute('md5'),
         postDate: dateString, // 2021-06-18 04:37:31
         postDateFormat: 'yyyy-MM-dd HH:mm:ss',
+        fileNameExtras: fileNameExtras ?? '',
       );
 
       return item;
