@@ -51,9 +51,9 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     if (item.mediaType.value.isImageOrAnimation) {
       return ImageViewer(item, key: item.key);
     } else if (item.mediaType.value.isVideo) {
-      if ((Platform.isAndroid || Platform.isIOS) && !settingsHandler.useAltVideoPlayer) {
+      if (Platform.isAndroid || Platform.isIOS) {
         return VideoViewer(item, enableFullscreen: true, key: item.key);
-      } else if ((Platform.isWindows || Platform.isLinux) || settingsHandler.useAltVideoPlayer) {
+      } else if (Platform.isWindows || Platform.isLinux) {
         return VideoViewerDesktop(item, key: item.key);
       } else {
         return VideoViewerPlaceholder(item: item);

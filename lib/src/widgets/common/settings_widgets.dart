@@ -245,6 +245,7 @@ class SettingsDropdown<T> extends StatelessWidget {
     this.selectedItemBuilder,
     this.itemTitleBuilder,
     this.clearable = false,
+    this.onReset,
     this.itemExtent,
     this.expendableByScroll = false,
     super.key,
@@ -262,6 +263,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final Widget Function(T?)? selectedItemBuilder;
   final String Function(T?)? itemTitleBuilder;
   final bool clearable;
+  final void Function()? onReset;
   final double? itemExtent;
   final bool expendableByScroll;
 
@@ -308,7 +310,13 @@ class SettingsDropdown<T> extends StatelessWidget {
         labelText: title,
       ),
       subtitle: subtitle,
-      trailing: trailingIcon,
+      trailing: trailingIcon ??
+          (onReset != null
+              ? IconButton(
+                  onPressed: onReset,
+                  icon: const Icon(Icons.refresh_rounded),
+                )
+              : null),
       dense: false,
       shape: Border(
         // draw top border when item is in the middle of other items, but they are not listtile

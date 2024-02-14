@@ -84,6 +84,8 @@ class SettingsHandler extends GetxController {
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
   String customUserAgent = '';
+  String altVideoPlayerVO = 'mediacodec_embed'; // mediakit default: gpu
+  String altVideoPlayerHWDEC = 'mediacodec'; // mediakit default: auto-safe
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -154,6 +156,7 @@ class SettingsHandler extends GetxController {
   bool snatchOnFavourite = false;
   bool useDoubleTapDragZoom = true;
   bool useAltVideoPlayer = false;
+  bool altVideoPlayerHwAccel = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
 
@@ -195,6 +198,10 @@ class SettingsHandler extends GetxController {
     'lastSyncIp',
     'lastSyncPort',
     'customUserAgent',
+    'useAltVideoPlayer',
+    'altVideoPlayerVO',
+    'altVideoPlayerHWDEC',
+    'altVideoPlayerHwAccel',
     'theme',
     'themeMode',
     'isAmoled',
@@ -270,6 +277,30 @@ class SettingsHandler extends GetxController {
       'type': 'stringFromList',
       'default': (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled',
       'options': <String>['Disabled', 'Left', 'Right'],
+    },
+    'altVideoPlayerVO': {
+      'type': 'stringFromList',
+      'default': 'mediacodec_embed', // mediakit default: gpu
+      'options': <String>[
+        'gpu',
+        'gpu-next',
+        'libmpv',
+        'mediacodec_embed',
+        'sdl',
+      ],
+    },
+    'altVideoPlayerHWDEC': {
+      'type': 'stringFromList',
+      'default': 'mediacodec', // mediakit default: auto-safe
+      'options': <String>[
+        'auto',
+        'auto-safe',
+        'auto-copy',
+        'mediacodec',
+        'mediacodec-copy',
+        'vulkan',
+        'vulkan-copy',
+      ],
     },
 
     // string
@@ -498,6 +529,10 @@ class SettingsHandler extends GetxController {
     'useAltVideoPlayer': {
       'type': 'bool',
       'default': false,
+    },
+    'altVideoPlayerHwAccel': {
+      'type': 'bool',
+      'default': true,
     },
 
     // other
@@ -957,6 +992,12 @@ class SettingsHandler extends GetxController {
         return useDoubleTapDragZoom;
       case 'useAltVideoPlayer':
         return useAltVideoPlayer;
+      case 'altVideoPlayerHwAccel':
+        return altVideoPlayerHwAccel;
+      case 'altVideoPlayerVO':
+        return altVideoPlayerVO;
+      case 'altVideoPlayerHWDEC':
+        return altVideoPlayerHWDEC;
       // theme stuff
       case 'appMode':
         return appMode;
@@ -1167,6 +1208,15 @@ class SettingsHandler extends GetxController {
       case 'useAltVideoPlayer':
         useAltVideoPlayer = validatedValue;
         break;
+      case 'altVideoPlayerHwAccel':
+        altVideoPlayerHwAccel = validatedValue;
+        break;
+      case 'altVideoPlayerVO':
+        altVideoPlayerVO = validatedValue;
+        break;
+      case 'altVideoPlayerHWDEC':
+        altVideoPlayerHWDEC = validatedValue;
+        break;
 
       // theme stuff
       case 'appMode':
@@ -1261,6 +1311,9 @@ class SettingsHandler extends GetxController {
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
       'useDoubleTapDragZoom': validateValue('useDoubleTapDragZoom', null, toJSON: true),
       'useAltVideoPlayer': validateValue('useAltVideoPlayer', null, toJSON: true),
+      'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
+      'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
+      'altVideoPlayerHWDEC': validateValue('altVideoPlayerHWDEC', null, toJSON: true),
 
       //TODO
       'buttonOrder': buttonOrder.map((e) => e[0]).toList(),

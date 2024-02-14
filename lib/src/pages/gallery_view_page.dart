@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -224,9 +225,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             if (settingsHandler.disableVideo) {
                               itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                             } else {
-                              if ((Platform.isAndroid || Platform.isIOS) && !settingsHandler.useAltVideoPlayer) {
+                              if (Platform.isAndroid || Platform.isIOS) {
                                 itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
-                              } else if ((Platform.isWindows || Platform.isLinux) || settingsHandler.useAltVideoPlayer) {
+                              } else if (Platform.isWindows || Platform.isLinux) {
                                 itemWidget = VideoViewerDesktop(item, key: item.key);
                               } else {
                                 itemWidget = VideoViewerPlaceholder(item: item);
@@ -246,8 +247,9 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
 
                           return Obx(() {
                             final bool isViewed = index == searchHandler.viewedIndex.value;
-                            final bool isNear = (searchHandler.viewedIndex.value - index).abs() <= settingsHandler.preloadCount;
-                            // print('!! preloadpageview item build $index $isViewed $isNear !!');
+                            final int distanceFromCurrent = (searchHandler.viewedIndex.value - index).abs();
+                            // don't render more than 3 videos at once, chance to crash is too high otherwise
+                            final bool isNear = distanceFromCurrent <= (isVideo ? min(settingsHandler.preloadCount, 1) : settingsHandler.preloadCount);
                             if (!isViewed && !isNear) {
                               // don't render if out of preload range
                               return Center(child: Container(color: Colors.black));

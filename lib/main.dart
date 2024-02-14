@@ -10,7 +10,6 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 
@@ -34,10 +33,10 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 import 'package:lolisnatcher/src/widgets/root/image_stats.dart';
 import 'package:lolisnatcher/src/widgets/root/scroll_physics.dart';
+import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MediaKit.ensureInitialized();
 
   if (Platform.isWindows || Platform.isLinux) {
     // Init db stuff
@@ -60,6 +59,9 @@ void main() async {
   Get.put(ViewerHandler(), permanent: true);
   final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
   await settingsHandler.initialize();
+  if (settingsHandler.useAltVideoPlayer) {
+    MediaKitVideoPlayer.registerWith();
+  }
 
   // TODO
   // AwesomeNotifications().initialize(

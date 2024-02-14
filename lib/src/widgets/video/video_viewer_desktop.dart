@@ -399,10 +399,11 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     await player!.setPlaylistMode(PlaylistMode.loop);
     controller = VideoController(
       player!,
-      configuration: const VideoControllerConfiguration(
-        enableHardwareAcceleration: true,
-        vo: 'mediacodec_embed',
-        hwdec: 'mediacodec',
+      configuration: VideoControllerConfiguration(
+        enableHardwareAcceleration: settingsHandler.altVideoPlayerHwAccel,
+        vo: settingsHandler.altVideoPlayerVO,
+        hwdec: settingsHandler.altVideoPlayerHWDEC,
+        // androidAttachSurfaceAfterVideoParameters: false,
       ),
     );
 
@@ -529,7 +530,8 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
                         child: Video(
                           controller: controller!,
                           filterQuality: FilterQuality.medium,
-                          controls: MaterialDesktopVideoControls,
+                          // controls: NoVideoControls,
+                          controls: (Platform.isAndroid || Platform.isIOS) ? MaterialVideoControls : MaterialDesktopVideoControls,
                         ),
                       ),
                     ),
