@@ -74,6 +74,11 @@ abstract class BooruHandler {
         continue;
       }
 
+      final bool isDuplicate = filteredItems.any((e) => e.fileURL == item.fileURL || (e.serverId != null && e.serverId == item.serverId));
+      if (isDuplicate) {
+        continue;
+      }
+
       filteredItems.add(item);
     }
 
