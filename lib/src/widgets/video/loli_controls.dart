@@ -9,9 +9,11 @@ import 'package:chewie/src/chewie_player.dart' show ChewieController;
 import 'package:chewie/src/chewie_progress_colors.dart';
 import 'package:chewie/src/helpers/utils.dart';
 import 'package:chewie/src/progress_bar.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 
 class LoliControls extends StatefulWidget {
@@ -86,8 +88,14 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
           absorbing: _hideStuff,
           child: Column(
             children: [
-              _buildDoubleTapMessage(),
-              _buildHitArea(),
+              Expanded(
+                child: Stack(
+                  children: [
+                    _buildDoubleTapMessage(),
+                    _buildHitArea(),
+                  ],
+                ),
+              ),
               Stack(
                 alignment: AlignmentDirectional.bottomStart,
                 children: [
@@ -272,8 +280,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         child: Container(
           height: barHeight,
           margin: EdgeInsets.only(
-            // when not in fullscreen - move lower to avoid conflict with appbar
-            top: chewieController.isFullScreen ? 10 : 60,
+            top: MediaQuery.paddingOf(context).top + 32,
             right: 10,
             left: 10,
             bottom: 10,
@@ -320,33 +327,40 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
     );
   }
 
-  Expanded _buildHitArea() {
+  Widget _buildHitArea() {
     final bool isFinished = _latestValue.position >= _latestValue.duration;
 
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          if (_latestValue.isPlaying) {
-            if (_displayTapped) {
-              setState(() {
-                _hideStuff = true;
-              });
-            } else {
-              _cancelAndRestartTimer();
-            }
-          } else {
-            _playPause();
-
+    return GestureDetector(
+      onTap: () {
+        if (_latestValue.isPlaying) {
+          if (_displayTapped) {
             setState(() {
               _hideStuff = true;
             });
+          } else {
+            _cancelAndRestartTimer();
           }
+        } else {
+          _playPause();
 
-          toggleToolbar();
-        },
-        child: ColoredBox(
+          setState(() {
+            _hideStuff = true;
+          });
+        }
+
+        toggleToolbar();
+      },
+      child: Obx(() {
+        final bool isFullScreen = chewieController.isFullScreen || !viewerHandler.displayAppbar.value;
+        final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
+
+        return Container(
           // color: Colors.yellow.withOpacity(0.66),
           color: Colors.transparent,
+          padding: EdgeInsets.only(
+            top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)),
+            bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
+          ),
           child: Center(
             child: Stack(
               alignment: Alignment.center,
@@ -392,8 +406,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
               ],
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -407,11 +421,12 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         final chosenSpeed = await showModalBottomSheet<double>(
           context: context,
           isScrollControlled: true,
+          isDismissible: true,
           useRootNavigator: true,
-          builder: (context) => _PlaybackSpeedDialog(
+          useSafeArea: true,
+          builder: (_) => _PlaybackSpeedDialog(
             speeds: chewieController.playbackSpeeds,
             selected: _latestValue.playbackSpeed,
-            key: const Key('playbackSpeedKey'),
           ),
         );
 
@@ -759,63 +774,73 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
 class _PlaybackSpeedDialog extends StatelessWidget {
   const _PlaybackSpeedDialog({
-    required Key key,
-    required List<double> speeds,
-    required double selected,
-  })  : _speeds = speeds,
-        _selected = selected,
-        super(key: key);
+    required this.speeds,
+    required this.selected,
+  });
 
-  final List<double> _speeds;
-  final double _selected;
+  final List<double> speeds;
+  final double selected;
 
   @override
   Widget build(BuildContext context) {
     final Color selectedColor = Theme.of(context).colorScheme.secondary;
 
+    final scrollController = ScrollController();
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(
+        SizedBox(
           height: 58,
           child: Row(
             children: [
-              SizedBox(width: 16),
-              Text('Select Video Speed:', style: TextStyle(color: Colors.white)),
+              const SizedBox(width: 32),
+              const Expanded(
+                child: Text(
+                  'Select Video Speed:',
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              IconButton(
+                onPressed: Navigator.of(context).pop,
+                icon: const Icon(Icons.close),
+              ),
+              const SizedBox(width: 8),
             ],
           ),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const ScrollPhysics(),
-          itemBuilder: (context, index) {
-            final double speed = _speeds[index];
-            return ListTile(
-              dense: true,
-              title: Row(
-                children: [
-                  if (speed == _selected)
-                    Icon(
-                      Icons.check,
-                      size: 20,
-                      color: selectedColor,
-                    )
-                  else
-                    Container(width: 20),
-                  const SizedBox(width: 16),
-                  Text(
+        Flexible(
+          child: Scrollbar(
+            controller: scrollController,
+            thumbVisibility: true,
+            child: ListView.builder(
+              shrinkWrap: true,
+              controller: scrollController,
+              itemCount: speeds.length,
+              itemBuilder: (context, index) {
+                final double speed = speeds[index];
+                return ListTile(
+                  dense: true,
+                  title: Text(
                     speed.toString(),
                     style: const TextStyle(color: Colors.white),
                   ),
-                ],
-              ),
-              selected: speed == _selected,
-              onTap: () {
-                Navigator.of(context).pop(speed);
+                  leading: Icon(
+                    speed == selected ? Icons.check : null,
+                    size: 20,
+                    color: selectedColor,
+                  ),
+                  selected: speed == selected,
+                  onTap: () {
+                    Navigator.of(context).pop(speed);
+                  },
+                );
               },
-            );
-          },
-          itemCount: _speeds.length,
+            ),
+          ),
         ),
       ],
     );

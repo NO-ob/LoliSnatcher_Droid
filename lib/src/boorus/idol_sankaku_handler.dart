@@ -21,6 +21,16 @@ class IdolSankakuHandler extends SankakuHandler {
   }
 
   @override
+  Options? fetchTagSuggestionsOptions() {
+    return Options(responseType: ResponseType.plain);
+  }
+
+  @override
+  Options? fetchCommentsOptions() {
+    return Options(responseType: ResponseType.plain);
+  }
+
+  @override
   Map<String, String> getHeaders() {
     return {
       'User-Agent': EnvironmentConfig.hasSiSecret ? 'SCChannelApp/4.0 (Android; idol)' : Constants.defaultBrowserUserAgent,
@@ -112,7 +122,11 @@ class IdolSankakuHandler extends SankakuHandler {
 
   @override
   String makeTagURL(String input) {
-    return '${booru.baseURL}/tag/index.json?name=$input*&limit=10';
+    final authPart = (booru.userID?.isNotEmpty == true && booru.apiKey?.isNotEmpty == true && login.isNotEmpty && passHash.isNotEmpty && appkey.isNotEmpty)
+        ? 'login=$login&password_hash=$passHash&appkey=$appkey&'
+        : '';
+
+    return '${booru.baseURL}/tag/index.json?${authPart}name=$input*&limit=10';
   }
 
   @override
@@ -122,8 +136,14 @@ class IdolSankakuHandler extends SankakuHandler {
   }
 
   @override
+  List parseTagSuggestionsList(dynamic response) {
+    final List<dynamic> parsedResponse = jsonDecode(response.data);
+    return parsedResponse;
+  }
+
+  @override
   List parseCommentsList(dynamic response) {
-    final List<dynamic> parsedResponse = response.data;
+    final List<dynamic> parsedResponse = jsonDecode(response.data);
     return parsedResponse;
   }
 

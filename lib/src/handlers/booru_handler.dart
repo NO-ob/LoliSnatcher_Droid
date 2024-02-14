@@ -74,6 +74,11 @@ abstract class BooruHandler {
         continue;
       }
 
+      final bool isDuplicate = filteredItems.any((e) => e.fileURL == item.fileURL || (e.serverId != null && e.serverId == item.serverId));
+      if (isDuplicate) {
+        continue;
+      }
+
       filteredItems.add(item);
     }
 
@@ -323,7 +328,16 @@ abstract class BooruHandler {
       if (cookies.isNotEmpty) 'Cookie': cookies,
     };
 
-    return DioNetwork.get(uri.toString(), headers: headers, cancelToken: cancelToken);
+    return DioNetwork.get(
+      uri.toString(),
+      headers: headers,
+      options: fetchTagSuggestionsOptions(),
+      cancelToken: cancelToken,
+    );
+  }
+
+  Options? fetchTagSuggestionsOptions() {
+    return null;
   }
 
   /// [SHOULD BE OVERRIDDEN]
@@ -408,8 +422,13 @@ abstract class BooruHandler {
     return DioNetwork.get(
       uri.toString(),
       headers: headers,
+      options: fetchCommentsOptions(),
       cancelToken: cancelToken,
     );
+  }
+
+  Options? fetchCommentsOptions() {
+    return null;
   }
 
   /// [SHOULD BE OVERRIDDEN]
