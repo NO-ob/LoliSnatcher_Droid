@@ -79,6 +79,7 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
       child: GestureDetector(
         onDoubleTapDown: _doubleTapInfoWrite,
         onDoubleTap: _doubleTapAction,
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           _cancelAndRestartTimer();
           toggleToolbar();
@@ -351,14 +352,15 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
         toggleToolbar();
       },
       child: Obx(() {
-        final bool isFullScreen = chewieController.isFullScreen || !viewerHandler.displayAppbar.value;
+        final bool isAppbarDisplayed = viewerHandler.displayAppbar.value;
+        final bool isFullScreen = chewieController.isFullScreen || !isAppbarDisplayed;
         final bool isTopAppbar = SettingsHandler.instance.galleryBarPosition == 'Top';
 
         return Container(
           // color: Colors.yellow.withOpacity(0.66),
           color: Colors.transparent,
           padding: EdgeInsets.only(
-            top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)),
+            top: MediaQuery.paddingOf(context).top + (isFullScreen ? 0 : (isTopAppbar ? 0 : kToolbarHeight)) + barHeight + 16,
             bottom: MediaQuery.paddingOf(context).bottom + (isFullScreen ? 0 : (isTopAppbar ? kToolbarHeight : 0)),
           ),
           child: Center(
@@ -395,14 +397,21 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     ),
                   ),
                 ),
-                if (_latestValue.isBuffering)
-                  const Center(
+                AnimatedCrossFade(
+                  firstChild: const SizedBox(height: 80, width: 80),
+                  secondChild: const Center(
                     widthFactor: 3,
                     heightFactor: 3,
                     child: CircularProgressIndicator(
                       strokeWidth: 5,
                     ),
                   ),
+                  crossFadeState: _latestValue.isBuffering ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                  duration: const Duration(milliseconds: 1000),
+                  secondCurve: Curves.easeIn,
+                  reverseDuration: const Duration(milliseconds: 100),
+                  firstCurve: Curves.easeOut,
+                ),
               ],
             ),
           ),
