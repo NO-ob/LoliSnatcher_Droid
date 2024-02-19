@@ -278,11 +278,11 @@ class _WaterfallViewState extends State<WaterfallView> {
       });
     }
 
-    return RawKeyboardListener(
+    return KeyboardListener(
       // Note: use autofocus instead focusedChild == null that was used before, old way caused unnecesary rebuilds and broke hero animation
       autofocus: true,
       focusNode: kbFocusNode,
-      onKey: (RawKeyEvent event) {
+      onKeyEvent: (KeyEvent event) {
         // print('waterfall keyboard ${viewerHandler.inViewer.value}');
 
         // TODO move all this higher? make global handler for hotkeys?
@@ -294,7 +294,7 @@ class _WaterfallViewState extends State<WaterfallView> {
 
         // detect only key DOWN events
         // physicalKey guarantees detection on non-english keys/languages
-        if (event.runtimeType == RawKeyDownEvent) {
+        if (event.runtimeType == KeyDownEvent) {
           if (event.physicalKey == PhysicalKeyboardKey.keyK || event.physicalKey == PhysicalKeyboardKey.keyS) {
             // searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
             columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;

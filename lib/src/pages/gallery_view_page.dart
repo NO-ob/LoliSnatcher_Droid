@@ -151,14 +151,14 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
           }, // Amount of swiped away which triggers dismiss
           onDismissed: (_) => Navigator.of(context).pop(),
           child: Center(
-            child: RawKeyboardListener(
+            child: KeyboardListener(
               autofocus: false,
               focusNode: kbFocusNode,
-              onKey: (RawKeyEvent event) async {
+              onKeyEvent: (KeyEvent event) async {
                 // print('viewer keyboard ${viewerHandler.inViewer.value}');
 
                 // detect only key DOWN events
-                if (event.runtimeType == RawKeyDownEvent) {
+                if (event.runtimeType == KeyDownEvent) {
                   if (event.physicalKey == PhysicalKeyboardKey.arrowLeft || event.physicalKey == PhysicalKeyboardKey.keyH) {
                     // prev page on Left Arrow or H
                     if (searchHandler.viewedIndex.value > 0) {
