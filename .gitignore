@@ -44,7 +44,7 @@ windows/flutter/generated_plugin_registrant.h
 /ios/
 
 # FVM files
-.fvm/flutter_sdk
+.fvm/
 
 # Secret variables
 /config/secrets.json
