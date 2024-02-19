@@ -24,7 +24,6 @@ import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 class GalleryViewPage extends StatefulWidget {
@@ -225,10 +224,8 @@ class _GalleryViewPageState extends State<GalleryViewPage> {
                             if (settingsHandler.disableVideo) {
                               itemWidget = const Center(child: Text('Video Disabled', style: TextStyle(fontSize: 20)));
                             } else {
-                              if (Platform.isAndroid || Platform.isIOS) {
+                              if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
                                 itemWidget = VideoViewer(item, enableFullscreen: true, key: item.key);
-                              } else if (Platform.isWindows || Platform.isLinux) {
-                                itemWidget = VideoViewerDesktop(item, key: item.key);
                               } else {
                                 itemWidget = VideoViewerPlaceholder(item: item);
                               }

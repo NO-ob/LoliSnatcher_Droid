@@ -84,8 +84,8 @@ class SettingsHandler extends GetxController {
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
   String customUserAgent = '';
-  String altVideoPlayerVO = 'mediacodec_embed'; // mediakit default: gpu
-  String altVideoPlayerHWDEC = 'mediacodec'; // mediakit default: auto-safe
+  String altVideoPlayerVO = (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'mediacodec_embed'; // mediakit default: gpu - android, libmpv - desktop
+  String altVideoPlayerHWDEC = (Platform.isWindows || Platform.isLinux) ? 'auto' : 'mediacodec'; // mediakit default: auto-safe - android, auto - desktop
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -155,7 +155,7 @@ class SettingsHandler extends GetxController {
   bool startVideosMuted = false;
   bool snatchOnFavourite = false;
   bool useDoubleTapDragZoom = true;
-  bool useAltVideoPlayer = false;
+  bool useAltVideoPlayer = Platform.isWindows || Platform.isLinux;
   bool altVideoPlayerHwAccel = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
@@ -280,7 +280,7 @@ class SettingsHandler extends GetxController {
     },
     'altVideoPlayerVO': {
       'type': 'stringFromList',
-      'default': 'mediacodec_embed', // mediakit default: gpu
+      'default': (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'mediacodec_embed', // mediakit default: gpu - android, libmpv - desktop
       'options': <String>[
         'gpu',
         'gpu-next',
@@ -291,7 +291,7 @@ class SettingsHandler extends GetxController {
     },
     'altVideoPlayerHWDEC': {
       'type': 'stringFromList',
-      'default': 'mediacodec', // mediakit default: auto-safe
+      'default': (Platform.isWindows || Platform.isLinux) ? 'auto' : 'mediacodec', // mediakit default: auto-safe - android, auto - desktop
       'options': <String>[
         'auto',
         'auto-safe',
@@ -528,7 +528,7 @@ class SettingsHandler extends GetxController {
     },
     'useAltVideoPlayer': {
       'type': 'bool',
-      'default': false,
+      'default': Platform.isWindows || Platform.isLinux,
     },
     'altVideoPlayerHwAccel': {
       'type': 'bool',

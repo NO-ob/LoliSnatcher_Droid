@@ -17,7 +17,6 @@ import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 /// This class will listen for the value of viewedItem in searchtabs
@@ -51,10 +50,8 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
     if (item.mediaType.value.isImageOrAnimation) {
       return ImageViewer(item, key: item.key);
     } else if (item.mediaType.value.isVideo) {
-      if (Platform.isAndroid || Platform.isIOS) {
+      if (Platform.isAndroid || Platform.isIOS || Platform.isWindows || Platform.isLinux) {
         return VideoViewer(item, enableFullscreen: true, key: item.key);
-      } else if (Platform.isWindows || Platform.isLinux) {
-        return VideoViewerDesktop(item, key: item.key);
       } else {
         return VideoViewerPlaceholder(item: item);
       }

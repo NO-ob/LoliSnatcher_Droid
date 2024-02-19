@@ -59,7 +59,7 @@ void main() async {
   Get.put(ViewerHandler(), permanent: true);
   final SettingsHandler settingsHandler = Get.put(SettingsHandler(), permanent: true);
   await settingsHandler.initialize();
-  if (settingsHandler.useAltVideoPlayer) {
+  if (settingsHandler.useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
     MediaKitVideoPlayer.registerWith();
   }
 

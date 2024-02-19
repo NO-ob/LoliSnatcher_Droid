@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -109,7 +111,7 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
     settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
     settingsHandler.altVideoPlayerHWDEC = altVideoPlayerHWDEC;
-    if (settingsHandler.useAltVideoPlayer) {
+    if (settingsHandler.useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
       MediaKitVideoPlayer.registerWith();
     } else {
       MediaKitVideoPlayer.registerNative();
@@ -385,16 +387,18 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
 
-              SettingsToggle(
-                value: useAltVideoPlayer,
-                onChanged: (newValue) {
-                  setState(() {
-                    useAltVideoPlayer = newValue;
-                  });
-                },
-                title: 'Use alternative video player backend',
-                subtitle: const Text('May have better performance, but some videos may not work on your device due to codecs'),
-              ),
+              if (Platform.isAndroid || Platform.isIOS) ...[
+                SettingsToggle(
+                  value: useAltVideoPlayer,
+                  onChanged: (newValue) {
+                    setState(() {
+                      useAltVideoPlayer = newValue;
+                    });
+                  },
+                  title: 'Use alternative video player backend',
+                  subtitle: const Text('May have better performance, but some videos may not work on your device due to codecs'),
+                ),
+              ],
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
                 child: useAltVideoPlayer
