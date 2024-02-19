@@ -171,14 +171,23 @@ class _MobileHomeState extends State<MobileHome> {
               icon: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.keyboard_double_arrow_left_rounded,
-                    color: Theme.of(context).appBarTheme.iconTheme?.color,
+                  if (settingsHandler.handSide.value.isLeft)
+                    Icon(
+                      Icons.save,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
+                  Transform.rotate(
+                    angle: settingsHandler.handSide.value.isRight ? 0 : pi,
+                    child: Icon(
+                      Icons.keyboard_double_arrow_left_rounded,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
                   ),
-                  Icon(
-                    Icons.save,
-                    color: Theme.of(context).appBarTheme.iconTheme?.color,
-                  ),
+                  if (settingsHandler.handSide.value.isRight)
+                    Icon(
+                      Icons.save,
+                      color: Theme.of(context).appBarTheme.iconTheme?.color,
+                    ),
                 ],
               ),
             ),
