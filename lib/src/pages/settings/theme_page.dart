@@ -26,7 +26,6 @@ class _ThemePageState extends State<ThemePage> {
 
   late ThemeItem theme;
   late ThemeMode themeMode;
-  late bool useMaterial3;
   late bool useDynamicColor;
   late bool isAmoled;
   late bool enableMascot;
@@ -42,7 +41,6 @@ class _ThemePageState extends State<ThemePage> {
     super.initState();
     theme = settingsHandler.theme.value;
     themeMode = settingsHandler.themeMode.value;
-    useMaterial3 = settingsHandler.useMaterial3.value;
     useDynamicColor = settingsHandler.useDynamicColor.value;
     isAmoled = settingsHandler.isAmoled.value;
     enableMascot = settingsHandler.enableDrawerMascot;
@@ -76,7 +74,6 @@ class _ThemePageState extends State<ThemePage> {
 
     settingsHandler.theme.value = theme;
     settingsHandler.themeMode.value = themeMode;
-    settingsHandler.useMaterial3.value = useMaterial3;
     settingsHandler.useDynamicColor.value = useDynamicColor;
     settingsHandler.isAmoled.value = isAmoled;
     settingsHandler.enableDrawerMascot = enableMascot;
@@ -265,20 +262,7 @@ class _ThemePageState extends State<ThemePage> {
                 },
                 title: 'AMOLED',
               ),
-              SettingsToggle(
-                value: useMaterial3,
-                onChanged: (bool newValue) {
-                  useMaterial3 = newValue;
-                  // dynamic color is exclusive to material theme
-                  if (newValue == false) {
-                    useDynamicColor = false;
-                  }
-                  setState(() {});
-                  updateTheme();
-                },
-                title: 'Material3 [Preview]',
-              ),
-              if (useMaterial3 && currentSdk >= 31)
+              if (currentSdk >= 31)
                 SettingsToggle(
                   value: useDynamicColor,
                   onChanged: (bool newValue) {

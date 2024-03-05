@@ -195,14 +195,12 @@ class _MainAppState extends State<MainApp> {
           ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
           : settingsHandler.theme.value;
       final ThemeMode themeMode = settingsHandler.themeMode.value;
-      final bool useMaterial3 = settingsHandler.useMaterial3.value;
       final bool useDynamicColor = settingsHandler.useDynamicColor.value;
       final bool isAmoled = settingsHandler.isAmoled.value;
 
       final ThemeHandler themeHandler = ThemeHandler(
         theme: theme,
         themeMode: themeMode,
-        useMaterial3: useMaterial3,
         isAmoled: isAmoled,
       );
 
