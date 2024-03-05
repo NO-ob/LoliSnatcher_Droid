@@ -493,7 +493,10 @@ class _TagViewState extends State<TagView> {
                 Container(
                   width: 6,
                   height: 24,
-                  color: tagHandler.getTag(tag).getColour(),
+                  decoration: BoxDecoration(
+                    color: tagHandler.getTag(tag).getColour(),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -702,11 +705,10 @@ class _TagViewState extends State<TagView> {
                   width: 6,
                   height: 50,
                   decoration: BoxDecoration(
-                    border: Border(
-                      left: BorderSide(
-                        width: 6,
-                        color: tagHandler.getTag(currentTag).getColour(),
-                      ),
+                    color: tagHandler.getTag(currentTag).getColour(),
+                    borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
                     ),
                   ),
                 ),

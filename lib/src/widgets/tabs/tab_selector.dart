@@ -10,8 +10,10 @@ import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+import 'package:lolisnatcher/src/handlers/tag_handler.dart';
 import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
@@ -161,6 +163,7 @@ class TabManagerPage extends StatefulWidget {
 class _TabManagerPageState extends State<TabManagerPage> {
   final SearchHandler searchHandler = SearchHandler.instance;
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+  final TagHandler tagHandler = TagHandler.instance;
 
   List<SearchTab> tabs = [], filteredTabs = [], selectedTabs = [];
   late final ScrollController scrollController;
@@ -168,6 +171,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
   final TextEditingController filterTextController = TextEditingController();
   bool? sortTabs, loadedFilter;
   Booru? booruFilter;
+  TagType? tagTypeFilter;
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
   bool selectMode = false;
 
@@ -184,6 +188,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
       count++;
     }
     if (booruFilter != null) {
+      count++;
+    }
+    if (tagTypeFilter != null) {
       count++;
     }
     if (duplicateFilter) {
@@ -289,6 +296,18 @@ class _TabManagerPageState extends State<TabManagerPage> {
           filteredTabs.where((t) => loadedFilter == true ? t.booruHandler.filteredFetched.isNotEmpty : t.booruHandler.filteredFetched.isEmpty).toList();
     }
 
+    if (tagTypeFilter != null) {
+      filteredTabs = filteredTabs.where((tab) {
+        final List<String> tags = tab.tags.toLowerCase().trim().split(' ');
+        for (final tag in tags) {
+          if (tagHandler.getTag(tag).tagType == tagTypeFilter) {
+            return true;
+          }
+        }
+        return false;
+      }).toList();
+    }
+
     if (duplicateFilter) {
       // tabs where booru and tags are the same
       final Map<String, List<SearchTab>> freqMap = {};
@@ -353,6 +372,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
         booruFilterChanged: (Booru? newValue) {
           booruFilter = newValue;
         },
+        tagTypeFilter: tagTypeFilter,
+        tagTypeFilterChanged: (TagType? newValue) {
+          tagTypeFilter = newValue;
+        },
         duplicateFilter: duplicateFilter,
         duplicateFilterChanged: (bool newValue) {
           duplicateFilter = newValue;
@@ -376,9 +399,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
         sortTabs = true;
       }
     }
-    if (result == 'clear' || (loadedFilter == null && booruFilter == null && duplicateFilter == false && emptyFilter == false)) {
+    if (result == 'clear' || (loadedFilter == null && booruFilter == null && tagTypeFilter == null && duplicateFilter == false && emptyFilter == false)) {
       loadedFilter = null;
       booruFilter = null;
+      tagTypeFilter = null;
       duplicateFilter = false;
       duplicateBooruFilter = true;
       emptyFilter = false;
