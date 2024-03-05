@@ -10,8 +10,9 @@ enum TagType {
 
   bool get isArtist => this == TagType.artist;
   bool get isCharacter => this == TagType.character;
-  bool get isSpecies => this == TagType.species;
+  bool get isCopyright => this == TagType.copyright;
   bool get isMeta => this == TagType.meta;
+  bool get isSpecies => this == TagType.species;
   bool get isNone => this == TagType.none;
 
   static TagType fromString(String string) {

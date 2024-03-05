@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:material_color_utilities/material_color_utilities.dart';
 
 import 'package:lolisnatcher/src/data/theme_item.dart';
 
@@ -11,7 +12,6 @@ class ThemeHandler {
   ThemeHandler({
     required this.theme,
     required this.themeMode,
-    required this.useMaterial3,
     required this.isAmoled,
   }) {
     final platformBrigtness = WidgetsBinding.instance.platformDispatcher.views.first.platformDispatcher.platformBrightness;
@@ -27,7 +27,6 @@ class ThemeHandler {
 
   final ThemeItem theme;
   final ThemeMode themeMode;
-  final bool useMaterial3;
   final bool isAmoled;
   ColorScheme? lightDynamic;
   ColorScheme? darkDynamic;
@@ -58,7 +57,7 @@ class ThemeHandler {
   ThemeData lightTheme() {
     final ColorScheme lightColorScheme = colorScheme();
 
-    return ThemeData.light(useMaterial3: useMaterial3).copyWith(
+    return ThemeData.light(useMaterial3: true).copyWith(
       brightness: Brightness.light,
       appBarTheme: appBarTheme(lightColorScheme),
 
@@ -98,13 +97,10 @@ class ThemeHandler {
   ThemeData darkTheme() {
     final ColorScheme darkColorScheme = colorScheme();
 
-    return ThemeData.dark(useMaterial3: useMaterial3).copyWith(
+    return ThemeData.dark(useMaterial3: true).copyWith(
       brightness: Brightness.dark,
       appBarTheme: appBarTheme(darkColorScheme),
-
-      scaffoldBackgroundColor: isAmoled ? Colors.black : null,
-      // canvasColor: isAmoled ? Colors.black : null,
-
+      scaffoldBackgroundColor: darkColorScheme.background,
       colorScheme: darkColorScheme,
       textTheme: textTheme(),
       textSelectionTheme: textSelectionTheme(darkColorScheme),
@@ -149,31 +145,27 @@ class ThemeHandler {
       }
     }
 
-    if (useMaterial3) {
-      return ColorScheme.fromSeed(
-        seedColor: theme.accent!,
-        primary: theme.primary,
-        onPrimary: primaryIsDark ? Colors.white : Colors.black,
-        secondary: theme.accent,
-        onSecondary: accentIsDark ? Colors.white : Colors.black,
-        error: Colors.redAccent,
-        onError: Colors.white,
-        brightness: isDark ? Brightness.dark : Brightness.light,
-      );
+    final brightness = isDark ? Brightness.dark : Brightness.light;
+    late final Scheme scheme;
+
+    switch (brightness) {
+      case Brightness.light:
+        scheme = Scheme.light(theme.accent!.value);
+      case Brightness.dark:
+        scheme = Scheme.dark(theme.accent!.value);
     }
 
-    return ColorScheme(
-      primary: theme.primary!,
+    return ColorScheme.fromSeed(
+      seedColor: theme.accent!,
+      primary: theme.primary,
       onPrimary: primaryIsDark ? Colors.white : Colors.black,
-      secondary: theme.accent!,
+      secondary: theme.accent,
       onSecondary: accentIsDark ? Colors.white : Colors.black,
-      surface: isDark ? Colors.grey[900]! : Colors.grey[300]!,
-      onSurface: isDark ? Colors.white : Colors.black,
-      background: isDark ? (isAmoled ? Colors.black : Colors.grey[900]!) : Colors.white,
-      onBackground: isDark ? Colors.white : Colors.black,
+      background: (isDark && isAmoled) ? Colors.black : Color(scheme.background),
+      onBackground: Color(scheme.onBackground),
       error: Colors.redAccent,
       onError: Colors.white,
-      brightness: isDark ? Brightness.dark : Brightness.light,
+      brightness: brightness,
     );
   }
 

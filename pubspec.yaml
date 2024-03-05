@@ -6,28 +6,28 @@ version: 2.4.0+188 # remember to update the values in constants.dart after chang
 
 environment:
   sdk: ">=3.1.4 <4.0.0"
-  flutter: ^3.19.0
+  flutter: ^3.19.2
 
 dependencies:
   flutter:
     sdk: flutter
 
   alice_lightweight: ^3.5.1
-  app_links: ^3.5.0
+  app_links: ^3.5.1
   auto_size_text: ^3.0.0
   awesome_notifications: ^0.9.2
   chewie: ^1.7.5
   crypto: ^3.0.3
   cupertino_icons: ^1.0.6
   dio: ^5.4.1
-  dynamic_color: ^1.6.9
+  dynamic_color: ^1.7.0
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original
       url: "https://github.com/NANI-SORE/fast_marquee.git"
       ref: 828e79014ed5fd73062d6a24db14b6c114ac175b # master - forked to add richtext
   flash: ^3.1.0
-  flex_color_picker: ^3.3.1
+  flex_color_picker: ^3.4.0
   flutter_displaymode: ^0.6.0
   flutter_improved_scrolling: ^0.0.3
   flutter_inappwebview: ^6.0.0
@@ -38,7 +38,7 @@ dependencies:
   flutter_linkify: ^6.0.0
   font_awesome_flutter: ^10.6.0
   get: ^4.6.6
-  google_fonts: ^6.1.0
+  google_fonts: ^6.2.1
   html: ^0.15.4
   huge_listview: ^2.0.11
   image: ^4.1.7
@@ -65,7 +65,7 @@ dependencies:
   sqflite: ^2.3.0
   statsfl: ^2.3.0
   transparent_image: ^2.0.1
-  url_launcher: ^6.2.4
+  url_launcher: ^6.2.5
   uuid: ^4.3.3
   vibration: ^1.8.4
   video_player: ^2.8.2 # in android/app/build.gradle exoplayer dependencies are overriden to lower versions to avoid videos not playing on older devices
