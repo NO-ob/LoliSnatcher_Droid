@@ -84,8 +84,8 @@ class SettingsHandler extends GetxController {
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
   String customUserAgent = '';
-  String altVideoPlayerVO = (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'mediacodec_embed'; // mediakit default: gpu - android, libmpv - desktop
-  String altVideoPlayerHWDEC = (Platform.isWindows || Platform.isLinux) ? 'auto' : 'mediacodec'; // mediakit default: auto-safe - android, auto - desktop
+  String altVideoPlayerVO = (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
+  String altVideoPlayerHWDEC = (Platform.isWindows || Platform.isLinux) ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -116,6 +116,7 @@ class SettingsHandler extends GetxController {
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
     ['toggle_quality', 'Toggle Quality'],
+    ['external_player', 'External player'],
   ];
   List<List<String>> buttonOrder = [
     ['autoscroll', 'AutoScroll'],
@@ -126,6 +127,7 @@ class SettingsHandler extends GetxController {
     ['open', 'Open in Browser'],
     ['reloadnoscale', 'Reload w/out scaling'],
     ['toggle_quality', 'Toggle Quality'],
+    ['external_player', 'External player'],
   ];
 
   bool jsonWrite = false;
@@ -278,7 +280,7 @@ class SettingsHandler extends GetxController {
     },
     'altVideoPlayerVO': {
       'type': 'stringFromList',
-      'default': (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'mediacodec_embed', // mediakit default: gpu - android, libmpv - desktop
+      'default': (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
       'options': <String>[
         'gpu',
         'gpu-next',
@@ -289,7 +291,7 @@ class SettingsHandler extends GetxController {
     },
     'altVideoPlayerHWDEC': {
       'type': 'stringFromList',
-      'default': (Platform.isWindows || Platform.isLinux) ? 'auto' : 'mediacodec', // mediakit default: auto-safe - android, auto - desktop
+      'default': (Platform.isWindows || Platform.isLinux) ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
       'options': <String>[
         'auto',
         'auto-safe',
@@ -545,6 +547,7 @@ class SettingsHandler extends GetxController {
         ['open', 'Open in Browser'],
         ['reloadnoscale', 'Reload w/out scaling'],
         ['toggle_quality', 'Toggle Quality'],
+        ['external_player', 'External player'],
       ],
     },
     'cacheDuration': {

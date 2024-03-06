@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
-import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 
 class GalleryPage extends StatefulWidget {
   const GalleryPage({super.key});
@@ -16,28 +13,17 @@ class GalleryPage extends StatefulWidget {
 
 class _GalleryPageState extends State<GalleryPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
+
   bool autoHideImageBar = false,
-      autoPlay = true,
-      startVideosMuted = false,
       hideNotes = false,
       allowRotation = false,
       loadingGif = false,
       useVolumeButtonsForScroll = false,
       shitDevice = false,
-      disableVideo = false,
       wakeLockEnabled = true,
       enableHeroTransitions = true,
-      useDoubleTapDragZoom = true,
-      useAltVideoPlayer = false,
-      altVideoPlayerHwAccel = true;
-  late String galleryMode,
-      galleryBarPosition,
-      galleryScrollDirection,
-      shareAction,
-      zoomButtonPosition,
-      changePageButtonsPosition,
-      altVideoPlayerVO,
-      altVideoPlayerHWDEC;
+      useDoubleTapDragZoom = true;
+  late String galleryMode, galleryBarPosition, galleryScrollDirection, shareAction, zoomButtonPosition, changePageButtonsPosition;
 
   List<List<String>>? buttonOrder;
 
@@ -62,8 +48,6 @@ class _GalleryPageState extends State<GalleryPage> {
 
     zoomButtonPosition = settingsHandler.zoomButtonPosition;
     changePageButtonsPosition = settingsHandler.changePageButtonsPosition;
-    autoPlay = settingsHandler.autoPlayEnabled;
-    startVideosMuted = settingsHandler.startVideosMuted;
     hideNotes = settingsHandler.hideNotes;
     allowRotation = settingsHandler.allowRotation;
     useVolumeButtonsForScroll = settingsHandler.useVolumeButtonsForScroll;
@@ -71,15 +55,10 @@ class _GalleryPageState extends State<GalleryPage> {
     galleryAutoScrollController.text = settingsHandler.galleryAutoScrollTime.toString();
     preloadController.text = settingsHandler.preloadCount.toString();
     shitDevice = settingsHandler.shitDevice;
-    disableVideo = settingsHandler.disableVideo;
     loadingGif = settingsHandler.loadingGif;
     wakeLockEnabled = settingsHandler.wakeLockEnabled;
     enableHeroTransitions = settingsHandler.enableHeroTransitions;
     useDoubleTapDragZoom = settingsHandler.useDoubleTapDragZoom;
-    useAltVideoPlayer = settingsHandler.useAltVideoPlayer;
-    altVideoPlayerHwAccel = settingsHandler.altVideoPlayerHwAccel;
-    altVideoPlayerVO = settingsHandler.altVideoPlayerVO;
-    altVideoPlayerHWDEC = settingsHandler.altVideoPlayerHWDEC;
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
@@ -96,26 +75,14 @@ class _GalleryPageState extends State<GalleryPage> {
     settingsHandler.shareAction = shareAction;
     settingsHandler.zoomButtonPosition = zoomButtonPosition;
     settingsHandler.changePageButtonsPosition = changePageButtonsPosition;
-    settingsHandler.autoPlayEnabled = autoPlay;
-    settingsHandler.startVideosMuted = startVideosMuted;
     settingsHandler.hideNotes = hideNotes;
     settingsHandler.allowRotation = allowRotation;
     settingsHandler.loadingGif = loadingGif;
     settingsHandler.shitDevice = shitDevice;
-    settingsHandler.disableVideo = disableVideo;
     settingsHandler.useVolumeButtonsForScroll = useVolumeButtonsForScroll;
     settingsHandler.wakeLockEnabled = wakeLockEnabled;
     settingsHandler.enableHeroTransitions = enableHeroTransitions;
     settingsHandler.useDoubleTapDragZoom = useDoubleTapDragZoom;
-    settingsHandler.useAltVideoPlayer = useAltVideoPlayer;
-    settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
-    settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
-    settingsHandler.altVideoPlayerHWDEC = altVideoPlayerHWDEC;
-    if (settingsHandler.useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
-      MediaKitVideoPlayer.registerWith();
-    } else {
-      MediaKitVideoPlayer.registerNative();
-    }
 
     if (int.parse(scrollSpeedController.text) < 100) {
       scrollSpeedController.text = '100';
@@ -387,115 +354,6 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
 
-              if (Platform.isAndroid || Platform.isIOS) ...[
-                SettingsToggle(
-                  value: useAltVideoPlayer,
-                  onChanged: (newValue) {
-                    setState(() {
-                      useAltVideoPlayer = newValue;
-                    });
-                  },
-                  title: 'Use alternative video player backend',
-                  subtitle: const Text('May have better performance, but some videos may not work on your device due to codecs'),
-                ),
-              ],
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                child: useAltVideoPlayer
-                    ? Column(
-                        children: [
-                          SettingsToggle(
-                            value: altVideoPlayerHwAccel,
-                            onChanged: (newValue) {
-                              setState(() {
-                                altVideoPlayerHwAccel = newValue;
-                              });
-                            },
-                            title: 'Alt player: use hardware acceleration',
-                          ),
-                          SettingsDropdown(
-                            value: altVideoPlayerVO,
-                            items: settingsHandler.map['altVideoPlayerVO']!['options'],
-                            onReset: () {
-                              setState(() {
-                                altVideoPlayerVO = settingsHandler.map['altVideoPlayerVO']!['default'];
-                              });
-                            },
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                altVideoPlayerVO = newValue ?? settingsHandler.map['altVideoPlayerVO']!['default'];
-                              });
-                            },
-                            title: 'Alt player: VO',
-                          ),
-                          SettingsDropdown(
-                            value: altVideoPlayerHWDEC,
-                            items: settingsHandler.map['altVideoPlayerHWDEC']!['options'],
-                            onReset: () {
-                              setState(() {
-                                altVideoPlayerHWDEC = settingsHandler.map['altVideoPlayerHWDEC']!['default'];
-                              });
-                            },
-                            onChanged: (String? newValue) {
-                              setState(() {
-                                altVideoPlayerHWDEC = newValue ?? settingsHandler.map['altVideoPlayerHWDEC']!['default'];
-                              });
-                            },
-                            title: 'Alt player: HWDEC',
-                          ),
-                        ],
-                      )
-                    : LayoutBuilder(
-                        builder: (_, constraints) => SizedBox(width: constraints.maxWidth),
-                      ),
-              ),
-
-              SettingsToggle(
-                value: disableVideo,
-                onChanged: (newValue) {
-                  setState(() {
-                    disableVideo = newValue;
-                  });
-                },
-                title: 'Disable Video',
-                drawTopBorder: true, // instead of border in reorder list
-                trailingIcon: IconButton(
-                  icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Disable Video'),
-                          contentItems: [
-                            Text('Useful on low end devices that crash when trying to load videos.'),
-                            Text("Replaces video with text that says 'Video disabled'."),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              SettingsToggle(
-                value: autoPlay,
-                onChanged: (newValue) {
-                  setState(() {
-                    autoPlay = newValue;
-                  });
-                },
-                title: 'Auto play videos',
-              ),
-              SettingsToggle(
-                value: startVideosMuted,
-                onChanged: (newValue) {
-                  setState(() {
-                    startVideosMuted = newValue;
-                  });
-                },
-                title: 'Start videos muted',
-              ),
-
               // TODO rework into loading element variant (small, verbose, gif...) or remove completely, this gif is like 20% of the app's size
               SettingsToggle(
                 value: loadingGif,
@@ -514,7 +372,7 @@ class _GalleryPageState extends State<GalleryPage> {
                     if (shitDevice) {
                       preloadController.text = '0';
                       galleryMode = 'Sample';
-                      autoPlay = false;
+                      settingsHandler.autoPlayEnabled = false;
                       settingsHandler.disableImageScaling = false;
                       settingsHandler.previewMode = 'Thumbnail';
                     }

@@ -473,6 +473,7 @@ class VideoViewerDesktopState extends State<VideoViewerDesktop> {
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
+        color: Colors.black,
         child: Listener(
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {

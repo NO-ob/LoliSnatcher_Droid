@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:dio/dio.dart';
+import 'package:external_video_player_launcher/external_video_player_launcher.dart';
 import 'package:get/get.dart';
 import 'package:preload_page_view/preload_page_view.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -172,7 +173,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
       final bool isFavButton = btn[0] == 'favourite';
       final bool isFavAllowed = isFavButton ? settingsHandler.dbEnabled : true; // allow favourite button if db is enabled
 
-      return isScaleAllowed && isFavAllowed && isQualityAllowed;
+      final bool isExtPlayer = btn[0] == 'external_player';
+      final bool isExtPlayerAllowed = isExtPlayer ? (Platform.isAndroid && item.mediaType.value.isVideo) : true;
+
+      return isScaleAllowed && isFavAllowed && isQualityAllowed && isExtPlayerAllowed;
     }).toList();
 
     final List<Widget> actions = [];
@@ -313,6 +317,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'toggle_quality':
         final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
         icon = isHq ? Icons.high_quality : Icons.high_quality_outlined;
+      case 'external_player':
+        icon = Icons.exit_to_app;
+        break;
     }
     return Icon(icon);
   }
@@ -392,6 +399,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
       case 'toggle_quality':
         final bool isHq = settingsHandler.galleryMode == 'Full Res' ? !item.toggleQuality.value : item.toggleQuality.value;
         label = isHq ? 'Load Sample Quality' : 'Load High Quality';
+        break;
       default:
         // use default text
         label = defaultLabel;
@@ -446,6 +454,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
         break;
       case 'toggle_quality':
         item.toggleQuality.toggle();
+        break;
+      case 'external_player':
+        ExternalVideoPlayerLauncher.launchOtherPlayer(item.fileURL, MIME.video, null);
+        break;
     }
   }
 

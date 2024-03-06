@@ -21,6 +21,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   dio: ^5.4.1
   dynamic_color: ^1.7.0
+  external_video_player_launcher: ^0.0.3
   fast_marquee:
     git:
       # url: "https://github.com/hacker1024/fast_marquee.git" # original

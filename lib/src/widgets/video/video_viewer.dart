@@ -548,6 +548,7 @@ class VideoViewerState extends State<VideoViewer> {
     return Hero(
       tag: 'imageHero${isViewed ? '' : '-ignore-'}${widget.booruItem.hashCode}',
       child: Material(
+        color: Colors.black,
         child: Stack(
           alignment: Alignment.center,
           children: [
