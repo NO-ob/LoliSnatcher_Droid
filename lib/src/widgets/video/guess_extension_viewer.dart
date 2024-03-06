@@ -81,9 +81,9 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
     final imageExtensions = ['jpg', 'png', 'jpeg'];
     List<String> possibleExtensions = [];
 
-    if (widget.item.possibleExt.value == 'animation') {
+    if (widget.item.possibleMediaType.value?.isAnimation == true) {
       possibleExtensions = [...gifExtensions, ...videoExtensions, ...imageExtensions];
-    } else if (widget.item.possibleExt.value == 'video') {
+    } else if (widget.item.possibleMediaType.value?.isVideo == true) {
       possibleExtensions = [...videoExtensions, ...imageExtensions, ...gifExtensions];
     } else {
       // videos are still in front because realbooru can have both image (video thumbnail) and video under same url (minus extension)

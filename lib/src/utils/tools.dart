@@ -9,6 +9,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
+import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/navigation_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
@@ -113,15 +114,15 @@ class Tools {
     return headers;
   }
 
-  static IconData getFileIcon(String? mediaType) {
+  static IconData? getFileIcon(MediaType? mediaType) {
     switch (mediaType) {
-      case 'image':
-        return Icons.photo;
-      case 'video':
+      case MediaType.image:
+        return null; // Icons.photo;
+      case MediaType.video:
         return CupertinoIcons.videocam_fill;
-      case 'animation':
+      case MediaType.animation:
         return CupertinoIcons.play_fill;
-      case 'not_supported_animation':
+      case MediaType.notSupportedAnimation:
         return Icons.play_disabled;
       default:
         return CupertinoIcons.question;
