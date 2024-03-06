@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:get/get.dart';
-
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/widgets/common/clear_button.dart';
@@ -140,10 +138,10 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
-              Text(item == null ? 'Any' : item.name.capitalizeFirst!),
+              Text(item == null ? 'Any' : item.locName),
             ],
           ),
-          itemTitleBuilder: (item) => item == null ? 'Any' : item.name.capitalizeFirst!,
+          itemTitleBuilder: (item) => item == null ? 'Any' : item.locName,
         ),
         SettingsToggle(
           title: 'Duplicates',
@@ -153,6 +151,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             duplicateFilter = newValue;
             setState(() {});
           },
+          drawBottomBorder: false,
         ),
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
@@ -172,6 +171,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                           duplicateBooruFilter = newValue;
                           setState(() {});
                         },
+                        drawBottomBorder: false,
                       ),
                     ),
                   ],
@@ -185,6 +185,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             emptyFilter = newValue;
             setState(() {});
           },
+          drawBottomBorder: false,
         ),
       ],
       actionButtons: [
