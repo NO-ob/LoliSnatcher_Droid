@@ -411,6 +411,7 @@ class NotesDialog extends StatelessWidget {
       content: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: Material(
+          color: Colors.transparent,
           child: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(

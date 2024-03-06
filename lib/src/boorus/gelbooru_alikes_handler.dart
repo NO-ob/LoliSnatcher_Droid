@@ -8,6 +8,7 @@ import 'package:xml/xml.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
+import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -279,5 +280,63 @@ class GelbooruAlikesHandler extends BooruHandler {
       width: int.tryParse(current.getAttribute('width') ?? '0') ?? 0,
       height: int.tryParse(current.getAttribute('height') ?? '0') ?? 0,
     );
+  }
+
+  // ----------------- Tags
+
+  @override
+  bool get shouldPopulateTags => booru.baseURL!.contains('rule34.xxx');
+
+  @override
+  String makeDirectTagURL(List<String> tags) {
+    String baseUrl = booru.baseURL!;
+    if (baseUrl.contains('rule34.xxx')) {
+      // because requests to default url are protected by a captcha
+      baseUrl = 'https://api.rule34.xxx';
+    }
+
+    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
+    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
+    return "$baseUrl/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=100&json=1$apiKeyStr$userIdStr";
+  }
+
+  @override
+  Future<List<Tag>> genTagObjects(List<String> tags) async {
+    if (booru.baseURL!.contains('rule34.xxx') == false) {
+      return [];
+    }
+
+    final List<Tag> tagObjects = [];
+    Logger.Inst().log('Got tag list: $tags', className, 'genTagObjects', LogTypes.booruHandlerTagInfo);
+    final String url = makeDirectTagURL(tags);
+    Logger.Inst().log('DirectTagURL: $url', className, 'genTagObjects', LogTypes.booruHandlerTagInfo);
+    try {
+      final response = await DioNetwork.get(url, headers: getHeaders());
+      if (response.statusCode == 200) {
+        final parsedResponse = XmlDocument.parse(response.data).findAllElements('tag');
+        if (parsedResponse.isNotEmpty) {
+          Logger.Inst().log(
+            'Tag response length: ${parsedResponse.length},Tag list length: ${tags.length}',
+            className,
+            'genTagObjects',
+            LogTypes.booruHandlerTagInfo,
+          );
+          for (int i = 0; i < parsedResponse.length; i++) {
+            final String fullString = parsedResponse.elementAt(i).getAttribute('name') ?? '';
+            final String typeKey = parsedResponse.elementAt(i).getAttribute('type').toString();
+            TagType tagType = TagType.none;
+            if (tagTypeMap.containsKey(typeKey)) {
+              tagType = tagTypeMap[typeKey] ?? TagType.none;
+            }
+            if (fullString.isNotEmpty) {
+              tagObjects.add(Tag(fullString, tagType: tagType));
+            }
+          }
+        }
+      }
+    } catch (e) {
+      Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.exception);
+    }
+    return tagObjects;
   }
 }

@@ -188,7 +188,7 @@ class ThemeHandler {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
-          fixedSize: const Size(double.infinity, kMinInteractiveDimension),
+          fixedSize: const Size(double.infinity, 40),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           splashFactory: InkSparkle.splashFactory,
@@ -284,7 +284,7 @@ class ThemeHandler {
   ButtonBarThemeData buttonBarTheme() => const ButtonBarThemeData(
         buttonTextTheme: ButtonTextTheme.primary,
         buttonMinWidth: 120,
-        buttonHeight: 48,
+        buttonHeight: 40,
         alignment: MainAxisAlignment.spaceBetween,
       );
 

@@ -1286,7 +1286,11 @@ class TabManagerItem extends StatelessWidget {
         height: 72,
         width: double.maxFinite,
         child: Material(
-          color: Theme.of(context).cardColor,
+          color: Color.lerp(
+            Theme.of(context).cardColor,
+            Theme.of(context).brightness == Brightness.dark ? Colors.transparent : Colors.grey[200],
+            0.66,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: radius,
             side: isCurrent

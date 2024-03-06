@@ -44,6 +44,7 @@ class TagsManagerList extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Material(
+          color: Colors.transparent,
           child: SizedBox(
             width: double.maxFinite,
             child: RefreshIndicator(

@@ -71,26 +71,29 @@ class SettingsButton extends StatelessWidget {
       );
     }
 
-    return ListTile(
-      leading: icon,
-      title: Text(name),
-      subtitle: subtitle,
-      trailing: trailingIcon,
-      enabled: enabled,
-      dense: dense,
-      onTap: () {
-        onTapAction(context);
-      },
-      onLongPress: onLongPress == null
-          ? null
-          : () {
-              onLongPress!();
-            },
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        leading: icon,
+        title: Text(name),
+        subtitle: subtitle,
+        trailing: trailingIcon,
+        enabled: enabled,
+        dense: dense,
+        onTap: () {
+          onTapAction(context);
+        },
+        onLongPress: onLongPress == null
+            ? null
+            : () {
+                onLongPress!();
+              },
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -201,31 +204,34 @@ class SettingsToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Row(
-        children: [
-          if (leadingIcon != null)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: leadingIcon,
-            ),
-          MarqueeText(text: title),
-          trailingIcon ?? const SizedBox(width: 8),
-        ],
-      ),
-      subtitle: subtitle,
-      trailing: Switch(
-        value: value,
-        onChanged: onChanged,
-      ),
-      onTap: () {
-        onChanged(!value);
-      },
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: Row(
+          children: [
+            if (leadingIcon != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: leadingIcon,
+              ),
+            MarqueeText(text: title),
+            trailingIcon ?? const SizedBox(width: 8),
+          ],
+        ),
+        subtitle: subtitle,
+        trailing: Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+        onTap: () {
+          onChanged(!value);
+        },
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -277,52 +283,55 @@ class SettingsDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: LoliDropdown(
-        value: value,
-        onChanged: onChanged ?? (item) {},
-        items: items,
-        clearable: clearable,
-        expandableByScroll: expendableByScroll,
-        itemExtent: itemExtent,
-        itemBuilder: (item) {
-          final bool isCurrent = value == item;
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: LoliDropdown(
+          value: value,
+          onChanged: onChanged ?? (item) {},
+          items: items,
+          clearable: clearable,
+          expandableByScroll: expendableByScroll,
+          itemExtent: itemExtent,
+          itemBuilder: (item) {
+            final bool isCurrent = value == item;
 
-          return Container(
-            padding: const EdgeInsets.only(left: 16, right: 16),
-            constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
-            alignment: Alignment.centerLeft,
-            decoration: isCurrent
-                ? BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+            return Container(
+              padding: const EdgeInsets.only(left: 16, right: 16),
+              constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+              alignment: Alignment.centerLeft,
+              decoration: isCurrent
+                  ? BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                    )
+                  : null,
+              child: getItemWidget(item),
+            );
+          },
+          selectionBuilder: (item) =>
+              selectedItemBuilder?.call(item) ??
+              Row(
+                children: [
+                  getItemWidget(item),
+                ],
+              ),
+          labelText: title,
+        ),
+        subtitle: subtitle,
+        trailing: trailingIcon ??
+            (onReset != null
+                ? IconButton(
+                    onPressed: onReset,
+                    icon: const Icon(Icons.refresh_rounded),
                   )
-                : null,
-            child: getItemWidget(item),
-          );
-        },
-        selectionBuilder: (item) =>
-            selectedItemBuilder?.call(item) ??
-            Row(
-              children: [
-                getItemWidget(item),
-              ],
-            ),
-        labelText: title,
-      ),
-      subtitle: subtitle,
-      trailing: trailingIcon ??
-          (onReset != null
-              ? IconButton(
-                  onPressed: onReset,
-                  icon: const Icon(Icons.refresh_rounded),
-                )
-              : null),
-      dense: false,
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+                : null),
+        dense: false,
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }
@@ -602,16 +611,19 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       return field;
     }
 
-    return ListTile(
-      title: field,
-      // subtitle: field,
-      trailing: widget.trailingIcon,
-      dense: false,
-      shape: Border(
-        // draw top border when item is in the middle of other items, but they are not listtile
-        top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
-        // draw bottom border when item is among other listtiles, but not when it's the last one
-        bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: field,
+        // subtitle: field,
+        trailing: widget.trailingIcon,
+        dense: false,
+        shape: Border(
+          // draw top border when item is in the middle of other items, but they are not listtile
+          top: widget.drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          // draw bottom border when item is among other listtiles, but not when it's the last one
+          bottom: widget.drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
       ),
     );
   }

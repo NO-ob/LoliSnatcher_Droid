@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:get/get.dart';
+
 enum TagType {
   artist,
   character,
@@ -64,6 +66,15 @@ enum TagType {
         return Colors.orange;
       default:
         return Colors.transparent;
+    }
+  }
+
+  String get locName {
+    switch (this) {
+      case none:
+        return 'None/General';
+      default:
+        return name.capitalizeFirst!;
     }
   }
 }

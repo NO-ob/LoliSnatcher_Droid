@@ -60,6 +60,22 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           },
           title: 'Type',
           drawBottomBorder: false,
+          itemBuilder: (item) => Row(
+            children: [
+              if (item != null && item.isNone == false)
+                Container(
+                  height: 24,
+                  width: 6,
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    color: item.getColour(),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              Text(item == null ? 'Any' : item.locName),
+            ],
+          ),
+          itemTitleBuilder: (item) => item == null ? 'Any' : item.locName,
         ),
         //
         const SizedBox(height: 10),
@@ -151,6 +167,16 @@ class _TagsManagerListItemDialogState extends State<TagsManagerListItemDialog> {
           onTap: () => callbackWithSetState(widget.onSetUnstaleable),
           leading: const Icon(Icons.lock_clock),
           title: const Text('Make Unstaleable'),
+        ),
+        const SizedBox(height: 10),
+        ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: BorderSide(color: Theme.of(context).colorScheme.secondary),
+          ),
+          onTap: () => Navigator.of(context).pop(),
+          leading: const Icon(Icons.cancel_outlined),
+          title: const Text('Close'),
         ),
       ],
     );

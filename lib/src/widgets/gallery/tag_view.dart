@@ -500,7 +500,7 @@ class _TagViewState extends State<TagView> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  tagHandler.getTag(tag).tagType.toString(),
+                  tagHandler.getTag(tag).tagType.locName,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ],
