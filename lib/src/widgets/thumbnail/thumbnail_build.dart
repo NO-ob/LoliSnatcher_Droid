@@ -31,7 +31,7 @@ class ThumbnailBuild extends StatelessWidget {
     return Obx(() {
       final SearchHandler searchHandler = SearchHandler.instance;
       final SettingsHandler settingsHandler = SettingsHandler.instance;
-      final IconData itemIcon = Tools.getFileIcon(item.possibleExt.value ?? item.mediaType.toJson());
+      final IconData? itemIcon = Tools.getFileIcon(item.possibleMediaType.value ?? item.mediaType.value);
 
       final tagsData = settingsHandler.parseTagsList(
         item.tagsList,
@@ -43,6 +43,9 @@ class ThumbnailBuild extends StatelessWidget {
       final bool isAi = tagsData.aiTags.isNotEmpty;
       final bool hasNotes = item.hasNotes == true;
       final bool hasComments = item.hasComments == true;
+
+      final bool isBottomRightEmpty =
+          !(item.isFavourite.value == true || isLoved) && item.isSnatched.value != true && !isAi && !hasComments && !hasNotes && !isSound && itemIcon == null;
 
       // print('ThumbnailBuild $index');
 
@@ -93,10 +96,6 @@ class ThumbnailBuild extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.66),
                                 borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
-                                border: Border(
-                                  bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                                  right: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                                ),
                               ),
                               child: const Icon(
                                 Icons.copy,
@@ -134,10 +133,6 @@ class ThumbnailBuild extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.66),
                               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
-                              border: Border(
-                                bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                                left: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                              ),
                             ),
                             child: Favicon(booru, size: 16),
                           );
@@ -171,10 +166,6 @@ class ThumbnailBuild extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.66),
                               borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
-                              border: Border(
-                                top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                                right: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                              ),
                             ),
                             child: Row(
                               children: [
@@ -210,14 +201,10 @@ class ThumbnailBuild extends StatelessWidget {
                     //
                     Flexible(
                       child: Container(
-                        padding: const EdgeInsets.all(3),
+                        padding: isBottomRightEmpty ? EdgeInsets.zero : const EdgeInsets.all(3),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.66),
                           borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
-                          border: Border(
-                            top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                            left: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
-                          ),
                         ),
                         child: Obx(
                           () => Wrap(
@@ -262,7 +249,7 @@ class ThumbnailBuild extends StatelessWidget {
                                   color: Colors.white,
                                   size: 13,
                                 ),
-                              if (settingsHandler.isDebug.value && hasComments)
+                              if (hasComments)
                                 const Icon(
                                   Icons.comment,
                                   color: Colors.white,
@@ -280,11 +267,12 @@ class ThumbnailBuild extends StatelessWidget {
                                   color: Colors.white,
                                   size: 14,
                                 ),
-                              Icon(
-                                itemIcon,
-                                color: Colors.white,
-                                size: 14,
-                              ),
+                              if (itemIcon != null)
+                                Icon(
+                                  itemIcon,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
                             ],
                           ),
                         ),

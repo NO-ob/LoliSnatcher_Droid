@@ -108,6 +108,7 @@ class _CommentsDialogState extends State<CommentsDialog> {
                   'No comments',
                   style: TextStyle(fontSize: 20),
                 ),
+                SizedBox(height: 50),
               ],
             ),
           ),
@@ -383,6 +384,12 @@ class _CommentsHeader extends StatelessWidget {
           // width > height
           width = constraints.maxWidth * 0.6;
           height = width / maxRatio;
+        }
+
+        if (MediaQuery.orientationOf(context) == Orientation.landscape) {
+          final double sizeDiff = height / (min(MediaQuery.sizeOf(context).height * 0.4, height));
+          height /= sizeDiff;
+          width /= sizeDiff;
         }
 
         return Padding(

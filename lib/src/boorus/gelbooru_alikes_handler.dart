@@ -112,10 +112,10 @@ class GelbooruAlikesHandler extends BooruHandler {
       if (booru.baseURL!.contains('realbooru.com')) {
         // the api is even shittier now and they don't even return correct file extensions
         // now we'll have to either rely on tags and make a bunch of requests for each item to get the real file ext
-        item.possibleExt.value = (tags.contains('gif') || tags.contains('animated_gif'))
-            ? 'animation'
+        item.possibleMediaType.value = (tags.contains('gif') || tags.contains('animated_gif'))
+            ? MediaType.animation
             : (tags.contains('webm') || tags.contains('mp4') || tags.contains('sound'))
-                ? 'video'
+                ? MediaType.video
                 : null;
         item.mediaType.value = MediaType.needsExtraRequest;
       }
