@@ -335,45 +335,48 @@ class _HistoryListState extends State<HistoryList> {
       },
     );
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-      height: 72,
-      child: ListTile(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(5),
-          side: const BorderSide(color: Colors.grey),
-        ),
-        onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
-        minLeadingWidth: 24,
-        leading: booru != null
-            ? (booru.type == BooruType.Downloads
-                ? const Icon(Icons.file_download_outlined, size: 20)
-                : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 20) : Favicon(booru)))
-            : const Icon(CupertinoIcons.question, size: 20),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (currentEntry.isFavourite)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
-                child: Icon(Icons.favorite, color: Colors.red),
-              ),
-            if (showCheckbox) checkbox,
-          ],
-        ),
-        title: SizedBox(
-          height: 16,
-          child: MarqueeText(
-            key: ValueKey(currentEntry.searchText),
-            text: currentEntry.searchText,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-            isExpanded: false,
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+        height: 72,
+        child: ListTile(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(5),
+            side: const BorderSide(color: Colors.grey),
           ),
+          onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
+          minLeadingWidth: 24,
+          leading: booru != null
+              ? (booru.type == BooruType.Downloads
+                  ? const Icon(Icons.file_download_outlined, size: 20)
+                  : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 20) : Favicon(booru)))
+              : const Icon(CupertinoIcons.question, size: 20),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (currentEntry.isFavourite)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                  child: Icon(Icons.favorite, color: Colors.red),
+                ),
+              if (showCheckbox) checkbox,
+            ],
+          ),
+          title: SizedBox(
+            height: 16,
+            child: MarqueeText(
+              key: ValueKey(currentEntry.searchText),
+              text: currentEntry.searchText,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              isExpanded: false,
+            ),
+          ),
+          subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
         ),
-        subtitle: Text(booru?.name ?? 'Unknown booru (${currentEntry.booruName}-${currentEntry.booruType})'),
       ),
     );
   }
@@ -575,6 +578,7 @@ class _HistoryListState extends State<HistoryList> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Material(
+        color: Colors.transparent,
         child: SizedBox(
           width: double.maxFinite,
           child: areThereErrors ? errorsBuild() : listBuild(),

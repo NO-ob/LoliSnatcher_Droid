@@ -93,9 +93,14 @@ class ThumbnailBuild extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.66),
                                 borderRadius: const BorderRadius.only(bottomRight: Radius.circular(5)),
+                                border: Border(
+                                  bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                                  right: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                                ),
                               ),
                               child: const Icon(
                                 Icons.copy,
+                                color: Colors.white,
                                 size: 16,
                               ),
                             ),
@@ -129,6 +134,10 @@ class ThumbnailBuild extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.66),
                               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(5)),
+                              border: Border(
+                                bottom: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                                left: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                              ),
                             ),
                             child: Favicon(booru, size: 16),
                           );
@@ -162,6 +171,10 @@ class ThumbnailBuild extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.66),
                               borderRadius: const BorderRadius.only(topRight: Radius.circular(5)),
+                              border: Border(
+                                top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                                right: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                              ),
                             ),
                             child: Row(
                               children: [
@@ -201,6 +214,10 @@ class ThumbnailBuild extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.66),
                           borderRadius: const BorderRadius.only(topLeft: Radius.circular(5)),
+                          border: Border(
+                            top: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                            left: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.66), width: 1),
+                          ),
                         ),
                         child: Obx(
                           () => Wrap(
