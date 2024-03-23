@@ -84,6 +84,10 @@ class SettingsHandler extends GetxController {
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
   String customUserAgent = '';
+  String proxyType = 'direct';
+  String proxyAddress = '';
+  String proxyUsername = '';
+  String proxyPassword = '';
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -106,7 +110,7 @@ class SettingsHandler extends GetxController {
   Duration cacheDuration = Duration.zero;
 
   List<List<String>> buttonList = [
-    ['autoscroll', 'AutoScroll'],
+    ['autoscroll', 'Slideshow'],
     ['snatch', 'Save'],
     ['favourite', 'Favourite'],
     ['info', 'Display Info'],
@@ -116,7 +120,7 @@ class SettingsHandler extends GetxController {
     ['toggle_quality', 'Toggle Quality'],
   ];
   List<List<String>> buttonOrder = [
-    ['autoscroll', 'AutoScroll'],
+    ['autoscroll', 'Slideshow'],
     ['snatch', 'Save'],
     ['favourite', 'Favourite'],
     ['info', 'Display Info'],
@@ -193,6 +197,10 @@ class SettingsHandler extends GetxController {
     'lastSyncIp',
     'lastSyncPort',
     'customUserAgent',
+    'proxyType',
+    'proxyAddress',
+    'proxyUsername',
+    'proxyPassword',
     'theme',
     'themeMode',
     'isAmoled',
@@ -268,6 +276,17 @@ class SettingsHandler extends GetxController {
       'default': (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled',
       'options': <String>['Disabled', 'Left', 'Right'],
     },
+    'proxyType': {
+      'type': 'stringFromList',
+      'default': 'direct',
+      'options': <String>[
+        'direct',
+        'system',
+        'http',
+        'socks5',
+        'socks4',
+      ],
+    },
 
     // string
     'defTags': {
@@ -295,6 +314,18 @@ class SettingsHandler extends GetxController {
       'default': '',
     },
     'customUserAgent': {
+      'type': 'string',
+      'default': '',
+    },
+    'proxyAddress': {
+      'type': 'string',
+      'default': '',
+    },
+    'proxyUsername': {
+      'type': 'string',
+      'default': '',
+    },
+    'proxyPassword': {
       'type': 'string',
       'default': '',
     },
@@ -497,7 +528,7 @@ class SettingsHandler extends GetxController {
     'buttonOrder': {
       'type': 'other',
       'default': <List<String>>[
-        ['autoscroll', 'AutoScroll'],
+        ['autoscroll', 'Slideshow'],
         ['snatch', 'Save'],
         ['favourite', 'Favourite'],
         ['info', 'Display Info'],
@@ -926,6 +957,14 @@ class SettingsHandler extends GetxController {
         return lastSyncPort;
       case 'customUserAgent':
         return customUserAgent;
+      case 'proxyType':
+        return proxyType;
+      case 'proxyAddress':
+        return proxyAddress;
+      case 'proxyUsername':
+        return proxyUsername;
+      case 'proxyPassword':
+        return proxyPassword;
       case 'wakeLockEnabled':
         return wakeLockEnabled;
       case 'tagTypeFetchEnabled':
@@ -1116,6 +1155,18 @@ class SettingsHandler extends GetxController {
       case 'customUserAgent':
         customUserAgent = validatedValue;
         break;
+      case 'proxyType':
+        proxyType = validatedValue;
+        break;
+      case 'proxyAddress':
+        proxyAddress = validatedValue;
+        break;
+      case 'proxyUsername':
+        proxyUsername = validatedValue;
+        break;
+      case 'proxyPassword':
+        proxyPassword = validatedValue;
+        break;
       case 'allowSelfSignedCerts':
         allowSelfSignedCerts = validatedValue;
         break;
@@ -1251,6 +1302,10 @@ class SettingsHandler extends GetxController {
       'lastSyncIp': validateValue('lastSyncIp', null, toJSON: true),
       'lastSyncPort': validateValue('lastSyncPort', null, toJSON: true),
       'customUserAgent': validateValue('customUserAgent', null, toJSON: true),
+      'proxyType': validateValue('proxyType', null, toJSON: true),
+      'proxyAddress': validateValue('proxyAddress', null, toJSON: true),
+      'proxyUsername': validateValue('proxyUsername', null, toJSON: true),
+      'proxyPassword': validateValue('proxyPassword', null, toJSON: true),
 
       'theme': validateValue('theme', null, toJSON: true),
       'themeMode': validateValue('themeMode', null, toJSON: true),
@@ -1735,64 +1790,88 @@ class SettingsHandler extends GetxController {
 
       final bool isDiffVersion = Constants.appBuildNumber < updateInfo.value!.buildNumber;
 
-      showDialog(
-        context: NavigationHandler.instance.navigatorKey.currentContext!,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return SettingsDialog(
-            title: Text('Update ${isDiffVersion ? 'Available' : 'Changelog'}: ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}'),
-            contentItems: [
-              if (isDiffVersion) ...[
-                const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
-                const Text(''),
-              ],
-              Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const Text(''),
-              const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const Text(''),
-              Text(updateInfo.value!.changelog),
-              // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
-            ],
-            actionButtons: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Later'),
-              ),
-              if (isFromStore && updateInfo.value!.isInStore)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // try {
-                    //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
-                    // } on PlatformException catch(e) {
-                    //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
-                    // }
-                    launchUrlString(
-                      'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
-                      mode: LaunchMode.externalApplication,
-                    );
-                    Navigator.of(context).pop(true);
-                  },
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Visit Play Store'),
-                )
-              else
-                ElevatedButton.icon(
-                  onPressed: () {
-                    launchUrlString(
-                      updateInfo.value!.githubURL,
-                      mode: LaunchMode.externalApplication,
-                    );
-                    Navigator.of(context).pop(true);
-                  },
-                  icon: const Icon(Icons.exit_to_app),
-                  label: const Text('Visit Releases'),
+      final ctx = NavigationHandler.instance.navigatorKey.currentContext!;
+
+      SettingsPageOpen(
+        context: ctx,
+        page: () => Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Update ${isDiffVersion ? 'Available!' : 'Changelog:'} ${updateInfo.value!.versionName}+${updateInfo.value!.buildNumber}',
+            ),
+          ),
+          body: Column(
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (isDiffVersion) ...[
+                        const Text('Currently Installed: ${Constants.appVersion}+${Constants.appBuildNumber}'),
+                        const Text(''),
+                      ],
+                      Text(updateInfo.value!.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text(''),
+                      const Text('Changelog:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text(''),
+                      Text(updateInfo.value!.changelog),
+                      // .replaceAll("\n", r"\n").replaceAll("\r", r"\r")
+                    ],
+                  ),
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                      },
+                      icon: const Icon(Icons.close),
+                      label: Text(isDiffVersion ? 'Later' : 'Close'),
+                    ),
+                    const SizedBox(width: 16),
+                    if (isFromStore && updateInfo.value!.isInStore)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          // try {
+                          //   launchUrlString("market://details?id=" + updateInfo.value!.storePackage);
+                          // } on PlatformException catch(e) {
+                          //   launchUrlString("https://play.google.com/store/apps/details?id=" + updateInfo.value!.storePackage);
+                          // }
+                          launchUrlString(
+                            'https://play.google.com/store/apps/details?id=${updateInfo.value!.storePackage}',
+                            mode: LaunchMode.externalApplication,
+                          );
+                          Navigator.of(ctx).pop();
+                        },
+                        icon: const Icon(Icons.play_arrow),
+                        label: const Text('Visit Play Store'),
+                      )
+                    else
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          launchUrlString(
+                            updateInfo.value!.githubURL,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          Navigator.of(ctx).pop();
+                        },
+                        icon: const Icon(Icons.exit_to_app),
+                        label: const Text('Visit Releases'),
+                      ),
+                  ],
+                ),
+              ),
             ],
-          );
-        },
-      );
+          ),
+        ),
+      ).open();
     }
   }
 
@@ -1812,10 +1891,6 @@ class SettingsHandler extends GetxController {
     try {
       await getPerms();
       await loadSettings();
-
-      if (allowSelfSignedCerts) {
-        HttpOverrides.global = MyHttpOverrides();
-      }
     } catch (e) {
       Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
       FlashElements.showSnackbar(
@@ -1852,6 +1927,8 @@ class SettingsHandler extends GetxController {
     }
 
     try {
+      postInitMessage.value = 'Setting up proxy...';
+      await initProxy();
       postInitMessage.value = 'Loading Database...';
       await loadDatabase();
       await indexDatabase();

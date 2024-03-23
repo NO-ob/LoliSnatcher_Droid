@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -24,8 +23,12 @@ class _NetworkPageState extends State<NetworkPage> {
   bool allowSelfSignedCerts = false;
   Booru? selectedBooru;
   List<Cookie> selectedBooruCookies = [];
+  ProxyType proxyType = ProxyType.direct;
 
-  final TextEditingController userAgentController = TextEditingController();
+  final TextEditingController userAgentController = TextEditingController(),
+      proxyAddressController = TextEditingController(),
+      proxyUsernameController = TextEditingController(),
+      proxyPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -33,6 +36,10 @@ class _NetworkPageState extends State<NetworkPage> {
 
     allowSelfSignedCerts = settingsHandler.allowSelfSignedCerts;
     userAgentController.text = settingsHandler.customUserAgent;
+    proxyType = ProxyType.fromName(settingsHandler.proxyType);
+    proxyAddressController.text = settingsHandler.proxyAddress;
+    proxyUsernameController.text = settingsHandler.proxyUsername;
+    proxyPasswordController.text = settingsHandler.proxyPassword;
   }
 
   Future<void> _onPopInvoked(bool didPop) async {
@@ -42,13 +49,13 @@ class _NetworkPageState extends State<NetworkPage> {
 
     settingsHandler.allowSelfSignedCerts = allowSelfSignedCerts;
     settingsHandler.customUserAgent = userAgentController.text;
+    settingsHandler.proxyType = proxyType.name;
+    settingsHandler.proxyAddress = proxyAddressController.text;
+    settingsHandler.proxyUsername = proxyUsernameController.text;
+    settingsHandler.proxyPassword = proxyPasswordController.text;
     final bool result = await settingsHandler.saveSettings(restate: false);
 
-    if (allowSelfSignedCerts) {
-      HttpOverrides.global = MyHttpOverrides();
-    } else {
-      HttpOverrides.global = null;
-    }
+    await initProxy();
 
     if (result) {
       Navigator.of(context).pop();
@@ -77,13 +84,48 @@ class _NetworkPageState extends State<NetworkPage> {
                 },
                 title: 'Enable Self Signed SSL Certificates',
               ),
+              SettingsDropdown<ProxyType>(
+                value: proxyType,
+                items: (settingsHandler.map['proxyType']!['options'] as List<String>).map(ProxyType.fromName).toList(),
+                onChanged: (ProxyType? newValue) {
+                  setState(() {
+                    proxyType = newValue ?? ProxyType.direct;
+                  });
+                },
+                title: 'Proxy',
+                subtitle: const Text('Does not work on videos'),
+                itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
+              ),
+              if (proxyType != ProxyType.direct && proxyType != ProxyType.system) ...[
+                SettingsTextInput(
+                  controller: proxyAddressController,
+                  title: 'Address',
+                  forceLabelOnTop: true,
+                  resetText: () => '',
+                  pasteable: true,
+                ),
+                SettingsTextInput(
+                  controller: proxyUsernameController,
+                  title: 'Username',
+                  forceLabelOnTop: true,
+                  resetText: () => '',
+                  pasteable: true,
+                ),
+                SettingsTextInput(
+                  controller: proxyPasswordController,
+                  title: 'Password',
+                  forceLabelOnTop: true,
+                  resetText: () => '',
+                  pasteable: true,
+                ),
+              ],
               const SettingsButton(name: '', enabled: false),
               SettingsTextInput(
                 controller: userAgentController,
                 title: 'Custom User Agent',
-                clearable: true,
                 forceLabelOnTop: true,
                 resetText: () => '',
+                pasteable: true,
                 drawBottomBorder: false,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
@@ -180,5 +222,17 @@ class _NetworkPageState extends State<NetworkPage> {
         ),
       ),
     );
+  }
+}
+
+enum ProxyType {
+  direct,
+  system,
+  http,
+  socks5,
+  socks4;
+
+  static ProxyType fromName(String name) {
+    return ProxyType.values.firstWhereOrNull((e) => e.name == name) ?? direct;
   }
 }

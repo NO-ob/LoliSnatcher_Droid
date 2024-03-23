@@ -517,8 +517,8 @@ class _GalleryPageState extends State<GalleryPage> {
 
               SettingsTextInput(
                 controller: galleryAutoScrollController,
-                title: 'AutoScroll Timeout (in ms)',
-                hintText: 'AutoScroll Timeout (in ms)',
+                title: 'Slideshow Timeout (in ms)',
+                hintText: 'Slideshow Timeout (in ms)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['galleryAutoScrollTime']!['default']!.toString(),
@@ -543,7 +543,7 @@ class _GalleryPageState extends State<GalleryPage> {
                       context: context,
                       builder: (context) {
                         return const SettingsDialog(
-                          title: Text('AutoScroll / Slideshow'),
+                          title: Text('Slideshow'),
                           contentItems: [
                             Text('[WIP] Videos and gifs must be scrolled manually for now.'),
                           ],
