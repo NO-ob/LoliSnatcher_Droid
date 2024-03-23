@@ -69,7 +69,7 @@ dependencies:
   url_launcher: ^6.2.5
   uuid: ^4.3.3
   vibration: ^1.8.4
-  video_player: ^2.8.2 # in android/app/build.gradle exoplayer dependencies are overriden to lower versions to avoid videos not playing on older devices
+  video_player: ^2.8.3 # in android/app/build.gradle exoplayer dependencies are overriden to lower versions to avoid videos not playing on older devices
   waterfall_flow: ^3.0.3
   xml: ^6.5.0
 

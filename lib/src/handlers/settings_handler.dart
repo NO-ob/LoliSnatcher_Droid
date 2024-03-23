@@ -27,6 +27,7 @@ import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
+import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 
 /// This class is used loading from and writing settings to files
 class SettingsHandler extends GetxController {
@@ -1920,6 +1921,9 @@ class SettingsHandler extends GetxController {
     }
 
     try {
+      if (useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
+        MediaKitVideoPlayer.registerWith();
+      }
       postInitMessage.value = 'Loading Database...';
       await loadDatabase();
       await indexDatabase();
