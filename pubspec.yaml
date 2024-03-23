@@ -37,10 +37,12 @@ dependencies:
       url: "https://github.com/NANI-SORE/flutter_inner_drawer.git"
       ref: 781d16e05e987e3873c1f1562465079f10e390e7 # master
   flutter_linkify: ^6.0.0
+  flutter_socks_proxy: ^0.0.3
   font_awesome_flutter: ^10.6.0
   get: ^4.6.6
   google_fonts: ^6.2.1
   html: ^0.15.4
+  http_proxy: ^1.2.1
   huge_listview: ^2.0.11
   image: ^4.1.7
   intl: ^0.19.0
@@ -65,6 +67,11 @@ dependencies:
   sqflite_common_ffi: ^2.3.2+1
   sqflite: ^2.3.0
   statsfl: ^2.3.0
+  system_network_proxy: # ^1.0.2
+    git:
+      url: "https://github.com/honjow/system_network_proxy.git"
+      ref: 2be220557ac039118c2039bd58ef1a16b3c8aeae
+      path: system_network_proxy
   transparent_image: ^2.0.1
   url_launcher: ^6.2.5
   uuid: ^4.3.3
@@ -72,6 +79,18 @@ dependencies:
   video_player: ^2.8.3 # in android/app/build.gradle exoplayer dependencies are overriden to lower versions to avoid videos not playing on older devices
   waterfall_flow: ^3.0.3
   xml: ^6.5.0
+
+
+
+dependency_overrides:
+  http: 1.2.1
+
+
+
+dev_dependencies:
+  flutter_lints: ^3.0.1
+  flutter_test:
+    sdk: flutter
 
 
 
@@ -83,18 +102,7 @@ flutter_icons:
 
 
 
-dev_dependencies:
-  flutter_lints: ^3.0.1
-  flutter_test:
-    sdk: flutter
-
-
-
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
   assets:
     - assets/images/drawer_icon.png

@@ -319,6 +319,7 @@ class _DebugPageState extends State<DebugPage> {
                               controller: sessionStrController,
                               title: 'Session string',
                               onlyInput: true,
+                              pasteable: true,
                             ),
                           ],
                         ),

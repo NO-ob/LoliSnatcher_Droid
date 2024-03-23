@@ -629,9 +629,10 @@ class _DatabasePageState extends State<DatabasePage> {
                             // ),
                             SettingsTextInput(
                               controller: sankakuSearchController,
-                              clearable: true,
                               title: 'Search query',
                               hintText: '(optional, may make the process slower)',
+                              clearable: true,
+                              pasteable: true,
                             ),
                             SettingsButton(
                               name: 'Update Sankaku URLs',

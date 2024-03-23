@@ -197,6 +197,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           inputType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9.]'))],
           clearable: true,
+          pasteable: true,
         ),
         SettingsTextInput(
           controller: portController,
@@ -205,6 +206,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
+          pasteable: true,
         ),
         SettingsToggle(
           value: favouritesv2,
@@ -505,6 +507,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           inputType: TextInputType.number,
           inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
           clearable: true,
+          pasteable: true,
           forceLabelOnTop: true,
         ),
         SettingsButton(

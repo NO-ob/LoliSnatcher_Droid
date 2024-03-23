@@ -45,6 +45,8 @@ class TagsFiltersList extends StatelessWidget {
             controller: tagSearchController,
             title: 'Search Tags Filters (${isSearchActive ? '$filteredCount/$originalCount' : '$originalCount'})',
             forceLabelOnTop: true,
+            clearable: true,
+            pasteable: true,
             onChanged: onSearchTextChanged,
           ),
           //

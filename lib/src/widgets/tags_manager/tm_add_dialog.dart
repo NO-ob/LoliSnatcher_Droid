@@ -25,6 +25,7 @@ class _TagsManagerAddDialogState extends State<TagsManagerAddDialog> {
           controller: _controller,
           title: 'Name',
           drawBottomBorder: false,
+          pasteable: true,
         ),
         SettingsDropdown(
           value: _type,

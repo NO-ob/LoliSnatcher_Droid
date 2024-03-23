@@ -31,6 +31,7 @@ class TagsManagerListFilter extends StatelessWidget {
               hintText: title,
               inputType: TextInputType.text,
               clearable: true,
+              pasteable: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
           ),
