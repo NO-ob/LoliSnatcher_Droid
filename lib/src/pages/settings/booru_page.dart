@@ -408,6 +408,7 @@ class _BooruPageState extends State<BooruPage> {
                 hintText: 'Tags searched when app opens',
                 inputType: TextInputType.text,
                 clearable: true,
+                pasteable: true,
                 resetText: () => 'rating:safe',
               ),
               SettingsTextInput(

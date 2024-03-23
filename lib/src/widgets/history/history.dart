@@ -396,6 +396,7 @@ class _HistoryListState extends State<HistoryList> {
               title: 'Filter Search History',
               inputType: TextInputType.text,
               clearable: true,
+              pasteable: true,
               margin: const EdgeInsets.fromLTRB(5, 8, 5, 5),
             ),
           ),

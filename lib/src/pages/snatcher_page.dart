@@ -54,6 +54,7 @@ class _SnatcherPageState extends State<SnatcherPage> {
               hintText: 'Enter Tags',
               inputType: TextInputType.text,
               clearable: true,
+              pasteable: true,
             ),
             SettingsTextInput(
               controller: snatcherAmountController,

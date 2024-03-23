@@ -190,6 +190,7 @@ class SettingsToggle extends StatelessWidget {
     this.drawBottomBorder = true,
     this.leadingIcon,
     this.trailingIcon,
+    this.defaultValue,
     super.key,
   });
 
@@ -201,6 +202,7 @@ class SettingsToggle extends StatelessWidget {
   final bool drawBottomBorder;
   final Widget? leadingIcon;
   final Widget? trailingIcon;
+  final bool? defaultValue;
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +217,17 @@ class SettingsToggle extends StatelessWidget {
                 child: leadingIcon,
               ),
             MarqueeText(text: title),
+            const SizedBox(width: 4),
+            if (defaultValue != null && value != defaultValue)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () {
+                    onChanged(defaultValue!);
+                  },
+                ),
+              ),
             trailingIcon ?? const SizedBox(width: 8),
           ],
         ),
@@ -425,6 +438,8 @@ class SettingsTextInput extends StatefulWidget {
     this.trailingIcon,
     this.onlyInput = false,
     this.forceLabelOnTop = false,
+    this.copyable = false,
+    this.pasteable = false,
     super.key,
   });
 
@@ -451,6 +466,8 @@ class SettingsTextInput extends StatefulWidget {
   final Widget? trailingIcon;
   final bool onlyInput;
   final bool forceLabelOnTop;
+  final bool copyable;
+  final bool pasteable;
 
   @override
   State<SettingsTextInput> createState() => _SettingsTextInputState();
@@ -481,6 +498,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   void onChangedCallback(String value) {
     widget.onChanged?.call(value);
+    setState(() {});
   }
 
   void stepNumberDown() {
@@ -541,7 +559,35 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
               onChangedCallback(widget.controller.text);
             },
           ),
-        if (widget.resetText != null)
+        if (widget.copyable && isFocused)
+          IconButton(
+            key: const Key('copy-button'),
+            icon: Icon(Icons.copy, color: Theme.of(context).colorScheme.onSurface),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: widget.controller.text));
+            },
+          ),
+        if (widget.pasteable && isFocused)
+          FutureBuilder(
+            future: Clipboard.getData(Clipboard.kTextPlain),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox.shrink();
+              }
+
+              return IconButton(
+                key: const Key('paste-button'),
+                icon: Icon(Icons.paste, color: Theme.of(context).colorScheme.onSurface),
+                onPressed: () async {
+                  final data = snapshot.data?.text;
+                  if (data?.isNotEmpty == true) {
+                    widget.controller.text = data!;
+                  }
+                },
+              );
+            },
+          ),
+        if (widget.resetText != null && widget.controller.text != widget.resetText!())
           IconButton(
             key: const Key('reset-button'),
             icon: Icon(Icons.refresh, color: Theme.of(context).colorScheme.onSurface),

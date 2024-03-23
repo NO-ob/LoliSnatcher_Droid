@@ -252,6 +252,7 @@ class _TagViewState extends State<TagView> {
                 title: 'Search tags',
                 onlyInput: true,
                 clearable: true,
+                pasteable: true,
                 onChanged: (_) {
                   parseSortGroupTags();
                 },
