@@ -213,6 +213,11 @@ class _WaterfallViewState extends State<WaterfallView> {
     viewerHandler.setCurrent(viewedItem.key);
 
     if (isMobile) {
+      // protection from opening multiple galleries at once
+      if (viewerHandler.inViewer.value) {
+        return;
+      }
+
       kbFocusNode.unfocus();
       viewerHandler.inViewer.value = true;
       viewerHandler.showNotes.value = !settingsHandler.hideNotes;
