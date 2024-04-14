@@ -619,7 +619,6 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   @override
   Widget build(BuildContext context) {
-    // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     final Widget field = Container(
       margin: widget.margin,
       child: TextFormField(
@@ -631,6 +630,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
         inputFormatters: widget.inputFormatters,
         onChanged: onChangedCallback,
         onFieldSubmitted: widget.onSubmitted,
+        enableIMEPersonalizedLearning: !SettingsHandler.instance.incognitoKeyboard,
         decoration: InputDecoration(
           labelText: widget.title,
           hintText: widget.hintText,
@@ -645,6 +645,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
       ),
     );
 
+    // return only textfield, without tile wrapper (in this case: no dividers, title, subtitle, icon)
     if (widget.onlyInput) {
       return field;
     }

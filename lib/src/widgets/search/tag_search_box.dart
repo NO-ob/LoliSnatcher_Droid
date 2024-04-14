@@ -595,6 +595,7 @@ class _TagSearchBoxState extends State<TagSearchBox> {
             textInputAction: TextInputAction.search,
             focusNode: searchHandler.searchBoxFocus,
             enableInteractiveSelection: true,
+            enableIMEPersonalizedLearning: !settingsHandler.incognitoKeyboard,
             onChanged: (text) {
               createOverlay();
             },
