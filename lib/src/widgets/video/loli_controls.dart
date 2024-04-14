@@ -397,21 +397,14 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
                     ),
                   ),
                 ),
-                AnimatedCrossFade(
-                  firstChild: const SizedBox(height: 80, width: 80),
-                  secondChild: const Center(
+                if (_latestValue.isBuffering)
+                  const Center(
                     widthFactor: 3,
                     heightFactor: 3,
                     child: CircularProgressIndicator(
                       strokeWidth: 5,
                     ),
                   ),
-                  crossFadeState: _latestValue.isBuffering ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                  duration: const Duration(milliseconds: 1000),
-                  secondCurve: Curves.easeIn,
-                  reverseDuration: const Duration(milliseconds: 100),
-                  firstCurve: Curves.easeOut,
-                ),
               ],
             ),
           ),
@@ -750,6 +743,8 @@ class _LoliControlsState extends State<LoliControls> with SingleTickerProviderSt
 
   Widget _buildProgressBar() {
     return Expanded(
+      // TODO make it update smoother
+      // TODO redesign to be taller and easier to hit (something like sound sliders on miui?)
       child: VideoProgressBar(
         controller,
         onDragStart: () {

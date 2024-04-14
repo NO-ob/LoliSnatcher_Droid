@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -15,6 +18,7 @@ import 'package:lolisnatcher/src/pages/settings/database_page.dart';
 import 'package:lolisnatcher/src/pages/settings/debug_page.dart';
 import 'package:lolisnatcher/src/pages/settings/gallery_page.dart';
 import 'package:lolisnatcher/src/pages/settings/network_page.dart';
+import 'package:lolisnatcher/src/pages/settings/privacy_page.dart';
 import 'package:lolisnatcher/src/pages/settings/save_cache_page.dart';
 import 'package:lolisnatcher/src/pages/settings/tags_filters_page.dart';
 import 'package:lolisnatcher/src/pages/settings/theme_page.dart';
@@ -125,6 +129,15 @@ class SettingsPage extends StatelessWidget {
                 icon: const Icon(Icons.network_check),
                 page: () => const NetworkPage(),
               ),
+              if (Platform.isAndroid)
+                SettingsButton(
+                  name: 'Privacy',
+                  icon: const FaIcon(
+                    FontAwesomeIcons.userShield,
+                    size: 20,
+                  ),
+                  page: () => const PrivacyPage(),
+                ),
               SettingsButton(
                 name: 'LoliSync',
                 icon: const Icon(Icons.sync),

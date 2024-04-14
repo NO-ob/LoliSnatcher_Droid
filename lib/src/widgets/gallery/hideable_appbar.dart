@@ -631,7 +631,13 @@ class _HideableAppBarState extends State<HideableAppBar> {
   Future<void> shareFileAction() async {
     final BooruItem item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
 
-    if (sharedItem != null) {
+    final bool alreadyLoading = sharedItem != null;
+    final bool alreadyLoadingSame = alreadyLoading && sharedItem == item;
+
+    if (alreadyLoading) {
+      final double thumbWidth = MediaQuery.sizeOf(context).shortestSide * (alreadyLoadingSame ? 0.3 : 0.2);
+      final double thumbHeight = thumbWidth / 9 * 16;
+
       final dialogRes = await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -640,25 +646,61 @@ class _HideableAppBarState extends State<HideableAppBar> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Already downloading file for sharing, do you want to abort and share a new file?'),
+                if (alreadyLoadingSame)
+                  const Text('Already downloading this file for sharing, do you want to abort?')
+                else
+                  const Text('Already downloading file for sharing, do you want to abort current file and share a new file?'),
                 const SizedBox(height: 10),
-                SizedBox(
-                  width: 100,
-                  height: 150,
-                  child: ThumbnailBuild(
-                    item: item,
-                    selectable: false,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        if (!alreadyLoadingSame) const Text('Current:'),
+                        SizedBox(
+                          width: thumbWidth,
+                          height: thumbHeight,
+                          child: ThumbnailBuild(
+                            item: sharedItem!,
+                            selectable: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!alreadyLoadingSame) ...[
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        children: [
+                          const Text('New:'),
+                          SizedBox(
+                            width: thumbWidth,
+                            height: thumbHeight,
+                            child: ThumbnailBuild(
+                              item: item,
+                              selectable: false,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
             actions: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop('new');
-                },
-                child: const Text('Share new'),
-              ),
+              if (!alreadyLoadingSame)
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop('new');
+                  },
+                  child: const Text('Share new'),
+                ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop('abort');

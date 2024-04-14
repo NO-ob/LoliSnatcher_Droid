@@ -66,7 +66,7 @@ class DioNetwork {
 
     // TODO create a separate class for this?
     return {
-      'url': Uri.encodeFull(cleanUrl),
+      'url': Uri.encodeFull(cleanUrl).replaceAll('%25', '%'),
       'query': queryParams.isEmpty ? null : queryParams,
     };
   }

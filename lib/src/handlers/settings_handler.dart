@@ -158,6 +158,7 @@ class SettingsHandler extends GetxController {
   bool downloadNotifications = true;
   bool allowRotation = false;
   bool enableHeroTransitions = true;
+  bool incognitoKeyboard = false;
   bool hideNotes = false;
   bool startVideosMuted = false;
   bool snatchOnFavourite = false;
@@ -231,6 +232,7 @@ class SettingsHandler extends GetxController {
     'showImageStats',
     'isDebug',
     'desktopListsDrag',
+    'incognitoKeyboard',
   ];
   // default values and possible options map for validation
   // TODO build settings widgets from this map, need to add Label/Description/other options required for the input element
@@ -541,6 +543,10 @@ class SettingsHandler extends GetxController {
     'enableHeroTransitions': {
       'type': 'bool',
       'default': true,
+    },
+    'incognitoKeyboard': {
+      'type': 'bool',
+      'default': false,
     },
     'hideNotes': {
       'type': 'bool',
@@ -1019,6 +1025,8 @@ class SettingsHandler extends GetxController {
         return allowRotation;
       case 'enableHeroTransitions':
         return enableHeroTransitions;
+      case 'incognitoKeyboard':
+        return incognitoKeyboard;
       case 'hideNotes':
         return hideNotes;
       case 'startVideosMuted':
@@ -1240,6 +1248,9 @@ class SettingsHandler extends GetxController {
       case 'enableHeroTransitions':
         enableHeroTransitions = validatedValue;
         break;
+      case 'incognitoKeyboard':
+        incognitoKeyboard = validatedValue;
+        break;
       case 'hideNotes':
         hideNotes = validatedValue;
         break;
@@ -1350,6 +1361,7 @@ class SettingsHandler extends GetxController {
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
       'allowRotation': validateValue('allowRotation', null, toJSON: true),
       'enableHeroTransitions': validateValue('enableHeroTransitions', null, toJSON: true),
+      'incognitoKeyboard': validateValue('incognitoKeyboard', null, toJSON: true),
       'hideNotes': validateValue('hideNotes', null, toJSON: true),
       'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),

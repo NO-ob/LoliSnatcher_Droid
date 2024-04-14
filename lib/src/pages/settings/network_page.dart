@@ -93,7 +93,7 @@ class _NetworkPageState extends State<NetworkPage> {
                   });
                 },
                 title: 'Proxy',
-                subtitle: const Text('Does not work on videos'),
+                subtitle: const Text('Does not apply to streaming video mode, use caching video mode instead'),
                 itemBuilder: (item) => Text(item?.name.capitalizeFirst ?? ''),
               ),
               if (proxyType != ProxyType.direct && proxyType != ProxyType.system) ...[

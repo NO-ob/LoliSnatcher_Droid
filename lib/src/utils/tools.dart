@@ -27,6 +27,27 @@ class Tools {
     return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)}${withSpace ? ' ' : ''}${suffixes[i]}';
   }
 
+  static int parseFormattedBytes(String bytes) {
+    const suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    if (bytes.isEmpty) {
+      return 0;
+    }
+    // parse bytes (string of format: 1.1GB)
+    String suffixStr = bytes.substring(bytes.length - 2);
+    if (!suffixes.contains(suffixStr)) {
+      suffixStr = bytes.substring(bytes.length - 1);
+    }
+    if (!suffixes.contains(suffixStr)) {
+      return 0;
+    }
+
+    final String bytesStr = bytes.substring(0, bytes.length - suffixStr.length);
+    final int suffixIndex = suffixes.indexOf(suffixStr);
+
+    return ((double.tryParse(bytesStr) ?? 0) * pow(1024, suffixIndex)).round();
+  }
+
   static int boolToInt(bool boolean) {
     return boolean ? 1 : 0;
   }
