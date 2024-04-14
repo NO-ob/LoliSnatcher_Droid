@@ -197,7 +197,13 @@ class VideoViewerState extends State<VideoViewer> {
           if (error.response?.statusCode != null) '${error.response?.statusCode} - ${error.response?.statusMessage}',
         ]);
       } else {
-        killLoading(['Loading Error: $error']);
+        killLoading([
+          'Loading Error: $error',
+          if (!settingsHandler.useAltVideoPlayer) ...[
+            '',
+            'Try enabling "Use alternative video player backend" in Settings->Video if you often encounter playback issues',
+          ],
+        ]);
       }
       // print('Dio request cancelled: $error');
     }

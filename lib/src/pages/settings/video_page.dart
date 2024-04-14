@@ -116,7 +116,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                         children: [
                           const Padding(
                             padding: EdgeInsets.only(left: 16, right: 16, top: 8),
-                            child: Text("Play around with 'Alt player' settings if videos don't work correctly:"),
+                            child: Text("Play around with 'Alt player' settings below if videos don't work correctly or give codec errors:"),
                           ),
                           SettingsToggle(
                             value: altVideoPlayerHwAccel,
