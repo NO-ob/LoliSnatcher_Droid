@@ -166,7 +166,7 @@ class ShimmieHtmlHandler extends BooruHandler {
   @override
   String validateTags(String tags) {
     if (tags == ' ' || tags == '') {
-      return '*';
+      return '';
     } else {
       return super.validateTags(tags);
     }
