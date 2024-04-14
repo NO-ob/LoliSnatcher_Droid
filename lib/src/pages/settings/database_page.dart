@@ -10,6 +10,7 @@ import 'package:lolisnatcher/src/boorus/idol_sankaku_handler.dart';
 import 'package:lolisnatcher/src/boorus/sankaku_handler.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/booru_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/handlers/database_handler.dart';
 import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -397,7 +398,7 @@ class _DatabasePageState extends State<DatabasePage> {
                               Text('Requires enabled Database.'),
                               Text('Long press any history entry for additional actions (Delete, Set as Favourite...)'),
                               Text('Favourited entries are pinned to the top of the list and will not be counted towards item limit.'),
-                              Text('Records last 5000 search queries.'),
+                              Text('Records last ${Constants.historyLimit} search queries.'),
                             ],
                           );
                         },

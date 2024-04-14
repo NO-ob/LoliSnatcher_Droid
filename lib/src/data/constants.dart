@@ -10,6 +10,8 @@ class Constants {
 
   static const int tagStaleTime = 3 * 24 * 60 * 60 * 1000; // 3 days
 
+  static const int historyLimit = 10000;
+
   static const String discordURL = 'https://discord.gg/r9E4HDx9dz';
 
   static const String email = 'no.aisu@protonmail.com';
