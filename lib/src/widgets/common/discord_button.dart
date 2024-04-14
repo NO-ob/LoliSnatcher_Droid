@@ -29,7 +29,10 @@ class DiscordButton extends StatelessWidget {
 
       return SettingsButton(
         name: overrideText ?? 'Discord',
-        icon: const FaIcon(FontAwesomeIcons.discord),
+        icon: const FaIcon(
+          FontAwesomeIcons.discord,
+          size: 20,
+        ),
         action: () {
           launchUrlString(
             discordURL,
