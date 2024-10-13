@@ -440,7 +440,7 @@ class LoliSync {
       switch (toSync.elementAt(i)) {
         case 'Favouritesv2':
           yield 'Sync Starting $address';
-          yield 'Preparing favoirites data';
+          yield 'Preparing favourites data';
           final int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
           yield 'Favourites count: $favouritesCount';
           if (favouritesCount > 0) {
@@ -470,7 +470,7 @@ class LoliSync {
           break;
         case 'Favourites':
           yield 'Sync Starting $address';
-          yield 'Preparing favoirites data';
+          yield 'Preparing favourites data';
           final int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
           yield 'Favourites count: $favouritesCount';
           if (favouritesCount > 0) {
