@@ -48,10 +48,8 @@ Install dependencies:
     flutter pub get
 
 Linux-specific builds:
+If you're building for Linux, note that there have been issues with missing directories for some Flutter plugins. You may need to regenerate or fix paths in the CMakeLists.txt file by ensuring that plugins like awesome_notifications and url_launcher have the correct paths​
 
-    If you're building for Linux, note that there have been issues with missing directories for some Flutter plugins. You may need to regenerate or fix paths in the CMakeLists.txt file by ensuring that plugins like awesome_notifications and url_launcher have the correct paths​
-    ​
-    .
 
 Build the project:
 
