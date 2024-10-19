@@ -31,3 +31,44 @@ Supported Booru engines:
 ![github-small](https://raw.githubusercontent.com/NO-ob/LoliSnatcher_Droid/master/sancucku.png)
 
 
+To build the LoliSnatcher_Droid project using CMake, you'll need to follow several steps, especially since some users have reported specific issues with the build process. Here's a general outline of the instructions:
+
+    Clone the repository:
+    Start by cloning the repository from GitHub:
+
+    git clone https://github.com/NO-ob/LoliSnatcher_Droid.git
+    cd LoliSnatcher_Droid
+
+Install dependencies:
+
+    Ensure you have Flutter and CMake installed. The project is a Flutter-based Android application, so you may also need the Android SDK.
+    Additionally, install any necessary plugins or dependencies using:
+    
+
+    flutter pub get
+
+Linux-specific builds:
+
+    If you're building for Linux, note that there have been issues with missing directories for some Flutter plugins. You may need to regenerate or fix paths in the CMakeLists.txt file by ensuring that plugins like awesome_notifications and url_launcher have the correct paths​
+    ​
+    .
+
+Build the project:
+
+    Run the following command to trigger the CMake build:
+
+
+    cmake .
+    make
+
+Troubleshooting:
+
+    If you encounter issues with missing resources or other errors like CMake Error at flutter/generated_plugins.cmake, make sure the flutter directory is correctly set up with all necessary files. Regenerating the CMake build files can help:
+
+    
+
+        rm -rf build
+        cmake .
+        make
+
+These steps should guide you in building the project successfully, though you may need to adapt them based on the environment or specific errors you encounter
