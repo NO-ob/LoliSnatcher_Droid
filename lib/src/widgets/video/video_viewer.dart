@@ -53,8 +53,9 @@ class VideoViewerState extends State<VideoViewer> {
   final RxInt total = 0.obs, received = 0.obs, startedAt = 0.obs;
   int lastViewedIndex = -1;
   int isTooBig = 0; // 0 = not too big, 1 = too big, 2 = too big, but allow downloading
-  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false;
+  bool isFromCache = false, isStopped = false, isViewed = false, isZoomed = false, didAutoplay = false, forceCache = false;
   List<String> stopReason = [];
+  Timer? bufferingTimer;
 
   StreamSubscription? indexListener;
 
@@ -81,27 +82,30 @@ class VideoViewerState extends State<VideoViewer> {
     isStopped = false;
     startedAt.value = DateTime.now().millisecondsSinceEpoch;
 
+    unawaited(getSize());
+
     if (!settingsHandler.mediaCache) {
       // Media caching disabled - don't cache videos
-      unawaited(getSize());
       unawaited(initPlayer());
       return;
     }
-    switch (settingsHandler.videoCacheMode) {
+
+    final usedVideoCacheMode = forceCache ? 'Cache' : settingsHandler.videoCacheMode;
+
+    switch (usedVideoCacheMode) {
       case 'Cache':
         // Cache to device from custom request
         break;
 
+      // Load and stream from default player network request, cache to device from custom request
+      // TODO: change video handler to allow viewing and caching from single network request
       case 'Stream+Cache':
-        // Load and stream from default player network request, cache to device from custom request
-        // TODO: change video handler to allow viewing and caching from single network request
         unawaited(initPlayer());
         break;
 
+      // Only stream, notice the return
       case 'Stream':
       default:
-        // Only stream, notice the return
-        unawaited(getSize());
         unawaited(initPlayer());
         return;
     }
@@ -283,6 +287,8 @@ class VideoViewerState extends State<VideoViewer> {
   @override
   void dispose() {
     disposables();
+
+    bufferingTimer?.cancel();
 
     indexListener?.cancel();
     indexListener = null;
@@ -468,7 +474,26 @@ class VideoViewerState extends State<VideoViewer> {
       await chewieController!.setVolume(0);
     }
 
+    if (!forceCache) {
+      bufferingTimer?.cancel();
+      bufferingTimer = Timer(
+        const Duration(seconds: 10),
+        () {
+          if (!isVideoInited) {
+            forceCache = true;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              killLoading([]);
+              initVideo(false);
+              updateState();
+            });
+          }
+        },
+      );
+    }
+
     await Future.wait([videoController!.initialize()]);
+
+    forceCache = false;
 
     // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
     updateState();
@@ -575,7 +600,7 @@ class VideoViewerState extends State<VideoViewer> {
                   ? const SizedBox.shrink()
                   : MediaLoading(
                       item: widget.booruItem,
-                      hasProgress: settingsHandler.mediaCache && settingsHandler.videoCacheMode != 'Stream',
+                      hasProgress: settingsHandler.mediaCache && (forceCache || settingsHandler.videoCacheMode != 'Stream'),
                       isFromCache: isFromCache,
                       isDone: isVideoInited,
                       isTooBig: isTooBig > 0,

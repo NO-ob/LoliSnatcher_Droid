@@ -17,7 +17,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
   final SettingsHandler settingsHandler = SettingsHandler.instance;
 
   bool autoPlay = true, startVideosMuted = false, disableVideo = false, useAltVideoPlayer = false, altVideoPlayerHwAccel = true;
-  late String altVideoPlayerVO, altVideoPlayerHWDEC;
+  late String altVideoPlayerVO, altVideoPlayerHWDEC, videoCacheMode;
 
   @override
   void initState() {
@@ -30,6 +30,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     altVideoPlayerHwAccel = settingsHandler.altVideoPlayerHwAccel;
     altVideoPlayerVO = settingsHandler.altVideoPlayerVO;
     altVideoPlayerHWDEC = settingsHandler.altVideoPlayerHWDEC;
+    videoCacheMode = settingsHandler.videoCacheMode;
   }
 
   Future<void> _onPopInvoked(bool didPop, _) async {
@@ -44,6 +45,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     settingsHandler.altVideoPlayerHwAccel = altVideoPlayerHwAccel;
     settingsHandler.altVideoPlayerVO = altVideoPlayerVO;
     settingsHandler.altVideoPlayerHWDEC = altVideoPlayerHWDEC;
+    settingsHandler.videoCacheMode = videoCacheMode;
 
     if (settingsHandler.useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
       MediaKitVideoPlayer.registerWith();
@@ -182,6 +184,42 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                               });
                             },
                             title: 'Alt player: HWDEC',
+                          ),
+                          SettingsDropdown(
+                            value: videoCacheMode,
+                            items: settingsHandler.map['videoCacheMode']!['options'],
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
+                              });
+                            },
+                            title: 'Video cache mode',
+                            subtitle: const Text(
+                              '''Videos on some Boorus may not work correctly (i.e. endless loading) on alt player with Stream video cache mode. In that case try using Cache mode. Also player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds''',
+                            ),
+                            trailingIcon: IconButton(
+                              icon: const Icon(Icons.help_outline),
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return SettingsDialog(
+                                      title: const Text('Video cache modes'),
+                                      contentItems: [
+                                        const Text("- Stream - Don't cache, start playing as soon as possible"),
+                                        const Text('- Cache - Saves the file to device storage, plays only when download is complete'),
+                                        const Text('- Stream+Cache - Mix of both, but currently leads to double download'),
+                                        const Text(''),
+                                        const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
+                                        const Text(''),
+                                        if (Platform.isWindows || Platform.isLinux || Platform.isAndroid)
+                                          const Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.'),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ],
                       )

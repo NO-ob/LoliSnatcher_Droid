@@ -476,7 +476,12 @@ class DioDownloader {
       currentClient = DioNetwork.getClient();
       final Response response = await currentClient!.head(
         resolved,
-        options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: await getHeaders(),
+          sendTimeout: timeoutDuration,
+          receiveTimeout: timeoutDuration,
+        ),
         cancelToken: cancelToken,
       );
       currentClient!.close();
