@@ -131,7 +131,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
     );
   }
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -151,7 +151,7 @@ class _LoliSyncProgressPageState extends State<LoliSyncProgressPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(

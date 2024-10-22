@@ -44,7 +44,7 @@ class TabRow extends StatelessWidget {
           fontSize: 16,
           fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
           fontWeight: fontWeight ?? FontWeight.normal,
-          color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+          color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
         ),
       );
 
@@ -58,7 +58,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
             );
 
             spans.add(
@@ -86,7 +86,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
             ),
           );
         } else if (withColoredTags) {
@@ -108,7 +108,7 @@ class TabRow extends StatelessWidget {
               fontSize: 16,
               fontStyle: hasItems ? FontStyle.normal : FontStyle.italic,
               fontWeight: fontWeight ?? FontWeight.normal,
-              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onBackground,
+              color: color ?? (tab.tags == '' ? Colors.grey : null) ?? Theme.of(context).colorScheme.onSurface,
               backgroundColor: isColored ? tagData.tagType.getColour().withOpacity(0.66) : null,
             );
 

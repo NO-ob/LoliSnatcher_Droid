@@ -291,7 +291,7 @@ class _NoteBuildState extends State<NoteBuild> {
   @override
   Widget build(BuildContext context) {
     // TODO don't render when box is out of the screen
-    // final screen = MediaQuery.of(context).size;
+    // final screen = MediaQuery.sizeOf(context);
     // if (widget.left < (0 - widget.width - 30) ||
     //     widget.top < (0 - widget.height - 30) ||
     //     widget.left > (screen.width + 30) ||

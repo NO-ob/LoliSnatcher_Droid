@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -21,15 +22,13 @@ class GuessExtensionViewer extends StatefulWidget {
 }
 
 class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
-  late Dio client;
   CancelToken? cancelToken;
   bool failed = false;
-  String currentExtension = '';
+  String currentExtension = 'head content-type';
 
   @override
   void initState() {
     super.initState();
-    client = DioNetwork.getClient();
     cancelToken = CancelToken();
 
     startGuessing();
@@ -44,7 +43,9 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
   Future<void> startGuessing() async {
     // check mimetype of original file url
     try {
-      final mimeRes = await client.head(
+      currentExtension = 'head content-type';
+      setState(() {});
+      final mimeRes = await DioNetwork.head(
         widget.item.fileURL,
         cancelToken: cancelToken,
       );
@@ -98,7 +99,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
         // TODO run multiple requests at once through Future.wait? (at least from the same category)
 
         // HEAD request, because we don't need the actual file, just its status code
-        final res = await client.head(
+        final res = await DioNetwork.head(
           '${widget.item.fileURL.replaceAll(RegExp(r'\.\w+$'), '')}.$extension',
           cancelToken: cancelToken,
         );
@@ -117,11 +118,12 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
       }
     }
     failed = true;
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    const String failedText = 'Failed to guess the file extension';
+    const String failedText = 'Failed to guess the file extension/Unknown file type';
     const String defaultText = 'Guessing file extension...';
 
     return Material(
@@ -135,6 +137,7 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            margin: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.5),
               borderRadius: BorderRadius.circular(10),
@@ -152,7 +155,10 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                 if (failed) ...[
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
                     ),
                     onPressed: () {
                       failed = false;
@@ -161,6 +167,23 @@ class _GuessExtensionViewerState extends State<GuessExtensionViewer> {
                     },
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retry'),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 20,
+                      ),
+                    ),
+                    onPressed: () {
+                      launchUrlString(
+                        widget.item.fileURL,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    icon: const Icon(Icons.public),
+                    label: const Text('Open in browser'),
                   ),
                 ] else ...[
                   const Text(

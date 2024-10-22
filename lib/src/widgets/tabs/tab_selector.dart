@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:auto_size_text/auto_size_text.dart';
+import 'package:auto_size_text_plus/auto_size_text_plus.dart';
 import 'package:get/get.dart';
 
 import 'package:lolisnatcher/src/boorus/mergebooru_handler.dart';
@@ -714,7 +714,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
       ),
       scrollable: false,
       content: Container(
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: MediaQuery.sizeOf(context).height * 0.75,
         width: double.maxFinite,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
@@ -1216,7 +1216,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
                   10,
                   10,
                   10,
-                  10 + MediaQuery.of(context).padding.bottom,
+                  10 + MediaQuery.paddingOf(context).bottom,
                 ),
                 width: double.infinity,
                 child: Row(

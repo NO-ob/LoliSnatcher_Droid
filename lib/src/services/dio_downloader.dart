@@ -3,7 +3,6 @@ import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/services/image_writer.dart';
@@ -123,7 +122,7 @@ class DioDownloader {
 
   Future<Map<String, dynamic>> getHeaders() async {
     final Map<String, dynamic> resultHeaders = {...headers ?? {}};
-    final String cookieString = await Tools.getCookies(WebUri(url));
+    final String cookieString = await Tools.getCookies(url);
     if (cookieString.isNotEmpty) {
       resultHeaders['Cookie'] = cookieString;
     }
@@ -166,8 +165,14 @@ class DioDownloader {
         }
         return;
       }
-    } catch (e) {
-      Logger.Inst().log('Error getting from cache $url :: $e', runtimeType.toString(), 'runRequestIsolate', LogTypes.imageLoadingError);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error getting from cache $url :: $e',
+        runtimeType.toString(),
+        'runRequestIsolate',
+        LogTypes.imageLoadingError,
+        s: s,
+      );
       if (e is Exception) {
         onError?.call(e);
       } else {
@@ -188,6 +193,7 @@ class DioDownloader {
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
+      currentClient!.close();
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
@@ -221,7 +227,7 @@ class DioDownloader {
         dispose();
       }
       return;
-    } catch (e) {
+    } catch (e, s) {
       final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) {
         Logger.Inst().log(
@@ -229,6 +235,7 @@ class DioDownloader {
           runtimeType.toString(),
           'runRequestIsolate',
           LogTypes.imageLoadingError,
+          s: s,
         );
       }
       if (e is Exception) {
@@ -268,8 +275,14 @@ class DioDownloader {
         }
         return;
       }
-    } catch (e) {
-      Logger.Inst().log('Error getting from cache $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error getting from cache $url :: $e',
+        runtimeType.toString(),
+        'runRequest',
+        LogTypes.imageLoadingError,
+        s: s,
+      );
       if (e is Exception) {
         onError?.call(e);
       } else {
@@ -289,6 +302,7 @@ class DioDownloader {
         cancelToken: cancelToken,
         onReceiveProgress: onProgress,
       );
+      currentClient!.close();
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
@@ -325,7 +339,7 @@ class DioDownloader {
         dispose();
       }
       return;
-    } catch (e) {
+    } catch (e, s) {
       final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) {
         Logger.Inst().log(
@@ -333,6 +347,7 @@ class DioDownloader {
           runtimeType.toString(),
           'runRequest',
           LogTypes.imageLoadingError,
+          s: s,
         );
       }
       if (e is Exception) {
@@ -369,8 +384,14 @@ class DioDownloader {
         }
         return;
       }
-    } catch (e) {
-      Logger.Inst().log('Error getting from cache $url :: $e', runtimeType.toString(), 'runRequest', LogTypes.imageLoadingError);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error getting from cache $url :: $e',
+        runtimeType.toString(),
+        'runRequest',
+        LogTypes.imageLoadingError,
+        s: s,
+      );
       if (e is Exception) {
         onError?.call(e);
       } else {
@@ -397,6 +418,7 @@ class DioDownloader {
         onReceiveProgress: onProgress,
         deleteOnError: true,
       );
+      currentClient!.close();
 
       if (response.isRedirect == true && isRedirectBroken(response.realUri.toString())) {
         throw DioLoadException(url: response.realUri.toString(), message: 'Image was redirected to a broken link, url should be: $resolved');
@@ -426,7 +448,7 @@ class DioDownloader {
         dispose();
       }
       return;
-    } catch (e) {
+    } catch (e, s) {
       final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) {
         Logger.Inst().log(
@@ -434,6 +456,7 @@ class DioDownloader {
           runtimeType.toString(),
           'runRequest',
           LogTypes.imageLoadingError,
+          s: s,
         );
       }
       if (e is Exception) {
@@ -456,6 +479,7 @@ class DioDownloader {
         options: Options(responseType: ResponseType.bytes, headers: await getHeaders(), sendTimeout: timeoutDuration, receiveTimeout: timeoutDuration),
         cancelToken: cancelToken,
       );
+      currentClient!.close();
 
       // print('response size: ${response.headers['content-length']}');
 
@@ -470,7 +494,7 @@ class DioDownloader {
       onEvent?.call('size', int.tryParse(response.headers['content-length']?.first ?? '') ?? 0);
       dispose();
       return;
-    } catch (e) {
+    } catch (e, s) {
       final bool isCancelError = e is DioException && CancelToken.isCancel(e);
       if (!isCancelError) {
         Logger.Inst().log(
@@ -478,6 +502,7 @@ class DioDownloader {
           runtimeType.toString(),
           'runRequestSize',
           LogTypes.imageLoadingError,
+          s: s,
         );
       }
       if (e is Exception) {

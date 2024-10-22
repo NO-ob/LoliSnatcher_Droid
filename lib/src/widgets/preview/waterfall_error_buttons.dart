@@ -118,13 +118,13 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
             );
           } else {
             return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
@@ -142,7 +142,7 @@ class _WaterfallErrorButtonsState extends State<WaterfallErrorButtons> {
                   const SizedBox(width: 16),
                   Container(
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
@@ -235,8 +235,8 @@ class _ButtonWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).colorScheme.background.withOpacity(0.66),
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      color: Theme.of(context).colorScheme.surface.withOpacity(0.66),
+      padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
       child: child,
     );
   }

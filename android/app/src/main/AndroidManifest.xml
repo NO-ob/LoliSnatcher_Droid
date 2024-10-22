@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.noaisu.loliSnatcher">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -12,7 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <!-- <uses-permission android:name="android.permission.USE_BIOMETRIC"/> -->
 
-
+    <!-- <application ... android:enableOnBackInvokedCallback="true" - required for predictive back -->
     <application
         android:name="${applicationName}"
         android:label="LoliSnatcher"
@@ -58,7 +57,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- Impeller preview -->
+        <!-- Impeller preview - causes screen tearing on videos? -->
         <!-- <meta-data
             android:name="io.flutter.embedding.android.EnableImpeller"
             android:value="true" /> -->

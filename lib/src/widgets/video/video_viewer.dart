@@ -334,6 +334,7 @@ class VideoViewerState extends State<VideoViewer> {
   void resetZoom() {
     if (!isVideoInited) return;
     scaleController.scaleState = PhotoViewScaleState.initial;
+    viewerHandler.setZoomed(widget.key, false);
   }
 
   void scrollZoomImage(double value) {
@@ -543,10 +544,11 @@ class VideoViewerState extends State<VideoViewer> {
     }
 
     final double aspectRatio = videoController?.value.aspectRatio ?? 16 / 9;
-    final double screenRatio = MediaQuery.of(context).size.width / MediaQuery.of(context).size.height;
+    final screenSize = MediaQuery.sizeOf(context);
+    final double screenRatio = screenSize.width / screenSize.height;
     final Size childSize = Size(
-      aspectRatio > screenRatio ? MediaQuery.of(context).size.width : MediaQuery.of(context).size.height * aspectRatio,
-      aspectRatio < screenRatio ? MediaQuery.of(context).size.height : MediaQuery.of(context).size.width / aspectRatio,
+      aspectRatio > screenRatio ? screenSize.width : screenSize.height * aspectRatio,
+      aspectRatio < screenRatio ? screenSize.height : screenSize.width / aspectRatio,
     );
 
     const double fullOpacity = Constants.imageDefaultOpacity;
@@ -618,8 +620,6 @@ class VideoViewerState extends State<VideoViewer> {
                               controller: viewController,
                               scaleStateController: scaleController,
                               enableRotation: settingsHandler.allowRotation,
-                              enableDoubleTapZoom: false,
-                              enableTapDragZoom: settingsHandler.useDoubleTapDragZoom,
                               child: Chewie(controller: chewieController!),
                             ),
                           ),

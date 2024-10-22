@@ -116,7 +116,7 @@ class DanbooruHandler extends BooruHandler {
           serverId: current['id'].toString(),
           rating: current['rating'].toString(),
           score: current['score'].toString(),
-          sources: [current['source'].toString()],
+          sources: (current['source'] != null && current['source'] is String) ? [current['source']] : null,
           md5String: current['md5'].toString(),
           postDate: dateStr, // 2021-06-17T16:27:45.743-04:00
           postDateFormat: 'iso',

@@ -50,7 +50,7 @@ class _DebugPageState extends State<DebugPage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -66,7 +66,7 @@ class _DebugPageState extends State<DebugPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -290,7 +290,7 @@ class _DebugPageState extends State<DebugPage> {
                 name: 'Get Session String',
                 icon: const Icon(Icons.copy),
                 action: () async {
-                  final str = SearchHandler.instance.getBackupString() ?? '';
+                  final str = SearchHandler.instance.generateBackupJson() ?? '';
                   await Clipboard.setData(ClipboardData(text: str));
                   FlashElements.showSnackbar(
                     context: context,

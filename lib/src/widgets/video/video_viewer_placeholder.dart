@@ -28,7 +28,7 @@ class VideoViewerPlaceholder extends StatelessWidget {
           ),
           // Image.network(item.thumbnailURL, fit: BoxFit.fill),
           SizedBox(
-            width: MediaQuery.of(context).size.width / 3,
+            width: MediaQuery.sizeOf(context).width / 3,
             child: SettingsButton(
               name: Platform.isLinux ? 'Open Video in External Player' : 'Open Video in Browser',
               action: () {

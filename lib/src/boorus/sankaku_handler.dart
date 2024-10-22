@@ -65,15 +65,16 @@ class SankakuHandler extends BooruHandler {
     final Map<TagType, List<String>> tagMap = {};
 
     for (int x = 0; x < current['tags'].length; x++) {
-      tags.add(current['tags'][x]['name'].toString());
+      tags.add(current['tags'][x]['tagName'].toString());
       final String typeStr = current['tags'][x]['type'].toString();
       final TagType type = tagTypeMap[typeStr] ?? TagType.none;
       if (tagMap.containsKey(type)) {
-        tagMap[type]?.add(current['tags'][x]['name'].toString());
+        tagMap[type]?.add(current['tags'][x]['tagName'].toString());
       } else {
-        tagMap[type] = [current['tags'][x]['name'].toString()];
+        tagMap[type] = [current['tags'][x]['tagName'].toString()];
       }
     }
+    tags.sort((a, b) => a.compareTo(b));
 
     if (current['file_url'] != null) {
       for (int i = 0; i < tagMap.entries.length; i++) {
@@ -230,7 +231,7 @@ class SankakuHandler extends BooruHandler {
 
   @override
   String? parseTagSuggestion(dynamic responseItem, int index) {
-    final String tagStr = responseItem['name'] ?? '';
+    final String tagStr = responseItem['tagName'] ?? '';
     if (tagStr.isEmpty) {
       return null;
     }

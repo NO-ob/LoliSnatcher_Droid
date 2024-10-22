@@ -32,7 +32,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
     altVideoPlayerHWDEC = settingsHandler.altVideoPlayerHWDEC;
   }
 
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -61,11 +61,11 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Title'),
+          title: const Text('Video'),
         ),
         body: Center(
           child: ListView(
@@ -77,8 +77,8 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                     disableVideo = newValue;
                   });
                 },
-                title: 'Disable Video',
-                drawTopBorder: true, // instead of border in reorder list
+                title: 'Disable videos',
+                drawTopBorder: true,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -86,7 +86,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                       context: context,
                       builder: (context) {
                         return const SettingsDialog(
-                          title: Text('Disable Video'),
+                          title: Text('Disable videos'),
                           contentItems: [
                             Text('Useful on low end devices that crash when trying to load videos.'),
                             Text("Replaces video with text that says 'Video disabled'."),
@@ -97,6 +97,30 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                   },
                 ),
               ),
+              SettingsToggle(
+                value: autoPlay,
+                onChanged: (newValue) {
+                  setState(() {
+                    autoPlay = newValue;
+                  });
+                },
+                title: 'Autoplay videos',
+              ),
+              SettingsToggle(
+                value: startVideosMuted,
+                onChanged: (newValue) {
+                  setState(() {
+                    startVideosMuted = newValue;
+                  });
+                },
+                title: 'Start videos muted',
+              ),
+              //
+              const SettingsButton(name: '', enabled: false),
+              const SettingsButton(
+                name: '[Experimental]',
+                icon: Icon(Icons.science),
+              ),
               if (Platform.isAndroid || Platform.isIOS) ...[
                 SettingsToggle(
                   value: useAltVideoPlayer,
@@ -106,17 +130,19 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                     });
                   },
                   title: 'Use alternative video player backend',
-                  subtitle: const Text('Has better performance in some cases, but certain videos may not work on your device due to codecs'),
+                  subtitle: const Text('Has better performance in some cases, but certain videos may not work on your device'),
                 ),
               ],
               AnimatedSize(
                 duration: const Duration(milliseconds: 300),
-                child: (useAltVideoPlayer || (Platform.isWindows || Platform.isLinux))
+                child: (useAltVideoPlayer || (Platform.isWindows || Platform.isLinux || Platform.isMacOS))
                     ? Column(
                         children: [
                           const Padding(
                             padding: EdgeInsets.only(left: 16, right: 16, top: 8),
-                            child: Text("Play around with 'Alt player' settings below if videos don't work correctly or give codec errors:"),
+                            child: Text(
+                              "Try different values of 'Alt player' settings below if videos don't work correctly or give codec errors:",
+                            ),
                           ),
                           SettingsToggle(
                             value: altVideoPlayerHwAccel,
@@ -160,26 +186,9 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                         ],
                       )
                     : LayoutBuilder(
+                        // used to avoid animating width change
                         builder: (_, constraints) => SizedBox(width: constraints.maxWidth),
                       ),
-              ),
-              SettingsToggle(
-                value: autoPlay,
-                onChanged: (newValue) {
-                  setState(() {
-                    autoPlay = newValue;
-                  });
-                },
-                title: 'Auto play videos',
-              ),
-              SettingsToggle(
-                value: startVideosMuted,
-                onChanged: (newValue) {
-                  setState(() {
-                    startVideosMuted = newValue;
-                  });
-                },
-                title: 'Start videos muted',
               ),
             ],
           ),

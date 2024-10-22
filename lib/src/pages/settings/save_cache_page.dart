@@ -28,7 +28,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
   final TextEditingController cacheSizeController = TextEditingController();
 
   late String videoCacheMode, extPathOverride, snatchMode;
-  bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true, snatchOnFavourite = false;
+  bool jsonWrite = false, thumbnailCache = true, mediaCache = false, downloadNotifications = true, snatchOnFavourite = false, favouriteOnSnatch = false;
 
   static const List<_CacheType> cacheTypes = [
     _CacheType('Total', null),
@@ -62,6 +62,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     cacheSizeController.text = settingsHandler.cacheSize.toString();
     downloadNotifications = settingsHandler.downloadNotifications;
     snatchOnFavourite = settingsHandler.snatchOnFavourite;
+    favouriteOnSnatch = settingsHandler.favouriteOnSnatch;
 
     getCacheStats(null);
   }
@@ -113,7 +114,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -129,6 +130,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
     settingsHandler.snatchMode = snatchMode;
     settingsHandler.downloadNotifications = downloadNotifications;
     settingsHandler.snatchOnFavourite = snatchOnFavourite;
+    settingsHandler.favouriteOnSnatch = favouriteOnSnatch;
     final bool result = await settingsHandler.saveSettings(restate: false);
     if (result) {
       Navigator.of(context).pop();
@@ -193,7 +195,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -210,12 +212,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     snatchMode = newValue ?? settingsHandler.map['snatchMode']!['default'];
                   });
                 },
-                title: 'Snatch Quality',
+                title: 'Snatch quality',
               ),
               SettingsTextInput(
                 controller: snatchCooldownController,
-                title: 'Snatch Cooldown (ms)',
-                hintText: 'Timeout between snatching images in ms',
+                title: 'Snatch cooldown (in ms)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['snatchCooldown']!['default']!.toString(),
@@ -243,7 +244,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     downloadNotifications = newValue;
                   });
                 },
-                title: 'Show Download Notifications',
+                title: 'Show download notifications',
               ),
               SettingsToggle(
                 value: snatchOnFavourite,
@@ -252,7 +253,30 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     snatchOnFavourite = newValue;
                   });
                 },
-                title: 'Snatch items on Favouriting',
+                trailingIcon: const Row(
+                  children: [
+                    Icon(Icons.favorite, color: Colors.red),
+                    Icon(Icons.arrow_right_alt_rounded),
+                    Icon(Icons.save),
+                  ],
+                ),
+                title: 'Snatch items on favouriting',
+              ),
+              SettingsToggle(
+                value: favouriteOnSnatch,
+                onChanged: (newValue) {
+                  setState(() {
+                    favouriteOnSnatch = newValue;
+                  });
+                },
+                trailingIcon: const Row(
+                  children: [
+                    Icon(Icons.save),
+                    Icon(Icons.arrow_right_alt_rounded),
+                    Icon(Icons.favorite, color: Colors.red),
+                  ],
+                ),
+                title: 'Favourite items on snatching',
               ),
               SettingsToggle(
                 value: jsonWrite,
@@ -261,11 +285,11 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     jsonWrite = newValue;
                   });
                 },
-                title: 'Write Image Data to JSON on save',
+                title: 'Write image data to JSON on save',
               ),
               SettingsButton(
-                name: 'Set Storage Directory',
-                subtitle: Text(extPathOverride.isEmpty ? '...' : 'Current: $extPathOverride'),
+                name: 'Set storage directory',
+                subtitle: extPathOverride.isEmpty ? null : Text('Current: $extPathOverride'),
                 icon: const Icon(Icons.folder_outlined),
                 action: () async {
                   //String url = await ServiceHandler.setExtDir();
@@ -315,7 +339,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
               ),
               if (extPathOverride.isNotEmpty)
                 SettingsButton(
-                  name: 'Reset Storage Directory',
+                  name: 'Reset storage directory',
                   icon: const Icon(Icons.refresh),
                   action: () {
                     setState(() {
@@ -331,7 +355,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     thumbnailCache = newValue;
                   });
                 },
-                title: 'Cache Thumbnails',
+                title: 'Cache previews',
               ),
               SettingsToggle(
                 value: mediaCache,
@@ -340,7 +364,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     mediaCache = newValue;
                   });
                 },
-                title: 'Cache Media',
+                title: 'Cache media',
               ),
               SettingsDropdown(
                 value: videoCacheMode,
@@ -350,23 +374,24 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     videoCacheMode = newValue ?? settingsHandler.map['videoCacheMode']!['default'];
                   });
                 },
-                title: 'Video Cache Mode',
+                title: 'Video cache mode',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (context) {
-                        return const SettingsDialog(
-                          title: Text('Video Cache Modes'),
+                        return SettingsDialog(
+                          title: const Text('Video cache modes'),
                           contentItems: [
-                            Text("- Stream - Don't cache, start playing as soon as possible"),
-                            Text('- Cache - Saves the file to device storage, plays only when download is complete'),
-                            Text('- Stream+Cache - Mix of both, but currently leads to double download'),
-                            Text(''),
-                            Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
-                            Text(''),
-                            Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.'),
+                            const Text("- Stream - Don't cache, start playing as soon as possible"),
+                            const Text('- Cache - Saves the file to device storage, plays only when download is complete'),
+                            const Text('- Stream+Cache - Mix of both, but currently leads to double download'),
+                            const Text(''),
+                            const Text("[Note]: Videos will cache only if 'Cache Media' is enabled."),
+                            const Text(''),
+                            if (Platform.isWindows || Platform.isLinux || Platform.isAndroid)
+                              const Text('[Warning]: On desktop builds Stream mode can work incorrectly for some Boorus.'),
                           ],
                         );
                       },
@@ -389,12 +414,12 @@ class _SaveCachePageState extends State<SaveCachePage> {
                     cacheDuration = cacheDurationSelected!['value'];
                   });
                 },
-                title: 'Delete Cache after:',
+                title: 'Delete cache after:',
               ),
               SettingsTextInput(
                 controller: cacheSizeController,
-                title: 'Cache Size Limit (in GB)',
-                hintText: 'Maximum Total Cache Size',
+                title: 'Cache size Limit (in GB)',
+                hintText: 'Maximum total cache size',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['cacheSize']!['default']!.toString(),
@@ -404,11 +429,14 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 numberMax: double.infinity,
               ),
               const SettingsButton(name: '', enabled: false),
-              const SettingsButton(name: 'Cache Stats:'),
+              const SettingsButton(name: 'Cache stats:'),
               ...cacheTypes.map(buildCacheButton),
               SettingsButton(
-                name: 'Clear cache completely',
-                icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                name: 'Clear all cache',
+                icon: Icon(
+                  Icons.delete_forever,
+                  color: Theme.of(context).colorScheme.error,
+                ),
                 action: () async {
                   FlashElements.showSnackbar(
                     context: context,

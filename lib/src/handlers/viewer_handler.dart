@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
 
+import 'package:lolisnatcher/src/handlers/search_handler.dart';
+import 'package:lolisnatcher/src/handlers/service_handler.dart';
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
+import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/video_viewer_desktop.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
 // TODO media actions, video pause/mute... global controller
@@ -105,16 +108,9 @@ class ViewerHandler extends GetxController {
           isFullscreen.value = widgetState.chewieController?.isFullScreen ?? false;
           viewState.value = widgetState.viewController.value;
           break;
-        case const (VideoViewerDesktop):
-          final widgetState = state! as VideoViewerDesktopState;
-          isZoomed.value = widgetState.isZoomed;
-          // TODO find a way to get video loaded state
-          isLoaded.value = true;
-          isFullscreen.value = false;
-          viewState.value = widgetState.viewController.value;
-          break;
         case const (VideoViewerPlaceholder):
         case const (UnknownViewerPlaceholder):
+        case const (GuessExtensionViewer):
           isLoaded.value = true;
           isFullscreen.value = false;
           viewState.value = null;
@@ -163,6 +159,23 @@ class ViewerHandler extends GetxController {
     }
 
     isLoaded.value = value;
+  }
+
+  void toggleToolbar(bool isLongTap) {
+    final bool newAppbarVisibility = !displayAppbar.value;
+    displayAppbar.value = newAppbarVisibility;
+
+    if (isLongTap) {
+      ServiceHandler.vibrate();
+    }
+
+    final searchHandler = SearchHandler.instance;
+    final settingsHandler = SettingsHandler.instance;
+
+    // enable volume buttons if current page is a video AND appbar is set to visible
+    final bool isVideo = searchHandler.currentFetched[searchHandler.viewedIndex.value].mediaType.value.isVideo;
+    final bool isVolumeAllowed = !settingsHandler.useVolumeButtonsForScroll || (isVideo && newAppbarVisibility);
+    ServiceHandler.setVolumeButtons(isVolumeAllowed);
   }
 
   // Related to videos

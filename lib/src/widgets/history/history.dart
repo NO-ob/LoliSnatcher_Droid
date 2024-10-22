@@ -277,7 +277,7 @@ class _HistoryListState extends State<HistoryList> {
   }
 
   Widget listBuild() {
-    final pageSize = MediaQuery.of(context).size.height ~/ 70;
+    final pageSize = MediaQuery.sizeOf(context).height ~/ 70;
 
     return HugeListView(
       scrollController: itemScrollController,

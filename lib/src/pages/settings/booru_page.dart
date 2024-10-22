@@ -13,6 +13,7 @@ import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/pages/settings/booru_edit_page.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
@@ -71,7 +72,7 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -161,7 +162,7 @@ class _BooruPageState extends State<BooruPage> {
               title: const Text('Share Booru'),
               contentItems: [
                 Text(
-                  "Booru Config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
+                  "Booru config of '${selectedBooru?.name}' will be converted to a link ${Platform.isAndroid ? 'and share dialog will open' : 'which will be copied to clipboard'}.",
                 ),
                 const Text(''),
                 const Text('Should login/apikey data be included?'),
@@ -298,7 +299,7 @@ class _BooruPageState extends State<BooruPage> {
                     if (await settingsHandler.deleteBooru(tempSelected)) {
                       FlashElements.showSnackbar(
                         context: context,
-                        title: const Text('Booru Deleted!', style: TextStyle(fontSize: 20)),
+                        title: const Text('Booru deleted!', style: TextStyle(fontSize: 20)),
                         leadingIcon: Icons.delete_forever,
                         leadingIconColor: Colors.red,
                         sideColor: Colors.yellow,
@@ -334,13 +335,17 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget webviewButton() {
-    // TODO add help button and explain how to properly setup cookies
-    return SettingsButton(
-      name: 'Open webview to get cookies',
-      subtitle: const Text('[BETA]'),
-      icon: const Icon(Icons.public),
-      page: () => InAppWebviewView(initialUrl: selectedBooru!.baseURL!),
-    );
+    if (Tools.isOnPlatformWithWebviewSupport) {
+      // TODO add help button and explain how to properly setup cookies?
+      return SettingsButton(
+        name: 'Open webview',
+        subtitle: const Text('To login or obtain cookies'),
+        icon: const Icon(Icons.public),
+        page: () => InAppWebviewView(initialUrl: selectedBooru!.baseURL!),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 
   Widget addFromClipboardButton() {
@@ -393,7 +398,7 @@ class _BooruPageState extends State<BooruPage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -404,8 +409,7 @@ class _BooruPageState extends State<BooruPage> {
             children: [
               SettingsTextInput(
                 controller: defaultTagsController,
-                title: 'Default Tags',
-                hintText: 'Tags searched when app opens',
+                title: 'Default tags',
                 inputType: TextInputType.text,
                 clearable: true,
                 pasteable: true,
@@ -413,8 +417,9 @@ class _BooruPageState extends State<BooruPage> {
               ),
               SettingsTextInput(
                 controller: limitController,
-                title: 'Items per Page',
-                hintText: 'Items to fetch per page 10-100',
+                title: 'Items fetched per page',
+                hintText: '10-100',
+                subtitle: const Text('Some Boorus may ignore this setting'),
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['limit']!['default']!.toString(),

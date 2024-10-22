@@ -183,7 +183,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     List<List<String>> overFlowList = [];
     List<List<String>> buttonList = [];
     // at least first 4 buttons will show on toolbar
-    final int listSplit = max(4, (MediaQuery.of(context).size.width / 100).floor());
+    final int listSplit = max(4, (MediaQuery.sizeOf(context).width / 100).floor());
     if (listSplit < filteredButtonOrder.length) {
       overFlowList = filteredButtonOrder.sublist(listSplit);
       buttonList = filteredButtonOrder.sublist(0, listSplit);
@@ -259,7 +259,6 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       key: ValueKey(name),
                       icon: buttonIcon(name),
                       subIcon: buttonSubicon(name),
-                      onTap: null,
                       stackWidget: buttonStackWidget(name),
                     ),
                     title: Text(buttonText(value)),
@@ -354,6 +353,27 @@ class _HideableAppBarState extends State<HideableAppBar> {
 
   Widget? buttonStackWidget(String name) {
     switch (name) {
+      case 'snatch':
+        if (searchHandler.viewedIndex.value == -1 || searchHandler.currentFetched.isEmpty) {
+          return null;
+        }
+
+        final item = searchHandler.currentFetched[searchHandler.viewedIndex.value];
+        final bool isBeingSnatched = snatchHandler.current.value?.booruItems[snatchHandler.queueProgress.value] == item && snatchHandler.total.value != 0;
+        if (!isBeingSnatched) {
+          return null;
+        } else {
+          return Padding(
+            padding: const EdgeInsets.all(2),
+            child: AnimatedProgressIndicator(
+              value: snatchHandler.currentProgress,
+              animationDuration: const Duration(milliseconds: 50),
+              indicatorStyle: IndicatorStyle.circular,
+              valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
+              minHeight: 4,
+            ),
+          );
+        }
       case 'autoscroll':
         if (autoScroll) {
           return RestartableProgressIndicator(
@@ -365,7 +385,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
         if (sharedItem != null && shareProgress != 0) {
           return AnimatedProgressIndicator(
             value: shareProgress,
-            animationDuration: const Duration(milliseconds: 150),
+            animationDuration: const Duration(milliseconds: 50),
             indicatorStyle: IndicatorStyle.circular,
             valueColor: Theme.of(context).progressIndicatorTheme.color?.withOpacity(0.66),
             minHeight: 4,
@@ -437,6 +457,10 @@ class _HideableAppBarState extends State<HideableAppBar> {
           settingsHandler.snatchCooldown,
           false,
         );
+
+        if (settingsHandler.favouriteOnSnatch) {
+          await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+        }
         break;
       case 'favourite':
         await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value);
@@ -465,7 +489,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     // TODO long press slideshow button to set the timer
     switch (action) {
       case 'share':
-        ServiceHandler.vibrate();
+        await ServiceHandler.vibrate();
         // Ignore share setting on long press
         showShareDialog(showTip: false);
         break;
@@ -510,6 +534,9 @@ class _HideableAppBarState extends State<HideableAppBar> {
                         settingsHandler.snatchCooldown,
                         true,
                       );
+                      if (settingsHandler.favouriteOnSnatch) {
+                        await searchHandler.toggleItemFavourite(searchHandler.viewedIndex.value, forcedValue: true);
+                      }
                       Navigator.of(context).pop();
                     },
                     leading: const Icon(Icons.file_download_outlined),
@@ -672,7 +699,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
                       Icon(
                         Icons.arrow_forward_ios,
                         size: 30,
-                        color: Theme.of(context).colorScheme.onBackground,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       const SizedBox(width: 8),
                       Column(
@@ -920,7 +947,7 @@ class _HideableAppBarState extends State<HideableAppBar> {
     final double extraPadding = isOnTop ? 0 : MediaQuery.paddingOf(context).bottom;
 
     return PopScope(
-      onPopInvoked: (bool didPop) {
+      onPopInvokedWithResult: (bool didPop, _) {
         // clear currently loading item from cache to avoid creating broken files
         // TODO move sharing download routine to somewhere in global context?
         shareCancelToken?.cancel();

@@ -2,13 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:dio/dio.dart';
+import 'package:get/get.dart' show FirstWhereExt;
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
 import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
+import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
-import 'package:lolisnatcher/src/data/tag.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
 import 'package:lolisnatcher/src/utils/dio_network.dart';
@@ -282,61 +285,86 @@ class GelbooruAlikesHandler extends BooruHandler {
     );
   }
 
-  // ----------------- Tags
+  @override
+  bool get hasLoadItemSupport => booru.baseURL!.contains('rule34.xxx');
 
   @override
-  bool get shouldPopulateTags => booru.baseURL!.contains('rule34.xxx');
+  bool get shouldUpdateIteminTagView => booru.baseURL!.contains('rule34.xxx');
 
-  @override
-  String makeDirectTagURL(List<String> tags) {
-    String baseUrl = booru.baseURL!;
-    if (baseUrl.contains('rule34.xxx')) {
-      // because requests to default url are protected by a captcha
-      baseUrl = 'https://api.rule34.xxx';
+  Future<String?> getCookiesForPost() async {
+    String cookieString = await Tools.getCookies('https://rule34.xxx/');
+
+    final Map<String, String> headers = getHeaders();
+    if (headers['Cookie']?.isNotEmpty ?? false) {
+      cookieString += headers['Cookie']!;
     }
 
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-    final String userIdStr = booru.userID?.isNotEmpty == true ? '&user_id=${booru.userID}' : '';
-    return "$baseUrl/index.php?page=dapi&s=tag&q=index&names=${tags.join(" ")}&limit=100&json=1$apiKeyStr$userIdStr";
+    Logger.Inst().log('${booru.baseURL}: $cookieString', className, 'getCookies', LogTypes.booruHandlerSearchURL);
+
+    return cookieString.trim();
   }
 
   @override
-  Future<List<Tag>> genTagObjects(List<String> tags) async {
-    if (booru.baseURL!.contains('rule34.xxx') == false) {
-      return [];
-    }
-
-    final List<Tag> tagObjects = [];
-    Logger.Inst().log('Got tag list: $tags', className, 'genTagObjects', LogTypes.booruHandlerTagInfo);
-    final String url = makeDirectTagURL(tags);
-    Logger.Inst().log('DirectTagURL: $url', className, 'genTagObjects', LogTypes.booruHandlerTagInfo);
+  Future loadItem({required BooruItem item, CancelToken? cancelToken}) async {
     try {
-      final response = await DioNetwork.get(url, headers: getHeaders());
-      if (response.statusCode == 200) {
-        final parsedResponse = XmlDocument.parse(response.data).findAllElements('tag');
-        if (parsedResponse.isNotEmpty) {
-          Logger.Inst().log(
-            'Tag response length: ${parsedResponse.length},Tag list length: ${tags.length}',
-            className,
-            'genTagObjects',
-            LogTypes.booruHandlerTagInfo,
-          );
-          for (int i = 0; i < parsedResponse.length; i++) {
-            final String fullString = parsedResponse.elementAt(i).getAttribute('name') ?? '';
-            final String typeKey = parsedResponse.elementAt(i).getAttribute('type').toString();
-            TagType tagType = TagType.none;
-            if (tagTypeMap.containsKey(typeKey)) {
-              tagType = tagTypeMap[typeKey] ?? TagType.none;
-            }
-            if (fullString.isNotEmpty) {
-              tagObjects.add(Tag(fullString, tagType: tagType));
-            }
-          }
-        }
+      final cookies = await getCookiesForPost();
+
+      final response = await DioNetwork.get(
+        item.postURL,
+        headers: {
+          ...getHeaders(),
+          if (booru.baseURL!.contains('rule34.xxx')) 'User-Agent': Constants.defaultBrowserUserAgent,
+          if (booru.baseURL!.contains('rule34.xxx') && cookies?.isNotEmpty == true) 'Cookie': cookies,
+        },
+        options: Options(
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+        cancelToken: cancelToken,
+      );
+
+      if (response.statusCode != 200) {
+        return [item, false, 'Invalid status code ${response.statusCode}'];
+      } else {
+        final html = parse(response.data);
+        final sidebar = html.getElementById('tag-sidebar');
+        final copyrightTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-copyright tag'));
+        addTagsWithType(copyrightTags, TagType.copyright);
+        final characterTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-character tag'));
+        addTagsWithType(characterTags, TagType.character);
+        final artistTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-artist tag'));
+        addTagsWithType(artistTags, TagType.artist);
+        final generalTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-general tag'));
+        addTagsWithType(generalTags, TagType.none);
+        final metaTags = tagsFromHtml(sidebar?.getElementsByClassName('tag-type-meta tag'));
+        addTagsWithType(metaTags, TagType.meta);
+        item.isUpdated = true;
+        return [item, true, null];
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), className, 'tagSearch', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        className,
+        'loadItem',
+        LogTypes.exception,
+        s: s,
+      );
+      return [item, false, e.toString()];
     }
-    return tagObjects;
   }
+}
+
+List<String> tagsFromHtml(List<Element>? elements) {
+  if (elements == null || elements.isEmpty) {
+    return [];
+  }
+
+  final tags = <String>[];
+  for (final element in elements) {
+    final tag = element.getElementsByTagName('a').firstWhereOrNull((e) => e.text.isNotEmpty && e.text != '?');
+    if (tag != null) {
+      tags.add(tag.text.replaceAll(' ', '_'));
+    }
+  }
+  return tags;
 }

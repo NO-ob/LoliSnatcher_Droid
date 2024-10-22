@@ -107,7 +107,7 @@ class SettingsHandler extends GetxController {
   double mousewheelScrollSpeed = 10;
 
   int currentColumnCount(BuildContext context) {
-    return MediaQuery.of(context).orientation == Orientation.portrait ? portraitColumns : landscapeColumns;
+    return MediaQuery.orientationOf(context) == Orientation.portrait ? portraitColumns : landscapeColumns;
   }
 
   Duration cacheDuration = Duration.zero;
@@ -158,11 +158,13 @@ class SettingsHandler extends GetxController {
   bool downloadNotifications = true;
   bool allowRotation = false;
   bool enableHeroTransitions = true;
+  bool disableCustomPageTransitions = false;
   bool incognitoKeyboard = false;
   bool hideNotes = false;
   bool startVideosMuted = false;
   bool snatchOnFavourite = false;
-  bool useDoubleTapDragZoom = true;
+  bool favouriteOnSnatch = false;
+  bool disableVibration = false;
   bool useAltVideoPlayer = Platform.isWindows || Platform.isLinux;
   bool altVideoPlayerHwAccel = true;
   RxList<Booru> booruList = RxList<Booru>([]);
@@ -544,6 +546,10 @@ class SettingsHandler extends GetxController {
       'type': 'bool',
       'default': true,
     },
+    'disableCustomPageTransitions': {
+      'type': 'bool',
+      'default': false,
+    },
     'incognitoKeyboard': {
       'type': 'bool',
       'default': false,
@@ -560,9 +566,13 @@ class SettingsHandler extends GetxController {
       'type': 'bool',
       'default': false,
     },
-    'useDoubleTapDragZoom': {
+    'favouriteOnSnatch': {
       'type': 'bool',
-      'default': true,
+      'default': false,
+    },
+    'disableVibration': {
+      'type': 'bool',
+      'default': false,
     },
     'useAltVideoPlayer': {
       'type': 'bool',
@@ -625,6 +635,7 @@ class SettingsHandler extends GetxController {
         ThemeItem(name: 'Teal', primary: Colors.teal, accent: Colors.teal[600]),
         ThemeItem(name: 'Red', primary: Colors.red[700], accent: Colors.red[800]),
         ThemeItem(name: 'Green', primary: Colors.green, accent: Colors.green[700]),
+        ThemeItem(name: 'Halloween', primary: const Color(0xFF0B192C), accent: const Color(0xFFEB5E28)),
         ThemeItem(name: 'Custom', primary: null, accent: null),
       ],
     },
@@ -828,9 +839,15 @@ class SettingsHandler extends GetxController {
         default:
           return value;
       }
-    } catch (err) {
+    } catch (e, s) {
       // return default value on exceptions
-      Logger.Inst().log('value validation error: $err', 'SettingsHandler', 'validateValue', null);
+      Logger.Inst().log(
+        'value validation error: $e',
+        'SettingsHandler',
+        'validateValue',
+        null,
+        s: s,
+      );
       return settingParams['default'];
     }
   }
@@ -861,8 +878,14 @@ class SettingsHandler extends GetxController {
         }
       }
       return true;
-    } catch (err) {
-      Logger.Inst().log('loadDatabase error: $err', 'SettingsHandler', 'loadDatabase', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'loadDatabase error: $e',
+        'SettingsHandler',
+        'loadDatabase',
+        LogTypes.exception,
+        s: s,
+      );
       return false;
     }
   }
@@ -881,8 +904,14 @@ class SettingsHandler extends GetxController {
         }
       }
       return true;
-    } catch (err) {
-      Logger.Inst().log('indexDatabase error: $err', 'SettingsHandler', 'indexDatabase', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'indexDatabase error: $e',
+        'SettingsHandler',
+        'indexDatabase',
+        LogTypes.exception,
+        s: s,
+      );
       return false;
     }
   }
@@ -1025,6 +1054,8 @@ class SettingsHandler extends GetxController {
         return allowRotation;
       case 'enableHeroTransitions':
         return enableHeroTransitions;
+      case 'disableCustomPageTransitions':
+        return disableCustomPageTransitions;
       case 'incognitoKeyboard':
         return incognitoKeyboard;
       case 'hideNotes':
@@ -1033,8 +1064,10 @@ class SettingsHandler extends GetxController {
         return startVideosMuted;
       case 'snatchOnFavourite':
         return snatchOnFavourite;
-      case 'useDoubleTapDragZoom':
-        return useDoubleTapDragZoom;
+      case 'favouriteOnSnatch':
+        return favouriteOnSnatch;
+      case 'disableVibration':
+        return disableVibration;
       case 'useAltVideoPlayer':
         return useAltVideoPlayer;
       case 'altVideoPlayerHwAccel':
@@ -1248,6 +1281,9 @@ class SettingsHandler extends GetxController {
       case 'enableHeroTransitions':
         enableHeroTransitions = validatedValue;
         break;
+      case 'disableCustomPageTransitions':
+        disableCustomPageTransitions = validatedValue;
+        break;
       case 'incognitoKeyboard':
         incognitoKeyboard = validatedValue;
         break;
@@ -1260,8 +1296,11 @@ class SettingsHandler extends GetxController {
       case 'snatchOnFavourite':
         snatchOnFavourite = validatedValue;
         break;
-      case 'useDoubleTapDragZoom':
-        useDoubleTapDragZoom = validatedValue;
+      case 'favouriteOnSnatch':
+        favouriteOnSnatch = validatedValue;
+        break;
+      case 'disableVibration':
+        disableVibration = validatedValue;
         break;
       case 'useAltVideoPlayer':
         useAltVideoPlayer = validatedValue;
@@ -1361,11 +1400,13 @@ class SettingsHandler extends GetxController {
       'downloadNotifications': validateValue('downloadNotifications', null, toJSON: true),
       'allowRotation': validateValue('allowRotation', null, toJSON: true),
       'enableHeroTransitions': validateValue('enableHeroTransitions', null, toJSON: true),
+      'disableCustomPageTransitions': validateValue('disableCustomPageTransitions', null, toJSON: true),
       'incognitoKeyboard': validateValue('incognitoKeyboard', null, toJSON: true),
       'hideNotes': validateValue('hideNotes', null, toJSON: true),
       'startVideosMuted': validateValue('startVideosMuted', null, toJSON: true),
       'snatchOnFavourite': validateValue('snatchOnFavourite', null, toJSON: true),
-      'useDoubleTapDragZoom': validateValue('useDoubleTapDragZoom', null, toJSON: true),
+      'favouriteOnSnatch': validateValue('favouriteOnSnatch', null, toJSON: true),
+      'disableVibration': validateValue('disableVibration', null, toJSON: true),
       'useAltVideoPlayer': validateValue('useAltVideoPlayer', null, toJSON: true),
       'altVideoPlayerHwAccel': validateValue('altVideoPlayerHwAccel', null, toJSON: true),
       'altVideoPlayerVO': validateValue('altVideoPlayerVO', null, toJSON: true),
@@ -1408,8 +1449,14 @@ class SettingsHandler extends GetxController {
     Map<String, dynamic> json = {};
     try {
       json = jsonDecode(jsonString);
-    } catch (e) {
-      Logger.Inst().log('Failed to parse settings config $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse settings config $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     // TODO add error handling for invalid values
@@ -1439,8 +1486,14 @@ class SettingsHandler extends GetxController {
         ),
       ); // add all buttons that are not present in the parsed list (future proofing, in case we add more buttons later)
       buttonOrder = btnOrder;
-    } catch (e) {
-      Logger.Inst().log('Failed to parse button order $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse button order $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     try {
@@ -1460,8 +1513,14 @@ class SettingsHandler extends GetxController {
           hatedTags.add(hateTags.elementAt(i));
         }
       }
-    } catch (e) {
-      Logger.Inst().log('Failed to parse hated tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse hated tags $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     try {
@@ -1481,8 +1540,14 @@ class SettingsHandler extends GetxController {
           lovedTags.add(loveTags.elementAt(i));
         }
       }
-    } catch (e) {
-      Logger.Inst().log('Failed to parse loved tags $e', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to parse loved tags $e',
+        'SettingsHandler',
+        'loadFromJSON',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     final List<String> leftoverKeys = json.keys.where((element) => !['buttonOrder', 'hatedTags', 'lovedTags'].contains(element)).toList();
@@ -1490,8 +1555,14 @@ class SettingsHandler extends GetxController {
       // TODO something causes rare exception which causes settings to reset
       try {
         setByString(key, json[key]);
-      } catch (e) {
-        Logger.Inst().log('Failed to set value for key $key', 'SettingsHandler', 'loadFromJSON', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          'Failed to set value for key $key',
+          'SettingsHandler',
+          'loadFromJSON',
+          LogTypes.exception,
+          s: s,
+        );
       }
       // print('key $key val ${json[key]} type ${json[key].runtimeType}');
     }
@@ -1567,8 +1638,14 @@ class SettingsHandler extends GetxController {
         tempList.add(Booru('Favourites', BooruType.Favourites, '', '', ''));
         tempList.add(Booru('Downloads', BooruType.Downloads, '', '', ''));
       }
-    } catch (e) {
-      Logger.Inst().log('Failed to load boorus $e', 'SettingsHandler', 'loadBoorus', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Failed to load boorus $e',
+        'SettingsHandler',
+        'loadBoorus',
+        LogTypes.exception,
+        s: s,
+      );
     }
 
     booruList.value = tempList.where((element) => !booruList.contains(element)).toList(); // filter due to possibility of duplicates
@@ -1972,8 +2049,14 @@ class SettingsHandler extends GetxController {
     try {
       await getPerms();
       await loadSettings();
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'SettingsHandler', 'initialize', LogTypes.settingsError);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'SettingsHandler',
+        'initialize',
+        LogTypes.settingsError,
+        s: s,
+      );
       FlashElements.showSnackbar(
         title: const Text(
           'Initialization Error!',
@@ -1993,9 +2076,7 @@ class SettingsHandler extends GetxController {
     // print(toJSON());
     // print(jsonEncode(toJSON()));
 
-    alice = Alice(
-      darkTheme: false, // TODO on true - throws theme exception when opening inspector?
-    );
+    alice = Alice();
 
     unawaited(checkUpdate(withMessage: false));
     isInit.value = true;
@@ -2021,9 +2102,15 @@ class SettingsHandler extends GetxController {
         await loadBoorus();
       }
       await externalAction();
-    } catch (e) {
+    } catch (e, s) {
       postInitMessage.value = 'Error!';
-      Logger.Inst().log(e.toString(), 'SettingsHandler', 'postInit', LogTypes.settingsError);
+      Logger.Inst().log(
+        e.toString(),
+        'SettingsHandler',
+        'postInit',
+        LogTypes.settingsError,
+        s: s,
+      );
       FlashElements.showSnackbar(
         title: const Text(
           'Post Initialization Error!',

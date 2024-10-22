@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:app_links/app_links.dart';
-import 'package:dio/dio.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
-import 'package:logger_flutter_fork/logger_flutter_fork.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/data/booru.dart';
 import 'package:lolisnatcher/src/data/theme_item.dart';
@@ -43,15 +42,7 @@ void main() async {
     databaseFactory = databaseFactoryFfi;
   }
 
-  FlutterError.onError = (FlutterErrorDetails details) {
-    if (details.exception is DioException && (details.exception as DioException).type == DioExceptionType.cancel) {
-      // ignore exceptions caused by cancelling dio requests (mostly for image loading)
-      return;
-    }
-    FlutterError.presentError(details);
-
-    Logger.Inst().log('$details', 'FlutterError', 'onError', LogTypes.exception);
-  };
+  Logger.Inst();
 
   // load settings before first render to get theme data early
   Get.put(NavigationHandler(), permanent: true);
@@ -189,7 +180,11 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return Obx(() {
       final ThemeItem theme = settingsHandler.theme.value.name == 'Custom'
-          ? ThemeItem(name: 'Custom', primary: settingsHandler.customPrimaryColor.value, accent: settingsHandler.customAccentColor.value)
+          ? ThemeItem(
+              name: 'Custom',
+              primary: settingsHandler.customPrimaryColor.value,
+              accent: settingsHandler.customAccentColor.value,
+            )
           : settingsHandler.theme.value;
       final ThemeMode themeMode = settingsHandler.themeMode.value;
       final bool useDynamicColor = settingsHandler.useDynamicColor.value;
@@ -200,8 +195,6 @@ class _MainAppState extends State<MainApp> {
         themeMode: themeMode,
         isAmoled: isAmoled,
       );
-
-      LogConsole.init(bufferSize: 10000);
 
       // TODO fix status bar coloring when in gallery view (AND depending on theme?)
       // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -248,6 +241,9 @@ class _MainAppState extends State<MainApp> {
                 darkTheme: themeHandler.darkTheme(),
                 themeMode: themeMode,
                 navigatorKey: navigationHandler.navigatorKey,
+                navigatorObservers: [
+                  TalkerRouteObserver(Logger.talker),
+                ],
                 home: const Home(),
               );
             },
@@ -278,27 +274,21 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   AppLinks? appLinks;
   StreamSubscription<Uri>? appLinksSubscription;
 
+  bool initedDeepLinks = false;
+
   @override
   void initState() {
     super.initState();
 
-    initDeepLinks();
-
-    // force cache clear every minute + perform tabs backup
     backupTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
-      // TODO we don't need to clear cache so much, since all images are cleared on dispose
-      // Tools.forceClearMemoryCache(withLive: false);
       // TODO rework so it happens on every tab change/addition, NOT on timer
       searchHandler.backupTabs();
-      // TODO possible performance problem if you have too many tags?
       if (!tagHandler.tagSaveActive) {
         tagHandler.saveTags();
       }
     });
 
     clearCache();
-    // run check for stale cache files
-    // TODO find a better way and/or cases when it will be better to call these
     cacheStaleTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       clearCache();
     });
@@ -314,18 +304,26 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   }
 
   Future<void> initDeepLinks() async {
+    if (initedDeepLinks) {
+      return;
+    }
+    initedDeepLinks = true;
     if (Platform.isAndroid || Platform.isIOS) {
       appLinks = AppLinks();
 
       // check if there is a deep link on app start
-      final Uri? initialLink = await appLinks!.getInitialAppLink();
+      final Uri? initialLink = await appLinks!.getInitialLink();
       if (initialLink != null) {
-        unawaited(openAppLink(initialLink.toString()));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openAppLink(initialLink.toString());
+        });
       }
 
       // listen for deep links
       appLinksSubscription = appLinks!.uriLinkStream.listen((uri) {
-        openAppLink(uri.toString());
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          openAppLink(uri.toString());
+        });
       });
     }
   }
@@ -386,7 +384,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
 
     return ColoredBox(
-      color: Theme.of(context).colorScheme.background,
+      color: Theme.of(context).colorScheme.surface,
       child: Obx(() {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
@@ -396,6 +394,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
               if (settingsHandler.isPostInit.value == false) {
                 return const InitHomePage();
               }
+
+              initDeepLinks();
 
               if (settingsHandler.appMode.value.isMobile) {
                 return const MobileHome();

@@ -37,25 +37,25 @@ class TagsFiltersSettingsList extends StatelessWidget {
         const SettingsButton(name: '', enabled: false),
         //
         SettingsToggle(
-          title: 'Remove Items with Hated Tags',
+          title: 'Remove items with Hated tags',
           value: filterHated,
           onChanged: onFilterHatedChanged,
           trailingIcon: const Icon(CupertinoIcons.eye_slash),
         ),
         SettingsToggle(
-          title: 'Remove Favourited Items',
+          title: 'Remove favourited items',
           value: filterFavourites,
           onChanged: onFilterFavouritesChanged,
           trailingIcon: const Icon(Icons.favorite, color: Colors.red),
         ),
         SettingsToggle(
-          title: 'Remove Snatched Items',
+          title: 'Remove snatched items',
           value: filterSnatched,
           onChanged: onFilterSnatchedChanged,
           trailingIcon: const Icon(Icons.file_download_outlined),
         ),
         SettingsToggle(
-          title: 'Remove AI Items',
+          title: 'Remove AI items',
           value: filterAi,
           onChanged: onFilterAiChanged,
           trailingIcon: const FaIcon(FontAwesomeIcons.robot, size: 20),

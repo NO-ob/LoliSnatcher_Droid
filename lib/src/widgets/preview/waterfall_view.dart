@@ -37,6 +37,8 @@ class _WaterfallViewState extends State<WaterfallView> {
   bool scrollDone = true;
   late StreamSubscription tabIndexListener, tabIdListener, viewedIndexListener, isLoadingListener;
 
+  Orientation currentOrientation = Orientation.portrait;
+
   bool isStaggered = false;
 
   bool get isMobile => settingsHandler.appMode.value.isMobile;
@@ -224,14 +226,18 @@ class _WaterfallViewState extends State<WaterfallView> {
 
       await Navigator.of(context).push(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) =>
-              // Opacity(opacity: 0.5, child: GalleryViewPage(index)),
-              GalleryViewPage(index),
+          pageBuilder: (_, __, ___) => GalleryViewPage(index),
           opaque: false,
           transitionDuration: const Duration(milliseconds: 300),
           barrierColor: Colors.black26,
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return const ZoomPageTransitionsBuilder().buildTransitions(null, context, animation, secondaryAnimation, child);
+            return const ZoomPageTransitionsBuilder().buildTransitions(
+              MaterialPageRoute(builder: (_) => const SizedBox.shrink()), // is not used anywhere, but function requires it to get allowSnapshotting from it
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            );
           },
         ),
       );
@@ -250,7 +256,7 @@ class _WaterfallViewState extends State<WaterfallView> {
   }
 
   Future<void> onLongPress(int index, BooruItem item) async {
-    ServiceHandler.vibrate(duration: 5);
+    await ServiceHandler.vibrate();
 
     if (searchHandler.currentTab.selected.contains(item)) {
       searchHandler.currentTab.selected.remove(item);
@@ -283,6 +289,18 @@ class _WaterfallViewState extends State<WaterfallView> {
       });
     }
 
+    final bool changedOrientation = MediaQuery.orientationOf(context) != currentOrientation;
+    if (changedOrientation && viewerHandler.inViewer.value) {
+      currentOrientation = MediaQuery.orientationOf(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        searchHandler.gridScrollController.scrollToIndex(
+          searchHandler.viewedIndex.value,
+          duration: Duration(milliseconds: isMobile ? 10 : 100),
+          preferPosition: AutoScrollPosition.begin,
+        );
+      });
+    }
+
     return KeyboardListener(
       // Note: use autofocus instead focusedChild == null that was used before, old way caused unnecesary rebuilds and broke hero animation
       autofocus: true,
@@ -302,7 +320,7 @@ class _WaterfallViewState extends State<WaterfallView> {
         if (event.runtimeType == KeyDownEvent) {
           if (event.physicalKey == PhysicalKeyboardKey.keyK || event.physicalKey == PhysicalKeyboardKey.keyS) {
             // searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset + 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
-            columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+            columnCount = MediaQuery.orientationOf(context) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
             oldIndex = searchHandler.viewedIndex.value;
             newIndex = oldIndex + columnCount;
             if (newIndex < searchHandler.currentFetched.length) {
@@ -312,7 +330,7 @@ class _WaterfallViewState extends State<WaterfallView> {
             }
           } else if (event.physicalKey == PhysicalKeyboardKey.keyJ || event.physicalKey == PhysicalKeyboardKey.keyW) {
             // searchHandler.gridScrollController.animateTo(searchHandler.gridScrollController.offset - 50, duration: Duration(milliseconds: 50), curve: Curves.linear);
-            columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+            columnCount = MediaQuery.orientationOf(context) == Orientation.portrait ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
             oldIndex = searchHandler.viewedIndex.value;
             newIndex = oldIndex - columnCount;
             if (newIndex > -1) {
@@ -410,30 +428,13 @@ class _WaterfallViewState extends State<WaterfallView> {
 
               if (!searchHandler.isLoading.value) {
                 if (!isScreenFilled || (isNotAtStart && isAtOrNearEdge)) {
-                  // print('LOADING MORE');
-                  // print('isScreenFilled: $isScreenFilled');
-                  // print('isNotAtStart: $isNotAtStart');
-                  // print('isAtOrNearEdge: $isAtOrNearEdge');
-                  // TODO could trigger extra search when changing tabs
-                  // print('!! scroll triggered search !!');
                   searchHandler.runSearch();
                 }
               }
               return true;
             },
           ),
-
-          // Obx(() => Positioned(
-          //   top: MediaQuery.of(context).size.height / 2,
-          //   left: 0,
-          //   child: Container(
-          //     color: Colors.black.withOpacity(0.5),
-          //     width: 160,
-          //     height: 30,
-          //     child: Text('L/T: ${searchHandler.currentFetched.length}/${searchHandler.currentBooruHandler.totalCount.value}'),
-          //   ),
-          // )),
-
+          //
           const WaterfallErrorButtons(),
         ],
       ),

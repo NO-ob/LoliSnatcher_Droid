@@ -3,6 +3,7 @@
 /// Copyright © 2023 & onwards, Hitesh Kumar Saini <saini123hitesh@gmail.com>.
 /// All rights reserved.
 /// Use of this source code is governed by MIT license that can be found in the LICENSE file.
+
 library;
 
 import 'dart:async';
@@ -22,6 +23,8 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 
 // https://github.com/dart-lang/linter/issues/1381
 // ignore_for_file: close_sinks
+
+// ignore_for_file: depend_on_referenced_packages
 
 /// package:media_kit implementation of [VideoPlayerPlatform].
 ///
@@ -47,8 +50,10 @@ class MediaKitVideoPlayer extends VideoPlayerPlatform {
   static void registerNative() {
     if (Platform.isAndroid) {
       VideoPlayerPlatform.instance = AndroidVideoPlayer();
-    } else {
+    } else if (Platform.isIOS) {
       VideoPlayerPlatform.instance = AVFoundationVideoPlayer();
+    } else {
+      //
     }
   }
 

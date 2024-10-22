@@ -34,7 +34,7 @@ import 'package:lolisnatcher/src/widgets/common/settings_widgets.dart';
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
-  Future<void> _onPopInvoked(BuildContext context, bool didPop) async {
+  Future<void> _onPopInvoked(BuildContext context, bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -62,7 +62,7 @@ class SettingsPage extends StatelessWidget {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async => _onPopInvoked(context, didPop),
+      onPopInvokedWithResult: (didPop, result) async => _onPopInvoked(context, didPop, result),
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -95,7 +95,7 @@ class SettingsPage extends StatelessWidget {
                 page: () => const ThemePage(),
               ),
               SettingsButton(
-                name: 'Gallery',
+                name: 'Viewer',
                 icon: const Icon(Icons.view_carousel),
                 page: () => const GalleryPage(),
               ),

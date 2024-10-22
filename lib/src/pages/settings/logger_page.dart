@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import 'package:logger_flutter_fork/logger_flutter_fork.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
@@ -31,7 +30,7 @@ class _LoggerPageState extends State<LoggerPage> {
   }
 
   //called when page is closed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -46,7 +45,7 @@ class _LoggerPageState extends State<LoggerPage> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -76,14 +75,10 @@ class _LoggerPageState extends State<LoggerPage> {
                 return SettingsButton(
                   name: 'Open Logger Output',
                   action: () {
-                    LogConsole.open(
-                      context,
-                      showCloseButton: true,
-                      showClearButton: true,
-                      dark: false, // Theme.of(context).brightness == Brightness.dark,
-                      onExport: (String text) {
-                        Clipboard.setData(ClipboardData(text: text));
-                      },
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => TalkerScreen(talker: Logger.talker),
+                      ),
                     );
                   },
                   trailingIcon: const Icon(Icons.print),

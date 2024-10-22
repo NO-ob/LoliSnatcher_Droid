@@ -15,7 +15,6 @@ import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/widgets/gallery/notes_renderer.dart';
 import 'package:lolisnatcher/src/widgets/image/image_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/guess_extension_viewer.dart';
-import 'package:lolisnatcher/src/widgets/video/unknown_viewer_placeholder.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer.dart';
 import 'package:lolisnatcher/src/widgets/video/video_viewer_placeholder.dart';
 
@@ -64,7 +63,14 @@ class _DesktopImageListenerState extends State<DesktopImageListener> {
         },
       );
     } else {
-      return UnknownViewerPlaceholder(item: item);
+      return GuessExtensionViewer(
+        item: item,
+        onMediaTypeGuessed: (MediaType mediaType) {
+          item.mediaType.value = mediaType;
+          updateState();
+        },
+      );
+      // return UnknownViewerPlaceholder(item: item);
     }
   }
 

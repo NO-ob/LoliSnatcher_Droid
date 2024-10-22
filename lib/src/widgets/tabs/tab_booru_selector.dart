@@ -75,7 +75,7 @@ class TabBooruSelector extends StatelessWidget {
               child: TabBooruSelectorItem(booru: item),
             );
           },
-          selectionBuilder: (value) {
+          selectedItemBuilder: (value) {
             if (value == null) {
               return const Text('Select a Booru');
             }
@@ -94,16 +94,18 @@ class TabBooruSelectorItem extends StatelessWidget {
     required this.booru,
     this.withFavicon = true,
     this.compact = false,
+    this.extraText,
     super.key,
   });
 
   final Booru booru;
   final bool withFavicon;
   final bool compact;
+  final String? extraText;
 
   @override
   Widget build(BuildContext context) {
-    final String name = ' ${booru.name}';
+    final String name = ' ${booru.name}${extraText?.isNotEmpty == true ? extraText : ''}';
 
     return Row(
       mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   }
 
   //called when page is clsoed, sets settingshandler variables and then writes settings to disk
-  Future<void> _onPopInvoked(bool didPop) async {
+  Future<void> _onPopInvoked(bool didPop, _) async {
     if (didPop) {
       return;
     }
@@ -70,7 +71,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: _onPopInvoked,
+      onPopInvokedWithResult: _onPopInvoked,
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
@@ -87,7 +88,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     appMode = newValue!;
                   });
                 },
-                title: 'App UI Mode',
+                title: 'App UI mode',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -95,7 +96,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return const SettingsDialog(
-                          title: Text('App UI Mode'),
+                          title: Text('App UI mode'),
                           contentItems: [
                             Text('- Mobile - Normal Mobile UI'),
                             Text('- Desktop - Ahoviewer Style UI'),
@@ -103,7 +104,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                             Text(
                               '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
                             ),
-                            Text('If you are on android versions smaller than 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
+                            Text('If you are on android versions below 11 you can remove the appMode line from /LoliSnatcher/config/settings.json'),
                             Text('If you are on android 11 or higher you will have to wipe app data via system settings'),
                           ],
                         );
@@ -120,7 +121,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     handSide = newValue!;
                   });
                 },
-                title: 'Hand Side',
+                title: 'Hand side',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.back_hand_outlined),
                   onPressed: () {
@@ -128,7 +129,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return const SettingsDialog(
-                          title: Text('Hand Side'),
+                          title: Text('Hand side'),
                           contentItems: [
                             Text('Changes position of some UI elements according to selected side'),
                           ],
@@ -140,8 +141,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,
-                title: 'Preview Columns Portrait',
-                hintText: 'Columns in Portrait orientation',
+                title: 'Preview columns (portrait)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 onChanged: (String? text) {
@@ -167,8 +167,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               ),
               SettingsTextInput(
                 controller: columnsLandscapeController,
-                title: 'Preview Columns Landscape',
-                hintText: 'Columns in Landscape orientation',
+                title: 'Preview columns (landscape)',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['landscapeColumns']!['default']!.toString(),
@@ -197,7 +196,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     previewMode = newValue ?? settingsHandler.map['previewMode']!['default'];
                   });
                 },
-                title: 'Preview Quality',
+                title: 'Preview quality',
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -205,7 +204,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       context: context,
                       builder: (BuildContext context) {
                         return const SettingsDialog(
-                          title: Text('Preview Quality'),
+                          title: Text('Preview quality'),
                           contentItems: [
                             Text('This setting changes the resolution of images in the preview grid'),
                             Text(' - Sample - Medium resolution, app will also load a Thumbnail quality as a placeholder while higher quality loads'),
@@ -222,12 +221,41 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
               SettingsDropdown(
                 value: previewDisplay,
                 items: settingsHandler.map['previewDisplay']!['options'],
+                itemBuilder: (item) {
+                  return switch (item) {
+                    'Square' => Row(
+                        children: [
+                          const Icon(Icons.crop_square_outlined),
+                          const SizedBox(width: 10),
+                          Text('${item!} (1:1)'),
+                        ],
+                      ),
+                    'Rectangle' => Row(
+                        children: [
+                          Transform.rotate(
+                            angle: pi / 2,
+                            child: const Icon(Icons.crop_16_9),
+                          ),
+                          const SizedBox(width: 10),
+                          Text('${item!} (9:16)'),
+                        ],
+                      ),
+                    'Staggered' => Row(
+                        children: [
+                          const Icon(Icons.dashboard_outlined),
+                          const SizedBox(width: 10),
+                          Text(item!),
+                        ],
+                      ),
+                    _ => const Text('?'),
+                  };
+                },
                 onChanged: (String? newValue) {
                   setState(() {
                     previewDisplay = newValue ?? settingsHandler.map['previewDisplay']!['default'];
                   });
                 },
-                title: 'Preview Display',
+                title: 'Preview display',
               ),
               SettingsToggle(
                 value: settingsHandler.disableImageScaling,

@@ -28,7 +28,7 @@ class GridBuilder extends StatelessWidget {
     final SearchHandler searchHandler = SearchHandler.instance;
 
     return Obx(() {
-      final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
+      final int columnCount = (MediaQuery.orientationOf(context) == Orientation.portrait) ? settingsHandler.portraitColumns : settingsHandler.landscapeColumns;
 
       final bool isDesktop = settingsHandler.appMode.value.isDesktop;
 
@@ -39,7 +39,12 @@ class GridBuilder extends StatelessWidget {
         cacheExtent: 200,
         shrinkWrap: false,
         itemCount: searchHandler.currentFetched.length,
-        padding: EdgeInsets.fromLTRB(10, 2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.of(context).padding.top)), 10, 80),
+        padding: EdgeInsets.fromLTRB(
+          10,
+          2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
+          10,
+          80,
+        ),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columnCount,
           childAspectRatio: settingsHandler.previewDisplay == 'Square' ? 1 : 9 / 16,

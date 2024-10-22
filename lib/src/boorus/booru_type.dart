@@ -1,5 +1,7 @@
 // ignore_for_file: constant_identifier_names
 
+import 'package:lolisnatcher/src/handlers/settings_handler.dart';
+
 enum BooruType {
   Autodetect,
   //
@@ -31,20 +33,25 @@ enum BooruType {
   Favourites;
 
   static List<BooruType> get dropDownValues {
+    final settingsHandler = SettingsHandler.instance;
+    final isDebug = settingsHandler.isDebug.value;
+
     return [...values]
       ..remove(BooruType.Downloads)
       ..remove(BooruType.Favourites)
       ..remove(BooruType.Merge)
-      ..remove(BooruType.GelbooruAlike);
+      ..remove(BooruType.GelbooruAlike)
+      ..remove(isDebug ? BooruType.NyanPals : null)
+      ..remove(isDebug ? BooruType.WildCritters : null);
   }
 
   static List<BooruType> get detectable {
     return [...values]
+      ..remove(BooruType.Autodetect)
       ..remove(BooruType.Downloads)
       ..remove(BooruType.Favourites)
-      ..remove(BooruType.Merge)
-      ..remove(BooruType.Autodetect)
-      ..remove(BooruType.Hydrus);
+      ..remove(BooruType.Hydrus)
+      ..remove(BooruType.Merge);
   }
 
   String get alias {

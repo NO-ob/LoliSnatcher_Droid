@@ -28,8 +28,14 @@ class ShimmieHandler extends BooruHandler {
     final parsedResponse = XmlDocument.parse(response.data);
     try {
       parseSearchCount(parsedResponse);
-    } catch (e) {
-      Logger.Inst().log('Error parsing search count: $e', className, 'parseListFromResponse::parseSearchCount', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        'Error parsing search count: $e',
+        className,
+        'parseListFromResponse::parseSearchCount',
+        LogTypes.exception,
+        s: s,
+      );
     }
     /**
      * This creates a list of xml elements 'post' to extract only the post elements which contain
@@ -52,21 +58,12 @@ class ShimmieHandler extends BooruHandler {
         preURL = booru.baseURL!.split('/booru')[0];
       }
 
-      String thumbnailUrl = preURL + current.getAttribute('preview_url')!;
-      String? possibleFileExt, fileNameExtras;
-      if (booru.baseURL!.contains('rule34.paheal.net')) {
-        // they now use cdn which hides file names, but it is still given through api in new file_name field
-        final fileName = current.getAttribute('file_name');
-        possibleFileExt = fileName?.split('.').last;
-        thumbnailUrl = 'https://rule34.paheal.net/${current.getAttribute('preview_url')}';
-        fileNameExtras = fileName;
-      }
+      final String thumbnailUrl = preURL + current.getAttribute('preview_url')!, fileUrl = preURL + current.getAttribute('file_url')!;
 
       final String dateString = current.getAttribute('date').toString();
       final BooruItem item = BooruItem(
-        fileURL: preURL + current.getAttribute('file_url')!,
-        fileExt: possibleFileExt,
-        sampleURL: preURL + current.getAttribute('file_url')!,
+        fileURL: fileUrl,
+        sampleURL: fileUrl,
         thumbnailURL: thumbnailUrl,
         tagsList: current.getAttribute('tags')!.split(' '),
         postURL: makePostURL(current.getAttribute('id')!),
@@ -76,11 +73,10 @@ class ShimmieHandler extends BooruHandler {
         previewHeight: double.tryParse(current.getAttribute('preview_height') ?? ''),
         serverId: current.getAttribute('id'),
         score: current.getAttribute('score'),
-        sources: [current.getAttribute('source') ?? ''],
+        sources: (current.getAttribute('source') != null && current.getAttribute('source') is String) ? [current.getAttribute('source')!] : null,
         md5String: current.getAttribute('md5'),
         postDate: dateString, // 2021-06-18 04:37:31
         postDateFormat: 'yyyy-MM-dd HH:mm:ss',
-        fileNameExtras: fileNameExtras ?? '',
       );
 
       return item;
@@ -196,7 +192,8 @@ class ShimmieHtmlHandler extends BooruHandler {
       final double? thumbHeight = double.tryParse(img.attributes['height'] ?? '');
       final double? fileWidth = double.tryParse(res[0]);
       final double? fileHeight = double.tryParse(res[1]);
-      final String fileURL = current.children[2].attributes['href']!; // "File only" link
+      String fileURL = current.children[2].attributes['href']!; // "File only" link
+      fileURL = '$fileURL${fileURL.contains('?') ? '&' : '?'}file_ext=$fileExt';
       final List<String> tags = current.attributes['data-tags']?.split(' ') ?? [];
 
       final BooruItem item = BooruItem(
@@ -217,11 +214,12 @@ class ShimmieHtmlHandler extends BooruHandler {
 
       return item;
     } catch (e, s) {
-      Logger.newLog(
-        m: 'Error parsing item from response',
-        e: e,
+      Logger.Inst().log(
+        e,
+        'ShimmieHtmlHandler',
+        'parseItemFromResponse',
+        LogTypes.booruHandlerParseFailed,
         s: s,
-        t: LogTypes.booruHandlerParseFailed,
       );
       return null;
     }

@@ -77,8 +77,14 @@ class LoliSync {
         req.response.statusCode = 200;
         req.response.write('Settings Sent');
         return 'Settings Saved';
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'LoliSync', 'storeSettings', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'LoliSync',
+          'storeSettings',
+          LogTypes.exception,
+          s: s,
+        );
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
         return 'Something went wrong $e';
@@ -100,7 +106,7 @@ class LoliSync {
         final String content = await utf8.decoder.bind(req).join();
         final List<BooruItem> items = List.from(jsonDecode(content)).map((e) => BooruItem.fromJSON(jsonEncode(e))).toList();
         if (settingsHandler.dbEnabled) {
-          final Map<String, int> result = await settingsHandler.dbHandler.updateMultipleBooruItems(items);
+          final Map<String, int> result = await settingsHandler.dbHandler.updateMultipleBooruItems(items, BooruUpdateMode.sync);
           final int saved = result['saved'] ?? 0;
           final int exist = result['exist'] ?? 0;
 
@@ -122,8 +128,14 @@ class LoliSync {
           req.response.write('DB is disabled');
           return 'DB is disabled';
         }
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'LoliSync', 'storeBooruItem', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'LoliSync',
+          'storeBooruItem',
+          LogTypes.exception,
+          s: s,
+        );
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
         return 'Something went wrong $e';
@@ -157,8 +169,14 @@ class LoliSync {
           req.response.write('DB is disabled');
           return 'DB is disabled';
         }
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'LoliSync', 'storeBooruItem', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'LoliSync',
+          'storeBooruItem',
+          LogTypes.exception,
+          s: s,
+        );
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
         return 'Something went wrong $e';
@@ -201,8 +219,14 @@ class LoliSync {
         } else {
           return '$current / $amount - ${booru.name}';
         }
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'LoliSync', 'storeBooru', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'LoliSync',
+          'storeBooru',
+          LogTypes.exception,
+          s: s,
+        );
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
         return 'Something went wrong $e';
@@ -236,8 +260,14 @@ class LoliSync {
         req.response.statusCode = 200;
         req.response.write('Tabs Sent');
         return 'Tabs Saved';
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'LoliSync', 'storeTabs', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'LoliSync',
+          'storeTabs',
+          LogTypes.exception,
+          s: s,
+        );
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
         return 'Something went wrong $e';
@@ -270,8 +300,14 @@ class LoliSync {
         req.response.statusCode = 200;
         req.response.write('Tags Sent');
         return 'Tags Saved';
-      } catch (e) {
-        Logger.Inst().log(e.toString(), 'LoliSync', 'storeTags', LogTypes.exception);
+      } catch (e, s) {
+        Logger.Inst().log(
+          e.toString(),
+          'LoliSync',
+          'storeTags',
+          LogTypes.exception,
+          s: s,
+        );
         req.response.statusCode = 404;
         req.response.write('Invalid Query');
         return 'Something went wrong $e';
@@ -400,8 +436,14 @@ class LoliSync {
         );
         return 'Test OK';
       }
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'LoliSync', 'sendTest', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'LoliSync',
+        'sendTest',
+        LogTypes.exception,
+        s: s,
+      );
       FlashElements.showSnackbar(
         title: Text(
           'Test error: $e',
@@ -421,8 +463,14 @@ class LoliSync {
       final HttpClientRequest request = await HttpClient().post(ip, port, '/lolisync/complete');
       final HttpClientResponse response = await request.close();
       return response.statusCode.toString();
-    } catch (e) {
-      Logger.Inst().log(e.toString(), 'LoliSync', 'sendSyncComplete', LogTypes.exception);
+    } catch (e, s) {
+      Logger.Inst().log(
+        e.toString(),
+        'LoliSync',
+        'sendSyncComplete',
+        LogTypes.exception,
+        s: s,
+      );
       return 'Sync Complete error $e';
     }
   }
@@ -440,7 +488,7 @@ class LoliSync {
       switch (toSync.elementAt(i)) {
         case 'Favouritesv2':
           yield 'Sync Starting $address';
-          yield 'Preparing favoirites data';
+          yield 'Preparing favourites data';
           final int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
           yield 'Favourites count: $favouritesCount';
           if (favouritesCount > 0) {
@@ -470,7 +518,7 @@ class LoliSync {
           break;
         case 'Favourites':
           yield 'Sync Starting $address';
-          yield 'Preparing favoirites data';
+          yield 'Preparing favourites data';
           final int favouritesCount = await settingsHandler.dbHandler.getFavouritesCount();
           yield 'Favourites count: $favouritesCount';
           if (favouritesCount > 0) {
@@ -539,7 +587,7 @@ class LoliSync {
         case 'Tabs':
           yield 'Sync Starting $address';
           yield 'Preparing tabs data';
-          final String resp = await sendTabs(searchHandler.getBackupString(), tabsMode);
+          final String resp = await sendTabs(searchHandler.generateBackupJson(), tabsMode);
           yield resp;
           break;
         case 'Test':
