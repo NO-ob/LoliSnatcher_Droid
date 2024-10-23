@@ -26,7 +26,10 @@ class PageNumberDialog extends StatelessWidget {
     final int possibleMaxPageNum = total != 0 ? (total / settingsHandler.limit).round() : 0;
 
     return SettingsBottomSheet(
-      title: const Text('Page changer'),
+      title: const Text(
+        'Page changer',
+        style: TextStyle(fontSize: 20),
+      ),
       contentItems: [
         SettingsTextInput(
           title: 'Page #',
