@@ -186,7 +186,7 @@ class SettingsToggle extends StatelessWidget {
   });
 
   final bool value;
-  final void Function(bool) onChanged;
+  final ValueChanged<bool> onChanged;
   final String title;
   final Widget? subtitle;
   final bool drawTopBorder;
@@ -258,7 +258,7 @@ class SettingsSegmentedButton<T> extends StatelessWidget {
   final T value;
   final List<T> values;
   final String Function(T) itemTitleBuilder;
-  final void Function(T) onChanged;
+  final ValueChanged<T> onChanged;
   final String title;
   final Widget? subtitle;
   final bool drawTopBorder;
@@ -359,7 +359,7 @@ class SettingsDropdown<T> extends StatelessWidget {
 
   final T? value;
   final List<T> items;
-  final void Function(T?)? onChanged;
+  final ValueChanged<T?>? onChanged;
   final String title;
   final Widget? subtitle;
   final bool drawTopBorder;
@@ -370,7 +370,7 @@ class SettingsDropdown<T> extends StatelessWidget {
   final Widget Function(T?)? selectedItemBuilder;
   final String Function(T?)? itemTitleBuilder;
   final bool clearable;
-  final void Function()? onReset;
+  final VoidCallback? onReset;
   final double? itemExtent;
   final bool expendableByScroll;
 
@@ -455,7 +455,7 @@ class SettingsBooruDropdown extends StatelessWidget {
   });
 
   final Booru? value;
-  final void Function(Booru?)? onChanged;
+  final ValueChanged<Booru?>? onChanged;
   final String title;
   final Widget Function(Booru?, bool)? itemBuilder;
   final bool Function(Booru?)? itemFilter;
@@ -519,6 +519,110 @@ class SettingsBooruDropdown extends StatelessWidget {
   }
 }
 
+class SettingsOptionsList<T> extends StatelessWidget {
+  const SettingsOptionsList({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    required this.title,
+    this.subtitle,
+    this.drawTopBorder = false,
+    this.drawBottomBorder = true,
+    this.trailingIcon,
+    this.itemBuilder,
+    this.itemLeadingBuilder,
+    this.selectedItemBuilder,
+    this.itemTitleBuilder,
+    this.clearable = false,
+    this.onReset,
+    super.key,
+  });
+
+  final T? value;
+  final List<T> items;
+  final ValueChanged<T?> onChanged;
+  final String title;
+  final Widget? subtitle;
+  final bool drawTopBorder;
+  final bool drawBottomBorder;
+  final Widget? trailingIcon;
+  final Widget Function(T?)? itemBuilder;
+  final Widget? Function(T?)? itemLeadingBuilder;
+  final Widget Function(T?)? selectedItemBuilder;
+  final String Function(T?)? itemTitleBuilder;
+  final bool clearable;
+  final VoidCallback? onReset;
+
+  String getItemTitle(T? value) => itemTitleBuilder?.call(value) ?? value.toString();
+
+  Widget? getItemLeading(T? value) => itemLeadingBuilder?.call(value);
+
+  Widget getItemWidget(
+    BuildContext context,
+    T? value,
+    bool isSelected,
+    int index,
+  ) {
+    final Color baseColor = Theme.of(context).colorScheme.secondary;
+    final Color oddItemColor = baseColor.withOpacity(0.25);
+    final Color evenItemColor = baseColor.withOpacity(0.15);
+
+    return InkWell(
+      onTap: () => onChanged(value),
+      child: (isSelected ? selectedItemBuilder ?? itemBuilder : itemBuilder)?.call(value) ??
+          ListTile(
+            key: Key('$index'),
+            tileColor: index.isOdd ? oddItemColor : evenItemColor,
+            leading: getItemLeading(value),
+            title: Text(getItemTitle(value)),
+            trailing: isSelected ? const Icon(Icons.check, size: 24) : null,
+          ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        children: [
+          ListTile(
+            title: Text(title),
+            subtitle: subtitle,
+            trailing: trailingIcon ??
+                (onReset != null
+                    ? IconButton(
+                        onPressed: onReset,
+                        icon: const Icon(Icons.refresh_rounded),
+                      )
+                    : null),
+            dense: false,
+            shape: Border(
+              top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+            ),
+          ),
+          ListTile(
+            title: Column(
+              children: [
+                for (final item in items)
+                  getItemWidget(
+                    context,
+                    item,
+                    value == item,
+                    items.indexOf(item),
+                  ),
+              ],
+            ),
+            shape: Border(
+              bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class SettingsTextInput extends StatefulWidget {
   const SettingsTextInput({
     required this.controller,
@@ -561,8 +665,8 @@ class SettingsTextInput extends StatefulWidget {
   final String hintText;
   final Widget? subtitle;
   final bool autofocus;
-  final void Function(String)? onChanged;
-  final void Function(String)? onSubmitted;
+  final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final bool drawTopBorder;
   final bool drawBottomBorder;
   final EdgeInsets margin;
@@ -640,7 +744,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
     }
   }
 
-  Widget buildNumberButton(void Function() stepFunc, IconData icon) {
+  Widget buildNumberButton(VoidCallback stepFunc, IconData icon) {
     return LongPressRepeater(
       onStart: () async {
         stepFunc();

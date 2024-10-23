@@ -308,7 +308,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: tabs
-              ? SettingsDropdown(
+              ? SettingsOptionsList(
                   value: tabsMode,
                   items: tabsModesList,
                   onChanged: (String? newValue) {
@@ -354,7 +354,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           child: tags
-              ? SettingsDropdown(
+              ? SettingsOptionsList(
                   value: tagsMode,
                   items: tagsModesList,
                   onChanged: (String? newValue) {
@@ -482,7 +482,7 @@ class _LoliSyncPageState extends State<LoliSyncPage> {
           margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
           child: const Text('Start the server if you want to recieve data from another device, do not use this on public wifi as you might get pozzed'),
         ),
-        SettingsDropdown(
+        SettingsOptionsList(
           value: selectedInterface,
           items: ipListNames,
           onChanged: (String? newValue) {

@@ -80,7 +80,6 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                   });
                 },
                 title: 'Disable videos',
-                drawTopBorder: true,
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -185,7 +184,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                             },
                             title: 'Alt player: HWDEC',
                           ),
-                          SettingsDropdown(
+                          SettingsOptionsList(
                             value: videoCacheMode,
                             items: settingsHandler.map['videoCacheMode']!['options'],
                             onChanged: (String? newValue) {
@@ -195,7 +194,7 @@ class _VideoSettingsPageState extends State<VideoSettingsPage> {
                             },
                             title: 'Video cache mode',
                             subtitle: const Text(
-                              '''Videos on some Boorus may not work correctly (i.e. endless loading) on alt player with Stream video cache mode. In that case try using Cache mode. Also player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds''',
+                              '''Videos on some Boorus may not work correctly (i.e. endless loading) on alt player with Stream video cache mode. In that case try using Cache mode. Otherwise player will retry with Cache mode automatically if video is in initial buffering state for 10+ seconds and video file size is <25mb''',
                             ),
                             trailingIcon: IconButton(
                               icon: const Icon(Icons.help_outline),

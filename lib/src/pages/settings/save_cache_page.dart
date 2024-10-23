@@ -204,7 +204,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: snatchMode,
                 items: settingsHandler.map['snatchMode']!['options'],
                 onChanged: (String? newValue) {
@@ -366,7 +366,7 @@ class _SaveCachePageState extends State<SaveCachePage> {
                 },
                 title: 'Cache media',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: videoCacheMode,
                 items: settingsHandler.map['videoCacheMode']!['options'],
                 onChanged: (String? newValue) {

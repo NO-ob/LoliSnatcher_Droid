@@ -193,7 +193,7 @@ class _ThemePageState extends State<ThemePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: themeMode,
                 items: ThemeMode.values,
                 onChanged: (ThemeMode? newValue) {
@@ -201,62 +201,38 @@ class _ThemePageState extends State<ThemePage> {
                   updateTheme();
                 },
                 title: 'Theme mode',
-                itemBuilder: (ThemeMode? item) {
-                  final String prettyValue = item!.name.capitalizeFirst!;
+                itemTitleBuilder: (item) => item?.name.capitalizeFirst ?? '?',
+                itemLeadingBuilder: (ThemeMode? item) {
                   const double size = 40;
 
-                  switch (prettyValue) {
-                    case 'Dark':
-                      return Row(
-                        children: [
-                          const SizedBox(
-                            width: size,
-                            child: Icon(Icons.dark_mode),
-                          ),
-                          Text(prettyValue),
-                        ],
-                      );
-                    case 'Light':
-                      return Row(
-                        children: [
-                          const SizedBox(
-                            width: size,
-                            child: Icon(Icons.light_mode),
-                          ),
-                          Text(prettyValue),
-                        ],
-                      );
-                    case 'System':
-                      return Row(
-                        children: [
-                          SizedBox(
-                            width: size,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                ClipPath(
-                                  clipper: _SunClipper(),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(right: 8),
-                                    child: Icon(Icons.light_mode),
-                                  ),
-                                ),
-                                ClipPath(
-                                  clipper: _MoonClipper(),
-                                  child: const Padding(
-                                    padding: EdgeInsets.only(left: 5),
-                                    child: Icon(Icons.dark_mode),
-                                  ),
-                                ),
-                              ],
+                  return SizedBox(
+                    width: size,
+                    height: size,
+                    child: switch (item) {
+                      ThemeMode.dark => const Icon(Icons.dark_mode),
+                      ThemeMode.light => const Icon(Icons.light_mode),
+                      ThemeMode.system => Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            ClipPath(
+                              clipper: _SunClipper(),
+                              child: const Padding(
+                                padding: EdgeInsets.only(right: 8),
+                                child: Icon(Icons.light_mode),
+                              ),
                             ),
-                          ),
-                          Text(prettyValue),
-                        ],
-                      );
-                    default:
-                      return Text(prettyValue);
-                  }
+                            ClipPath(
+                              clipper: _MoonClipper(),
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 5),
+                                child: Icon(Icons.dark_mode),
+                              ),
+                            ),
+                          ],
+                        ),
+                      _ => const SizedBox.shrink(),
+                    },
+                  );
                 },
               ),
               if (themeMode == ThemeMode.system || themeMode == ThemeMode.dark)

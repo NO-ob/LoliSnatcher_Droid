@@ -413,13 +413,14 @@ class _WaterfallViewState extends State<WaterfallView> {
                         left: settingsHandler.scrollGridButtonsPosition == 'Left' ? MediaQuery.sizeOf(context).width * 0.07 : null,
                         child: AnimatedSwitcher(
                           duration: const Duration(milliseconds: 300),
-                          child: (isLoadingOrNoItems || settingsHandler.scrollGridButtonsPosition == 'Disabled')
-                              ? const SizedBox.shrink()
-                              : WaterfallScrollButtons(
-                                  onTap: (bool forward) {
-                                    // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
-                                  },
-                                ),
+                          child:
+                              (isLoadingOrNoItems || settingsHandler.scrollGridButtonsPosition == 'Disabled' || settingsHandler.appMode.value.isDesktop == true)
+                                  ? const SizedBox.shrink()
+                                  : WaterfallScrollButtons(
+                                      onTap: (bool forward) {
+                                        // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
+                                      },
+                                    ),
                         ),
                       ),
                     ],

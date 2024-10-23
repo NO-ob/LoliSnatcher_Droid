@@ -148,7 +148,7 @@ class _GalleryPageState extends State<GalleryPage> {
                   }
                 },
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: galleryMode,
                 items: settingsHandler.map['galleryMode']!['options'],
                 onChanged: (String? newValue) {
@@ -158,7 +158,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Image quality',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: galleryScrollDirection,
                 items: settingsHandler.map['galleryScrollDirection']!['options'],
                 onChanged: (String? newValue) {
@@ -168,43 +168,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Viewer scroll direction',
               ),
-              SettingsDropdown(
-                value: shareAction,
-                items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
-                  });
-                },
-                title: 'Default share action',
-                trailingIcon: IconButton(
-                  icon: const Icon(Icons.help_outline),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return SettingsDialog(
-                          title: const Text('Share actions'),
-                          contentItems: [
-                            const Text('- Ask - always ask what to share'),
-                            const Text('- Post URL'),
-                            const Text('- File URL - shares direct link to the original file (may not work with some sites)'),
-                            const Text('- File - shares the file itself, may take some time to load, progress will be shown on the Share button'),
-                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
-                            const Text(''),
-                            const Text(
-                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network.',
-                            ),
-                            const Text(''),
-                            const Text('[Tip]: You can open Share actions menu by long pressing Share button.'),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: galleryBarPosition,
                 items: settingsHandler.map['galleryBarPosition']!['options'],
                 onChanged: (String? newValue) {
@@ -214,7 +178,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Viewer toolbar position',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: zoomButtonPosition,
                 items: settingsHandler.map['zoomButtonPosition']!['options'],
                 onChanged: (String? newValue) {
@@ -224,7 +188,7 @@ class _GalleryPageState extends State<GalleryPage> {
                 },
                 title: 'Zoom button position',
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: changePageButtonsPosition,
                 items: settingsHandler.map['changePageButtonsPosition']!['options'],
                 onChanged: (String? newValue) {
@@ -358,16 +322,43 @@ class _GalleryPageState extends State<GalleryPage> {
                 ),
               ),
 
-              // TODO rework into loading element variant (small, verbose, gif...) or remove completely, this gif is like 20% of the app's size
-              SettingsToggle(
-                value: loadingGif,
-                onChanged: (newValue) {
+              SettingsDropdown(
+                value: shareAction,
+                items: (settingsHandler.map['shareAction']!['options'] as List<String>).where((element) => hasHydrus || element != 'Hydrus').toList(),
+                onChanged: (String? newValue) {
                   setState(() {
-                    loadingGif = newValue;
+                    shareAction = newValue ?? settingsHandler.map['shareAction']!['default'];
                   });
                 },
-                title: 'Kanna loading Gif',
+                title: 'Default share action',
+                trailingIcon: IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return SettingsDialog(
+                          title: const Text('Share actions'),
+                          contentItems: [
+                            const Text('- Ask - always ask what to share'),
+                            const Text('- Post URL'),
+                            const Text('- File URL - shares direct link to the original file (may not work with some sites)'),
+                            const Text('- File - shares the file itself, may take some time to load, progress will be shown on the Share button'),
+                            if (hasHydrus) const Text('- Hydrus - sends the post url to Hydrus for import'),
+                            const Text(''),
+                            const Text(
+                              '[Note]: If File is saved in cache, it will be loaded from there. Otherwise it will be loaded again from network.',
+                            ),
+                            const Text(''),
+                            const Text('[Tip]: You can open Share actions menu by long pressing Share button.'),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
+
               SettingsToggle(
                 value: shitDevice,
                 onChanged: (newValue) {
@@ -411,16 +402,6 @@ class _GalleryPageState extends State<GalleryPage> {
               //////////////////////////////////////////
 
               SettingsToggle(
-                value: disableVibration,
-                onChanged: (newValue) {
-                  setState(() {
-                    disableVibration = newValue;
-                  });
-                },
-                title: 'Disable vibration',
-                subtitle: const Text('(may still happen on some actions even when disabled)'),
-              ),
-              SettingsToggle(
                 value: useVolumeButtonsForScroll,
                 onChanged: (newValue) {
                   setState(() {
@@ -454,8 +435,7 @@ class _GalleryPageState extends State<GalleryPage> {
               ),
               SettingsTextInput(
                 controller: scrollSpeedController,
-                title: 'Buttons scroll speed',
-                hintText: 'Scroll speed',
+                title: 'Volume buttons scroll speed',
                 inputType: TextInputType.number,
                 inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
                 resetText: () => settingsHandler.map['volumeButtonsScrollSpeed']!['default']!.toString(),
@@ -543,6 +523,17 @@ class _GalleryPageState extends State<GalleryPage> {
                 subtitle: Text(
                   disableCustomPageTransitions ? 'Using default animation' : 'Using custom animation',
                 ),
+              ),
+
+              // TODO rework into loading element variant (small, verbose, gif...) or remove completely, this gif is like 20% of the app's size
+              SettingsToggle(
+                value: loadingGif,
+                onChanged: (newValue) {
+                  setState(() {
+                    loadingGif = newValue;
+                  });
+                },
+                title: 'Kanna loading Gif',
               ),
             ],
           ),

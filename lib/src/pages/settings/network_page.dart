@@ -84,6 +84,7 @@ class _NetworkPageState extends State<NetworkPage> {
                 },
                 title: 'Enable self signed SSL certificates',
               ),
+              const SettingsButton(name: '', enabled: false),
               SettingsDropdown<ProxyType>(
                 value: proxyType,
                 items: (settingsHandler.map['proxyType']!['options'] as List<String>).map(ProxyType.fromName).toList(),

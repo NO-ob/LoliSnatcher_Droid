@@ -27,6 +27,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController mouseSpeedController = TextEditingController();
 
   late String previewMode, previewDisplay, scrollGridButtonsPosition;
+  late bool disableVibration;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -37,6 +38,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     columnsLandscapeController.text = settingsHandler.landscapeColumns.toString();
     appMode = settingsHandler.appMode.value;
     handSide = settingsHandler.handSide.value;
+    disableVibration = settingsHandler.disableVibration;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
     scrollGridButtonsPosition = settingsHandler.scrollGridButtonsPosition;
@@ -51,6 +53,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
 
     settingsHandler.appMode.value = appMode;
     settingsHandler.handSide.value = handSide;
+    settingsHandler.disableVibration = disableVibration;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
     settingsHandler.scrollGridButtonsPosition = scrollGridButtonsPosition;
@@ -82,15 +85,48 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
         body: Center(
           child: ListView(
             children: [
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: appMode,
                 items: AppMode.values,
-                onChanged: (AppMode? newValue) {
+                onChanged: (AppMode? newValue) async {
+                  bool confirmation = false;
+                  if ((Platform.isAndroid || Platform.isIOS) && newValue?.isDesktop == true) {
+                    confirmation = await showDialog<bool>(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return const SettingsDialog(
+                              title: Text('App UI mode'),
+                              contentItems: [
+                                Text('Are you sure you want to use Desktop mode? It may cause problems on Mobile devices and is considered DEPRECATED.'),
+                              ],
+                              actionButtons: [
+                                CancelButton(),
+                                ConfirmButton(),
+                              ],
+                            );
+                          },
+                        ) ??
+                        false;
+                  } else {
+                    confirmation = true;
+                  }
+
+                  if (!confirmation) {
+                    return;
+                  }
+
                   setState(() {
                     appMode = newValue!;
                   });
                 },
                 title: 'App UI mode',
+                itemLeadingBuilder: (item) {
+                  return switch (item) {
+                    AppMode.Mobile => const Icon(Icons.phone_android_sharp),
+                    AppMode.Desktop => const Icon(Icons.desktop_windows_sharp),
+                    _ => const Icon(null),
+                  };
+                },
                 trailingIcon: IconButton(
                   icon: const Icon(Icons.help_outline),
                   onPressed: () {
@@ -101,7 +137,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                           title: Text('App UI mode'),
                           contentItems: [
                             Text('- Mobile - Normal Mobile UI'),
-                            Text('- Desktop - Ahoviewer Style UI'),
+                            Text('- Desktop - Ahoviewer Style UI [DEPRECATED, NEEDS REWORK]'),
                             SizedBox(height: 10),
                             Text(
                               '[Warning]: Do not set UI Mode to Desktop on a phone you might break the app and might have to wipe your settings including booru configs.',
@@ -115,7 +151,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   },
                 ),
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: handSide,
                 items: HandSide.values,
                 onChanged: (HandSide? newValue) {
@@ -140,6 +176,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     );
                   },
                 ),
+              ),
+              SettingsToggle(
+                value: disableVibration,
+                onChanged: (newValue) {
+                  setState(() {
+                    disableVibration = newValue;
+                  });
+                },
+                title: 'Disable vibration',
+                subtitle: const Text('(may still happen on some actions even when disabled)'),
               ),
               SettingsTextInput(
                 controller: columnsPortraitController,
@@ -190,7 +236,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   }
                 },
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: previewMode,
                 items: settingsHandler.map['previewMode']!['options'],
                 onChanged: (String? newValue) {
@@ -220,36 +266,23 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                   },
                 ),
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: previewDisplay,
                 items: settingsHandler.map['previewDisplay']!['options'],
-                itemBuilder: (item) {
+                itemTitleBuilder: (item) => switch (item) {
+                  'Square' => '${item!} (1:1)',
+                  'Rectangle' => '${item!} (9:16)',
+                  _ => item ?? '?',
+                },
+                itemLeadingBuilder: (item) {
                   return switch (item) {
-                    'Square' => Row(
-                        children: [
-                          const Icon(Icons.crop_square_outlined),
-                          const SizedBox(width: 10),
-                          Text('${item!} (1:1)'),
-                        ],
+                    'Square' => const Icon(Icons.crop_square_outlined),
+                    'Rectangle' => Transform.rotate(
+                        angle: pi / 2,
+                        child: const Icon(Icons.crop_16_9),
                       ),
-                    'Rectangle' => Row(
-                        children: [
-                          Transform.rotate(
-                            angle: pi / 2,
-                            child: const Icon(Icons.crop_16_9),
-                          ),
-                          const SizedBox(width: 10),
-                          Text('${item!} (9:16)'),
-                        ],
-                      ),
-                    'Staggered' => Row(
-                        children: [
-                          const Icon(Icons.dashboard_outlined),
-                          const SizedBox(width: 10),
-                          Text(item!),
-                        ],
-                      ),
-                    _ => const Text('?'),
+                    'Staggered' => const Icon(Icons.dashboard_outlined),
+                    _ => const Icon(null),
                   };
                 },
                 onChanged: (String? newValue) {
@@ -321,7 +354,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                     ),
                 ],
               ),
-              SettingsDropdown(
+              SettingsOptionsList(
                 value: scrollGridButtonsPosition,
                 items: settingsHandler.map['scrollGridButtonsPosition']!['options'],
                 onChanged: (String? newValue) {
