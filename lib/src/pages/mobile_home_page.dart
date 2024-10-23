@@ -25,6 +25,7 @@ import 'package:lolisnatcher/src/utils/extensions.dart';
 import 'package:lolisnatcher/src/utils/logger.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
 import 'package:lolisnatcher/src/widgets/common/animated_progress_indicator.dart';
+import 'package:lolisnatcher/src/widgets/common/cancel_button.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
 import 'package:lolisnatcher/src/widgets/common/kaomoji.dart';
 import 'package:lolisnatcher/src/widgets/common/loli_dropdown.dart';
@@ -627,7 +628,7 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                     Expanded(
                                       child: Obx(
                                         () => Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             if (snatchHandler.current.value!.booruItems.length != 1)
                                               Text(
@@ -636,25 +637,17 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                               ),
                                             //
                                             if (index == 0)
-                                              if (snatchHandler.total.value == 0)
-                                                const CircularProgressIndicator()
-                                              else
-                                                Text(
-                                                  '${(snatchHandler.currentProgress * 100.0).toStringAsFixed(2)}%',
-                                                  style: const TextStyle(fontSize: 16),
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: 8),
+                                                child: CancelButton(
+                                                  withIcon: true,
+                                                  action: snatchHandler.onCancel,
                                                 ),
+                                              ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    if (index == 0)
-                                      ElevatedButton.icon(
-                                        onPressed: snatchHandler.onCancel,
-                                        label: const Text('Cancel'),
-                                        icon: const Icon(
-                                          Icons.cancel_outlined,
-                                        ),
-                                      ),
                                     const SizedBox(width: 8),
                                   ],
                                 ),
@@ -663,19 +656,36 @@ class _DownloadsDrawerState extends State<DownloadsDrawer> {
                                   Obx(
                                     () => Padding(
                                       padding: const EdgeInsets.only(left: 8, right: 8),
-                                      child: Text(
-                                        snatchHandler.total.value == 0
-                                            ? ''
-                                            : '${Tools.formatBytes(
+                                      child: Row(
+                                        children: [
+                                          if (snatchHandler.total.value != 0)
+                                            Text(
+                                              '${Tools.formatBytes(
                                                 snatchHandler.received.value,
-                                                1,
+                                                2,
                                                 withSpace: false,
                                               )}/${Tools.formatBytes(
                                                 snatchHandler.total.value,
-                                                1,
+                                                2,
                                                 withSpace: false,
                                               )}',
-                                        style: const TextStyle(fontSize: 16),
+                                              style: const TextStyle(fontSize: 16),
+                                            )
+                                          else
+                                            const SizedBox.shrink(),
+                                          const Spacer(),
+                                          if (snatchHandler.total.value != 0)
+                                            Text(
+                                              '${(snatchHandler.currentProgress * 100.0).toStringAsFixed(2)}%',
+                                              style: const TextStyle(fontSize: 16),
+                                            )
+                                          else
+                                            const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(),
+                                            ),
+                                        ],
                                       ),
                                     ),
                                   ),
