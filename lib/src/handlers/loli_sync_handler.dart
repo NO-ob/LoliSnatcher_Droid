@@ -566,7 +566,7 @@ class LoliSync {
         case 'Booru':
           yield 'Sync Starting $address';
           yield 'Preparing booru data';
-          final List<Booru> booruList = settingsHandler.booruList.where((e) => e.type != BooruType.Favourites && e.type != BooruType.Downloads).toList();
+          final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
           final int booruCount = booruList.length;
           if (booruCount > 0) {
             for (int i = 0; i < booruCount; i++) {

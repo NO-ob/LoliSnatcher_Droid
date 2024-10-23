@@ -205,8 +205,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           name: 'Backup boorus',
                           action: () async {
                             try {
-                              final List<Booru> booruList =
-                                  settingsHandler.booruList.where((e) => e.type != BooruType.Favourites && e.type != BooruType.Downloads).toList();
+                              final List<Booru> booruList = settingsHandler.booruList.where((e) => BooruType.saveable.contains(e.type)).toList();
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
                                 final bool res = await detectedDuplicateFile('boorus.json');
                                 if (!res) {
@@ -245,7 +244,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                       final Booru booru = Booru.fromMap(json[i]);
                                       final bool alreadyExists =
                                           settingsHandler.booruList.indexWhere((el) => el.baseURL == booru.baseURL && el.name == booru.name) != -1;
-                                      final bool isAllowed = booru.type != BooruType.Favourites && booru.type != BooruType.Downloads;
+                                      final bool isAllowed = BooruType.saveable.contains(booru.type);
                                       if (!alreadyExists && isAllowed) {
                                         final File booruFile = File('${configBoorusDir.path}${booru.name}.json');
                                         final writer = booruFile.openWrite();

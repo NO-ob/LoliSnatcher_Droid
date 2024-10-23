@@ -397,34 +397,35 @@ class MainDrawer extends StatelessWidget {
                         icon: const Icon(Icons.settings),
                         page: () => const SettingsPage(),
                       ),
-                      if (Tools.isOnPlatformWithWebviewSupport &&
-                          settingsHandler.booruList.isNotEmpty &&
-                          searchHandler.list.isNotEmpty &&
-                          (searchHandler.currentBooru.type != BooruType.Favourites && searchHandler.currentBooru.type != BooruType.Downloads))
-                        SettingsButton(
-                          name: 'Open webview',
-                          icon: const Icon(Icons.public),
-                          action: () {
-                            String? url = searchHandler.currentBooru.baseURL;
-                            String userAgent = Tools.browserUserAgent;
-                            if (searchHandler.currentBooru.baseURL?.contains('rule34.xxx') ?? false) {
-                              url = 'https://rule34.xxx/';
-                              userAgent = Constants.defaultBrowserUserAgent;
-                            }
-                            if (url == null || url.isEmpty) {
-                              return;
-                            }
+                      Obx(() {
+                        if (Tools.isOnPlatformWithWebviewSupport &&
+                            settingsHandler.booruList.isNotEmpty &&
+                            searchHandler.list.isNotEmpty &&
+                            BooruType.saveable.contains(searchHandler.currentBooru.type)) {
+                          return SettingsButton(
+                            name: 'Open webview',
+                            icon: const Icon(Icons.public),
+                            action: () {
+                              final String? url = searchHandler.currentBooru.baseURL;
+                              final String userAgent = Tools.browserUserAgent;
+                              if (url == null || url.isEmpty) {
+                                return;
+                              }
 
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => InAppWebviewView(
-                                  initialUrl: url!,
-                                  userAgent: userAgent,
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => InAppWebviewView(
+                                    initialUrl: url,
+                                    userAgent: userAgent,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
+                              );
+                            },
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      }),
                       //
                       Obx(() {
                         if (settingsHandler.updateInfo.value != null && Constants.appBuildNumber < (settingsHandler.updateInfo.value!.buildNumber)) {

@@ -1288,9 +1288,7 @@ class _TagContentPreviewState extends State<TagContentPreview> {
                           const SizedBox(width: 8),
                           IconButton(
                             onPressed: loadPreview,
-                            icon: const Icon(
-                              Icons.refresh,
-                            ),
+                            icon: const Icon(Icons.refresh),
                           ),
                         ],
                       ),

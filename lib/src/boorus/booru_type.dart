@@ -54,6 +54,14 @@ enum BooruType {
       ..remove(BooruType.Merge);
   }
 
+  static List<BooruType> get saveable {
+    return [...values]
+      ..remove(BooruType.Autodetect)
+      ..remove(BooruType.Downloads)
+      ..remove(BooruType.Favourites)
+      ..remove(BooruType.Merge);
+  }
+
   String get alias {
     switch (this) {
       case World:

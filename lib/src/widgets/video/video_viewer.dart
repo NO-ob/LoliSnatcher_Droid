@@ -147,9 +147,11 @@ class VideoViewerState extends State<VideoViewer> {
     return;
   }
 
+  static const int maxSize = 1024 * 1024 * 200;
   void onSize(int size) {
+    total.value = size;
     // TODO find a way to stop loading based on size when caching is enabled
-    const int maxSize = 1024 * 1024 * 200;
+
     // print('onSize: $size $maxSize ${size > maxSize}');
     if (size == 0) {
       killLoading(['File is zero bytes']);
@@ -267,6 +269,8 @@ class VideoViewerState extends State<VideoViewer> {
   void killLoading(List<String> reason) {
     disposables();
 
+    bufferingTimer?.cancel();
+
     total.value = 0;
     received.value = 0;
     startedAt.value = 0;
@@ -375,6 +379,7 @@ class VideoViewerState extends State<VideoViewer> {
     if (chewieController == null) return;
 
     if (isVideoInited) {
+      bufferingTimer?.cancel();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         viewerHandler.setLoaded(widget.key, true);
       });
@@ -479,7 +484,8 @@ class VideoViewerState extends State<VideoViewer> {
       bufferingTimer = Timer(
         const Duration(seconds: 10),
         () {
-          if (!isVideoInited) {
+          // force restart with cache mode, but only if file size isn't loaded yet or it's small enough (<25mb) (big videos may take a while to buffer)
+          if (!isVideoInited && (total.value == 0 || total.value < maxSize / 8)) {
             forceCache = true;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               killLoading([]);

@@ -26,7 +26,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
   final TextEditingController columnsPortraitController = TextEditingController();
   final TextEditingController mouseSpeedController = TextEditingController();
 
-  late String previewMode, previewDisplay;
+  late String previewMode, previewDisplay, scrollGridButtonsPosition;
   late AppMode appMode;
   late HandSide handSide;
 
@@ -39,6 +39,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     handSide = settingsHandler.handSide.value;
     previewDisplay = settingsHandler.previewDisplay;
     previewMode = settingsHandler.previewMode;
+    scrollGridButtonsPosition = settingsHandler.scrollGridButtonsPosition;
     mouseSpeedController.text = settingsHandler.mousewheelScrollSpeed.toString();
   }
 
@@ -52,6 +53,7 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
     settingsHandler.handSide.value = handSide;
     settingsHandler.previewMode = previewMode;
     settingsHandler.previewDisplay = previewDisplay;
+    settingsHandler.scrollGridButtonsPosition = scrollGridButtonsPosition;
     if (int.parse(columnsLandscapeController.text) < 1) {
       columnsLandscapeController.text = 1.toString();
     }
@@ -318,6 +320,16 @@ class _UserInterfacePageState extends State<UserInterfacePage> {
                       ),
                     ),
                 ],
+              ),
+              SettingsDropdown(
+                value: scrollGridButtonsPosition,
+                items: settingsHandler.map['scrollGridButtonsPosition']!['options'],
+                onChanged: (String? newValue) {
+                  setState(() {
+                    scrollGridButtonsPosition = newValue ?? settingsHandler.map['scrollGridButtonsPosition']!['default'];
+                  });
+                },
+                title: 'Scroll previews buttons position',
               ),
               if (Platform.isWindows || Platform.isLinux || Platform.isMacOS)
                 SettingsTextInput(

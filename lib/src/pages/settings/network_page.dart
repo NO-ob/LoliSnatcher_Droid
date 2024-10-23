@@ -166,7 +166,11 @@ class _NetworkPageState extends State<NetworkPage> {
                 nullable: true,
                 onChanged: (newValue) async {
                   selectedBooru = newValue;
-                  selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  if (newValue != null) {
+                    selectedBooruCookies = await CookieManager.instance().getCookies(url: WebUri(selectedBooru!.baseURL!));
+                  } else {
+                    selectedBooruCookies = [];
+                  }
                   setState(() {});
                 },
                 title: 'Booru',
@@ -200,7 +204,7 @@ class _NetworkPageState extends State<NetworkPage> {
                   color: Colors.red,
                 ),
                 action: () async {
-                  if (selectedBooru == null) {
+                  if (selectedBooru != null) {
                     await CookieManager.instance().deleteCookies(url: WebUri(selectedBooru!.baseURL!));
                     FlashElements.showSnackbar(
                       context: context,

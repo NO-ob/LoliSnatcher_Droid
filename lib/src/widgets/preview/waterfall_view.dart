@@ -14,6 +14,7 @@ import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/viewer_handler.dart';
 import 'package:lolisnatcher/src/pages/gallery_view_page.dart';
 import 'package:lolisnatcher/src/widgets/common/flash_elements.dart';
+import 'package:lolisnatcher/src/widgets/common/long_press_repeater.dart';
 import 'package:lolisnatcher/src/widgets/desktop/desktop_scroll_wrap.dart';
 import 'package:lolisnatcher/src/widgets/preview/grid_builder.dart';
 import 'package:lolisnatcher/src/widgets/preview/shimmer_builder.dart';
@@ -406,6 +407,21 @@ class _WaterfallViewState extends State<WaterfallView> {
                         duration: const Duration(milliseconds: 300),
                         child: isLoadingOrNoItems ? const ShimmerList() : const SizedBox.shrink(),
                       ),
+                      Positioned(
+                        bottom: MediaQuery.paddingOf(context).bottom + 80,
+                        right: settingsHandler.scrollGridButtonsPosition == 'Right' ? MediaQuery.sizeOf(context).width * 0.07 : null,
+                        left: settingsHandler.scrollGridButtonsPosition == 'Left' ? MediaQuery.sizeOf(context).width * 0.07 : null,
+                        child: AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 300),
+                          child: (isLoadingOrNoItems || settingsHandler.scrollGridButtonsPosition == 'Disabled')
+                              ? const SizedBox.shrink()
+                              : WaterfallScrollButtons(
+                                  onTap: (bool forward) {
+                                    // TODO increase cacheExtent (to load future thumbnails faster) for duration of scrolling + few seconds after + keep resetting timer if didn't exceed debounce between presses?
+                                  },
+                                ),
+                        ),
+                      ),
                     ],
                   );
                 }),
@@ -437,6 +453,97 @@ class _WaterfallViewState extends State<WaterfallView> {
           //
           const WaterfallErrorButtons(),
         ],
+      ),
+    );
+  }
+}
+
+class WaterfallScrollButtons extends StatelessWidget {
+  const WaterfallScrollButtons({
+    required this.onTap,
+    super.key,
+  });
+
+  final ValueChanged<bool> onTap;
+
+  Future<void> pageScroll(bool forward) async {
+    final scrollController = SearchHandler.instance.gridScrollController;
+
+    if (scrollController.hasClients && scrollController.position.hasContentDimensions) {
+      double nextOffset = 0;
+      final double viewportHeight = scrollController.position.viewportDimension;
+      final double leftTillClosestEdge = max(
+        0,
+        min(
+          scrollController.position.maxScrollExtent - scrollController.offset,
+          scrollController.offset,
+        ),
+      );
+      final bool closestEdgeIsTop = scrollController.offset < scrollController.position.maxScrollExtent - scrollController.offset;
+      if (leftTillClosestEdge < viewportHeight / 2 && ((forward && !closestEdgeIsTop) || (!forward && closestEdgeIsTop))) {
+        nextOffset = (forward ? 1 : -1) * (leftTillClosestEdge * 1.2);
+      } else {
+        nextOffset = (scrollController.position.viewportDimension * 0.9) * (forward ? 1 : -1);
+      }
+
+      onTap(forward);
+
+      await scrollController.animateTo(
+        scrollController.offset + nextOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.33),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            LongPressRepeater(
+              onStart: () async => pageScroll(false),
+              startDelay: 300,
+              child: InkWell(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
+                onTap: () => pageScroll(false),
+                child: SizedBox(
+                  width: kMinInteractiveDimension,
+                  height: kMinInteractiveDimension,
+                  child: Icon(
+                    Icons.arrow_upward,
+                    size: 30,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            LongPressRepeater(
+              onStart: () async => pageScroll(true),
+              startDelay: 300,
+              child: InkWell(
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(10)),
+                onTap: () => pageScroll(true),
+                child: SizedBox(
+                  width: kMinInteractiveDimension,
+                  height: kMinInteractiveDimension,
+                  child: Icon(
+                    Icons.arrow_downward,
+                    size: 30,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.5),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

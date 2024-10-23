@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:dio/dio.dart';
@@ -78,6 +80,7 @@ class _FaviconState extends State<Favicon> {
       if (error is DioException && error.response != null && Tools.isGoodStatusCode(error.response!.statusCode) == false) {
         if (manualReloadTapped && (error.response!.statusCode == 403 || error.response!.statusCode == 503)) {
           await Tools.checkForCaptcha(error.response, error.requestOptions.uri);
+          unawaited(restartLoading());
           manualReloadTapped = false;
         }
         errorCode = error.response!.statusCode.toString();
@@ -190,20 +193,17 @@ class _FaviconState extends State<Favicon> {
                 );
               },
             )
-          else ...[
-            if (isFailed)
-              FaviconError(
-                iconSize: size,
-                color: Colors.grey,
-                code: errorCode,
-                onRestart: () {
-                  manualReloadTapped = true;
-                  restartLoading();
-                },
-              )
-            else
-              const SizedBox.shrink(),
-          ],
+          else if (isFailed)
+            FaviconError(
+              iconSize: size,
+              color: Colors.grey,
+              code: errorCode,
+              onRestart: () {
+                manualReloadTapped = true;
+                restartLoading();
+              },
+            ),
+          //
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             child: (isLoaded || isFailed)

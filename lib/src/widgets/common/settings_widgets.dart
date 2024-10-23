@@ -642,7 +642,7 @@ class _SettingsTextInputState extends State<SettingsTextInput> {
 
   Widget buildNumberButton(void Function() stepFunc, IconData icon) {
     return LongPressRepeater(
-      onStart: () {
+      onStart: () async {
         stepFunc();
       },
       tick: 100,

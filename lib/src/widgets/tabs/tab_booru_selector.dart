@@ -112,12 +112,11 @@ class TabBooruSelectorItem extends StatelessWidget {
       children: [
         //Booru Icon
         if (withFavicon) ...[
-          if (booru.type == BooruType.Downloads)
-            const Icon(Icons.file_download_outlined, size: 20)
-          else if (booru.type == BooruType.Favourites)
-            const Icon(Icons.favorite, color: Colors.red, size: 20)
-          else
-            Favicon(booru),
+          switch (booru.type) {
+            BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+            BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+            _ => Favicon(booru),
+          },
           const SizedBox(width: 4),
         ],
         //Booru name

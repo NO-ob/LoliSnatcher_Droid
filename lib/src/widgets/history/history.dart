@@ -347,11 +347,12 @@ class _HistoryListState extends State<HistoryList> {
           ),
           onTap: isActive ? () => showHistoryEntryActions(buildEntry(index, false, true), currentEntry, booru) : null,
           minLeadingWidth: 24,
-          leading: booru != null
-              ? (booru.type == BooruType.Downloads
-                  ? const Icon(Icons.file_download_outlined, size: 20)
-                  : (booru.type == BooruType.Favourites ? const Icon(Icons.favorite, color: Colors.red, size: 20) : Favicon(booru)))
-              : const Icon(CupertinoIcons.question, size: 20),
+          leading: switch (booru?.type) {
+            BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+            BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+            null => const Icon(CupertinoIcons.question, size: 20),
+            _ => Favicon(booru!),
+          },
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

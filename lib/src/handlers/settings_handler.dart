@@ -33,6 +33,8 @@ import 'package:lolisnatcher/src/widgets/video/media_kit_video_player.dart';
 class SettingsHandler extends GetxController {
   static SettingsHandler get instance => Get.find<SettingsHandler>();
 
+  static bool get isDesktopPlatform => Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+
   DBHandler dbHandler = DBHandler();
 
   late Alice alice;
@@ -80,7 +82,8 @@ class SettingsHandler extends GetxController {
   String extPathOverride = '';
   String drawerMascotPathOverride = '';
   String zoomButtonPosition = 'Right';
-  String changePageButtonsPosition = (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled';
+  String changePageButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
+  String scrollGridButtonsPosition = isDesktopPlatform ? 'Right' : 'Disabled';
   String lastSyncIp = '';
   String lastSyncPort = '';
   // TODO move it to boorus themselves to have different user agents for different boorus?
@@ -89,8 +92,8 @@ class SettingsHandler extends GetxController {
   String proxyAddress = '';
   String proxyUsername = '';
   String proxyPassword = '';
-  String altVideoPlayerVO = (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
-  String altVideoPlayerHWDEC = (Platform.isWindows || Platform.isLinux) ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
+  String altVideoPlayerVO = isDesktopPlatform ? 'libmpv' : 'gpu'; // mediakit default: gpu - android, libmpv - desktop
+  String altVideoPlayerHWDEC = isDesktopPlatform ? 'auto' : 'auto-safe'; // mediakit default: auto-safe - android, auto - desktop
 
   List<String> hatedTags = [];
   List<String> lovedTags = [];
@@ -165,7 +168,7 @@ class SettingsHandler extends GetxController {
   bool snatchOnFavourite = false;
   bool favouriteOnSnatch = false;
   bool disableVibration = false;
-  bool useAltVideoPlayer = Platform.isWindows || Platform.isLinux;
+  bool useAltVideoPlayer = isDesktopPlatform;
   bool altVideoPlayerHwAccel = true;
   RxList<Booru> booruList = RxList<Booru>([]);
   ////////////////////////////////////////////////////
@@ -288,12 +291,17 @@ class SettingsHandler extends GetxController {
     },
     'changePageButtonsPosition': {
       'type': 'stringFromList',
-      'default': (Platform.isWindows || Platform.isLinux) ? 'Right' : 'Disabled',
+      'default': isDesktopPlatform ? 'Right' : 'Disabled',
+      'options': <String>['Disabled', 'Left', 'Right'],
+    },
+    'scrollGridButtonsPosition': {
+      'type': 'stringFromList',
+      'default': isDesktopPlatform ? 'Right' : 'Disabled',
       'options': <String>['Disabled', 'Left', 'Right'],
     },
     'altVideoPlayerVO': {
       'type': 'stringFromList',
-      'default': (Platform.isWindows || Platform.isLinux) ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
+      'default': isDesktopPlatform ? 'libmpv' : 'gpu', // mediakit default: gpu - android, libmpv - desktop
       'options': <String>[
         'gpu',
         'gpu-next',
@@ -304,7 +312,7 @@ class SettingsHandler extends GetxController {
     },
     'altVideoPlayerHWDEC': {
       'type': 'stringFromList',
-      'default': (Platform.isWindows || Platform.isLinux) ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
+      'default': isDesktopPlatform ? 'auto' : 'auto-safe', // mediakit default: auto-safe - android, auto - desktop
       'options': <String>[
         'auto',
         'auto-safe',
@@ -576,7 +584,7 @@ class SettingsHandler extends GetxController {
     },
     'useAltVideoPlayer': {
       'type': 'bool',
-      'default': Platform.isWindows || Platform.isLinux,
+      'default': isDesktopPlatform,
     },
     'altVideoPlayerHwAccel': {
       'type': 'bool',
@@ -1007,6 +1015,8 @@ class SettingsHandler extends GetxController {
         return zoomButtonPosition;
       case 'changePageButtonsPosition':
         return changePageButtonsPosition;
+      case 'scrollGridButtonsPosition':
+        return scrollGridButtonsPosition;
       case 'disableImageScaling':
         return disableImageScaling;
       case 'gifsAsThumbnails':
@@ -1218,6 +1228,9 @@ class SettingsHandler extends GetxController {
       case 'changePageButtonsPosition':
         changePageButtonsPosition = validatedValue;
         break;
+      case 'scrollGridButtonsPosition':
+        scrollGridButtonsPosition = validatedValue;
+        break;
       case 'disableImageScaling':
         disableImageScaling = validatedValue;
         break;
@@ -1388,6 +1401,7 @@ class SettingsHandler extends GetxController {
       'galleryAutoScrollTime': validateValue('galleryAutoScrollTime', null, toJSON: true),
       'zoomButtonPosition': validateValue('zoomButtonPosition', null, toJSON: true),
       'changePageButtonsPosition': validateValue('changePageButtonsPosition', null, toJSON: true),
+      'scrollGridButtonsPosition': validateValue('scrollGridButtonsPosition', null, toJSON: true),
       'disableImageScaling': validateValue('disableImageScaling', null, toJSON: true),
       'gifsAsThumbnails': validateValue('gifsAsThumbnails', null, toJSON: true),
       'desktopListsDrag': validateValue('desktopListsDrag', null, toJSON: true),
@@ -1620,7 +1634,7 @@ class SettingsHandler extends GetxController {
             // print(files[i].toString());
             final File booruFile = files[i] as File;
             final Booru booruFromFile = Booru.fromJSON(await booruFile.readAsString());
-            final bool isAllowed = booruFromFile.type != BooruType.Favourites && booruFromFile.type != BooruType.Downloads;
+            final bool isAllowed = BooruType.saveable.contains(booruFromFile.type);
             if (isAllowed) {
               tempList.add(booruFromFile);
             } else {
@@ -2091,7 +2105,7 @@ class SettingsHandler extends GetxController {
     try {
       postInitMessage.value = 'Setting up proxy...';
       await initProxy();
-      if (useAltVideoPlayer || (Platform.isWindows || Platform.isLinux)) {
+      if (useAltVideoPlayer || isDesktopPlatform) {
         MediaKitVideoPlayer.registerWith();
       }
       postInitMessage.value = 'Loading Database...';

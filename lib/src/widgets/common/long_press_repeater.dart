@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
@@ -16,18 +17,19 @@ class LongPressRepeater extends StatefulWidget {
     this.tick = 200,
     this.fastTick = 100,
     this.fasterAfter = -1,
+    this.startDelay,
     this.behavior,
     super.key,
   });
 
   /// called on every tick of long press
-  final VoidCallback onStart;
+  final AsyncCallback onStart;
 
   /// called afrter user stops long press
-  final VoidCallback? onStop;
+  final AsyncCallback? onStop;
 
   /// called when user just taps on widget
-  final VoidCallback? onTap;
+  final AsyncCallback? onTap;
 
   /// delay in ms between each callback during long press
   final int tick;
@@ -38,6 +40,9 @@ class LongPressRepeater extends StatefulWidget {
   /// after how many ticks action gets called faster
   final int fasterAfter;
 
+  /// delay in ms before first onStart is triggered (aside from long tap detection timer)
+  final int? startDelay;
+
   /// see [GestureDetector.behavior]
   final HitTestBehavior? behavior;
   final Widget child;
@@ -47,56 +52,53 @@ class LongPressRepeater extends StatefulWidget {
 }
 
 class _LongPressRepeaterState extends State<LongPressRepeater> {
-  Timer? longPressTimer;
+  bool active = false;
   int repeatCount = 0;
 
   @override
   void dispose() {
-    longPressTimer?.cancel();
+    active = false;
     super.dispose();
+  }
+
+  Future<void> runAction() async {
+    if (mounted) {
+      await Future.delayed(
+        Duration(
+          // repeat faster after a certain amount of times
+          milliseconds: (widget.fasterAfter > 0 && repeatCount > widget.fasterAfter) ? widget.fastTick : widget.tick,
+        ),
+      );
+      await widget.onStart();
+      if (repeatCount > 0) {
+        await ServiceHandler.vibrate(duration: 2);
+      }
+      repeatCount++;
+
+      if (active) {
+        unawaited(runAction());
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPressStart: (details) {
-        // repeat every 100ms if the user holds down the button
-        if (longPressTimer != null) {
-          return;
+      onLongPressStart: (details) async {
+        active = true;
+        if (widget.startDelay != null) {
+          await Future.delayed(Duration(milliseconds: widget.startDelay!));
         }
-        longPressTimer = Timer.periodic(Duration(milliseconds: widget.tick), (timer) {
-          widget.onStart();
-          if (repeatCount > 0) {
-            ServiceHandler.vibrate(duration: 2);
-          }
-          repeatCount++;
-
-          // repeat faster after a certain amount of times
-          if (widget.fasterAfter > 0 && repeatCount > widget.fasterAfter) {
-            longPressTimer?.cancel();
-            longPressTimer = Timer.periodic(Duration(milliseconds: widget.fastTick), (timer) {
-              widget.onStart();
-              if (repeatCount > 0) {
-                ServiceHandler.vibrate(duration: 2);
-              }
-              repeatCount++;
-            });
-          }
-        });
+        unawaited(runAction());
       },
-      onLongPressEnd: (details) {
-        // stop repeating if the user releases the button
-        widget.onStop?.call();
-        longPressTimer?.cancel();
-        longPressTimer = null;
+      onLongPressEnd: (details) async {
+        active = false;
+        await widget.onStop?.call();
         repeatCount = 0;
       },
-      onLongPressCancel: () {
-        // stop repeating if the user moves the finger/mouse away
-        // TODO doesn't work?
-        widget.onStop?.call();
-        longPressTimer?.cancel();
-        longPressTimer = null;
+      onLongPressCancel: () async {
+        active = false;
+        await widget.onStop?.call();
         repeatCount = 0;
       },
       onTap: widget.onTap,

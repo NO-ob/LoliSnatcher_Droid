@@ -151,15 +151,15 @@ class TabRow extends StatelessWidget {
         child: Row(
           children: [
             if (withFavicon) ...[
-              if (isNotEmptyBooru) ...[
-                if (tab.selectedBooru.value.type == BooruType.Downloads)
-                  const Icon(Icons.file_download_outlined, size: 20)
-                else if (tab.selectedBooru.value.type == BooruType.Favourites)
-                  const Icon(Icons.favorite, color: Colors.red, size: 20)
-                else
-                  Favicon(tab.selectedBooru.value, color: color),
-              ] else
+              if (isNotEmptyBooru)
+                switch (tab.selectedBooru.value.type) {
+                  BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+                  BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+                  _ => Favicon(tab.selectedBooru.value, color: color),
+                }
+              else
                 const Icon(CupertinoIcons.question, size: 20),
+              //
               const SizedBox(width: 4),
             ],
             marquee,

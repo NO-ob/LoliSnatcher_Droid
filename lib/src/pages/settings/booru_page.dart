@@ -147,14 +147,14 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget shareButton() {
+    if (!BooruType.saveable.contains(selectedBooru?.type)) {
+      return const SizedBox.shrink();
+    }
+
     return SettingsButton(
       name: 'Share Booru config',
       icon: const Icon(Icons.share),
       action: () {
-        if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
-          return;
-        }
-
         showDialog(
           context: context,
           builder: (context) {
@@ -217,19 +217,25 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget editButton() {
+    if (!BooruType.saveable.contains(selectedBooru?.type)) {
+      return const SizedBox.shrink();
+    }
+
     return SettingsButton(
       name: 'Edit Booru config',
       icon: const Icon(Icons.edit),
       // do nothing if no selected or selected "Favourites/Dowloads"
       // TODO update all tabs with old booru with a new one
       // TODO if you open edit after already editing - it will open old instance + possible exception due to old data
-      page: (selectedBooru != null && selectedBooru?.type != BooruType.Favourites && selectedBooru?.type != BooruType.Downloads)
-          ? () => BooruEdit(selectedBooru!)
-          : null,
+      page: (selectedBooru != null && BooruType.saveable.contains(selectedBooru?.type)) ? () => BooruEdit(selectedBooru!) : null,
     );
   }
 
   Widget deleteButton() {
+    if (!BooruType.saveable.contains(selectedBooru?.type)) {
+      return const SizedBox.shrink();
+    }
+
     return SettingsButton(
       name: 'Delete ${selectedBooru?.name} Booru config',
       icon: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
@@ -239,16 +245,6 @@ class _BooruPageState extends State<BooruPage> {
           FlashElements.showSnackbar(
             context: context,
             title: const Text('No Booru Selected!', style: TextStyle(fontSize: 20)),
-            leadingIcon: Icons.warning_amber,
-            leadingIconColor: Colors.red,
-            sideColor: Colors.red,
-          );
-          return;
-        }
-        if (selectedBooru?.type == BooruType.Favourites || selectedBooru?.type == BooruType.Downloads) {
-          FlashElements.showSnackbar(
-            context: context,
-            title: const Text("Can't delete this Booru!", style: TextStyle(fontSize: 20)),
             leadingIcon: Icons.warning_amber,
             leadingIconColor: Colors.red,
             sideColor: Colors.red,
@@ -335,7 +331,7 @@ class _BooruPageState extends State<BooruPage> {
   }
 
   Widget webviewButton() {
-    if (Tools.isOnPlatformWithWebviewSupport) {
+    if (BooruType.saveable.contains(selectedBooru?.type) && Tools.isOnPlatformWithWebviewSupport) {
       // TODO add help button and explain how to properly setup cookies?
       return SettingsButton(
         name: 'Open webview',
@@ -475,7 +471,13 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                 children: [
                   const TextSpan(text: 'Change to: '),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  WidgetSpan(child: Favicon(selectedBooru)),
+                  WidgetSpan(
+                    child: switch (selectedBooru.type) {
+                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+                      _ => Favicon(selectedBooru),
+                    },
+                  ),
                   const TextSpan(text: '?'),
                 ],
               ),
@@ -494,7 +496,13 @@ Future<bool?> askToChangePrefBooru(Booru? initBooru, Booru selectedBooru) async 
                 children: [
                   const TextSpan(text: 'Tap [Yes] to change to: '),
                   TextSpan(text: selectedBooru.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  WidgetSpan(child: Favicon(selectedBooru)),
+                  WidgetSpan(
+                    child: switch (selectedBooru.type) {
+                      BooruType.Favourites => const Icon(Icons.favorite, color: Colors.red, size: 20),
+                      BooruType.Downloads => const Icon(Icons.file_download_outlined, size: 20),
+                      _ => Favicon(selectedBooru),
+                    },
+                  ),
                 ],
               ),
             ),

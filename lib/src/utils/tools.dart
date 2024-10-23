@@ -172,7 +172,7 @@ class Tools {
 
   static const String appUserAgent = 'LoliSnatcher_Droid/${Constants.appVersion}';
   static String get browserUserAgent {
-    return isTestMode ? appUserAgent : (SettingsHandler.instance.customUserAgent.isNotEmpty ? SettingsHandler.instance.customUserAgent : appUserAgent);
+    return (isTestMode || SettingsHandler.instance.customUserAgent.isEmpty) ? appUserAgent : SettingsHandler.instance.customUserAgent;
   }
 
   static bool get isTestMode => Platform.environment.containsKey('FLUTTER_TEST');
@@ -186,13 +186,15 @@ class Tools {
       return false;
     }
 
+    final String host = uri.host;
+
     if (isOnPlatformWithWebviewSupport && (response?.statusCode == 503 || response?.statusCode == 403)) {
       captchaScreenActive = true;
       await Navigator.push(
         NavigationHandler.instance.navigatorKey.currentContext!,
         MaterialPageRoute(
           builder: (context) => InAppWebviewView(
-            initialUrl: '${uri.scheme}://${uri.host}',
+            initialUrl: '${uri.scheme}://$host',
             userAgent: customUserAgent,
             title: 'Captcha check',
             subtitle:

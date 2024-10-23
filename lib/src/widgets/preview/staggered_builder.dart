@@ -50,7 +50,7 @@ class StaggeredBuilder extends StatelessWidget {
               10,
               2 + (isDesktop ? 0 : (kToolbarHeight + MediaQuery.paddingOf(context).top)),
               10,
-              80,
+              180,
             ),
             gridDelegate: SliverWaterfallFlowDelegateWithFixedCrossAxisCount(
               crossAxisCount: columnCount,

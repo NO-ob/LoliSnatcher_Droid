@@ -10,7 +10,6 @@ import 'package:xml/xml.dart';
 
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/comment_item.dart';
-import 'package:lolisnatcher/src/data/constants.dart';
 import 'package:lolisnatcher/src/data/note_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
@@ -291,8 +290,8 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   bool get shouldUpdateIteminTagView => booru.baseURL!.contains('rule34.xxx');
 
-  Future<String?> getCookiesForPost() async {
-    String cookieString = await Tools.getCookies('https://rule34.xxx/');
+  Future<String?> getCookiesForPost(String postUrl) async {
+    String cookieString = await Tools.getCookies(postUrl);
 
     final Map<String, String> headers = getHeaders();
     if (headers['Cookie']?.isNotEmpty ?? false) {
@@ -307,13 +306,12 @@ class GelbooruAlikesHandler extends BooruHandler {
   @override
   Future loadItem({required BooruItem item, CancelToken? cancelToken}) async {
     try {
-      final cookies = await getCookiesForPost();
+      final cookies = await getCookiesForPost(item.postURL);
 
       final response = await DioNetwork.get(
         item.postURL,
         headers: {
           ...getHeaders(),
-          if (booru.baseURL!.contains('rule34.xxx')) 'User-Agent': Constants.defaultBrowserUserAgent,
           if (booru.baseURL!.contains('rule34.xxx') && cookies?.isNotEmpty == true) 'Cookie': cookies,
         },
         options: Options(
@@ -321,6 +319,7 @@ class GelbooruAlikesHandler extends BooruHandler {
           receiveTimeout: const Duration(seconds: 5),
         ),
         cancelToken: cancelToken,
+        customInterceptor: DioNetwork.captchaInterceptor,
       );
 
       if (response.statusCode != 200) {

@@ -109,9 +109,12 @@ class Logger {
           settings: const TalkerDioLoggerSettings(
             printResponseData: false,
             printRequestData: true,
+            printErrorData: false,
             printResponseHeaders: true,
             printRequestHeaders: true,
+            printErrorHeaders: true,
             printResponseMessage: true,
+            printErrorMessage: true,
           ),
         )
       : null;
