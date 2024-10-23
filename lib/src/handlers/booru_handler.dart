@@ -512,7 +512,7 @@ abstract class BooruHandler {
   // TODO fetch and overwrite current item data when entering tag view with a newer / more complete data
   bool get shouldUpdateIteminTagView => false;
 
-  Future loadItem({required BooruItem item, CancelToken? cancelToken}) async {
+  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
     return null;
   }
 

@@ -304,7 +304,7 @@ class GelbooruAlikesHandler extends BooruHandler {
   }
 
   @override
-  Future loadItem({required BooruItem item, CancelToken? cancelToken}) async {
+  Future loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
     try {
       final cookies = await getCookiesForPost(item.postURL);
 
@@ -319,7 +319,7 @@ class GelbooruAlikesHandler extends BooruHandler {
           receiveTimeout: const Duration(seconds: 5),
         ),
         cancelToken: cancelToken,
-        customInterceptor: DioNetwork.captchaInterceptor,
+        customInterceptor: withCapcthaCheck ? DioNetwork.captchaInterceptor : null,
       );
 
       if (response.statusCode != 200) {

@@ -118,13 +118,14 @@ class SankakuHandler extends BooruHandler {
   }
 
   @override
-  Future<List> loadItem({required BooruItem item, CancelToken? cancelToken}) async {
+  Future<List> loadItem({required BooruItem item, CancelToken? cancelToken, bool withCapcthaCheck = false}) async {
     try {
       await searchSetup();
       final response = await DioNetwork.get(
         makeApiPostURL(item.postURL.split('/').last),
         headers: getHeaders(),
         cancelToken: cancelToken,
+        customInterceptor: withCapcthaCheck ? (dio) => DioNetwork.captchaInterceptor(dio, customUserAgent: Constants.defaultBrowserUserAgent) : null,
       );
       if (response.statusCode != 200) {
         return [item, false, 'Invalid status code ${response.statusCode}'];

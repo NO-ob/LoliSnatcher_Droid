@@ -84,7 +84,7 @@ class _TagViewState extends State<TagView> {
       parseSortGroupTags();
     });
 
-    reloadItemData();
+    reloadItemData(initial: true);
   }
 
   @override
@@ -98,7 +98,10 @@ class _TagViewState extends State<TagView> {
 
   bool get supportsItemUpdate => searchHandler.currentBooruHandler.hasLoadItemSupport && searchHandler.currentBooruHandler.shouldUpdateIteminTagView;
 
-  Future<void> reloadItemData({bool force = false}) async {
+  Future<void> reloadItemData({
+    bool initial = false,
+    bool force = false,
+  }) async {
     if (supportsItemUpdate && (!item.isUpdated || force)) {
       loadingUpdate = true;
       failedUpdate = false;
@@ -107,6 +110,7 @@ class _TagViewState extends State<TagView> {
       final res = await searchHandler.currentBooruHandler.loadItem(
         item: item,
         cancelToken: cancelToken,
+        withCapcthaCheck: !initial,
       );
       if (res[1] == false) {
         failedUpdate = true;
