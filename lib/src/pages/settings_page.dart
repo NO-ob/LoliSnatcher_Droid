@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:lolisnatcher/src/data/constants.dart';
@@ -65,7 +66,7 @@ class SettingsPage extends StatelessWidget {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Settings'),
+          title: Text(AppLocalizations.of(context).title_settings),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -79,53 +80,53 @@ class SettingsPage extends StatelessWidget {
           child: ListView(
             children: [
               SettingsButton(
-                name: 'Boorus & Search',
+                name: AppLocalizations.of(context).title_boorusSearch,
                 icon: const Icon(Icons.image_search),
                 page: () => const BooruPage(),
               ),
               SettingsButton(
-                name: 'Interface',
+                name: AppLocalizations.of(context).title_interface,
                 icon: const Icon(Icons.grid_on),
                 page: () => const UserInterfacePage(),
               ),
               SettingsButton(
-                name: 'Themes',
+                name: AppLocalizations.of(context).title_themes,
                 icon: const Icon(Icons.palette),
                 page: () => const ThemePage(),
               ),
               SettingsButton(
-                name: 'Gallery',
+                name: AppLocalizations.of(context).title_gallery,
                 icon: const Icon(Icons.view_carousel),
                 page: () => const GalleryPage(),
               ),
               SettingsButton(
-                name: 'Snatching & Caching',
+                name: AppLocalizations.of(context).title_snatchingCaching,
                 icon: const Icon(Icons.sd_storage_sharp),
                 page: () => const SaveCachePage(),
               ),
               SettingsButton(
-                name: 'Tag Filters',
+                name: AppLocalizations.of(context).title_tagFilters,
                 icon: const Icon(CupertinoIcons.tag),
                 page: () => const TagsFiltersPage(),
               ),
               SettingsButton(
-                name: 'Database',
+                name: AppLocalizations.of(context).title_database,
                 icon: const Icon(Icons.list_alt),
                 page: () => const DatabasePage(),
               ),
               SettingsButton(
-                name: 'Backup & Restore',
+                name: AppLocalizations.of(context).title_backupRestore,
                 icon: const Icon(Icons.restore_page),
                 page: () => const BackupRestorePage(),
               ),
               SettingsButton(
-                name: 'Network',
+                name: AppLocalizations.of(context).title_network,
                 icon: const Icon(Icons.network_check),
                 page: () => const NetworkPage(),
               ),
               if (Platform.isAndroid)
                 SettingsButton(
-                  name: 'Privacy',
+                  name: AppLocalizations.of(context).title_privacy,
                   icon: const FaIcon(
                     FontAwesomeIcons.userShield,
                     size: 20,
@@ -133,19 +134,19 @@ class SettingsPage extends StatelessWidget {
                   page: () => const PrivacyPage(),
                 ),
               SettingsButton(
-                name: 'LoliSync',
+                name: AppLocalizations.of(context).title_loliSync,
                 icon: const Icon(Icons.sync),
                 action: settingsHandler.dbEnabled
                     ? null
                     : () {
                         FlashElements.showSnackbar(
                           context: context,
-                          title: const Text(
-                            'Error!',
-                            style: TextStyle(fontSize: 20),
+                          title: Text(
+                            AppLocalizations.of(context).snackBar_loliSync_title,
+                            style: const TextStyle(fontSize: 20),
                           ),
-                          content: const Text(
-                            'Database must be enabled to use LoliSync',
+                          content: Text(
+                            AppLocalizations.of(context).snackBar_loliSync_body,
                           ),
                           leadingIcon: Icons.error_outline,
                           leadingIconColor: Colors.red,
@@ -156,19 +157,19 @@ class SettingsPage extends StatelessWidget {
               ),
               const DiscordButton(),
               SettingsButton(
-                name: 'About',
+                name: AppLocalizations.of(context).title_about,
                 icon: const Icon(Icons.info_outline),
                 page: () => const AboutPage(),
               ),
               SettingsButton(
-                name: 'Check for Updates',
+                name: AppLocalizations.of(context).title_checkForUpdates,
                 icon: const Icon(Icons.update),
                 action: () {
                   settingsHandler.checkUpdate(withMessage: true);
                 },
               ),
               SettingsButton(
-                name: 'Help',
+                name: AppLocalizations.of(context).title_help,
                 icon: const Icon(Icons.help_center_outlined),
                 action: () {
                   launchUrlString(
@@ -182,7 +183,7 @@ class SettingsPage extends StatelessWidget {
               Obx(() {
                 if (settingsHandler.isDebug.value) {
                   return SettingsButton(
-                    name: 'Debug',
+                    name: AppLocalizations.of(context).title_debug,
                     icon: const Icon(Icons.developer_mode),
                     page: () => const DebugPage(),
                   );

@@ -11,6 +11,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:get/get.dart';
 import 'package:logger_flutter_fork/logger_flutter_fork.dart';
+import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:statsfl/statsfl.dart';
 
@@ -252,6 +253,11 @@ class _MainAppState extends State<MainApp> {
                 themeMode: themeMode,
                 navigatorKey: navigationHandler.navigatorKey,
                 home: const Home(),
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                ],
+
+                supportedLocales: AppLocalizations.supportedLocales, // English
               );
             },
           ),
@@ -321,7 +327,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
       appLinks = AppLinks();
 
       // check if there is a deep link on app start
-      final Uri? initialLink = await appLinks!.getInitialAppLink();
+      final Uri? initialLink = await appLinks!.getInitialLink();
       if (initialLink != null) {
         unawaited(openAppLink(initialLink.toString()));
       }
@@ -389,7 +395,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
 
     return ColoredBox(
-      color: Theme.of(context).colorScheme.background,
+      color: Theme.of(context).colorScheme.surface,
       child: Obx(() {
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),

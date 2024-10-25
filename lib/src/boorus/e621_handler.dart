@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:lolisnatcher/src/data/booru_item.dart';
 import 'package:lolisnatcher/src/data/tag_type.dart';
 import 'package:lolisnatcher/src/handlers/booru_handler.dart';
+import 'package:lolisnatcher/src/utils/tools.dart';
 
 // ignore: camel_case_types
 class e621Handler extends BooruHandler {
@@ -101,15 +104,24 @@ class e621Handler extends BooruHandler {
 
   @override
   String makeURL(String tags) {
-    final String loginStr = booru.userID?.isNotEmpty == true ? '&login=${booru.userID}' : '';
-    final String apiKeyStr = booru.apiKey?.isNotEmpty == true ? '&api_key=${booru.apiKey}' : '';
-
-    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum$loginStr$apiKeyStr';
+    return '${booru.baseURL}/posts.json?tags=$tags&limit=$limit&page=$pageNum';
   }
 
   @override
   String makeTagURL(String input) {
     return '${booru.baseURL}/tags.json?search[name_matches]=$input*&limit=10&search[order]=count';
+  }
+
+  @override
+  Map<String, String> getHeaders() {
+    final String? userName = booru.userID?.isNotEmpty == true ? booru.userID : null;
+    final String? apiKey = booru.apiKey?.isNotEmpty == true ? booru.apiKey : null;
+
+    return {
+      'Accept': 'text/html,application/xml,application/json',
+      'User-Agent': Tools.browserUserAgent,
+      if (userName != null && apiKey != null) 'Authorization': "Basic ${base64.encode(utf8.encode("$userName:$apiKey"))}",
+    };
   }
 
   @override

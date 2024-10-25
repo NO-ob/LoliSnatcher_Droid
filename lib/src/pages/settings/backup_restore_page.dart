@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:lolisnatcher/l10n/generated/app_localizations.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -32,7 +33,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
     FlashElements.showSnackbar(
       context: context,
       title: Text(
-        isError ? 'Error!' : 'Success!',
+        isError ? AppLocalizations.of(context).snackBar_backupRestore_title_error : AppLocalizations.of(context).snackBar_backupRestore_title_success,
         style: const TextStyle(fontSize: 20),
       ),
       content: Text(
@@ -50,19 +51,19 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Duplicate file detected!'),
-          content: Text('The file "$fileName" already exists. Do you want to overwrite it? If you choose no, the backup will be cancelled.'),
+          title: Text(AppLocalizations.of(context).alert_backupRestore_duplicateFile_title),
+          content: Text(AppLocalizations.of(context).alert_backupRestore_duplicateFile_body(fileName)),
           actions: [
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('No'),
+              child: Text(AppLocalizations.of(context).alert_action_no),
             ),
             ElevatedButton(
               onPressed: () async {
                 Navigator.of(context).pop(true);
                 await ServiceHandler.deleteFileFromSAFDirectory(backupPath, fileName);
               },
-              child: const Text('Yes'),
+              child: Text(AppLocalizations.of(context).alert_action_yes),
             ),
           ],
         );
@@ -93,7 +94,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
-            title: const Text('Backup & Restore [BETA]'),
+            title: Text(AppLocalizations.of(context).title_backupRestoreBeta),
           ),
           body: Center(
             child: ListView(
@@ -101,8 +102,8 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                 Container(
                   margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                   width: double.infinity,
-                  child: const Text(
-                    "This feature is only available on Android, on Desktop builds you can just copy/paste files from/to app's data folder, respective to your system",
+                  child: Text(
+                    AppLocalizations.of(context).backupRestore_featureMessage,
                   ),
                 ),
               ],
@@ -118,13 +119,13 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('Backup & Restore [BETA]'),
+          title: Text(AppLocalizations.of(context).title_backupRestoreBeta),
         ),
         body: Center(
           child: ListView(
             children: [
                   SettingsButton(
-                    name: 'Select Backup Directory',
+                    name: AppLocalizations.of(context).backupRestore_selectBackupDir,
                     action: () async {
                       final String path = await ServiceHandler.getSAFDirectoryAccess();
                       if (path.isNotEmpty) {
@@ -132,7 +133,7 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                           backupPath = path;
                         });
                       } else {
-                        showSnackbar(context, 'Failed to get backup path!', true);
+                        showSnackbar(context, AppLocalizations.of(context).backupRestore_backupFailed, true);
                       }
                     },
                     drawTopBorder: true,
@@ -140,12 +141,16 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                   Container(
                     margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     width: double.infinity,
-                    child: Text(backupPath.isNotEmpty ? 'Backup path is: $backupPath' : 'No backup directory selected'),
+                    child: Text(
+                      backupPath.isNotEmpty
+                          ? AppLocalizations.of(context).backupRestore_backupPathMessage(backupPath)
+                          : AppLocalizations.of(context).backupRestore_noBackupDirMessage,
+                    ),
                   ),
                   Container(
                     margin: const EdgeInsets.fromLTRB(10, 10, 10, 10),
                     width: double.infinity,
-                    child: const Text('Restore will work only if the files are placed in the same directory.'),
+                    child: Text(AppLocalizations.of(context).backupRestore_restoreInfoMessage),
                   ),
                 ] +
                 (backupPath.isNotEmpty
@@ -158,18 +163,18 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'settings.json')) {
                                 final bool res = await detectedDuplicateFile('settings.json');
                                 if (!res) {
-                                  showSnackbar(context, 'Backup cancelled!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_backupCancelled, true);
                                   return;
                                 }
                               }
                               if (backupPath.isNotEmpty) {
                                 await ServiceHandler.writeImage(await file.readAsBytes(), 'settings', 'text/json', 'json', backupPath);
-                                showSnackbar(context, 'Settings saved to settings.json', false);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_settingsSaved, false);
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while saving settings! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_settingsSaveError(e.toString()), true);
                             }
                           },
                           drawTopBorder: true,
@@ -188,15 +193,15 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                   }
                                   await newFile.writeAsBytes(settingsFileBytes);
                                   await settingsHandler.loadSettingsJson();
-                                  showSnackbar(context, 'Settings restored from backup!', false);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_settingsRestored, false);
                                 } else {
-                                  showSnackbar(context, 'No Restore File Found!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_noRestoreFileFound, true);
                                 }
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while restoring settings! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_settingsRestoreError(e.toString()), true);
                             }
                           },
                         ),
@@ -210,23 +215,23 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'boorus.json')) {
                                 final bool res = await detectedDuplicateFile('boorus.json');
                                 if (!res) {
-                                  showSnackbar(context, 'Backup cancelled!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_backupCancelled, true);
                                   return;
                                 }
                               }
                               if (backupPath.isNotEmpty) {
                                 await ServiceHandler.writeImage(utf8.encode(json.encode(booruList)), 'boorus', 'text', 'json', backupPath);
-                                showSnackbar(context, 'Boorus saved to boorus.json', false);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_boorusSavedMessage, false);
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while saving boorus! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_boorusSaveError(e.toString()), true);
                             }
                           },
                         ),
                         SettingsButton(
-                          name: 'Restore Boorus',
+                          name: AppLocalizations.of(context).backupRestore_restoreBoorus,
                           subtitle: const Text('boorus.json'),
                           action: () async {
                             try {
@@ -254,42 +259,42 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                       }
                                     }
                                     await settingsHandler.loadBoorus();
-                                    showSnackbar(context, 'Boorus restored from backup!', false);
+                                    showSnackbar(context, AppLocalizations.of(context).backupRestore_boorusRestoredMessage, false);
                                   }
                                 }
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while restoring boorus! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_booruRestoreError(e.toString()), true);
                             }
                           },
                         ),
                         const SettingsButton(name: '', enabled: false),
                         SettingsButton(
-                          name: 'Backup Tags',
+                          name: AppLocalizations.of(context).backupRestore_backupTags,
                           action: () async {
                             try {
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'tags.json')) {
                                 final bool res = await detectedDuplicateFile('tags.json');
                                 if (!res) {
-                                  showSnackbar(context, 'Backup cancelled!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_backupCancelled, true);
                                   return;
                                 }
                               }
                               if (backupPath.isNotEmpty) {
                                 await ServiceHandler.writeImage(utf8.encode(json.encode(tagHandler.toList())), 'tags', 'text', 'json', backupPath);
-                                showSnackbar(context, 'Tags saved to tags.json', false);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_tagsSavedMessage, false);
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while saving tags! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_tagSaveError(e.toString()), true);
                             }
                           },
                         ),
                         SettingsButton(
-                          name: 'Restore Tags',
+                          name: AppLocalizations.of(context).backupRestore_restoreTags,
                           subtitle: const Text('tags.json'),
                           action: () async {
                             try {
@@ -301,49 +306,49 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 }
                                 if (tagJSONString.isNotEmpty) {
                                   await tagHandler.loadFromJSON(tagJSONString);
-                                  showSnackbar(context, 'Tags restored from backup!', false);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_tagsRestoredMessage, false);
                                 }
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while restoring tags! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_tagRestoreError(e.toString()), true);
                             }
                           },
                         ),
                         const SettingsButton(name: '', enabled: false),
                         SettingsButton(
-                          name: 'Backup Database',
+                          name: AppLocalizations.of(context).backupRestore_backupDatabase,
                           action: () async {
                             try {
                               final File file = File('${await ServiceHandler.getConfigDir()}store.db');
                               if (await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db')) {
                                 final bool res = await detectedDuplicateFile('store.db');
                                 if (!res) {
-                                  showSnackbar(context, 'Backup cancelled!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_backupCancelled, true);
                                   return;
                                 }
                               }
                               if (backupPath.isNotEmpty) {
                                 await ServiceHandler.writeImage(await file.readAsBytes(), 'store', 'application/x-sqlite3', 'db', backupPath);
-                                showSnackbar(context, 'Database saved to store.db', false);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseSaved, false);
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while saving database! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseSaveError(e.toString()), true);
                             }
                           },
                         ),
                         SettingsButton(
-                          name: 'Restore Database',
+                          name: AppLocalizations.of(context).backupRestore_restoreDatabase,
                           subtitle: const Text('store.db'),
                           action: () async {
                             try {
                               if (backupPath.isNotEmpty) {
                                 final fileExists = await ServiceHandler.existsFileFromSAFDirectory(backupPath, 'store.db');
                                 if (!fileExists) {
-                                  showSnackbar(context, 'No Restore File Found!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_noRestoreFileFound, true);
                                   return;
                                 }
 
@@ -357,27 +362,31 @@ class _BackupRestorePageState extends State<BackupRestorePage> {
                                 );
 
                                 if (!res) {
-                                  showSnackbar(context, 'Error while restoring database!', true);
+                                  showSnackbar(
+                                    context,
+                                    AppLocalizations.of(context).backupRestore_databaseRestoreError('False result when db file with SAF'),
+                                    true,
+                                  );
                                   return;
                                 }
 
                                 final File newFile = File('${await ServiceHandler.getConfigDir()}store.db');
                                 if (!(await newFile.exists())) {
-                                  showSnackbar(context, 'Error while restoring database!', true);
+                                  showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseRestoreError('New db file does not exist'), true);
                                   return;
                                 }
 
                                 settingsHandler.dbHandler = DBHandler();
                                 await settingsHandler.dbHandler.dbConnect(newFile.path);
                                 //
-                                showSnackbar(context, 'Database restored from backup! App will restart in a few seconds!', false);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseRestored, false);
                                 await Future.delayed(const Duration(seconds: 3));
                                 unawaited(ServiceHandler.restartApp());
                               } else {
-                                showSnackbar(context, 'No Access to backup folder!', true);
+                                showSnackbar(context, AppLocalizations.of(context).backupRestore_backupNoAccess, true);
                               }
                             } catch (e) {
-                              showSnackbar(context, 'Error while restoring database! $e', true);
+                              showSnackbar(context, AppLocalizations.of(context).backupRestore_databaseRestoreError(e.toString()), true);
                             }
                           },
                         ),
