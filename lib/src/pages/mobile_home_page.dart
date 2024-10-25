@@ -399,10 +399,10 @@ class MainDrawer extends StatelessWidget {
                         page: () => const SettingsPage(),
                       ),
                       Obx(() {
-                        if (Tools.isOnPlatformWithWebviewSupport &&
-                            settingsHandler.booruList.isNotEmpty &&
+                        if (settingsHandler.booruList.isNotEmpty &&
                             searchHandler.list.isNotEmpty &&
-                            BooruType.saveable.contains(searchHandler.currentBooru.type)) {
+                            BooruType.saveable.contains(searchHandler.currentBooru.type) &&
+                            Tools.isOnPlatformWithWebviewSupport) {
                           return SettingsButton(
                             name: 'Open webview',
                             icon: const Icon(Icons.public),
