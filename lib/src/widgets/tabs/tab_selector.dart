@@ -192,6 +192,7 @@ class _TabManagerPageState extends State<TabManagerPage> {
   Booru? booruFilter;
   TagType? tagTypeFilter;
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
+  bool? isMultiBooruMode;
   bool selectMode = false;
 
   static const double tabHeight = 72 + 8;
@@ -213,6 +214,9 @@ class _TabManagerPageState extends State<TabManagerPage> {
       count++;
     }
     if (duplicateFilter) {
+      count++;
+    }
+    if (isMultiBooruMode != null) {
       count++;
     }
     if (emptyFilter) {
@@ -347,6 +351,11 @@ class _TabManagerPageState extends State<TabManagerPage> {
       });
     }
 
+    if (isMultiBooruMode != null) {
+      filteredTabs =
+          filteredTabs.where((tab) => isMultiBooruMode == false ? (tab.secondaryBoorus?.isEmpty ?? true) : tab.secondaryBoorus?.isNotEmpty == true).toList();
+    }
+
     if (emptyFilter) {
       filteredTabs = filteredTabs.where((tab) => tab.tags.trim().isEmpty).toList();
     }
@@ -417,6 +426,10 @@ class _TabManagerPageState extends State<TabManagerPage> {
         duplicateBooruFilterChanged: (bool newValue) {
           duplicateBooruFilter = newValue;
         },
+        isMultiBooruMode: isMultiBooruMode,
+        isMultiBooruModeChanged: (bool? newValue) {
+          isMultiBooruMode = newValue;
+        },
         emptyFilter: emptyFilter,
         emptyFilterChanged: (bool newValue) {
           emptyFilter = newValue;
@@ -429,12 +442,19 @@ class _TabManagerPageState extends State<TabManagerPage> {
         sortingMode = TabSortingMode.alphabet;
       }
     }
-    if (result == 'clear' || (loadedFilter == null && booruFilter == null && tagTypeFilter == null && duplicateFilter == false && emptyFilter == false)) {
+    if (result == 'clear' ||
+        (loadedFilter == null &&
+            booruFilter == null &&
+            tagTypeFilter == null &&
+            duplicateFilter == false &&
+            isMultiBooruMode == null &&
+            emptyFilter == false)) {
       loadedFilter = null;
       booruFilter = null;
       tagTypeFilter = null;
       duplicateFilter = false;
       duplicateBooruFilter = true;
+      isMultiBooruMode = null;
       emptyFilter = false;
 
       if (!sortingMode.isNone) {

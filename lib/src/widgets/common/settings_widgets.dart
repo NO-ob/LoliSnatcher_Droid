@@ -239,6 +239,83 @@ class SettingsToggle extends StatelessWidget {
   }
 }
 
+class SettingsToggleTristate extends StatelessWidget {
+  const SettingsToggleTristate({
+    required this.value,
+    required this.onChanged,
+    required this.title,
+    this.subtitle,
+    this.drawTopBorder = false,
+    this.drawBottomBorder = true,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.defaultValue,
+    this.reverse = false,
+    super.key,
+  });
+
+  final bool? value;
+  final ValueChanged<bool?> onChanged;
+  final String title;
+  final Widget? subtitle;
+  final bool drawTopBorder;
+  final bool drawBottomBorder;
+  final Widget? leadingIcon;
+  final Widget? trailingIcon;
+  final bool? defaultValue;
+  final bool reverse;
+
+  void _onChangedToggle() {
+    if (reverse) {
+      onChanged(value == null ? true : (value == true ? false : null));
+    } else {
+      onChanged(value == null ? false : (value == false ? true : null));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
+        title: Row(
+          children: [
+            if (leadingIcon != null)
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: leadingIcon,
+              ),
+            MarqueeText(text: title),
+            const SizedBox(width: 4),
+            if (defaultValue != null && value != defaultValue)
+              Padding(
+                padding: const EdgeInsets.only(left: 8),
+                child: IconButton(
+                  icon: const Icon(Icons.restore),
+                  onPressed: () {
+                    onChanged(defaultValue);
+                  },
+                ),
+              ),
+            trailingIcon ?? const SizedBox(width: 8),
+          ],
+        ),
+        subtitle: subtitle,
+        trailing: Checkbox(
+          value: value,
+          tristate: true,
+          onChanged: (_) => _onChangedToggle(),
+        ),
+        onTap: _onChangedToggle,
+        shape: Border(
+          top: drawTopBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+          bottom: drawBottomBorder ? BorderSide(color: Theme.of(context).dividerColor, width: borderWidth) : BorderSide.none,
+        ),
+      ),
+    );
+  }
+}
+
 class SettingsSegmentedButton<T> extends StatelessWidget {
   const SettingsSegmentedButton({
     required this.value,

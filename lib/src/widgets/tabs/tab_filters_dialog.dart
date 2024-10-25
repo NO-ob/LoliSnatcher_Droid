@@ -20,6 +20,8 @@ class TabManagerFiltersDialog extends StatefulWidget {
     required this.duplicateFilterChanged,
     required this.duplicateBooruFilter,
     required this.duplicateBooruFilterChanged,
+    required this.isMultiBooruMode,
+    required this.isMultiBooruModeChanged,
     required this.emptyFilter,
     required this.emptyFilterChanged,
     super.key,
@@ -35,6 +37,8 @@ class TabManagerFiltersDialog extends StatefulWidget {
   final ValueChanged<bool> duplicateFilterChanged;
   final bool duplicateBooruFilter;
   final ValueChanged<bool> duplicateBooruFilterChanged;
+  final bool? isMultiBooruMode;
+  final ValueChanged<bool?> isMultiBooruModeChanged;
   final bool emptyFilter;
   final ValueChanged<bool> emptyFilterChanged;
 
@@ -47,6 +51,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
   Booru? booruFilter;
   TagType? tagTypeFilter;
   bool duplicateFilter = false, duplicateBooruFilter = true, emptyFilter = false;
+  bool? isMultiBooruMode;
 
   @override
   void initState() {
@@ -57,6 +62,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
     tagTypeFilter = widget.tagTypeFilter;
     duplicateFilter = widget.duplicateFilter;
     duplicateBooruFilter = widget.duplicateBooruFilter;
+    isMultiBooruMode = widget.isMultiBooruMode;
     emptyFilter = widget.emptyFilter;
   }
 
@@ -177,8 +183,18 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
                 )
               : const SizedBox.shrink(),
         ),
+        SettingsToggleTristate(
+          title: 'Multibooru',
+          value: isMultiBooruMode,
+          onChanged: (bool? newValue) {
+            isMultiBooruMode = newValue;
+            setState(() {});
+          },
+          reverse: true,
+          drawBottomBorder: false,
+        ),
         SettingsToggle(
-          title: 'Empty tags',
+          title: 'Empty search query',
           value: emptyFilter,
           onChanged: (bool newValue) {
             emptyFilter = newValue;
@@ -199,6 +215,7 @@ class _TabManagerFiltersDialogState extends State<TabManagerFiltersDialog> {
             widget.tagTypeFilterChanged(tagTypeFilter);
             widget.duplicateFilterChanged(duplicateFilter);
             widget.duplicateBooruFilterChanged(duplicateBooruFilter);
+            widget.isMultiBooruModeChanged(isMultiBooruMode);
             widget.emptyFilterChanged(emptyFilter);
             Navigator.of(context).pop('apply');
           },
