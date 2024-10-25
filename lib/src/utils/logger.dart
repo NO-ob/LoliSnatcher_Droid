@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:talker/talker.dart';
 import 'package:talker_dio_logger/talker_dio_logger.dart';
+// ignore: implementation_imports
+import 'package:talker_flutter/src/controller/talker_view_controller.dart';
 
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/utils/tools.dart';
@@ -35,6 +37,9 @@ class Logger {
       ),
     );
 
+    viewController = TalkerViewController();
+    viewController!.toggleExpandedLogs();
+
     if (isInit) {
       FlutterError.onError = (FlutterErrorDetails details) {
         if (details.exception is DioException && (details.exception as DioException).type == DioExceptionType.cancel) {
@@ -63,6 +68,8 @@ class Logger {
   static Talker? _talkerInstance;
 
   static Talker get talker => _talkerInstance!;
+
+  static TalkerViewController? viewController;
 
   void log(
     dynamic logStr,
@@ -107,9 +114,9 @@ class Logger {
       ? TalkerDioLogger(
           talker: _talkerInstance,
           settings: const TalkerDioLoggerSettings(
-            printResponseData: false,
+            printResponseData: true,
             printRequestData: true,
-            printErrorData: false,
+            printErrorData: true,
             printResponseHeaders: true,
             printRequestHeaders: true,
             printErrorHeaders: true,

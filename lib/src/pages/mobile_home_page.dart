@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:get/get.dart';
-import 'package:talker_flutter/talker_flutter.dart';
 
 import 'package:lolisnatcher/src/boorus/booru_type.dart';
 import 'package:lolisnatcher/src/data/booru.dart';
@@ -18,6 +17,7 @@ import 'package:lolisnatcher/src/handlers/search_handler.dart';
 import 'package:lolisnatcher/src/handlers/service_handler.dart';
 import 'package:lolisnatcher/src/handlers/settings_handler.dart';
 import 'package:lolisnatcher/src/handlers/snatch_handler.dart';
+import 'package:lolisnatcher/src/pages/settings/logger_page.dart';
 import 'package:lolisnatcher/src/pages/settings_page.dart';
 import 'package:lolisnatcher/src/pages/snatcher_page.dart';
 import 'package:lolisnatcher/src/services/get_perms.dart';
@@ -383,7 +383,7 @@ class MainDrawer extends StatelessWidget {
                             action: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => TalkerScreen(talker: Logger.talker),
+                                  builder: (_) => LoggerViewPage(talker: Logger.talker),
                                 ),
                               );
                             },

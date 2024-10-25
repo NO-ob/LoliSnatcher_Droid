@@ -77,7 +77,7 @@ class _LoggerPageState extends State<LoggerPage> {
                   action: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => TalkerScreen(talker: Logger.talker),
+                        builder: (_) => LoggerViewPage(talker: Logger.talker),
                       ),
                     );
                   },
@@ -111,6 +111,44 @@ class _LoggerPageState extends State<LoggerPage> {
               );
             },
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class LoggerViewPage extends StatelessWidget {
+  const LoggerViewPage({
+    required this.talker,
+    this.appBarTitle = 'Logger',
+    this.theme = const TalkerScreenTheme(),
+    this.itemsBuilder,
+    super.key,
+  });
+
+  final Talker talker;
+
+  final TalkerScreenTheme theme;
+
+  final String appBarTitle;
+
+  final TalkerDataBuilder? itemsBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: theme.backgroundColor,
+      body: Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                primaryContainer: Colors.blue[800],
+              ),
+        ),
+        child: TalkerView(
+          controller: Logger.viewController,
+          talker: talker,
+          theme: theme,
+          appBarTitle: appBarTitle,
         ),
       ),
     );
